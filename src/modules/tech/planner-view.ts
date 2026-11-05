@@ -169,7 +169,7 @@ export function openPlanner(o: PlannerOptions): void {
           const here = o.current?.id ?? null;
           const source = here !== null && here !== body.id ? here : nextBody(refs, here ?? body.id, { skip: body.id });
           if (!source) return;
-          const delivery: Delivery = { target: body.id, need: { metal: gap.metal, crystal: gap.crystal, deuterium: gap.deuterium } };
+          const delivery: Delivery = { target: body.id, need: { metal: Math.ceil(gap.metal), crystal: Math.ceil(gap.crystal), deuterium: Math.ceil(gap.deuterium) } };
           o.store.set(DELIVERY_KEY, delivery);
           o.navigate!(repeatUrl(o.href!, source, { mode: 'plan', first: source, dest: body.id }));
         });
