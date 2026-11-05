@@ -1,7 +1,24 @@
 {
   "app.name": "Future",
-  "sync.button": "Synchroniser",
+  "sync.button": "Synchroniser le compte",
   "sync.done": "Données mises à jour",
   "data.missing": "Données manquantes sur {count} planètes : ouvrez leur vue d'ensemble",
-  "guard.refused": "Appel bloqué pour respecter les règles d'OGame"
+  "guard.refused": "Appel bloqué pour respecter les règles d'OGame",
+  "planetMenu.moon": "Lune",
+  "planetMenu.compact": "Compact",
+  "res.metal": "Métal",
+  "res.crystal": "Cristal",
+  "res.deuterium": "Deutérium",
+  "planetMenu.idle": "Aucune construction en cours",
+  "planetMenu.side": "Côte à côte",
+  "planetMenu.toSide": "Vue côte à côte (avec ressources)",
+  "planetMenu.toCompact": "Vue compacte",
+  "planetMenu.noRoom": "Écran trop étroit pour la vue côte à côte",
+  "toolbar.settings": "Paramètres",
+  "toolbar.lastSync": "dernière mise à jour {time}",
+  "settings.view": "Vue du menu",
+  "settings.totals": "Totaux des ressources",
+  "settings.on": "Oui",
+  "settings.off": "Non",
+  "planetMenu.age": "Minutes depuis la dernière mise à jour (ouvrez la planète pour actualiser)"
 }

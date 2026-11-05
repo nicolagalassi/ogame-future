@@ -1,7 +1,24 @@
 {
   "app.name": "Future",
-  "sync.button": "Sync",
+  "sync.button": "Sync account data",
   "sync.done": "Data updated",
   "data.missing": "Missing data on {count} planets: open their overview",
-  "guard.refused": "Call blocked to respect OGame rules"
+  "guard.refused": "Call blocked to respect OGame rules",
+  "planetMenu.moon": "Moon",
+  "planetMenu.compact": "Compact",
+  "res.metal": "Metal",
+  "res.crystal": "Crystal",
+  "res.deuterium": "Deuterium",
+  "planetMenu.idle": "Nothing under construction",
+  "planetMenu.side": "Side by side",
+  "planetMenu.toSide": "Side-by-side view (with resources)",
+  "planetMenu.toCompact": "Compact view",
+  "planetMenu.noRoom": "Screen too narrow for the side-by-side view",
+  "toolbar.settings": "Settings",
+  "toolbar.lastSync": "last update {time}",
+  "settings.view": "Menu view",
+  "settings.totals": "Resource totals",
+  "settings.on": "On",
+  "settings.off": "Off",
+  "planetMenu.age": "Minutes since the data was last updated (open the planet to refresh)"
 }

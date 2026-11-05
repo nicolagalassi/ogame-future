@@ -18,6 +18,12 @@ export interface Production {
   deuterium: number;
 }
 
+export interface Resources {
+  metal: number;
+  crystal: number;
+  deuterium: number;
+}
+
 export interface OwnBody {
   id: number;
   type: 'planet' | 'moon';
@@ -25,7 +31,13 @@ export interface OwnBody {
   coords: string;
   /** For a planet: its moon's id. For a moon: its planet's id. */
   siblingId: number | null;
+  /** Per hour, as in OGLight (daily = ×24). Verified in game on 2026-11-05. */
   production: Production;
+  resources: Resources;
+  /** Storage capacity when the snapshot gives it, else 0 (= unknown, no cap). */
+  storage: Resources;
+  /** When `resources` was last read (accountInfo or the game's resource bar). */
+  resourcesAt: number;
   levels: Record<string, number>;
 }
 
@@ -43,8 +55,9 @@ const record = (v: unknown): Record<string, number> => {
   return Object.fromEntries(Object.entries(v as Record<string, unknown>).map(([k, x]) => [k, num(x)]));
 };
 
-function toBody(raw: RawBody, type: OwnBody['type']): OwnBody {
+function toBody(raw: RawBody, type: OwnBody['type'], fetchedAt: number): OwnBody {
   const prod = (raw.production ?? {}) as Record<string, unknown>;
+  const res = (raw.resources ?? {}) as Record<string, unknown>;
   return {
     id: num(raw.id),
     type,
@@ -52,6 +65,9 @@ function toBody(raw: RawBody, type: OwnBody['type']): OwnBody {
     coords: `${num(raw.galaxy)}:${num(raw.system)}:${num(raw.position)}`,
     siblingId: raw.siblingId == null ? null : num(raw.siblingId),
     production: { metal: num(prod.metal), crystal: num(prod.crystal), deuterium: num(prod.deuterium) },
+    resources: { metal: num(res.metal), crystal: num(res.crystal), deuterium: num(res.deuterium) },
+    storage: { metal: num(res.metalStorage), crystal: num(res.crystalStorage), deuterium: num(res.deuteriumStorage) },
+    resourcesAt: fetchedAt,
     levels: {
       ...record(raw.buildings),
       ...record(raw.ships),
@@ -70,8 +86,8 @@ export function parseAccountInfo(json: unknown, fetchedAt: number): AccountSnaps
   return {
     fetchedAt,
     bodies: [
-      ...list(data.planets).map((b) => toBody(b, 'planet')),
-      ...list(data.moons).map((b) => toBody(b, 'moon')),
+      ...list(data.planets).map((b) => toBody(b, 'planet', fetchedAt)),
+      ...list(data.moons).map((b) => toBody(b, 'moon', fetchedAt)),
     ],
     researches: record(data.researches),
   };
@@ -85,7 +101,7 @@ export interface HydrateDeps {
   now?: () => number;
 }
 
-const SNAPSHOT_KEY = 'account.snapshot';
+export const SNAPSHOT_KEY = 'account.snapshot';
 const sessionKey = (store: Store) => `${store.namespace}:account.hydrated`;
 
 export async function fetchAccount(deps: HydrateDeps, reason: CallReason): Promise<AccountSnapshot> {
