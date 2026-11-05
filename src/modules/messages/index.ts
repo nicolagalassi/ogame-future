@@ -59,10 +59,12 @@ export function summaryFor(doc: Document, m: ParsedMessage, o: { locale: string;
   const { t, locale } = o;
   const fmt = (n: number) => formatUnits(n, locale);
   const box = h(doc, 'div', `fut-msg fut-msg-${m.kind}`);
+  /** Where the next chips go: the box itself, or one of its rows. */
+  let into: HTMLElement = box;
   const chip = (text: string, cls = '', title?: string) => {
     const c = h(doc, 'span', `fut-msg-chip ${cls}`.trim(), text);
     if (title) c.title = title;
-    box.append(c);
+    into.append(c);
     return c;
   };
   const resChips = (r: Partial<Res & { food: number; darkMatter: number }>, sign = 1) => {
@@ -93,17 +95,35 @@ export function summaryFor(doc: Document, m: ParsedMessage, o: { locale: string;
   switch (m.kind) {
     case 'expedition':
     case 'discovery': {
+      // Three rows: outcome and value, then what was found (centred), then depletion.
+      // The size is the colour of the frame: normal, big, huge.
+      box.classList.add('fut-msg-rows');
+      if (m.size >= 0) {
+        box.classList.add(`fut-size-${m.size}`);
+        box.dataset.size = t(`msg.size.${m.size}`);
+      }
+      const row = (cls: string) => {
+        const r = h(doc, 'div', `fut-msg-row ${cls}`);
+        box.append(r);
+        into = r;
+        return r;
+      };
+      row('fut-msg-top');
       chip(m.kind === 'discovery' ? `${t('msg.discovery')} · ${t(`msg.out.${m.result}`)}` : t(`msg.out.${m.result}`), `fut-msg-out fut-out-${m.result}`);
+      const value = msu(m.res) + msu(unitsValue(m.ships)) - msu(unitsValue(m.lost));
+      if (value) chip(`${fmt(value)} MSU`, `fut-msg-msu fut-msg-big${value < 0 ? ' fut-msg-neg' : ''}`, t('msg.msuHint'));
+      const found = row('fut-msg-found');
       resChips(m.res);
       unitChips(m.ships, false);
       unitChips(m.lost, true);
       if (m.item) chip(m.item, 'fut-msg-item');
       if (m.lfXp) chip(t('msg.lfXp', { n: m.lfXp.toLocaleString(locale) }), 'fut-msg-lf');
       if (m.artefacts) chip(t('msg.artefacts', { n: m.artefacts.toLocaleString(locale) }), 'fut-msg-art');
-      if (m.size >= 0) chip(t(`msg.size.${m.size}`), `fut-msg-size fut-size-${m.size}`);
-      if (m.depletion > 0) chip(t('msg.depletion', { n: m.depletion }), 'fut-msg-muted');
-      const value = msu(m.res) + msu(unitsValue(m.ships)) - msu(unitsValue(m.lost));
-      if (value) chip(`${fmt(value)} MSU`, `fut-msg-msu${value < 0 ? ' fut-msg-neg' : ''}`, t('msg.msuHint'));
+      if (!found.childElementCount) found.remove();
+      if (m.depletion > 0) {
+        row('fut-msg-foot');
+        chip(t('msg.depletion', { n: m.depletion }), 'fut-msg-muted');
+      }
       return box;
     }
     case 'spy': {
@@ -178,7 +198,7 @@ export function processMessages(o: MessagesOptions): number {
     if (!parsed) continue;
     const box = summaryFor(doc, parsed, { locale, t, ships });
     if (box) {
-      box.title = t('msg.toggle');
+      box.title = [box.dataset.size, t('msg.toggle')].filter(Boolean).join(' · ');
       box.addEventListener('click', (e) => {
         if ((e.target as Element).closest('a, button')) return;
         msg.classList.toggle('fut-msg-folded');
