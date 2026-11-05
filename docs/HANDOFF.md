@@ -61,8 +61,9 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
 
 1. **Dashboard** (fatta il 2026-11-05 al posto della "Plancia", `src/modules/dashboard`): schede
    Riepilogo, Miniere, Strutture, Forme di vita, Navi, Difese, Rottamatore (solo calcolo, 35–75%).
-   Da verificare in gioco: che `accountInfo` riporti i livelli delle specie non attive
-   (`speciesBuildings`/`speciesResearches`) e `selectedSpeciesId`. Nomi: quelli letti dalle
+   Verificato in gioco (s808-en, 2026-11-05): `selectedSpeciesId` arriva (14 pianeti, tutti
+   Mechas = 3) e `speciesBuildings` contiene anche edifici di specie non attive (Umani e
+   Rock'tal sui pianeti Mechas, con livelli > 0). Nomi: quelli letti dalle
    pagine del gioco (`tech.names`) vincono sulla tabella interna (`src/data/tech-names.ts`,
    forme di vita solo in inglese finché il giocatore non apre la pagina).
 2. Telefono: barra d'azioni flotta fissa in basso con pulsanti grandi (serve una pagina
