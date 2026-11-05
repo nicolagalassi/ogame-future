@@ -3,39 +3,26 @@
  * inbox, kept locally, with totals per period. Pure functions: no DOM, no network.
  * Data stays on the player's machine (AGENTS.md §1.9).
  */
-import type { ExpeditionMessage, Outcome } from "../data/messages";
-import { rawCost } from "./tech";
+import type { ExpeditionMessage, Outcome } from '../data/messages';
+import { rawCost } from './tech';
 
-export const JOURNAL_KEY = "exp.journal";
+export const JOURNAL_KEY = 'exp.journal';
 const DAY = 86_400_000;
 /** Older entries leave the journal: about a year and a half of play. */
 const KEEP_MS = 550 * DAY;
 const MAX_ENTRIES = 25_000;
 
-export type JournalEntry = Omit<ExpeditionMessage, "id"> & {
+export type JournalEntry = Omit<ExpeditionMessage, 'id'> & {
   /** Losses from the combat report at position 16 (pirates/aliens), not a separate expedition. */
   combat?: boolean;
 };
 export type Journal = Record<string, JournalEntry>;
 
-export type Res4 = {
-  metal: number;
-  crystal: number;
-  deuterium: number;
-  darkMatter: number;
-};
-const ZERO = (): Res4 => ({
-  metal: 0,
-  crystal: 0,
-  deuterium: 0,
-  darkMatter: 0,
-});
+export type Res4 = { metal: number; crystal: number; deuterium: number; darkMatter: number };
+const ZERO = (): Res4 => ({ metal: 0, crystal: 0, deuterium: 0, darkMatter: 0 });
 
 /** Adds new reports; a report already in the journal is not counted twice. */
-export function record(
-  journal: Journal,
-  messages: ExpeditionMessage[],
-): { journal: Journal; added: number } {
+export function record(journal: Journal, messages: ExpeditionMessage[]): { journal: Journal; added: number } {
   let added = 0;
   let next = journal;
   for (const { id, ...entry } of messages) {
@@ -48,18 +35,12 @@ export function record(
 }
 
 /** Losses of a combat at an expedition position: they count against the expeditions. */
-export function recordCombat(
-  journal: Journal,
-  id: string,
-  at: number,
-  lost: Record<number, number>,
-  coords: string | null,
-): { journal: Journal; added: number } {
+export function recordCombat(journal: Journal, id: string, at: number, lost: Record<number, number>, coords: string | null): { journal: Journal; added: number } {
   if (journal[id] || !Object.keys(lost).length) return { journal, added: 0 };
   const entry: JournalEntry = {
-    kind: "expedition",
+    kind: 'expedition',
     at,
-    result: "unknown",
+    result: 'unknown',
     size: -1,
     depletion: 0,
     res: { metal: 0, crystal: 0, deuterium: 0, darkMatter: 0, food: 0 },
@@ -76,14 +57,9 @@ export function recordCombat(
 }
 
 export function trim(journal: Journal, now: number): Journal {
-  const entries = Object.entries(journal).filter(
-    ([, e]) => e.at > now - KEEP_MS,
-  );
-  if (entries.length > MAX_ENTRIES)
-    entries.sort((a, b) => b[1].at - a[1].at).splice(MAX_ENTRIES);
-  return entries.length === Object.keys(journal).length
-    ? journal
-    : Object.fromEntries(entries);
+  const entries = Object.entries(journal).filter(([, e]) => e.at > now - KEEP_MS);
+  if (entries.length > MAX_ENTRIES) entries.sort((a, b) => b[1].at - a[1].at).splice(MAX_ENTRIES);
+  return entries.length === Object.keys(journal).length ? journal : Object.fromEntries(entries);
 }
 
 /** Resource value of units (ships found or lost), at base cost. */
@@ -99,11 +75,7 @@ export function unitsValue(units: Record<number, number>): Res4 {
 }
 
 /** Metal-standard units: 1 crystal = 1.5 metal, 1 deuterium = 3 metal (as in the cost panel). */
-export const msu = (r: {
-  metal: number;
-  crystal: number;
-  deuterium: number;
-}): number => r.metal + r.crystal * 1.5 + r.deuterium * 3;
+export const msu = (r: { metal: number; crystal: number; deuterium: number }): number => r.metal + r.crystal * 1.5 + r.deuterium * 3;
 
 export interface PeriodStats {
   /** Expeditions (without discoveries and combat entries). */
@@ -140,17 +112,15 @@ export function periodStats(entries: JournalEntry[]): PeriodStats {
     netMsu: 0,
   };
   for (const e of entries) {
-    if (e.kind === "discovery") s.discoveries++;
+    if (e.kind === 'discovery') s.discoveries++;
     else if (!e.combat) s.count++;
     if (!e.combat) s.outcomes[e.result] = (s.outcomes[e.result] ?? 0) + 1;
     s.res.metal += e.res.metal;
     s.res.crystal += e.res.crystal;
     s.res.deuterium += e.res.deuterium;
     s.res.darkMatter += e.res.darkMatter;
-    for (const [id, n] of Object.entries(e.ships))
-      s.shipsFound[Number(id)] = (s.shipsFound[Number(id)] ?? 0) + n;
-    for (const [id, n] of Object.entries(e.lost))
-      s.lost[Number(id)] = (s.lost[Number(id)] ?? 0) + n;
+    for (const [id, n] of Object.entries(e.ships)) s.shipsFound[Number(id)] = (s.shipsFound[Number(id)] ?? 0) + n;
+    for (const [id, n] of Object.entries(e.lost)) s.lost[Number(id)] = (s.lost[Number(id)] ?? 0) + n;
     s.lfXp += e.lfXp;
     s.artefacts += e.artefacts;
     if (e.item) s.items.push(e.item);
@@ -169,38 +139,32 @@ export function dayStart(at: number): number {
   return d.getTime();
 }
 
-export type Period = "today" | "yesterday" | "week" | "month" | "all";
+export type Period = 'today' | 'yesterday' | 'week' | 'month' | 'all';
 
 export function periodRange(period: Period, now: number): [number, number] {
   const today = dayStart(now);
   switch (period) {
-    case "today":
+    case 'today':
       return [today, Infinity];
-    case "yesterday":
+    case 'yesterday':
       return [dayStart(today - 1), today];
-    case "week":
+    case 'week':
       return [dayStart(today - 6 * DAY), Infinity];
-    case "month":
+    case 'month':
       return [dayStart(today - 29 * DAY), Infinity];
     default:
       return [0, Infinity];
   }
 }
 
-export function entriesIn(
-  journal: Journal,
-  [from, to]: [number, number],
-): JournalEntry[] {
+export function entriesIn(journal: Journal, [from, to]: [number, number]): JournalEntry[] {
   return Object.values(journal)
     .filter((e) => e.at >= from && e.at < to)
     .sort((a, b) => b.at - a.at);
 }
 
 /** One row per day, most recent first, only days with at least one entry. */
-export function byDay(
-  entries: JournalEntry[],
-  limit = 14,
-): { day: number; stats: PeriodStats }[] {
+export function byDay(entries: JournalEntry[], limit = 14): { day: number; stats: PeriodStats }[] {
   const days = new Map<number, JournalEntry[]>();
   for (const e of entries) {
     const key = dayStart(e.at);
