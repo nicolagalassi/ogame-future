@@ -41,8 +41,9 @@ import {
   type PrepareResult,
   type Target,
 } from './actions';
-import { armRepeat, decideRepeat, readRepeatParams, repeatUrl, type RepeatState } from './repeat';
-import { FLEET_CSS } from './style';
+import { hookSend, nextInRound, readRepeatParams, repeatUrl, type RepeatState } from './repeat';
+import { FLEET_CSS, MODAL_CSS } from './style';
+import { iconSvg, type IconName } from './icons';
 
 export interface FleetBody {
   planetId: number | null;
@@ -65,6 +66,7 @@ export interface FleetOptions {
 }
 
 const STYLE_ID = 'fut-fleet-style';
+const MODAL_ID = 'fut-fleet-modal';
 /** Missions offered for fleetsave, in the game's order codes. */
 export const FLEETSAVE_MISSIONS = [3, 4, 6, 8, 15, 5, 1];
 const pageState = new WeakMap<Document, { active: RepeatState | null; o: FleetOptions }>();
@@ -208,7 +210,6 @@ function reserveEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEle
   const profile = profileFor(loadProfiles(o.store), o.bodyId);
   const moon = isMoon(o.bodies, o.bodyId);
   const panel = el(doc, 'div', 'fut-feditor');
-  panel.hidden = true;
   panel.append(el(doc, 'h4', '', t(moon ? 'fleet.editTitleMoon' : 'fleet.editTitlePlanet', { body: bodyLabel(o, o.bodyId) })));
 
   panel.append(el(doc, 'h5', '', t('fleet.reserveShips')));
@@ -304,7 +305,6 @@ function settingsEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEl
   const names = new Map(readShipSlots(doc).map((x) => [Number(x.id), x.name || `#${x.id}`]));
   const shipName = (id: number) => names.get(id) ?? `#${id}`;
   const panel = el(doc, 'div', 'fut-feditor');
-  panel.hidden = true;
   panel.append(el(doc, 'h4', '', t('fleet.settingsTitle')));
 
   panel.append(el(doc, 'h5', '', t('fleet.transportTitle')));
@@ -320,6 +320,20 @@ function settingsEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEl
   );
   g1.append(mainW, secW, spdW);
   panel.append(g1);
+
+  panel.append(el(doc, 'h5', '', t('fleet.favTitle')));
+  const gf = el(doc, 'div', 'fut-fgrid');
+  const destOptions: [string, string][] = [
+    ['0', t('fleet.none')],
+    ...o.bodies
+      .flatMap((b) => [b.planetId, b.moonId])
+      .filter((x): x is number => x !== null)
+      .map((id) => [String(id), bodyLabel(o, id)] as [string, string]),
+  ];
+  const [favTW, favTSel] = selectField(doc, t('fleet.favTransport'), destOptions, String(s.favTransport ?? 0));
+  const [favDW, favDSel] = selectField(doc, t('fleet.favDeploy'), destOptions, String(s.favDeploy ?? 0));
+  gf.append(favTW, favDW);
+  panel.append(gf);
 
   panel.append(el(doc, 'h5', '', t('fleet.expeditionTitle')));
   const g2 = el(doc, 'div', 'fut-fgrid');
@@ -348,6 +362,8 @@ function settingsEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEl
         mainShip: Number(mainSel.value),
         secondShip: Number(secSel.value),
         transportSpeed: Number(spdSel.value),
+        favTransport: Number(favTSel.value) || null,
+        favDeploy: Number(favDSel.value) || null,
         expeditionShip: Number(expSel.value),
         expeditionValue: valIn.value.trim(),
         expeditionExtras: extIn.checked,
@@ -380,32 +396,130 @@ function universeSpeed(doc: Document): number {
   return Number.isFinite(n) && n > 0 ? n : 1;
 }
 
-/** Destination picker for Trasporto / Schiera, preselected on its favourite. */
-function destinationPicker(o: FleetOptions, fav: number | null, onFav: (id: number) => void): { wrap: HTMLElement; value: () => number | null } {
+
+/* ------------------------------------------------------------------ */
+/* Settings window: separate from the action bar                       */
+/* ------------------------------------------------------------------ */
+
+let modalKeyHandler: ((e: KeyboardEvent) => void) | null = null;
+
+function closeModal(doc: Document): void {
+  doc.getElementById(MODAL_ID)?.remove();
+  if (modalKeyHandler) doc.removeEventListener('keydown', modalKeyHandler, true);
+  modalKeyHandler = null;
+}
+
+/**
+ * Opens the fleet settings over the page, in a Shadow DOM so the game's CSS cannot
+ * restyle our fields. Tab "this body": reserves and fleetsave; tab "general": the rest.
+ */
+function openSettings(o: FleetOptions, tab: 'body' | 'general', onChange: () => void): void {
   const { doc, t } = o;
-  const wrap = el(doc, 'span', 'fut-fdest');
-  const sel = el(doc, 'select');
-  isolate(sel);
-  const ids = o.bodies.flatMap((b) => [b.planetId, b.moonId]).filter((x): x is number => x !== null && x !== o.bodyId);
-  const preferred = fav !== null && ids.includes(fav) ? fav : null;
-  if (preferred === null) {
-    const opt = el(doc, 'option', '', t('fleet.pickDest'));
-    opt.value = '';
-    sel.append(opt);
+  closeModal(doc);
+  const host = el(doc, 'div');
+  host.id = MODAL_ID;
+  const root = host.attachShadow({ mode: 'open' });
+  const style = el(doc, 'style');
+  style.textContent = MODAL_CSS;
+  const backdrop = el(doc, 'div', 'backdrop');
+  const panel = el(doc, 'div', 'panel');
+  const head = el(doc, 'div', 'head');
+  const tabs = el(doc, 'div', 'tabs');
+  const moon = isMoon(o.bodies, o.bodyId);
+  const status = el(doc, 'span', 'status');
+  const body = el(doc, 'div', 'body');
+  const show = (which: 'body' | 'general') => {
+    tabs.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.tab === which));
+    const saved = (msg: string) => {
+      status.textContent = msg;
+      onChange();
+    };
+    body.replaceChildren(which === 'body' ? reserveEditor(o, saved) : settingsEditor(o, saved));
+  };
+  for (const [id, label] of [
+    ['body', t(moon ? 'fleet.tabMoon' : 'fleet.tabPlanet')],
+    ['general', t('fleet.tabGeneral')],
+  ] as const) {
+    const b = button(doc, label, () => show(id), 'tab');
+    b.dataset.tab = id;
+    tabs.append(b);
   }
-  for (const id of ids) {
-    const opt = el(doc, 'option', '', `${id === fav ? '★ ' : ''}${bodyLabel(o, id)}`);
-    opt.value = String(id);
-    opt.selected = id === preferred;
-    sel.append(opt);
+  const close = button(doc, '×', () => closeModal(doc), 'close', t('fleet.close'));
+  head.append(tabs, status, close);
+  panel.append(head, body);
+  backdrop.append(panel);
+  backdrop.addEventListener('click', (e) => {
+    if (e.target === backdrop) closeModal(doc);
+  });
+  root.append(style, backdrop);
+  doc.body.append(host);
+  modalKeyHandler = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') closeModal(doc);
+  };
+  doc.addEventListener('keydown', modalKeyHandler, true);
+  show(tab);
+}
+
+/* ------------------------------------------------------------------ */
+/* Action bar                                                          */
+/* ------------------------------------------------------------------ */
+
+function shortLabel(o: FleetOptions, id: number | null): string {
+  if (!id) return o.t('fleet.pickDest');
+  const b = o.bodies.find((x) => x.planetId === id || x.moonId === id);
+  if (!b) return o.t('fleet.pickDest');
+  return `${b.name}${b.moonId === id ? ' ☾' : ''}`;
+}
+
+function tile(doc: Document, icon: IconName, label: string, caption: string, title: string, onClick: () => void, cls = ''): HTMLButtonElement {
+  const b = el(doc, 'button', `fut-ftile ${cls}`.trim());
+  b.type = 'button';
+  b.title = title;
+  b.innerHTML = iconSvg(icon);
+  b.append(el(doc, 'span', 'fut-flabel', label));
+  if (caption) b.append(el(doc, 'span', 'fut-fcaption', caption));
+  b.addEventListener('click', (e) => {
+    e.preventDefault();
+    onClick();
+  });
+  return b;
+}
+
+function iconToggle(doc: Document, icon: IconName, title: string, onClick: () => void, cls = ''): HTMLButtonElement {
+  const b = el(doc, 'button', `fut-ficon ${cls}`.trim());
+  b.type = 'button';
+  b.title = title;
+  b.innerHTML = iconSvg(icon, 18);
+  b.addEventListener('click', (e) => {
+    e.preventDefault();
+    onClick();
+  });
+  return b;
+}
+
+/** Small list to pick the destination of Trasporto / Schiera; the pick becomes the favourite. */
+function destinationMenu(o: FleetOptions, anchor: HTMLElement, current: number | null, onPick: (id: number) => void): void {
+  const { doc } = o;
+  doc.querySelectorAll('.fut-fmenu').forEach((n) => n.remove());
+  const menu = el(doc, 'div', 'fut-fmenu');
+  for (const b of o.bodies) {
+    for (const id of [b.planetId, b.moonId]) {
+      if (id === null || id === o.bodyId) continue;
+      const item = button(doc, `${b.name}${id === b.moonId ? ' ☾' : ''}  [${b.coords}]`, () => {
+        menu.remove();
+        onPick(id);
+      }, id === current ? 'on' : '');
+      menu.append(item);
+    }
   }
-  const star = button(doc, '★', () => {
-    const v = Number(sel.value);
-    if (v > 0) onFav(v);
-  }, `fut-fstar${preferred !== null ? ' on' : ''}`, t('fleet.setFav'));
-  sel.addEventListener('change', () => star.classList.toggle('on', Number(sel.value) === fav));
-  wrap.append(sel, star);
-  return { wrap, value: () => (Number(sel.value) > 0 ? Number(sel.value) : null) };
+  anchor.append(menu);
+  const away = (e: MouseEvent) => {
+    if (!menu.contains(e.target as Node)) {
+      menu.remove();
+      doc.removeEventListener('mousedown', away, true);
+    }
+  };
+  doc.addEventListener('mousedown', away, true);
 }
 
 export function renderFleetTools(o: FleetOptions): void {
@@ -416,7 +530,7 @@ export function renderFleetTools(o: FleetOptions): void {
     style.textContent = FLEET_CSS;
     doc.head.append(style);
   }
-  doc.querySelectorAll('.fut-fbar, .fut-feditor').forEach((n) => n.remove());
+  doc.querySelectorAll('.fut-fbar').forEach((n) => n.remove());
   const href = o.href ?? doc.location?.href ?? '';
   const navigate = o.navigate ?? ((url: string) => doc.location.assign(url));
   const profile = profileFor(loadProfiles(o.store), o.bodyId);
@@ -429,31 +543,29 @@ export function renderFleetTools(o: FleetOptions): void {
   const anchor2 = fleet2?.querySelector('#buttonz') ?? null;
   if (fleet2) enableOriginAutofill(doc);
 
-  // State of this page: which Future button prepared the fleet, for "Ripeti". It outlives
-  // redraws (saving a favourite re-renders the bar), so it is kept per document.
+  // Which button prepared the fleet on this page, for "Ripeti". Kept per document so a
+  // redraw (after changing a setting) does not forget it.
   const incoming = readRepeatParams(href);
   const state = pageState.get(doc) ?? { active: incoming, o };
   state.o = o;
   pageState.set(doc, state);
 
   const info = el(doc, 'span', 'fut-finfo', summary(o, profile));
-  const report = (r: PrepareResult, okKey: string, vars: Record<string, string | number> = {}) => {
-    info.classList.toggle('err', !r.ok);
-    info.textContent = r.ok
-      ? t(okKey, { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), ...vars })
-      : t(r.reason ?? 'fleet.err.noShips');
+  const say = (text: string, err = false) => {
+    info.textContent = text;
+    info.classList.toggle('err', err);
   };
+  const report = (r: PrepareResult, okKey: string, vars: Record<string, string | number> = {}) =>
+    r.ok
+      ? say(t(okKey, { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), ...vars }))
+      : say(t(r.reason ?? 'fleet.err.noShips'), true);
   const withDispatcher = (fn: (fd: FleetDispatcher) => void) => {
     const fd = getDispatcher();
-    if (!fd) {
-      info.textContent = t('fleet.err.notReady');
-      return;
-    }
-    if (fd.currentPage !== 'fleet1') {
-      info.textContent = t('fleet.err.page1');
-      return;
-    }
-    fn(fd);
+    if (!fd) return say(t('fleet.err.notReady'), true);
+    if (fd.currentPage !== 'fleet1') return say(t('fleet.err.page1'), true);
+    // The game checks the target on its own (e.g. right after the page loads): when that
+    // answer lands it rewrites the target, so we prepare only once it is back.
+    void whenTargetIdle(fd).then(() => fn(fd));
   };
   const begin = (mode: FleetMode, dest: number | null = null) => {
     const prev = state.active;
@@ -465,30 +577,21 @@ export function renderFleetTools(o: FleetOptions): void {
       withDispatcher((fd) => {
         const here = o.bodies.find((b) => b.planetId === o.bodyId);
         const target = here?.moonId ? bodyTarget(o.bodies, here.moonId) : null;
-        if (!target) {
-          info.textContent = t('fleet.err.noMoon');
-          return;
-        }
+        if (!target) return say(t('fleet.err.noMoon'), true);
         begin('moon');
         report(prepareTransport(fd, doc, profile, settings, target), 'fleet.ok.cargo');
       }),
     transport: (dest) =>
       withDispatcher((fd) => {
         const target = dest ? bodyTarget(o.bodies, dest) : null;
-        if (!dest || !target) {
-          info.textContent = t('fleet.err.noDest');
-          return;
-        }
+        if (!dest || !target) return say(t('fleet.err.noDest'), true);
         begin('transport', dest);
         report(prepareTransport(fd, doc, profile, settings, target), 'fleet.ok.cargo');
       }),
     deploy: (dest) =>
       withDispatcher((fd) => {
         const target = dest ? bodyTarget(o.bodies, dest) : null;
-        if (!dest || !target) {
-          info.textContent = t('fleet.err.noDest');
-          return;
-        }
+        if (!dest || !target) return say(t('fleet.err.noDest'), true);
         begin('deploy', dest);
         report(prepareDeploy(fd, doc, profile, settings, target), 'fleet.ok.cargo');
       }),
@@ -500,10 +603,7 @@ export function renderFleetTools(o: FleetOptions): void {
       }),
     fleetsave: () =>
       withDispatcher((fd) => {
-        if (!profile.save) {
-          info.textContent = t('fleet.err.noFleetsave');
-          return;
-        }
+        if (!profile.save) return say(t('fleet.err.noFleetsave'), true);
         begin('fleetsave');
         report(prepareFleetsave(fd, doc, profile, profile.save), 'fleet.ok.cargo');
       }),
@@ -514,60 +614,58 @@ export function renderFleetTools(o: FleetOptions): void {
       }),
   };
 
+  const setFav = (key: 'favTransport' | 'favDeploy', id: number) => {
+    o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: id });
+    redraw();
+  };
+  const withCaret = (tileEl: HTMLButtonElement, key: 'favTransport' | 'favDeploy') => {
+    const wrap = el(doc, 'span', 'fut-ftilewrap');
+    const caret = iconToggle(doc, 'caret', t('fleet.pickDest'), () => destinationMenu(o, wrap, settings[key], (id) => setFav(key, id)), 'fut-fcaret');
+    wrap.append(tileEl, caret);
+    return wrap;
+  };
+
   if (fleet1 && anchor1) {
     const bar = el(doc, 'div', 'fut-fbar');
-    const row = el(doc, 'div', 'fut-frow');
-    row.append(el(doc, 'span', 'fut-fbrand', 'Future'));
-
+    const tiles = el(doc, 'div', 'fut-ftiles');
     const here = o.bodies.find((b) => b.planetId === o.bodyId);
-    if (here?.moonId) row.append(button(doc, t('fleet.btn.moon'), () => run.moon(), '', t('fleet.tip.moon')));
-
-    const saveFav = (key: 'favTransport' | 'favDeploy') => (id: number) => {
-      o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: id });
-      redraw();
-    };
-    const tp = destinationPicker(o, settings.favTransport, saveFav('favTransport'));
-    const tpGroup = el(doc, 'span', 'fut-fgroup');
-    tpGroup.append(button(doc, t('fleet.btn.transport'), () => run.transport(tp.value()), '', t('fleet.tip.transport')), tp.wrap);
-    const dp = destinationPicker(o, settings.favDeploy, saveFav('favDeploy'));
-    const dpGroup = el(doc, 'span', 'fut-fgroup');
-    dpGroup.append(button(doc, t('fleet.btn.deploy'), () => run.deploy(dp.value()), '', t('fleet.tip.deploy')), dp.wrap);
-    row.append(tpGroup, dpGroup);
-
-    row.append(button(doc, t('fleet.btn.expedition'), () => run.expedition(), '', t('fleet.tip.expedition')));
-    row.append(
-      button(doc, t('fleet.btn.fleetsave'), () => run.fleetsave(), profile.save ? 'primary' : 'dim', profile.save ? t('fleet.tip.fleetsave') : t('fleet.err.noFleetsave')),
+    if (here?.moonId) tiles.append(tile(doc, 'moon', t('fleet.btn.moon'), '', t('fleet.tip.moon'), () => run.moon()));
+    tiles.append(
+      withCaret(
+        tile(doc, 'transport', t('fleet.btn.transport'), `→ ${shortLabel(o, settings.favTransport)}`, t('fleet.tip.transport'), () =>
+          settings.favTransport ? run.transport(settings.favTransport) : say(t('fleet.err.noDest'), true),
+        ),
+        'favTransport',
+      ),
+      withCaret(
+        tile(doc, 'deploy', t('fleet.btn.deploy'), `→ ${shortLabel(o, settings.favDeploy)}`, t('fleet.tip.deploy'), () =>
+          settings.favDeploy ? run.deploy(settings.favDeploy) : say(t('fleet.err.noDest'), true),
+        ),
+        'favDeploy',
+      ),
+      tile(doc, 'expedition', t('fleet.btn.expedition'), '', t('fleet.tip.expedition'), () => run.expedition()),
+      tile(
+        doc,
+        'fleetsave',
+        t('fleet.btn.fleetsave'),
+        profile.save ? `→ ${profile.save.position}` : '',
+        profile.save ? t('fleet.tip.fleetsave') : t('fleet.err.noFleetsave'),
+        () => (profile.save ? run.fleetsave() : openSettings(o, 'body', redraw)),
+        profile.save ? '' : 'dim',
+      ),
+      tile(doc, 'all', t('fleet.btn.all'), '', t('fleet.tip.all'), () => run.all()),
     );
-    row.append(button(doc, t('fleet.btn.all'), () => run.all(), '', t('fleet.tip.all')));
-    bar.append(row);
-
-    const row2 = el(doc, 'div', 'fut-frow');
-    const repeat = button(doc, `${t('fleet.repeatShort')}: ${settings.repeat ? t('fleet.on') : t('fleet.off')}`, () => {
-      o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), repeat: !loadSettings(o.store).repeat });
-      redraw();
-    }, `fut-fchip${settings.repeat ? ' on' : ''}`, t('fleet.repeatHint'));
-    const notify = (msg: string) => {
-      redraw();
-      const fresh = doc.querySelector('.fut-fbar .fut-finfo');
-      if (fresh) fresh.textContent = msg;
-    };
-    const reserves = reserveEditor(o, notify);
-    const setup = settingsEditor(o, notify);
-    row2.append(
-      repeat,
-      button(doc, t('fleet.edit'), () => {
-        reserves.hidden = !reserves.hidden;
-        setup.hidden = true;
-      }),
-      button(doc, '⚙', () => {
-        setup.hidden = !setup.hidden;
-        reserves.hidden = true;
-      }, '', t('fleet.settingsTitle')),
-      info,
+    const side = el(doc, 'div', 'fut-fside');
+    side.append(
+      iconToggle(doc, 'repeat', `${t('fleet.repeatShort')}: ${settings.repeat ? t('fleet.on') : t('fleet.off')}. ${t('fleet.repeatHint')}`, () => {
+        o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), repeat: !loadSettings(o.store).repeat });
+        redraw();
+      }, settings.repeat ? 'on' : ''),
+      iconToggle(doc, 'settings', t('fleet.settingsTitle'), () => openSettings(o, 'body', redraw)),
     );
-    bar.append(row2);
-    // Panels sit outside the game's #fleet1 form, so its own input handlers and styles stay off them.
-    fleet1.before(reserves, setup);
+    const top = el(doc, 'div', 'fut-frow');
+    top.append(tiles, side);
+    bar.append(top, info);
     anchor1.before(bar);
   }
 
@@ -575,56 +673,55 @@ export function renderFleetTools(o: FleetOptions): void {
     const bar = el(doc, 'div', 'fut-fbar');
     const row = el(doc, 'div', 'fut-frow');
     const info2 = el(doc, 'span', 'fut-finfo', summary(o, profile));
-    row.append(el(doc, 'span', 'fut-fbrand', 'Future'));
-    row.append(
-      button(doc, t('fleet.resMinusReserve'), () => {
+    const tiles = el(doc, 'div', 'fut-ftiles');
+    tiles.append(
+      tile(doc, 'cargo', t('fleet.resMinusReserve'), '', t('fleet.tip.cargo'), () => {
         const fd = getDispatcher();
         if (!fd) return;
         const load = loadCargoNow(fd, profile);
         info2.textContent = t('fleet.resLoaded', { cargo: load.toLocaleString(o.locale) });
       }),
-      info2,
     );
-    bar.append(row);
+    row.append(tiles);
+    bar.append(row, info2);
     anchor2.before(bar);
-  }
-
-  // "Ripeti": the player's own send arms it; the page that follows the send moves on.
-  const armOnSend = () => {
-    const current = pageState.get(doc);
-    const fd = getDispatcher();
-    if (!current?.active || !fd || fd.currentPage !== 'fleet2' || !loadSettings(current.o.store).repeat) return;
-    armRepeat(current.active, current.o.bodyId, fd.fleetCount);
-  };
-  if (!doc.documentElement.dataset.futSendHook) {
-    doc.documentElement.dataset.futSendHook = '1';
-    doc.addEventListener('click', (e) => {
-      if ((e.target as Element | null)?.closest?.('#sendFleet')) armOnSend();
-    }, true);
-    doc.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') armOnSend();
-    }, true);
   }
 
   void whenDispatcherReady().then((fd) => {
     if (!fd) return;
-    const decision = decideRepeat({ bodyId: o.bodyId, fleetCount: fd.fleetCount, list: o.bodies });
-    if (decision.kind === 'next') {
-      info.textContent = t('fleet.repeatNext', { body: bodyLabel(o, decision.cp) });
-      navigate(repeatUrl(href, decision.cp, decision.state));
-      return;
-    }
-    if (decision.kind === 'done') {
-      info.textContent = t('fleet.repeatDone');
-      return;
-    }
+    // "Ripeti": know when the game accepted the send, and move on as OGLight does.
+    hookSend(fd, () => {
+      const current = pageState.get(doc);
+      if (!current?.active || !loadSettings(current.o.store).repeat) return false;
+      const next = nextInRound(current.active, current.o.bodyId, current.o.bodies);
+      if (next === null) return false;
+      navigate(repeatUrl(href, next, current.active));
+      return true;
+    });
     // Opened by "Ripeti": prepare the same button here (OGLight does the same on its modes).
-    // Once per page: a redraw (e.g. after saving a favourite) must not prepare it again.
+    // Once per page: a redraw must not prepare it again.
     if (incoming && fd.currentPage === 'fleet1' && !doc.documentElement.dataset.futAutoRun) {
       doc.documentElement.dataset.futAutoRun = '1';
-      if (incoming.mode === 'transport' || incoming.mode === 'deploy') run[incoming.mode](incoming.dest);
-      else run[incoming.mode]();
+      // After the page has fully loaded, so the game's own first target check has started
+      // (withDispatcher then waits for its answer before preparing).
+      const go = () => {
+        if (incoming.mode === 'transport' || incoming.mode === 'deploy') run[incoming.mode](incoming.dest);
+        else run[incoming.mode]();
+      };
+      if (doc.readyState === 'complete') setTimeout(go, 0);
+      else doc.defaultView?.addEventListener('load', () => setTimeout(go, 0), { once: true });
     }
+  });
+}
+
+/** Resolves when the game's own target check is not running (client-side wait, at most 5 s). */
+function whenTargetIdle(fd: FleetDispatcher, timeoutMs = 5000): Promise<void> {
+  const busy = () => Boolean((fd as { fetchTargetPlayerDataTimeout?: unknown }).fetchTargetPlayerDataTimeout);
+  if (!busy()) return Promise.resolve();
+  const started = Date.now();
+  return new Promise((resolve) => {
+    const check = () => (!busy() || Date.now() - started > timeoutMs ? resolve() : setTimeout(check, 50));
+    check();
   });
 }
 

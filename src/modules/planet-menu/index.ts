@@ -203,7 +203,8 @@ function formatTime(at: number, locale: string): string {
 function toolbar(o: PlanetMenuOptions, mode: MenuMode, roomy: boolean, colonies: string): HTMLElement {
   const { doc, t } = o;
   const bar = el(doc, 'div', 'fut-toolbar');
-  const brand = el(doc, 'span', 'fut-brand', t('app.name'));
+  // No product name on screen (Nicola, 2026-11-05): an empty spacer that keeps the colony count as tooltip.
+  const brand = el(doc, 'span', 'fut-brand');
   if (colonies) brand.title = colonies;
   bar.append(brand);
 
