@@ -2,7 +2,8 @@
  * Expedition journal window: what expeditions brought per period, outcomes, ships found and
  * lost, day by day. Shadow DOM, like the planner. Stored data only: no network, no game action.
  */
-import { BASE_SHEET, icon } from '../../core/icons';
+import { icon } from '../../core/icons';
+import { WINDOW_SHEET } from '../../core/sheet';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
@@ -46,7 +47,7 @@ export function openJournal(o: JournalOptions): void {
   host.id = JOURNAL_ID;
   const root = host.attachShadow({ mode: 'open' });
   const style = h('style');
-  style.textContent = JOURNAL_CSS + BASE_SHEET;
+  style.textContent = WINDOW_SHEET + JOURNAL_CSS;
   const backdrop = h('div', 'backdrop');
   const panel = h('div', 'panel');
   backdrop.append(panel);
@@ -134,7 +135,7 @@ export function openJournal(o: JournalOptions): void {
         const row = h('div');
         const dot = h('span', 'dot');
         dot.style.background = OUTCOME_COLORS[key] ?? '#5B6B80';
-        row.append(dot, h('span', '', t(`msg.out.${key}`)), h('span', 'n', n.toLocaleString(locale)), h('span', 'pct', `${((n / total) * 100).toFixed(1)}%`));
+        row.append(dot, h('span', '', t(`msg.out.${key}`)), h('span', 'n', n.toLocaleString(locale)), h('span', 'pct', (n / total).toLocaleString(locale, { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 })));
         legend.append(row);
       }
       outs.append(bar, legend);
@@ -142,7 +143,7 @@ export function openJournal(o: JournalOptions): void {
       if (sized) {
         const sizes = h('div', 'detail');
         sizes.style.cssText = 'display:flex;gap:12px;margin-top:8px;color:#8A9BB0;font-size:12px';
-        for (const i of [2, 1, 0] as const) sizes.append(h('span', '', `${t(`msg.size.${i}`)} ${s.sizes[i].toLocaleString(locale)} (${((s.sizes[i] / sized) * 100).toFixed(0)}%)`));
+        for (const i of [2, 1, 0] as const) sizes.append(h('span', '', `${t(`msg.size.${i}`)} ${s.sizes[i].toLocaleString(locale)} (${(s.sizes[i] / sized).toLocaleString(locale, { style: 'percent', maximumFractionDigits: 0 })})`));
         outs.append(sizes);
       }
       parts.push(outs);
@@ -168,7 +169,7 @@ export function openJournal(o: JournalOptions): void {
         };
         if (found.length) card.append(grid(found, false));
         if (lost.length) {
-          card.append(h('h4', '', t('exp.lost')));
+          card.append(h('h4', 'lost', t('exp.lost')));
           card.append(grid(lost, true));
         }
         parts.push(card);
