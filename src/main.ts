@@ -20,7 +20,7 @@ import { registerShortcuts, switchBodyUrl } from './modules/shortcuts';
 import { nextBody } from './engines/fleet';
 import { watchTechPages } from './modules/tech';
 import { openPlanner } from './modules/tech/planner-view';
-import { PLAN_KEY, planCount, type Plan } from './engines/planner';
+import { PLAN_KEY, planCount, pruneByQueues, type Plan } from './engines/planner';
 import { renderPlanetMenu, type MenuMode, type MenuSettings } from './modules/planet-menu';
 
 async function bootstrap(): Promise<void> {
@@ -58,6 +58,12 @@ async function bootstrap(): Promise<void> {
   const bodyId = currentBodyId(document);
   const onPage = readCurrentResources(document);
   if (snapshot && bodyId && onPage && applyPageResources(snapshot, bodyId, onPage, Date.now())) saver.markDirty();
+
+  // Planned levels already in the construction queues leave the plan, on every page.
+  if (queues) {
+    const pruned = pruneByQueues(store.get<Plan>(PLAN_KEY, {}), queues.bodies);
+    if (pruned.changed) store.set(PLAN_KEY, pruned.plan);
+  }
 
   // Active items are listed on the overview's buff bar only: keep the last list seen.
   const items = readActiveItems(document);

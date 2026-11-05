@@ -24,7 +24,7 @@ import {
   techKind,
   type Cost,
 } from '../../engines/tech';
-import { addToPlan, inPlan, PLAN_KEY, prune, removeFromPlan, type Plan, type PlanItem } from '../../engines/planner';
+import { addToPlan, inPlan, PLAN_KEY, prune, removeFromPlan, startBuild, type Plan, type PlanItem } from '../../engines/planner';
 import { TECH_CSS } from './style';
 
 export type T = (key: string, vars?: Record<string, string | number>) => string;
@@ -363,6 +363,27 @@ export function watchTechPages(o: TechOptions): void {
     o.onPlanChange?.();
   }
   injectStyle(doc);
+  // "Sviluppa" (in the panel or on the list), also with dark matter: the started level, or
+  // the units ordered, leave the plan at once. The page reload after it prunes again.
+  doc.addEventListener(
+    'click',
+    (e) => {
+      const b = (e.target as Element | null)?.closest?.<HTMLButtonElement>('#technologydetails .build-it_wrap button, #technologies button.upgrade[data-technology]');
+      if (!b || b.disabled) return;
+      const id = Number(b.getAttribute('data-technology') ?? readTechDetails(doc)?.id);
+      if (!id) return;
+      const entry = readTechList(doc).find((x) => x.id === id);
+      const amountInput = doc.querySelector<HTMLInputElement>('#technologydetails #build_amount');
+      const change = isLevelled(id)
+        ? startBuild(loadPlan(o.store), o.bodyId, id, { level: (entry?.level ?? 0) + 1 })
+        : startBuild(loadPlan(o.store), o.bodyId, id, { amount: Math.max(1, Math.floor(Number(amountInput?.value) || 1)) });
+      if (change.changed) {
+        o.store.set(PLAN_KEY, change.plan);
+        o.onPlanChange?.();
+      }
+    },
+    true,
+  );
   let lastRoot: Element | null = null;
   const check = () => {
     const details = readTechDetails(doc);
