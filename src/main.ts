@@ -109,7 +109,8 @@ async function bootstrap(): Promise<void> {
   // Fleet page helpers: reserves and fleetsave, on the game's own form.
   const currentId = currentBodyId(document);
   if (isFleetDispatch(document) && currentId) {
-    renderFleetTools({ doc: document, store, bodyId: currentId, bodyIds, t, locale });
+    const bodies = readPlanetList(document).map(({ planetId, moonId, name, coords }) => ({ planetId, moonId, name, coords }));
+    renderFleetTools({ doc: document, store, bodyId: currentId, bodies, t, locale });
   }
 }
 
