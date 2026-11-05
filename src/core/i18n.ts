@@ -8,9 +8,9 @@ type Dictionary = Record<string, string>;
 
 const dictionaries: Record<Locale, Dictionary> = { it, en, fr, de };
 
-/** Picks the game's language from the page, falling back to English. */
+/** Picks the language the player reads the game in (UI language, which can differ from the server's), falling back to English. */
 export function detectLocale(doc: Document): Locale {
-  const lang = doc.querySelector('meta[name="ogame-language"]')?.getAttribute('content') ?? doc.documentElement.lang;
+  const lang = doc.querySelector('meta[name="ogame-ui-language"]')?.getAttribute('content') ?? doc.querySelector('meta[name="ogame-language"]')?.getAttribute('content') ?? doc.documentElement.lang;
   const short = (lang ?? '').slice(0, 2).toLowerCase();
   return short in dictionaries ? (short as Locale) : 'en';
 }

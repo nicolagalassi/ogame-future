@@ -114,7 +114,7 @@ ${L} a.planetlink.active .planet-name { color: #8BE4F2 !important; }
 /* Data age: minutes since this body's numbers were last read (green < 15, amber < 30, red after). */
 ${L} .fut-age {
   position: absolute; left: 1px; top: 1px; z-index: 2; min-width: 14px; padding: 0 2px; border-radius: 4px;
-  font: 700 9px/12px Arial, sans-serif; text-align: center; background: rgba(5,10,18,0.8); pointer-events: none;
+  font: 700 10px/12px Arial, sans-serif; text-align: center; background: rgba(5,10,18,0.8); pointer-events: none;
 }
 ${L} a.moonlink .fut-age { left: 1px; top: auto; bottom: 1px; }
 ${L} .fut-age-fresh { color: #38C56E; }
@@ -123,7 +123,7 @@ ${L} .fut-age-old { color: #EF7676; }
 
 /* Running queues: one coloured stripe per kind (OGLight colours), details in the tooltip. */
 ${L} .fut-queue { display: flex; gap: 2px; margin-top: 2px; height: 3px; }
-${L} .fut-q { display: block; width: 12px; height: 3px; border-radius: 2px; background: currentColor; box-shadow: 0 0 3px currentColor; }
+${L} .fut-q { display: block; width: 12px; height: 3px; border-radius: 2px; background: currentColor; }
 ${L} a.moonlink .fut-queue { position: absolute; left: 3px; bottom: 3px; margin: 0; }
 ${L} a.moonlink .fut-q { width: 8px; }
 ${L} .fut-q-building { color: #FF8200; }

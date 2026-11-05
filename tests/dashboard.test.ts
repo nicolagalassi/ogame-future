@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { readPlanetList } from '../src/data/planet-list';
-import { readScore } from '../src/data/score';
+import { readScore, watchScore } from '../src/data/score';
 import { accountAlerts, bodyRows, summarize } from '../src/engines/account';
 import { closeDashboard, isDashboardOpen, openDashboard, scrapReturn, TABS } from '../src/modules/dashboard';
 import { lfResearch, techName } from '../src/data/tech-names';
@@ -21,6 +21,22 @@ describe('readScore', () => {
   });
   it('returns null off the overview', () => {
     expect(readScore(document, 0)).toBeNull();
+  });
+  it('waits for the game to fill the field, once', async () => {
+    document.body.insertAdjacentHTML('beforeend', '<span id="scoreContentField"></span>');
+    const field = document.getElementById('scoreContentField')!;
+    const seen: number[] = [];
+    watchScore(document, () => 7, (s) => seen.push(s.rank ?? 0));
+    expect(seen).toEqual([]);
+    field.textContent = '1.978_';
+    await Promise.resolve();
+    expect(seen).toEqual([]);
+    field.innerHTML = '<a>1.978.540.738 (Posizione 1.053 su 3.058)</a>';
+    await Promise.resolve();
+    field.innerHTML = '<a>1 (Posizione 2 su 3)</a>';
+    await Promise.resolve();
+    expect(seen).toEqual([1053]);
+    field.remove();
   });
 });
 

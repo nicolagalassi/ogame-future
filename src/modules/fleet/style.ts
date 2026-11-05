@@ -19,7 +19,7 @@ export const FLEET_CSS = `
 .fut-ftile.dim .fut-flabel { color: #8A9BB0; }
 .fut-fkey {
   position: absolute; left: 4px; top: 3px; padding: 0 3px; border-radius: 3px; background: #16243A;
-  color: #8A9BB0; font: 9px/13px Consolas, monospace;
+  color: #8A9BB0; font: 10px/13px Consolas, monospace;
 }
 .fut-flabel { color: #E6EDF5; font-weight: 700; white-space: nowrap; }
 .fut-fcaption { color: #8A9BB0; font-size: 10px; max-width: 76px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -54,27 +54,19 @@ export const FLEET_CSS = `
 
 /** Settings window: inside a Shadow DOM, so the game's CSS cannot reach these rules. */
 export const MODAL_CSS = `
-.fut-moon-ico { margin-right: 4px; vertical-align: -1px; color: #8A9BB0; }
-:host { all: initial; }
-* { box-sizing: border-box; }
-.backdrop {
-  position: fixed; inset: 0; z-index: 100000; display: flex; justify-content: center; align-items: flex-start;
-  padding: 60px 16px; background: rgba(3,6,12,0.72); overflow-y: auto; font: 12px/1.4 Arial, sans-serif; color: #C9D4E2;
-}
-.panel { width: min(720px, 100%); padding: 14px; border: 1px solid #1F2C40; border-radius: 12px; background: #0A111C; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
-.head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.tabs { display: flex; gap: 4px; }
-.status { flex: 1; color: #38C56E; }
+:host { --panel-w: 720px; }
+.fut-moon-ico { margin-right: 4px; vertical-align: -1px; color: var(--muted); }
+.status { color: var(--ok); min-height: 17px; }
+.body { padding-top: 2px; color: var(--text-2); font-size: 12px; }
 .fut-fbtn {
-  height: 28px; padding: 0 12px; border-radius: 7px; border: 1px solid #2C3E57; background: #0D1522;
-  color: #E6EDF5; font: 12px Arial, sans-serif; cursor: pointer;
+  height: 28px; padding: 0 12px; border-radius: 7px; border: 1px solid #2C3E57; background: var(--surface);
+  color: var(--text); font: 12px Arial, sans-serif; cursor: pointer;
 }
-.fut-fbtn:hover { border-color: #4FD1E8; }
-.fut-fbtn.primary { border-color: #4FD1E8; background: #12283A; font-weight: 700; }
-.tab.on { border-color: #4FD1E8; color: #4FD1E8; }
-.close { width: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.fut-fbtn:hover { border-color: var(--accent); }
+.fut-fbtn.primary { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
 .fut-feditor h4 { margin: 0 0 4px; font-size: 14px; color: #E6EDF5; }
 .fut-feditor h5 { margin: 16px 0 6px; font-size: 12px; font-weight: 700; color: #C9D4E2; }
+.fut-feditor > h5:first-child { margin-top: 0; }
 .fut-fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px 12px; }
 .fut-ffield { display: flex; flex-direction: column; gap: 3px; color: #8A9BB0; font-size: 11px; }
 .fut-ffield input, .fut-ffield select {

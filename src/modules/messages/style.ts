@@ -63,31 +63,9 @@ ${outcomeCss}
 `;
 
 export const JOURNAL_CSS = `
-:host { all: initial; }
-* { box-sizing: border-box; }
-.backdrop { position: fixed; inset: 0; z-index: 100000; display: flex; justify-content: center; align-items: flex-start;
-  padding: 40px 16px; background: rgba(3,6,12,0.72); overflow-y: auto; font: 13px/1.4 Arial, Helvetica, sans-serif; color: #E6EDF5; }
-.panel { width: min(860px, 100%); display: flex; flex-direction: column; gap: 12px; padding: 18px;
-  border: 1px solid #1F2C40; border-radius: 14px; background: #0A111C; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
-.head { display: flex; align-items: flex-start; gap: 12px; }
-.titles { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-h2 { margin: 0; font-size: 20px; font-weight: 700; }
-h3 { margin: 0 0 6px; font-size: 13px; font-weight: 700; color: #C9D4E2; }
-.sub { color: #8A9BB0; font-size: 12px; }
-.close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #1F2C40; background: #111B2A; color: #B4C2D3; line-height: 1; cursor: pointer; }
-.close:hover { border-color: #4FD1E8; color: #E6EDF5; }
-.tabs { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid #1F2C40; }
-.tab { padding: 6px 12px; margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent; background: none; color: #8A9BB0; font: 12px Arial, sans-serif; cursor: pointer; }
-.tab:hover { color: #E6EDF5; }
-.tab[aria-pressed="true"] { border-bottom-color: #4FD1E8; color: #E6EDF5; font-weight: 700; }
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; border: 1px solid #1F2C40; border-radius: 10px; background: #0D1522; overflow: hidden; }
-.kpi { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; min-width: 0; box-shadow: 1px 0 0 #1F2C40, 0 1px 0 #1F2C40; }
-.kpi .label { color: #8A9BB0; font-size: 11px; }
-.kpi .value { font-size: 18px; font-weight: 700; font-family: "JetBrains Mono", Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kpi .detail { color: #8A9BB0; font-size: 11px; display: flex; flex-wrap: wrap; gap: 8px; }
-.neg { color: #FF7A7A; } .pos { color: #4FE0B0; }
-.m { color: #B8C2CC; } .c { color: #7FB8FF; } .d { color: #4FE0B0; } .dm { color: #B58CDB; }
-.card { padding: 12px 0 2px; border-top: 1px solid #1F2C40; }
+:host { --panel-w: 860px; }
+.kpi .value { font-size: 18px; font-family: var(--mono); }
+.kpi .detail { display: flex; flex-wrap: wrap; gap: 8px; }
 .bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: #0D1522; gap: 2px; }
 .bar span { display: block; height: 100%; min-width: 2px; }
 .legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 4px 12px; margin-top: 8px; font-size: 12px; }
@@ -108,14 +86,9 @@ td:first-child { font-family: Arial, sans-serif; color: #C9D4E2; }
 .ship-info { display: flex; flex-direction: column; min-width: 0; }
 .ship-info b { font-family: "JetBrains Mono", Consolas, monospace; font-size: 14px; }
 .ship-name { color: #B4C2D3; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-h4 { margin: 10px 0 6px; font-size: 12px; font-weight: 700; color: #FF7A7A; }
+h4.lost { margin: 10px 0 6px; color: var(--bad); }
 .foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
 .opt { display: flex; gap: 6px; align-items: center; color: #B4C2D3; font-size: 12px; cursor: pointer; }
 .acts { display: flex; gap: 6px; }
-.act { padding: 5px 10px; border: 1px solid #2B6F7D; border-radius: 6px; background: #0F2A33; color: #E6EDF5; font: 700 12px Arial, sans-serif; cursor: pointer; }
-.act:hover { border-color: #4FD1E8; }
-.act.ghost { border-color: #1F2C40; background: none; color: #8A9BB0; font-weight: 400; }
-.act.ghost:hover, .act.danger { border-color: #FF7A7A; color: #FF7A7A; }
-.empty { margin: 0; padding: 18px; text-align: center; color: #8A9BB0; border: 1px dashed #1F2C40; border-radius: 10px; }
 @media (max-width: 560px) { .kpi .value { font-size: 15px; } }
 `;
