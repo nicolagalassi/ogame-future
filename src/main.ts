@@ -15,6 +15,7 @@ import { ITEMS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems } f
 import { openDashboard } from './modules/dashboard';
 import { TECH_NAMES_KEY, learnTechNames, type TechNames } from './data/tech-names';
 import { readTechList } from './data/tech-details';
+import { LF_SLOTS_KEY, readLfSlots, rememberLfSlots, type LfSlots } from './data/lf-slots';
 import { isFleetDispatch } from './data/fleet-page';
 import { renderFleetTools } from './modules/fleet';
 import { watchJumpgate } from './modules/fleet/jumpgate';
@@ -78,7 +79,13 @@ async function bootstrap(): Promise<void> {
 
   // Technology names in the player's language, from any technology page the player opens.
   const techNames = store.get<TechNames>(TECH_NAMES_KEY, {});
-  if (learnTechNames(techNames, readTechList(document))) store.set(TECH_NAMES_KEY, techNames);
+  const techList = readTechList(document);
+  if (learnTechNames(techNames, techList)) store.set(TECH_NAMES_KEY, techNames);
+
+  // Lifeform research slots in use on this planet, from the game's own page (lifeforms mix).
+  const lfSlots = store.get<LfSlots>(LF_SLOTS_KEY, {});
+  const seenSlots = readLfSlots(document, techList);
+  if (seenSlots && bodyId && rememberLfSlots(lfSlots, bodyId, seenSlots)) store.set(LF_SLOTS_KEY, lfSlots);
 
   // Points are on the overview page only: keep the last value seen.
   const seenScore = readScore(document, Date.now());
@@ -138,6 +145,7 @@ async function bootstrap(): Promise<void> {
           score: store.get<Score | null>(SCORE_KEY, null),
           queues,
           names: techNames,
+          lfSlots,
           now: Date.now(),
           locale,
           t,
