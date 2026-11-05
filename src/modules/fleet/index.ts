@@ -26,6 +26,8 @@ import {
   PROFILES_KEY,
   profileFor,
   SETTINGS_KEY,
+  LAST_FLEET_KEY,
+  type LastFleet,
   type FleetProfile,
   type Reserve,
   type FleetSettings,
@@ -35,6 +37,8 @@ import { originCoords, readShipSlots } from '../../data/fleet-page';
 import { getDispatcher, whenDispatcherReady, type FleetDispatcher } from '../../data/fleet-dispatcher';
 import {
   prepareAllShips,
+  prepareLast,
+  snapshotFleet,
   prepareDeploy,
   prepareExpedition,
   prepareFleetsave,
@@ -45,6 +49,7 @@ import {
 } from './actions';
 import { hookSend, nextInRound, readRepeatParams, repeatUrl, type RepeatState } from './repeat';
 import { FLEET_CSS, MODAL_CSS } from './style';
+import { listShortcuts, registerShortcuts } from '../shortcuts';
 import { iconSvg, type IconName } from './icons';
 
 export interface FleetBody {
@@ -365,6 +370,15 @@ function settingsEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEl
   panel.append(g2);
   panel.append(el(doc, 'p', 'fut-fnote', t('fleet.expeditionHint')));
 
+  panel.append(el(doc, 'h5', '', t('fleet.shortcutsTitle')));
+  const keys = el(doc, 'div', 'fut-fkeys');
+  for (const sc of listShortcuts()) {
+    const row = el(doc, 'span', 'fut-fkeyrow');
+    row.append(el(doc, 'kbd', '', sc.key.toUpperCase()), el(doc, 'span', '', t(sc.label)));
+    keys.append(row);
+  }
+  panel.append(keys);
+
   panel.append(el(doc, 'h5', '', t('fleet.repeatTitle')));
   const [repW, repIn] = checkField(doc, t('fleet.repeat'), s.repeat);
   panel.append(repW, el(doc, 'p', 'fut-fnote', t('fleet.repeatHint')));
@@ -486,11 +500,15 @@ function shortLabel(o: FleetOptions, id: number | null): string {
   return `${b.name}${b.moonId === id ? ' ☾' : ''}`;
 }
 
-function tile(doc: Document, icon: IconName, label: string, caption: string, title: string, onClick: () => void, cls = ''): HTMLButtonElement {
+/** Keyboard key of each fleet action (OGLight-style shortcuts, shown on the tile). */
+export const FLEET_KEYS: Partial<Record<FleetMode, string>> = { moon: 'l', transport: 't', deploy: 'd', expedition: 'x', fleetsave: 'e', all: 'a', last: 'p' };
+
+function tile(doc: Document, icon: IconName, label: string, caption: string, title: string, onClick: () => void, cls = '', key = ''): HTMLButtonElement {
   const b = el(doc, 'button', `fut-ftile ${cls}`.trim());
   b.type = 'button';
-  b.title = title;
+  b.title = key ? `${title} [${key.toUpperCase()}]` : title;
   b.innerHTML = iconSvg(icon);
+  if (key) b.append(el(doc, 'kbd', 'fut-fkey', key.toUpperCase()));
   b.append(el(doc, 'span', 'fut-flabel', label));
   if (caption) b.append(el(doc, 'span', 'fut-fcaption', caption));
   b.addEventListener('click', (e) => {
@@ -633,6 +651,17 @@ export function renderFleetTools(o: FleetOptions): void {
         begin('all');
         report(prepareAllShips(fd, profile), 'fleet.ok.ships');
       }),
+    last: () =>
+      withDispatcher((fd) => {
+        const last = o.store.get<LastFleet | null>(LAST_FLEET_KEY, null);
+        if (!last) return say(t('fleet.err.noLast'), true);
+        begin('last');
+        report(prepareLast(fd, doc, profile, last), 'fleet.ok.ships');
+      }),
+  };
+  const favRun = {
+    transport: () => (settings.favTransport ? run.transport(settings.favTransport) : say(t('fleet.err.noDest'), true)),
+    deploy: () => (settings.favDeploy ? run.deploy(settings.favDeploy) : say(t('fleet.err.noDest'), true)),
   };
 
   const setFav = (key: 'favTransport' | 'favDeploy', id: number) => {
@@ -650,21 +679,17 @@ export function renderFleetTools(o: FleetOptions): void {
     const bar = el(doc, 'div', 'fut-fbar');
     const tiles = el(doc, 'div', 'fut-ftiles');
     const here = o.bodies.find((b) => b.planetId === o.bodyId);
-    if (here?.moonId) tiles.append(tile(doc, 'moon', t('fleet.btn.moon'), '', t('fleet.tip.moon'), () => run.moon()));
+    if (here?.moonId) tiles.append(tile(doc, 'moon', t('fleet.btn.moon'), '', t('fleet.tip.moon'), () => run.moon(), '', FLEET_KEYS.moon));
     tiles.append(
       withCaret(
-        tile(doc, 'transport', t('fleet.btn.transport'), `→ ${shortLabel(o, settings.favTransport)}`, t('fleet.tip.transport'), () =>
-          settings.favTransport ? run.transport(settings.favTransport) : say(t('fleet.err.noDest'), true),
-        ),
+        tile(doc, 'transport', t('fleet.btn.transport'), `→ ${shortLabel(o, settings.favTransport)}`, t('fleet.tip.transport'), favRun.transport, '', FLEET_KEYS.transport),
         'favTransport',
       ),
       withCaret(
-        tile(doc, 'deploy', t('fleet.btn.deploy'), `→ ${shortLabel(o, settings.favDeploy)}`, t('fleet.tip.deploy'), () =>
-          settings.favDeploy ? run.deploy(settings.favDeploy) : say(t('fleet.err.noDest'), true),
-        ),
+        tile(doc, 'deploy', t('fleet.btn.deploy'), `→ ${shortLabel(o, settings.favDeploy)}`, t('fleet.tip.deploy'), favRun.deploy, '', FLEET_KEYS.deploy),
         'favDeploy',
       ),
-      tile(doc, 'expedition', t('fleet.btn.expedition'), '', t('fleet.tip.expedition'), () => run.expedition()),
+      tile(doc, 'expedition', t('fleet.btn.expedition'), '', t('fleet.tip.expedition'), () => run.expedition(), '', FLEET_KEYS.expedition),
       tile(
         doc,
         'fleetsave',
@@ -673,9 +698,21 @@ export function renderFleetTools(o: FleetOptions): void {
         profile.save ? t('fleet.tip.fleetsave') : t('fleet.err.noFleetsave'),
         () => (profile.save ? run.fleetsave() : openSettings(o, 'body', redraw)),
         profile.save ? '' : 'dim',
+        FLEET_KEYS.fleetsave,
       ),
-      tile(doc, 'all', t('fleet.btn.all'), '', t('fleet.tip.all'), () => run.all()),
+      tile(doc, 'all', t('fleet.btn.all'), '', t('fleet.tip.all'), () => run.all(), '', FLEET_KEYS.all),
+      tile(doc, 'last', t('fleet.btn.last'), '', t('fleet.tip.last'), () => run.last(), o.store.get(LAST_FLEET_KEY, null) ? '' : 'dim', FLEET_KEYS.last),
     );
+    // Same actions from the keyboard, like OGLight (one key = one prepared fleet, never a send).
+    registerShortcuts(doc, [
+      ...(here?.moonId ? [{ key: FLEET_KEYS.moon!, label: 'fleet.btn.moon', run: () => run.moon() }] : []),
+      { key: FLEET_KEYS.transport!, label: 'fleet.btn.transport', run: favRun.transport },
+      { key: FLEET_KEYS.deploy!, label: 'fleet.btn.deploy', run: favRun.deploy },
+      { key: FLEET_KEYS.expedition!, label: 'fleet.btn.expedition', run: () => run.expedition() },
+      { key: FLEET_KEYS.fleetsave!, label: 'fleet.btn.fleetsave', run: () => run.fleetsave() },
+      { key: FLEET_KEYS.all!, label: 'fleet.btn.all', run: () => run.all() },
+      { key: FLEET_KEYS.last!, label: 'fleet.btn.last', run: () => run.last() },
+    ]);
     const side = el(doc, 'div', 'fut-fside');
     side.append(
       iconToggle(doc, 'repeat', `${t('fleet.repeatShort')}: ${settings.repeat ? t('fleet.on') : t('fleet.off')}. ${t('fleet.repeatHint')}`, () => {
@@ -712,6 +749,12 @@ export function renderFleetTools(o: FleetOptions): void {
     if (!fd) return;
     // "Ripeti": know when the game accepted the send, and move on as OGLight does.
     hookSend(fd, () => {
+      // Remember what was sent, for "Ultima flotta".
+      try {
+        o.store.set(LAST_FLEET_KEY, snapshotFleet(fd));
+      } catch {
+        /* storage full or blocked: the send itself is unaffected */
+      }
       const current = pageState.get(doc);
       if (!current?.active || !loadSettings(current.o.store).repeat) return false;
       const next = nextInRound(current.active, current.o.bodyId, current.o.bodies);

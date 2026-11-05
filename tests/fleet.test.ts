@@ -296,3 +296,53 @@ describe('fleetsave reserve', () => {
     expect(fd2.selected).toEqual({ 203: 100, 202: 50, 210: 3 });
   });
 });
+
+describe('shortcuts, last fleet and jump gate', () => {
+  it('runs a key once, not while typing nor with modifiers', async () => {
+    const { registerShortcuts, resetShortcuts, switchBodyUrl } = await import('../src/modules/shortcuts');
+    resetShortcuts();
+    let n = 0;
+    registerShortcuts(document, [{ key: 'o', label: 'x', run: () => n++ }]);
+    document.body.innerHTML = '<input id="f">';
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'o' }));
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'O', ctrlKey: true }));
+    (document.getElementById('f') as HTMLInputElement).focus();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'o' }));
+    expect(n).toBe(1);
+    expect(switchBodyUrl('https://s1.test/game/index.php?page=ingame&component=fleetdispatch&cp=1&futmode=moon', 2)).toBe(
+      'https://s1.test/game/index.php?page=ingame&component=fleetdispatch&cp=2',
+    );
+    expect(nextBody([{ planetId: 1, moonId: null }, { planetId: 2, moonId: null }, { planetId: 3, moonId: null }], 1, { backwards: true })).toBe(3);
+  });
+
+  it('repeats the last fleet within the reserve', async () => {
+    const { prepareLast, snapshotFleet } = await import('../src/modules/fleet/actions');
+    const fd = fakeDispatcher();
+    prepareLast(fd, fleetPage(), { reserve: { ships: { '203': 90 }, resources: { metal: 0, crystal: 0, deuterium: 0 } }, save: null }, {
+      ships: { '203': 20, '202': 5 },
+      target: { galaxy: 1, system: 2, position: 3, type: 1 },
+      mission: 3,
+      speed: 50,
+    });
+    expect(fd.selected).toEqual({ 203: 10, 202: 5 });
+    expect(fd.mission).toBe(3);
+    fd.shipsToSend = [{ id: 203, number: 10 }];
+    expect(snapshotFleet(fd)).toMatchObject({ ships: { '203': 10 }, mission: 3, speed: 50 });
+  });
+
+  it('keeps reserve 1 in the jump gate dialog', async () => {
+    const { applyJumpgateReserve } = await import('../src/modules/fleet/jumpgate');
+    document.body.innerHTML = `<div id="jumpgate"><form id="jumpgateForm"><table>
+      <tr><td><a></a><span class="quantity"></span></td></tr><tr class="ship_input_row"><td><input id="ship_203" rel="100" value="100"></td></tr>
+      <tr class="tdInactive"><td></td></tr><tr class="ship_input_row"><td><input id="ship_202" rel="0"></td></tr>
+    </table><a id="sendall"></a></form></div>`;
+    const store = new Map<string, unknown>([['fleet.profiles', { '7': { reserve: { ships: { '203': 30 }, resources: { metal: 0, crystal: 0, deuterium: 0 } }, save: null } }]]);
+    const s = { get: <T,>(k: string, d: T) => (store.has(k) ? (store.get(k) as T) : d), set: (k: string, v: unknown) => void store.set(k, v) };
+    expect(applyJumpgateReserve(document, s as never, 7, (k) => k)).toBe(30);
+    expect(applyJumpgateReserve(document, s as never, 7, (k) => k)).toBe(30);
+    const input = document.getElementById('ship_203') as HTMLInputElement;
+    expect(input.getAttribute('rel')).toBe('70');
+    expect(input.value).toBe('70');
+    expect(document.getElementById('sendall')!.getAttribute('onclick')).toBe('setMaxIntInput("#jumpgateForm", {"203":70})');
+  });
+});

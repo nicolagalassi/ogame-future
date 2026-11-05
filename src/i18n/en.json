@@ -162,5 +162,12 @@
   "fleet.reserve1Title": "Reserve 1 · transports and deployments",
   "fleet.reserve1Hint": "Stays here with To moon, Transport, Deploy, Expedition and All − reserve.",
   "fleet.reserve2Title": "Reserve 2 · fleetsave only",
-  "fleet.reserve2Hint": "Stays here only when you press Fleetsave. Empty = everything leaves."
+  "fleet.reserve2Hint": "Stays here only when you press Fleetsave. Empty = everything leaves.",
+  "fleet.btn.last": "Last",
+  "fleet.tip.last": "Repeat the last fleet sent: same ships, target, mission and speed",
+  "fleet.err.noLast": "No fleet sent yet",
+  "fleet.jumpgateKeep": "Reserve 1 of this moon",
+  "shortcut.prev": "Previous planet",
+  "shortcut.next": "Next planet",
+  "fleet.shortcutsTitle": "Keyboard shortcuts"
 }

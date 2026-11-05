@@ -16,13 +16,14 @@ import {
   resolveTarget,
   shipsAfterReserve,
   type FleetProfile,
+  type LastFleet,
   type FleetSettings,
   type FleetsaveProfile,
   type ShipStock,
 } from '../../engines/fleet';
 import { pageWindow, shipCapacity, shipsOnPlanet, type FleetDispatcher } from '../../data/fleet-dispatcher';
 
-export type FleetMode = 'moon' | 'transport' | 'deploy' | 'expedition' | 'fleetsave' | 'all';
+export type FleetMode = 'moon' | 'transport' | 'deploy' | 'expedition' | 'fleetsave' | 'all' | 'last';
 
 export interface Target {
   galaxy: number;
@@ -192,4 +193,25 @@ export function prepareExpedition(
     /* expeditionTime is already set on the dispatcher */
   }
   return { ...finish(fd, EXPEDITION, count, 0), target };
+}
+
+/** "Ripeti ultima flotta": the same ships (within what is here after reserve 1), target, mission, speed. */
+export function prepareLast(fd: FleetDispatcher, doc: Document, profile: FleetProfile, last: LastFleet): PrepareResult {
+  const left = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
+  const ships: Record<number, number> = {};
+  for (const [id, n] of Object.entries(last.ships)) ships[Number(id)] = Math.min(n, left[Number(id)] ?? 0);
+  const count = selectShips(fd, ships);
+  setTarget(fd, doc, last.target);
+  setSpeedBar(fd, last.speed);
+  return finish(fd, last.mission, count, 0);
+}
+
+/** What was just sent, to offer it again later. */
+export function snapshotFleet(fd: FleetDispatcher): LastFleet {
+  return {
+    ships: Object.fromEntries(fd.shipsToSend.map((s) => [String(s.id), s.number])),
+    target: { galaxy: fd.targetPlanet.galaxy, system: fd.targetPlanet.system, position: fd.targetPlanet.position, type: fd.targetPlanet.type },
+    mission: fd.mission,
+    speed: Math.round(fd.speedPercent * 10),
+  };
 }
