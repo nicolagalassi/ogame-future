@@ -327,5 +327,14 @@
   "ship.217": "Foreuse",
   "ship.218": "Faucheur",
   "ship.219": "Éclaireur",
-  "msg.return": "Retour d'expédition"
+  "msg.return": "Retour d'expédition",
+  "bar.dash": "Compte",
+  "bar.perDay": "/j",
+  "bar.dashHint": "production par jour en MSU",
+  "bar.plan": "Plan · {n}",
+  "bar.planEmpty": "Plan",
+  "bar.ready": "Prêt",
+  "bar.planHint": "ce qui manque en MSU, ressources en route comprises",
+  "bar.journal": "Aujourd'hui",
+  "bar.journalHint": "{n} expéditions aujourd'hui, gain net en MSU"
 }

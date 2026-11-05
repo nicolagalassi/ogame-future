@@ -327,5 +327,14 @@
   "ship.217": "Crawler",
   "ship.218": "Reaper",
   "ship.219": "Pathfinder",
-  "msg.return": "Expeditionsrückkehr"
+  "msg.return": "Expeditionsrückkehr",
+  "bar.dash": "Konto",
+  "bar.perDay": "/T",
+  "bar.dashHint": "Produktion pro Tag in MSU",
+  "bar.plan": "Plan · {n}",
+  "bar.planEmpty": "Plan",
+  "bar.ready": "Bereit",
+  "bar.planHint": "was noch fehlt in MSU, inkl. unterwegs",
+  "bar.journal": "Heute",
+  "bar.journalHint": "{n} Expeditionen heute, Nettogewinn in MSU"
 }

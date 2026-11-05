@@ -327,5 +327,14 @@
   "ship.217": "Crawler",
   "ship.218": "Reaper",
   "ship.219": "Pathfinder",
-  "msg.return": "Rientro spedizione"
+  "msg.return": "Rientro spedizione",
+  "bar.dash": "Plancia",
+  "bar.perDay": "/g",
+  "bar.dashHint": "produzione al giorno in MSU",
+  "bar.plan": "Piano · {n}",
+  "bar.planEmpty": "Piano",
+  "bar.ready": "Pronto",
+  "bar.planHint": "quanto manca, in MSU, contando le risorse in viaggio",
+  "bar.journal": "Diario oggi",
+  "bar.journalHint": "{n} spedizioni oggi, guadagno netto in MSU"
 }

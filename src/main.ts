@@ -20,7 +20,9 @@ import { registerShortcuts, switchBodyUrl } from './modules/shortcuts';
 import { nextBody } from './engines/fleet';
 import { watchTechPages } from './modules/tech';
 import { openPlanner } from './modules/tech/planner-view';
-import { PLAN_KEY, planCount, pruneByQueues, type Plan } from './engines/planner';
+import { PLAN_KEY, pendingFor, planCount, planMissing, pruneByQueues, SENT_KEY, type Plan, type Shipment } from './engines/planner';
+import { estimateResources } from './engines/resources';
+import { entriesIn, JOURNAL_KEY, periodRange, periodStats, type Journal } from './engines/expeditions';
 import { isMessagesPage, ownPlayerId } from './data/messages';
 import { watchMessages } from './modules/messages';
 import { openJournal } from './modules/messages/journal-view';
@@ -84,6 +86,27 @@ async function bootstrap(): Promise<void> {
     showTotals: store.get<boolean>('planetMenu.totals', true),
     markIdle: store.get<boolean>('planetMenu.markIdle', false),
   };
+  /** What the plan still misses over all bodies, in MSU (resources on the way count as there). */
+  const planGap = (): number | null => {
+    const plan = store.get<Plan>(PLAN_KEY, {});
+    const sent = store.get<Shipment[]>(SENT_KEY, []);
+    const now = Date.now();
+    const here = currentBodyId(document);
+    const onScreen = readCurrentResources(document);
+    let total = 0;
+    let known = false;
+    for (const [key, items] of Object.entries(plan)) {
+      const id = Number(key);
+      const body = snapshot?.bodies.find((b) => b.id === id);
+      const have = here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
+      if (!have || !items.length) continue;
+      known = true;
+      const p = pendingFor(sent, id, here === id ? now : (body?.resourcesAt ?? 0));
+      const gap = planMissing(items, { metal: have.metal + p.metal, crystal: have.crystal + p.crystal, deuterium: have.deuterium + p.deuterium });
+      total += gap.metal + gap.crystal * 1.5 + gap.deuterium * 3;
+    }
+    return known ? total : null;
+  };
   const draw = () =>
     renderPlanetMenu({
       doc: document,
@@ -113,6 +136,11 @@ async function bootstrap(): Promise<void> {
           t,
         }),
       planCount: planCount(store.get<Plan>(PLAN_KEY, {})),
+      planGap: planGap(),
+      journalToday: (() => {
+        const s = periodStats(entriesIn(store.get<Journal>(JOURNAL_KEY, {}), periodRange('today', Date.now())));
+        return { count: s.count, net: s.netMsu };
+      })(),
       onOpenPlanner: () => {
         const id = currentBodyId(document);
         const resources = readCurrentResources(document);
