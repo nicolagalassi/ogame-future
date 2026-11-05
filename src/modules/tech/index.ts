@@ -275,7 +275,7 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
         );
       }
       row.append(...chips);
-      if (start.discount > 0.0005) row.append(chip(doc, '', t('tech.discountShort', { pct: (start.discount * 100).toFixed(1) }), t('tech.discount', { pct: (start.discount * 100).toFixed(1) }), 'fut-tp-disc'));
+      if (start.discount > 0.0005) row.append(chip(doc, '', t('tech.discountShort', { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), t('tech.discount', { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), 'fut-tp-disc'));
       box.replaceChildren(grid(o, view, have !== null), row);
     };
     draw();

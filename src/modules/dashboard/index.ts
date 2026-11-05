@@ -6,7 +6,8 @@
  * game's own planet pages (a normal click = one navigation, AGENTS.md §1). The scrap tab
  * only calculates: selling stays on the game's own merchant page.
  */
-import { BASE_SHEET, icon } from '../../core/icons';
+import { icon } from '../../core/icons';
+import { WINDOW_SHEET } from '../../core/sheet';
 import type { AccountSnapshot, OwnBody } from '../../data/account-info';
 import type { PlanetListEntry } from '../../data/planet-list';
 import type { Score } from '../../data/score';
@@ -121,9 +122,10 @@ export function openDashboard(o: DashboardOptions): void {
   closeDashboard(doc);
   const host = doc.createElement('div');
   host.id = HOST_ID;
+  host.lang = locale; // column headers hyphenate in the player's language
   const root = host.attachShadow({ mode: 'open' });
   const style = h('style');
-  style.textContent = DASHBOARD_CSS + BASE_SHEET;
+  style.textContent = WINDOW_SHEET + DASHBOARD_CSS;
   root.append(style);
 
   const backdrop = h('div', 'backdrop');
@@ -274,7 +276,7 @@ function bodyMatrix(
     for (const id of ids) {
       const values = bodies.map((b) => level(b, id));
       const total = values.reduce((a, v) => a + v, 0);
-      fr.append(h('td', 'num mono', opts.foot === 'sum' ? (total ? count(total) : '·') : (total / values.length).toFixed(1).replace('.', ctx.o.locale === 'en' ? '.' : ',')));
+      fr.append(h('td', 'num mono', opts.foot === 'sum' ? (total ? count(total) : '·') : (total / values.length).toLocaleString(ctx.o.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })));
     }
     for (let i = 0; i < (opts.extra ?? []).length; i++) fr.append(h('td'));
     const tfoot = h('tfoot');
@@ -363,7 +365,7 @@ function summaryTab(parent: HTMLElement, ctx: Ctx): void {
     const text = h('div', 'move-text');
     text.append(h('strong', '', `${t(`mine.${m.mine}`)} ${m.from} → ${m.from + 1}`));
     text.append(h('span', '', `${m.name} [${m.coords}] · ${fmt(m.cost.metal)} M · ${fmt(m.cost.crystal)} C`));
-    line.append(text, h('span', 'roi mono', m.days < 1 ? `<1 ${t('dash.daysShort')}` : `${m.days.toFixed(1)} ${t('dash.daysShort')}`));
+    line.append(text, h('span', 'roi mono', m.days < 1 ? `<1 ${t('dash.daysShort')}` : `${m.days.toLocaleString(ctx.o.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${t('dash.daysShort')}`));
     movesCard.append(line);
   });
   movesCard.append(h('p', 'hint', t('dash.movesHint')));

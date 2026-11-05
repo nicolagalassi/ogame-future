@@ -3,7 +3,8 @@
  * total cost and what is still missing against the resources Future estimates there.
  * Shadow DOM, like the dashboard. Data already stored only: no network, no game action.
  */
-import { BASE_SHEET, icon } from '../../core/icons';
+import { icon } from '../../core/icons';
+import { WINDOW_SHEET } from '../../core/sheet';
 import type { Store } from '../../core/storage';
 import type { AccountSnapshot } from '../../data/account-info';
 import type { PlanetListEntry } from '../../data/planet-list';
@@ -83,7 +84,7 @@ export function openPlanner(o: PlannerOptions): void {
   host.id = PLANNER_ID;
   const root = host.attachShadow({ mode: 'open' });
   const style = h('style');
-  style.textContent = PLANNER_CSS + BASE_SHEET;
+  style.textContent = WINDOW_SHEET + PLANNER_CSS;
   const backdrop = h('div', 'backdrop');
   const panel = h('div', 'panel');
   backdrop.append(panel);

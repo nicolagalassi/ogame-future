@@ -201,7 +201,7 @@ describe('tech panel', () => {
     document.getElementById('technologydetails_content')!.innerHTML = html;
     const box = renderTechPanel(o, readTechDetails(document)!)!;
     expect(level()).toBe('31 → 32');
-    expect(box.querySelector('.fut-tp-disc')!.textContent).toContain('10.0%');
+    expect(box.querySelector('.fut-tp-disc')!.textContent).toContain('10,0%');
   });
 
   it('ships: any amount, also more than the game field allows', () => {

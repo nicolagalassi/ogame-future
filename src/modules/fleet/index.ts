@@ -15,7 +15,8 @@
  * "Avanti" and "Invia flotta". No request is made by Future here: the game checks the
  * target itself when page 2 opens. See ./repeat.ts for the "Ripeti" precedent (OGLight).
  */
-import { BASE_SHEET, icon } from '../../core/icons';
+import { icon } from '../../core/icons';
+import { WINDOW_SHEET } from '../../core/sheet';
 import { PLAN_KEY, SENT_KEY, type Plan, type Shipment } from '../../engines/planner';
 import { expeditionItemBoost, ITEMS_KEY, LF_BONUS_KEY, type ActiveItems, type LfBonuses } from '../../data/bonuses';
 import type { Store } from '../../core/storage';
@@ -331,7 +332,6 @@ function settingsEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEl
   const names = new Map(readShipSlots(doc).map((x) => [Number(x.id), x.name || `#${x.id}`]));
   const shipName = (id: number) => names.get(id) ?? `#${id}`;
   const panel = el(doc, 'div', 'fut-feditor');
-  panel.append(el(doc, 'h4', '', t('fleet.settingsTitle')));
 
   panel.append(el(doc, 'h5', '', t('fleet.transportTitle')));
   const g1 = el(doc, 'div', 'fut-fgrid');
@@ -455,16 +455,18 @@ function openSettings(o: FleetOptions, tab: 'body' | 'general', onChange: () => 
   host.id = MODAL_ID;
   const root = host.attachShadow({ mode: 'open' });
   const style = el(doc, 'style');
-  style.textContent = MODAL_CSS + BASE_SHEET;
+  style.textContent = WINDOW_SHEET + MODAL_CSS;
   const backdrop = el(doc, 'div', 'backdrop');
   const panel = el(doc, 'div', 'panel');
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-label', t('fleet.settingsTitle'));
   const head = el(doc, 'div', 'head');
   const tabs = el(doc, 'div', 'tabs');
   const moon = isMoon(o.bodies, o.bodyId);
-  const status = el(doc, 'span', 'status');
+  const status = el(doc, 'span', 'sub status');
   const body = el(doc, 'div', 'body');
   const show = (which: 'body' | 'general') => {
-    tabs.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.tab === which));
+    tabs.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tab === which)));
     const saved = (msg: string) => {
       status.textContent = msg;
       onChange();
@@ -475,14 +477,21 @@ function openSettings(o: FleetOptions, tab: 'body' | 'general', onChange: () => 
     ['body', t(moon ? 'fleet.tabMoon' : 'fleet.tabPlanet')],
     ['general', t('fleet.tabGeneral')],
   ] as const) {
-    const b = button(doc, label, () => show(id), 'tab');
+    const b = el(doc, 'button', 'tab', label);
+    b.type = 'button';
     b.dataset.tab = id;
+    b.addEventListener('click', () => show(id));
     tabs.append(b);
   }
-  const close = button(doc, '', () => closeModal(doc), 'close', t('fleet.close'));
+  const close = el(doc, 'button', 'close');
+  close.type = 'button';
+  close.setAttribute('aria-label', t('fleet.close'));
+  close.addEventListener('click', () => closeModal(doc));
   close.append(icon(doc, 'close', 16));
-  head.append(tabs, status, close);
-  panel.append(head, body);
+  const titles = el(doc, 'div', 'titles');
+  titles.append(el(doc, 'h2', '', t('fleet.settingsTitle')), status);
+  head.append(titles, close);
+  panel.append(head, tabs, body);
   backdrop.append(panel);
   backdrop.addEventListener('click', (e) => {
     if (e.target === backdrop) closeModal(doc);

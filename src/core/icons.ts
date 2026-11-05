@@ -25,12 +25,3 @@ export function icon(doc: Document, name: IconName, size = 14, cls = 'fut-ico'):
   svg.innerHTML = PATHS[name];
   return svg;
 }
-
-/** Shared rules for Future's own windows (Shadow DOM): focus, scrollbars, selection, numbers. */
-export const BASE_SHEET = `
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #4FD1E8; outline-offset: 1px; }
-.backdrop, .scroll, .table-wrap { scrollbar-color: #2A3B55 #0A111C; scrollbar-width: thin; }
-::selection { background: #2B6F7D; color: #fff; }
-.num, td, .value, .kpi-line { font-variant-numeric: tabular-nums; }
-.close { display: inline-flex; align-items: center; justify-content: center; }
-`;
