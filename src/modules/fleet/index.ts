@@ -15,6 +15,7 @@
  * "Avanti" and "Invia flotta". No request is made by Future here: the game checks the
  * target itself when page 2 opens. See ./repeat.ts for the "Ripeti" precedent (OGLight).
  */
+import { PLAN_KEY, SENT_KEY, type Plan, type Shipment } from '../../engines/planner';
 import { expeditionItemBoost, ITEMS_KEY, LF_BONUS_KEY, type ActiveItems, type LfBonuses } from '../../data/bonuses';
 import type { Store } from '../../core/storage';
 import {
@@ -782,6 +783,7 @@ export function renderFleetTools(o: FleetOptions): void {
       // Remember what was sent, for "Ultima flotta".
       try {
         o.store.set(LAST_FLEET_KEY, snapshotFleet(fd));
+        recordShipment(o, fd);
       } catch {
         /* storage full or blocked: the send itself is unaffected */
       }
@@ -823,6 +825,27 @@ export function renderFleetTools(o: FleetOptions): void {
       else doc.defaultView?.addEventListener('load', () => setTimeout(go, 0), { once: true });
     }
   });
+}
+
+/**
+ * Resources sent to a body that has a construction plan are marked as sent in the planner,
+ * whether they left from "Porta qui le risorse" or from any other transport.
+ */
+function recordShipment(o: FleetOptions, fd: FleetDispatcher): void {
+  if (fd.mission !== 3 && fd.mission !== 4) return;
+  const cargo = { metal: Math.floor(fd.cargoMetal || 0), crystal: Math.floor(fd.cargoCrystal || 0), deuterium: Math.floor(fd.cargoDeuterium || 0) };
+  if (cargo.metal + cargo.crystal + cargo.deuterium <= 0) return;
+  const tp = fd.targetPlanet;
+  const coords = `${tp.galaxy}:${tp.system}:${tp.position}`;
+  const body = o.bodies.find((b) => b.coords === coords);
+  const target = body ? (tp.type === 3 ? body.moonId : body.planetId) : null;
+  if (!target) return;
+  const plan = o.store.get<Plan>(PLAN_KEY, {});
+  if (!plan[String(target)]?.length) return;
+  const seconds = Number((fd as { getDuration?: () => number }).getDuration?.()) || 0;
+  const now = Date.now();
+  const list = o.store.get<Shipment[]>(SENT_KEY, []);
+  o.store.set(SENT_KEY, [...list, { target, cargo, sentAt: now, arriveAt: now + Math.max(0, seconds) * 1000 }]);
 }
 
 const initialFood = new WeakMap<FleetDispatcher, number>();

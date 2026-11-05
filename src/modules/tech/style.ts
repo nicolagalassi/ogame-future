@@ -2,7 +2,9 @@
 export const TECH_CSS = `
 /* The game's own cost list and detail lines give way to the panel (their data is in it). */
 #technologydetails.fut-tp-on .content .costs,
-#technologydetails.fut-tp-on .content .information .narrow { display: none !important; }
+#technologydetails.fut-tp-on .content .information > ul { display: none !important; }
+/* The game's dark matter button ("Inizia con MO") is much bigger than the normal one. */
+#technologydetails.fut-tp-on .build-it_wrap .build-it_premium { transform: scale(0.72); transform-origin: right bottom; }
 #technologydetails.fut-tp-on .content .information .level { color: #4FD1E8; font-weight: 700; }
 .fut-tp { position: absolute; top: 24px; left: 6px; right: 138px; bottom: 6px; display: flex; flex-direction: column; gap: 5px;
   font: 11px/14px Arial, Helvetica, sans-serif; color: #E6EDF5; text-align: left; }
@@ -64,7 +66,8 @@ h3 { margin: 0; font-size: 14px; font-weight: 700; color: #C9D4E2; }
 .act:hover { border-color: #4FD1E8; }
 .act.ghost { border-color: #1F2C40; background: none; color: #8A9BB0; font-weight: 400; }
 .act.ghost:hover { border-color: #FF7A7A; color: #FF7A7A; }
-.sums { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.sums { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+.sum.sent .label { color: #4FD1E8; }
 .sum { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 8px; background: #0D1522; }
 .sum .label { color: #8A9BB0; font-size: 11px; }
 .sum.warn .label { color: #F5B547; }

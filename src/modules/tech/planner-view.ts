@@ -13,7 +13,7 @@ import { addCost, ZERO_COST, type Cost } from '../../engines/tech';
 import { PLANNER_CSS } from './style';
 import { DELIVERY_KEY, nextBody, type Delivery } from '../../engines/fleet';
 import { repeatUrl } from '../fleet/repeat';
-import type { PlanItem } from '../../engines/planner';
+import { pendingFor, prunePending, SENT_KEY, type PlanItem, type Shipment } from '../../engines/planner';
 import type { T } from './index';
 
 export const PLANNER_ID = 'fut-planner';
@@ -96,6 +96,9 @@ export function openPlanner(o: PlannerOptions): void {
     const body = byId.get(id);
     return body ? estimateResources(body, o.now) : null;
   };
+  /** When the resources we have for a body were read. */
+  const seenAt = (id: number) => (o.current && o.current.id === id ? o.now : (byId.get(id)?.resourcesAt ?? 0));
+  const timeOf = (ms: number) => new Date(ms).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
   const costCells = (row: HTMLElement, cost: Cost, cls = '') => {
     for (const [key, c] of [
       ['metal', 'm'],
@@ -110,6 +113,9 @@ export function openPlanner(o: PlannerOptions): void {
 
   const draw = () => {
     const plan = o.store.get<Plan>(PLAN_KEY, {});
+    const allSent = o.store.get<Shipment[]>(SENT_KEY, []);
+    const sent = prunePending(allSent, plan, seenAt);
+    if (sent.length !== allSent.length) o.store.set(SENT_KEY, sent);
     const save = (next: Plan) => {
       o.store.set(PLAN_KEY, next);
       o.onChange?.();
@@ -153,7 +159,12 @@ export function openPlanner(o: PlannerOptions): void {
       if (!items?.length) continue;
       const total = planTotal(items);
       const have = haveOf(body.id);
-      const gap = have ? planMissing(items, have) : null;
+      const pending = pendingFor(sent, body.id, seenAt(body.id));
+      const pendingSum = pending.metal + pending.crystal + pending.deuterium;
+      // What was sent counts as here: only the rest is missing.
+      const gap = have
+        ? planMissing(items, { metal: have.metal + pending.metal, crystal: have.crystal + pending.crystal, deuterium: have.deuterium + pending.deuterium })
+        : null;
       const short = gap ? gap.metal + gap.crystal + gap.deuterium : 0;
       grand = addCost(grand, total);
       if (gap) grandMissing = addCost(grandMissing, gap);
@@ -163,7 +174,7 @@ export function openPlanner(o: PlannerOptions): void {
       title.append(h('h3', '', body.label), h('span', 'count', t('plan.items', { n: items.length })));
       const acts = h('div', 'card-acts');
       if (gap && short > 0 && o.navigate && o.href) {
-        const bring = h('button', 'act', t('plan.bring'));
+        const bring = h('button', 'act', pendingSum > 0 ? t('plan.complete') : t('plan.bring'));
         bring.title = t('plan.bringHint');
         bring.addEventListener('click', () => {
           const here = o.current?.id ?? null;
@@ -188,8 +199,18 @@ export function openPlanner(o: PlannerOptions): void {
         return b;
       };
       sums.append(sumBox(t('plan.total'), total, ''));
-      if (gap) sums.append(short > 0 ? sumBox(t('plan.missingHere'), gap, 'warn') : sumBox(t('plan.ready'), null, 'ok'));
-      else sums.append(sumBox(t('plan.unknownHere'), null, 'muted'));
+      if (pendingSum > 0) {
+        const box = sumBox(
+          pending.arriveAt > o.now ? t('plan.sentArriving', { time: timeOf(pending.arriveAt) }) : t('plan.sentArrived'),
+          { ...pending, energy: 0 },
+          'sent',
+        );
+        sums.append(box);
+      }
+      if (gap) {
+        if (short > 0) sums.append(sumBox(pendingSum > 0 ? t('plan.missingAfterSent') : t('plan.missingHere'), gap, 'warn'));
+        else sums.append(sumBox(pendingSum > 0 ? t('plan.allSent') : t('plan.ready'), null, 'ok'));
+      } else sums.append(sumBox(t('plan.unknownHere'), null, 'muted'));
 
       const rows = h('div', 'rows');
       for (const g of groupItems(items)) {

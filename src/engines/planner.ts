@@ -93,3 +93,40 @@ export function planMissing(items: PlanItem[], have: { metal: number; crystal: n
 export function inPlan(plan: Plan, bodyId: number, id: number, level?: number): boolean {
   return (plan[String(bodyId)] ?? []).some((x) => x.id === id && (level === undefined || x.level === level));
 }
+
+/* ------------------------------------------------------------------ */
+/* Resources already sent to a planned body                            */
+/* ------------------------------------------------------------------ */
+
+export const SENT_KEY = 'plan.sent';
+
+type Res = { metal: number; crystal: number; deuterium: number };
+
+/** One transport (or deployment) with resources towards a body that has a plan. */
+export interface Shipment {
+  target: number;
+  cargo: Res;
+  sentAt: number;
+  arriveAt: number;
+}
+
+/**
+ * Resources on their way, or arrived but not yet in the numbers we have for that body:
+ * a shipment counts until the body's resources were read after it landed.
+ */
+export function pendingFor(list: Shipment[], target: number, seenAt: number): Res & { arriveAt: number } {
+  const out = { metal: 0, crystal: 0, deuterium: 0, arriveAt: 0 };
+  for (const s of list) {
+    if (s.target !== target || s.arriveAt <= seenAt) continue;
+    out.metal += s.cargo.metal;
+    out.crystal += s.cargo.crystal;
+    out.deuterium += s.cargo.deuterium;
+    out.arriveAt = Math.max(out.arriveAt, s.arriveAt);
+  }
+  return out;
+}
+
+/** Drops shipments already counted in the body's resources, or towards bodies with no plan. */
+export function prunePending(list: Shipment[], plan: Plan, seenAtOf: (target: number) => number): Shipment[] {
+  return list.filter((s) => (plan[String(s.target)]?.length ?? 0) > 0 && s.arriveAt > seenAtOf(s.target));
+}

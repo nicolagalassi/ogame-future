@@ -224,5 +224,10 @@
   "plan.levels": "St. {from}–{to}",
   "plan.bring": "Ressourcen hierher bringen",
   "plan.bringHint": "Öffnet die Flotte auf dem nächsten Planeten mit einem Transport des Fehlenden hierher. Nach jedem Senden geht es zum nächsten Planeten, bis nichts mehr fehlt.",
-  "plan.unknownHere": "Ressourcen hier unbekannt: Aktualisieren drücken"
+  "plan.unknownHere": "Ressourcen hier unbekannt: Aktualisieren drücken",
+  "plan.complete": "Lieferung vervollständigen",
+  "plan.sentArriving": "Gesendet · Ankunft {time}",
+  "plan.sentArrived": "Gesendet · angekommen (noch nicht gelesen)",
+  "plan.missingAfterSent": "Fehlt noch",
+  "plan.allSent": "Alles gesendet ✓"
 }
