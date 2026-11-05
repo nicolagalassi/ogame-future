@@ -207,5 +207,8 @@
   "plan.ready": "Enough resources ✓",
   "plan.empty": "The plan is empty. Open a building or research and use “Plan”.",
   "plan.grandTotal": "Total plan cost",
-  "plan.grandMissing": "Missing overall"
+  "plan.grandMissing": "Missing overall",
+  "tech.rangeShort": "{from}→{to}",
+  "tech.rangeHint": "Total of levels {from} to {to}",
+  "tech.discountShort": "−{pct}%"
 }

@@ -1,30 +1,31 @@
 /** Cost panel (inside the game's details panel, prefixed classes) and planner window (Shadow DOM). */
 export const TECH_CSS = `
-.fut-tp { margin: 8px 0 4px; padding: 8px 10px; border: 1px solid #1F2C40; border-radius: 8px; background: rgba(10,17,28,0.92);
-  font: 11px/1.35 Arial, Helvetica, sans-serif; color: #E6EDF5; text-align: left; clear: both; }
-.fut-tp-head { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
-.fut-tp-range { flex: 1; display: flex; align-items: baseline; gap: 6px; min-width: 0; }
-.fut-tp-lv { font-size: 13px; font-weight: 700; color: #4FD1E8; }
-.fut-tp-from { color: #8A9BB0; }
-.fut-tp-step, .fut-tp-reset { width: 22px; height: 22px; padding: 0; border: 1px solid #1F2C40; border-radius: 6px; background: #111B2A;
-  color: #C9D4E2; font: 700 14px/20px Arial, sans-serif; cursor: pointer; }
-.fut-tp-reset { width: 18px; height: 18px; font-size: 12px; line-height: 16px; }
+#technologydetails.fut-tp-on > .description .txt_box .text { display: none; }
+#technologydetails.fut-tp-on > .description .txt_box { position: absolute; right: 4px; top: 4px; width: auto; padding: 0; }
+.fut-tp { display: flex; gap: 12px; box-sizing: border-box; height: 86px; padding: 6px 30px 6px 8px; border: 1px solid #1F2C40; border-radius: 6px;
+  background: rgba(10,17,28,0.92); font: 11px/14px Arial, Helvetica, sans-serif; color: #E6EDF5; text-align: left; overflow: hidden; }
+.fut-tp-side { flex: none; width: 142px; display: flex; flex-direction: column; gap: 4px; }
+.fut-tp-head { display: flex; align-items: center; gap: 4px; }
+.fut-tp-lv { font-size: 13px; font-weight: 700; color: #4FD1E8; white-space: nowrap; }
+.fut-tp-head .fut-tp-lv { min-width: 52px; text-align: center; }
+.fut-tp-from { color: #8A9BB0; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#technologydetails .fut-tp-step, #technologydetails .fut-tp-reset { width: 20px; height: 20px; padding: 0; border: 1px solid #1F2C40; border-radius: 5px; background: #111B2A;
+  color: #C9D4E2; font: 700 13px/18px Arial, sans-serif; cursor: pointer; }
+.fut-tp-reset { width: 16px; height: 16px; font-size: 11px; line-height: 14px; }
 .fut-tp-step:hover:not(:disabled), .fut-tp-reset:hover { border-color: #4FD1E8; color: #fff; }
 .fut-tp-step:disabled { opacity: 0.35; cursor: default; }
-.fut-tp-grid { display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 2px 10px; align-items: baseline; }
-.fut-tp-h { color: #8A9BB0; font-size: 10px; text-align: right; }
-.fut-tp-k { color: #8A9BB0; }
-.fut-tp-k.fut-m { color: #B8C2CC; } .fut-tp-k.fut-c { color: #7FB8FF; } .fut-tp-k.fut-d { color: #4FE0B0; } .fut-tp-k.fut-e { color: #F5D547; }
-.fut-tp-v { text-align: right; font-family: "JetBrains Mono", Consolas, monospace; white-space: nowrap; }
+.fut-tp-grid { flex: 1; min-width: 0; display: grid; gap: 2px 10px; align-content: start; }
+.fut-tp-h { color: #8A9BB0; font-size: 10px; text-align: right; white-space: nowrap; }
+.fut-tp-h.fut-m { color: #B8C2CC; } .fut-tp-h.fut-c { color: #7FB8FF; } .fut-tp-h.fut-d { color: #4FE0B0; } .fut-tp-h.fut-e { color: #F5D547; }
+.fut-tp-k { color: #8A9BB0; white-space: nowrap; }
+.fut-tp-v { text-align: right; font-family: "JetBrains Mono", Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fut-tp-sum { color: #4FD1E8; }
 .fut-tp-short { color: #FF7A7A; }
 .fut-tp-ok { color: #4FE0B0; }
-.fut-tp-actions { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-.fut-tp-add { padding: 4px 10px; border: 1px solid #2B6F7D; border-radius: 6px; background: #0F2A33; color: #E6EDF5;
-  font: 700 11px Arial, sans-serif; cursor: pointer; }
-.fut-tp-add:hover { border-color: #4FD1E8; }
-.fut-tp-add.on { border-color: #2E7D5B; background: #10291F; color: #4FE0B0; }
-.fut-tp-note { color: #8A9BB0; font-size: 10px; }
+#technologydetails .fut-tp-add { align-self: flex-start; margin-top: auto; padding: 3px 8px; border: 1px solid #2B6F7D; border-radius: 5px; background: #0F2A33; color: #E6EDF5;
+  font: 700 11px Arial, sans-serif; cursor: pointer; white-space: nowrap; }
+#technologydetails .fut-tp-add:hover { border-color: #4FD1E8; }
+#technologydetails .fut-tp-add.on { border-color: #2E7D5B; background: #10291F; color: #4FE0B0; }
 `;
 
 export const PLANNER_CSS = `

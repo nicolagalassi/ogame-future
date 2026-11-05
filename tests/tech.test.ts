@@ -175,7 +175,7 @@ describe('tech panel', () => {
     (box.querySelectorAll<HTMLButtonElement>('.fut-tp-step')[1]!).click();
     (box.querySelectorAll<HTMLButtonElement>('.fut-tp-step')[1]!).click();
     expect(box.querySelector('.fut-tp-lv')!.textContent).toBe('Liv. 33');
-    const sum = box.querySelectorAll('.fut-tp-sum')[0]!;
+    const sum = box.querySelectorAll('.fut-tp-v.fut-tp-sum')[0]!;
     expect(sum.getAttribute('title')).toBe(rangeCost(1, 31, 33).metal.toLocaleString('it'));
     // Time row: 2h for 31, scaled for 33.
     const add = box.querySelector<HTMLButtonElement>('.fut-tp-add')!;
@@ -197,7 +197,7 @@ describe('tech panel', () => {
     document.getElementById('technologydetails_content')!.innerHTML = html;
     const box = renderTechPanel(o, readTechDetails(document)!)!;
     expect(box.querySelector('.fut-tp-lv')!.textContent).toBe('Liv. 32');
-    expect(box.querySelector('.fut-tp-note')!.textContent).toContain('10.0%');
+    expect(box.querySelector('.fut-tp-from')!.textContent).toContain('10.0%');
   });
 
   it('ships: cost × amount from the game field', () => {
@@ -210,7 +210,7 @@ describe('tech panel', () => {
     details.amountInput!.dispatchEvent(new Event('input'));
     return new Promise<void>((resolve) =>
       setTimeout(() => {
-        expect(box.querySelectorAll('.fut-tp-sum')[0]!.getAttribute('title')).toBe((6000000).toLocaleString('it'));
+        expect(box.querySelectorAll('.fut-tp-v.fut-tp-sum')[0]!.getAttribute('title')).toBe((6000000).toLocaleString('it'));
         expect(Array.from(box.querySelectorAll('.fut-tp-short')).map((x) => x.getAttribute('title'))).toEqual([(-1000000).toLocaleString('it'), (-5000000).toLocaleString('it')]);
         box.querySelector<HTMLButtonElement>('.fut-tp-add')!.click();
         expect(store.get<Plan>('planner', {})['10']![0]).toMatchObject({ id: 203, amount: 1000, cost: { metal: 6000000 } });
@@ -260,5 +260,28 @@ describe('planner window', () => {
     expect(root.querySelector('.empty')).not.toBeNull();
     closePlanner(document);
     expect(document.getElementById('fut-planner')).toBeNull();
+  });
+});
+
+import { expeditionItemBoost, parseSpeciesBonuses, readActiveItems } from '../src/data/bonuses';
+import { expeditionMax } from '../src/engines/fleet';
+
+describe('expedition bonuses', () => {
+  it('reads the lifeform booster and the active items', () => {
+    expect(parseSpeciesBonuses({ data: { expedition: { ResultBooster: { totalBonus: { ResultBooster: 0.9184 } } } } }, 1).expedition).toBe(0.9184);
+    expect(parseSpeciesBonuses({}, 1).expedition).toBe(0);
+    document.body.innerHTML = `<div id="buffBar"><div data-uuid=""></div><div data-uuid="b0f6477d68c9683170cb8d32be2df1177669c5a0"></div><div data-uuid="615beac7f493e7724db5f6ef4f182e3be8d9545c"></div></div>`;
+    const items = readActiveItems(document, 5)!;
+    expect(items.uuids).toHaveLength(2);
+    expect(expeditionItemBoost(items)).toBeCloseTo(0.4, 6);
+    document.body.innerHTML = '';
+    expect(readActiveItems(document)).toBeNull();
+  });
+
+  it('multiplies class, lifeform and item bonuses as OGLight does', () => {
+    const plain = expeditionMax({ characterClass: 3, economySpeed: 8, classBooster: 0 }).max;
+    expect(plain).toBe(5_000_000 * 24);
+    const boosted = expeditionMax({ characterClass: 3, economySpeed: 8, classBooster: 0.5, lfBooster: 1, itemBoost: 0.4 }).max;
+    expect(boosted).toBe(Math.round(5_000_000 * 24 * 1.5 * 2 * 1.4));
   });
 });

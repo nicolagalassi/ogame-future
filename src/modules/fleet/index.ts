@@ -15,6 +15,7 @@
  * "Avanti" and "Invia flotta". No request is made by Future here: the game checks the
  * target itself when page 2 opens. See ./repeat.ts for the "Ripeti" precedent (OGLight).
  */
+import { expeditionItemBoost, ITEMS_KEY, LF_BONUS_KEY, type ActiveItems, type LfBonuses } from '../../data/bonuses';
 import type { Store } from '../../core/storage';
 import {
   CARGO_SHIPS,
@@ -637,7 +638,11 @@ export function renderFleetTools(o: FleetOptions): void {
     expedition: () =>
       withDispatcher((fd) => {
         begin('expedition');
-        const r = prepareExpedition(fd, doc, profile, settings, { economySpeed: universeSpeed(doc) });
+        const r = prepareExpedition(fd, doc, profile, settings, {
+          economySpeed: universeSpeed(doc),
+          lfBooster: o.store.get<LfBonuses | null>(LF_BONUS_KEY, null)?.expedition ?? 0,
+          itemBoost: expeditionItemBoost(o.store.get<ActiveItems | null>(ITEMS_KEY, null)),
+        });
         report(r, 'fleet.ok.expedition', { target: r.target.toLocaleString(o.locale) });
       }),
     fleetsave: () =>
