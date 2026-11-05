@@ -224,5 +224,10 @@
   "plan.levels": "lv. {from}–{to}",
   "plan.bring": "Bring resources here",
   "plan.bringHint": "Opens the fleet page on the next planet with a transport of what is missing to here. After each send it moves to the next planet until nothing is missing.",
-  "plan.unknownHere": "Resources here unknown: press Sync"
+  "plan.unknownHere": "Resources here unknown: press Sync",
+  "plan.complete": "Complete the delivery",
+  "plan.sentArriving": "Sent · arriving {time}",
+  "plan.sentArrived": "Sent · arrived (not read yet)",
+  "plan.missingAfterSent": "Still missing",
+  "plan.allSent": "All sent ✓"
 }

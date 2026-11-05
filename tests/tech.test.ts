@@ -312,3 +312,43 @@ describe('expedition bonuses', () => {
     expect(boosted).toBe(Math.round(5_000_000 * 24 * 1.5 * 2 * 1.4));
   });
 });
+
+import { pendingFor, prunePending } from '../src/engines/planner';
+
+describe('resources sent to a planned body', () => {
+  const ship = (target: number, metal: number, arriveAt: number) => ({ target, cargo: { metal, crystal: 0, deuterium: 0 }, sentAt: 0, arriveAt });
+
+  it('counts shipments until the body was read after they landed', () => {
+    const list = [ship(10, 100, 50), ship(10, 30, 200), ship(20, 5, 300)];
+    expect(pendingFor(list, 10, 0)).toMatchObject({ metal: 130, arriveAt: 200 });
+    expect(pendingFor(list, 10, 100).metal).toBe(30);
+    const plan = addToPlan({}, 10, [{ id: 1, level: 5, name: 'x', cost: { metal: 1, crystal: 0, deuterium: 0, energy: 0 }, added: 1 }]);
+    // Planet 20 has no plan, and the first shipment to 10 was already read.
+    expect(prunePending(list, plan, () => 100)).toEqual([ship(10, 30, 200)]);
+  });
+
+  it('shows what was sent and offers to complete a partial delivery', () => {
+    document.body.innerHTML = '';
+    const store = new Store(new MemoryStore(), 'test');
+    store.set('planner', addToPlan({}, 10, [{ id: 1, level: 31, name: 'Miniera', cost: { metal: 1000, crystal: 0, deuterium: 0, energy: 0 }, added: 1 }]));
+    store.set('plan.sent', [ship(10, 600, 5_000)]);
+    let went = '';
+    openPlanner({
+      doc: document, store, snapshot: null, now: 1_000, locale: 'it', t,
+      entries: [{ planetId: 10, moonId: null, name: 'Casa', coords: '1:2:3' } as never, { planetId: 20, moonId: null, name: 'Due', coords: '1:2:4' } as never],
+      current: { id: 10, resources: { metal: 0, crystal: 0, deuterium: 0 } },
+      href: 'https://s1-it.ogame.gameforge.com/game/index.php?page=ingame&component=supplies',
+      navigate: (u) => (went = u),
+    });
+    const root = document.getElementById('fut-planner')!.shadowRoot!;
+    expect(root.querySelector('.sum.sent .num.m')!.textContent).toBe('600');
+    const bring = root.querySelector<HTMLButtonElement>('.act:not(.ghost)')!;
+    expect(bring.textContent).toBe("Completa l'invio");
+    bring.click();
+    expect(went).toContain('cp=20');
+    // 1000 needed, 600 on the way: only 400 still to bring.
+    expect(root.querySelector('.sum.warn .num.m')!.textContent).toBe('400');
+    expect(store.get<{ need: { metal: number } } | null>('plan.delivery', null)!.need.metal).toBe(400);
+    closePlanner(document);
+  });
+});

@@ -155,15 +155,28 @@ function chip(doc: Document, icon: string, text: string, title: string, cls = ''
   return c;
 }
 
-/** The game's own extra lines (energy needed, possible start), kept as small chips. */
+/**
+ * The game's own extra lines, kept as small chips. Buildings, research and lifeform pages
+ * carry different ones (energy, possible start, population, lab levels…): every line of
+ * the game's list becomes a chip, except the build time, which the panel computes.
+ */
 function gameChips(doc: Document, details: TechDetails): HTMLElement[] {
   const out: HTMLElement[] = [];
-  const energy = details.root.querySelector<HTMLElement>('.information .additional_energy_consumption .value');
-  if (energy?.textContent?.trim()) out.push(chip(doc, ICON.energy, `-${energy.textContent.trim()}`, energy.closest('li')?.textContent?.replace(/\s+/g, ' ').trim() ?? '', 'fut-tp-energy'));
-  const start = details.root.querySelector<HTMLElement>('.information .possible_build_start .value');
-  if (start?.textContent?.trim()) {
-    const why = start.getAttribute('data-tooltip-title') ?? start.getAttribute('title') ?? '';
-    out.push(chip(doc, ICON.start, start.textContent.trim(), [start.closest('li')?.querySelector('strong')?.textContent?.trim(), why].filter(Boolean).join(' '), 'fut-tp-start'));
+  const icons: Record<string, string> = {
+    additional_energy_consumption: ICON.energy,
+    energy_consumption: ICON.energy,
+    possible_build_start: ICON.start,
+  };
+  for (const li of Array.from(details.root.querySelectorAll<HTMLElement>('.content .information > ul > li'))) {
+    if (li.classList.contains('build_duration')) continue;
+    const value = li.querySelector<HTMLElement>('.value');
+    const text = (value?.textContent ?? li.textContent ?? '').replace(/\s+/g, ' ').trim();
+    if (!text) continue;
+    const label = li.querySelector('strong')?.textContent?.replace(/\s+/g, ' ').trim() ?? '';
+    const why = value?.getAttribute('data-tooltip-title') ?? value?.getAttribute('title') ?? '';
+    const cls = Array.from(li.classList).find((c) => icons[c]) ?? '';
+    const shown = cls.includes('energy') ? `-${text}` : value ? text : text.replace(label, '').trim();
+    out.push(chip(doc, icons[cls] ?? '', shown, [label, why].filter(Boolean).join(' '), cls.includes('energy') ? 'fut-tp-energy' : cls ? 'fut-tp-start' : ''));
   }
   return out;
 }

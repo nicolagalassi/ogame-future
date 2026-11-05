@@ -224,5 +224,10 @@
   "plan.levels": "niv. {from}–{to}",
   "plan.bring": "Amener les ressources ici",
   "plan.bringHint": "Ouvre la flotte sur la planète suivante avec un transport de ce qui manque vers ici. Après chaque envoi, passe à la planète suivante jusqu'à ce que rien ne manque.",
-  "plan.unknownHere": "Ressources ici inconnues : appuyez sur Actualiser"
+  "plan.unknownHere": "Ressources ici inconnues : appuyez sur Actualiser",
+  "plan.complete": "Compléter l'envoi",
+  "plan.sentArriving": "Envoyées · arrivée {time}",
+  "plan.sentArrived": "Envoyées · arrivées (pas encore lues)",
+  "plan.missingAfterSent": "Manque encore",
+  "plan.allSent": "Tout envoyé ✓"
 }
