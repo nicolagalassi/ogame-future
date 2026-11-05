@@ -130,3 +130,62 @@ export function pendingFor(list: Shipment[], target: number, seenAt: number): Re
 export function prunePending(list: Shipment[], plan: Plan, seenAtOf: (target: number) => number): Shipment[] {
   return list.filter((s) => (plan[String(s.target)]?.length ?? 0) > 0 && s.arriveAt > seenAtOf(s.target));
 }
+
+const norm = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+
+/**
+ * Drops planned levels already started, from the game's construction queues (any page).
+ * Queue entries carry the name and level, not the id: names are compared loosely.
+ */
+export function pruneByQueues(plan: Plan, queues: Record<string, { name: string; level: number }[]>): { plan: Plan; changed: boolean } {
+  let changed = false;
+  const started: { body: string; name: string; level: number }[] = [];
+  for (const [body, items] of Object.entries(queues)) for (const q of items) if (q.level > 0 && q.name) started.push({ body, name: norm(q.name), level: q.level });
+  const next: Plan = {};
+  for (const [key, list] of Object.entries(plan)) {
+    const kept = list.filter((item) => {
+      if (item.level === undefined) return true;
+      const hit = started.some((s) => (s.body === key || isResearch(item.id)) && s.name === norm(item.name) && s.level >= item.level!);
+      if (hit) changed = true;
+      return !hit;
+    });
+    if (kept.length) next[key] = kept;
+  }
+  return { plan: changed ? next : plan, changed };
+}
+
+/** The player started building: the planned level (or units) leaves the plan. */
+export function startBuild(plan: Plan, bodyId: number, id: number, o: { level?: number; amount?: number }): { plan: Plan; changed: boolean } {
+  const key = String(bodyId);
+  let changed = false;
+  const next: Plan = {};
+  for (const [k, list] of Object.entries(plan)) {
+    let left = o.amount ?? 0;
+    const kept: PlanItem[] = [];
+    for (const item of list) {
+      if (item.id !== id || (k !== key && !isResearch(id))) {
+        kept.push(item);
+        continue;
+      }
+      if (item.level !== undefined && o.level !== undefined && item.level <= o.level) {
+        changed = true;
+        continue;
+      }
+      if (item.amount !== undefined && left > 0 && k === key) {
+        changed = true;
+        if (item.amount <= left) {
+          left -= item.amount;
+          continue;
+        }
+        const keep = item.amount - left;
+        const share = keep / item.amount;
+        kept.push({ ...item, amount: keep, cost: { metal: Math.round(item.cost.metal * share), crystal: Math.round(item.cost.crystal * share), deuterium: Math.round(item.cost.deuterium * share), energy: item.cost.energy } });
+        left = 0;
+        continue;
+      }
+      kept.push(item);
+    }
+    if (kept.length) next[k] = kept;
+  }
+  return { plan: changed ? next : plan, changed };
+}

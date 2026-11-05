@@ -352,3 +352,32 @@ describe('resources sent to a planned body', () => {
     closePlanner(document);
   });
 });
+
+import { pruneByQueues, startBuild } from '../src/engines/planner';
+
+describe('started builds leave the plan', () => {
+  const cost = { metal: 100, crystal: 0, deuterium: 0, energy: 0 };
+  it('on the click: level up to the started one, units by amount', () => {
+    let plan = addToPlan({}, 10, [
+      { id: 1, level: 46, name: 'Miniera di Metallo', cost, added: 1 },
+      { id: 1, level: 47, name: 'Miniera di Metallo', cost, added: 1 },
+      { id: 203, amount: 100, name: 'Cargo grande', cost: { ...cost, metal: 1000 }, added: 2 },
+    ]);
+    plan = startBuild(plan, 10, 1, { level: 46 }).plan;
+    expect(plan['10']!.map((x) => x.level ?? x.amount)).toEqual([47, 100]);
+    plan = startBuild(plan, 10, 203, { amount: 30 }).plan;
+    expect(plan['10']![1]).toMatchObject({ amount: 70, cost: { metal: 700 } });
+    plan = startBuild(plan, 10, 203, { amount: 500 }).plan;
+    expect(plan['10']!.map((x) => x.id)).toEqual([1]);
+  });
+
+  it('from the construction queues, on any page', () => {
+    const plan = addToPlan({}, 10, [
+      { id: 1, level: 46, name: 'Miniera di Metallo', cost, added: 1 },
+      { id: 1, level: 47, name: 'Miniera di Metallo', cost, added: 1 },
+    ]);
+    const out = pruneByQueues(plan, { '10': [{ name: 'Miniera di metallo', level: 46 }], '20': [{ name: 'Miniera di Metallo', level: 47 }] });
+    expect(out.changed).toBe(true);
+    expect(out.plan['10']!.map((x) => x.level)).toEqual([47]);
+  });
+});
