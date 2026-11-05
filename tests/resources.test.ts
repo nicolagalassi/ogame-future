@@ -13,13 +13,14 @@ describe('formatUnits', () => {
 });
 
 describe('estimateResources', () => {
-  it('adds production per second on planets', () => {
-    const p = body({ id: 1, type: 'planet', production: { metal: 10, crystal: 0, deuterium: 0 } });
-    expect(estimateResources(p, 60_000).metal).toBe(600);
+  it('adds hourly production on planets, pro rata', () => {
+    const p = body({ id: 1, type: 'planet', production: { metal: 3600, crystal: 0, deuterium: 0 } });
+    expect(estimateResources(p, 60_000).metal).toBe(60);
+    expect(estimateResources(p, 3_600_000).metal).toBe(3600);
   });
 
   it('stops at storage but never lowers an amount already above it', () => {
-    const p = body({ id: 1, type: 'planet', production: { metal: 10, crystal: 0, deuterium: 0 },
+    const p = body({ id: 1, type: 'planet', production: { metal: 36_000, crystal: 0, deuterium: 0 },
       resources: { metal: 950, crystal: 2000, deuterium: 0 }, storage: { metal: 1000, crystal: 1000, deuterium: 0 } });
     const r = estimateResources(p, 60_000);
     expect(r.metal).toBe(1000);
@@ -50,6 +51,6 @@ describe('applyPageResources and totals', () => {
     expect(applyPageResources(snap, 1, { metal: 5, crystal: 6, deuterium: 7 }, 0)).toBe(true);
     const { stock, perHour } = totals(snap, 0);
     expect(stock.metal).toBe(5 + 292_600_000);
-    expect(perHour.metal).toBe(36_000);
+    expect(perHour.metal).toBe(10);
   });
 });
