@@ -5,6 +5,7 @@
 - Ogni chiamata di rete passa da `src/core/guard.ts`. Mai `fetch` diretto altrove.
 - Il codice pubblicato non si minifica (`scripts/build.mjs`).
 - Prima di ogni push: `npm run check` (typecheck, test, build).
+- Prova in gioco con il browser dev (`npm run dev`, poi `dev:reload` / `dev:eval` / `dev:shot`): vedi `.claude/QUICK_START.md`.
 
 ---
 
