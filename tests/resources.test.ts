@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { formatUnits } from '../src/core/format';
-import { applyPageResources, estimateResources, storageFill, totals } from '../src/engines/resources';
+import { applyPageResources, estimateResources, storageCapacity, storageFill, totals } from '../src/engines/resources';
 import { SNAPSHOT, body } from './fixtures';
 
 describe('formatUnits', () => {
@@ -29,6 +29,14 @@ describe('estimateResources', () => {
   it('moons do not produce', () => {
     const m = body({ id: 2, type: 'moon', production: { metal: 10, crystal: 0, deuterium: 0 } });
     expect(estimateResources(m, 60_000).metal).toBe(0);
+  });
+
+  it('computes storage from the storage building levels (22/23/24)', () => {
+    expect(storageCapacity(0)).toBe(10_000);
+    expect(storageCapacity(1)).toBe(20_000);
+    expect(storageCapacity(10)).toBe(5_355_000);
+    const b = body({ id: 9, type: 'planet', levels: { '22': 1, '23': 0, '24': 0 } });
+    expect(storageFill(b, { metal: 10_000, crystal: 10_000, deuterium: 0 })).toEqual({ metal: 0.5, crystal: 1, deuterium: 0 });
   });
 
   it('storageFill is null when storage is unknown', () => {

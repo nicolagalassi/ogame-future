@@ -13,6 +13,8 @@ export interface PlanetListEntry {
   name: string;
   coords: string;
   current: 'planet' | 'moon' | null;
+  /** The game's own construction icons on this entry (planet / moon), if something is being built. */
+  construction: { planet: HTMLAnchorElement | null; moon: HTMLAnchorElement | null };
 }
 
 const idFromLink = (a: HTMLAnchorElement | null): number | null => {
@@ -42,6 +44,10 @@ export function readPlanetList(doc: Document): PlanetListEntry[] {
       name: element.querySelector('.planet-name')?.textContent?.trim() ?? '',
       coords,
       current,
+      construction: {
+        planet: element.querySelector<HTMLAnchorElement>('a.constructionIcon:not(.moon)'),
+        moon: element.querySelector<HTMLAnchorElement>('a.constructionIcon.moon'),
+      },
     };
   });
 }

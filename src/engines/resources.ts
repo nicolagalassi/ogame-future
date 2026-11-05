@@ -13,16 +13,38 @@ export function estimateResources(body: OwnBody, now: number): Resources {
   for (const key of KEYS) {
     const start = body.resources[key];
     const grown = body.type === 'planet' ? start + body.production[key] * seconds : start;
-    const cap = body.storage[key];
+    const cap = effectiveStorage(body)[key];
     out[key] = cap > 0 ? Math.max(start, Math.min(grown, cap)) : grown;
+  }
+  return out;
+}
+
+/** OGame storage formula: capacity of a metal/crystal/deuterium storage at a level. */
+export function storageCapacity(level: number): number {
+  return 5000 * Math.floor(2.5 * Math.exp((20 * level) / 33));
+}
+
+/** Storage building ids in OGame: 22 metal, 23 crystal, 24 deuterium. */
+const STORAGE_BUILDING = { metal: '22', crystal: '23', deuterium: '24' } as const;
+
+/**
+ * Capacity per resource: the snapshot's own value when it has one, else computed
+ * from the storage building level. 0 means unknown.
+ */
+export function effectiveStorage(body: OwnBody): Resources {
+  const out = { metal: 0, crystal: 0, deuterium: 0 };
+  for (const k of KEYS) {
+    const level = body.levels[STORAGE_BUILDING[k]] ?? body.levels[`${k}Storage`];
+    out[k] = body.storage[k] > 0 ? body.storage[k] : level !== undefined ? storageCapacity(level) : 0;
   }
   return out;
 }
 
 /** Share of storage in use, 0..1, or null when storage is unknown. */
 export function storageFill(body: OwnBody, amount: Resources): Resources | null {
-  if (KEYS.every((k) => body.storage[k] <= 0)) return null;
-  const fill = (k: (typeof KEYS)[number]) => (body.storage[k] > 0 ? Math.min(1, amount[k] / body.storage[k]) : 0);
+  const cap = effectiveStorage(body);
+  if (KEYS.every((k) => cap[k] <= 0)) return null;
+  const fill = (k: (typeof KEYS)[number]) => (cap[k] > 0 ? Math.min(1, amount[k] / cap[k]) : 0);
   return { metal: fill('metal'), crystal: fill('crystal'), deuterium: fill('deuterium') };
 }
 
