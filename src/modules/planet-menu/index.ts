@@ -39,6 +39,9 @@ export interface PlanetMenuOptions {
   onSync: () => Promise<void>;
   /** Opens the account dashboard (Future's own panel, no game action). */
   onOpenDashboard?: () => void;
+  /** Opens the construction plan; `planCount` items are planned in total. */
+  onOpenPlanner?: () => void;
+  planCount?: number;
 }
 
 const STYLE_ID = 'fut-planet-menu-style';
@@ -46,6 +49,7 @@ const STYLE_ID = 'fut-planet-menu-style';
 let panelOpen = false;
 
 const ICONS = {
+  planner: '<path d="M9 6h11M9 12h11M9 18h11" fill="none" stroke-width="2.2"/><path stroke="none" d="M3 4.5h3v3H3zM3 10.5h3v3H3zM3 16.5h3v3H3z"/>',
   dashboard: '<path stroke="none" d="M3 3h8v10H3zM13 3h8v6h-8zM13 11h8v10h-8zM3 15h8v6H3z"/>',
   side: '<path stroke="none" d="M2 5h12v14H2zM16 5h6v14h-6z"/>',
   compact: '<path stroke="none" d="M3 4h18v3H3zM3 10.5h18v3H3zM3 17h18v3H3z"/>',
@@ -233,6 +237,12 @@ function toolbar(o: PlanetMenuOptions, mode: MenuMode, roomy: boolean, colonies:
   gear.setAttribute('aria-expanded', String(panelOpen));
 
   if (o.onOpenDashboard) bar.append(iconButton(doc, 'dashboard', t('dash.title'), o.onOpenDashboard));
+  if (o.onOpenPlanner) {
+    const count = o.planCount ?? 0;
+    const planner = iconButton(doc, 'planner', count ? t('plan.titleCount', { n: count }) : t('plan.title'), o.onOpenPlanner);
+    if (count) planner.append(el(doc, 'span', 'fut-tool-badge', count > 99 ? '99+' : String(count)));
+    bar.append(planner);
+  }
   bar.append(sw, sync, gear);
   return bar;
 }

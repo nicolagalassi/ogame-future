@@ -168,6 +168,9 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
   display: flex; align-items: center; justify-content: center; width: 26px; height: 22px; padding: 0;
   border: 0; border-radius: 5px; background: none; color: #B4C2D3; cursor: pointer;
 }
+.fut-tool { position: relative; }
+.fut-tool-badge { position: absolute; top: -3px; right: -4px; min-width: 13px; height: 13px; padding: 0 3px; border-radius: 7px;
+  background: #4FD1E8; color: #0A111C; font: 700 9px/13px Arial, sans-serif; text-align: center; pointer-events: none; }
 .fut-tool:hover { background: rgba(79,209,232,0.15); color: #E6EDF5; }
 .fut-tool:disabled { opacity: 0.35; cursor: default; background: none; }
 .fut-tool[aria-expanded="true"] { background: rgba(79,209,232,0.2); color: #4FD1E8; }
