@@ -19,5 +19,6 @@
   "settings.view": "Vue du menu",
   "settings.totals": "Totaux des ressources",
   "settings.on": "Oui",
-  "settings.off": "Non"
+  "settings.off": "Non",
+  "planetMenu.age": "Minutes depuis la dernière mise à jour (ouvrez la planète pour actualiser)"
 }

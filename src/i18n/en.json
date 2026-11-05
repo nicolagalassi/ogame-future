@@ -19,5 +19,6 @@
   "settings.view": "Menu view",
   "settings.totals": "Resource totals",
   "settings.on": "On",
-  "settings.off": "Off"
+  "settings.off": "Off",
+  "planetMenu.age": "Minutes since the data was last updated (open the planet to refresh)"
 }

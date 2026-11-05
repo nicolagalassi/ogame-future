@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { readCurrentResources, readPlanetList } from '../src/data/planet-list';
-import { renderPlanetMenu } from '../src/modules/planet-menu';
+import { dataAge, renderPlanetMenu } from '../src/modules/planet-menu';
 import { translator } from '../src/core/i18n';
 import { PLANET_LIST_HTML, SNAPSHOT } from './fixtures';
 
@@ -131,5 +131,15 @@ describe('width and banner', () => {
     draw('compact');
     expect(document.getElementById('planetbarcomponent')?.classList.contains('fut-wide')).toBe(false);
     expect(document.body.classList.contains('fut-banner-shift')).toBe(false);
+  });
+});
+
+describe('data age badge', () => {
+  it('counts minutes, then hours and days, with OGLight colour steps', () => {
+    expect(dataAge(0, 5 * 60_000)).toEqual({ text: '5', cls: 'fut-age-fresh' });
+    expect(dataAge(0, 20 * 60_000)).toEqual({ text: '20', cls: 'fut-age-warm' });
+    expect(dataAge(0, 45 * 60_000)).toEqual({ text: '45', cls: 'fut-age-old' });
+    expect(dataAge(0, 3 * 3_600_000)).toEqual({ text: '3h', cls: 'fut-age-old' });
+    expect(dataAge(0, 2 * 86_400_000)).toEqual({ text: '2d', cls: 'fut-age-old' });
   });
 });

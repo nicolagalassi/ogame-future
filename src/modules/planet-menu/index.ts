@@ -58,7 +58,7 @@ function iconButton(doc: Document, icon: keyof typeof ICONS, title: string, onCl
   button.type = 'button';
   button.title = title;
   button.setAttribute('aria-label', title);
-  button.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor" stroke="currentColor">${ICONS[icon]}</svg>`;
+  button.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor" stroke="currentColor">${ICONS[icon]}</svg>`;
   button.addEventListener('click', (event) => {
     event.preventDefault();
     onClick();
@@ -114,10 +114,43 @@ export function guardSkin(img: HTMLImageElement): void {
   if (img.complete && img.naturalWidth === 0 && img.getAttribute('src')) fail();
 }
 
+/** Age badge text and colour class, like OGLight's timers (minutes up to an hour, then hours/days). */
+export function dataAge(resourcesAt: number, now: number): { text: string; cls: string } {
+  const minutes = Math.max(0, Math.floor((now - resourcesAt) / 60_000));
+  const cls = minutes < 15 ? 'fut-age-fresh' : minutes <= 30 ? 'fut-age-warm' : 'fut-age-old';
+  const text = minutes < 60 ? String(minutes) : minutes < 1440 ? `${Math.floor(minutes / 60)}h` : `${Math.floor(minutes / 1440)}d`;
+  return { text, cls };
+}
+
+function ageBadge(doc: Document, body: OwnBody | undefined, now: number, t: PlanetMenuOptions['t']): HTMLElement | null {
+  if (!body || !body.resourcesAt) return null;
+  const { text, cls } = dataAge(body.resourcesAt, now);
+  const badge = el(doc, 'span', `fut-age ${cls}`, text);
+  badge.dataset.at = String(body.resourcesAt);
+  badge.title = t('planetMenu.age');
+  return badge;
+}
+
+/**
+ * Refreshes the age badges once a minute. Display only: it reads the clock and rewrites
+ * text already on the page, with no network call and no game action.
+ */
+let ageTimer: ReturnType<typeof setInterval> | null = null;
+function startAgeClock(doc: Document): void {
+  if (ageTimer !== null) return;
+  ageTimer = setInterval(() => {
+    doc.querySelectorAll<HTMLElement>('.fut-age').forEach((badge) => {
+      const { text, cls } = dataAge(Number(badge.dataset.at), Date.now());
+      badge.textContent = text;
+      badge.className = `fut-age ${cls}`;
+    });
+  }, 60_000);
+}
+
 /** Removes everything Future added, so the menu can be redrawn without duplicates. */
 export function clearPlanetMenu(doc: Document): void {
   doc
-    .querySelectorAll('.fut-res, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-idle, .fut-nomoon')
+    .querySelectorAll('.fut-res, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-idle, .fut-nomoon, .fut-age')
     .forEach((n) => n.remove());
   doc.querySelectorAll('.fut-name').forEach((wrap) => wrap.replaceWith(...Array.from(wrap.childNodes)));
   doc.querySelectorAll('.fut-row').forEach((n) => n.classList.remove('fut-row', 'fut-current', 'fut-building'));
@@ -244,7 +277,10 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
     if (link) {
       const wrap = el(doc, 'span', 'fut-name');
       link.querySelectorAll('.planet-name, .planet-koords').forEach((n) => wrap.append(n));
-      link.append(wrap, resourceColumn(doc, entry.planetId ? byId.get(entry.planetId) : undefined, o.now, o.locale, true));
+      const planetBody = entry.planetId ? byId.get(entry.planetId) : undefined;
+      link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true));
+      const age = ageBadge(doc, planetBody, o.now, o.t);
+      if (age) link.append(age);
       // Queue: the game's construction icon stays as it is (its own link); a planet with
       // nothing in construction gets an amber dot.
       if (entry.construction.planet) entry.element.classList.add('fut-building');
@@ -257,7 +293,10 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
 
     const moon = entry.moonLink;
     if (moon) {
-      moon.append(resourceColumn(doc, entry.moonId ? byId.get(entry.moonId) : undefined, o.now, o.locale, false));
+      const moonBody = entry.moonId ? byId.get(entry.moonId) : undefined;
+      moon.append(resourceColumn(doc, moonBody, o.now, o.locale, false));
+      const age = ageBadge(doc, moonBody, o.now, o.t);
+      if (age) moon.append(age);
     } else {
       // Keeps the planet columns aligned on planets without a moon.
       link?.after(el(doc, 'span', 'fut-nomoon'));
@@ -265,6 +304,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
     entry.element.querySelectorAll<HTMLImageElement>('img.planetPic, img.icon-moon').forEach(guardSkin);
   }
 
+  startAgeClock(doc);
   const colonies = (doc.getElementById('countColonies')?.textContent ?? '').replace(/\s+/g, ' ').trim();
   list.before(toolbar(o, mode, roomy, colonies), settingsPanel(o, mode, roomy, colonies));
 

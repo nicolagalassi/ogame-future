@@ -19,5 +19,6 @@
   "settings.view": "Menüansicht",
   "settings.totals": "Rohstoffsummen",
   "settings.on": "An",
-  "settings.off": "Aus"
+  "settings.off": "Aus",
+  "planetMenu.age": "Minuten seit der letzten Aktualisierung (Planeten öffnen zum Aktualisieren)"
 }
