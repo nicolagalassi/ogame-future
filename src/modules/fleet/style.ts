@@ -10,16 +10,16 @@ export const FLEET_CSS = `
 .fut-ftilewrap { position: relative; display: inline-flex; }
 .fut-ftile {
   position: relative; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-  min-width: 64px; height: 58px; padding: 6px 7px; border-radius: 8px; border: 1px solid #24344B; background: #0A111C;
+  min-width: 60px; height: 58px; padding: 6px 6px; border-radius: 8px; border: 1px solid #24344B; background: #0A111C;
   color: #4FD1E8; font: 11px Arial, sans-serif; cursor: pointer;
 }
 .fut-ftile:hover { border-color: #4FD1E8; background: #0F1C2C; }
 .fut-ftile.dim { color: #5B6B80; }
-.fut-ftile.dim .fut-fkey {
+.fut-ftile.dim .fut-flabel { color: #8A9BB0; }
+.fut-fkey {
   position: absolute; left: 4px; top: 3px; padding: 0 3px; border-radius: 3px; background: #16243A;
   color: #8A9BB0; font: 9px/13px Consolas, monospace;
 }
-.fut-flabel { color: #8A9BB0; }
 .fut-flabel { color: #E6EDF5; font-weight: 700; white-space: nowrap; }
 .fut-fcaption { color: #8A9BB0; font-size: 10px; max-width: 76px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fut-ftilewrap .fut-ftile { padding-right: 16px; }
