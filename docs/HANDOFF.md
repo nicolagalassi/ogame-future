@@ -68,7 +68,13 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
    forme di vita solo in inglese finché il giocatore non apre la pagina).
 2. Telefono: barra d'azioni flotta fissa in basso con pulsanti grandi (serve una pagina
    flotta salvata da telefono).
-3. Galassia (serve una pagina galassia salvata con giocatori e un campo detriti).
+3. **Galassia** (fatta il 2026-11-05, `src/modules/galaxy`, dati in `src/data/galaxy.ts`): striscia di
+   riepilogo sopra la tabella (giocatori, inattivi, vacanza, lune, detriti in MSU), righe inattive e tue
+   tinte, valore MSU sotto ogni campo detriti, mirino per segnare bersagli (lista con link alle coordinate,
+   niente pulsante sonda), distintivo con la posizione accanto al giocatore: al passaggio del mouse una
+   scheda con punti e posizioni (generale, economia, ricerca, militare, forme di vita, navi) da
+   `/api/playerData.xml` come OGLight. Chiamata `user-view` del guard: solo API pubblica, senza cookie,
+   in cache un'ora per giocatore. Da verificare: detriti in posizione 16 (markup mai visto pieno).
 4. Verificare in gioco i riepiloghi di spionaggio su un giocatore vero.
 5. Domanda aperta: plancia, piano e diario restano finestre sopra il gioco o diventano pannelli?
 6. Roadmap: classifiche e giocatori, storico account, confronto rivali, promemoria manuali,
