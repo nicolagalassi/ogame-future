@@ -333,6 +333,8 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
 
   // Like OGLight: tools over the picture, the grid where the game lists costs and details.
   details.root.classList.add('fut-tp-on');
+  // Shipyard and defence: the game's amount field and shipyard choice need their own room.
+  details.root.classList.toggle('fut-tp-unit', !!details.root.querySelector('.build_amount, .shipyardSelection'));
   const sprite = details.root.querySelector('.sprite, .sprite_large');
   (sprite ?? details.root).append(tools);
   const content = details.root.querySelector('.content') ?? details.root;
