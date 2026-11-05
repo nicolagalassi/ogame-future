@@ -173,7 +173,7 @@ export function prepareExpedition(
   settings: FleetSettings,
   universe: { economySpeed: number; topScore?: number; lfBooster?: number; itemBoost?: number },
 ): PrepareResult & { target: number } {
-  if (fd.expeditionCount >= fd.maxExpeditionCount) return { ok: false, reason: 'fleet.err.noExpSlots', ships: 0, cargo: 0, target: 0 };
+  // No free-slot check (Nicola): the fleet is prepared anyway, the game refuses the send if no slot is free.
   const cls = fd.apiDataJson?.characterClassId ?? 0;
   const booster = fd.apiDataJson?.bonuses?.characterClassBooster?.[String(cls)] ?? 0;
   const limits = expeditionMax({
