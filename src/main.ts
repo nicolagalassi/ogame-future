@@ -9,7 +9,7 @@ import { detectLocale, translator } from './core/i18n';
 import { SNAPSHOT_KEY, hydrateAccountOncePerSession, syncAccountOnUserClick, type AccountSnapshot } from './data/account-info';
 import { currentBodyId, readCurrentResources, readPlanetList } from './data/planet-list';
 import { applyPageResources } from './engines/resources';
-import { SCORE_KEY, readScore, type Score } from './data/score';
+import { SCORE_KEY, watchScore, type Score } from './data/score';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
 import { ITEMS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems } from './data/bonuses';
 import { openDashboard } from './modules/dashboard';
@@ -87,9 +87,8 @@ async function bootstrap(): Promise<void> {
   const seenSlots = readLfSlots(document, techList);
   if (seenSlots && bodyId && rememberLfSlots(lfSlots, bodyId, seenSlots)) store.set(LF_SLOTS_KEY, lfSlots);
 
-  // Points are on the overview page only: keep the last value seen.
-  const seenScore = readScore(document, Date.now());
-  if (seenScore) store.set(SCORE_KEY, seenScore);
+  // Points are on the overview page only, typed in by the game's own script after load: keep the last value seen.
+  watchScore(document, () => Date.now(), (score) => store.set(SCORE_KEY, score));
 
   const deps = { guard, store, session: window.sessionStorage };
   const storedMode = store.get<string>('planetMenu.mode', 'side');
