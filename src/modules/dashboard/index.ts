@@ -16,9 +16,9 @@ import { activeItems, QUEUE_KINDS, type QueueSnapshot } from '../../data/queues'
 import { bestUpgrades } from '../../engines/roi';
 import { rawCost } from '../../engines/tech';
 import {
-  DEFENCES, lfBuildings, lfResearch, MINES, MOON_FACILITIES, PLANET_FACILITIES, RESEARCH, SHIPS, SPECIES,
-  techName, type Species, type TechNames,
+  DEFENCES, MINES, MOON_FACILITIES, PLANET_FACILITIES, RESEARCH, SHIPS, SPECIES, speciesOf, techName, type TechNames,
 } from '../../data/tech-names';
+import { activeLfBuildings, activeLfResearch, type ActiveTech, type LfSlots } from '../../data/lf-slots';
 import { shipIcon } from '../messages';
 import { DASHBOARD_CSS } from './style';
 
@@ -30,6 +30,8 @@ export interface DashboardOptions {
   queues?: QueueSnapshot | null;
   /** Technology names learned from the game's pages (player's language). */
   names?: TechNames;
+  /** Lifeform research slots seen on the game's page, per planet (see data/lf-slots). */
+  lfSlots?: LfSlots;
   now: number;
   locale: string;
   t: (key: string, vars?: Record<string, string | number>) => string;
@@ -40,7 +42,6 @@ export type Tab = (typeof TABS)[number];
 
 const HOST_ID = 'fut-dashboard';
 let tab: Tab = 'summary';
-let species: Species | null = null;
 let scrapBody: number | null = null;
 let scrapRate = 35;
 let keyHandler: ((e: KeyboardEvent) => void) | null = null;
@@ -70,11 +71,13 @@ function orderedBodies(snapshot: AccountSnapshot | null, entries: PlanetListEntr
   for (const e of entries) {
     for (const id of [e.planetId, e.moonId]) {
       const b = id ? byId.get(id) : undefined;
-      if (b) list.push(b);
+      // accountInfo can leave names empty: the game's planet list always has the planet's name.
+      if (b) list.push(b.name ? b : { ...b, name: e.name });
     }
   }
   // Bodies the planet list does not show (should not happen) go last.
-  for (const b of snapshot.bodies) if (!list.includes(b)) list.push(b);
+  const listed = new Set(list.map((b) => b.id));
+  for (const b of snapshot.bodies) if (!listed.has(b.id)) list.push(b);
   return list;
 }
 
@@ -421,29 +424,17 @@ function lifeformsTab(parent: HTMLElement, ctx: Ctx): void {
   const { o, name } = ctx;
   const { t, doc } = o;
   const planets = ctx.bodies.filter((b) => b.type === 'planet');
-  const count = (s: Species) => planets.filter((p) => p.species === s).length;
-  if (species === null) species = [...SPECIES].sort((a, b) => count(b) - count(a))[0]!;
-  const current = species;
-
-  const sub = h('nav', 'tabs sub-tabs');
-  for (const s of SPECIES) {
-    const b = h('button', 'tab', `${t(`lf.${s}`)} · ${count(s)}`);
-    b.type = 'button';
-    b.setAttribute('aria-pressed', String(s === current));
-    b.addEventListener('click', () => {
-      species = s;
-      ctx.redraw();
-    });
-    sub.append(b);
-  }
-  parent.append(sub);
+  // Lifeforms mix: each planet has its own species (buildings) and its own research per slot.
+  const active = new Map(planets.map((p) => [p.id, { b: activeLfBuildings(p), r: activeLfResearch(p, o.lfSlots?.[String(p.id)]) }]));
   parent.append(h('p', 'hint', t('dash.lfHint')));
 
-  // Rows = technologies, columns = planets: 18 research names would never fit as headers.
-  const table = (title: string, ids: number[]) => {
+  // Rows = technologies active on at least one planet, columns = planets.
+  const table = (title: string, pick: (p: OwnBody) => ActiveTech[]) => {
     const s = section(parent, title);
-    const any = ids.some((id) => planets.some((p) => level(p, id) > 0));
-    if (!any) {
+    const ids = [...new Set(planets.flatMap((p) => pick(p).filter((a) => a.level > 0).map((a) => a.id)))].sort(
+      (a, b) => a % 100 - b % 100 || a - b,
+    );
+    if (!ids.length) {
       s.append(h('p', 'hint', t('dash.lfNone')));
       return;
     }
@@ -452,9 +443,9 @@ function lifeformsTab(parent: HTMLElement, ctx: Ctx): void {
     const hr = h('tr');
     hr.append(h('th', 'name', ''));
     for (const p of planets) {
-      const th = h('th', `num col${p.species === current ? ' on' : ''}`);
+      const th = h('th', 'num col');
       const a = h('a', 'col-name', p.name);
-      a.href = `${doc.location?.origin ?? ''}/game/index.php?page=ingame&component=lfbuildings&cp=${p.id}`;
+      a.href = `${doc.location?.origin ?? ''}/game/index.php?page=ingame&component=lfresearch&cp=${p.id}`;
       th.append(a);
       th.title = `${p.name} [${p.coords}]${p.species ? ` · ${t(`lf.${p.species}`)}` : ''}`;
       hr.append(th);
@@ -465,22 +456,27 @@ function lifeformsTab(parent: HTMLElement, ctx: Ctx): void {
     const tbody = h('tbody');
     for (const id of ids) {
       const tr = h('tr');
-      tr.append(h('td', 'name tech', name(id)));
-      const values = planets.filter((p) => p.species === current).map((p) => level(p, id));
+      const sp = speciesOf(id);
+      tr.append(h('td', 'name tech', `${name(id)}${sp ? ` · ${t(`lf.${sp}`)}` : ''}`));
+      const on = planets.map((p) => pick(p).find((a) => a.id === id));
+      const values = on.flatMap((a) => (a ? [a.level] : []));
       const max = values.length > 1 && values.some((v) => v !== Math.max(...values)) ? Math.max(...values) : -1;
-      for (const p of planets) {
-        const cell = levelCell(level(p, id), max);
-        if (p.species !== current) cell.classList.add('off');
+      on.forEach((a) => {
+        const cell = levelCell(a?.level ?? 0, max);
+        if (a?.guessed) {
+          cell.classList.add('guess');
+          cell.title = t('dash.lfGuess');
+        }
         tr.append(cell);
-      }
+      });
       tbody.append(tr);
     }
     tab.append(tbody);
     wrap.append(tab);
     s.append(wrap);
   };
-  table(t('dash.lfBuildings'), lfBuildings(current));
-  table(t('dash.lfResearch'), lfResearch(current));
+  table(t('dash.lfBuildings'), (p) => active.get(p.id)!.b);
+  table(t('dash.lfResearch'), (p) => active.get(p.id)!.r);
 }
 
 function unitsTab(parent: HTMLElement, ctx: Ctx, ids: readonly number[], ships: boolean): void {

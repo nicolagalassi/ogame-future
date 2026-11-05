@@ -113,6 +113,7 @@ h4 { margin: 12px 0 4px; font-size: 12px; font-weight: 700; color: #C9D4E2; }
 td.zero { color: #3A4A60; }
 td.top { color: #4FD1E8; }
 td.off { opacity: 0.55; }
+td.guess { font-style: italic; opacity: 0.7; }
 .unit-ico { width: 28px; height: 28px; border-radius: 4px; object-fit: cover; display: block; margin: 0 auto; background: #16202E; }
 .unit-ico-none { display: flex; align-items: center; justify-content: center; color: #8A9BB0; font-size: 10px; }
 
