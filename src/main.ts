@@ -9,6 +9,8 @@ import { detectLocale, translator } from './core/i18n';
 import { SNAPSHOT_KEY, hydrateAccountOncePerSession, syncAccountOnUserClick, type AccountSnapshot } from './data/account-info';
 import { currentBodyId, readCurrentResources, readPlanetList } from './data/planet-list';
 import { applyPageResources } from './engines/resources';
+import { SCORE_KEY, readScore, type Score } from './data/score';
+import { openDashboard } from './modules/dashboard';
 import { renderPlanetMenu, type MenuMode, type MenuSettings } from './modules/planet-menu';
 
 async function bootstrap(): Promise<void> {
@@ -37,12 +39,17 @@ async function bootstrap(): Promise<void> {
   const onPage = readCurrentResources(document);
   if (snapshot && bodyId && onPage && applyPageResources(snapshot, bodyId, onPage, Date.now())) saver.markDirty();
 
+  // Points are on the overview page only: keep the last value seen.
+  const seenScore = readScore(document, Date.now());
+  if (seenScore) store.set(SCORE_KEY, seenScore);
+
   const deps = { guard, store, session: window.sessionStorage };
   const storedMode = store.get<string>('planetMenu.mode', 'side');
   let settings: MenuSettings = {
     // 'stacked' was the previous layout: it maps to the side-by-side one.
     mode: (storedMode === 'compact' ? 'compact' : 'side') as MenuMode,
     showTotals: store.get<boolean>('planetMenu.totals', true),
+    markIdle: store.get<boolean>('planetMenu.markIdle', false),
   };
   const draw = () =>
     renderPlanetMenu({
@@ -57,8 +64,19 @@ async function bootstrap(): Promise<void> {
         settings = next;
         store.set('planetMenu.mode', next.mode);
         store.set('planetMenu.totals', next.showTotals);
+        store.set('planetMenu.markIdle', next.markIdle);
         draw();
       },
+      onOpenDashboard: () =>
+        openDashboard({
+          doc: document,
+          snapshot,
+          entries: readPlanetList(document),
+          score: store.get<Score | null>(SCORE_KEY, null),
+          now: Date.now(),
+          locale,
+          t,
+        }),
       // COMPLIANCE: runs only from the Sync button's click (reason 'user-sync', no cp).
       onSync: async () => {
         try {

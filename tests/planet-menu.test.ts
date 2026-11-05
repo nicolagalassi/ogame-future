@@ -7,7 +7,7 @@ import { PLANET_LIST_HTML, SNAPSHOT } from './fixtures';
 const t = translator('it');
 const draw = (mode: 'side' | 'compact', onSettingsChange = vi.fn(), onSync = vi.fn(async () => {})) =>
   renderPlanetMenu({
-    doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { mode, showTotals: true },
+    doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { mode, showTotals: true, markIdle: true },
     now: 0, locale: 'it', t, onSettingsChange, onSync,
   });
 
@@ -97,7 +97,7 @@ describe('renderPlanetMenu', () => {
     const onSettingsChange = vi.fn();
     draw('side', onSettingsChange);
     document.querySelector<HTMLButtonElement>('.fut-toolbar .fut-tool-compact')!.click();
-    expect(onSettingsChange).toHaveBeenCalledWith({ mode: 'compact', showTotals: true });
+    expect(onSettingsChange).toHaveBeenCalledWith({ mode: 'compact', showTotals: true, markIdle: true });
   });
 
   it('sync runs only from the button click', () => {
@@ -117,7 +117,7 @@ describe('renderPlanetMenu', () => {
     expect(panel.hasAttribute('hidden')).toBe(false);
     const off = Array.from(panel.querySelectorAll<HTMLButtonElement>('.fut-chip')).find((b) => b.textContent === 'No')!;
     off.click();
-    expect(onSettingsChange).toHaveBeenCalledWith({ mode: 'side', showTotals: false });
+    expect(onSettingsChange).toHaveBeenCalledWith({ mode: 'side', showTotals: false, markIdle: true });
     document.querySelector<HTMLButtonElement>('.fut-tool-settings')!.click(); // close again for later tests
   });
 });
