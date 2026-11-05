@@ -24,7 +24,10 @@ export interface FleetsaveProfile {
 }
 
 export interface FleetProfile {
+  /** Reserve 1: kept by transports, deployments, expeditions, "all ships". */
   reserve: Reserve;
+  /** Reserve 2: kept by the fleetsave only (absent = keep nothing back). */
+  saveReserve?: Reserve;
   save: FleetsaveProfile | null;
 }
 

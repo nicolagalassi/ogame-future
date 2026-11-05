@@ -35,7 +35,7 @@ export const FLEET_CSS = `
 .fut-finfo { color: #8A9BB0; font-size: 11px; min-height: 14px; }
 .fut-finfo.err { color: #FF7A7A; }
 .fut-fmenu {
-  position: absolute; z-index: 1000; top: 60px; left: 0; min-width: 220px; max-height: 300px; overflow-y: auto;
+  position: fixed; z-index: 100001; min-width: 220px; max-height: 320px; overflow-y: auto;
   display: flex; flex-direction: column; padding: 4px; border: 1px solid #2C3E57; border-radius: 8px; background: #0A111C;
   box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
@@ -76,6 +76,9 @@ export const MODAL_CSS = `
 }
 .fut-ffield input:focus, .fut-ffield select:focus { outline: none; border-color: #4FD1E8; }
 .fut-fcheck { display: flex; align-items: center; gap: 6px; color: #C9D4E2; font-size: 12px; align-self: end; min-height: 26px; }
+.fut-freserve { margin-top: 12px; padding: 10px; border: 1px solid #1F2C40; border-radius: 8px; background: #0D1522; }
+.fut-freserve h5 { margin-top: 0; }
+.fut-feditor h6 { margin: 10px 0 4px; font-size: 11px; font-weight: 400; color: #8A9BB0; }
 .fut-fnote { margin: 6px 0 0; color: #8A9BB0; font-size: 11px; }
 .fut-factions { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
 `;

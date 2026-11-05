@@ -283,3 +283,16 @@ describe('repeat', () => {
     expect(calls).toEqual(['post send', 'post send', 'game callback', 'post send', 'game callback']);
   });
 });
+
+describe('fleetsave reserve', () => {
+  it('fleetsave keeps reserve 2, not reserve 1', async () => {
+    const { prepareFleetsave } = await import('../src/modules/fleet/actions');
+    const fd = fakeDispatcher();
+    const save = { galaxy: null, system: null, position: 16, type: 1 as const, mission: 6, speed: 100 };
+    prepareFleetsave(fd, fleetPage(), { reserve: { ships: { '203': 50 }, resources: { metal: 0, crystal: 0, deuterium: 0 } }, saveReserve: { ships: { '202': 10 }, resources: { metal: 0, crystal: 0, deuterium: 0 } }, save }, save);
+    expect(fd.selected).toEqual({ 203: 100, 202: 40, 210: 3 });
+    const fd2 = fakeDispatcher();
+    prepareFleetsave(fd2, fleetPage(), { reserve: { ships: { '203': 50 }, resources: { metal: 0, crystal: 0, deuterium: 0 } }, save }, save);
+    expect(fd2.selected).toEqual({ 203: 100, 202: 50, 210: 3 });
+  });
+});

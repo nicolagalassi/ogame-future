@@ -7,6 +7,7 @@
  * the target when page 2 opens, as it always does.
  */
 import {
+  EMPTY_RESERVE,
   cargoLoad,
   cargoShipsFor,
   expeditionFleet,
@@ -152,7 +153,9 @@ export function prepareAllShips(fd: FleetDispatcher, profile: FleetProfile): Pre
   return { ok: count > 0, reason: count > 0 ? undefined : 'fleet.err.noShips', ships: count, cargo: 0 };
 }
 
-export function prepareFleetsave(fd: FleetDispatcher, doc: Document, profile: FleetProfile, save: FleetsaveProfile): PrepareResult {
+export function prepareFleetsave(fd: FleetDispatcher, doc: Document, base: FleetProfile, save: FleetsaveProfile): PrepareResult {
+  // The fleetsave has its own reserve (reserve 2), separate from the one of transports.
+  const profile: FleetProfile = { ...base, reserve: base.saveReserve ?? EMPTY_RESERVE };
   const ships = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
   const count = selectShips(fd, ships);
   setTarget(fd, doc, resolveTarget(save, fd.currentPlanet));

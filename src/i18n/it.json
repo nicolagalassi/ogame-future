@@ -74,8 +74,8 @@
   "mine.metal": "Miniera di metallo",
   "mine.crystal": "Miniera di cristallo",
   "mine.deuterium": "Sintetizzatore di deuterio",
-  "fleet.reserveShips": "Navi da lasciare sempre qui",
-  "fleet.reserveRes": "Risorse da lasciare sempre qui",
+  "fleet.reserveShips": "Navi",
+  "fleet.reserveRes": "Risorse",
   "fleet.noShips": "Nessuna nave su questo pianeta.",
   "fleet.fleetsave": "Fleetsave",
   "fleet.galaxy": "Galassia (vuoto = questa)",
@@ -158,5 +158,9 @@
   "fleet.favTitle": "Destinazioni preferite",
   "fleet.favTransport": "Trasporto verso",
   "fleet.favDeploy": "Schiera verso",
-  "fleet.tip.cargo": "Carica le risorse lasciando la riserva e il deuterio per il volo"
+  "fleet.tip.cargo": "Carica le risorse lasciando la riserva e il deuterio per il volo",
+  "fleet.reserve1Title": "Riserva 1 · trasporti e schieramenti",
+  "fleet.reserve1Hint": "Resta sul corpo con Su luna, Trasporto, Schiera, Spedizione e Tutte − riserva.",
+  "fleet.reserve2Title": "Riserva 2 · solo fleetsave",
+  "fleet.reserve2Hint": "Resta sul corpo solo quando premi Fleetsave. Vuota = parte tutto."
 }

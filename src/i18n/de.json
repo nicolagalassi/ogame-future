@@ -74,8 +74,8 @@
   "mine.metal": "Metallmine",
   "mine.crystal": "Kristallmine",
   "mine.deuterium": "Deuteriumsynthetisierer",
-  "fleet.reserveShips": "Schiffe, die immer hier bleiben",
-  "fleet.reserveRes": "Rohstoffe, die immer hier bleiben",
+  "fleet.reserveShips": "Schiffe",
+  "fleet.reserveRes": "Rohstoffe",
   "fleet.noShips": "Keine Schiffe hier.",
   "fleet.fleetsave": "Fleetsave",
   "fleet.galaxy": "Galaxie (leer = diese)",
@@ -158,5 +158,9 @@
   "fleet.favTitle": "Lieblingsziele",
   "fleet.favTransport": "Transport nach",
   "fleet.favDeploy": "Stationieren nach",
-  "fleet.tip.cargo": "Rohstoffe laden, Reserve und Flug-Deuterium bleiben"
+  "fleet.tip.cargo": "Rohstoffe laden, Reserve und Flug-Deuterium bleiben",
+  "fleet.reserve1Title": "Reserve 1 · Transporte und Stationierungen",
+  "fleet.reserve1Hint": "Bleibt hier bei Zum Mond, Transport, Stationieren, Expedition und Alle − Reserve.",
+  "fleet.reserve2Title": "Reserve 2 · nur Fleetsave",
+  "fleet.reserve2Hint": "Bleibt nur beim Fleetsave hier. Leer = alles fliegt."
 }

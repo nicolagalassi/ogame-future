@@ -74,8 +74,8 @@
   "mine.metal": "Mine de métal",
   "mine.crystal": "Mine de cristal",
   "mine.deuterium": "Synthétiseur de deutérium",
-  "fleet.reserveShips": "Vaisseaux à toujours garder ici",
-  "fleet.reserveRes": "Ressources à toujours garder ici",
+  "fleet.reserveShips": "Vaisseaux",
+  "fleet.reserveRes": "Ressources",
   "fleet.noShips": "Aucun vaisseau ici.",
   "fleet.fleetsave": "Fleetsave",
   "fleet.galaxy": "Galaxie (vide = celle-ci)",
@@ -158,5 +158,9 @@
   "fleet.favTitle": "Destinations favorites",
   "fleet.favTransport": "Transport vers",
   "fleet.favDeploy": "Stationner vers",
-  "fleet.tip.cargo": "Charger les ressources en gardant la réserve et le deutérium du vol"
+  "fleet.tip.cargo": "Charger les ressources en gardant la réserve et le deutérium du vol",
+  "fleet.reserve1Title": "Réserve 1 · transports et stationnements",
+  "fleet.reserve1Hint": "Reste ici avec Vers lune, Transport, Stationner, Expédition et Tout − réserve.",
+  "fleet.reserve2Title": "Réserve 2 · fleetsave uniquement",
+  "fleet.reserve2Hint": "Reste ici uniquement avec Fleetsave. Vide = tout part."
 }
