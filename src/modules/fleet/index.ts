@@ -38,7 +38,7 @@ import {
   type FleetsaveProfile,
 } from '../../engines/fleet';
 import { originCoords, readShipSlots } from '../../data/fleet-page';
-import { getDispatcher, whenDispatcherReady, type FleetDispatcher } from '../../data/fleet-dispatcher';
+import { getDispatcher, readShipsInfo, SHIPS_INFO_KEY, whenDispatcherReady, type FleetDispatcher } from '../../data/fleet-dispatcher';
 import {
   prepareAllShips,
   prepareLast,
@@ -778,6 +778,9 @@ export function renderFleetTools(o: FleetOptions): void {
   void whenDispatcherReady().then((fd) => {
     if (!fd) return;
     applyFood(o.store, fd);
+    // Names and capacities for the inbox summaries (spy loot, ships found): kept locally.
+    const ships = readShipsInfo(fd);
+    if (ships) o.store.set(SHIPS_INFO_KEY, ships);
     // "Ripeti": know when the game accepted the send, and move on as OGLight does.
     hookSend(fd, () => {
       // Remember what was sent, for "Ultima flotta".
