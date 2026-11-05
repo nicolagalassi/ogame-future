@@ -9,7 +9,7 @@ import type { AccountSnapshot, OwnBody } from '../../data/account-info';
 import type { PlanetListEntry } from '../../data/planet-list';
 import { formatUnits } from '../../core/format';
 import { estimateResources, storageFill, totals } from '../../engines/resources';
-import { PLANET_MENU_CSS } from './style';
+import { MENU_WIDTH, NATIVE_WIDTH, PLANET_MENU_CSS } from './style';
 
 export type MenuMode = 'stacked' | 'compact';
 
@@ -58,6 +58,20 @@ export function clearPlanetMenu(doc: Document): void {
   doc.querySelectorAll('.fut-row').forEach((n) => n.classList.remove('fut-row', 'fut-current'));
 }
 
+/**
+ * Widens the planet column only when the shifted banner still fits on screen,
+ * so the banner is never pushed out of view (AGENTS.md §1.7). Otherwise the menu
+ * stays in the game's own width and switches to compact.
+ */
+export function canWiden(doc: Document): boolean {
+  const banner = doc.getElementById('bannerskyscrapercomponent');
+  const view = doc.documentElement.clientWidth;
+  if (!banner) return true;
+  const rect = banner.getBoundingClientRect();
+  const shifted = rect.right + (MENU_WIDTH - NATIVE_WIDTH + 8);
+  return rect.width === 0 || shifted <= view;
+}
+
 export function renderPlanetMenu(o: PlanetMenuOptions): void {
   const { doc } = o;
   const list = doc.getElementById('planetList');
@@ -71,8 +85,14 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
   }
 
   clearPlanetMenu(doc);
+  const roomy = canWiden(doc);
+  const mode: MenuMode = roomy ? o.mode : 'compact';
+  // Only the stacked menu needs the extra width (and the banner shift).
+  const wide = mode === 'stacked';
+  doc.getElementById('planetbarcomponent')?.classList.toggle('fut-wide', wide);
+  doc.body.classList.toggle('fut-banner-shift', wide);
   list.classList.add('fut-menu');
-  list.classList.toggle('fut-mode-compact', o.mode === 'compact');
+  list.classList.toggle('fut-mode-compact', mode === 'compact');
 
   const byId = new Map((o.snapshot?.bodies ?? []).map((b) => [b.id, b]));
 
@@ -98,10 +118,12 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
 
   // Mode switch: changes Future's own display only, never a game action.
   const bar = el(doc, 'div', 'fut-menu-bar');
+  const current = mode;
   for (const mode of ['stacked', 'compact'] as const) {
     const button = el(doc, 'button', '', o.t(`planetMenu.${mode}`));
     button.type = 'button';
-    button.setAttribute('aria-pressed', String(o.mode === mode));
+    button.setAttribute('aria-pressed', String(mode === current));
+    button.disabled = !roomy && mode === 'stacked';
     button.addEventListener('click', () => o.onModeChange(mode));
     bar.append(button);
   }
