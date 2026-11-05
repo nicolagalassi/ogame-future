@@ -84,57 +84,12 @@ function startLevel(details: TechDetails, listLevel: number | undefined, built: 
   return { level: (listLevel ?? details.panelLevel ?? 0) + 1, discount: 0 };
 }
 
-/** One line of the cost table: a label, a value per resource, and a time. */
-interface Line {
-  label: string;
-  title?: string;
-  cost: Cost;
-  /** Negative numbers in red (what is missing). */
-  short?: boolean;
-  ms?: number | null;
-  cls?: string;
-}
+const msu = (c: Cost): number => c.metal + c.crystal * 1.5 + c.deuterium * 3;
 
-/**
- * The cost table, one resource per column, so it fits the game's description strip
- * (654 × 95 px) under the details panel.
- */
-function costTable(o: TechOptions, lines: Line[], have: boolean, ms: boolean): HTMLElement {
-  const { doc, t, locale } = o;
-  const keys = RES.filter(([key]) => lines.some((l) => !l.short && l.cost[key] > 0));
-  const grid = el(doc, 'div', 'fut-tp-grid');
-  grid.style.gridTemplateColumns = `auto repeat(${keys.length + (ms ? 1 : 0)}, minmax(0, 1fr))`;
-  grid.append(el(doc, 'span', 'fut-tp-h'));
-  for (const [key, cls] of keys) grid.append(el(doc, 'span', `fut-tp-h fut-${cls}`, t(`tech.res.${key}`)));
-  if (ms) grid.append(el(doc, 'span', 'fut-tp-h', t('tech.time')));
-  for (const line of lines) {
-    const label = el(doc, 'span', `fut-tp-k ${line.cls ?? ''}`, line.label);
-    if (line.title) label.title = line.title;
-    grid.append(label);
-    for (const [key] of keys) {
-      if (line.short) {
-        const gap = line.cost[key];
-        if (key === 'energy') grid.append(el(doc, 'span', 'fut-tp-v'));
-        else if (gap > 0) {
-          const c = el(doc, 'span', 'fut-tp-v fut-tp-short', formatUnits(-gap, locale));
-          c.title = Math.round(-gap).toLocaleString(locale);
-          grid.append(c);
-        } else grid.append(el(doc, 'span', 'fut-tp-v fut-tp-ok', have ? '✓' : '—'));
-        continue;
-      }
-      const v = line.cost[key];
-      const c = el(doc, 'span', `fut-tp-v ${line.cls ?? ''}`, v ? formatUnits(v, locale) : '—');
-      c.title = Math.round(v).toLocaleString(locale);
-      grid.append(c);
-    }
-    if (ms) grid.append(el(doc, 'span', `fut-tp-v ${line.cls ?? ''}`, line.ms ? formatDuration(line.ms) : ''));
-  }
-  return grid;
-}
-
-function button(doc: Document, cls: string, text: string, title: string, onClick: () => void): HTMLButtonElement {
-  const b = el(doc, 'button', cls, text);
+function button(doc: Document, cls: string, html: string, title: string, onClick: () => void): HTMLButtonElement {
+  const b = el(doc, 'button', cls);
   b.type = 'button';
+  b.innerHTML = html;
   b.title = title;
   b.addEventListener('click', (e) => {
     e.preventDefault();
@@ -144,15 +99,87 @@ function button(doc: Document, cls: string, text: string, title: string, onClick
   return b;
 }
 
+const ICON = {
+  prev: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  next: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+  reset: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  plan: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h1M4 12h1M4 18h1"/></svg>',
+  time: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+  energy: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>',
+  start: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v5h5"/></svg>',
+};
+
+interface View {
+  /** Column heads after the resource column. */
+  heads: string[];
+  /** Values per column, per row key. */
+  cols: { cost: Cost; cls?: string; short?: boolean }[];
+}
+
+/** The cost grid: one row per resource (+ MSU), one column per view (level, range, missing). */
+function grid(o: TechOptions, view: View, have: boolean): HTMLElement {
+  const { doc, t, locale } = o;
+  const g = el(doc, 'div', 'fut-tp-grid');
+  g.style.gridTemplateColumns = `auto repeat(${view.cols.length}, minmax(0, 1fr))`;
+  g.append(el(doc, 'span', 'fut-tp-h'));
+  for (const h of view.heads) g.append(el(doc, 'span', 'fut-tp-h', h));
+  const rows = RES.filter(([key]) => view.cols.some((c) => !c.short && c.cost[key] > 0));
+  const cell = (value: number, cls: string) => {
+    const c = el(doc, 'span', `fut-tp-v ${cls}`, value ? formatUnits(value, locale) : '—');
+    c.title = Math.round(value).toLocaleString(locale);
+    return c;
+  };
+  for (const [key, cls] of rows) {
+    g.append(el(doc, 'span', `fut-tp-k fut-${cls}`, t(`tech.res.${key}`)));
+    for (const col of view.cols) {
+      if (!col.short) g.append(cell(col.cost[key], col.cls ?? ''));
+      else if (key === 'energy') g.append(el(doc, 'span', 'fut-tp-v'));
+      else if (col.cost[key] > 0) g.append(cell(-col.cost[key], 'fut-tp-short'));
+      else g.append(el(doc, 'span', 'fut-tp-v fut-tp-ok', have ? '✓' : '—'));
+    }
+  }
+  g.append(el(doc, 'span', 'fut-tp-k fut-tp-msu', 'MSU'));
+  for (const col of view.cols) {
+    const v = msu(col.cost);
+    if (col.short) g.append(v > 0 ? cell(-v, 'fut-tp-short fut-tp-msu') : el(doc, 'span', 'fut-tp-v fut-tp-ok fut-tp-msu', have ? '✓' : '—'));
+    else g.append(cell(v, `${col.cls ?? ''} fut-tp-msu`));
+  }
+  return g;
+}
+
+function chip(doc: Document, icon: string, text: string, title: string, cls = ''): HTMLElement {
+  const c = el(doc, 'span', `fut-tp-chip ${cls}`.trim());
+  c.innerHTML = icon;
+  c.append(el(doc, 'span', '', text));
+  c.title = title;
+  return c;
+}
+
+/** The game's own extra lines (energy needed, possible start), kept as small chips. */
+function gameChips(doc: Document, details: TechDetails): HTMLElement[] {
+  const out: HTMLElement[] = [];
+  const energy = details.root.querySelector<HTMLElement>('.information .additional_energy_consumption .value');
+  if (energy?.textContent?.trim()) out.push(chip(doc, ICON.energy, `-${energy.textContent.trim()}`, energy.closest('li')?.textContent?.replace(/\s+/g, ' ').trim() ?? '', 'fut-tp-energy'));
+  const start = details.root.querySelector<HTMLElement>('.information .possible_build_start .value');
+  if (start?.textContent?.trim()) {
+    const why = start.getAttribute('data-tooltip-title') ?? start.getAttribute('title') ?? '';
+    out.push(chip(doc, ICON.start, start.textContent.trim(), [start.closest('li')?.querySelector('strong')?.textContent?.trim(), why].filter(Boolean).join(' '), 'fut-tp-start'));
+  }
+  return out;
+}
+
 export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLElement | null {
   const { doc, t, locale } = o;
   const kind = techKind(details.id);
   if (!kind) return null;
-  details.root.querySelector('.fut-tp')?.remove();
+  details.root.querySelectorAll('.fut-tp, .fut-tp-tools').forEach((n) => n.remove());
   const list = readTechList(doc);
   const entry = list.find((e) => e.id === details.id);
   const box = el(doc, 'div', 'fut-tp');
-  const side = () => el(doc, 'div', 'fut-tp-side');
+  const tools = el(doc, 'div', 'fut-tp-tools');
+  const levelLabel = details.root.querySelector<HTMLElement>('.information .level');
+  const levelText = levelLabel?.textContent ?? '';
+  const chips = gameChips(doc, details);
 
   if (isLevelled(details.id)) {
     const start = startLevel(details, entry?.level, entry?.built);
@@ -161,121 +188,143 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
       const one = levelCost(details.id, to, start.discount);
       const total = rangeCost(details.id, start.level, to, start.discount);
       const have = o.have();
-      const gap = have ? missing(total, have) : missing(total, { metal: 0, crystal: 0, deuterium: 0 });
+      const gap = missing(total, have ?? { metal: 0, crystal: 0, deuterium: 0 });
       const plan = loadPlan(o.store);
       let planned = true;
       for (let l = start.level; l <= to; l++) planned &&= inPlan(plan, o.bodyId, details.id, l);
-      const ms = (l: number) => (details.durationMs ? scaleDuration(details.id, start.level, details.durationMs, l) : null);
+      const ms = (l: number) => (details.durationMs ? scaleDuration(details.id, start.level, details.durationMs, l) : 0);
       let sumMs = 0;
-      for (let l = start.level; l <= to; l++) sumMs += ms(l) ?? 0;
+      for (let l = start.level; l <= to; l++) sumMs += ms(l);
 
-      const left = side();
-      const stepper = el(doc, 'div', 'fut-tp-head');
-      const prev = button(doc, 'fut-tp-step', '‹', t('tech.prev'), () => {
+      const prev = button(doc, 'fut-tp-btn', ICON.prev, t('tech.prev'), () => {
         to = Math.max(start.level, to - 1);
         draw();
       });
       prev.disabled = to <= start.level;
-      const next = button(doc, 'fut-tp-step', '›', t('tech.next'), () => {
+      const reset = button(doc, 'fut-tp-btn', ICON.reset, t('tech.reset'), () => {
+        to = start.level;
+        draw();
+      });
+      reset.disabled = to <= start.level;
+      const next = button(doc, 'fut-tp-btn', ICON.next, t('tech.next'), () => {
         to += 1;
         draw();
       });
-      stepper.append(prev, el(doc, 'span', 'fut-tp-lv', t('tech.level', { level: to })), next);
-      if (to > start.level) {
-        stepper.append(
-          button(doc, 'fut-tp-reset', '×', t('tech.reset'), () => {
-            to = start.level;
-            draw();
-          }),
+      const add = button(doc, planned ? 'fut-tp-btn fut-tp-plan on' : 'fut-tp-btn fut-tp-plan', ICON.plan, '', () => {
+        let current = loadPlan(o.store);
+        if (planned) {
+          for (let l = to; l >= start.level; l--) {
+            const idx = (current[String(o.bodyId)] ?? []).findIndex((x) => x.id === details.id && x.level === l);
+            if (idx >= 0) current = removeFromPlan(current, o.bodyId, idx);
+          }
+        } else {
+          const now = Date.now();
+          const items: PlanItem[] = [];
+          for (let l = start.level; l <= to; l++) {
+            items.push({ id: details.id, level: l, name: details.name, cost: levelCost(details.id, l, start.discount), added: now });
+          }
+          current = addToPlan(current, o.bodyId, items);
+        }
+        o.store.set(PLAN_KEY, current);
+        o.onPlanChange?.();
+        draw();
+      });
+      add.title = planned
+        ? `${t('tech.inPlan')} · ${t('tech.removeHint')}`
+        : to > start.level
+          ? t('tech.addRange', { from: start.level, to })
+          : t('tech.addOne', { level: to });
+      tools.replaceChildren(prev, reset, next, add);
+
+      // The game's "Livello 45" becomes the range, as OGLight does.
+      if (levelLabel) levelLabel.textContent = `${start.level - 1} → ${to}`;
+      const view: View = {
+        heads: [t('tech.colLevel', { level: to }), t('tech.rangeShort', { from: start.level - 1, to }), t('tech.colMissing')],
+        cols: [{ cost: one }, { cost: total, cls: 'fut-tp-sum' }, { cost: gap, short: true }],
+      };
+      const row = el(doc, 'div', 'fut-tp-chips');
+      if (details.durationMs) {
+        row.append(
+          chip(
+            doc,
+            ICON.time,
+            to > start.level ? `${formatDuration(ms(to))} · Σ ${formatDuration(sumMs)}` : formatDuration(ms(to)),
+            to > start.level ? t('tech.timeHint', { level: to, from: start.level, to }) : t('tech.time'),
+          ),
         );
       }
-      const from = el(doc, 'span', 'fut-tp-from', t('tech.fromNow', { from: start.level - 1 }));
-      const add = button(
-        doc,
-        planned ? 'fut-tp-add on' : 'fut-tp-add',
-        planned ? t('tech.inPlan') : to > start.level ? t('tech.addRange', { from: start.level, to }) : t('tech.addOne', { level: to }),
-        planned ? t('tech.removeHint') : t('tech.addHint'),
-        () => {
-          let current = loadPlan(o.store);
-          if (planned) {
-            for (let l = to; l >= start.level; l--) {
-              const idx = (current[String(o.bodyId)] ?? []).findIndex((x) => x.id === details.id && x.level === l);
-              if (idx >= 0) current = removeFromPlan(current, o.bodyId, idx);
-            }
-          } else {
-            const now = Date.now();
-            const items: PlanItem[] = [];
-            for (let l = start.level; l <= to; l++) {
-              items.push({ id: details.id, level: l, name: details.name, cost: levelCost(details.id, l, start.discount), added: now });
-            }
-            current = addToPlan(current, o.bodyId, items);
-          }
-          o.store.set(PLAN_KEY, current);
-          o.onPlanChange?.();
-          draw();
-        },
-      );
-      left.append(stepper, from, add);
-      if (start.discount > 0.0005) {
-        from.textContent += ` · ${t('tech.discountShort', { pct: (start.discount * 100).toFixed(1) })}`;
-        from.title = t('tech.discount', { pct: (start.discount * 100).toFixed(1) });
-      }
-
-      const lines: Line[] = [{ label: t('tech.colLevel', { level: to }), cost: one, ms: ms(to) }];
-      if (to > start.level) {
-        lines.push({ label: t('tech.rangeShort', { from: start.level, to }), title: t('tech.rangeHint', { from: start.level, to }), cost: total, ms: sumMs, cls: 'fut-tp-sum' });
-      }
-      lines.push({ label: t('tech.colMissing'), cost: gap, short: true });
-      box.replaceChildren(left, costTable(o, lines, have !== null, details.durationMs !== null));
+      row.append(...chips);
+      if (start.discount > 0.0005) row.append(chip(doc, '', t('tech.discountShort', { pct: (start.discount * 100).toFixed(1) }), t('tech.discount', { pct: (start.discount * 100).toFixed(1) }), 'fut-tp-disc'));
+      box.replaceChildren(grid(o, view, have !== null), row);
     };
     draw();
   } else {
-    // Ships and defences: cost of the amount typed in the game's own field.
+    // Ships and defences: our own amount, free from what can be paid now (the game's field
+    // stops at what the resources allow, the plan does not).
     const unit = matchShownLevel(details.id, [1], details.shown);
     const discount = unit?.discount ?? 0;
-    const amountOf = () => Math.max(1, Math.floor(Number(details.amountInput?.value) || 1));
+    const amount = el(doc, 'input', 'fut-tp-amount');
+    amount.type = 'text';
+    amount.inputMode = 'numeric';
+    amount.value = String(Math.max(1, Math.floor(Number(details.amountInput?.value) || 1)));
+    amount.title = t('tech.amountHint');
+    // Keys typed here are ours: the game must not catch them (shortcuts, Enter = build).
+    for (const type of ['keydown', 'keyup', 'keypress']) amount.addEventListener(type, (e) => e.stopPropagation());
+    const amountOf = () => Math.max(1, Math.floor(Number(amount.value.replace(/\D/g, '')) || 1));
+    let added = false;
     const draw = () => {
       const n = amountOf();
       const one = levelCost(details.id, 1, discount);
       const total = scaleCost(one, n);
       const have = o.have();
       const gap = missing(total, have ?? { metal: 0, crystal: 0, deuterium: 0 });
-      const left = side();
-      const add = button(doc, 'fut-tp-add', t('tech.addUnits', { n: n.toLocaleString(locale) }), t('tech.addHint'), () => {
+      const add = button(doc, added ? 'fut-tp-btn fut-tp-plan on' : 'fut-tp-btn fut-tp-plan', ICON.plan, t('tech.addUnits', { n: n.toLocaleString(locale) }), () => {
         const item: PlanItem = { id: details.id, amount: n, name: details.name, cost: total, added: Date.now() };
         o.store.set(PLAN_KEY, addToPlan(loadPlan(o.store), o.bodyId, [item]));
         o.onPlanChange?.();
-        add.classList.add('on');
-        add.textContent = t('tech.added');
+        added = true;
+        draw();
       });
-      left.append(el(doc, 'span', 'fut-tp-lv', t('tech.amount', { n: n.toLocaleString(locale) })), add);
-      const lines: Line[] = [
-        { label: t('tech.colOne'), cost: one, ms: details.durationMs },
-        { label: `×${n.toLocaleString(locale)}`, cost: total, ms: details.durationMs ? details.durationMs * n : null, cls: 'fut-tp-sum' },
-        { label: t('tech.colMissing'), cost: gap, short: true },
-      ];
-      box.replaceChildren(left, costTable(o, lines, have !== null, details.durationMs !== null));
+      if (added) add.title = t('tech.added');
+      tools.replaceChildren(amount, add);
+      const view: View = {
+        heads: [t('tech.colOne'), `×${n.toLocaleString(locale)}`, t('tech.colMissing')],
+        cols: [{ cost: one }, { cost: total, cls: 'fut-tp-sum' }, { cost: gap, short: true }],
+      };
+      const row = el(doc, 'div', 'fut-tp-chips');
+      if (details.durationMs) row.append(chip(doc, ICON.time, `${formatDuration(details.durationMs)} · Σ ${formatDuration(details.durationMs * n)}`, t('tech.time')));
+      row.append(...chips);
+      box.replaceChildren(grid(o, view, have !== null), row);
     };
+    amount.addEventListener('input', () => {
+      added = false;
+      // Redraw only the panel: the field keeps its focus.
+      const keep = amount.selectionStart;
+      draw();
+      amount.focus();
+      if (keep !== null) amount.setSelectionRange(keep, keep);
+    });
     draw();
+    // The game's own field (and its max button) still drives ours.
     const input = details.amountInput;
+    const follow = () =>
+      setTimeout(() => {
+        amount.value = String(Math.max(1, Math.floor(Number(input?.value) || 1)));
+        draw();
+      }, 0);
     if (input) {
-      for (const type of ['input', 'change', 'keyup']) input.addEventListener(type, () => setTimeout(draw, 0));
-      // The game's "max" button writes the field without an input event.
-      input.parentElement?.querySelector('.maximum')?.addEventListener('click', () => setTimeout(draw, 0));
+      for (const type of ['input', 'change', 'keyup']) input.addEventListener(type, follow);
+      input.parentElement?.querySelector('.maximum')?.addEventListener('click', follow);
     }
   }
 
-  // The game's description strip (full width, under image and costs) has room for the
-  // panel; its flavour text stays one click away behind the game's own "?" button.
-  const strip = details.root.querySelector(':scope > .description');
-  if (strip) {
-    details.root.classList.add('fut-tp-on');
-    strip.prepend(box);
-  } else {
-    const costs = details.root.querySelector('.costs');
-    if (costs?.parentElement) costs.after(box);
-    else details.root.append(box);
-  }
+  // Like OGLight: tools over the picture, the grid where the game lists costs and details.
+  details.root.classList.add('fut-tp-on');
+  const sprite = details.root.querySelector('.sprite, .sprite_large');
+  (sprite ?? details.root).append(tools);
+  const content = details.root.querySelector('.content') ?? details.root;
+  content.append(box);
+  if (levelLabel && !levelLabel.dataset.futText) levelLabel.dataset.futText = levelText.trim();
   return box;
 }
 

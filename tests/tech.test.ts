@@ -163,30 +163,34 @@ describe('tech panel', () => {
     expect(d.durationMs).toBe(7200000);
   });
 
+  const btn = (i: number) => document.querySelectorAll<HTMLButtonElement>('.fut-tp-tools .fut-tp-btn')[i]!;
+  const level = () => document.querySelector('.information .level')!.textContent;
+
   it('shows next level, cumulative, missing and adds the range to the plan', () => {
     const raw = rawCost(1, 31);
     const html = techPage({ id: 1, built: 30, shown: { metal: raw.metal, crystal: raw.crystal } });
     const { store, o } = setup(html);
     document.getElementById('technologydetails_content')!.innerHTML = html;
     const box = renderTechPanel(o, readTechDetails(document)!)!;
-    expect(box.querySelector('.fut-tp-lv')!.textContent).toBe('Liv. 31');
+    expect(level()).toBe('30 → 31');
+    expect(box.querySelector('.fut-tp-h:nth-child(2)')!.textContent).toBe('Liv. 31');
     // Metal 11.5M needed, 5M here: 6.5M missing.
     expect(box.querySelector('.fut-tp-short')!.getAttribute('title')).toBe((-(raw.metal - 5000000)).toLocaleString('it'));
-    (box.querySelectorAll<HTMLButtonElement>('.fut-tp-step')[1]!).click();
-    (box.querySelectorAll<HTMLButtonElement>('.fut-tp-step')[1]!).click();
-    expect(box.querySelector('.fut-tp-lv')!.textContent).toBe('Liv. 33');
-    const sum = box.querySelectorAll('.fut-tp-v.fut-tp-sum')[0]!;
+    btn(2).click();
+    btn(2).click();
+    expect(level()).toBe('30 → 33');
+    const sum = document.querySelectorAll('.fut-tp-v.fut-tp-sum')[0]!;
     expect(sum.getAttribute('title')).toBe(rangeCost(1, 31, 33).metal.toLocaleString('it'));
-    // Time row: 2h for 31, scaled for 33.
-    const add = box.querySelector<HTMLButtonElement>('.fut-tp-add')!;
-    expect(add.textContent).toBe('Pianifica liv. 31–33');
-    add.click();
-    const plan = store.get<Plan>('planner', {});
-    expect(plan['10']!.map((x) => x.level)).toEqual([31, 32, 33]);
-    expect(box.querySelector('.fut-tp-add')!.textContent).toBe('Nel piano ✓');
+    expect(btn(3).title).toBe('Pianifica liv. 31–33');
+    btn(3).click();
+    expect(store.get<Plan>('planner', {})['10']!.map((x) => x.level)).toEqual([31, 32, 33]);
+    expect(btn(3).classList.contains('on')).toBe(true);
     // Click again removes them.
-    box.querySelector<HTMLButtonElement>('.fut-tp-add')!.click();
+    btn(3).click();
     expect(store.get<Plan>('planner', {})['10']).toBeUndefined();
+    // The game's cost list and detail lines are hidden, the panel sits in .content.
+    expect(document.getElementById('technologydetails')!.classList.contains('fut-tp-on')).toBe(true);
+    expect(box.parentElement!.classList.contains('content')).toBe(true);
   });
 
   it('finds the right level when one is in construction and applies the discount', () => {
@@ -196,24 +200,29 @@ describe('tech panel', () => {
     const { o } = setup(html);
     document.getElementById('technologydetails_content')!.innerHTML = html;
     const box = renderTechPanel(o, readTechDetails(document)!)!;
-    expect(box.querySelector('.fut-tp-lv')!.textContent).toBe('Liv. 32');
-    expect(box.querySelector('.fut-tp-from')!.textContent).toContain('10.0%');
+    expect(level()).toBe('31 → 32');
+    expect(box.querySelector('.fut-tp-disc')!.textContent).toContain('10.0%');
   });
 
-  it('ships: cost × amount from the game field', () => {
+  it('ships: any amount, also more than the game field allows', () => {
     const html = techPage({ id: 203, built: 0, shown: { metal: 6000, crystal: 6000 }, amount: true });
     const { store, o } = setup(html);
     document.getElementById('technologydetails_content')!.innerHTML = html;
     const details = readTechDetails(document)!;
     const box = renderTechPanel(o, details)!;
-    details.amountInput!.value = '1000';
+    const amount = document.querySelector<HTMLInputElement>('.fut-tp-amount')!;
+    amount.value = '1000';
+    amount.dispatchEvent(new Event('input'));
+    expect(box.querySelectorAll('.fut-tp-v.fut-tp-sum')[0]!.getAttribute('title')).toBe((6000000).toLocaleString('it'));
+    expect(Array.from(box.querySelectorAll('.fut-tp-short:not(.fut-tp-msu)')).map((x) => x.getAttribute('title'))).toEqual([(-1000000).toLocaleString('it'), (-5000000).toLocaleString('it')]);
+    btn(0).click();
+    expect(store.get<Plan>('planner', {})['10']![0]).toMatchObject({ id: 203, amount: 1000, cost: { metal: 6000000 } });
+    // The game's own field still drives ours.
+    details.amountInput!.value = '7';
     details.amountInput!.dispatchEvent(new Event('input'));
     return new Promise<void>((resolve) =>
       setTimeout(() => {
-        expect(box.querySelectorAll('.fut-tp-v.fut-tp-sum')[0]!.getAttribute('title')).toBe((6000000).toLocaleString('it'));
-        expect(Array.from(box.querySelectorAll('.fut-tp-short')).map((x) => x.getAttribute('title'))).toEqual([(-1000000).toLocaleString('it'), (-5000000).toLocaleString('it')]);
-        box.querySelector<HTMLButtonElement>('.fut-tp-add')!.click();
-        expect(store.get<Plan>('planner', {})['10']![0]).toMatchObject({ id: 203, amount: 1000, cost: { metal: 6000000 } });
+        expect(document.querySelector<HTMLInputElement>('.fut-tp-amount')!.value).toBe('7');
         resolve();
       }, 5),
     );
@@ -236,25 +245,43 @@ describe('tech panel', () => {
 });
 
 describe('planner window', () => {
-  it('lists bodies with totals and missing, and removes items', () => {
+  it('groups levels, shows totals and missing, removes and brings resources', () => {
     document.body.innerHTML = '';
     const store = new Store(new MemoryStore(), 'test');
-    store.set('planner', addToPlan({}, 10, [{ id: 1, level: 31, name: 'Miniera', cost: { metal: 100, crystal: 50, deuterium: 0, energy: 0 }, added: 1 }]));
+    const c = (metal: number) => ({ metal, crystal: 50, deuterium: 0, energy: 0 });
+    store.set('planner', addToPlan({}, 10, [
+      { id: 1, level: 31, name: 'Miniera', cost: c(100), added: 1 },
+      { id: 1, level: 32, name: 'Miniera', cost: c(150), added: 1 },
+    ]));
     let changes = 0;
+    let went = '';
     openPlanner({
       doc: document,
       store,
-      entries: [{ planetId: 10, moonId: null, name: 'Casa', coords: '1:2:3' } as never],
+      entries: [
+        { planetId: 10, moonId: null, name: 'Casa', coords: '1:2:3' } as never,
+        { planetId: 20, moonId: null, name: 'Due', coords: '1:2:4' } as never,
+      ],
       snapshot: null,
       current: { id: 10, resources: { metal: 60, crystal: 80, deuterium: 0 } },
       now: 0,
       locale: 'it',
       t,
       onChange: () => changes++,
+      href: 'https://s1-it.ogame.gameforge.com/game/index.php?page=ingame&component=supplies',
+      navigate: (u) => (went = u),
     });
     const root = document.getElementById('fut-planner')!.shadowRoot!;
     expect(root.querySelector('h3')!.textContent).toBe('Casa [1:2:3]');
-    expect(root.querySelector('.row.miss .short')!.textContent).toBe('40');
+    expect(root.querySelectorAll('.row')).toHaveLength(1);
+    expect(root.querySelector('.row .lv')!.textContent).toBe('liv. 31–32');
+    // 250 metal needed, 60 here: 190 missing; crystal 100 vs 80: 20.
+    expect(root.querySelector('.sum.warn .num.m')!.textContent).toBe('190');
+    root.querySelector<HTMLButtonElement>('.act:not(.ghost)')!.click();
+    expect(went).toContain('cp=20');
+    expect(went).toContain('futmode=plan');
+    expect(went).toContain('futdest=10');
+    expect(store.get('plan.delivery', null)).toEqual({ target: 10, need: { metal: 190, crystal: 20, deuterium: 0 } });
     root.querySelector<HTMLButtonElement>('.x')!.click();
     expect(changes).toBe(1);
     expect(root.querySelector('.empty')).not.toBeNull();

@@ -210,5 +210,19 @@
   "plan.grandMissing": "Fehlt insgesamt",
   "tech.rangeShort": "{from}→{to}",
   "tech.rangeHint": "Summe der Stufen {from} bis {to}",
-  "tech.discountShort": "−{pct}%"
+  "tech.discountShort": "−{pct}%",
+  "fleet.reserveOff": "Reserven aus: auch Schiffe und Ressourcen in Reserve fliegen mit.",
+  "fleet.reserveShort": "Reserven",
+  "fleet.reserveToggleHint": "Schaltet Reserve 1 und 2 ein oder aus, ohne sie zu löschen. Expeditionen nutzen nie die Reserve.",
+  "fleet.foodShort": "Nahrung ignorieren",
+  "fleet.foodHint": "Nahrung bleibt bei jeder Flotte auf dem Planeten, auch mit den Knöpfen des Spiels.",
+  "fleet.err.noDelivery": "Keine Plan-Lieferung aktiv.",
+  "fleet.ok.delivery": "Lieferung bereit: {ships} Schiffe mit {cargo} Ressourcen (es fehlten {left}). Weiter und Flotte senden drücken.",
+  "tech.timeHint": "Dauer St. {level} · gesamt {from} bis {to}",
+  "tech.amountHint": "Zu planende Anzahl: auch mehr, als du jetzt bezahlen kannst",
+  "plan.items": "{n} Einträge",
+  "plan.levels": "St. {from}–{to}",
+  "plan.bring": "Ressourcen hierher bringen",
+  "plan.bringHint": "Öffnet die Flotte auf dem nächsten Planeten mit einem Transport des Fehlenden hierher. Nach jedem Senden geht es zum nächsten Planeten, bis nichts mehr fehlt.",
+  "plan.unknownHere": "Ressourcen hier unbekannt: Aktualisieren drücken"
 }
