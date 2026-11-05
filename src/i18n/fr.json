@@ -162,5 +162,12 @@
   "fleet.reserve1Title": "Réserve 1 · transports et stationnements",
   "fleet.reserve1Hint": "Reste ici avec Vers lune, Transport, Stationner, Expédition et Tout − réserve.",
   "fleet.reserve2Title": "Réserve 2 · fleetsave uniquement",
-  "fleet.reserve2Hint": "Reste ici uniquement avec Fleetsave. Vide = tout part."
+  "fleet.reserve2Hint": "Reste ici uniquement avec Fleetsave. Vide = tout part.",
+  "fleet.btn.last": "Dernière",
+  "fleet.tip.last": "Répéter la dernière flotte : mêmes vaisseaux, cible, mission et vitesse",
+  "fleet.err.noLast": "Aucune flotte envoyée",
+  "fleet.jumpgateKeep": "Réserve 1 de cette lune",
+  "shortcut.prev": "Planète précédente",
+  "shortcut.next": "Planète suivante",
+  "fleet.shortcutsTitle": "Raccourcis clavier"
 }

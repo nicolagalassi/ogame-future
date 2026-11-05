@@ -264,7 +264,11 @@ export interface BodyRef {
  * From a moon: the next planet that has a moon, on its moon. `skip` (e.g. the transport
  * destination) is jumped over; `onlyWithMoon` keeps planets that have a moon (planet → moon).
  */
-export function nextBody(list: BodyRef[], current: number, opts: { skip?: number | null; onlyWithMoon?: boolean } = {}): number | null {
+export function nextBody(
+  list: BodyRef[],
+  current: number,
+  opts: { skip?: number | null; onlyWithMoon?: boolean; backwards?: boolean } = {},
+): number | null {
   const isMoon = list.some((b) => b.moonId === current);
   const ids = list
     .filter((b) => (isMoon || opts.onlyWithMoon ? b.moonId !== null : b.planetId !== null))
@@ -272,8 +276,23 @@ export function nextBody(list: BodyRef[], current: number, opts: { skip?: number
   const i = ids.indexOf(current);
   if (i < 0) return null;
   for (let k = 1; k < ids.length; k++) {
-    const id = ids[(i + k) % ids.length]!;
+    const step = opts.backwards ? -k : k;
+    const id = ids[(((i + step) % ids.length) + ids.length) % ids.length]!;
     if (id !== opts.skip) return id;
   }
   return null;
 }
+
+/* ------------------------------------------------------------------ */
+/* Last fleet (for "ripeti ultima flotta")                             */
+/* ------------------------------------------------------------------ */
+
+export interface LastFleet {
+  ships: Record<string, number>;
+  target: { galaxy: number; system: number; position: number; type: number };
+  mission: number;
+  /** 10..100 */
+  speed: number;
+}
+
+export const LAST_FLEET_KEY = 'fleet.last';

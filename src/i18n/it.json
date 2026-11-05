@@ -162,5 +162,12 @@
   "fleet.reserve1Title": "Riserva 1 · trasporti e schieramenti",
   "fleet.reserve1Hint": "Resta sul corpo con Su luna, Trasporto, Schiera, Spedizione e Tutte − riserva.",
   "fleet.reserve2Title": "Riserva 2 · solo fleetsave",
-  "fleet.reserve2Hint": "Resta sul corpo solo quando premi Fleetsave. Vuota = parte tutto."
+  "fleet.reserve2Hint": "Resta sul corpo solo quando premi Fleetsave. Vuota = parte tutto.",
+  "fleet.btn.last": "Ultima",
+  "fleet.tip.last": "Ripete l'ultima flotta inviata: stesse navi, destinazione, missione e velocità",
+  "fleet.err.noLast": "Nessuna flotta inviata finora",
+  "fleet.jumpgateKeep": "Riserva 1 di questa luna",
+  "shortcut.prev": "Pianeta precedente",
+  "shortcut.next": "Pianeta successivo",
+  "fleet.shortcutsTitle": "Scorciatoie da tastiera"
 }

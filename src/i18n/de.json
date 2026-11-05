@@ -162,5 +162,12 @@
   "fleet.reserve1Title": "Reserve 1 · Transporte und Stationierungen",
   "fleet.reserve1Hint": "Bleibt hier bei Zum Mond, Transport, Stationieren, Expedition und Alle − Reserve.",
   "fleet.reserve2Title": "Reserve 2 · nur Fleetsave",
-  "fleet.reserve2Hint": "Bleibt nur beim Fleetsave hier. Leer = alles fliegt."
+  "fleet.reserve2Hint": "Bleibt nur beim Fleetsave hier. Leer = alles fliegt.",
+  "fleet.btn.last": "Letzte",
+  "fleet.tip.last": "Letzte Flotte wiederholen: gleiche Schiffe, Ziel, Mission und Geschwindigkeit",
+  "fleet.err.noLast": "Noch keine Flotte gesendet",
+  "fleet.jumpgateKeep": "Reserve 1 dieses Mondes",
+  "shortcut.prev": "Vorheriger Planet",
+  "shortcut.next": "Nächster Planet",
+  "fleet.shortcutsTitle": "Tastenkürzel"
 }
