@@ -17,6 +17,9 @@ import { renderFleetTools } from './modules/fleet';
 import { watchJumpgate } from './modules/fleet/jumpgate';
 import { registerShortcuts, switchBodyUrl } from './modules/shortcuts';
 import { nextBody } from './engines/fleet';
+import { watchTechPages } from './modules/tech';
+import { openPlanner } from './modules/tech/planner-view';
+import { PLAN_KEY, planCount, type Plan } from './engines/planner';
 import { renderPlanetMenu, type MenuMode, type MenuSettings } from './modules/planet-menu';
 
 async function bootstrap(): Promise<void> {
@@ -92,6 +95,22 @@ async function bootstrap(): Promise<void> {
           locale,
           t,
         }),
+      planCount: planCount(store.get<Plan>(PLAN_KEY, {})),
+      onOpenPlanner: () => {
+        const id = currentBodyId(document);
+        const resources = readCurrentResources(document);
+        openPlanner({
+          doc: document,
+          store,
+          entries: readPlanetList(document),
+          snapshot,
+          current: id && resources ? { id, resources } : null,
+          now: Date.now(),
+          locale,
+          t,
+          onChange: () => draw(),
+        });
+      },
       // COMPLIANCE: runs only from the Sync button's click (reason 'user-sync', no cp).
       onSync: async () => {
         try {
@@ -125,6 +144,11 @@ async function bootstrap(): Promise<void> {
     ]);
     // Jump gate dialog: keeps reserve 1 of this moon at home.
     watchJumpgate(document, store, currentId, t);
+  }
+
+  // Building, research, shipyard and defence pages: cost panel and construction plan.
+  if (currentId) {
+    watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), onPlanChange: () => draw() });
   }
 
   // Fleet page helpers: reserves and fleetsave, on the game's own form.
