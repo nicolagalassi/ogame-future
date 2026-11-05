@@ -11,12 +11,16 @@ import { currentBodyId, readCurrentResources, readPlanetList } from './data/plan
 import { applyPageResources } from './engines/resources';
 import { SCORE_KEY, readScore, type Score } from './data/score';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
+import { ITEMS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems } from './data/bonuses';
 import { openDashboard } from './modules/dashboard';
 import { isFleetDispatch } from './data/fleet-page';
 import { renderFleetTools } from './modules/fleet';
 import { watchJumpgate } from './modules/fleet/jumpgate';
 import { registerShortcuts, switchBodyUrl } from './modules/shortcuts';
 import { nextBody } from './engines/fleet';
+import { watchTechPages } from './modules/tech';
+import { openPlanner } from './modules/tech/planner-view';
+import { PLAN_KEY, planCount, pruneByQueues, type Plan } from './engines/planner';
 import { renderPlanetMenu, type MenuMode, type MenuSettings } from './modules/planet-menu';
 
 async function bootstrap(): Promise<void> {
@@ -34,10 +38,13 @@ async function bootstrap(): Promise<void> {
   const bodyIds = readPlanetList(document).flatMap((e) => [e.planetId, e.moonId]).filter((id): id is number => id !== null);
   let queues: QueueSnapshot | null = store.get<QueueSnapshot | null>(QUEUES_KEY, null);
   try {
-    const [account, queue] = await Promise.allSettled([
+    const [account, queue, lf] = await Promise.allSettled([
       hydrateAccountOncePerSession({ guard, store, session: window.sessionStorage }),
       loadQueuesOnPageLoad({ guard, store, ids: bodyIds }),
+      // Lifeform bonuses for the expedition size: once per session, like accountInfo.
+      hydrateLfOncePerSession({ guard, store, session: window.sessionStorage }),
     ]);
+    if (lf.status === 'rejected') console.warn(`[${t('app.name')}]`, lf.reason);
     if (account.status === 'fulfilled') snapshot = account.value;
     else console.warn(`[${t('app.name')}]`, account.reason);
     if (queue.status === 'fulfilled') queues = queue.value;
@@ -51,6 +58,16 @@ async function bootstrap(): Promise<void> {
   const bodyId = currentBodyId(document);
   const onPage = readCurrentResources(document);
   if (snapshot && bodyId && onPage && applyPageResources(snapshot, bodyId, onPage, Date.now())) saver.markDirty();
+
+  // Planned levels already in the construction queues leave the plan, on every page.
+  if (queues) {
+    const pruned = pruneByQueues(store.get<Plan>(PLAN_KEY, {}), queues.bodies);
+    if (pruned.changed) store.set(PLAN_KEY, pruned.plan);
+  }
+
+  // Active items are listed on the overview's buff bar only: keep the last list seen.
+  const items = readActiveItems(document);
+  if (items) store.set(ITEMS_KEY, items);
 
   // Points are on the overview page only: keep the last value seen.
   const seenScore = readScore(document, Date.now());
@@ -92,12 +109,31 @@ async function bootstrap(): Promise<void> {
           locale,
           t,
         }),
+      planCount: planCount(store.get<Plan>(PLAN_KEY, {})),
+      onOpenPlanner: () => {
+        const id = currentBodyId(document);
+        const resources = readCurrentResources(document);
+        openPlanner({
+          doc: document,
+          store,
+          entries: readPlanetList(document),
+          snapshot,
+          current: id && resources ? { id, resources } : null,
+          now: Date.now(),
+          locale,
+          t,
+          onChange: () => draw(),
+          href: location.href,
+          navigate: (url) => location.assign(url),
+        });
+      },
       // COMPLIANCE: runs only from the Sync button's click (reason 'user-sync', no cp).
       onSync: async () => {
         try {
           const [account, queue] = await Promise.allSettled([
             syncAccountOnUserClick(deps),
             syncQueuesOnUserClick({ guard, store, ids: bodyIds }),
+            fetchLfBonuses({ guard, store }, 'user-sync'),
           ]);
           if (account.status === 'fulfilled') snapshot = account.value;
           if (queue.status === 'fulfilled') queues = queue.value;
@@ -125,6 +161,11 @@ async function bootstrap(): Promise<void> {
     ]);
     // Jump gate dialog: keeps reserve 1 of this moon at home.
     watchJumpgate(document, store, currentId, t);
+  }
+
+  // Building, research, shipyard and defence pages: cost panel and construction plan.
+  if (currentId) {
+    watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), onPlanChange: () => draw() });
   }
 
   // Fleet page helpers: reserves and fleetsave, on the game's own form.

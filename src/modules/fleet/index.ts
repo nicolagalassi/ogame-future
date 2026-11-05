@@ -15,6 +15,8 @@
  * "Avanti" and "Invia flotta". No request is made by Future here: the game checks the
  * target itself when page 2 opens. See ./repeat.ts for the "Ripeti" precedent (OGLight).
  */
+import { PLAN_KEY, SENT_KEY, type Plan, type Shipment } from '../../engines/planner';
+import { expeditionItemBoost, ITEMS_KEY, LF_BONUS_KEY, type ActiveItems, type LfBonuses } from '../../data/bonuses';
 import type { Store } from '../../core/storage';
 import {
   CARGO_SHIPS,
@@ -27,6 +29,8 @@ import {
   profileFor,
   SETTINGS_KEY,
   LAST_FLEET_KEY,
+  DELIVERY_KEY,
+  type Delivery,
   type LastFleet,
   type FleetProfile,
   type Reserve,
@@ -40,6 +44,7 @@ import {
   prepareLast,
   snapshotFleet,
   prepareDeploy,
+  prepareDelivery,
   prepareExpedition,
   prepareFleetsave,
   prepareTransport,
@@ -77,7 +82,7 @@ const MODAL_ID = 'fut-fleet-modal';
 /** Missions offered for fleetsave, in the game's order codes. */
 export const FLEETSAVE_MISSIONS = [3, 4, 6, 8, 15, 5, 1];
 const pageState = new WeakMap<Document, { active: RepeatState | null; o: FleetOptions }>();
-const REPEATABLE: FleetMode[] = ['moon', 'transport', 'deploy', 'expedition', 'fleetsave'];
+const REPEATABLE: FleetMode[] = ['moon', 'transport', 'deploy', 'expedition', 'fleetsave', 'plan'];
 
 function el<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, className = '', text?: string) {
   const node = doc.createElement(tag);
@@ -572,8 +577,10 @@ export function renderFleetTools(o: FleetOptions): void {
   doc.querySelectorAll('.fut-fbar').forEach((n) => n.remove());
   const href = o.href ?? doc.location?.href ?? '';
   const navigate = o.navigate ?? ((url: string) => doc.location.assign(url));
-  const profile = profileFor(loadProfiles(o.store), o.bodyId);
   const settings = loadSettings(o.store);
+  const stored = profileFor(loadProfiles(o.store), o.bodyId);
+  // Reserves switched off: kept in the settings, not applied.
+  const profile: FleetProfile = settings.reserveOn ? stored : { ...stored, reserve: EMPTY_RESERVE, saveReserve: EMPTY_RESERVE };
   const redraw = () => renderFleetTools(o);
 
   const fleet1 = doc.getElementById('fleet1');
@@ -589,7 +596,7 @@ export function renderFleetTools(o: FleetOptions): void {
   state.o = o;
   pageState.set(doc, state);
 
-  const info = el(doc, 'span', 'fut-finfo', summary(o, profile));
+  const info = el(doc, 'span', 'fut-finfo', settings.reserveOn ? summary(o, profile) : t('fleet.reserveOff'));
   const say = (text: string, err = false) => {
     info.textContent = text;
     info.classList.toggle('err', err);
@@ -637,7 +644,11 @@ export function renderFleetTools(o: FleetOptions): void {
     expedition: () =>
       withDispatcher((fd) => {
         begin('expedition');
-        const r = prepareExpedition(fd, doc, profile, settings, { economySpeed: universeSpeed(doc) });
+        const r = prepareExpedition(fd, doc, profile, settings, {
+          economySpeed: universeSpeed(doc),
+          lfBooster: o.store.get<LfBonuses | null>(LF_BONUS_KEY, null)?.expedition ?? 0,
+          itemBoost: expeditionItemBoost(o.store.get<ActiveItems | null>(ITEMS_KEY, null)),
+        });
         report(r, 'fleet.ok.expedition', { target: r.target.toLocaleString(o.locale) });
       }),
     fleetsave: () =>
@@ -650,6 +661,16 @@ export function renderFleetTools(o: FleetOptions): void {
       withDispatcher((fd) => {
         begin('all');
         report(prepareAllShips(fd, profile), 'fleet.ok.ships');
+      }),
+    plan: (dest) =>
+      withDispatcher((fd) => {
+        const delivery = o.store.get<Delivery | null>(DELIVERY_KEY, null);
+        const target = dest ? bodyTarget(o.bodies, dest) : null;
+        if (!delivery || !dest || delivery.target !== dest || !target) return say(t('fleet.err.noDelivery'), true);
+        begin('plan', dest);
+        const r = prepareDelivery(fd, doc, profile, settings, target, delivery.need);
+        const left = delivery.need.metal + delivery.need.crystal + delivery.need.deuterium;
+        report(r, 'fleet.ok.delivery', { left: left.toLocaleString(o.locale) });
       }),
     last: () =>
       withDispatcher((fd) => {
@@ -715,6 +736,15 @@ export function renderFleetTools(o: FleetOptions): void {
     ]);
     const side = el(doc, 'div', 'fut-fside');
     side.append(
+      iconToggle(doc, 'reserve', `${t('fleet.reserveShort')}: ${settings.reserveOn ? t('fleet.on') : t('fleet.off')}. ${t('fleet.reserveToggleHint')}`, () => {
+        o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), reserveOn: !loadSettings(o.store).reserveOn });
+        redraw();
+      }, settings.reserveOn ? 'on' : ''),
+      iconToggle(doc, 'food', `${t('fleet.foodShort')}: ${settings.ignoreFood ? t('fleet.on') : t('fleet.off')}. ${t('fleet.foodHint')}`, () => {
+        o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), ignoreFood: !loadSettings(o.store).ignoreFood });
+        applyFood(o.store);
+        redraw();
+      }, settings.ignoreFood ? 'on' : ''),
       iconToggle(doc, 'repeat', `${t('fleet.repeatShort')}: ${settings.repeat ? t('fleet.on') : t('fleet.off')}. ${t('fleet.repeatHint')}`, () => {
         o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), repeat: !loadSettings(o.store).repeat });
         redraw();
@@ -730,7 +760,7 @@ export function renderFleetTools(o: FleetOptions): void {
   if (fleet2 && anchor2) {
     const bar = el(doc, 'div', 'fut-fbar');
     const row = el(doc, 'div', 'fut-frow');
-    const info2 = el(doc, 'span', 'fut-finfo', summary(o, profile));
+    const info2 = el(doc, 'span', 'fut-finfo', settings.reserveOn ? summary(o, profile) : t('fleet.reserveOff'));
     const tiles = el(doc, 'div', 'fut-ftiles');
     tiles.append(
       tile(doc, 'cargo', t('fleet.resMinusReserve'), '', t('fleet.tip.cargo'), () => {
@@ -747,15 +777,34 @@ export function renderFleetTools(o: FleetOptions): void {
 
   void whenDispatcherReady().then((fd) => {
     if (!fd) return;
+    applyFood(o.store, fd);
     // "Ripeti": know when the game accepted the send, and move on as OGLight does.
     hookSend(fd, () => {
       // Remember what was sent, for "Ultima flotta".
       try {
         o.store.set(LAST_FLEET_KEY, snapshotFleet(fd));
+        recordShipment(o, fd);
       } catch {
         /* storage full or blocked: the send itself is unaffected */
       }
       const current = pageState.get(doc);
+      if (current?.active?.mode === 'plan') {
+        // Planner delivery: count what left, go on while something is still missing.
+        const d = current.o.store.get<Delivery | null>(DELIVERY_KEY, null);
+        if (!d) return false;
+        const need = {
+          metal: Math.max(0, d.need.metal - fd.cargoMetal),
+          crystal: Math.max(0, d.need.crystal - fd.cargoCrystal),
+          deuterium: Math.max(0, d.need.deuterium - fd.cargoDeuterium),
+        };
+        const done = need.metal + need.crystal + need.deuterium <= 0;
+        current.o.store.set(DELIVERY_KEY, done ? null : { ...d, need });
+        if (done) return false;
+        const nextBody = nextInRound(current.active, current.o.bodyId, current.o.bodies);
+        if (nextBody === null) return false;
+        navigate(repeatUrl(href, nextBody, current.active));
+        return true;
+      }
       if (!current?.active || !loadSettings(current.o.store).repeat) return false;
       const next = nextInRound(current.active, current.o.bodyId, current.o.bodies);
       if (next === null) return false;
@@ -769,13 +818,55 @@ export function renderFleetTools(o: FleetOptions): void {
       // After the page has fully loaded, so the game's own first target check has started
       // (withDispatcher then waits for its answer before preparing).
       const go = () => {
-        if (incoming.mode === 'transport' || incoming.mode === 'deploy') run[incoming.mode](incoming.dest);
+        if (incoming.mode === 'transport' || incoming.mode === 'deploy' || incoming.mode === 'plan') run[incoming.mode](incoming.dest);
         else run[incoming.mode]();
       };
       if (doc.readyState === 'complete') setTimeout(go, 0);
       else doc.defaultView?.addEventListener('load', () => setTimeout(go, 0), { once: true });
     }
   });
+}
+
+/**
+ * Resources sent to a body that has a construction plan are marked as sent in the planner,
+ * whether they left from "Porta qui le risorse" or from any other transport.
+ */
+function recordShipment(o: FleetOptions, fd: FleetDispatcher): void {
+  if (fd.mission !== 3 && fd.mission !== 4) return;
+  const cargo = { metal: Math.floor(fd.cargoMetal || 0), crystal: Math.floor(fd.cargoCrystal || 0), deuterium: Math.floor(fd.cargoDeuterium || 0) };
+  if (cargo.metal + cargo.crystal + cargo.deuterium <= 0) return;
+  const tp = fd.targetPlanet;
+  const coords = `${tp.galaxy}:${tp.system}:${tp.position}`;
+  const body = o.bodies.find((b) => b.coords === coords);
+  const target = body ? (tp.type === 3 ? body.moonId : body.planetId) : null;
+  if (!target) return;
+  const plan = o.store.get<Plan>(PLAN_KEY, {});
+  if (!plan[String(target)]?.length) return;
+  const seconds = Number((fd as { getDuration?: () => number }).getDuration?.()) || 0;
+  const now = Date.now();
+  const list = o.store.get<Shipment[]>(SENT_KEY, []);
+  o.store.set(SENT_KEY, [...list, { target, cargo, sentAt: now, arriveAt: now + Math.max(0, seconds) * 1000 }]);
+}
+
+const initialFood = new WeakMap<FleetDispatcher, number>();
+
+/**
+ * "Ignora cibo", as OGLight's limiter does: the game sees no food on the planet, so neither
+ * our buttons nor the game's own "max" ones load it. Switching it off gives it back.
+ */
+export function applyFood(store: Store, fd: FleetDispatcher | null = getDispatcher()): void {
+  if (!fd) return;
+  const f = fd as FleetDispatcher & { foodOnPlanet?: number; cargoFood?: number };
+  if (f.foodOnPlanet === undefined) return;
+  if (!initialFood.has(fd)) initialFood.set(fd, f.foodOnPlanet);
+  const ignore = loadSettings(store).ignoreFood;
+  f.foodOnPlanet = ignore ? 0 : (initialFood.get(fd) ?? f.foodOnPlanet);
+  if (ignore) f.cargoFood = 0;
+  try {
+    fd.refresh();
+  } catch {
+    /* refresh is cosmetic here */
+  }
 }
 
 /** Resolves when the game's own target check is not running (client-side wait, at most 5 s). */

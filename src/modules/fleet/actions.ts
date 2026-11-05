@@ -10,6 +10,7 @@ import {
   EMPTY_RESERVE,
   cargoLoad,
   cargoShipsFor,
+  deliveryLoad,
   expeditionFleet,
   expeditionMax,
   expeditionTarget,
@@ -21,9 +22,10 @@ import {
   type FleetsaveProfile,
   type ShipStock,
 } from '../../engines/fleet';
+import type { Resources } from '../../data/account-info';
 import { pageWindow, shipCapacity, shipsOnPlanet, type FleetDispatcher } from '../../data/fleet-dispatcher';
 
-export type FleetMode = 'moon' | 'transport' | 'deploy' | 'expedition' | 'fleetsave' | 'all' | 'last';
+export type FleetMode = 'moon' | 'transport' | 'deploy' | 'expedition' | 'fleetsave' | 'all' | 'last' | 'plan';
 
 export interface Target {
   galaxy: number;
@@ -166,17 +168,56 @@ export function prepareFleetsave(fd: FleetDispatcher, doc: Document, base: Fleet
   return finish(fd, save.mission, count, cargo);
 }
 
+/**
+ * Planner delivery: brings what is still missing to the planned body, from this one. Ships
+ * and resources respect reserve 1; the main cargo ship goes first, the second covers the rest.
+ */
+export function prepareDelivery(
+  fd: FleetDispatcher,
+  doc: Document,
+  profile: FleetProfile,
+  settings: FleetSettings,
+  target: Target,
+  need: Resources,
+): PrepareResult {
+  const free = deliveryLoad(onPlanet(fd), profile.reserve, 0, Number.MAX_SAFE_INTEGER, need);
+  const amount = free.metal + free.crystal + free.deuterium;
+  if (amount <= 0) return { ok: false, reason: 'fleet.err.noResources', ships: 0, cargo: 0 };
+  const count = selectShips(fd, cargoShipsFor(amount, stock(fd, profile), settings.mainShip, settings.secondShip));
+  setTarget(fd, doc, target);
+  setSpeedBar(fd, settings.transportSpeed);
+  fd.mission = TRANSPORT;
+  let cargo = 0;
+  if (count > 0) {
+    const load = deliveryLoad(onPlanet(fd), profile.reserve, Math.ceil(Number(fd.getConsumption()) || 0), fd.getCargoCapacity(), need);
+    fd.cargoMetal = load.metal;
+    fd.cargoCrystal = load.crystal;
+    fd.cargoDeuterium = load.deuterium;
+    cargo = load.metal + load.crystal + load.deuterium;
+  }
+  return finish(fd, TRANSPORT, count, cargo);
+}
+
 export function prepareExpedition(
   fd: FleetDispatcher,
   doc: Document,
   profile: FleetProfile,
   settings: FleetSettings,
-  universe: { economySpeed: number; topScore?: number },
+  universe: { economySpeed: number; topScore?: number; lfBooster?: number; itemBoost?: number },
 ): PrepareResult & { target: number } {
-  if (fd.expeditionCount >= fd.maxExpeditionCount) return { ok: false, reason: 'fleet.err.noExpSlots', ships: 0, cargo: 0, target: 0 };
+  // Expeditions never keep a reserve back (Nicola): every ship here can go.
+  profile = { ...profile, reserve: EMPTY_RESERVE };
+  // No free-slot check (Nicola): the fleet is prepared anyway, the game refuses the send if no slot is free.
   const cls = fd.apiDataJson?.characterClassId ?? 0;
   const booster = fd.apiDataJson?.bonuses?.characterClassBooster?.[String(cls)] ?? 0;
-  const limits = expeditionMax({ topScore: universe.topScore, characterClass: cls, economySpeed: universe.economySpeed, classBooster: booster });
+  const limits = expeditionMax({
+    topScore: universe.topScore,
+    characterClass: cls,
+    economySpeed: universe.economySpeed,
+    classBooster: booster,
+    lfBooster: universe.lfBooster,
+    itemBoost: universe.itemBoost,
+  });
   const target = expeditionTarget(limits.max, settings.expeditionValue);
   // As in OGLight: the minimum fleet size only applies to the calculated value, not to a value the player typed.
   const base = settings.expeditionValue.trim() ? 0 : limits.base;

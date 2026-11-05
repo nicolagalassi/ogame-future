@@ -113,6 +113,10 @@ export interface FleetSettings {
   expeditionExtras: boolean;
   /** After a send from a Future button, open the next planet or moon ready with the same action. */
   repeat: boolean;
+  /** Reserves (1 and 2) on or off, without forgetting them. */
+  reserveOn: boolean;
+  /** Food stays home in every fleet, also with the game's own buttons (OGLight precedent). */
+  ignoreFood: boolean;
 }
 
 export const SETTINGS_KEY = 'fleet.settings';
@@ -126,7 +130,30 @@ export const DEFAULT_SETTINGS: FleetSettings = {
   expeditionValue: '',
   expeditionExtras: true,
   repeat: false,
+  reserveOn: true,
+  ignoreFood: false,
 };
+
+/** Resources still to bring to a planned body (planner "Porta risorse"). */
+export interface Delivery {
+  target: number;
+  need: Resources;
+}
+export const DELIVERY_KEY = 'plan.delivery';
+
+/** What one source body sends: what is still needed, within what it has after the reserve. */
+export function deliveryLoad(onPlanet: Resources, reserve: Reserve, fuel: number, capacity: number, need: Resources): Resources {
+  // Whole units only: the game's own number formatting turns 1234.5 into "1.234.5".
+  const free = resourcesAfterReserve(onPlanet, reserve, fuel);
+  let room = Math.max(0, Math.floor(capacity));
+  const take = (a: number, b: number) => Math.max(0, Math.floor(Math.min(a, b, room)));
+  const deuterium = take(free.deuterium, Math.ceil(need.deuterium));
+  room -= deuterium;
+  const crystal = take(free.crystal, Math.ceil(need.crystal));
+  room -= crystal;
+  const metal = take(free.metal, Math.ceil(need.metal));
+  return { metal, crystal, deuterium };
+}
 
 /** Ships that carry resources, in the order offered to the player. */
 export const CARGO_SHIPS = [203, 202, 219, 209, 210];
@@ -165,11 +192,11 @@ export function cargoShipsFor(amount: number, stock: ShipStock[], main: number, 
 export function cargoLoad(onPlanet: Resources, reserve: Reserve, fuel: number, capacity: number): Resources {
   const free = resourcesAfterReserve(onPlanet, reserve, fuel);
   let room = Math.max(0, Math.floor(capacity));
-  const deuterium = Math.min(free.deuterium, room);
+  const deuterium = Math.max(0, Math.floor(Math.min(free.deuterium, room)));
   room -= deuterium;
-  const crystal = Math.min(free.crystal, room);
+  const crystal = Math.max(0, Math.floor(Math.min(free.crystal, room)));
   room -= crystal;
-  const metal = Math.min(free.metal, room);
+  const metal = Math.max(0, Math.floor(Math.min(free.metal, room)));
   return { metal, crystal, deuterium };
 }
 
@@ -194,10 +221,20 @@ const EXPEDITION_TABLE = [
  * Most resources one expedition can bring back. Without the top score we assume the last
  * row (top player over 100M points), which is where almost every running universe is.
  */
-export function expeditionMax(o: { topScore?: number; characterClass: number; economySpeed: number; classBooster: number }): { base: number; max: number } {
+export function expeditionMax(o: {
+  topScore?: number;
+  characterClass: number;
+  economySpeed: number;
+  classBooster: number;
+  /** Lifeform expedition resource bonus (0.92 = +92%). */
+  lfBooster?: number;
+  /** Active expedition amplifier items, summed (0.4 = +40%). */
+  itemBoost?: number;
+}): { base: number; max: number } {
   const row = EXPEDITION_TABLE.find((r) => r.topScore >= (o.topScore ?? Infinity))!;
   const factor = o.characterClass === 3 ? 3 * o.economySpeed : 2;
-  return { base: row.base, max: Math.round(row.max * factor * (1 + o.classBooster)) };
+  const bonus = (1 + o.classBooster) * (1 + (o.lfBooster ?? 0)) * (1 + (o.itemBoost ?? 0));
+  return { base: row.base, max: Math.round(row.max * factor * bonus) };
 }
 
 /** Applies the player's expedition value: '' = calculated, '50%' = share, number = fixed. */
