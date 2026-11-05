@@ -64,3 +64,15 @@ describe('renderPlanetMenu', () => {
     expect(onModeChange).toHaveBeenCalledWith('compact');
   });
 });
+
+describe('width and banner', () => {
+  it('widens the column and shifts the banner only in stacked mode', () => {
+    document.body.innerHTML = `<div id="planetbarcomponent">${PLANET_LIST_HTML}</div><div id="bannerskyscrapercomponent"></div>`;
+    draw('stacked');
+    expect(document.getElementById('planetbarcomponent')?.classList.contains('fut-wide')).toBe(true);
+    expect(document.body.classList.contains('fut-banner-shift')).toBe(true);
+    draw('compact');
+    expect(document.getElementById('planetbarcomponent')?.classList.contains('fut-wide')).toBe(false);
+    expect(document.body.classList.contains('fut-banner-shift')).toBe(false);
+  });
+});
