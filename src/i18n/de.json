@@ -207,5 +207,8 @@
   "plan.ready": "Genug Ressourcen ✓",
   "plan.empty": "Der Plan ist leer. Öffne ein Gebäude oder eine Forschung und nutze „Planen“.",
   "plan.grandTotal": "Gesamtkosten des Plans",
-  "plan.grandMissing": "Fehlt insgesamt"
+  "plan.grandMissing": "Fehlt insgesamt",
+  "tech.rangeShort": "{from}→{to}",
+  "tech.rangeHint": "Summe der Stufen {from} bis {to}",
+  "tech.discountShort": "−{pct}%"
 }

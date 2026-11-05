@@ -207,5 +207,8 @@
   "plan.ready": "Ressources suffisantes ✓",
   "plan.empty": "Le plan est vide. Ouvrez un bâtiment ou une recherche et utilisez « Planifier ».",
   "plan.grandTotal": "Coût total du plan",
-  "plan.grandMissing": "Manque au total"
+  "plan.grandMissing": "Manque au total",
+  "tech.rangeShort": "{from}→{to}",
+  "tech.rangeHint": "Total des niveaux {from} à {to}",
+  "tech.discountShort": "−{pct}%"
 }

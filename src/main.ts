@@ -11,6 +11,7 @@ import { currentBodyId, readCurrentResources, readPlanetList } from './data/plan
 import { applyPageResources } from './engines/resources';
 import { SCORE_KEY, readScore, type Score } from './data/score';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
+import { ITEMS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems } from './data/bonuses';
 import { openDashboard } from './modules/dashboard';
 import { isFleetDispatch } from './data/fleet-page';
 import { renderFleetTools } from './modules/fleet';
@@ -37,10 +38,13 @@ async function bootstrap(): Promise<void> {
   const bodyIds = readPlanetList(document).flatMap((e) => [e.planetId, e.moonId]).filter((id): id is number => id !== null);
   let queues: QueueSnapshot | null = store.get<QueueSnapshot | null>(QUEUES_KEY, null);
   try {
-    const [account, queue] = await Promise.allSettled([
+    const [account, queue, lf] = await Promise.allSettled([
       hydrateAccountOncePerSession({ guard, store, session: window.sessionStorage }),
       loadQueuesOnPageLoad({ guard, store, ids: bodyIds }),
+      // Lifeform bonuses for the expedition size: once per session, like accountInfo.
+      hydrateLfOncePerSession({ guard, store, session: window.sessionStorage }),
     ]);
+    if (lf.status === 'rejected') console.warn(`[${t('app.name')}]`, lf.reason);
     if (account.status === 'fulfilled') snapshot = account.value;
     else console.warn(`[${t('app.name')}]`, account.reason);
     if (queue.status === 'fulfilled') queues = queue.value;
@@ -54,6 +58,10 @@ async function bootstrap(): Promise<void> {
   const bodyId = currentBodyId(document);
   const onPage = readCurrentResources(document);
   if (snapshot && bodyId && onPage && applyPageResources(snapshot, bodyId, onPage, Date.now())) saver.markDirty();
+
+  // Active items are listed on the overview's buff bar only: keep the last list seen.
+  const items = readActiveItems(document);
+  if (items) store.set(ITEMS_KEY, items);
 
   // Points are on the overview page only: keep the last value seen.
   const seenScore = readScore(document, Date.now());
@@ -117,6 +125,7 @@ async function bootstrap(): Promise<void> {
           const [account, queue] = await Promise.allSettled([
             syncAccountOnUserClick(deps),
             syncQueuesOnUserClick({ guard, store, ids: bodyIds }),
+            fetchLfBonuses({ guard, store }, 'user-sync'),
           ]);
           if (account.status === 'fulfilled') snapshot = account.value;
           if (queue.status === 'fulfilled') queues = queue.value;

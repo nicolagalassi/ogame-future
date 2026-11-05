@@ -194,10 +194,20 @@ const EXPEDITION_TABLE = [
  * Most resources one expedition can bring back. Without the top score we assume the last
  * row (top player over 100M points), which is where almost every running universe is.
  */
-export function expeditionMax(o: { topScore?: number; characterClass: number; economySpeed: number; classBooster: number }): { base: number; max: number } {
+export function expeditionMax(o: {
+  topScore?: number;
+  characterClass: number;
+  economySpeed: number;
+  classBooster: number;
+  /** Lifeform expedition resource bonus (0.92 = +92%). */
+  lfBooster?: number;
+  /** Active expedition amplifier items, summed (0.4 = +40%). */
+  itemBoost?: number;
+}): { base: number; max: number } {
   const row = EXPEDITION_TABLE.find((r) => r.topScore >= (o.topScore ?? Infinity))!;
   const factor = o.characterClass === 3 ? 3 * o.economySpeed : 2;
-  return { base: row.base, max: Math.round(row.max * factor * (1 + o.classBooster)) };
+  const bonus = (1 + o.classBooster) * (1 + (o.lfBooster ?? 0)) * (1 + (o.itemBoost ?? 0));
+  return { base: row.base, max: Math.round(row.max * factor * bonus) };
 }
 
 /** Applies the player's expedition value: '' = calculated, '50%' = share, number = fixed. */

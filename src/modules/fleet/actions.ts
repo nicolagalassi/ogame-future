@@ -171,12 +171,19 @@ export function prepareExpedition(
   doc: Document,
   profile: FleetProfile,
   settings: FleetSettings,
-  universe: { economySpeed: number; topScore?: number },
+  universe: { economySpeed: number; topScore?: number; lfBooster?: number; itemBoost?: number },
 ): PrepareResult & { target: number } {
   if (fd.expeditionCount >= fd.maxExpeditionCount) return { ok: false, reason: 'fleet.err.noExpSlots', ships: 0, cargo: 0, target: 0 };
   const cls = fd.apiDataJson?.characterClassId ?? 0;
   const booster = fd.apiDataJson?.bonuses?.characterClassBooster?.[String(cls)] ?? 0;
-  const limits = expeditionMax({ topScore: universe.topScore, characterClass: cls, economySpeed: universe.economySpeed, classBooster: booster });
+  const limits = expeditionMax({
+    topScore: universe.topScore,
+    characterClass: cls,
+    economySpeed: universe.economySpeed,
+    classBooster: booster,
+    lfBooster: universe.lfBooster,
+    itemBoost: universe.itemBoost,
+  });
   const target = expeditionTarget(limits.max, settings.expeditionValue);
   // As in OGLight: the minimum fleet size only applies to the calculated value, not to a value the player typed.
   const base = settings.expeditionValue.trim() ? 0 : limits.base;
