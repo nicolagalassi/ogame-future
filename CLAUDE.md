@@ -1,10 +1,11 @@
 # Future — istruzioni per gli agenti
 
-- Leggi [AGENTS.md](AGENTS.md) prima di ogni feature: sono vincoli, non preferenze.
+- Leggi [AGENTS.md](AGENTS.md) prima di ogni feature: sono vincoli, non preferenze. Testo ufficiale integrale (solo per casi dubbi): `docs/AGENTS-FULL.md`.
 - Regole extra ricavate da OGLight: [docs/OGLIGHT-RULES.md](docs/OGLIGHT-RULES.md). API: [docs/API-NOTES.md](docs/API-NOTES.md).
 - Ogni chiamata di rete passa da `src/core/guard.ts`. Mai `fetch` diretto altrove.
 - Il codice pubblicato non si minifica (`scripts/build.mjs`).
 - Prima di ogni push: `npm run check` (typecheck, test, build).
+- Prova in gioco con il browser dev (`npm run dev`, poi `dev:reload` / `dev:eval` / `dev:shot`): vedi `.claude/QUICK_START.md`.
 
 ---
 
@@ -13,7 +14,7 @@
 **MANDATORY** at start of each session:
 
 ```bash
-# Load essential docs (~800 tokens - 2 min read)
+# Load essential docs (~1600 tokens)
 ✓ .claude/COMMON_MISTAKES.md      # ⚠️ CRITICAL - Read FIRST
 ✓ .claude/QUICK_START.md          # Essential commands
 ✓ .claude/ARCHITECTURE_MAP.md     # File locations

@@ -13,6 +13,7 @@ README.md
 CONTRIBUTING.md
 GEMINI.md
 # AGENTS.md is NOT ignored here: it holds the OGame compliance rules every feature must follow.
+# docs/AGENTS-FULL.md is not ignored either: read on demand for edge cases.
 .cursorrules
 .windsurfrules
 .clinerules

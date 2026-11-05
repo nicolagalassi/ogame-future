@@ -9,7 +9,13 @@
     "build": "node scripts/build.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "check": "npm run typecheck && npm test && npm run build"
+    "check": "npm run typecheck && npm test && npm run build",
+    "dev": "node scripts/build.mjs && (node scripts/build.mjs --watch & node scripts/dev-browser.mjs)",
+    "dev:reload": "node scripts/dev-browser.mjs reload",
+    "dev:eval": "node scripts/dev-browser.mjs eval",
+    "dev:goto": "node scripts/dev-browser.mjs goto",
+    "dev:shot": "node scripts/dev-browser.mjs shot",
+    "dev:tabs": "node scripts/dev-browser.mjs tabs"
   },
   "devDependencies": {
     "esbuild": "^0.24.2",
