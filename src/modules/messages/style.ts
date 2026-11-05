@@ -80,12 +80,6 @@ th:first-child, td:first-child { text-align: left; }
 td { text-align: right; padding: 3px 6px; border-bottom: 1px solid #172334; font-family: "JetBrains Mono", Consolas, monospace; white-space: nowrap; }
 td:first-child { font-family: Arial, sans-serif; color: #C9D4E2; }
 .scroll { overflow-x: auto; }
-.recent { display: flex; flex-direction: column; }
-.entry { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; padding: 4px 0; border-top: 1px solid #172334; font-size: 12px; }
-.entry:first-child { border-top: 0; }
-.time { color: #8A9BB0; font-family: "JetBrains Mono", Consolas, monospace; min-width: 92px; }
-.out { font-weight: 700; min-width: 96px; }
-.gain { font-family: "JetBrains Mono", Consolas, monospace; }
 .ships { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; }
 .ships span b { font-family: "JetBrains Mono", Consolas, monospace; }
 .foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
