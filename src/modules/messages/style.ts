@@ -2,25 +2,28 @@
 
 /** Outcome colours, shared by the inbox chips and the journal. */
 export const OUTCOME_COLORS: Record<string, string> = {
-  resource: '#4FD1E8',
-  darkmatter: '#B58CDB',
-  ship: '#4FE0B0',
-  nothing: '#8A9BB0',
-  trader: '#F59E4B',
-  item: '#D08A5B',
-  blackhole: '#9AA3AD',
-  early: '#7FA7FF',
-  late: '#E06A6A',
-  pirate: '#F5D547',
-  alien: '#7EE05A',
-  artefact: '#D4A93A',
-  lifeform: '#E07BC8',
-  unknown: '#5B6B80',
+  resource: "#4FD1E8",
+  darkmatter: "#B58CDB",
+  ship: "#4FE0B0",
+  nothing: "#8A9BB0",
+  trader: "#F59E4B",
+  item: "#D08A5B",
+  blackhole: "#9AA3AD",
+  early: "#7FA7FF",
+  late: "#E06A6A",
+  pirate: "#F5D547",
+  alien: "#7EE05A",
+  artefact: "#D4A93A",
+  lifeform: "#E07BC8",
+  unknown: "#5B6B80",
 };
 
 const outcomeCss = Object.entries(OUTCOME_COLORS)
-  .map(([k, c]) => `.fut-msg .fut-out-${k} { color: ${c}; border-color: ${c}55; background: ${c}14; }`)
-  .join('\n');
+  .map(
+    ([k, c]) =>
+      `.fut-msg .fut-out-${k} { color: ${c}; border-color: ${c}55; background: ${c}14; }`,
+  )
+  .join("\n");
 
 export const MESSAGES_CSS = `
 .fut-msg { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin: 6px 8px; padding: 5px 6px;
