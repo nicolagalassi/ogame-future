@@ -9,6 +9,9 @@ import { detectLocale, translator } from './core/i18n';
 import { SNAPSHOT_KEY, hydrateAccountOncePerSession, syncAccountOnUserClick, type AccountSnapshot } from './data/account-info';
 import { currentBodyId, readCurrentResources, readPlanetList } from './data/planet-list';
 import { applyPageResources } from './engines/resources';
+import { SCORE_KEY, readScore, type Score } from './data/score';
+import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
+import { openDashboard } from './modules/dashboard';
 import { renderPlanetMenu, type MenuMode, type MenuSettings } from './modules/planet-menu';
 
 async function bootstrap(): Promise<void> {
@@ -23,10 +26,17 @@ async function bootstrap(): Promise<void> {
   const saver = new IdleSaver(() => store.set(SNAPSHOT_KEY, snapshot));
   window.addEventListener('beforeunload', () => saver.saveNow());
 
+  const bodyIds = readPlanetList(document).flatMap((e) => [e.planetId, e.moonId]).filter((id): id is number => id !== null);
+  let queues: QueueSnapshot | null = store.get<QueueSnapshot | null>(QUEUES_KEY, null);
   try {
-    snapshot = await hydrateAccountOncePerSession({ guard, store, session: window.sessionStorage });
-  } catch (error) {
-    console.warn(`[${t('app.name')}]`, error);
+    const [account, queue] = await Promise.allSettled([
+      hydrateAccountOncePerSession({ guard, store, session: window.sessionStorage }),
+      loadQueuesOnPageLoad({ guard, store, ids: bodyIds }),
+    ]);
+    if (account.status === 'fulfilled') snapshot = account.value;
+    else console.warn(`[${t('app.name')}]`, account.reason);
+    if (queue.status === 'fulfilled') queues = queue.value;
+    else console.warn(`[${t('app.name')}]`, queue.reason);
   } finally {
     // COMPLIANCE: from here on no background call can leave the page (AGENTS.md §4).
     guard.closePageLoadWindow();
@@ -37,18 +47,24 @@ async function bootstrap(): Promise<void> {
   const onPage = readCurrentResources(document);
   if (snapshot && bodyId && onPage && applyPageResources(snapshot, bodyId, onPage, Date.now())) saver.markDirty();
 
+  // Points are on the overview page only: keep the last value seen.
+  const seenScore = readScore(document, Date.now());
+  if (seenScore) store.set(SCORE_KEY, seenScore);
+
   const deps = { guard, store, session: window.sessionStorage };
   const storedMode = store.get<string>('planetMenu.mode', 'side');
   let settings: MenuSettings = {
     // 'stacked' was the previous layout: it maps to the side-by-side one.
     mode: (storedMode === 'compact' ? 'compact' : 'side') as MenuMode,
     showTotals: store.get<boolean>('planetMenu.totals', true),
+    markIdle: store.get<boolean>('planetMenu.markIdle', false),
   };
   const draw = () =>
     renderPlanetMenu({
       doc: document,
       entries: readPlanetList(document),
       snapshot,
+      queues,
       settings,
       now: Date.now(),
       locale,
@@ -57,12 +73,29 @@ async function bootstrap(): Promise<void> {
         settings = next;
         store.set('planetMenu.mode', next.mode);
         store.set('planetMenu.totals', next.showTotals);
+        store.set('planetMenu.markIdle', next.markIdle);
         draw();
       },
+      onOpenDashboard: () =>
+        openDashboard({
+          doc: document,
+          snapshot,
+          entries: readPlanetList(document),
+          score: store.get<Score | null>(SCORE_KEY, null),
+          queues,
+          now: Date.now(),
+          locale,
+          t,
+        }),
       // COMPLIANCE: runs only from the Sync button's click (reason 'user-sync', no cp).
       onSync: async () => {
         try {
-          snapshot = await syncAccountOnUserClick(deps);
+          const [account, queue] = await Promise.allSettled([
+            syncAccountOnUserClick(deps),
+            syncQueuesOnUserClick({ guard, store, ids: bodyIds }),
+          ]);
+          if (account.status === 'fulfilled') snapshot = account.value;
+          if (queue.status === 'fulfilled') queues = queue.value;
           draw();
         } catch (error) {
           console.warn(`[${t('app.name')}]`, error);

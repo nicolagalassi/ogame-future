@@ -10,6 +10,7 @@
  */
 import type { AccountSnapshot, OwnBody } from '../../data/account-info';
 import type { PlanetListEntry } from '../../data/planet-list';
+import { activeItems, type QueueItem, type QueueSnapshot } from '../../data/queues';
 import { formatUnits } from '../../core/format';
 import { estimateResources, storageFill, totals } from '../../engines/resources';
 import { MENU_WIDTH, NATIVE_WIDTH, PLANET_MENU_CSS } from './style';
@@ -19,12 +20,16 @@ export type MenuMode = 'side' | 'compact';
 export interface MenuSettings {
   mode: MenuMode;
   showTotals: boolean;
+  /** Amber dot on planets with nothing under construction. */
+  markIdle: boolean;
 }
 
 export interface PlanetMenuOptions {
   doc: Document;
   entries: PlanetListEntry[];
   snapshot: AccountSnapshot | null;
+  /** Production queues per body (null when never read). */
+  queues?: QueueSnapshot | null;
   settings: MenuSettings;
   now: number;
   locale: string;
@@ -32,6 +37,8 @@ export interface PlanetMenuOptions {
   onSettingsChange: (next: MenuSettings) => void;
   /** Runs the user-initiated sync. Only ever called from the Sync button's click. */
   onSync: () => Promise<void>;
+  /** Opens the account dashboard (Future's own panel, no game action). */
+  onOpenDashboard?: () => void;
 }
 
 const STYLE_ID = 'fut-planet-menu-style';
@@ -39,6 +46,7 @@ const STYLE_ID = 'fut-planet-menu-style';
 let panelOpen = false;
 
 const ICONS = {
+  dashboard: '<path stroke="none" d="M3 3h8v10H3zM13 3h8v6h-8zM13 11h8v10h-8zM3 15h8v6H3z"/>',
   side: '<path stroke="none" d="M2 5h12v14H2zM16 5h6v14h-6z"/>',
   compact: '<path stroke="none" d="M3 4h18v3H3zM3 10.5h18v3H3zM3 17h18v3H3z"/>',
   sync: '<path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9" fill="none" stroke-width="2.2"/><path d="M19 3v5h-5M5 21v-5h5" fill="none" stroke-width="2.2"/>',
@@ -147,10 +155,28 @@ function startAgeClock(doc: Document): void {
   }, 60_000);
 }
 
+export function remaining(end: number, now: number): string {
+  const min = Math.max(0, Math.round((end - now) / 60_000));
+  if (min < 60) return `${min}m`;
+  const hours = Math.floor(min / 60);
+  return hours < 48 ? `${hours}h ${String(min % 60).padStart(2, '0')}m` : `${Math.floor(hours / 24)}d ${hours % 24}h`;
+}
+
+/** Coloured stripes, one per running queue kind (as OGLight), with the details in the tooltip. */
+function queueStripes(doc: Document, items: QueueItem[], now: number, t: PlanetMenuOptions['t']): HTMLElement | null {
+  if (!items.length) return null;
+  const box = el(doc, 'span', 'fut-queue');
+  box.title = items
+    .map((i) => `${t(`queue.${i.kind}`)}: ${i.name}${i.level ? ` → ${i.level}` : ''} · ${remaining(i.end, now)}`)
+    .join('\n');
+  for (const i of items) box.append(el(doc, 'span', `fut-q fut-q-${i.kind}`));
+  return box;
+}
+
 /** Removes everything Future added, so the menu can be redrawn without duplicates. */
 export function clearPlanetMenu(doc: Document): void {
   doc
-    .querySelectorAll('.fut-res, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-idle, .fut-nomoon, .fut-age')
+    .querySelectorAll('.fut-res, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-idle, .fut-nomoon, .fut-age, .fut-queue')
     .forEach((n) => n.remove());
   doc.querySelectorAll('.fut-name').forEach((wrap) => wrap.replaceWith(...Array.from(wrap.childNodes)));
   doc.querySelectorAll('.fut-row').forEach((n) => n.classList.remove('fut-row', 'fut-current', 'fut-building'));
@@ -205,6 +231,7 @@ function toolbar(o: PlanetMenuOptions, mode: MenuMode, roomy: boolean, colonies:
   });
   gear.setAttribute('aria-expanded', String(panelOpen));
 
+  if (o.onOpenDashboard) bar.append(iconButton(doc, 'dashboard', t('dash.title'), o.onOpenDashboard));
   bar.append(sw, sync, gear);
   return bar;
 }
@@ -237,6 +264,11 @@ function settingsPanel(o: PlanetMenuOptions, mode: MenuMode, roomy: boolean, col
     t('settings.totals'),
     choice(t('settings.on'), o.settings.showTotals, () => o.onSettingsChange({ ...o.settings, showTotals: true })),
     choice(t('settings.off'), !o.settings.showTotals, () => o.onSettingsChange({ ...o.settings, showTotals: false })),
+  );
+  row(
+    t('settings.markIdle'),
+    choice(t('settings.on'), o.settings.markIdle, () => o.onSettingsChange({ ...o.settings, markIdle: true })),
+    choice(t('settings.off'), !o.settings.markIdle, () => o.onSettingsChange({ ...o.settings, markIdle: false })),
   );
   if (colonies) panel.append(el(doc, 'div', 'fut-set-note', colonies));
   if (o.snapshot) panel.append(el(doc, 'div', 'fut-set-note', t('toolbar.lastSync', { time: formatTime(o.snapshot.fetchedAt, o.locale) })));
@@ -281,10 +313,12 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true));
       const age = ageBadge(doc, planetBody, o.now, o.t);
       if (age) link.append(age);
+      const pq = entry.planetId ? queueStripes(doc, activeItems(o.queues?.bodies[String(entry.planetId)], o.now), o.now, o.t) : null;
+      if (pq) wrap.append(pq);
       // Queue: the game's construction icon stays as it is (its own link); a planet with
       // nothing in construction gets an amber dot.
       if (entry.construction.planet) entry.element.classList.add('fut-building');
-      else {
+      else if (o.settings.markIdle) {
         const idle = el(doc, 'span', 'fut-idle');
         idle.title = o.t('planetMenu.idle');
         link.append(idle);
@@ -297,6 +331,8 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       moon.append(resourceColumn(doc, moonBody, o.now, o.locale, false));
       const age = ageBadge(doc, moonBody, o.now, o.t);
       if (age) moon.append(age);
+      const mq = entry.moonId ? queueStripes(doc, activeItems(o.queues?.bodies[String(entry.moonId)], o.now), o.now, o.t) : null;
+      if (mq) moon.append(mq);
     } else {
       // Keeps the planet columns aligned on planets without a moon.
       link?.after(el(doc, 'span', 'fut-nomoon'));
@@ -314,7 +350,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
     const box = el(doc, 'div', 'fut-totals');
     const line = (label: string, value: number, rate: number, cls: string) => {
       box.append(el(doc, 'span', cls, `${label} ${formatUnits(value, o.locale)}`));
-      box.append(el(doc, 'span', 'fut-rate', `+${formatUnits(rate, o.locale)}/h`));
+      box.append(el(doc, 'span', 'fut-rate', `+${formatUnits(rate * 24, o.locale)}/24h`));
     };
     line(o.t('res.metal'), stock.metal, perHour.metal, 'fut-m');
     line(o.t('res.crystal'), stock.crystal, perHour.crystal, 'fut-c');
