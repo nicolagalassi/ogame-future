@@ -6,6 +6,21 @@ export const TECH_CSS = `
 /* The game's dark matter button ("Inizia con MO") is much bigger than the normal one. */
 #technologydetails.fut-tp-on .build-it_wrap .build-it_premium { transform: scale(0.72); transform-origin: right bottom; }
 #technologydetails.fut-tp-on .content .information .level { color: #4FD1E8; font-weight: 700; }
+/* Units: shipyard choice on one line under the title, amount field over the build button. */
+#technologydetails.fut-tp-unit .content .shipyardSelection { position: absolute; top: 28px; left: 6px; right: 158px; height: 16px;
+  display: flex; align-items: center; gap: 4px; margin: 0; padding: 0; font-size: 10px; line-height: 16px; white-space: nowrap; overflow: hidden; }
+#technologydetails.fut-tp-unit .content .shipyardSelection input { margin: 0 2px 0 6px; width: 11px; height: 11px; }
+#technologydetails.fut-tp-unit .content .shipyardSelection label { float: none; margin: 0; padding: 0; width: auto; }
+#technologydetails.fut-tp-unit .content .build_amount { position: absolute; top: 104px; right: 6px; width: 146px; height: 28px; margin: 0; padding: 0;
+  display: flex; align-items: center; gap: 4px; }
+#technologydetails.fut-tp-unit .content .build_amount label { display: none; }
+#technologydetails.fut-tp-unit .content .build_amount input, #technologydetails.fut-tp-unit #build_amount { position: static; float: none; flex: 1; min-width: 0; width: auto; height: 26px; margin: 0; padding: 0 4px; box-sizing: border-box; font-size: 13px; }
+#technologydetails.fut-tp-unit .content .build_amount .maximum { position: static; float: none; flex: none; width: auto; height: 26px; margin: 0; padding: 0 6px;
+  background: #16202E none !important; border: 1px solid #2A3B55; border-radius: 5px; color: #C9D4E2; font-size: 11px; cursor: pointer; }
+#technologydetails.fut-tp-unit .content .build_amount .maximum::before, #technologydetails.fut-tp-unit .content .build_amount .maximum::after { display: none !important; }
+#technologydetails.fut-tp-unit .content .build_amount .maximum:hover { border-color: #4FD1E8; color: #fff; }
+#technologydetails.fut-tp-unit .fut-tp { right: 158px; }
+#technologydetails.fut-tp-unit:has(.shipyardSelection) .fut-tp { top: 48px; }
 .fut-tp { position: absolute; top: 24px; left: 6px; right: 138px; bottom: 6px; display: flex; flex-direction: column; gap: 5px;
   font: 11px/14px Arial, Helvetica, sans-serif; color: #E6EDF5; text-align: left; }
 .fut-tp-grid { display: grid; gap: 2px; align-content: start; }
