@@ -9,5 +9,6 @@
   "planetMenu.compact": "Kompakt",
   "res.metal": "Metall",
   "res.crystal": "Kristall",
-  "res.deuterium": "Deuterium"
+  "res.deuterium": "Deuterium",
+  "planetMenu.idle": "Kein Bau im Gange"
 }

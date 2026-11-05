@@ -36,14 +36,25 @@ function el<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, classN
 function resourceCells(doc: Document, body: OwnBody | undefined, now: number, locale: string): HTMLElement {
   const box = el(doc, 'span', 'fut-res');
   if (!body) {
-    for (const cls of ['fut-m', 'fut-c', 'fut-d']) box.append(el(doc, 'span', `${cls} fut-missing`, '—'));
+    for (const cls of ['fut-m', 'fut-c', 'fut-d']) box.append(el(doc, 'span', `fut-cell ${cls} fut-missing`, '—'));
     return box;
   }
   const amount = estimateResources(body, now);
   const fill = storageFill(body, amount);
   const cell = (key: 'metal' | 'crystal' | 'deuterium', cls: string) => {
     const full = fill !== null && fill[key] >= 0.9;
-    box.append(el(doc, 'span', full ? `${cls} fut-full` : cls, formatUnits(amount[key], locale)));
+    const wrap = el(doc, 'span', full ? `fut-cell ${cls} fut-full` : `fut-cell ${cls}`);
+    wrap.append(el(doc, 'span', 'fut-num', formatUnits(amount[key], locale)));
+    if (fill !== null) {
+      // Storage fill bar: how full this deposit is (amber from 90%).
+      const bar = el(doc, 'span', 'fut-bar');
+      const level = el(doc, 'span', 'fut-bar-fill');
+      level.style.width = `${Math.round(fill[key] * 100)}%`;
+      bar.append(level);
+      wrap.append(bar);
+      wrap.title = `${Math.round(fill[key] * 100)}%`;
+    }
+    box.append(wrap);
   };
   cell('metal', 'fut-m');
   cell('crystal', 'fut-c');
@@ -53,9 +64,9 @@ function resourceCells(doc: Document, body: OwnBody | undefined, now: number, lo
 
 /** Removes everything Future added, so the menu can be redrawn without duplicates. */
 export function clearPlanetMenu(doc: Document): void {
-  doc.querySelectorAll('.fut-res, .fut-moon-label, .fut-menu-bar, .fut-totals').forEach((n) => n.remove());
+  doc.querySelectorAll('.fut-res, .fut-moon-label, .fut-menu-bar, .fut-totals, .fut-idle').forEach((n) => n.remove());
   doc.querySelectorAll('.fut-name').forEach((wrap) => wrap.replaceWith(...Array.from(wrap.childNodes)));
-  doc.querySelectorAll('.fut-row').forEach((n) => n.classList.remove('fut-row', 'fut-current'));
+  doc.querySelectorAll('.fut-row').forEach((n) => n.classList.remove('fut-row', 'fut-current', 'fut-building'));
 }
 
 /**
@@ -105,6 +116,14 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       const wrap = el(doc, 'span', 'fut-name');
       link.querySelectorAll('.planet-name, .planet-koords').forEach((n) => wrap.append(n));
       link.append(wrap, resourceCells(doc, entry.planetId ? byId.get(entry.planetId) : undefined, o.now, o.locale));
+      // Queue: the game's construction icon stays as it is (its own link); a planet with
+      // nothing in construction gets an amber dot, as in the mock-up.
+      if (entry.construction.planet) entry.element.classList.add('fut-building');
+      else {
+        const idle = el(doc, 'span', 'fut-idle');
+        idle.title = o.t('planetMenu.idle');
+        link.append(idle);
+      }
     }
 
     const moon = entry.moonLink;

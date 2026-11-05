@@ -33,7 +33,7 @@ describe('renderPlanetMenu', () => {
     const planetLink = document.querySelector('#planet-1 a.planetlink')!;
     const moonLink = document.querySelector('#planet-1 a.moonlink')!;
     expect(planetLink.querySelector('.fut-name .planet-name')?.textContent).toBe('Yolen');
-    expect(planetLink.querySelectorAll('.fut-res span')).toHaveLength(3);
+    expect(planetLink.querySelectorAll('.fut-res .fut-cell')).toHaveLength(3);
     expect(moonLink.querySelector('.fut-moon-label')?.textContent).toBe('Luna');
     expect(moonLink.getAttribute('href')).toContain('cp=2');
     expect(document.querySelector('#planet-1 .fut-m')?.textContent).toBe('38,3M');
@@ -47,12 +47,27 @@ describe('renderPlanetMenu', () => {
     expect(document.body.textContent).not.toMatch(/NaN|undefined/);
   });
 
+  it('shows the build queue: game icon kept, amber dot on idle planets', () => {
+    draw('stacked');
+    expect(document.querySelector('#planet-1 .fut-idle')).not.toBeNull();
+    expect(document.querySelector('#planet-3 .fut-idle')).toBeNull();
+    expect(document.querySelector('#planet-3 a.constructionIcon')).not.toBeNull();
+    expect(document.getElementById('planet-3')?.classList.contains('fut-building')).toBe(true);
+  });
+
+  it('draws a storage fill bar under each number when storage is known', () => {
+    draw('stacked');
+    const bar = document.querySelector<HTMLElement>('#planet-1 a.planetlink .fut-m .fut-bar-fill');
+    expect(bar?.style.width).toMatch(/%$/);
+  });
+
   it('can be redrawn without duplicating anything', () => {
     draw('stacked');
     draw('compact');
     expect(document.querySelectorAll('.fut-menu-bar')).toHaveLength(1);
     expect(document.querySelectorAll('#planet-1 .fut-res')).toHaveLength(2); // planet + moon
     expect(document.querySelectorAll('.fut-name')).toHaveLength(2);
+    expect(document.querySelectorAll('.fut-idle')).toHaveLength(1);
     expect(document.getElementById('planetList')?.classList.contains('fut-mode-compact')).toBe(true);
   });
 

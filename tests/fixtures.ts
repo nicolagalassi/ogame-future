@@ -13,6 +13,7 @@ export const PLANET_LIST_HTML = `
     <a class="planetlink" href="https://s1-it.ogame.gameforge.com/game/index.php?page=ingame&component=overview&cp=3">
       <img class="planetPic" src="p3.png"><span class="planet-name">Mythos</span><span class="planet-koords">[5:356:8]</span>
     </a>
+    <a class="constructionIcon tooltip" href="https://s1-it.ogame.gameforge.com/game/index.php?page=ingame&component=supplies&cp=3" data-tooltip-title="Produzione di cristalli"></a>
   </div>
 </div>`;
 
