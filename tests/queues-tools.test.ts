@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { activeItems, loadQueuesOnPageLoad, parseProductionQueue, QUEUES_KEY } from '../src/data/queues';
 import { bestUpgrades, mineCost, mineGainRatio } from '../src/engines/roi';
-import { fleetLink, largeCargoCapacity, planCollection } from '../src/engines/collect';
 import { bodyRows } from '../src/engines/account';
 import { readPlanetList } from '../src/data/planet-list';
 import { renderPlanetMenu } from '../src/modules/planet-menu';
@@ -72,28 +71,6 @@ describe('mine advisor', () => {
     const [first] = bestUpgrades(snap, readPlanetList(document));
     expect(first?.mine).toBe('metal');
     expect(first?.days).toBeGreaterThan(0);
-  });
-});
-
-describe('collection planner', () => {
-  it('counts Large Cargos per body and skips the target', () => {
-    const rows = bodyRows(SNAPSHOT, readPlanetList(document), 0);
-    const plan = planCollection(rows, SNAPSHOT, 1, { metal: true, crystal: true, deuterium: true }, 25_000_000);
-    expect(plan.rows.map((r) => r.id)).toEqual([2]);
-    expect(plan.rows[0]!.ships).toBe(Math.ceil((292_600_000 + 38_100_000 + 300_900_000) / 25_000_000));
-  });
-
-  it('capacity counts hyperspace and the collector class', () => {
-    expect(largeCargoCapacity({ ...SNAPSHOT, researches: { '114': 10 } }, 1)).toBe(25_000 * 1.75);
-    expect(largeCargoCapacity(null, 3)).toBe(25_000);
-  });
-
-  it('the link opens the game fleet page from the source with transport filled in', () => {
-    const url = new URL(fleetLink('https://s1.example', 2, { coords: '5:185:2', type: 'planet' }, 26));
-    expect(url.searchParams.get('component')).toBe('fleetdispatch');
-    expect(url.searchParams.get('cp')).toBe('2');
-    expect(url.searchParams.get('mission')).toBe('3');
-    expect(url.searchParams.get('am203')).toBe('26');
   });
 });
 

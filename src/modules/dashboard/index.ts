@@ -11,7 +11,6 @@ import { formatUnits } from '../../core/format';
 import { accountAlerts, bodyRows, msu, summarize, type BodyRow } from '../../engines/account';
 import { activeItems, QUEUE_KINDS, type QueueSnapshot } from '../../data/queues';
 import { bestUpgrades } from '../../engines/roi';
-import { fleetLink, largeCargoCapacity, planCollection } from '../../engines/collect';
 import { remaining } from '../planet-menu';
 import { DASHBOARD_CSS } from './style';
 
@@ -32,8 +31,6 @@ const HOST_ID = 'fut-dashboard';
 let sortKey: SortKey = 'list';
 let sortDesc = false;
 let showMoons = true;
-let tab: 'overview' | 'collect' = 'overview';
-const collect = { target: 0, metal: true, crystal: true, deuterium: true, capacity: 0 };
 let keyHandler: ((e: KeyboardEvent) => void) | null = null;
 
 function h<K extends keyof HTMLElementTagNameMap>(tag: K, className = '', text?: string): HTMLElementTagNameMap[K] {
@@ -140,25 +137,9 @@ export function openDashboard(o: DashboardOptions): void {
   x.type = 'button';
   x.setAttribute('aria-label', t('dash.close'));
   x.addEventListener('click', close);
-  const tabs = h('nav', 'tabs');
-  for (const key of ['overview', 'collect'] as const) {
-    const b = h('button', 'tab', t(`dash.tab.${key}`));
-    b.type = 'button';
-    b.setAttribute('aria-pressed', String(tab === key));
-    b.addEventListener('click', () => {
-      tab = key;
-      openDashboard(o);
-    });
-    tabs.append(b);
-  }
-  header.append(titles, tabs, x);
+  header.append(titles, x);
   panel.append(header);
   doc.body.append(host);
-
-  if (tab === 'collect') {
-    renderCollect(o, panel, rows);
-    return;
-  }
 
   // KPIs
   const kpis = h('div', 'kpis');
@@ -329,111 +310,3 @@ export function openDashboard(o: DashboardOptions): void {
   panel.append(tableCard);
 }
 
-/** "Raccolta risorse": ships needed to bring resources to one body. Calculation only. */
-function renderCollect(o: DashboardOptions, panel: HTMLElement, rows: BodyRow[]): void {
-  const { doc, t, locale } = o;
-  const fmt = (v: number) => formatUnits(v, locale);
-  const classId = Number(doc.querySelector('meta[name="ogame-player-characterclass-id"]')?.getAttribute('content')) || null;
-  if (!collect.capacity) collect.capacity = largeCargoCapacity(o.snapshot, classId);
-  if (!rows.some((r) => r.id === collect.target)) {
-    const here = Number(doc.querySelector('meta[name="ogame-planet-id"]')?.getAttribute('content'));
-    collect.target = rows.some((r) => r.id === here) ? here : (rows[0]?.id ?? 0);
-  }
-  const target = rows.find((r) => r.id === collect.target);
-
-  const card = h('div', 'card');
-  card.append(h('h3', '', t('collect.title')));
-  const form = h('div', 'form');
-
-  const targetLabel = h('label', 'field');
-  targetLabel.append(h('span', '', t('collect.target')));
-  const select = h('select');
-  for (const r of rows) {
-    const opt = h('option', '', `${r.type === 'moon' ? '☾ ' : ''}${r.name} [${r.coords}]`);
-    opt.value = String(r.id);
-    opt.selected = r.id === collect.target;
-    select.append(opt);
-  }
-  select.addEventListener('change', () => {
-    collect.target = Number(select.value);
-    openDashboard(o);
-  });
-  targetLabel.append(select);
-  form.append(targetLabel);
-
-  const picks = h('div', 'field');
-  picks.append(h('span', '', t('collect.resources')));
-  const pickRow = h('div', 'picks');
-  for (const k of ['metal', 'crystal', 'deuterium'] as const) {
-    const lab = h('label', `pick ${k[0]}`);
-    const box = h('input');
-    box.type = 'checkbox';
-    box.checked = collect[k];
-    box.addEventListener('change', () => {
-      collect[k] = box.checked;
-      openDashboard(o);
-    });
-    lab.append(box, doc.createTextNode(` ${t(`res.${k}`)}`));
-    pickRow.append(lab);
-  }
-  picks.append(pickRow);
-  form.append(picks);
-
-  const capLabel = h('label', 'field');
-  capLabel.append(h('span', '', t('collect.capacity')));
-  const cap = h('input');
-  cap.type = 'number';
-  cap.min = '1';
-  cap.value = String(collect.capacity);
-  cap.addEventListener('change', () => {
-    collect.capacity = Math.max(1, Math.floor(Number(cap.value) || 0));
-    openDashboard(o);
-  });
-  capLabel.append(cap);
-  form.append(capLabel);
-  card.append(form);
-
-  const plan = planCollection(rows, o.snapshot, collect.target, collect, collect.capacity);
-  const wrap = h('div', 'table-wrap');
-  const table = h('table');
-  const head = h('tr');
-  for (const [label, cls] of [
-    [t('dash.colBody'), ''], [t('res.metal'), 'num'], [t('res.crystal'), 'num'], [t('res.deuterium'), 'num'],
-    [t('collect.ships'), 'num'], [t('collect.available'), 'num'], ['', ''],
-  ] as const) head.append(h('th', cls, label));
-  const thead = h('thead');
-  thead.append(head);
-  table.append(thead);
-  const tbody = h('tbody');
-  const origin = doc.location?.origin ?? '';
-  for (const r of plan.rows) {
-    const tr = h('tr', r.type);
-    const name = h('td', 'name');
-    name.append(h('span', 'strong', `${r.type === 'moon' ? '☾ ' : ''}${r.name}`), h('span', 'coords', `[${r.coords}]`));
-    tr.append(name);
-    tr.append(h('td', 'num mono m', fmt(r.send.metal)), h('td', 'num mono c', fmt(r.send.crystal)), h('td', 'num mono d', fmt(r.send.deuterium)));
-    tr.append(h('td', 'num mono', r.ships.toLocaleString(locale)));
-    tr.append(h('td', `num mono${r.available < r.ships ? ' short' : ''}`, r.available.toLocaleString(locale)));
-    const act = h('td', 'num');
-    if (target) {
-      const a = h('a', 'go', t('collect.open'));
-      a.href = fleetLink(origin, r.id, { coords: target.coords, type: target.type }, Math.min(r.ships, r.available) || r.ships);
-      a.title = t('collect.openHint');
-      act.append(a);
-    }
-    tr.append(act);
-    tbody.append(tr);
-  }
-  table.append(tbody);
-  const foot = h('tfoot');
-  const fr = h('tr');
-  fr.append(h('td', 'name', t('dash.total')));
-  fr.append(h('td', 'num mono m', fmt(plan.send.metal)), h('td', 'num mono c', fmt(plan.send.crystal)), h('td', 'num mono d', fmt(plan.send.deuterium)));
-  fr.append(h('td', 'num mono', plan.ships.toLocaleString(locale)), h('td'), h('td'));
-  foot.append(fr);
-  table.append(foot);
-  wrap.append(table);
-  card.append(wrap);
-  card.append(h('p', 'hint', t('collect.hint')));
-  panel.append(card);
-}

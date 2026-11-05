@@ -64,8 +64,6 @@
   "queue.ship": "Werft",
   "queue.lfbuilding": "Lebensform-Gebäude",
   "queue.lfresearch": "Lebensform-Forschung",
-  "dash.tab.overview": "Übersicht",
-  "dash.tab.collect": "Rohstoffe sammeln",
   "dash.queues": "Aktive Aufträge",
   "dash.queuesNone": "kein Bau im Gange",
   "dash.queuesUnknown": "noch nicht gelesen",
@@ -75,14 +73,5 @@
   "dash.colQueue": "Läuft",
   "mine.metal": "Metallmine",
   "mine.crystal": "Kristallmine",
-  "mine.deuterium": "Deuteriumsynthetisierer",
-  "collect.title": "Rohstoffe auf einem Körper sammeln",
-  "collect.target": "Ziel",
-  "collect.resources": "Rohstoffe",
-  "collect.capacity": "Kapazität Großer Transporter",
-  "collect.ships": "Große Transporter",
-  "collect.available": "Verfügbar",
-  "collect.open": "Versand öffnen",
-  "collect.openHint": "Öffnet die Flottenseite mit Ziel und Transportern. Prüfen und selbst Senden drücken.",
-  "collect.hint": "Nur Berechnung: nichts wird automatisch gesendet. Kapazität für Lebensform-Boni anpassen."
+  "mine.deuterium": "Deuteriumsynthetisierer"
 }
