@@ -195,32 +195,6 @@ export function openJournal(o: JournalOptions): void {
         card.append(scroll);
         parts.push(card);
       }
-
-      // Last expeditions.
-      const card = h('div', 'card');
-      card.append(h('h3', '', t('exp.recent')));
-      const recent = h('div', 'recent');
-      for (const e of entries.filter((x) => !x.combat).slice(0, 25)) {
-        const row = h('div', 'entry');
-        row.append(h('span', 'time', new Date(e.at).toLocaleString(locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })));
-        const out = h('span', 'out', t(`msg.out.${e.result}`));
-        out.style.color = OUTCOME_COLORS[e.result] ?? '#C9D4E2';
-        row.append(out);
-        const gains: [number, string][] = [
-          [e.res.metal, 'm'],
-          [e.res.crystal, 'c'],
-          [e.res.deuterium, 'd'],
-          [e.res.darkMatter, 'dm'],
-        ];
-        for (const [v, cls] of gains) if (v) row.append(h('span', `gain ${cls}`, `+${fmt(v)}`));
-        for (const [id, n] of Object.entries(e.ships)) row.append(h('span', 'gain pos', `+${n.toLocaleString(locale)} ${shipName(Number(id), ships, t)}`));
-        for (const [id, n] of Object.entries(e.lost)) row.append(h('span', 'gain neg', `−${n.toLocaleString(locale)} ${shipName(Number(id), ships, t)}`));
-        if (e.item) row.append(h('span', 'gain', e.item));
-        if (e.size >= 0) row.append(h('span', 'gain', t(`msg.size.${e.size}`)));
-        recent.append(row);
-      }
-      card.append(recent);
-      parts.push(card);
     }
 
     // Options and data.

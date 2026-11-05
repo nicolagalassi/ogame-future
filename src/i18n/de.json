@@ -305,7 +305,6 @@
   "exp.countShort": "Anz.",
   "exp.dmShort": "DM",
   "exp.shipsShort": "Schiffe (MSU)",
-  "exp.recent": "Letzte Expeditionen",
   "exp.fold": "Im Postfach den Spieltext unter der Zusammenfassung einklappen",
   "exp.export": "Exportieren",
   "exp.exportHint": "Tagebuch als JSON-Datei herunterladen (Backup)",

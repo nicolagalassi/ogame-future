@@ -305,7 +305,6 @@
   "exp.countShort": "No.",
   "exp.dmShort": "DM",
   "exp.shipsShort": "Ships (MSU)",
-  "exp.recent": "Latest expeditions",
   "exp.fold": "In the inbox, fold the game's text under the summary",
   "exp.export": "Export",
   "exp.exportHint": "Download the journal as a JSON file (backup)",

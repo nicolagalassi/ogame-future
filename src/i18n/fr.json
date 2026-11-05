@@ -305,7 +305,6 @@
   "exp.countShort": "Nb",
   "exp.dmShort": "AM",
   "exp.shipsShort": "Vaisseaux (MSU)",
-  "exp.recent": "Dernières expéditions",
   "exp.fold": "Dans la messagerie, replier le texte du jeu sous le résumé",
   "exp.export": "Exporter",
   "exp.exportHint": "Télécharger le journal en JSON (sauvegarde)",
