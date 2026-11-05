@@ -12,6 +12,8 @@ import { applyPageResources } from './engines/resources';
 import { SCORE_KEY, readScore, type Score } from './data/score';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
 import { openDashboard } from './modules/dashboard';
+import { isFleetDispatch } from './data/fleet-page';
+import { renderFleetTools } from './modules/fleet';
 import { renderPlanetMenu, type MenuMode, type MenuSettings } from './modules/planet-menu';
 
 async function bootstrap(): Promise<void> {
@@ -103,6 +105,12 @@ async function bootstrap(): Promise<void> {
       },
     });
   draw();
+
+  // Fleet page helpers: reserves and fleetsave, on the game's own form.
+  const currentId = currentBodyId(document);
+  if (isFleetDispatch(document) && currentId) {
+    renderFleetTools({ doc: document, store, bodyId: currentId, bodyIds, t, locale });
+  }
 }
 
 if (document.readyState === 'loading') {
