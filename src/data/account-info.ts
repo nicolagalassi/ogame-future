@@ -31,7 +31,7 @@ export interface OwnBody {
   coords: string;
   /** For a planet: its moon's id. For a moon: its planet's id. */
   siblingId: number | null;
-  /** Assumed per second, as OGLight treats it. To verify in game. */
+  /** Per hour, as in OGLight (daily = ×24). Verified in game on 2026-11-05. */
   production: Production;
   resources: Resources;
   /** Storage capacity when the snapshot gives it, else 0 (= unknown, no cap). */

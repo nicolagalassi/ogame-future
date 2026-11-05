@@ -4,7 +4,8 @@ const KEYS = ['metal', 'crystal', 'deuterium'] as const;
 
 /**
  * Estimates what a body holds now from the last known amount plus production.
- * Production is assumed per second; moons produce nothing. A known storage caps the
+ * accountInfo production is per HOUR (OGLight shows it ×24 as daily; confirmed in game:
+ * reading it per second made the numbers grow 3600 times too fast). Moons produce nothing. A known storage caps the
  * result, but never below what was already there (resources can exceed storage).
  */
 export function estimateResources(body: OwnBody, now: number): Resources {
@@ -12,7 +13,7 @@ export function estimateResources(body: OwnBody, now: number): Resources {
   const out = { metal: 0, crystal: 0, deuterium: 0 };
   for (const key of KEYS) {
     const start = body.resources[key];
-    const grown = body.type === 'planet' ? start + body.production[key] * seconds : start;
+    const grown = body.type === 'planet' ? start + (body.production[key] * seconds) / 3600 : start;
     const cap = effectiveStorage(body)[key];
     out[key] = cap > 0 ? Math.max(start, Math.min(grown, cap)) : grown;
   }
@@ -64,7 +65,7 @@ export function totals(snapshot: AccountSnapshot, now: number): { stock: Resourc
     const r = estimateResources(body, now);
     for (const k of KEYS) {
       stock[k] += r[k];
-      if (body.type === 'planet') perHour[k] += body.production[k] * 3600;
+      if (body.type === 'planet') perHour[k] += body.production[k];
     }
   }
   return { stock, perHour };
