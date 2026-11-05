@@ -13,6 +13,8 @@ import { SCORE_KEY, readScore, type Score } from './data/score';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
 import { ITEMS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems } from './data/bonuses';
 import { openDashboard } from './modules/dashboard';
+import { TECH_NAMES_KEY, learnTechNames, type TechNames } from './data/tech-names';
+import { readTechList } from './data/tech-details';
 import { isFleetDispatch } from './data/fleet-page';
 import { renderFleetTools } from './modules/fleet';
 import { watchJumpgate } from './modules/fleet/jumpgate';
@@ -74,6 +76,10 @@ async function bootstrap(): Promise<void> {
   const items = readActiveItems(document);
   if (items) store.set(ITEMS_KEY, items);
 
+  // Technology names in the player's language, from any technology page the player opens.
+  const techNames = store.get<TechNames>(TECH_NAMES_KEY, {});
+  if (learnTechNames(techNames, readTechList(document))) store.set(TECH_NAMES_KEY, techNames);
+
   // Points are on the overview page only: keep the last value seen.
   const seenScore = readScore(document, Date.now());
   if (seenScore) store.set(SCORE_KEY, seenScore);
@@ -131,6 +137,7 @@ async function bootstrap(): Promise<void> {
           entries: readPlanetList(document),
           score: store.get<Score | null>(SCORE_KEY, null),
           queues,
+          names: techNames,
           now: Date.now(),
           locale,
           t,

@@ -110,7 +110,7 @@ describe('renderPlanetMenu', () => {
       onOpenDashboard: vi.fn(), onOpenPlanner, onOpenJournal, planCount: 50, planGap: 1.2e9, journalToday: { count: 25, net: 4e7 },
     });
     const cells = Array.from(document.querySelectorAll<HTMLButtonElement>('.fut-toolbar .fut-cell'));
-    expect(cells.map((c) => c.querySelector('.fut-cell-k')!.textContent)).toEqual(['Plancia', 'Piano · 50', 'Diario oggi']);
+    expect(cells.map((c) => c.querySelector('.fut-cell-k')!.textContent)).toEqual(['Dashboard', 'Piano · 50', 'Diario oggi']);
     expect(cells[1]!.querySelector('.fut-cell-v')!.textContent).toBe('−1,2G');
     expect(cells[2]!.querySelector('.fut-cell-v')!.textContent).toBe('+40,0M');
     cells[1]!.click();
