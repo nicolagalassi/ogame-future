@@ -36,11 +36,24 @@ export const MESSAGES_CSS = `
 .fut-msg-ship { color: #4FE0B0; gap: 4px; padding-left: 2px; font-family: "JetBrains Mono", Consolas, monospace; }
 .fut-msg-icon { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; flex: none; }
 .fut-msg-icon-none { font-size: 9px; color: #8A9BB0; } .fut-msg-item { color: #D08A5B; } .fut-msg-lf { color: #E07BC8; } .fut-msg-art { color: #D4A93A; }
-.fut-msg-size.fut-size-0 { color: #F5D547; border-color: #F5D54755; } .fut-msg-size.fut-size-1 { color: #4FD1E8; }
 .fut-msg-route { color: #C9D4E2; }
 .fut-msg-warn { color: #F5B547; } .fut-msg-muted { color: #8A9BB0; }
 .fut-msg .fut-msg-neg { color: #FF7A7A; border-color: #FF7A7A44; }
 ${outcomeCss}
+.fut-msg.fut-msg-rows { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 5px; border-left-width: 3px; }
+.fut-msg-row { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.fut-msg-found { justify-content: center; }
+.fut-msg-foot { justify-content: center; }
+.fut-msg-foot .fut-msg-chip { border-color: transparent; background: none; font-size: 10px; padding: 0 4px; }
+.fut-msg-big { font-size: 12px; font-weight: 700; }
+.fut-msg-top .fut-msg-size { margin-left: auto; }
+/* Size: normal = grey, big = cyan, huge = gold (frame and label). */
+.fut-msg.fut-size-2 { border-color: #2A3B55; }
+.fut-msg.fut-size-1 { border-color: #4FD1E8aa; }
+.fut-msg.fut-size-0 { border-color: #F5D547cc; box-shadow: 0 0 8px #F5D54733; }
+.fut-msg-chip.fut-size-2 { color: #8A9BB0; }
+.fut-msg-chip.fut-size-1 { color: #4FD1E8; border-color: #4FD1E855; }
+.fut-msg-chip.fut-size-0 { color: #F5D547; border-color: #F5D54777; font-weight: 700; }
 .msg.fut-msg-folded .msgContent, .msg.fut-msg-folded .msg_content, .msg.fut-msg-folded > .content-box { display: none !important; }
 `;
 
