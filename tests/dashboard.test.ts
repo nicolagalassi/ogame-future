@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { readPlanetList } from '../src/data/planet-list';
 import { readScore } from '../src/data/score';
 import { accountAlerts, bodyRows, summarize } from '../src/engines/account';
-import { closeDashboard, isDashboardOpen, openDashboard } from '../src/modules/dashboard';
+import { closeDashboard, isDashboardOpen, openDashboard, scrapReturn, TABS } from '../src/modules/dashboard';
+import { lfResearch, techName } from '../src/data/tech-names';
 import { translator } from '../src/core/i18n';
 import { PLANET_LIST_HTML, SNAPSHOT } from './fixtures';
 
@@ -48,13 +49,14 @@ describe('account engine', () => {
 describe('dashboard panel', () => {
   const open = () =>
     openDashboard({ doc: document, snapshot: SNAPSHOT, entries: readPlanetList(document), score: null, now: 0, locale: 'it', t });
+  const shadow = () => document.getElementById('fut-dashboard')!.shadowRoot!;
+  const goTo = (tab: string) => shadow().querySelector<HTMLButtonElement>(`.tab[data-tab="${tab}"]`)!.click();
 
-  it('opens in a shadow root with the bodies table, and closes with Escape', () => {
+  it('opens on the summary in a shadow root, without the old bodies table, and closes with Escape', () => {
     open();
-    const root = document.getElementById('fut-dashboard')!.shadowRoot!;
-    expect(root.querySelectorAll('tbody tr')).toHaveLength(2);
-    expect(root.querySelector('tbody a')?.getAttribute('href')).toContain('cp=1');
-    expect(root.textContent).not.toMatch(/NaN|undefined/);
+    expect(shadow().querySelector('.tab[aria-pressed="true"]')?.textContent).toBe('Riepilogo');
+    expect(shadow().querySelectorAll('.kpi')).toHaveLength(6);
+    expect(shadow().textContent).not.toMatch(/NaN|undefined/);
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     expect(isDashboardOpen(document)).toBe(false);
   });
@@ -66,13 +68,38 @@ describe('dashboard panel', () => {
     closeDashboard(document);
   });
 
-  it('can hide moons', () => {
+  it('every tab renders without broken values', () => {
     open();
-    const root = document.getElementById('fut-dashboard')!.shadowRoot!;
-    root.querySelector<HTMLButtonElement>('.chip')!.click();
-    const after = document.getElementById('fut-dashboard')!.shadowRoot!;
-    expect(after.querySelectorAll('tbody tr')).toHaveLength(1);
-    after.querySelector<HTMLButtonElement>('.chip')!.click(); // restore for other tests
+    for (const tab of TABS) {
+      goTo(tab);
+      expect(shadow().querySelector('.tab[aria-pressed="true"]')?.getAttribute('data-tab')).toBe(tab);
+      expect(shadow().textContent).not.toMatch(/NaN|undefined/);
+    }
+    goTo('summary');
     closeDashboard(document);
+  });
+
+  it('mines tab: one row per planet with game links', () => {
+    open();
+    goTo('mines');
+    const rows = shadow().querySelectorAll('tbody tr');
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.querySelector('a')?.getAttribute('href')).toContain('cp=1');
+    goTo('summary');
+    closeDashboard(document);
+  });
+});
+
+describe('dashboard maths', () => {
+  it('scrap return follows the rate and caps at 75%', () => {
+    expect(scrapReturn({ 202: 10 }, 35)).toEqual({ metal: 7000, crystal: 7000, deuterium: 0 });
+    expect(scrapReturn({ 202: 10 }, 90)).toEqual(scrapReturn({ 202: 10 }, 75));
+  });
+  it('names: learned beats built-in, lifeforms fall back to English', () => {
+    expect(techName(1, 'it')).toBe('Miniera di metallo');
+    expect(techName(1, 'it', { 1: 'Miniera M' })).toBe('Miniera M');
+    expect(techName(12101, 'it')).toBe('Meditation Enclave');
+    expect(techName(14218, 'de')).toBe('Kaelesh Discoverer Enhancement');
+    expect(lfResearch(2)).toHaveLength(18);
   });
 });
