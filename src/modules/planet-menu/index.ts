@@ -19,6 +19,8 @@ export type MenuMode = 'side' | 'compact';
 export interface MenuSettings {
   mode: MenuMode;
   showTotals: boolean;
+  /** Amber dot on planets with nothing under construction. */
+  markIdle: boolean;
 }
 
 export interface PlanetMenuOptions {
@@ -32,6 +34,8 @@ export interface PlanetMenuOptions {
   onSettingsChange: (next: MenuSettings) => void;
   /** Runs the user-initiated sync. Only ever called from the Sync button's click. */
   onSync: () => Promise<void>;
+  /** Opens the account dashboard (Future's own panel, no game action). */
+  onOpenDashboard?: () => void;
 }
 
 const STYLE_ID = 'fut-planet-menu-style';
@@ -39,6 +43,7 @@ const STYLE_ID = 'fut-planet-menu-style';
 let panelOpen = false;
 
 const ICONS = {
+  dashboard: '<path stroke="none" d="M3 3h8v10H3zM13 3h8v6h-8zM13 11h8v10h-8zM3 15h8v6H3z"/>',
   side: '<path stroke="none" d="M2 5h12v14H2zM16 5h6v14h-6z"/>',
   compact: '<path stroke="none" d="M3 4h18v3H3zM3 10.5h18v3H3zM3 17h18v3H3z"/>',
   sync: '<path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9" fill="none" stroke-width="2.2"/><path d="M19 3v5h-5M5 21v-5h5" fill="none" stroke-width="2.2"/>',
@@ -205,6 +210,7 @@ function toolbar(o: PlanetMenuOptions, mode: MenuMode, roomy: boolean, colonies:
   });
   gear.setAttribute('aria-expanded', String(panelOpen));
 
+  if (o.onOpenDashboard) bar.append(iconButton(doc, 'dashboard', t('dash.title'), o.onOpenDashboard));
   bar.append(sw, sync, gear);
   return bar;
 }
@@ -237,6 +243,11 @@ function settingsPanel(o: PlanetMenuOptions, mode: MenuMode, roomy: boolean, col
     t('settings.totals'),
     choice(t('settings.on'), o.settings.showTotals, () => o.onSettingsChange({ ...o.settings, showTotals: true })),
     choice(t('settings.off'), !o.settings.showTotals, () => o.onSettingsChange({ ...o.settings, showTotals: false })),
+  );
+  row(
+    t('settings.markIdle'),
+    choice(t('settings.on'), o.settings.markIdle, () => o.onSettingsChange({ ...o.settings, markIdle: true })),
+    choice(t('settings.off'), !o.settings.markIdle, () => o.onSettingsChange({ ...o.settings, markIdle: false })),
   );
   if (colonies) panel.append(el(doc, 'div', 'fut-set-note', colonies));
   if (o.snapshot) panel.append(el(doc, 'div', 'fut-set-note', t('toolbar.lastSync', { time: formatTime(o.snapshot.fetchedAt, o.locale) })));
@@ -284,7 +295,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       // Queue: the game's construction icon stays as it is (its own link); a planet with
       // nothing in construction gets an amber dot.
       if (entry.construction.planet) entry.element.classList.add('fut-building');
-      else {
+      else if (o.settings.markIdle) {
         const idle = el(doc, 'span', 'fut-idle');
         idle.title = o.t('planetMenu.idle');
         link.append(idle);
@@ -314,7 +325,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
     const box = el(doc, 'div', 'fut-totals');
     const line = (label: string, value: number, rate: number, cls: string) => {
       box.append(el(doc, 'span', cls, `${label} ${formatUnits(value, o.locale)}`));
-      box.append(el(doc, 'span', 'fut-rate', `+${formatUnits(rate, o.locale)}/h`));
+      box.append(el(doc, 'span', 'fut-rate', `+${formatUnits(rate * 24, o.locale)}/24h`));
     };
     line(o.t('res.metal'), stock.metal, perHour.metal, 'fut-m');
     line(o.t('res.crystal'), stock.crystal, perHour.crystal, 'fut-c');
