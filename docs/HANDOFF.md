@@ -79,3 +79,7 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
 I test (`npm test`, vitest + jsdom) usano fixture in `tests/`. Le anteprime grafiche sono state
 fatte caricando le pagine di gioco salvate da Nicola in Chromium (Playwright) e iniettando
 `dist/future.user.js`; le pagine salvate non sono nel repo perché contengono dati dell'account.
+
+Dal 2026-11-05 c'è anche la prova sul gioco vero: `npm run dev` apre un Chrome dedicato che esegue
+`dist/future.user.js` senza Tampermonkey e si pilota da riga di comando (harness portato da PrOGect,
+`scripts/dev-browser.mjs`; comandi in `.claude/QUICK_START.md`).
