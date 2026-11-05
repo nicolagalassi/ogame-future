@@ -13,7 +13,7 @@ import {
 import { readFuel, readShipSlots, originCoords, isFleetDispatch } from '../src/data/fleet-page';
 import { enableOriginAutofill } from '../src/modules/fleet/index';
 import { prepareDeploy, prepareExpedition, prepareTransport } from '../src/modules/fleet/actions';
-import { armRepeat, decideRepeat, readRepeatParams, repeatUrl } from '../src/modules/fleet/repeat';
+import { hookSend, nextInRound, readRepeatParams, repeatUrl } from '../src/modules/fleet/repeat';
 import { DEFAULT_SETTINGS, cargoLoad, cargoShipsFor, expeditionFleet, expeditionMax, expeditionTarget, nextBody } from '../src/engines/fleet';
 import type { FleetDispatcher } from '../src/data/fleet-dispatcher';
 
@@ -252,14 +252,34 @@ describe('repeat', () => {
     expect(readRepeatParams('https://x.test/game/index.php?page=ingame')).toBeNull();
   });
 
-  it('moves on only after a successful send from the same body', () => {
-    armRepeat({ mode: 'expedition', first: 1, dest: null }, 1, 3, 1000);
-    expect(decideRepeat({ bodyId: 1, fleetCount: 3, list, now: 2000 }).kind).toBe('none');
-    armRepeat({ mode: 'expedition', first: 1, dest: null }, 1, 3, 1000);
-    expect(decideRepeat({ bodyId: 1, fleetCount: 4, list, now: 2000 })).toEqual({ kind: 'next', cp: 2, state: { mode: 'expedition', first: 1, dest: null } });
-    armRepeat({ mode: 'expedition', first: 1, dest: null }, 2, 4, 1000);
-    expect(decideRepeat({ bodyId: 2, fleetCount: 5, list, now: 2000 }).kind).toBe('done');
-    armRepeat({ mode: 'expedition', first: 1, dest: null }, 1, 3, 1000);
-    expect(decideRepeat({ bodyId: 1, fleetCount: 4, list, now: 120_000 }).kind).toBe('none');
+  it('goes round the bodies and stops at the first one', () => {
+    expect(nextInRound({ mode: 'expedition', first: 1, dest: null }, 1, list)).toBe(2);
+    expect(nextInRound({ mode: 'expedition', first: 1, dest: null }, 2, list)).toBeNull();
+    expect(nextInRound({ mode: 'transport', first: 11, dest: 12 }, 11, list)).toBeNull();
+    expect(nextInRound({ mode: 'moon', first: 2, dest: null }, 2, list)).toBe(1);
+  });
+
+  it('hooks the game send and takes over only on success', () => {
+    const calls: string[] = [];
+    let reply = '{"success":true}';
+    (window as unknown as { $: unknown }).$ = {
+      post(url: string, _p: unknown, cb: (r: string) => void) {
+        calls.push('post ' + url);
+        cb(reply);
+      },
+    };
+    const fd = fakeDispatcher() as unknown as FleetDispatcher & { submitFleet2: () => void; sendFleetUrl: string };
+    fd.sendFleetUrl = 'send';
+    fd.submitFleet2 = () => (window as unknown as { $: { post: (u: string, p: unknown, cb: (r: string) => void) => void } }).$.post('send', {}, () => calls.push('game callback'));
+    let takeOver = true;
+    hookSend(fd, () => takeOver);
+    fd.submitFleet2();
+    expect(calls).toEqual(['post send']);
+    takeOver = false;
+    fd.submitFleet2();
+    reply = '{"success":false}';
+    takeOver = true;
+    fd.submitFleet2();
+    expect(calls).toEqual(['post send', 'post send', 'game callback', 'post send', 'game callback']);
   });
 });
