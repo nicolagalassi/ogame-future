@@ -9,6 +9,10 @@ import type { PlanetListEntry } from '../../data/planet-list';
 import type { Score } from '../../data/score';
 import { formatUnits } from '../../core/format';
 import { accountAlerts, bodyRows, msu, summarize, type BodyRow } from '../../engines/account';
+import { activeItems, QUEUE_KINDS, type QueueSnapshot } from '../../data/queues';
+import { bestUpgrades } from '../../engines/roi';
+import { fleetLink, largeCargoCapacity, planCollection } from '../../engines/collect';
+import { remaining } from '../planet-menu';
 import { DASHBOARD_CSS } from './style';
 
 export interface DashboardOptions {
@@ -16,6 +20,7 @@ export interface DashboardOptions {
   snapshot: AccountSnapshot | null;
   entries: PlanetListEntry[];
   score: Score | null;
+  queues?: QueueSnapshot | null;
   now: number;
   locale: string;
   t: (key: string, vars?: Record<string, string | number>) => string;
@@ -27,6 +32,8 @@ const HOST_ID = 'fut-dashboard';
 let sortKey: SortKey = 'list';
 let sortDesc = false;
 let showMoons = true;
+let tab: 'overview' | 'collect' = 'overview';
+const collect = { target: 0, metal: true, crystal: true, deuterium: true, capacity: 0 };
 let keyHandler: ((e: KeyboardEvent) => void) | null = null;
 
 function h<K extends keyof HTMLElementTagNameMap>(tag: K, className = '', text?: string): HTMLElementTagNameMap[K] {
@@ -115,7 +122,7 @@ export function openDashboard(o: DashboardOptions): void {
   });
 
   const fmt = (v: number) => formatUnits(v, locale);
-  const rows = bodyRows(o.snapshot, o.entries, o.now);
+  const rows = bodyRows(o.snapshot, o.entries, o.now, o.queues ?? null);
   const sum = summarize(rows);
   const alerts = accountAlerts(rows, o.snapshot, o.entries);
 
@@ -133,8 +140,25 @@ export function openDashboard(o: DashboardOptions): void {
   x.type = 'button';
   x.setAttribute('aria-label', t('dash.close'));
   x.addEventListener('click', close);
-  header.append(titles, x);
+  const tabs = h('nav', 'tabs');
+  for (const key of ['overview', 'collect'] as const) {
+    const b = h('button', 'tab', t(`dash.tab.${key}`));
+    b.type = 'button';
+    b.setAttribute('aria-pressed', String(tab === key));
+    b.addEventListener('click', () => {
+      tab = key;
+      openDashboard(o);
+    });
+    tabs.append(b);
+  }
+  header.append(titles, tabs, x);
   panel.append(header);
+  doc.body.append(host);
+
+  if (tab === 'collect') {
+    renderCollect(o, panel, rows);
+    return;
+  }
 
   // KPIs
   const kpis = h('div', 'kpis');
@@ -152,7 +176,16 @@ export function openDashboard(o: DashboardOptions): void {
   kpi(t('dash.stock'), fmt(msu(sum.stock)), t('dash.stockNote'), 'accent');
   kpi(t('dash.prodHour'), `+${fmt(msu(sum.perHour))}`, t('dash.prodDay', { value: fmt(msu(sum.perHour) * 24) }), 'accent');
   kpi(t('dash.bodies'), `${sum.planets} / ${sum.moons}`, t('dash.bodiesNote'));
-  kpi(t('dash.idle'), String(sum.idle), t('dash.idleNote'), sum.idle ? 'warn' : '');
+  // Running queues: how many bodies have each kind in progress.
+  const running = new Map<string, number>();
+  let busyBodies = 0;
+  for (const r of rows) {
+    const items = activeItems(o.queues?.bodies[String(r.id)], o.now);
+    if (items.length) busyBodies++;
+    for (const k of new Set(items.map((i) => i.kind))) running.set(k, (running.get(k) ?? 0) + 1);
+  }
+  const breakdown = QUEUE_KINDS.filter((k) => running.has(k)).map((k) => `${running.get(k)} ${t(`queue.${k}`).toLowerCase()}`).join(' · ');
+  kpi(t('dash.queues'), o.queues ? String(busyBodies) : '—', o.queues ? breakdown || t('dash.queuesNone') : t('dash.queuesUnknown'), 'accent');
   panel.append(kpis);
 
   // Two columns: production + alerts
@@ -188,7 +221,21 @@ export function openDashboard(o: DashboardOptions): void {
     item.append(text);
     checks.append(item);
   }
-  cols.append(prod, checks);
+  const movesCard = h('div', 'card');
+  movesCard.append(h('h3', '', t('dash.moves')));
+  const moves = bestUpgrades(o.snapshot, o.entries, 5);
+  if (!moves.length) movesCard.append(h('p', 'hint', t('dash.movesNone')));
+  moves.forEach((m, i) => {
+    const line = h('div', 'move');
+    line.append(h('span', 'n', String(i + 1)));
+    const text = h('div', 'move-text');
+    text.append(h('strong', '', `${t(`mine.${m.mine}`)} ${m.from} → ${m.from + 1}`));
+    text.append(h('span', '', `${m.name} [${m.coords}] · ${fmt(m.cost.metal)} M · ${fmt(m.cost.crystal)} C`));
+    line.append(text, h('span', 'roi mono', m.days < 1 ? `<1 ${t('dash.daysShort')}` : `${m.days.toFixed(1)} ${t('dash.daysShort')}`));
+    movesCard.append(line);
+  });
+  movesCard.append(h('p', 'hint', t('dash.movesHint')));
+  cols.append(prod, movesCard, checks);
   panel.append(cols);
 
   // Table
@@ -232,6 +279,7 @@ export function openDashboard(o: DashboardOptions): void {
   th(t('res.deuterium'), 'deuterium', 'num');
   th(t('dash.colProd'), 'prod', 'num');
   th(t('dash.colFull'), 'full', 'num');
+  th(t('dash.colQueue'), null);
   th(t('dash.colAge'), 'age', 'num');
   thead.append(hr);
   table.append(thead);
@@ -244,7 +292,6 @@ export function openDashboard(o: DashboardOptions): void {
     const link = h('a', '', r.type === 'moon' ? `☾ ${r.name}` : r.name);
     link.href = `${origin}/game/index.php?page=ingame&component=overview&cp=${r.id}`;
     nameCell.append(link, h('span', 'coords', `[${r.coords}]`));
-    if (r.idle) nameCell.append(h('span', 'tag', t('dash.idleTag')));
     tr.append(nameCell);
     tr.append(h('td', 'num mono', r.type === 'planet' ? `${r.mines.metal}·${r.mines.crystal}·${r.mines.deuterium}` : ''));
     for (const k of ['metal', 'crystal', 'deuterium'] as const) {
@@ -256,6 +303,13 @@ export function openDashboard(o: DashboardOptions): void {
     tr.append(h('td', 'num mono', r.type === 'planet' ? `+${fmt(msu(r.perHour) * 24)}` : ''));
     const mf = minFull(r);
     tr.append(h('td', `num mono${mf !== null && mf <= 6 ? ' warnText' : ''}`, r.type === 'planet' ? hoursText(mf, t) : ''));
+    const qCell = h('td', 'queue');
+    for (const item of activeItems(o.queues?.bodies[String(r.id)], o.now)) {
+      const q = h('span', `q q-${item.kind}`, `${item.name}${item.level ? ` ${item.level}` : ''}`);
+      q.title = `${t(`queue.${item.kind}`)} · ${remaining(item.end, o.now)}`;
+      qCell.append(q);
+    }
+    tr.append(qCell);
     tr.append(h('td', `num mono age ${ageClass(r.ageMinutes)}`, ageText(r.ageMinutes)));
     tbody.append(tr);
   }
@@ -265,7 +319,7 @@ export function openDashboard(o: DashboardOptions): void {
   const fr = h('tr');
   fr.append(h('td', 'name', t('dash.total')), h('td'));
   fr.append(h('td', 'num mono m', fmt(sum.stock.metal)), h('td', 'num mono c', fmt(sum.stock.crystal)), h('td', 'num mono d', fmt(sum.stock.deuterium)));
-  fr.append(h('td', 'num mono', `+${fmt(msu(sum.perHour) * 24)}`), h('td'), h('td'));
+  fr.append(h('td', 'num mono', `+${fmt(msu(sum.perHour) * 24)}`), h('td'), h('td'), h('td'));
   tfoot.append(fr);
   table.append(tfoot);
 
@@ -273,6 +327,113 @@ export function openDashboard(o: DashboardOptions): void {
   tableCard.append(wrap);
   tableCard.append(h('p', 'hint', t('dash.tableHint')));
   panel.append(tableCard);
+}
 
-  doc.body.append(host);
+/** "Raccolta risorse": ships needed to bring resources to one body. Calculation only. */
+function renderCollect(o: DashboardOptions, panel: HTMLElement, rows: BodyRow[]): void {
+  const { doc, t, locale } = o;
+  const fmt = (v: number) => formatUnits(v, locale);
+  const classId = Number(doc.querySelector('meta[name="ogame-player-characterclass-id"]')?.getAttribute('content')) || null;
+  if (!collect.capacity) collect.capacity = largeCargoCapacity(o.snapshot, classId);
+  if (!rows.some((r) => r.id === collect.target)) {
+    const here = Number(doc.querySelector('meta[name="ogame-planet-id"]')?.getAttribute('content'));
+    collect.target = rows.some((r) => r.id === here) ? here : (rows[0]?.id ?? 0);
+  }
+  const target = rows.find((r) => r.id === collect.target);
+
+  const card = h('div', 'card');
+  card.append(h('h3', '', t('collect.title')));
+  const form = h('div', 'form');
+
+  const targetLabel = h('label', 'field');
+  targetLabel.append(h('span', '', t('collect.target')));
+  const select = h('select');
+  for (const r of rows) {
+    const opt = h('option', '', `${r.type === 'moon' ? '☾ ' : ''}${r.name} [${r.coords}]`);
+    opt.value = String(r.id);
+    opt.selected = r.id === collect.target;
+    select.append(opt);
+  }
+  select.addEventListener('change', () => {
+    collect.target = Number(select.value);
+    openDashboard(o);
+  });
+  targetLabel.append(select);
+  form.append(targetLabel);
+
+  const picks = h('div', 'field');
+  picks.append(h('span', '', t('collect.resources')));
+  const pickRow = h('div', 'picks');
+  for (const k of ['metal', 'crystal', 'deuterium'] as const) {
+    const lab = h('label', `pick ${k[0]}`);
+    const box = h('input');
+    box.type = 'checkbox';
+    box.checked = collect[k];
+    box.addEventListener('change', () => {
+      collect[k] = box.checked;
+      openDashboard(o);
+    });
+    lab.append(box, doc.createTextNode(` ${t(`res.${k}`)}`));
+    pickRow.append(lab);
+  }
+  picks.append(pickRow);
+  form.append(picks);
+
+  const capLabel = h('label', 'field');
+  capLabel.append(h('span', '', t('collect.capacity')));
+  const cap = h('input');
+  cap.type = 'number';
+  cap.min = '1';
+  cap.value = String(collect.capacity);
+  cap.addEventListener('change', () => {
+    collect.capacity = Math.max(1, Math.floor(Number(cap.value) || 0));
+    openDashboard(o);
+  });
+  capLabel.append(cap);
+  form.append(capLabel);
+  card.append(form);
+
+  const plan = planCollection(rows, o.snapshot, collect.target, collect, collect.capacity);
+  const wrap = h('div', 'table-wrap');
+  const table = h('table');
+  const head = h('tr');
+  for (const [label, cls] of [
+    [t('dash.colBody'), ''], [t('res.metal'), 'num'], [t('res.crystal'), 'num'], [t('res.deuterium'), 'num'],
+    [t('collect.ships'), 'num'], [t('collect.available'), 'num'], ['', ''],
+  ] as const) head.append(h('th', cls, label));
+  const thead = h('thead');
+  thead.append(head);
+  table.append(thead);
+  const tbody = h('tbody');
+  const origin = doc.location?.origin ?? '';
+  for (const r of plan.rows) {
+    const tr = h('tr', r.type);
+    const name = h('td', 'name');
+    name.append(h('span', 'strong', `${r.type === 'moon' ? '☾ ' : ''}${r.name}`), h('span', 'coords', `[${r.coords}]`));
+    tr.append(name);
+    tr.append(h('td', 'num mono m', fmt(r.send.metal)), h('td', 'num mono c', fmt(r.send.crystal)), h('td', 'num mono d', fmt(r.send.deuterium)));
+    tr.append(h('td', 'num mono', r.ships.toLocaleString(locale)));
+    tr.append(h('td', `num mono${r.available < r.ships ? ' short' : ''}`, r.available.toLocaleString(locale)));
+    const act = h('td', 'num');
+    if (target) {
+      const a = h('a', 'go', t('collect.open'));
+      a.href = fleetLink(origin, r.id, { coords: target.coords, type: target.type }, Math.min(r.ships, r.available) || r.ships);
+      a.title = t('collect.openHint');
+      act.append(a);
+    }
+    tr.append(act);
+    tbody.append(tr);
+  }
+  table.append(tbody);
+  const foot = h('tfoot');
+  const fr = h('tr');
+  fr.append(h('td', 'name', t('dash.total')));
+  fr.append(h('td', 'num mono m', fmt(plan.send.metal)), h('td', 'num mono c', fmt(plan.send.crystal)), h('td', 'num mono d', fmt(plan.send.deuterium)));
+  fr.append(h('td', 'num mono', plan.ships.toLocaleString(locale)), h('td'), h('td'));
+  foot.append(fr);
+  table.append(foot);
+  wrap.append(table);
+  card.append(wrap);
+  card.append(h('p', 'hint', t('collect.hint')));
+  panel.append(card);
 }

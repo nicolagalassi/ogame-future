@@ -10,6 +10,7 @@
  */
 import type { AccountSnapshot, OwnBody } from '../../data/account-info';
 import type { PlanetListEntry } from '../../data/planet-list';
+import { activeItems, type QueueItem, type QueueSnapshot } from '../../data/queues';
 import { formatUnits } from '../../core/format';
 import { estimateResources, storageFill, totals } from '../../engines/resources';
 import { MENU_WIDTH, NATIVE_WIDTH, PLANET_MENU_CSS } from './style';
@@ -27,6 +28,8 @@ export interface PlanetMenuOptions {
   doc: Document;
   entries: PlanetListEntry[];
   snapshot: AccountSnapshot | null;
+  /** Production queues per body (null when never read). */
+  queues?: QueueSnapshot | null;
   settings: MenuSettings;
   now: number;
   locale: string;
@@ -152,10 +155,28 @@ function startAgeClock(doc: Document): void {
   }, 60_000);
 }
 
+export function remaining(end: number, now: number): string {
+  const min = Math.max(0, Math.round((end - now) / 60_000));
+  if (min < 60) return `${min}m`;
+  const hours = Math.floor(min / 60);
+  return hours < 48 ? `${hours}h ${String(min % 60).padStart(2, '0')}m` : `${Math.floor(hours / 24)}d ${hours % 24}h`;
+}
+
+/** Coloured stripes, one per running queue kind (as OGLight), with the details in the tooltip. */
+function queueStripes(doc: Document, items: QueueItem[], now: number, t: PlanetMenuOptions['t']): HTMLElement | null {
+  if (!items.length) return null;
+  const box = el(doc, 'span', 'fut-queue');
+  box.title = items
+    .map((i) => `${t(`queue.${i.kind}`)}: ${i.name}${i.level ? ` → ${i.level}` : ''} · ${remaining(i.end, now)}`)
+    .join('\n');
+  for (const i of items) box.append(el(doc, 'span', `fut-q fut-q-${i.kind}`));
+  return box;
+}
+
 /** Removes everything Future added, so the menu can be redrawn without duplicates. */
 export function clearPlanetMenu(doc: Document): void {
   doc
-    .querySelectorAll('.fut-res, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-idle, .fut-nomoon, .fut-age')
+    .querySelectorAll('.fut-res, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-idle, .fut-nomoon, .fut-age, .fut-queue')
     .forEach((n) => n.remove());
   doc.querySelectorAll('.fut-name').forEach((wrap) => wrap.replaceWith(...Array.from(wrap.childNodes)));
   doc.querySelectorAll('.fut-row').forEach((n) => n.classList.remove('fut-row', 'fut-current', 'fut-building'));
@@ -292,6 +313,8 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true));
       const age = ageBadge(doc, planetBody, o.now, o.t);
       if (age) link.append(age);
+      const pq = entry.planetId ? queueStripes(doc, activeItems(o.queues?.bodies[String(entry.planetId)], o.now), o.now, o.t) : null;
+      if (pq) wrap.append(pq);
       // Queue: the game's construction icon stays as it is (its own link); a planet with
       // nothing in construction gets an amber dot.
       if (entry.construction.planet) entry.element.classList.add('fut-building');
@@ -308,6 +331,8 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       moon.append(resourceColumn(doc, moonBody, o.now, o.locale, false));
       const age = ageBadge(doc, moonBody, o.now, o.t);
       if (age) moon.append(age);
+      const mq = entry.moonId ? queueStripes(doc, activeItems(o.queues?.bodies[String(entry.moonId)], o.now), o.now, o.t) : null;
+      if (mq) moon.append(mq);
     } else {
       // Keeps the planet columns aligned on planets without a moon.
       link?.after(el(doc, 'span', 'fut-nomoon'));

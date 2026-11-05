@@ -10,6 +10,7 @@ import { SNAPSHOT_KEY, hydrateAccountOncePerSession, syncAccountOnUserClick, typ
 import { currentBodyId, readCurrentResources, readPlanetList } from './data/planet-list';
 import { applyPageResources } from './engines/resources';
 import { SCORE_KEY, readScore, type Score } from './data/score';
+import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
 import { openDashboard } from './modules/dashboard';
 import { renderPlanetMenu, type MenuMode, type MenuSettings } from './modules/planet-menu';
 
@@ -25,10 +26,17 @@ async function bootstrap(): Promise<void> {
   const saver = new IdleSaver(() => store.set(SNAPSHOT_KEY, snapshot));
   window.addEventListener('beforeunload', () => saver.saveNow());
 
+  const bodyIds = readPlanetList(document).flatMap((e) => [e.planetId, e.moonId]).filter((id): id is number => id !== null);
+  let queues: QueueSnapshot | null = store.get<QueueSnapshot | null>(QUEUES_KEY, null);
   try {
-    snapshot = await hydrateAccountOncePerSession({ guard, store, session: window.sessionStorage });
-  } catch (error) {
-    console.warn(`[${t('app.name')}]`, error);
+    const [account, queue] = await Promise.allSettled([
+      hydrateAccountOncePerSession({ guard, store, session: window.sessionStorage }),
+      loadQueuesOnPageLoad({ guard, store, ids: bodyIds }),
+    ]);
+    if (account.status === 'fulfilled') snapshot = account.value;
+    else console.warn(`[${t('app.name')}]`, account.reason);
+    if (queue.status === 'fulfilled') queues = queue.value;
+    else console.warn(`[${t('app.name')}]`, queue.reason);
   } finally {
     // COMPLIANCE: from here on no background call can leave the page (AGENTS.md §4).
     guard.closePageLoadWindow();
@@ -56,6 +64,7 @@ async function bootstrap(): Promise<void> {
       doc: document,
       entries: readPlanetList(document),
       snapshot,
+      queues,
       settings,
       now: Date.now(),
       locale,
@@ -73,6 +82,7 @@ async function bootstrap(): Promise<void> {
           snapshot,
           entries: readPlanetList(document),
           score: store.get<Score | null>(SCORE_KEY, null),
+          queues,
           now: Date.now(),
           locale,
           t,
@@ -80,7 +90,12 @@ async function bootstrap(): Promise<void> {
       // COMPLIANCE: runs only from the Sync button's click (reason 'user-sync', no cp).
       onSync: async () => {
         try {
-          snapshot = await syncAccountOnUserClick(deps);
+          const [account, queue] = await Promise.allSettled([
+            syncAccountOnUserClick(deps),
+            syncQueuesOnUserClick({ guard, store, ids: bodyIds }),
+          ]);
+          if (account.status === 'fulfilled') snapshot = account.value;
+          if (queue.status === 'fulfilled') queues = queue.value;
           draw();
         } catch (error) {
           console.warn(`[${t('app.name')}]`, error);

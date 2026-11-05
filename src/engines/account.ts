@@ -4,6 +4,7 @@
  */
 import type { AccountSnapshot, Resources } from '../data/account-info';
 import type { PlanetListEntry } from '../data/planet-list';
+import { activeItems, type QueueSnapshot } from '../data/queues';
 import { effectiveStorage, estimateResources, storageFill } from './resources';
 
 const KEYS = ['metal', 'crystal', 'deuterium'] as const;
@@ -30,7 +31,16 @@ export interface BodyRow {
   idle: boolean | null;
 }
 
-export function bodyRows(snapshot: AccountSnapshot | null, entries: PlanetListEntry[], now: number): BodyRow[] {
+/**
+ * Builds the rows. Idle = no building or lifeform building running: from the production
+ * queues when known, otherwise from the game's construction icon in the planet list.
+ */
+export function bodyRows(
+  snapshot: AccountSnapshot | null,
+  entries: PlanetListEntry[],
+  now: number,
+  queues: QueueSnapshot | null = null,
+): BodyRow[] {
   if (!snapshot) return [];
   const byId = new Map(snapshot.bodies.map((b) => [b.id, b]));
   const rows: BodyRow[] = [];
@@ -58,7 +68,12 @@ export function bodyRows(snapshot: AccountSnapshot | null, entries: PlanetListEn
         hoursToFull: { metal: toFull('metal'), crystal: toFull('crystal'), deuterium: toFull('deuterium') },
         ageMinutes: Math.max(0, Math.floor((now - body.resourcesAt) / 60_000)),
         mines: { metal: body.levels['1'] ?? 0, crystal: body.levels['2'] ?? 0, deuterium: body.levels['3'] ?? 0 },
-        idle: type === 'planet' ? !entry.construction.planet : null,
+        idle:
+          type !== 'planet'
+            ? null
+            : queues
+              ? !activeItems(queues.bodies[String(body.id)], now).some((i) => i.kind === 'building' || i.kind === 'lfbuilding')
+              : !entry.construction.planet,
       });
     }
   }
