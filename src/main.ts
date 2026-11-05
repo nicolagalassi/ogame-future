@@ -10,6 +10,7 @@ import { SNAPSHOT_KEY, hydrateAccountOncePerSession, syncAccountOnUserClick, typ
 import { currentBodyId, readCurrentResources, readPlanetList } from './data/planet-list';
 import { applyPageResources } from './engines/resources';
 import { SCORE_KEY, watchScore, type Score } from './data/score';
+import { isGalaxyPage, watchGalaxy } from './modules/galaxy';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
 import { ITEMS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems } from './data/bonuses';
 import { openDashboard } from './modules/dashboard';
@@ -221,6 +222,12 @@ async function bootstrap(): Promise<void> {
   if (isFleetDispatch(document) && currentId) {
     const bodies = readPlanetList(document).map(({ planetId, moonId, name, coords }) => ({ planetId, moonId, name, coords }));
     renderFleetTools({ doc: document, store, bodyId: currentId, bodies, t, locale });
+  }
+
+  // Galaxy view: system summary, marks, debris in MSU, targets and the scores card.
+  if (isGalaxyPage(document)) {
+    const ownPlanetIds = new Set(readPlanetList(document).flatMap((e) => (e.planetId ? [e.planetId] : [])));
+    watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t });
   }
 }
 

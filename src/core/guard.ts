@@ -6,13 +6,16 @@
  *   the window closes and any further 'page-load' call is refused.
  * - 'user-sync' calls are allowed later, but only from a handler bound to a
  *   real user click (e.g. the Sync button). Never call it from a timer.
+ * - 'user-view' calls are allowed later too, but only to the universe's public API
+ *   (/api/*.xml, no session, no cookies) and only from what the player points at
+ *   (as OGLight does for player data in the galaxy view). The caller caches the answer.
  * - The `cp` (change planet) parameter is refused on every game URL:
  *   it mutates the session's active planet.
  * - Every attempt, allowed or refused, is written to an in-memory log so the
  *   behaviour can be shown to a ToolDev during review.
  */
 
-export type CallReason = 'page-load' | 'user-sync';
+export type CallReason = 'page-load' | 'user-sync' | 'user-view';
 
 export interface GuardLogEntry {
   at: number;
@@ -55,7 +58,7 @@ export class NetworkGuard {
     this.log.push({ at: this.now(), url, reason, allowed: refusal === null, why: refusal ?? undefined });
     if (refusal !== null) throw new GuardError(refusal);
 
-    const isGame = this.isGameUrl(url);
+    const isGame = this.isGameUrl(url) && reason !== 'user-view';
     return this.fetchImpl(url, {
       ...init,
       credentials: isGame ? 'include' : 'omit',
@@ -66,6 +69,9 @@ export class NetworkGuard {
   private check(url: string, reason: CallReason): string | null {
     if (reason === 'page-load' && !this.pageLoadOpen) {
       return 'Background call refused: the page has finished loading (AGENTS.md §4).';
+    }
+    if (reason === 'user-view' && !(this.isGameUrl(url) && /^\/api\/\w+\.xml$/.test(new URL(url, this.gameOrigin).pathname))) {
+      return "Call refused: 'user-view' reaches only the universe's public API (AGENTS.md §6).";
     }
     if (this.isGameUrl(url) && new URL(url, this.gameOrigin).searchParams.has('cp')) {
       return 'Call refused: the cp parameter changes the active planet (AGENTS.md §4.2).';
