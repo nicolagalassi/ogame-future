@@ -1,14 +1,23 @@
 {
   "app.name": "Future",
-  "sync.button": "Synchronisieren",
+  "sync.button": "Kontodaten synchronisieren",
   "sync.done": "Daten aktualisiert",
   "data.missing": "Fehlende Daten auf {count} Planeten: öffne ihre Übersicht",
   "guard.refused": "Aufruf blockiert, um die OGame-Regeln einzuhalten",
   "planetMenu.moon": "Mond",
-  "planetMenu.stacked": "Gestapelt",
   "planetMenu.compact": "Kompakt",
   "res.metal": "Metall",
   "res.crystal": "Kristall",
   "res.deuterium": "Deuterium",
-  "planetMenu.idle": "Kein Bau im Gange"
+  "planetMenu.idle": "Kein Bau im Gange",
+  "planetMenu.side": "Nebeneinander",
+  "planetMenu.toSide": "Ansicht nebeneinander (mit Rohstoffen)",
+  "planetMenu.toCompact": "Kompakte Ansicht",
+  "planetMenu.noRoom": "Bildschirm zu schmal für die Ansicht nebeneinander",
+  "toolbar.settings": "Einstellungen",
+  "toolbar.lastSync": "letzte Aktualisierung {time}",
+  "settings.view": "Menüansicht",
+  "settings.totals": "Rohstoffsummen",
+  "settings.on": "An",
+  "settings.off": "Aus"
 }
