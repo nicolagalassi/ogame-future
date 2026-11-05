@@ -32,7 +32,7 @@ export function registerShortcuts(doc: Document, list: Shortcut[]): void {
     'keydown',
     (e) => {
       if (e.repeat || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
-      if (typing(doc) || doc.getElementById('fut-fleet-modal') || doc.getElementById('fut-dashboard') || doc.getElementById('fut-planner')) return;
+      if (typing(doc) || doc.getElementById('fut-fleet-modal') || doc.getElementById('fut-dashboard') || doc.getElementById('fut-planner') || doc.getElementById('fut-journal')) return;
       const s = registry.get(e.key.toLowerCase());
       if (!s) return;
       e.preventDefault();

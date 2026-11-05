@@ -21,6 +21,9 @@ import { nextBody } from './engines/fleet';
 import { watchTechPages } from './modules/tech';
 import { openPlanner } from './modules/tech/planner-view';
 import { PLAN_KEY, planCount, pruneByQueues, type Plan } from './engines/planner';
+import { isMessagesPage, ownPlayerId } from './data/messages';
+import { watchMessages } from './modules/messages';
+import { openJournal } from './modules/messages/journal-view';
 import { renderPlanetMenu, type MenuMode, type MenuSettings } from './modules/planet-menu';
 
 async function bootstrap(): Promise<void> {
@@ -127,6 +130,7 @@ async function bootstrap(): Promise<void> {
           navigate: (url) => location.assign(url),
         });
       },
+      onOpenJournal: () => openJournal({ doc: document, store, now: Date.now(), locale, t }),
       // COMPLIANCE: runs only from the Sync button's click (reason 'user-sync', no cp).
       onSync: async () => {
         try {
@@ -167,6 +171,9 @@ async function bootstrap(): Promise<void> {
   if (currentId) {
     watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), onPlanChange: () => draw() });
   }
+
+  // Inbox: a summary on each report; expedition reports go into the journal.
+  if (isMessagesPage(document)) watchMessages({ doc: document, store, playerId: ownPlayerId(document), locale, t });
 
   // Fleet page helpers: reserves and fleetsave, on the game's own form.
   if (isFleetDispatch(document) && currentId) {

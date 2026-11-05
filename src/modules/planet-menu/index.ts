@@ -42,6 +42,8 @@ export interface PlanetMenuOptions {
   /** Opens the construction plan; `planCount` items are planned in total. */
   onOpenPlanner?: () => void;
   planCount?: number;
+  /** Opens the expedition journal. */
+  onOpenJournal?: () => void;
 }
 
 const STYLE_ID = 'fut-planet-menu-style';
@@ -49,6 +51,7 @@ const STYLE_ID = 'fut-planet-menu-style';
 let panelOpen = false;
 
 const ICONS = {
+  journal: '<path d="M5 3.5h11a3 3 0 0 1 3 3V20.5H8a3 3 0 0 1-3-3z" fill="none" stroke-width="2"/><path d="M5 17.5a3 3 0 0 1 3-3h11" fill="none" stroke-width="2"/><path stroke="none" d="M9.5 6.5l1 2.2 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3L6.2 9l2.3-.3z"/>',
   planner: '<path d="M9 6h11M9 12h11M9 18h11" fill="none" stroke-width="2.2"/><path stroke="none" d="M3 4.5h3v3H3zM3 10.5h3v3H3zM3 16.5h3v3H3z"/>',
   dashboard: '<path stroke="none" d="M3 3h8v10H3zM13 3h8v6h-8zM13 11h8v10h-8zM3 15h8v6H3z"/>',
   side: '<path stroke="none" d="M2 5h12v14H2zM16 5h6v14h-6z"/>',
@@ -243,6 +246,7 @@ function toolbar(o: PlanetMenuOptions, mode: MenuMode, roomy: boolean, colonies:
     if (count) planner.append(el(doc, 'span', 'fut-tool-badge', count > 99 ? '99+' : String(count)));
     bar.append(planner);
   }
+  if (o.onOpenJournal) bar.append(iconButton(doc, 'journal', t('exp.title'), o.onOpenJournal));
   bar.append(sw, sync, gear);
   return bar;
 }
