@@ -210,5 +210,19 @@
   "plan.grandMissing": "Missing overall",
   "tech.rangeShort": "{from}→{to}",
   "tech.rangeHint": "Total of levels {from} to {to}",
-  "tech.discountShort": "−{pct}%"
+  "tech.discountShort": "−{pct}%",
+  "fleet.reserveOff": "Reserves off: ships and resources in reserve leave too.",
+  "fleet.reserveShort": "Reserves",
+  "fleet.reserveToggleHint": "Turns reserves 1 and 2 on or off without deleting them. Expeditions never use the reserve.",
+  "fleet.foodShort": "Ignore food",
+  "fleet.foodHint": "Food stays on the planet in every fleet, also with the game's own buttons.",
+  "fleet.err.noDelivery": "No plan delivery in progress.",
+  "fleet.ok.delivery": "Delivery ready: {ships} ships with {cargo} resources ({left} were missing). Press Next and Send fleet.",
+  "tech.timeHint": "Time of lv. {level} · total {from} to {to}",
+  "tech.amountHint": "Amount to plan: also more than you can pay for now",
+  "plan.items": "{n} items",
+  "plan.levels": "lv. {from}–{to}",
+  "plan.bring": "Bring resources here",
+  "plan.bringHint": "Opens the fleet page on the next planet with a transport of what is missing to here. After each send it moves to the next planet until nothing is missing.",
+  "plan.unknownHere": "Resources here unknown: press Sync"
 }

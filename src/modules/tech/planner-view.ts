@@ -11,6 +11,9 @@ import { estimateResources } from '../../engines/resources';
 import { clearBody, PLAN_KEY, planMissing, planTotal, removeFromPlan, type Plan } from '../../engines/planner';
 import { addCost, ZERO_COST, type Cost } from '../../engines/tech';
 import { PLANNER_CSS } from './style';
+import { DELIVERY_KEY, nextBody, type Delivery } from '../../engines/fleet';
+import { repeatUrl } from '../fleet/repeat';
+import type { PlanItem } from '../../engines/planner';
 import type { T } from './index';
 
 export const PLANNER_ID = 'fut-planner';
@@ -26,6 +29,35 @@ export interface PlannerOptions {
   locale: string;
   t: T;
   onChange?: () => void;
+  /** Current page URL and page change, for "Porta qui le risorse" (a normal navigation). */
+  href?: string;
+  navigate?: (url: string) => void;
+}
+
+/** Items of one tech next to each other become one row ("liv. 46–49"). */
+export interface PlanGroup {
+  id: number;
+  name: string;
+  from?: number;
+  to?: number;
+  amount?: number;
+  cost: Cost;
+  indexes: number[];
+}
+
+export function groupItems(items: PlanItem[]): PlanGroup[] {
+  const out: PlanGroup[] = [];
+  items.forEach((item, index) => {
+    const last = out[out.length - 1];
+    if (last && item.level !== undefined && last.id === item.id && last.to !== undefined && item.level === last.to + 1) {
+      last.to = item.level;
+      last.cost = addCost(last.cost, item.cost);
+      last.indexes.push(index);
+      return;
+    }
+    out.push({ id: item.id, name: item.name, from: item.level, to: item.level, amount: item.amount, cost: { ...item.cost }, indexes: [index] });
+  });
+  return out;
 }
 
 let keyHandler: ((e: KeyboardEvent) => void) | null = null;
@@ -102,54 +134,85 @@ export function openPlanner(o: PlannerOptions): void {
     let grand: Cost = { ...ZERO_COST };
     let grandMissing: Cost = { ...ZERO_COST };
     const cards: HTMLElement[] = [];
+    const refs = o.entries.map((e) => ({ planetId: e.planetId, moonId: e.moonId }));
+    const triple = (cost: Cost, cls = '') => {
+      const box = h('span', `triple ${cls}`);
+      for (const [key, c] of [
+        ['metal', 'm'],
+        ['crystal', 'c'],
+        ['deuterium', 'd'],
+      ] as const) {
+        const v = h('span', `num ${c}`, cost[key] ? fmt(cost[key]) : '—');
+        v.title = `${t(`tech.res.${key}`)}: ${Math.round(cost[key]).toLocaleString(locale)}`;
+        box.append(v);
+      }
+      return box;
+    };
     for (const body of bodies) {
       const items = plan[String(body.id)];
       if (!items?.length) continue;
       const total = planTotal(items);
       const have = haveOf(body.id);
       const gap = have ? planMissing(items, have) : null;
+      const short = gap ? gap.metal + gap.crystal + gap.deuterium : 0;
       grand = addCost(grand, total);
       if (gap) grandMissing = addCost(grandMissing, gap);
       const card = h('div', 'card');
       const top = h('div', 'card-head');
-      const clear = h('button', 'link', t('plan.clear'));
+      const title = h('div', 'card-title');
+      title.append(h('h3', '', body.label), h('span', 'count', t('plan.items', { n: items.length })));
+      const acts = h('div', 'card-acts');
+      if (gap && short > 0 && o.navigate && o.href) {
+        const bring = h('button', 'act', t('plan.bring'));
+        bring.title = t('plan.bringHint');
+        bring.addEventListener('click', () => {
+          const here = o.current?.id ?? null;
+          const source = here !== null && here !== body.id ? here : nextBody(refs, here ?? body.id, { skip: body.id });
+          if (!source) return;
+          const delivery: Delivery = { target: body.id, need: { metal: gap.metal, crystal: gap.crystal, deuterium: gap.deuterium } };
+          o.store.set(DELIVERY_KEY, delivery);
+          o.navigate!(repeatUrl(o.href!, source, { mode: 'plan', first: source, dest: body.id }));
+        });
+        acts.append(bring);
+      }
+      const clear = h('button', 'act ghost', t('plan.clear'));
       clear.addEventListener('click', () => save(clearBody(plan, body.id)));
-      top.append(h('h3', '', body.label), clear);
-      const table = h('div', 'rows');
-      const header = h('div', 'row hdr');
-      header.append(h('span', '', t('plan.colItem')), h('span', 'num', t('tech.res.metal')), h('span', 'num', t('tech.res.crystal')), h('span', 'num', t('tech.res.deuterium')), h('span'));
-      table.append(header);
-      items.forEach((item, index) => {
+      acts.append(clear);
+      top.append(title, acts);
+
+      const sums = h('div', 'sums');
+      const sumBox = (label: string, cost: Cost | null, cls: string) => {
+        const b = h('div', `sum ${cls}`);
+        b.append(h('span', 'label', label));
+        if (cost) b.append(triple(cost, cls === 'warn' ? 'short' : ''));
+        return b;
+      };
+      sums.append(sumBox(t('plan.total'), total, ''));
+      if (gap) sums.append(short > 0 ? sumBox(t('plan.missingHere'), gap, 'warn') : sumBox(t('plan.ready'), null, 'ok'));
+      else sums.append(sumBox(t('plan.unknownHere'), null, 'muted'));
+
+      const rows = h('div', 'rows');
+      for (const g of groupItems(items)) {
         const row = h('div', 'row');
-        const what = item.level !== undefined ? t('plan.level', { level: item.level }) : `×${(item.amount ?? 0).toLocaleString(locale)}`;
         const name = h('span', 'name');
-        name.append(h('span', '', item.name), h('span', 'lv', what));
-        row.append(name);
-        costCells(row, item.cost);
+        const what =
+          g.amount !== undefined
+            ? `×${g.amount.toLocaleString(locale)}`
+            : g.from === g.to
+              ? t('plan.level', { level: g.from ?? 0 })
+              : t('plan.levels', { from: g.from ?? 0, to: g.to ?? 0 });
+        name.append(h('span', '', g.name), h('span', 'lv', what));
         const remove = h('button', 'x', '×');
         remove.title = t('plan.remove');
-        remove.addEventListener('click', () => save(removeFromPlan(plan, body.id, index)));
-        row.append(remove);
-        table.append(row);
-      });
-      const sum = h('div', 'row sum');
-      sum.append(h('span', '', t('plan.total')));
-      costCells(sum, total);
-      sum.append(h('span'));
-      table.append(sum);
-      if (gap) {
-        const miss = h('div', 'row miss');
-        miss.append(h('span', '', t('plan.missingHere')));
-        if (gap.metal + gap.crystal + gap.deuterium > 0) costCells(miss, gap, 'short');
-        else {
-          const ok = h('span', 'ok', t('plan.ready'));
-          ok.style.gridColumn = 'span 3';
-          miss.append(ok);
-        }
-        miss.append(h('span'));
-        table.append(miss);
+        remove.addEventListener('click', () => {
+          let next = plan;
+          for (const i of [...g.indexes].reverse()) next = removeFromPlan(next, body.id, i);
+          save(next);
+        });
+        row.append(name, triple(g.cost), remove);
+        rows.append(row);
       }
-      card.append(top, table);
+      card.append(top, sums, rows);
       cards.push(card);
     }
 

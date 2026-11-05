@@ -47,7 +47,7 @@ export function repeatUrl(base: string, cp: number, state: RepeatState): string 
 /** Where the round goes after a successful send from `bodyId`: a body id, or null when done. */
 export function nextInRound(state: RepeatState, bodyId: number, list: BodyRef[]): number | null {
   const next = nextBody(list, bodyId, {
-    skip: state.mode === 'transport' || state.mode === 'deploy' ? state.dest : null,
+    skip: state.mode === 'transport' || state.mode === 'deploy' || state.mode === 'plan' ? state.dest : null,
     onlyWithMoon: state.mode === 'moon',
   });
   return next === null || next === state.first ? null : next;

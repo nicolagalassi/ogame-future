@@ -113,6 +113,10 @@ export interface FleetSettings {
   expeditionExtras: boolean;
   /** After a send from a Future button, open the next planet or moon ready with the same action. */
   repeat: boolean;
+  /** Reserves (1 and 2) on or off, without forgetting them. */
+  reserveOn: boolean;
+  /** Food stays home in every fleet, also with the game's own buttons (OGLight precedent). */
+  ignoreFood: boolean;
 }
 
 export const SETTINGS_KEY = 'fleet.settings';
@@ -126,7 +130,28 @@ export const DEFAULT_SETTINGS: FleetSettings = {
   expeditionValue: '',
   expeditionExtras: true,
   repeat: false,
+  reserveOn: true,
+  ignoreFood: false,
 };
+
+/** Resources still to bring to a planned body (planner "Porta risorse"). */
+export interface Delivery {
+  target: number;
+  need: Resources;
+}
+export const DELIVERY_KEY = 'plan.delivery';
+
+/** What one source body sends: what is still needed, within what it has after the reserve. */
+export function deliveryLoad(onPlanet: Resources, reserve: Reserve, fuel: number, capacity: number, need: Resources): Resources {
+  const free = resourcesAfterReserve(onPlanet, reserve, fuel);
+  let room = Math.max(0, Math.floor(capacity));
+  const deuterium = Math.min(free.deuterium, need.deuterium, room);
+  room -= deuterium;
+  const crystal = Math.min(free.crystal, need.crystal, room);
+  room -= crystal;
+  const metal = Math.min(free.metal, need.metal, room);
+  return { metal, crystal, deuterium };
+}
 
 /** Ships that carry resources, in the order offered to the player. */
 export const CARGO_SHIPS = [203, 202, 219, 209, 210];

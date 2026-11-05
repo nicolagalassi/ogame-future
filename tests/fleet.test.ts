@@ -12,7 +12,9 @@ import {
 } from '../src/engines/fleet';
 import { readFuel, readShipSlots, originCoords, isFleetDispatch } from '../src/data/fleet-page';
 import { enableOriginAutofill } from '../src/modules/fleet/index';
-import { prepareDeploy, prepareExpedition, prepareTransport } from '../src/modules/fleet/actions';
+import { prepareDelivery, prepareDeploy, prepareExpedition, prepareTransport } from '../src/modules/fleet/actions';
+import { applyFood } from '../src/modules/fleet/index';
+import { MemoryStore, Store } from '../src/core/storage';
 import { hookSend, nextInRound, readRepeatParams, repeatUrl } from '../src/modules/fleet/repeat';
 import { DEFAULT_SETTINGS, cargoLoad, cargoShipsFor, expeditionFleet, expeditionMax, expeditionTarget, nextBody } from '../src/engines/fleet';
 import type { FleetDispatcher } from '../src/data/fleet-dispatcher';
@@ -232,6 +234,38 @@ describe('fleet actions on the game dispatcher', () => {
     expect(fd.targetPlanet).toMatchObject({ galaxy: 5, system: 185, position: 16 });
     expect(fd.mission).toBe(15);
     expect(fd.expeditionTime).toBe(1);
+  });
+
+  it('expeditions ignore the reserve', () => {
+    const fd = fakeDispatcher();
+    prepareExpedition(fd, fleetPage(), { reserve: { ships: { '203': 100 }, resources: reserve.resources }, save: null }, { ...DEFAULT_SETTINGS, expeditionValue: '100k' }, { economySpeed: 1 });
+    expect(fd.selected[203]).toBe(50);
+  });
+
+  it('brings only what the plan still needs, within the reserve', () => {
+    const fd = fakeDispatcher();
+    const r = prepareDelivery(fd, fleetPage(), profile, DEFAULT_SETTINGS, { galaxy: 1, system: 2, position: 3, type: 1 }, { metal: 30_000, crystal: 0, deuterium: 100_000 });
+    // Deuterium: 20,000 here − 5,000 reserve − 1,000 fuel = 14,000.
+    expect(fd.cargoDeuterium).toBe(14_000);
+    expect(fd.cargoMetal).toBe(30_000);
+    expect(fd.cargoCrystal).toBe(0);
+    expect(fd.mission).toBe(3);
+    expect(r.ok).toBe(true);
+    expect(fd.selected).toEqual({ 203: 23 });
+  });
+
+  it('ignore food hides it from the game and gives it back', () => {
+    const store = new Store(new MemoryStore(), 'x');
+    const fd = fakeDispatcher() as FleetDispatcher & { foodOnPlanet?: number; cargoFood?: number };
+    fd.foodOnPlanet = 900;
+    fd.cargoFood = 100;
+    store.set('fleet.settings', { ignoreFood: true });
+    applyFood(store, fd);
+    expect(fd.foodOnPlanet).toBe(0);
+    expect(fd.cargoFood).toBe(0);
+    store.set('fleet.settings', { ignoreFood: false });
+    applyFood(store, fd);
+    expect(fd.foodOnPlanet).toBe(900);
   });
 
   it('prepares an expedition even when every slot is busy', () => {

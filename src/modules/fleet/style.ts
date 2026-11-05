@@ -6,11 +6,11 @@ export const FLEET_CSS = `
   font: 12px Arial, sans-serif; color: #C9D4E2;
 }
 .fut-frow { display: flex; align-items: flex-start; gap: 8px; }
-.fut-ftiles { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+.fut-ftiles { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; }
 .fut-ftilewrap { position: relative; display: inline-flex; }
 .fut-ftile {
   position: relative; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-  min-width: 60px; height: 58px; padding: 6px 6px; border-radius: 8px; border: 1px solid #24344B; background: #0A111C;
+  min-width: 56px; height: 58px; padding: 6px 4px; border-radius: 8px; border: 1px solid #24344B; background: #0A111C;
   color: #4FD1E8; font: 11px Arial, sans-serif; cursor: pointer;
 }
 .fut-ftile:hover { border-color: #4FD1E8; background: #0F1C2C; }
@@ -29,7 +29,7 @@ export const FLEET_CSS = `
 }
 .fut-fcaret:hover { color: #E6EDF5; }
 .fut-fcaret svg { width: 14px; height: 14px; }
-.fut-fside { display: flex; flex-direction: column; gap: 6px; }
+.fut-fside { display: grid; grid-template-columns: repeat(2, auto); gap: 4px; align-content: start; }
 .fut-ficon {
   width: 30px; height: 26px; display: inline-flex; align-items: center; justify-content: center; padding: 0;
   border-radius: 7px; border: 1px solid #24344B; background: #0A111C; color: #8A9BB0; cursor: pointer;

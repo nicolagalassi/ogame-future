@@ -210,5 +210,19 @@
   "plan.grandMissing": "Manque au total",
   "tech.rangeShort": "{from}→{to}",
   "tech.rangeHint": "Total des niveaux {from} à {to}",
-  "tech.discountShort": "−{pct}%"
+  "tech.discountShort": "−{pct}%",
+  "fleet.reserveOff": "Réserves désactivées : vaisseaux et ressources en réserve partent aussi.",
+  "fleet.reserveShort": "Réserves",
+  "fleet.reserveToggleHint": "Active ou désactive les réserves 1 et 2 sans les effacer. Les expéditions n'utilisent jamais la réserve.",
+  "fleet.foodShort": "Ignorer la nourriture",
+  "fleet.foodHint": "La nourriture reste sur la planète dans chaque flotte, même avec les boutons du jeu.",
+  "fleet.err.noDelivery": "Aucune livraison du plan en cours.",
+  "fleet.ok.delivery": "Livraison prête : {ships} vaisseaux avec {cargo} ressources (il manquait {left}). Appuyez sur Suivant puis Envoyer.",
+  "tech.timeHint": "Durée du niv. {level} · total de {from} à {to}",
+  "tech.amountHint": "Quantité à planifier : même plus que ce que vous pouvez payer maintenant",
+  "plan.items": "{n} éléments",
+  "plan.levels": "niv. {from}–{to}",
+  "plan.bring": "Amener les ressources ici",
+  "plan.bringHint": "Ouvre la flotte sur la planète suivante avec un transport de ce qui manque vers ici. Après chaque envoi, passe à la planète suivante jusqu'à ce que rien ne manque.",
+  "plan.unknownHere": "Ressources ici inconnues : appuyez sur Actualiser"
 }

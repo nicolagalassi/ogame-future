@@ -117,6 +117,8 @@ async function bootstrap(): Promise<void> {
           locale,
           t,
           onChange: () => draw(),
+          href: location.href,
+          navigate: (url) => location.assign(url),
         });
       },
       // COMPLIANCE: runs only from the Sync button's click (reason 'user-sync', no cp).
