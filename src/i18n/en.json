@@ -64,8 +64,6 @@
   "queue.ship": "Shipyard",
   "queue.lfbuilding": "Lifeform building",
   "queue.lfresearch": "Lifeform research",
-  "dash.tab.overview": "Overview",
-  "dash.tab.collect": "Collect resources",
   "dash.queues": "Active queues",
   "dash.queuesNone": "nothing under construction",
   "dash.queuesUnknown": "not read yet",
@@ -75,14 +73,5 @@
   "dash.colQueue": "Running",
   "mine.metal": "Metal mine",
   "mine.crystal": "Crystal mine",
-  "mine.deuterium": "Deuterium synthesizer",
-  "collect.title": "Collect resources on one body",
-  "collect.target": "Target",
-  "collect.resources": "Resources",
-  "collect.capacity": "Large Cargo capacity",
-  "collect.ships": "Large Cargos",
-  "collect.available": "Available",
-  "collect.open": "Open dispatch",
-  "collect.openHint": "Opens the game fleet page from this body with target, transport and cargos filled in. Check it and press Send yourself.",
-  "collect.hint": "Calculation only: nothing is sent automatically. Capacity counts Hyperspace and class; adjust it for lifeform bonuses. Red = not enough cargos."
+  "mine.deuterium": "Deuterium synthesizer"
 }

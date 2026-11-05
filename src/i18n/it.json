@@ -64,8 +64,6 @@
   "queue.ship": "Cantiere",
   "queue.lfbuilding": "Edificio forma di vita",
   "queue.lfresearch": "Ricerca forma di vita",
-  "dash.tab.overview": "Panoramica",
-  "dash.tab.collect": "Raccolta risorse",
   "dash.queues": "Code attive",
   "dash.queuesNone": "nessuna costruzione in corso",
   "dash.queuesUnknown": "non ancora lette",
@@ -75,14 +73,5 @@
   "dash.colQueue": "In corso",
   "mine.metal": "Miniera di metallo",
   "mine.crystal": "Miniera di cristallo",
-  "mine.deuterium": "Sintetizzatore di deuterio",
-  "collect.title": "Raccogli le risorse su un corpo",
-  "collect.target": "Destinazione",
-  "collect.resources": "Risorse",
-  "collect.capacity": "Capacità di un cargo grande",
-  "collect.ships": "Cargo grandi",
-  "collect.available": "Disponibili",
-  "collect.open": "Apri invio",
-  "collect.openHint": "Apre la pagina flotta del gioco da questo corpo, con destinazione, trasporto e cargo compilati. Controlla e premi tu Invia.",
-  "collect.hint": "Solo calcolo: niente parte da solo. La capacità conta Iperspaziale e classe; correggila se hai bonus delle forme di vita. In rosso i corpi senza abbastanza cargo."
+  "mine.deuterium": "Sintetizzatore di deuterio"
 }
