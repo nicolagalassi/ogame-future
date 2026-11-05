@@ -1,8 +1,9 @@
 /** Styles for the action bars on the game's fleet page (scoped by fut- class names). */
 export const FLEET_CSS = `
+.fut-fmenu .fut-moon-ico { margin-right: 4px; vertical-align: -1px; color: #8A9BB0; }
 .fut-fbar {
   display: flex; flex-direction: column; gap: 6px; margin: 6px 10px; padding: 8px;
-  border: 1px solid #1F2C40; border-radius: 10px; background: linear-gradient(#141F31, #0C131F);
+  border: 1px solid #1F2C40; border-radius: 10px; background: #0D1522;
   font: 12px Arial, sans-serif; color: #C9D4E2;
 }
 .fut-frow { display: flex; align-items: flex-start; gap: 8px; }
@@ -53,6 +54,7 @@ export const FLEET_CSS = `
 
 /** Settings window: inside a Shadow DOM, so the game's CSS cannot reach these rules. */
 export const MODAL_CSS = `
+.fut-moon-ico { margin-right: 4px; vertical-align: -1px; color: #8A9BB0; }
 :host { all: initial; }
 * { box-sizing: border-box; }
 .backdrop {
@@ -70,9 +72,9 @@ export const MODAL_CSS = `
 .fut-fbtn:hover { border-color: #4FD1E8; }
 .fut-fbtn.primary { border-color: #4FD1E8; background: #12283A; font-weight: 700; }
 .tab.on { border-color: #4FD1E8; color: #4FD1E8; }
-.close { width: 30px; padding: 0; font-size: 18px; }
+.close { width: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 .fut-feditor h4 { margin: 0 0 4px; font-size: 14px; color: #E6EDF5; }
-.fut-feditor h5 { margin: 14px 0 6px; font-size: 11px; color: #4FD1E8; text-transform: uppercase; letter-spacing: 0.06em; }
+.fut-feditor h5 { margin: 16px 0 6px; font-size: 12px; font-weight: 700; color: #C9D4E2; }
 .fut-fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px 12px; }
 .fut-ffield { display: flex; flex-direction: column; gap: 3px; color: #8A9BB0; font-size: 11px; }
 .fut-ffield input, .fut-ffield select {

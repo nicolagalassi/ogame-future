@@ -39,6 +39,8 @@ export interface OwnBody {
   /** When `resources` was last read (accountInfo or the game's resource bar). */
   resourcesAt: number;
   levels: Record<string, number>;
+  /** Active lifeform species (1 humans, 2 Rock'tal, 3 Mechas, 4 Kaelesh), 0 = none. As OGLight: selectedSpeciesId % 10. */
+  species?: number;
 }
 
 export interface AccountSnapshot {
@@ -68,6 +70,7 @@ function toBody(raw: RawBody, type: OwnBody['type'], fetchedAt: number): OwnBody
     resources: { metal: num(res.metal), crystal: num(res.crystal), deuterium: num(res.deuterium) },
     storage: { metal: num(res.metalStorage), crystal: num(res.crystalStorage), deuterium: num(res.deuteriumStorage) },
     resourcesAt: fetchedAt,
+    species: num(raw.selectedSpeciesId) % 10,
     levels: {
       ...record(raw.buildings),
       ...record(raw.ships),

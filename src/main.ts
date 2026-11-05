@@ -13,6 +13,8 @@ import { SCORE_KEY, readScore, type Score } from './data/score';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
 import { ITEMS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems } from './data/bonuses';
 import { openDashboard } from './modules/dashboard';
+import { TECH_NAMES_KEY, learnTechNames, type TechNames } from './data/tech-names';
+import { readTechList } from './data/tech-details';
 import { isFleetDispatch } from './data/fleet-page';
 import { renderFleetTools } from './modules/fleet';
 import { watchJumpgate } from './modules/fleet/jumpgate';
@@ -20,7 +22,12 @@ import { registerShortcuts, switchBodyUrl } from './modules/shortcuts';
 import { nextBody } from './engines/fleet';
 import { watchTechPages } from './modules/tech';
 import { openPlanner } from './modules/tech/planner-view';
-import { PLAN_KEY, planCount, pruneByQueues, type Plan } from './engines/planner';
+import { PLAN_KEY, pendingFor, planCount, planMissing, pruneByQueues, SENT_KEY, type Plan, type Shipment } from './engines/planner';
+import { estimateResources } from './engines/resources';
+import { entriesIn, JOURNAL_KEY, periodRange, periodStats, type Journal } from './engines/expeditions';
+import { isMessagesPage, ownPlayerId } from './data/messages';
+import { watchMessages } from './modules/messages';
+import { openJournal } from './modules/messages/journal-view';
 import { renderPlanetMenu, type MenuMode, type MenuSettings } from './modules/planet-menu';
 
 async function bootstrap(): Promise<void> {
@@ -69,6 +76,10 @@ async function bootstrap(): Promise<void> {
   const items = readActiveItems(document);
   if (items) store.set(ITEMS_KEY, items);
 
+  // Technology names in the player's language, from any technology page the player opens.
+  const techNames = store.get<TechNames>(TECH_NAMES_KEY, {});
+  if (learnTechNames(techNames, readTechList(document))) store.set(TECH_NAMES_KEY, techNames);
+
   // Points are on the overview page only: keep the last value seen.
   const seenScore = readScore(document, Date.now());
   if (seenScore) store.set(SCORE_KEY, seenScore);
@@ -80,6 +91,27 @@ async function bootstrap(): Promise<void> {
     mode: (storedMode === 'compact' ? 'compact' : 'side') as MenuMode,
     showTotals: store.get<boolean>('planetMenu.totals', true),
     markIdle: store.get<boolean>('planetMenu.markIdle', false),
+  };
+  /** What the plan still misses over all bodies, in MSU (resources on the way count as there). */
+  const planGap = (): number | null => {
+    const plan = store.get<Plan>(PLAN_KEY, {});
+    const sent = store.get<Shipment[]>(SENT_KEY, []);
+    const now = Date.now();
+    const here = currentBodyId(document);
+    const onScreen = readCurrentResources(document);
+    let total = 0;
+    let known = false;
+    for (const [key, items] of Object.entries(plan)) {
+      const id = Number(key);
+      const body = snapshot?.bodies.find((b) => b.id === id);
+      const have = here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
+      if (!have || !items.length) continue;
+      known = true;
+      const p = pendingFor(sent, id, here === id ? now : (body?.resourcesAt ?? 0));
+      const gap = planMissing(items, { metal: have.metal + p.metal, crystal: have.crystal + p.crystal, deuterium: have.deuterium + p.deuterium });
+      total += gap.metal + gap.crystal * 1.5 + gap.deuterium * 3;
+    }
+    return known ? total : null;
   };
   const draw = () =>
     renderPlanetMenu({
@@ -105,11 +137,17 @@ async function bootstrap(): Promise<void> {
           entries: readPlanetList(document),
           score: store.get<Score | null>(SCORE_KEY, null),
           queues,
+          names: techNames,
           now: Date.now(),
           locale,
           t,
         }),
       planCount: planCount(store.get<Plan>(PLAN_KEY, {})),
+      planGap: planGap(),
+      journalToday: (() => {
+        const s = periodStats(entriesIn(store.get<Journal>(JOURNAL_KEY, {}), periodRange('today', Date.now())));
+        return { count: s.count, net: s.netMsu };
+      })(),
       onOpenPlanner: () => {
         const id = currentBodyId(document);
         const resources = readCurrentResources(document);
@@ -127,6 +165,7 @@ async function bootstrap(): Promise<void> {
           navigate: (url) => location.assign(url),
         });
       },
+      onOpenJournal: () => openJournal({ doc: document, store, now: Date.now(), locale, t }),
       // COMPLIANCE: runs only from the Sync button's click (reason 'user-sync', no cp).
       onSync: async () => {
         try {
@@ -167,6 +206,9 @@ async function bootstrap(): Promise<void> {
   if (currentId) {
     watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), onPlanChange: () => draw() });
   }
+
+  // Inbox: a summary on each report; expedition reports go into the journal.
+  if (isMessagesPage(document)) watchMessages({ doc: document, store, playerId: ownPlayerId(document), locale, t });
 
   // Fleet page helpers: reserves and fleetsave, on the game's own form.
   if (isFleetDispatch(document) && currentId) {

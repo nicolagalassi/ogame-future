@@ -89,3 +89,15 @@ export function shipCapacity(fd: FleetDispatcher, id: number): number {
 export function shipsOnPlanet(fd: FleetDispatcher): Record<string, number> {
   return Object.fromEntries(fd.shipsOnPlanet.map((s) => [String(s.id), s.number]));
 }
+
+export const SHIPS_INFO_KEY = 'ships.info';
+export type ShipsInfo = Record<string, { name: string; capacity: number }>;
+
+/** Ship names (in the game's language) and cargo capacities, as the fleet page knows them. */
+export function readShipsInfo(fd: FleetDispatcher): ShipsInfo | null {
+  const data = fd.fleetHelper?.shipsData;
+  if (!data) return null;
+  const out: ShipsInfo = {};
+  for (const [id, s] of Object.entries(data)) out[id] = { name: s.name ?? '', capacity: s.cargoCapacity || s.baseCargoCapacity || 0 };
+  return Object.keys(out).length ? out : null;
+}

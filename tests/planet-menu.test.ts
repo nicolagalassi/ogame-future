@@ -93,11 +93,30 @@ describe('renderPlanetMenu', () => {
     expect(document.getElementById('planetList')?.classList.contains('fut-mode-compact')).toBe(true);
   });
 
-  it('the toolbar view switch only calls back, with no navigation', () => {
+  it('the view switch (in the settings panel) only calls back, with no navigation', () => {
     const onSettingsChange = vi.fn();
     draw('side', onSettingsChange);
-    document.querySelector<HTMLButtonElement>('.fut-toolbar .fut-tool-compact')!.click();
+    const compact = Array.from(document.querySelectorAll<HTMLButtonElement>('.fut-settings .fut-chip')).find((b) => b.textContent === t('planetMenu.compact'))!;
+    compact.click();
     expect(onSettingsChange).toHaveBeenCalledWith({ mode: 'compact', showTotals: true, markIdle: true });
+  });
+
+  it('toolbar buttons show data and open their window', () => {
+    const onOpenPlanner = vi.fn();
+    const onOpenJournal = vi.fn();
+    renderPlanetMenu({
+      doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { mode: 'side', showTotals: true, markIdle: true },
+      now: 0, locale: 'it', t, onSettingsChange: vi.fn(), onSync: vi.fn(async () => {}),
+      onOpenDashboard: vi.fn(), onOpenPlanner, onOpenJournal, planCount: 50, planGap: 1.2e9, journalToday: { count: 25, net: 4e7 },
+    });
+    const cells = Array.from(document.querySelectorAll<HTMLButtonElement>('.fut-toolbar .fut-cell'));
+    expect(cells.map((c) => c.querySelector('.fut-cell-k')!.textContent)).toEqual(['Dashboard', 'Piano · 50', 'Diario oggi']);
+    expect(cells[1]!.querySelector('.fut-cell-v')!.textContent).toBe('−1,2G');
+    expect(cells[2]!.querySelector('.fut-cell-v')!.textContent).toBe('+40,0M');
+    cells[1]!.click();
+    cells[2]!.click();
+    expect(onOpenPlanner).toHaveBeenCalledTimes(1);
+    expect(onOpenJournal).toHaveBeenCalledTimes(1);
   });
 
   it('sync runs only from the button click', () => {

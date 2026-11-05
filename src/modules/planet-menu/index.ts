@@ -42,6 +42,12 @@ export interface PlanetMenuOptions {
   /** Opens the construction plan; `planCount` items are planned in total. */
   onOpenPlanner?: () => void;
   planCount?: number;
+  /** Opens the expedition journal. */
+  onOpenJournal?: () => void;
+  /** What the plan still misses in MSU (null when no stock is known for its bodies). */
+  planGap?: number | null;
+  /** Expeditions read today: how many and the net value in MSU. */
+  journalToday?: { count: number; net: number } | null;
 }
 
 const STYLE_ID = 'fut-planet-menu-style';
@@ -49,6 +55,7 @@ const STYLE_ID = 'fut-planet-menu-style';
 let panelOpen = false;
 
 const ICONS = {
+  journal: '<path d="M5 3.5h11a3 3 0 0 1 3 3V20.5H8a3 3 0 0 1-3-3z" fill="none" stroke-width="2"/><path d="M5 17.5a3 3 0 0 1 3-3h11" fill="none" stroke-width="2"/><path stroke="none" d="M9.5 6.5l1 2.2 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3L6.2 9l2.3-.3z"/>',
   planner: '<path d="M9 6h11M9 12h11M9 18h11" fill="none" stroke-width="2.2"/><path stroke="none" d="M3 4.5h3v3H3zM3 10.5h3v3H3zM3 16.5h3v3H3z"/>',
   dashboard: '<path stroke="none" d="M3 3h8v10H3zM13 3h8v6h-8zM13 11h8v10h-8zM3 15h8v6H3z"/>',
   side: '<path stroke="none" d="M2 5h12v14H2zM16 5h6v14h-6z"/>',
@@ -204,46 +211,63 @@ function formatTime(at: number, locale: string): string {
   return new Date(at).toLocaleString(locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
-function toolbar(o: PlanetMenuOptions, mode: MenuMode, roomy: boolean, colonies: string): HTMLElement {
+/**
+ * Toolbar: three buttons that already say something (production, what the plan misses,
+ * today's expeditions) and open their window; sync and settings stacked on the right.
+ * The view switch lives in the settings panel: it is a preference, not an action.
+ */
+function toolbar(o: PlanetMenuOptions, colonies: string): HTMLElement {
   const { doc, t } = o;
   const bar = el(doc, 'div', 'fut-toolbar');
-  // No product name on screen (Nicola, 2026-11-05): an empty spacer that keeps the colony count as tooltip.
-  const brand = el(doc, 'span', 'fut-brand');
-  if (colonies) brand.title = colonies;
-  bar.append(brand);
+  if (colonies) bar.title = colonies;
+  const fmt = (n: number) => formatUnits(n, o.locale);
+  const msu = (r: { metal: number; crystal: number; deuterium: number }) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
 
-  // View switch: changes Future's own display only, never a game action.
-  const next: MenuMode = mode === 'side' ? 'compact' : 'side';
-  const sw = iconButton(doc, next, t(next === 'side' ? 'planetMenu.toSide' : 'planetMenu.toCompact'), () =>
-    o.onSettingsChange({ ...o.settings, mode: next }),
+  const cell = (label: string, value: string, cls: string, title: string, onClick?: () => void) => {
+    const b = el(doc, 'button', 'fut-cell');
+    b.type = 'button';
+    b.title = title;
+    b.append(el(doc, 'span', 'fut-cell-k', label), el(doc, 'span', `fut-cell-v ${cls}`.trim(), value));
+    if (onClick) b.addEventListener('click', onClick);
+    else b.disabled = true;
+    bar.append(b);
+  };
+
+  const perDay = o.snapshot ? msu(totals(o.snapshot, o.now).perHour) * 24 : null;
+  cell(t('bar.dash'), perDay === null ? '—' : `+${fmt(perDay)}${t('bar.perDay')}`, '', `${t('dash.title')}${perDay === null ? '' : ` · ${t('bar.dashHint')}`}`, o.onOpenDashboard);
+
+  const count = o.planCount ?? 0;
+  const gap = o.planGap;
+  const planValue = !count ? '—' : gap === null || gap === undefined ? '?' : gap > 0 ? `−${fmt(gap)}` : t('bar.ready');
+  const planCls = !count || gap === null || gap === undefined ? '' : gap > 0 ? 'fut-warn' : 'fut-ok';
+  cell(count ? t('bar.plan', { n: count > 99 ? '99+' : count }) : t('bar.planEmpty'), planValue, planCls, `${t('plan.title')} · ${count && gap ? t('bar.planHint') : t('plan.title')}`, o.onOpenPlanner);
+
+  const today = o.journalToday;
+  cell(
+    t('bar.journal'),
+    today && today.count ? `${today.net >= 0 ? '+' : '−'}${fmt(Math.abs(today.net))}` : '—',
+    today && today.count ? (today.net >= 0 ? 'fut-ok' : 'fut-warn') : '',
+    today && today.count ? `${t('exp.title')} · ${t('bar.journalHint', { n: today.count })}` : t('exp.title'),
+    o.onOpenJournal,
   );
-  if (next === 'side' && !roomy) {
-    sw.disabled = true;
-    sw.title = t('planetMenu.noRoom');
-  }
 
+  const side = el(doc, 'div', 'fut-side');
   const lastSync = o.snapshot ? t('toolbar.lastSync', { time: formatTime(o.snapshot.fetchedAt, o.locale) }) : '';
   const sync = iconButton(doc, 'sync', [t('sync.button'), lastSync].filter(Boolean).join(' · '), () => {
     if (sync.classList.contains('fut-busy')) return;
     sync.classList.add('fut-busy');
     o.onSync().finally(() => sync.classList.remove('fut-busy'));
   });
-
+  // Data older than an hour: the sync button says so.
+  if (!o.snapshot || o.now - o.snapshot.fetchedAt > 3_600_000) sync.classList.add('fut-stale');
   const gear = iconButton(doc, 'settings', t('toolbar.settings'), () => {
     panelOpen = !panelOpen;
     gear.setAttribute('aria-expanded', String(panelOpen));
     doc.querySelector('.fut-settings')?.toggleAttribute('hidden', !panelOpen);
   });
   gear.setAttribute('aria-expanded', String(panelOpen));
-
-  if (o.onOpenDashboard) bar.append(iconButton(doc, 'dashboard', t('dash.title'), o.onOpenDashboard));
-  if (o.onOpenPlanner) {
-    const count = o.planCount ?? 0;
-    const planner = iconButton(doc, 'planner', count ? t('plan.titleCount', { n: count }) : t('plan.title'), o.onOpenPlanner);
-    if (count) planner.append(el(doc, 'span', 'fut-tool-badge', count > 99 ? '99+' : String(count)));
-    bar.append(planner);
-  }
-  bar.append(sw, sync, gear);
+  side.append(sync, gear);
+  bar.append(side);
   return bar;
 }
 
@@ -353,7 +377,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
 
   startAgeClock(doc);
   const colonies = (doc.getElementById('countColonies')?.textContent ?? '').replace(/\s+/g, ' ').trim();
-  list.before(toolbar(o, mode, roomy, colonies), settingsPanel(o, mode, roomy, colonies));
+  list.before(toolbar(o, colonies), settingsPanel(o, mode, roomy, colonies));
 
   if (o.snapshot && o.settings.showTotals) {
     const { stock, perHour } = totals(o.snapshot, o.now);

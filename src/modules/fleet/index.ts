@@ -15,6 +15,7 @@
  * "Avanti" and "Invia flotta". No request is made by Future here: the game checks the
  * target itself when page 2 opens. See ./repeat.ts for the "Ripeti" precedent (OGLight).
  */
+import { BASE_SHEET, icon } from '../../core/icons';
 import { PLAN_KEY, SENT_KEY, type Plan, type Shipment } from '../../engines/planner';
 import { expeditionItemBoost, ITEMS_KEY, LF_BONUS_KEY, type ActiveItems, type LfBonuses } from '../../data/bonuses';
 import type { Store } from '../../core/storage';
@@ -38,7 +39,7 @@ import {
   type FleetsaveProfile,
 } from '../../engines/fleet';
 import { originCoords, readShipSlots } from '../../data/fleet-page';
-import { getDispatcher, whenDispatcherReady, type FleetDispatcher } from '../../data/fleet-dispatcher';
+import { getDispatcher, readShipsInfo, SHIPS_INFO_KEY, whenDispatcherReady, type FleetDispatcher } from '../../data/fleet-dispatcher';
 import {
   prepareAllShips,
   prepareLast,
@@ -454,7 +455,7 @@ function openSettings(o: FleetOptions, tab: 'body' | 'general', onChange: () => 
   host.id = MODAL_ID;
   const root = host.attachShadow({ mode: 'open' });
   const style = el(doc, 'style');
-  style.textContent = MODAL_CSS;
+  style.textContent = MODAL_CSS + BASE_SHEET;
   const backdrop = el(doc, 'div', 'backdrop');
   const panel = el(doc, 'div', 'panel');
   const head = el(doc, 'div', 'head');
@@ -478,7 +479,8 @@ function openSettings(o: FleetOptions, tab: 'body' | 'general', onChange: () => 
     b.dataset.tab = id;
     tabs.append(b);
   }
-  const close = button(doc, '×', () => closeModal(doc), 'close', t('fleet.close'));
+  const close = button(doc, '', () => closeModal(doc), 'close', t('fleet.close'));
+  close.append(icon(doc, 'close', 16));
   head.append(tabs, status, close);
   panel.append(head, body);
   backdrop.append(panel);
@@ -543,10 +545,11 @@ function destinationMenu(o: FleetOptions, anchor: HTMLElement, current: number |
   for (const b of o.bodies) {
     for (const id of [b.planetId, b.moonId]) {
       if (id === null || id === o.bodyId) continue;
-      const item = button(doc, `${b.name}${id === b.moonId ? ' ☾' : ''}  [${b.coords}]`, () => {
+      const item = button(doc, `${b.name}  [${b.coords}]`, () => {
         menu.remove();
         onPick(id);
       }, id === current ? 'on' : '');
+      if (id === b.moonId) item.prepend(icon(doc, 'moon', 11, 'fut-moon-ico'));
       menu.append(item);
     }
   }
@@ -778,6 +781,9 @@ export function renderFleetTools(o: FleetOptions): void {
   void whenDispatcherReady().then((fd) => {
     if (!fd) return;
     applyFood(o.store, fd);
+    // Names and capacities for the inbox summaries (spy loot, ships found): kept locally.
+    const ships = readShipsInfo(fd);
+    if (ships) o.store.set(SHIPS_INFO_KEY, ships);
     // "Ripeti": know when the game accepted the send, and move on as OGLight does.
     hookSend(fd, () => {
       // Remember what was sent, for "Ultima flotta".
