@@ -234,9 +234,9 @@ describe('fleet actions on the game dispatcher', () => {
     expect(fd.expeditionTime).toBe(1);
   });
 
-  it('refuses an expedition without free slots', () => {
+  it('prepares an expedition even when every slot is busy', () => {
     const fd = fakeDispatcher({ expeditionCount: 5 });
-    expect(prepareExpedition(fd, fleetPage(), profile, DEFAULT_SETTINGS, { economySpeed: 1 }).reason).toBe('fleet.err.noExpSlots');
+    expect(prepareExpedition(fd, fleetPage(), profile, DEFAULT_SETTINGS, { economySpeed: 1 }).ok).toBe(true);
   });
 });
 
