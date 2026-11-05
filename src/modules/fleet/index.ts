@@ -214,8 +214,8 @@ function reserveFields(o: FleetOptions, reserve: Reserve, title: string, hint: s
   box.append(el(doc, 'h5', '', title), el(doc, 'p', 'fut-fnote', hint));
   const shipGrid = el(doc, 'div', 'fut-fgrid');
   const shipInputs: [string, HTMLInputElement][] = [];
+  // Every ship type, not only those on this body: the reserve is copied to other bodies too.
   for (const slot of readShipSlots(doc)) {
-    if (slot.available <= 0 && !reserve.ships[slot.id]) continue;
     const [wrap, input] = numberField(doc, slot.name, reserve.ships[slot.id] ?? null, '0');
     shipGrid.append(wrap);
     shipInputs.push([slot.id, input]);
