@@ -15,6 +15,7 @@ const header = `// ==UserScript==
 // @match        https://*.ogame.gameforge.com/game/*
 // @grant        GM_getValue
 // @grant        GM_setValue
+// @grant        unsafeWindow
 // @run-at       document-start
 // ==/UserScript==
 // Portions derived from OGLight, Copyright (c) 2019 Oz, MIT License.
