@@ -21,11 +21,13 @@ import {
   cargoLoad,
   copyProfileToAll,
   DEFAULT_SETTINGS,
+  EMPTY_RESERVE,
   parseAmount,
   PROFILES_KEY,
   profileFor,
   SETTINGS_KEY,
   type FleetProfile,
+  type Reserve,
   type FleetSettings,
   type FleetsaveProfile,
 } from '../../engines/fleet';
@@ -205,6 +207,42 @@ function bodyLabel(o: FleetOptions, id: number): string {
 /* Panels                                                              */
 /* ------------------------------------------------------------------ */
 
+/** Ships and resources to keep on the body, as a block of fields. */
+function reserveFields(o: FleetOptions, reserve: Reserve, title: string, hint: string): { el: HTMLElement; read: () => Reserve } {
+  const { doc, t } = o;
+  const box = el(doc, 'div', 'fut-freserve');
+  box.append(el(doc, 'h5', '', title), el(doc, 'p', 'fut-fnote', hint));
+  const shipGrid = el(doc, 'div', 'fut-fgrid');
+  const shipInputs: [string, HTMLInputElement][] = [];
+  for (const slot of readShipSlots(doc)) {
+    if (slot.available <= 0 && !reserve.ships[slot.id]) continue;
+    const [wrap, input] = numberField(doc, slot.name, reserve.ships[slot.id] ?? null, '0');
+    shipGrid.append(wrap);
+    shipInputs.push([slot.id, input]);
+  }
+  if (!shipInputs.length) shipGrid.append(el(doc, 'span', 'fut-fnote', t('fleet.noShips')));
+  const resGrid = el(doc, 'div', 'fut-fgrid');
+  const resInputs = (['metal', 'crystal', 'deuterium'] as const).map((k) => {
+    const [wrap, input] = numberField(doc, t(`res.${k}`), reserve.resources[k] || null, '0');
+    resGrid.append(wrap);
+    return [k, input] as const;
+  });
+  box.append(el(doc, 'h6', '', t('fleet.reserveShips')), shipGrid, el(doc, 'h6', '', t('fleet.reserveRes')), resGrid);
+  return {
+    el: box,
+    read: () => {
+      const ships: Record<string, number> = {};
+      for (const [id, input] of shipInputs) {
+        const n = parseAmount(input.value);
+        if (n > 0) ships[id] = n;
+      }
+      const resources = { metal: 0, crystal: 0, deuterium: 0 };
+      for (const [k, input] of resInputs) resources[k] = parseAmount(input.value);
+      return { ships, resources };
+    },
+  };
+}
+
 function reserveEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLElement {
   const { doc, t } = o;
   const profile = profileFor(loadProfiles(o.store), o.bodyId);
@@ -212,27 +250,9 @@ function reserveEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEle
   const panel = el(doc, 'div', 'fut-feditor');
   panel.append(el(doc, 'h4', '', t(moon ? 'fleet.editTitleMoon' : 'fleet.editTitlePlanet', { body: bodyLabel(o, o.bodyId) })));
 
-  panel.append(el(doc, 'h5', '', t('fleet.reserveShips')));
-  const shipGrid = el(doc, 'div', 'fut-fgrid');
-  const shipInputs: [string, HTMLInputElement][] = [];
-  for (const slot of readShipSlots(doc)) {
-    if (slot.available <= 0 && !profile.reserve.ships[slot.id]) continue;
-    const [wrap, input] = numberField(doc, slot.name, profile.reserve.ships[slot.id] ?? null, '0');
-    shipGrid.append(wrap);
-    shipInputs.push([slot.id, input]);
-  }
-  if (!shipInputs.length) shipGrid.append(el(doc, 'span', 'fut-fnote', t('fleet.noShips')));
-  panel.append(shipGrid);
-
-  panel.append(el(doc, 'h5', '', t('fleet.reserveRes')));
-  const resGrid = el(doc, 'div', 'fut-fgrid');
-  const resInputs = (['metal', 'crystal', 'deuterium'] as const).map((k) => {
-    const [wrap, input] = numberField(doc, t(`res.${k}`), profile.reserve.resources[k] || null, '0');
-    resGrid.append(wrap);
-    return [k, input] as const;
-  });
-  panel.append(resGrid);
-
+  // Reserve 1: Trasporto, Schiera, Su luna, Spedizione, Tutte. Reserve 2: Fleetsave only.
+  const r1 = reserveFields(o, profile.reserve, t('fleet.reserve1Title'), t('fleet.reserve1Hint'));
+  panel.append(r1.el);
   panel.append(el(doc, 'h5', '', t('fleet.fleetsave')));
   const saveGrid = el(doc, 'div', 'fut-fgrid');
   const origin = originCoords(doc);
@@ -255,15 +275,10 @@ function reserveEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEle
   saveGrid.append(gWrap, sWrap, pWrap, typeWrap, misWrap, spdWrap);
   panel.append(saveGrid);
   panel.append(el(doc, 'p', 'fut-fnote', t('fleet.fleetsaveHint')));
+  const r2 = reserveFields(o, profile.saveReserve ?? EMPTY_RESERVE, t('fleet.reserve2Title'), t('fleet.reserve2Hint'));
+  panel.append(r2.el);
 
   const read = (): FleetProfile => {
-    const ships: Record<string, number> = {};
-    for (const [id, input] of shipInputs) {
-      const n = parseAmount(input.value);
-      if (n > 0) ships[id] = n;
-    }
-    const resources = { metal: 0, crystal: 0, deuterium: 0 };
-    for (const [k, input] of resInputs) resources[k] = parseAmount(input.value);
     const position = parseAmount(pIn.value);
     const save: FleetsaveProfile | null =
       position >= 1 && position <= 17
@@ -276,7 +291,7 @@ function reserveEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEle
             speed: Number(spdSel.value),
           }
         : null;
-    return { reserve: { ships, resources }, save };
+    return { reserve: r1.read(), saveReserve: r2.read(), save };
   };
 
   const same = sameTypeIds(o.bodies, o.bodyId);
@@ -512,7 +527,11 @@ function destinationMenu(o: FleetOptions, anchor: HTMLElement, current: number |
       menu.append(item);
     }
   }
-  anchor.append(menu);
+  // On <body> with fixed position: inside the bar the game's ship panels covered and clipped it.
+  const r = anchor.getBoundingClientRect();
+  menu.style.top = `${Math.round(r.bottom + 4)}px`;
+  menu.style.left = `${Math.round(r.left)}px`;
+  doc.body.append(menu);
   const away = (e: MouseEvent) => {
     if (!menu.contains(e.target as Node)) {
       menu.remove();
@@ -520,6 +539,8 @@ function destinationMenu(o: FleetOptions, anchor: HTMLElement, current: number |
     }
   };
   doc.addEventListener('mousedown', away, true);
+  // Fixed on screen: close it when the page scrolls instead of leaving it floating.
+  doc.defaultView?.addEventListener('scroll', () => menu.remove(), { once: true, capture: true });
 }
 
 export function renderFleetTools(o: FleetOptions): void {

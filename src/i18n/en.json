@@ -74,8 +74,8 @@
   "mine.metal": "Metal mine",
   "mine.crystal": "Crystal mine",
   "mine.deuterium": "Deuterium synthesizer",
-  "fleet.reserveShips": "Ships to always keep here",
-  "fleet.reserveRes": "Resources to always keep here",
+  "fleet.reserveShips": "Ships",
+  "fleet.reserveRes": "Resources",
   "fleet.noShips": "No ships on this planet.",
   "fleet.fleetsave": "Fleetsave",
   "fleet.galaxy": "Galaxy (empty = this one)",
@@ -158,5 +158,9 @@
   "fleet.favTitle": "Favourite destinations",
   "fleet.favTransport": "Transport to",
   "fleet.favDeploy": "Deploy to",
-  "fleet.tip.cargo": "Load the resources, keeping the reserve and the flight's deuterium"
+  "fleet.tip.cargo": "Load the resources, keeping the reserve and the flight's deuterium",
+  "fleet.reserve1Title": "Reserve 1 · transports and deployments",
+  "fleet.reserve1Hint": "Stays here with To moon, Transport, Deploy, Expedition and All − reserve.",
+  "fleet.reserve2Title": "Reserve 2 · fleetsave only",
+  "fleet.reserve2Hint": "Stays here only when you press Fleetsave. Empty = everything leaves."
 }
