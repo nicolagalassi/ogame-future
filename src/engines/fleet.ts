@@ -143,13 +143,15 @@ export const DELIVERY_KEY = 'plan.delivery';
 
 /** What one source body sends: what is still needed, within what it has after the reserve. */
 export function deliveryLoad(onPlanet: Resources, reserve: Reserve, fuel: number, capacity: number, need: Resources): Resources {
+  // Whole units only: the game's own number formatting turns 1234.5 into "1.234.5".
   const free = resourcesAfterReserve(onPlanet, reserve, fuel);
   let room = Math.max(0, Math.floor(capacity));
-  const deuterium = Math.min(free.deuterium, need.deuterium, room);
+  const take = (a: number, b: number) => Math.max(0, Math.floor(Math.min(a, b, room)));
+  const deuterium = take(free.deuterium, Math.ceil(need.deuterium));
   room -= deuterium;
-  const crystal = Math.min(free.crystal, need.crystal, room);
+  const crystal = take(free.crystal, Math.ceil(need.crystal));
   room -= crystal;
-  const metal = Math.min(free.metal, need.metal, room);
+  const metal = take(free.metal, Math.ceil(need.metal));
   return { metal, crystal, deuterium };
 }
 
@@ -190,11 +192,11 @@ export function cargoShipsFor(amount: number, stock: ShipStock[], main: number, 
 export function cargoLoad(onPlanet: Resources, reserve: Reserve, fuel: number, capacity: number): Resources {
   const free = resourcesAfterReserve(onPlanet, reserve, fuel);
   let room = Math.max(0, Math.floor(capacity));
-  const deuterium = Math.min(free.deuterium, room);
+  const deuterium = Math.max(0, Math.floor(Math.min(free.deuterium, room)));
   room -= deuterium;
-  const crystal = Math.min(free.crystal, room);
+  const crystal = Math.max(0, Math.floor(Math.min(free.crystal, room)));
   room -= crystal;
-  const metal = Math.min(free.metal, room);
+  const metal = Math.max(0, Math.floor(Math.min(free.metal, room)));
   return { metal, crystal, deuterium };
 }
 

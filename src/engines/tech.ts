@@ -148,10 +148,11 @@ export function scaleDuration(id: number, shownLevel: number, shownMs: number, l
 
 /** Missing resources against what is available: only the positive gaps. */
 export function missing(cost: Cost, have: { metal: number; crystal: number; deuterium: number }): Cost {
+  // Estimated stocks are fractional: missing amounts are whole units.
   return {
-    metal: Math.max(0, cost.metal - have.metal),
-    crystal: Math.max(0, cost.crystal - have.crystal),
-    deuterium: Math.max(0, cost.deuterium - have.deuterium),
+    metal: Math.max(0, Math.ceil(cost.metal - have.metal)),
+    crystal: Math.max(0, Math.ceil(cost.crystal - have.crystal)),
+    deuterium: Math.max(0, Math.ceil(cost.deuterium - have.deuterium)),
     energy: 0,
   };
 }

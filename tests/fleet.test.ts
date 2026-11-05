@@ -380,3 +380,15 @@ describe('shortcuts, last fleet and jump gate', () => {
     expect(document.getElementById('sendall')!.getAttribute('onclick')).toBe('setMaxIntInput("#jumpgateForm", {"203":70})');
   });
 });
+
+describe('whole numbers in the game form', () => {
+  it('never loads fractions, also from estimated stocks', async () => {
+    const { deliveryLoad, cargoLoad } = await import('../src/engines/fleet');
+    const none = { ships: {}, resources: { metal: 0, crystal: 0, deuterium: 0 } };
+    const d = deliveryLoad({ metal: 5e6, crystal: 5e6, deuterium: 5e6 }, none, 0, 1e9, { metal: 2821979.574679, crystal: 10.5, deuterium: 0.2 });
+    expect([d.metal, d.crystal, d.deuterium].every(Number.isInteger)).toBe(true);
+    expect(d.metal).toBe(2821980);
+    const c = cargoLoad({ metal: 10.7, crystal: 3.2, deuterium: 9.9 }, none, 0, 100);
+    expect([c.metal, c.crystal, c.deuterium].every(Number.isInteger)).toBe(true);
+  });
+});
