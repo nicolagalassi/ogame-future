@@ -4,6 +4,7 @@
  * Expedition reports also go into the expedition journal. Reads the page only: no network,
  * no game action (the game's own buttons, probe included, stay as they are).
  */
+import { icon } from '../../core/icons';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
 import { readMessage, type ExpeditionMessage, type ParsedMessage, type Res } from '../../data/messages';
@@ -150,8 +151,16 @@ export function summaryFor(doc: Document, m: ParsedMessage, o: { locale: string;
     case 'return':
     case 'recycle': {
       chip(t(`msg.${m.kind}`), `fut-msg-out ${m.kind === 'recycle' ? 'fut-out-resource' : m.kind === 'transport' ? 'fut-out-trader' : 'fut-out-early'}`);
-      const label = (p: { name: string; coords: string; moon: boolean }) => `${p.moon ? '☾ ' : ''}${p.name ? `${p.name} ` : ''}[${p.coords}]`;
-      if (m.from && m.to) chip(`${label(m.from)} → ${label(m.to)}`, 'fut-msg-route');
+      if (m.from && m.to) {
+        // Route: origin → destination, a drawn moon in front of moons.
+        const route = chip('', 'fut-msg-route');
+        const place = (p: { name: string; coords: string; moon: boolean }) => {
+          const s = h(doc, 'span', 'fut-msg-place', `${p.name ? `${p.name} ` : ''}[${p.coords}]`);
+          if (p.moon) s.prepend(icon(doc, 'moon', 10, 'fut-msg-moon'));
+          return s;
+        };
+        route.append(place(m.from), h(doc, 'span', 'fut-msg-arrow', '→'), place(m.to));
+      }
       const any = resChips(m.res);
       if (any) chip(`${fmt(msu(m.res))} MSU`, 'fut-msg-msu', t('msg.msuHint'));
       else chip(t('msg.empty'), 'fut-msg-muted');

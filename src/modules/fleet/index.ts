@@ -15,6 +15,7 @@
  * "Avanti" and "Invia flotta". No request is made by Future here: the game checks the
  * target itself when page 2 opens. See ./repeat.ts for the "Ripeti" precedent (OGLight).
  */
+import { BASE_SHEET, icon } from '../../core/icons';
 import { PLAN_KEY, SENT_KEY, type Plan, type Shipment } from '../../engines/planner';
 import { expeditionItemBoost, ITEMS_KEY, LF_BONUS_KEY, type ActiveItems, type LfBonuses } from '../../data/bonuses';
 import type { Store } from '../../core/storage';
@@ -454,7 +455,7 @@ function openSettings(o: FleetOptions, tab: 'body' | 'general', onChange: () => 
   host.id = MODAL_ID;
   const root = host.attachShadow({ mode: 'open' });
   const style = el(doc, 'style');
-  style.textContent = MODAL_CSS;
+  style.textContent = MODAL_CSS + BASE_SHEET;
   const backdrop = el(doc, 'div', 'backdrop');
   const panel = el(doc, 'div', 'panel');
   const head = el(doc, 'div', 'head');
@@ -478,7 +479,8 @@ function openSettings(o: FleetOptions, tab: 'body' | 'general', onChange: () => 
     b.dataset.tab = id;
     tabs.append(b);
   }
-  const close = button(doc, '×', () => closeModal(doc), 'close', t('fleet.close'));
+  const close = button(doc, '', () => closeModal(doc), 'close', t('fleet.close'));
+  close.append(icon(doc, 'close', 16));
   head.append(tabs, status, close);
   panel.append(head, body);
   backdrop.append(panel);
@@ -543,10 +545,11 @@ function destinationMenu(o: FleetOptions, anchor: HTMLElement, current: number |
   for (const b of o.bodies) {
     for (const id of [b.planetId, b.moonId]) {
       if (id === null || id === o.bodyId) continue;
-      const item = button(doc, `${b.name}${id === b.moonId ? ' ☾' : ''}  [${b.coords}]`, () => {
+      const item = button(doc, `${b.name}  [${b.coords}]`, () => {
         menu.remove();
         onPick(id);
       }, id === current ? 'on' : '');
+      if (id === b.moonId) item.prepend(icon(doc, 'moon', 11, 'fut-moon-ico'));
       menu.append(item);
     }
   }

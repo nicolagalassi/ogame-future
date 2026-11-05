@@ -30,17 +30,22 @@ export const MESSAGES_CSS = `
 .fut-msg-chip { display: inline-flex; align-items: center; padding: 1px 7px; border: 1px solid #1F2C40; border-radius: 10px;
   background: #0E1724; white-space: nowrap; }
 .fut-msg-out { font-weight: 700; }
+/* Only the outcome is a pill; the values are plain, spaced text. */
+.fut-msg .fut-msg-chip:not(.fut-msg-out) { border-color: transparent; background: none; padding: 1px 4px; }
+.fut-msg-place { display: inline-flex; align-items: center; gap: 3px; }
+.fut-msg-arrow { margin: 0 5px; color: #8A9BB0; }
+.fut-msg-moon { color: #8A9BB0; }
 .fut-msg-res, .fut-msg-msu, .fut-msg-loot { font-family: "JetBrains Mono", Consolas, monospace; }
 .fut-msg-m { color: #B8C2CC; } .fut-msg-c { color: #7FB8FF; } .fut-msg-d { color: #4FE0B0; } .fut-msg-f { color: #D6A8C8; } .fut-msg-dm { color: #B58CDB; }
 .fut-msg-msu { color: #C9D4E2; } .fut-msg-loot { color: #4FD1E8; }
 .fut-msg-ship { color: #4FE0B0; gap: 4px; padding-left: 2px; font-family: "JetBrains Mono", Consolas, monospace; }
 .fut-msg-icon { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; flex: none; }
-.fut-msg-icon-none { font-size: 9px; color: #8A9BB0; } .fut-msg-item { color: #D08A5B; } .fut-msg-lf { color: #E07BC8; } .fut-msg-art { color: #D4A93A; }
+.fut-msg-icon-none { font-size: 10px; color: #8A9BB0; } .fut-msg-item { color: #D08A5B; } .fut-msg-lf { color: #E07BC8; } .fut-msg-art { color: #D4A93A; }
 .fut-msg-route { color: #C9D4E2; }
 .fut-msg-warn { color: #F5B547; } .fut-msg-muted { color: #8A9BB0; }
 .fut-msg .fut-msg-neg { color: #FF7A7A; border-color: #FF7A7A44; }
 ${outcomeCss}
-.fut-msg.fut-msg-rows { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 5px; border-left-width: 3px; }
+.fut-msg.fut-msg-rows { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 5px; }
 .fut-msg-row { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
 .fut-msg-found { justify-content: center; }
 .fut-msg-foot { justify-content: center; }
@@ -50,7 +55,7 @@ ${outcomeCss}
 /* Size: normal = grey, big = cyan, huge = gold (frame and label). */
 .fut-msg.fut-size-2 { border-color: #2A3B55; }
 .fut-msg.fut-size-1 { border-color: #4FD1E8aa; }
-.fut-msg.fut-size-0 { border-color: #F5D547cc; box-shadow: 0 0 8px #F5D54733; }
+.fut-msg.fut-size-0 { border-color: #F5D547cc; background: #17150C; }
 .fut-msg-chip.fut-size-2 { color: #8A9BB0; }
 .fut-msg-chip.fut-size-1 { color: #4FD1E8; border-color: #4FD1E855; }
 .fut-msg-chip.fut-size-0 { color: #F5D547; border-color: #F5D54777; font-weight: 700; }
@@ -69,19 +74,20 @@ export const JOURNAL_CSS = `
 h2 { margin: 0; font-size: 20px; font-weight: 700; }
 h3 { margin: 0 0 6px; font-size: 13px; font-weight: 700; color: #C9D4E2; }
 .sub { color: #8A9BB0; font-size: 12px; }
-.close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #1F2C40; background: #111B2A; color: #B4C2D3; font-size: 20px; line-height: 1; cursor: pointer; }
+.close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #1F2C40; background: #111B2A; color: #B4C2D3; line-height: 1; cursor: pointer; }
 .close:hover { border-color: #4FD1E8; color: #E6EDF5; }
-.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
-.tab { padding: 5px 12px; border: 1px solid #1F2C40; border-radius: 16px; background: #111B2A; color: #B4C2D3; font: 12px Arial, sans-serif; cursor: pointer; }
-.tab[aria-pressed="true"] { border-color: #4FD1E8; background: #0F2A33; color: #E6EDF5; font-weight: 700; }
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
-.kpi { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; border: 1px solid #1F2C40; border-radius: 10px; background: #111B2A; min-width: 0; }
+.tabs { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid #1F2C40; }
+.tab { padding: 6px 12px; margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent; background: none; color: #8A9BB0; font: 12px Arial, sans-serif; cursor: pointer; }
+.tab:hover { color: #E6EDF5; }
+.tab[aria-pressed="true"] { border-bottom-color: #4FD1E8; color: #E6EDF5; font-weight: 700; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; border: 1px solid #1F2C40; border-radius: 10px; background: #0D1522; overflow: hidden; }
+.kpi { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; min-width: 0; box-shadow: 1px 0 0 #1F2C40, 0 1px 0 #1F2C40; }
 .kpi .label { color: #8A9BB0; font-size: 11px; }
 .kpi .value { font-size: 18px; font-weight: 700; font-family: "JetBrains Mono", Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kpi .detail { color: #8A9BB0; font-size: 11px; display: flex; flex-wrap: wrap; gap: 8px; }
 .neg { color: #FF7A7A; } .pos { color: #4FE0B0; }
 .m { color: #B8C2CC; } .c { color: #7FB8FF; } .d { color: #4FE0B0; } .dm { color: #B58CDB; }
-.card { padding: 12px 14px; border: 1px solid #1F2C40; border-radius: 10px; background: #111B2A; }
+.card { padding: 12px 0 2px; border-top: 1px solid #1F2C40; }
 .bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: #0D1522; gap: 2px; }
 .bar span { display: block; height: 100%; min-width: 2px; }
 .legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 4px 12px; margin-top: 8px; font-size: 12px; }
@@ -96,8 +102,7 @@ td { text-align: right; padding: 3px 6px; border-bottom: 1px solid #172334; font
 td:first-child { font-family: Arial, sans-serif; color: #C9D4E2; }
 .scroll { overflow-x: auto; }
 .ships { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px; }
-.ship { display: flex; align-items: center; gap: 8px; padding: 4px; border: 1px solid #1F2C40; border-radius: 8px; background: #0D1522; min-width: 0; }
-.ships.lost .ship { border-color: #FF7A7A33; }
+.ship { display: flex; align-items: center; gap: 8px; padding: 2px 0; min-width: 0; }
 .ship-img { width: 44px; height: 44px; flex: none; border-radius: 6px; object-fit: cover; background: #16202E; }
 .ship-img-none { display: flex; align-items: center; justify-content: center; color: #8A9BB0; font-size: 11px; }
 .ship-info { display: flex; flex-direction: column; min-width: 0; }
