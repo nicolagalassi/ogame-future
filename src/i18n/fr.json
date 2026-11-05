@@ -1,0 +1,7 @@
+{
+  "app.name": "Future",
+  "sync.button": "Synchroniser",
+  "sync.done": "Données mises à jour",
+  "data.missing": "Données manquantes sur {count} planètes : ouvrez leur vue d'ensemble",
+  "guard.refused": "Appel bloqué pour respecter les règles d'OGame"
+}
