@@ -12,6 +12,11 @@ import { applyPageResources } from './engines/resources';
 import { SCORE_KEY, readScore, type Score } from './data/score';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
 import { openDashboard } from './modules/dashboard';
+import { isFleetDispatch } from './data/fleet-page';
+import { renderFleetTools } from './modules/fleet';
+import { watchJumpgate } from './modules/fleet/jumpgate';
+import { registerShortcuts, switchBodyUrl } from './modules/shortcuts';
+import { nextBody } from './engines/fleet';
 import { renderPlanetMenu, type MenuMode, type MenuSettings } from './modules/planet-menu';
 
 async function bootstrap(): Promise<void> {
@@ -103,6 +108,30 @@ async function bootstrap(): Promise<void> {
       },
     });
   draw();
+
+  const currentId = currentBodyId(document);
+  const list = readPlanetList(document);
+
+  // Keyboard, as in OGLight: I / O = previous / next planet (from a moon: previous / next moon).
+  // A normal page change with cp, the same as clicking the planet list.
+  if (currentId) {
+    const go = (backwards: boolean) => {
+      const id = nextBody(list, currentId, { backwards });
+      if (id) location.assign(switchBodyUrl(location.href, id));
+    };
+    registerShortcuts(document, [
+      { key: 'i', label: 'shortcut.prev', run: () => go(true) },
+      { key: 'o', label: 'shortcut.next', run: () => go(false) },
+    ]);
+    // Jump gate dialog: keeps reserve 1 of this moon at home.
+    watchJumpgate(document, store, currentId, t);
+  }
+
+  // Fleet page helpers: reserves and fleetsave, on the game's own form.
+  if (isFleetDispatch(document) && currentId) {
+    const bodies = readPlanetList(document).map(({ planetId, moonId, name, coords }) => ({ planetId, moonId, name, coords }));
+    renderFleetTools({ doc: document, store, bodyId: currentId, bodies, t, locale });
+  }
 }
 
 if (document.readyState === 'loading') {
