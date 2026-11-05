@@ -3,5 +3,11 @@
   "sync.button": "Sync",
   "sync.done": "Data updated",
   "data.missing": "Missing data on {count} planets: open their overview",
-  "guard.refused": "Call blocked to respect OGame rules"
+  "guard.refused": "Call blocked to respect OGame rules",
+  "planetMenu.moon": "Moon",
+  "planetMenu.stacked": "Stacked",
+  "planetMenu.compact": "Compact",
+  "res.metal": "Metal",
+  "res.crystal": "Crystal",
+  "res.deuterium": "Deuterium"
 }

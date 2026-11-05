@@ -26,6 +26,7 @@ describe('parseAccountInfo', () => {
     expect(s.bodies).toHaveLength(2);
     expect(s.bodies[0]).toMatchObject({ type: 'planet', name: 'Yolen', coords: '5:185:2', siblingId: 2 });
     expect(s.bodies[0]?.levels['1']).toBe(45);
+    expect(s.bodies[0]?.resourcesAt).toBe(0);
     expect(s.bodies[1]).toMatchObject({ type: 'moon', siblingId: 1 });
     expect(s.researches['122']).toBe(20);
   });

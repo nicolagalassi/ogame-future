@@ -3,5 +3,11 @@
   "sync.button": "Synchronisieren",
   "sync.done": "Daten aktualisiert",
   "data.missing": "Fehlende Daten auf {count} Planeten: öffne ihre Übersicht",
-  "guard.refused": "Aufruf blockiert, um die OGame-Regeln einzuhalten"
+  "guard.refused": "Aufruf blockiert, um die OGame-Regeln einzuhalten",
+  "planetMenu.moon": "Mond",
+  "planetMenu.stacked": "Gestapelt",
+  "planetMenu.compact": "Kompakt",
+  "res.metal": "Metall",
+  "res.crystal": "Kristall",
+  "res.deuterium": "Deuterium"
 }
