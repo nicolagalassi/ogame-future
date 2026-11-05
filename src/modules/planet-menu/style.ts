@@ -137,12 +137,12 @@ ${L} .smallplanet .constructionIcon,
 ${L} .smallplanet a.alert {
   position: absolute !important; left: 1px !important; top: auto !important; bottom: 1px !important; right: auto !important; z-index: 2;
   width: 12px !important; height: 12px !important; border-radius: 50%;
-  background-color: rgba(79,209,232,0.35) !important; box-shadow: 0 0 4px rgba(79,209,232,0.8);
+  background-color: rgba(79,209,232,0.35) !important; box-shadow: 0 0 0 1px #0A111C;
 }
 ${L} .smallplanet a.constructionIcon.moon { left: auto !important; right: 2px !important; top: 1px !important; bottom: auto !important; }
 ${L} .fut-idle {
   position: absolute; left: 3px; bottom: 3px; width: 6px; height: 6px; border-radius: 50%;
-  background: #F5B547; box-shadow: 0 0 4px rgba(245,181,71,0.8);
+  background: #F5B547; box-shadow: 0 0 0 1px #0A111C;
 }
 
 /* Compact: the game's width, 30px rows, no numbers, moon as a square button. */
@@ -189,7 +189,7 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
 #planetbarcomponent .fut-tool.fut-busy svg { animation: fut-spin 1s linear infinite; }
 #planetbarcomponent:not(.fut-wide) .fut-cell { padding: 3px 3px 4px; }
 #planetbarcomponent:not(.fut-wide) .fut-cell-v { font-size: 10px; }
-#planetbarcomponent:not(.fut-wide) .fut-cell-k { font-size: 9px; }
+#planetbarcomponent:not(.fut-wide) .fut-cell-k { font-size: 10px; }
 @keyframes fut-spin { to { transform: rotate(360deg); } }
 
 .fut-settings {

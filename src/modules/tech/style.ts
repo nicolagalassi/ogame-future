@@ -32,7 +32,7 @@ export const TECH_CSS = `
   font-family: "JetBrains Mono", Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fut-tp-sum { color: #4FD1E8; }
 .fut-tp-short { color: #FF7A7A; }
-.fut-tp-ok { color: #4FE0B0; text-align: center; }
+.fut-tp-ok { color: #4FE0B0; text-align: center; display: flex; align-items: center; justify-content: center; }
 .fut-tp-msu { color: #C9D4E2; font-size: 10px; }
 .fut-tp-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: auto; }
 .fut-tp-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border: 1px solid #1F2C40; border-radius: 10px;
@@ -64,15 +64,15 @@ export const PLANNER_CSS = `
 h2 { margin: 0; font-size: 20px; font-weight: 700; }
 h3 { margin: 0; font-size: 14px; font-weight: 700; color: #C9D4E2; }
 .sub { color: #8A9BB0; font-size: 12px; }
-.close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #1F2C40; background: #111B2A; color: #B4C2D3; font-size: 20px; line-height: 1; cursor: pointer; }
+.close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #1F2C40; background: #111B2A; color: #B4C2D3; line-height: 1; cursor: pointer; }
 .close:hover { border-color: #4FD1E8; color: #E6EDF5; }
-.summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border: 1px solid #1F2C40; border-radius: 10px; background: #0D1522; overflow: hidden; }
 .empty { grid-column: span 2; margin: 0; padding: 18px; text-align: center; color: #8A9BB0; border: 1px dashed #1F2C40; border-radius: 10px; }
-.kpi { display: flex; flex-direction: column; gap: 4px; padding: 12px; border: 1px solid #1F2C40; border-radius: 10px; background: #111B2A; }
+.kpi { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; box-shadow: 1px 0 0 #1F2C40, 0 1px 0 #1F2C40; }
 .kpi .label { color: #8A9BB0; font-size: 12px; }
 .kpi-line { display: flex; gap: 14px; font-size: 16px; font-weight: 700; }
 .kpi.warn .label { color: #F5B547; }
-.card { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border: 1px solid #1F2C40; border-radius: 10px; background: #111B2A; }
+.card { display: flex; flex-direction: column; gap: 8px; padding: 12px 0 4px; border-top: 1px solid #1F2C40; }
 .card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .card-title { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
 .count { color: #8A9BB0; font-size: 12px; white-space: nowrap; }
@@ -81,9 +81,9 @@ h3 { margin: 0; font-size: 14px; font-weight: 700; color: #C9D4E2; }
 .act:hover { border-color: #4FD1E8; }
 .act.ghost { border-color: #1F2C40; background: none; color: #8A9BB0; font-weight: 400; }
 .act.ghost:hover { border-color: #FF7A7A; color: #FF7A7A; }
-.sums { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+.sums { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0; border: 1px solid #1F2C40; border-radius: 8px; background: #0D1522; overflow: hidden; }
 .sum.sent .label { color: #4FD1E8; }
-.sum { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 8px; background: #0D1522; }
+.sum { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; box-shadow: 1px 0 0 #1F2C40, 0 1px 0 #1F2C40; }
 .sum .label { color: #8A9BB0; font-size: 11px; }
 .sum.warn .label { color: #F5B547; }
 .sum.ok .label { color: #4FE0B0; font-size: 13px; font-weight: 700; }
@@ -99,7 +99,7 @@ h3 { margin: 0; font-size: 14px; font-weight: 700; color: #C9D4E2; }
 .lv { color: #4FD1E8; font-size: 11px; white-space: nowrap; }
 .num { text-align: right; font-family: "JetBrains Mono", Consolas, monospace; white-space: nowrap; }
 .m { color: #B8C2CC; } .c { color: #7FB8FF; } .d { color: #4FE0B0; }
-.x { width: 22px; height: 22px; padding: 0; border: 1px solid transparent; border-radius: 6px; background: none; color: #8A9BB0; font-size: 15px; cursor: pointer; }
+.x { width: 22px; height: 22px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 6px; background: none; color: #8A9BB0; cursor: pointer; }
 .x:hover { border-color: #FF7A7A; color: #FF7A7A; }
 @media (max-width: 560px) { .summary, .sums { grid-template-columns: 1fr; } .empty { grid-column: auto; } .card-head { flex-wrap: wrap; } }
 `;

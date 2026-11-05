@@ -10,6 +10,7 @@
  * COMPLIANCE: reads the panel the game itself loaded; no request, no game action. The panel
  * is watched with a MutationObserver instead of replacing the game's technologyDetails.
  */
+import { icon } from '../../core/icons';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
 import { levelsOf, readTechDetails, readTechList, type TechDetails } from '../../data/tech-details';
@@ -53,6 +54,13 @@ function el<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, cls = 
   if (cls) node.className = cls;
   if (text !== undefined) node.textContent = text;
   return node;
+}
+
+/** "Nothing missing": a drawn check (or a dash when the stock is unknown). */
+function okCell(doc: Document, have: unknown, cls: string): HTMLElement {
+  const c = el(doc, 'span', cls, have ? '' : '—');
+  if (have) c.append(icon(doc, 'check', 12));
+  return c;
 }
 
 export function formatDuration(ms: number): string {
@@ -135,13 +143,13 @@ function grid(o: TechOptions, view: View, have: boolean): HTMLElement {
       if (!col.short) g.append(cell(col.cost[key], col.cls ?? ''));
       else if (key === 'energy') g.append(el(doc, 'span', 'fut-tp-v'));
       else if (col.cost[key] > 0) g.append(cell(-col.cost[key], 'fut-tp-short'));
-      else g.append(el(doc, 'span', 'fut-tp-v fut-tp-ok', have ? '✓' : '—'));
+      else g.append(okCell(doc, have, 'fut-tp-v fut-tp-ok'));
     }
   }
   g.append(el(doc, 'span', 'fut-tp-k fut-tp-msu', 'MSU'));
   for (const col of view.cols) {
     const v = msu(col.cost);
-    if (col.short) g.append(v > 0 ? cell(-v, 'fut-tp-short fut-tp-msu') : el(doc, 'span', 'fut-tp-v fut-tp-ok fut-tp-msu', have ? '✓' : '—'));
+    if (col.short) g.append(v > 0 ? cell(-v, 'fut-tp-short fut-tp-msu') : okCell(doc, have, 'fut-tp-v fut-tp-ok fut-tp-msu'));
     else g.append(cell(v, `${col.cls ?? ''} fut-tp-msu`));
   }
   return g;

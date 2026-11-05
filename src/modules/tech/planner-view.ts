@@ -3,6 +3,7 @@
  * total cost and what is still missing against the resources Future estimates there.
  * Shadow DOM, like the dashboard. Data already stored only: no network, no game action.
  */
+import { BASE_SHEET, icon } from '../../core/icons';
 import type { Store } from '../../core/storage';
 import type { AccountSnapshot } from '../../data/account-info';
 import type { PlanetListEntry } from '../../data/planet-list';
@@ -82,7 +83,7 @@ export function openPlanner(o: PlannerOptions): void {
   host.id = PLANNER_ID;
   const root = host.attachShadow({ mode: 'open' });
   const style = h('style');
-  style.textContent = PLANNER_CSS;
+  style.textContent = PLANNER_CSS + BASE_SHEET;
   const backdrop = h('div', 'backdrop');
   const panel = h('div', 'panel');
   backdrop.append(panel);
@@ -124,7 +125,8 @@ export function openPlanner(o: PlannerOptions): void {
     const head = h('div', 'head');
     const titles = h('div', 'titles');
     titles.append(h('h2', '', t('plan.title')), h('span', 'sub', t('plan.sub')));
-    const close = h('button', 'close', '×');
+    const close = h('button', 'close');
+    close.append(icon(doc, 'close', 16));
     close.title = t('fleet.close');
     close.addEventListener('click', () => closePlanner(doc));
     head.append(titles, close);
@@ -223,7 +225,8 @@ export function openPlanner(o: PlannerOptions): void {
               ? t('plan.level', { level: g.from ?? 0 })
               : t('plan.levels', { from: g.from ?? 0, to: g.to ?? 0 });
         name.append(h('span', '', g.name), h('span', 'lv', what));
-        const remove = h('button', 'x', '×');
+        const remove = h('button', 'x');
+        remove.append(icon(doc, 'close', 13));
         remove.title = t('plan.remove');
         remove.addEventListener('click', () => {
           let next = plan;

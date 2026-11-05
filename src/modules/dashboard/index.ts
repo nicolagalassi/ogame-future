@@ -4,6 +4,7 @@
  * stored; it makes no network call and sends no game action. Planet names link to the
  * game's own planet pages (a normal click = one navigation, AGENTS.md §1).
  */
+import { BASE_SHEET, icon } from '../../core/icons';
 import type { AccountSnapshot } from '../../data/account-info';
 import type { PlanetListEntry } from '../../data/planet-list';
 import type { Score } from '../../data/score';
@@ -99,7 +100,7 @@ export function openDashboard(o: DashboardOptions): void {
   host.id = HOST_ID;
   const root = host.attachShadow({ mode: 'open' });
   const style = h('style');
-  style.textContent = DASHBOARD_CSS;
+  style.textContent = DASHBOARD_CSS + BASE_SHEET;
   root.append(style);
 
   const backdrop = h('div', 'backdrop');
@@ -133,7 +134,8 @@ export function openDashboard(o: DashboardOptions): void {
     .filter(Boolean)
     .join(' · ');
   titles.append(h('span', 'sub', sub));
-  const x = h('button', 'close', '×');
+  const x = h('button', 'close');
+  x.append(icon(doc, 'close', 16));
   x.type = 'button';
   x.setAttribute('aria-label', t('dash.close'));
   x.addEventListener('click', close);
@@ -270,7 +272,8 @@ export function openDashboard(o: DashboardOptions): void {
   for (const r of sortRows(rows.filter((row) => showMoons || row.type === 'planet'))) {
     const tr = h('tr', r.type);
     const nameCell = h('td', 'name');
-    const link = h('a', '', r.type === 'moon' ? `☾ ${r.name}` : r.name);
+    const link = h('a', '', r.name);
+    if (r.type === 'moon') link.prepend(icon(doc, 'moon', 11, 'moon-ico'));
     link.href = `${origin}/game/index.php?page=ingame&component=overview&cp=${r.id}`;
     nameCell.append(link, h('span', 'coords', `[${r.coords}]`));
     tr.append(nameCell);

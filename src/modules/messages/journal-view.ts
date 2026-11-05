@@ -2,6 +2,7 @@
  * Expedition journal window: what expeditions brought per period, outcomes, ships found and
  * lost, day by day. Shadow DOM, like the planner. Stored data only: no network, no game action.
  */
+import { BASE_SHEET, icon } from '../../core/icons';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
@@ -45,7 +46,7 @@ export function openJournal(o: JournalOptions): void {
   host.id = JOURNAL_ID;
   const root = host.attachShadow({ mode: 'open' });
   const style = h('style');
-  style.textContent = JOURNAL_CSS;
+  style.textContent = JOURNAL_CSS + BASE_SHEET;
   const backdrop = h('div', 'backdrop');
   const panel = h('div', 'panel');
   backdrop.append(panel);
@@ -66,7 +67,8 @@ export function openJournal(o: JournalOptions): void {
     const head = h('div', 'head');
     const titles = h('div', 'titles');
     titles.append(h('h2', '', t('exp.title')), h('span', 'sub', t('exp.sub')));
-    const close = h('button', 'close', '×');
+    const close = h('button', 'close');
+    close.append(icon(doc, 'close', 16));
     close.title = t('fleet.close');
     close.addEventListener('click', () => closeJournal(doc));
     head.append(titles, close);
