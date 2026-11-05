@@ -121,6 +121,17 @@ ${L} .fut-age-fresh { color: #38C56E; }
 ${L} .fut-age-warm { color: #E3BB28; }
 ${L} .fut-age-old { color: #EF7676; }
 
+/* Running queues: one coloured stripe per kind (OGLight colours), details in the tooltip. */
+${L} .fut-queue { display: flex; gap: 2px; margin-top: 2px; height: 3px; }
+${L} .fut-q { display: block; width: 12px; height: 3px; border-radius: 2px; background: currentColor; box-shadow: 0 0 3px currentColor; }
+${L} a.moonlink .fut-queue { position: absolute; left: 3px; bottom: 3px; margin: 0; }
+${L} a.moonlink .fut-q { width: 8px; }
+${L} .fut-q-building { color: #FF8200; }
+${L} .fut-q-research { color: #32FB2F; }
+${L} .fut-q-ship { color: #FFEB00; }
+${L} .fut-q-lfbuilding { color: #FF79BD; }
+${L} .fut-q-lfresearch { color: #42AFFF; }
+
 /* Queue: the game's own construction icon (kept clickable) on the skin, or an amber dot when idle. */
 ${L} .smallplanet .constructionIcon,
 ${L} .smallplanet a.alert {
