@@ -8453,7 +8453,7 @@ h3 { margin: 0; }
   var isHighscorePage = (doc) => new URL(doc.location?.href ?? "http://x/").searchParams.get("component") === "highscore";
   var CSS = `
 #ranks .fut-hs-gap { display: block; font-size: 10px; line-height: 1.3; }
-#ranks .fut-hs-gap.ahead { color: #E3BB28; } #ranks .fut-hs-gap.behind { color: #7BC47F; }
+#ranks .fut-hs-gap.ahead { color: #7BC47F; } #ranks .fut-hs-gap.behind { color: #D86A6A; }
 #ranks .fut-hs-eta { display: block; font-size: 10px; color: #6F9FC8; }
 #ranks .fut-hs-star { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-left: 4px; padding: 0;
   border: 1px solid #2E4356; border-radius: 3px; background: #111A21; color: #848484; cursor: pointer; vertical-align: middle; }
