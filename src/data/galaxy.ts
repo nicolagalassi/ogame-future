@@ -24,7 +24,12 @@ export interface GalaxyRow {
   rank: number | null;
   alliance: string;
   debris: Debris | null;
+  /** Activity the game shows on the planet and on the moon (the moon's only means something with a moonId). */
+  activity: { planet: Activity; moon: Activity };
 }
+
+/** '*' = active in the last 15 minutes, a number = minutes since (15–59), null = nothing in the hour. */
+export type Activity = '*' | number | null;
 
 export interface GalaxySystem {
   galaxy: number;
@@ -62,6 +67,15 @@ function statusesOf(cell: Element | null): PlayerStatus[] {
   return KNOWN.filter((s) => found.has(s));
 }
 
+/** The game's activity mark inside a planet or moon cell ("minute15", or "showMinutes" with the minutes). */
+export function readActivity(cell: Element | null): Activity {
+  const a = cell?.querySelector('.activity');
+  if (!a) return null;
+  if (a.classList.contains('minute15')) return '*';
+  const min = int(a.textContent);
+  return min !== null && min > 0 ? min : null;
+}
+
 /** The system on screen, or null when the galaxy table is not there. */
 export function readGalaxy(doc: Document): GalaxySystem | null {
   const content = doc.getElementById('galaxyContent');
@@ -90,6 +104,7 @@ export function readGalaxy(doc: Document): GalaxySystem | null {
       rank: int(nameCell?.querySelector('.rank a')?.textContent),
       alliance: [...(row.querySelector('.cellAlliance > span')?.childNodes ?? [])].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim(),
       debris: readDebris(row.querySelector('.cellDebris')),
+      activity: { planet: readActivity(row.querySelector('.cellPlanet')), moon: readActivity(row.querySelector('.cellMoon')) },
     });
   }
   return { galaxy, system, rows, deepDebris: readDebris(doc.getElementById('expeditionDebrisSlotDebrisContainer')) };

@@ -13,8 +13,8 @@ import { applyPageResources } from './engines/resources';
 import { SCORE_KEY, watchScore, type Score } from './data/score';
 import { HISTORY_KEY, recordDay, type History } from './engines/history';
 import { loadServerDataOnPageLoad } from './data/server-data';
-import { isGalaxyPage, TARGETS_KEY, watchGalaxy } from './modules/galaxy';
-import { openTargets } from './modules/marks/targets-view';
+import { highlightPosition, isGalaxyPage, TARGETS_KEY, watchGalaxy } from './modules/galaxy';
+import { nextInSide, onSideNavigate, refreshSide, restoreSide, toggleSide } from './modules/marks/side';
 import { loadMarks, MARKS_KEY, migrateOld, type Marks } from './engines/marks';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
 import { ITEMS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems } from './data/bonuses';
@@ -244,7 +244,12 @@ async function bootstrap(): Promise<void> {
     watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), onPlanChange: () => draw() });
   }
 
-  const openTargetsHere = () => openTargets({ doc: document, store, guard, t, locale, here: document.querySelector('meta[name="ogame-planet-coordinates"]')?.getAttribute('content') ?? '1:1:1' });
+  // Targets side bar: stays open across pages as the player left it; M = next position of its list.
+  const side = { doc: document, store, guard, t, locale };
+  const openTargetsHere = () => toggleSide(side);
+  onSideNavigate(highlightPosition);
+  restoreSide(side);
+  registerShortcuts(document, [{ key: 'm', label: 'shortcut.nextTarget', run: () => void nextInSide(document) }]);
   const pageMeta = (name: string) => document.querySelector(`meta[name="${name}"]`)?.getAttribute('content') ?? '';
 
   // Manual reminders: due ones are shown on the page; bells on the game's event list.
@@ -277,7 +282,7 @@ async function bootstrap(): Promise<void> {
   // Galaxy view: system summary, marks, debris in MSU, targets and the scores card.
   if (isGalaxyPage(document)) {
     const ownPlanetIds = new Set(readPlanetList(document).flatMap((e) => (e.planetId ? [e.planetId] : [])));
-    watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onOpenTargets: openTargetsHere });
+    watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onOpenTargets: openTargetsHere, onSystem: refreshSide });
   }
 }
 

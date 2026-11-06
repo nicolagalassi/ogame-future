@@ -664,7 +664,24 @@
     "marks.hide.inactive": "Nascondi inattivi",
     "marks.noneInRange": "Nessun pianeta colorato in questo intervallo con questi filtri.",
     "marks.noPlanets": "Nessun pianeta colorato. In galassia usa il pallino a destra del nome del pianeta.",
-    "marks.planetsHint": "{n} pianeti. Le coordinate aprono la galassia, dove c'\xE8 la sonda del gioco."
+    "marks.planetsHint": "{n} pianeti \xB7 le coordinate mostrano il sistema in galassia",
+    "marks.keyNext": "prossima posizione",
+    "marks.footData": "galassia + API pubblica",
+    "marks.fleetPlanet": "Flotta verso il pianeta {coords} (attivit\xE0 del pianeta)",
+    "marks.fleetMoon": "Flotta verso la luna {coords} (attivit\xE0 della luna)",
+    "marks.ago": "{n}{u}",
+    "marks.unit.m": "m",
+    "marks.unit.h": "h",
+    "marks.unit.d": "g",
+    "marks.seenOnly": "Visto in galassia, l'API non lo elenca ancora \xB7 clic: mostra il sistema",
+    "marks.showSystem": "Mostra il sistema in galassia",
+    "marks.col.coords": "Coord.",
+    "marks.col.debris": "CD",
+    "marks.col.planet": "Pian.",
+    "marks.col.moon": "Luna",
+    "marks.col.seen": "Visto",
+    "marks.col.who": "Pianeta \xB7 giocatore",
+    "shortcut.nextTarget": "Bersagli: prossima posizione"
   };
 
   // src/i18n/en.json
@@ -1167,7 +1184,24 @@
     "marks.hide.inactive": "Hide inactive",
     "marks.noneInRange": "No coloured planet in this range with these filters.",
     "marks.noPlanets": "No coloured planet. In the galaxy view use the dot to the right of the planet name.",
-    "marks.planetsHint": "{n} planets. Coordinates open the galaxy view, where the game's probe is."
+    "marks.planetsHint": "{n} planets \xB7 coordinates show the system in the galaxy",
+    "marks.keyNext": "next position",
+    "marks.footData": "galaxy + public API",
+    "marks.fleetPlanet": "Fleet to planet {coords} (planet activity)",
+    "marks.fleetMoon": "Fleet to moon {coords} (moon activity)",
+    "marks.ago": "{n}{u}",
+    "marks.unit.m": "m",
+    "marks.unit.h": "h",
+    "marks.unit.d": "d",
+    "marks.seenOnly": "Seen in the galaxy, not in the API yet \xB7 click: show the system",
+    "marks.showSystem": "Show the system in the galaxy",
+    "marks.col.coords": "Coords",
+    "marks.col.debris": "DF",
+    "marks.col.planet": "Plan.",
+    "marks.col.moon": "Moon",
+    "marks.col.seen": "Seen",
+    "marks.col.who": "Planet \xB7 player",
+    "shortcut.nextTarget": "Targets: next position"
   };
 
   // src/i18n/fr.json
@@ -1670,7 +1704,24 @@
     "marks.hide.inactive": "Masquer inactifs",
     "marks.noneInRange": "Aucune plan\xE8te color\xE9e dans cette zone avec ces filtres.",
     "marks.noPlanets": "Aucune plan\xE8te color\xE9e. Dans la galaxie, utilisez le point \xE0 droite du nom de la plan\xE8te.",
-    "marks.planetsHint": "{n} plan\xE8tes. Les coordonn\xE9es ouvrent la galaxie, o\xF9 se trouve la sonde du jeu."
+    "marks.planetsHint": "{n} plan\xE8tes \xB7 les coordonn\xE9es affichent le syst\xE8me en galaxie",
+    "marks.keyNext": "position suivante",
+    "marks.footData": "galaxie + API publique",
+    "marks.fleetPlanet": "Flotte vers la plan\xE8te {coords} (activit\xE9 de la plan\xE8te)",
+    "marks.fleetMoon": "Flotte vers la lune {coords} (activit\xE9 de la lune)",
+    "marks.ago": "{n}{u}",
+    "marks.unit.m": "m",
+    "marks.unit.h": "h",
+    "marks.unit.d": "j",
+    "marks.seenOnly": "Vue en galaxie, pas encore dans l'API \xB7 clic : afficher le syst\xE8me",
+    "marks.showSystem": "Afficher le syst\xE8me en galaxie",
+    "marks.col.coords": "Coord.",
+    "marks.col.debris": "CDR",
+    "marks.col.planet": "Plan.",
+    "marks.col.moon": "Lune",
+    "marks.col.seen": "Vu",
+    "marks.col.who": "Plan\xE8te \xB7 joueur",
+    "shortcut.nextTarget": "Cibles : position suivante"
   };
 
   // src/i18n/de.json
@@ -2173,7 +2224,24 @@
     "marks.hide.inactive": "Inaktive ausblenden",
     "marks.noneInRange": "Kein gef\xE4rbter Planet in diesem Bereich mit diesen Filtern.",
     "marks.noPlanets": "Kein gef\xE4rbter Planet. Nutze in der Galaxie den Punkt rechts vom Planetennamen.",
-    "marks.planetsHint": "{n} Planeten. Koordinaten \xF6ffnen die Galaxie, wo die Sonde des Spiels ist."
+    "marks.planetsHint": "{n} Planeten \xB7 Koordinaten zeigen das System in der Galaxie",
+    "marks.keyNext": "n\xE4chste Position",
+    "marks.footData": "Galaxie + \xF6ffentliche API",
+    "marks.fleetPlanet": "Flotte zum Planeten {coords} (Aktivit\xE4t des Planeten)",
+    "marks.fleetMoon": "Flotte zum Mond {coords} (Aktivit\xE4t des Mondes)",
+    "marks.ago": "{n}{u}",
+    "marks.unit.m": "m",
+    "marks.unit.h": "h",
+    "marks.unit.d": "T",
+    "marks.seenOnly": "In der Galaxie gesehen, noch nicht in der API \xB7 Klick: System zeigen",
+    "marks.showSystem": "System in der Galaxie zeigen",
+    "marks.col.coords": "Koord.",
+    "marks.col.debris": "TF",
+    "marks.col.planet": "Plan.",
+    "marks.col.moon": "Mond",
+    "marks.col.seen": "Gesehen",
+    "marks.col.who": "Planet \xB7 Spieler",
+    "shortcut.nextTarget": "Ziele: n\xE4chste Position"
   };
 
   // src/core/i18n.ts
@@ -2400,17 +2468,17 @@
     return out.slice(-HISTORY_MAX);
   }
   function changeOver(history, days) {
-    const last = history.at(-1);
-    if (!last || history.length < 2) return null;
-    const limit = last.at - days * 864e5;
+    const last2 = history.at(-1);
+    if (!last2 || history.length < 2) return null;
+    const limit = last2.at - days * 864e5;
     const base = [...history].reverse().find((d) => d.at <= limit + 36e5) ?? history[0];
-    if (base === last) return null;
-    const span = Math.max(1, Math.round((last.at - base.at) / 864e5));
+    if (base === last2) return null;
+    const span = Math.max(1, Math.round((last2.at - base.at) / 864e5));
     return {
       days: span,
-      points: last.points - base.points,
-      rank: last.rank !== null && base.rank !== null ? base.rank - last.rank : null,
-      perDay: (last.points - base.points) / span
+      points: last2.points - base.points,
+      rank: last2.rank !== null && base.rank !== null ? base.rank - last2.rank : null,
+      perDay: (last2.points - base.points) / span
     };
   }
 
@@ -2486,6 +2554,54 @@
     return { ...next, lastFlag: m.lastFlag, lastTag: m.lastTag };
   }
 
+  // src/engines/positions.ts
+  var POSITIONS_KEY = "positions";
+  var MAX = 4e3;
+  function recordSystem(db, galaxy, system, rows, keep, now) {
+    let next = null;
+    const put = (coords, seen) => {
+      next ?? (next = { ...db });
+      if (seen) next[coords] = seen;
+      else delete next[coords];
+    };
+    const byPos = new Map(rows.map((r) => [r.position, r]));
+    for (let p = 1; p <= 15; p++) {
+      const coords = `${galaxy}:${system}:${p}`;
+      const r = byPos.get(p);
+      const owner = r?.planetId && r.playerId ? r.playerId : 0;
+      if (owner && (keep(owner, coords) || db[coords])) {
+        put(coords, { player: owner, name: r.planetName, moon: !!r.moonId, debris: Math.round(r.debris), act: [r.activity.planet, r.moonId ? r.activity.moon : null], at: now });
+      } else if (!owner && db[coords]) {
+        if (db[coords].player) put(coords, { player: 0, name: "", moon: false, debris: Math.round(r?.debris ?? 0), act: [null, null], at: now });
+      }
+    }
+    if (!next) return null;
+    const all2 = next;
+    const keys = Object.keys(all2);
+    if (keys.length > MAX) for (const k of keys.sort((a, b) => all2[a].at - all2[b].at).slice(0, keys.length - MAX)) delete all2[k];
+    return all2;
+  }
+  var coordsValue2 = (c) => c.split(":").reduce((s, n) => s * 1e3 + Number(n), 0);
+  function planetsOf(id, api, db) {
+    const out = /* @__PURE__ */ new Map();
+    const apiAt = api?.updated ?? api?.at ?? 0;
+    for (const p of api?.planets ?? []) {
+      const seen = db[p.coords];
+      if (seen && seen.player !== id && seen.at > apiAt) continue;
+      out.set(p.coords, { coords: p.coords, name: seen?.player === id ? seen.name || p.name : p.name, moon: seen?.player === id && seen.at > apiAt ? seen.moon : !!p.moon, seen: seen?.player === id ? seen : null, fresh: false });
+    }
+    for (const [coords, seen] of Object.entries(db)) {
+      if (seen.player === id && !out.has(coords)) out.set(coords, { coords, name: seen.name, moon: seen.moon, seen, fresh: true });
+    }
+    return [...out.values()].sort((a, b) => coordsValue2(a.coords) - coordsValue2(b.coords));
+  }
+  function ageParts(ms) {
+    const min = Math.max(0, Math.floor(ms / 6e4));
+    if (min < 60) return { n: min, unit: "m" };
+    if (min < 48 * 60) return { n: Math.floor(min / 60), unit: "h" };
+    return { n: Math.floor(min / 1440), unit: "d" };
+  }
+
   // src/core/icons.ts
   var PATHS = {
     close: '<path d="M6 6l12 12M18 6L6 18"/>',
@@ -2499,7 +2615,12 @@
     flag: '<path d="M5.5 21V4M5.5 4.5h11l-2.5 4 2.5 4h-11"/>',
     star: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
     bell: '<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
-    target: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>'
+    target: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
+    back: '<path d="M19 12H5.5M11 5.5L4.5 12l6.5 6.5"/>',
+    pen: '<path d="M4 20l1-4.5L16 4.5l3.5 3.5L8.5 19z"/><path d="M13.5 7l3.5 3.5"/>',
+    chart: '<path d="M4 20.5h16"/><path d="M7 17v-5M12 17V6.5M17 17v-8"/>',
+    planet: '<circle cx="12" cy="12" r="6"/><path d="M3 15.5c2.5 1.6 15.5-3.5 18-7"/>',
+    fleet: '<path d="M3.5 12h11l5-4.5v9l-5-4.5"/><path d="M6.5 8.5L9 12l-2.5 3.5"/>'
   };
   function icon(doc, name, size = 14, cls = "fut-ico") {
     const svg2 = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -2529,7 +2650,7 @@
 .fut-mk.on { border-color: currentColor; background: #0D1522; }
 .fut-mk-dot { width: 9px; height: 9px; border-radius: 50%; border: 1px solid #4A5B72; }
 .fut-mk.on .fut-mk-dot { border-color: transparent; }
-#fut-mk-pop { position: fixed; z-index: 100002; display: flex; gap: 3px; padding: 5px; border: 1px solid #2E4356; border-radius: 8px;
+#fut-mk-pop { position: fixed; z-index: 1000003; display: flex; gap: 3px; padding: 5px; border: 1px solid #2E4356; border-radius: 8px;
   background: #111B2A; box-shadow: 0 8px 22px rgba(0,0,0,0.55); font: 11px Verdana, Arial, sans-serif; }
 #fut-mk-pop button { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; padding: 0; border: 1px solid #1F2C40;
   border-radius: 6px; background: #0A111C; color: #8A9BB0; cursor: pointer; }
@@ -2718,6 +2839,13 @@
     if (found.size > 1) found.delete("active");
     return KNOWN.filter((s) => found.has(s));
   }
+  function readActivity(cell) {
+    const a = cell?.querySelector(".activity");
+    if (!a) return null;
+    if (a.classList.contains("minute15")) return "*";
+    const min = int(a.textContent);
+    return min !== null && min > 0 ? min : null;
+  }
   function readGalaxy(doc) {
     const content = doc.getElementById("galaxyContent");
     if (!content) return null;
@@ -2743,7 +2871,8 @@
         statuses: statusesOf(nameCell ?? null),
         rank: int(nameCell?.querySelector(".rank a")?.textContent),
         alliance: [...row.querySelector(".cellAlliance > span")?.childNodes ?? []].filter((n) => n.nodeType === 3).map((n) => n.textContent).join("").trim(),
-        debris: readDebris(row.querySelector(".cellDebris"))
+        debris: readDebris(row.querySelector(".cellDebris")),
+        activity: { planet: readActivity(row.querySelector(".cellPlanet")), moon: readActivity(row.querySelector(".cellMoon")) }
       });
     }
     return { galaxy, system, rows, deepDebris: readDebris(doc.getElementById("expeditionDebrisSlotDebrisContainer")) };
@@ -2777,7 +2906,8 @@
         moon: m ? { id: Number(m.getAttribute("id")) || 0, name: m.getAttribute("name") ?? "", size: Number(m.getAttribute("size")) || 0 } : null
       };
     }).filter((p) => /^\d+:\d+:\d+$/.test(p.coords));
-    return { id, name: root.getAttribute("name") ?? "", at: now, scores, ships: Number.isFinite(ships) && ships > 0 ? ships : null, planets };
+    const ts = Number(root.getAttribute("timestamp"));
+    return { id, name: root.getAttribute("name") ?? "", at: now, updated: ts > 0 ? ts * 1e3 : void 0, scores, ships: Number.isFinite(ships) && ships > 0 ? ships : null, planets };
   }
   async function playerScores(guard, store, origin, id, now) {
     const cache = store.get(PLAYER_SCORES_KEY, {});
@@ -2798,7 +2928,7 @@
   var GALAXY_CSS = `
 .fut-g-bar {
   display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin: 4px 0 6px; padding: 6px 10px;
-  border: 1px solid #1F2C40; border-radius: 8px; background: #0D1522;
+  border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A;
   font: 12px/16px Arial, Helvetica, sans-serif; color: #C9D4E2; text-align: left;
 }
 .fut-g-bar b { color: #E6EDF5; font-family: Consolas, "JetBrains Mono", monospace; }
@@ -2816,6 +2946,10 @@
 #galaxyContent .galaxyRow.fut-g-inactive .galaxyCell { background-color: rgba(155,227,109,0.07); }
 #galaxyContent .galaxyRow.fut-g-own .galaxyCell { background-color: rgba(79,209,232,0.08); }
 #galaxyContent .galaxyRow.fut-g-tagged .cellPlanetName { box-shadow: inset 3px 0 0 var(--fut-tag); }
+
+/* The position the side bar (or the link) asked for: the planet menu's cyan frame. */
+#galaxyContent .galaxyRow.fut-g-hl { box-shadow: inset 0 0 0 1px #4FD1E8, inset 3px 0 0 #4FD1E8; }
+#galaxyContent .galaxyRow.fut-g-hl .galaxyCell { background-color: rgba(79,209,232,0.12); }
 
 #galaxyContent .cellPlanetName { position: relative; }
 /* Planet colour: at the right of the name, faint until the row is pointed at or the planet has one. */
@@ -2835,7 +2969,7 @@
 .fut-g-dval.big { color: #F5B547; font-weight: 700; }
 
 .fut-g-card {
-  position: fixed; z-index: 100001; width: 250px; padding: 10px 12px; border: 1px solid #2C3E57; border-radius: 8px;
+  position: fixed; z-index: 1000002; width: 250px; padding: 10px 12px; border: 1px solid #2C3E57; border-radius: 8px;
   background: #0A111C; box-shadow: 0 10px 30px rgba(0,0,0,0.6); font: 12px/16px Arial, Helvetica, sans-serif; color: #C9D4E2;
   text-align: left; pointer-events: none;
 }
@@ -2851,6 +2985,10 @@
   // src/modules/galaxy/index.ts
   var TARGETS_KEY = "galaxy.targets";
   var BIG_DEBRIS = 1e6;
+  var highlight = "";
+  function highlightPosition(coords) {
+    highlight = coords;
+  }
   var isGalaxyPage = (doc) => new URL(doc.location?.href ?? "http://x/").searchParams.get("component") === "galaxy";
   var coordsOf = (s, r) => `${s.galaxy}:${s.system}:${r.position}`;
   function systemSummary(s, ownPlanetIds) {
@@ -2894,11 +3032,18 @@
       doc.head.append(style);
     }
     ensureMarksStyle(doc);
+    highlight = (() => {
+      const q = new URL(doc.location.href).searchParams;
+      return q.get("galaxy") && q.get("system") && q.get("position") ? `${q.get("galaxy")}:${q.get("system")}:${q.get("position")}` : "";
+    })();
     let queued = false;
     const run = () => {
       queued = false;
       const content = doc.getElementById("galaxyContent");
-      if (content) decorate(o, content);
+      if (!content) return;
+      remember(o);
+      decorate(o, content);
+      o.onSystem?.();
     };
     new doc.defaultView.MutationObserver((records) => {
       const theirs = records.some((r) => ![...r.addedNodes, ...r.removedNodes].every(isOurs));
@@ -2907,6 +3052,16 @@
       setTimeout(run, 30);
     }).observe(component, { childList: true, subtree: true });
     run();
+  }
+  function remember(o) {
+    const s = readGalaxy(o.doc);
+    if (!s) return;
+    const marks = loadMarks(o.store.get(MARKS_KEY, null));
+    const recent = new Set(marks.recent.map((r) => r.id));
+    const keep = (id, coords) => !!marks.players[String(id)] || recent.has(id) || !!marks.planets[coords];
+    const rows = s.rows.filter((r) => !(r.planetId && o.ownPlanetIds.has(r.planetId))).map((r) => ({ ...r, debris: r.debris ? debrisMsu(r.debris) : 0 }));
+    const next = recordSystem(o.store.get(POSITIONS_KEY, {}), s.galaxy, s.system, rows, keep, Date.now());
+    if (next) o.store.set(POSITIONS_KEY, next);
   }
   function decorate(o, content) {
     const { doc, store, t, locale } = o;
@@ -2923,6 +3078,7 @@
       r.row.classList.toggle("fut-g-own", own);
       r.row.classList.toggle("fut-g-inactive", inactive && !own);
       r.row.classList.toggle("fut-g-tagged", !!tag);
+      r.row.classList.toggle("fut-g-hl", coords === highlight);
       const rowStyle = r.row.style;
       if (tag) rowStyle.setProperty("--fut-tag", TAG_COLORS[tag]);
       else rowStyle.removeProperty("--fut-tag");
@@ -3029,74 +3185,42 @@
     place2();
   }
 
-  // src/core/sheet.ts
-  var WINDOW_SHEET = `
-:host {
-  all: initial;
-  --bg: #0A111C; --surface: #0D1522; --raised: #111B2A; --line: #1F2C40; --line-soft: #16202F;
-  --text: #E6EDF5; --text-2: #C9D4E2; --muted: #8A9BB0; --faint: #4A5B72;
-  --accent: #4FD1E8; --accent-soft: #12283A; --warn: #F5B547; --ok: #4FE0B0; --bad: #FF7A7A;
-  --m: #B8C2CC; --c: #7FB8FF; --d: #4FE0B0; --dm: #B58CDB;
-  --mono: "JetBrains Mono", Consolas, monospace;
-  --panel-w: 860px;
-}
-* { box-sizing: border-box; }
-.backdrop {
-  position: fixed; inset: 0; z-index: 100000; display: flex; justify-content: center; align-items: flex-start;
-  padding: 48px 16px; background: rgba(3,6,12,0.72); overflow-y: auto;
-  font: 13px/1.4 Arial, Helvetica, sans-serif; color: var(--text);
-}
-.panel {
-  width: min(var(--panel-w), 100%); display: flex; flex-direction: column; gap: 12px; padding: 18px;
-  border: 1px solid var(--line); border-radius: 14px; background: var(--bg); box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-}
-.head { display: flex; align-items: flex-start; gap: 12px; }
-.titles { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-h2 { margin: 0; font-size: 20px; font-weight: 700; }
-h3 { margin: 0 0 8px; font-size: 14px; font-weight: 700; color: var(--text-2); }
-h4 { margin: 12px 0 4px; font-size: 12px; font-weight: 700; color: var(--text-2); }
-.sub { color: var(--muted); font-size: 12px; }
-.close {
-  flex: none; width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 8px; border: 1px solid var(--line); background: var(--raised); color: #B4C2D3; line-height: 1; cursor: pointer;
-}
-.close:hover { border-color: var(--accent); color: var(--text); }
-.mono { font-family: var(--mono); }
-.m { color: var(--m); } .c { color: var(--c); } .d { color: var(--d); } .dm { color: var(--dm); }
-.neg { color: var(--bad); } .pos { color: var(--ok); }
-
-/* Tabs: an underline under the one in use. */
-.tabs { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid var(--line); }
-.tab { padding: 7px 12px; margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--muted); font: 13px Arial, sans-serif; cursor: pointer; }
-.tab:hover { color: var(--text); }
-.tab[aria-pressed="true"] { border-bottom-color: var(--accent); color: var(--text); font-weight: 700; }
-
-/* Key numbers: one strip split by hairlines. */
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow: hidden; }
-.kpi { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; min-width: 0; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
-.kpi .label { color: var(--muted); font-size: 12px; }
-.kpi .value { font-size: 20px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kpi .note, .kpi .detail { color: var(--muted); font-size: 11px; }
-.kpi.accent .value { color: var(--accent); }
-.kpi.warn .value { color: var(--warn); }
-
-/* Sections, not cards inside the window: a hairline on top and air around. */
-.card { padding: 12px 0 4px; border-top: 1px solid var(--line); min-width: 0; }
-.hint { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
-.empty { margin: 0; padding: 18px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 10px; }
-
-/* Buttons: one filled action, ghost for the rest. */
-.act { padding: 5px 10px; border: 1px solid #2B6F7D; border-radius: 6px; background: #0F2A33; color: var(--text); font: 700 12px Arial, sans-serif; cursor: pointer; }
-.act:hover { border-color: var(--accent); }
-.act.ghost { border-color: var(--line); background: none; color: var(--muted); font-weight: 400; }
-.act.ghost:hover, .act.danger { border-color: var(--bad); color: var(--bad); }
-
-/* Browser surfaces. */
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.backdrop, .scroll, .table-wrap { scrollbar-color: #2A3B55 var(--bg); scrollbar-width: thin; }
-::selection { background: #2B6F7D; color: #fff; }
-.num, td, .value, .kpi-line { font-variant-numeric: tabular-nums; }
-`;
+  // src/data/fleet-dispatcher.ts
+  function pageWindow() {
+    return typeof unsafeWindow !== "undefined" && unsafeWindow || window;
+  }
+  function getDispatcher(win = pageWindow()) {
+    return win.fleetDispatcher ?? null;
+  }
+  function whenDispatcherReady(win = pageWindow(), timeoutMs = 5e3) {
+    const ready = getDispatcher(win);
+    if (ready) return Promise.resolve(ready);
+    return new Promise((resolve) => {
+      const started = Date.now();
+      const check = () => {
+        const fd = getDispatcher(win);
+        if (fd) return resolve(fd);
+        if (Date.now() - started > timeoutMs) return resolve(null);
+        setTimeout(check, 50);
+      };
+      check();
+    });
+  }
+  function shipCapacity(fd, id) {
+    const data = fd.fleetHelper.shipsData?.[String(id)];
+    return data?.cargoCapacity || data?.baseCargoCapacity || 0;
+  }
+  function shipsOnPlanet(fd) {
+    return Object.fromEntries(fd.shipsOnPlanet.map((s) => [String(s.id), s.number]));
+  }
+  var SHIPS_INFO_KEY = "ships.info";
+  function readShipsInfo(fd) {
+    const data = fd.fleetHelper?.shipsData;
+    if (!data) return null;
+    const out = {};
+    for (const [id, s] of Object.entries(data)) out[id] = { name: s.name ?? "", capacity: s.cargoCapacity || s.baseCargoCapacity || 0, speed: s.speed || 0 };
+    return Object.keys(out).length ? out : null;
+  }
 
   // src/data/universe-players.ts
   var UNIVERSE_PLAYERS_KEY = "universe.players";
@@ -3133,46 +3257,101 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     return fresh;
   }
 
-  // src/modules/marks/targets-view.ts
-  var TARGETS_ID = "fut-targets";
+  // src/modules/marks/side.ts
+  var SIDE_ID = "fut-side";
+  var SIDE_W = 330;
   var VIEW_KEY = "marks.view";
-  var keyHandler = null;
-  var sheetId = null;
+  var HOUR = 36e5;
+  var last = null;
+  var sheetData = /* @__PURE__ */ new Map();
+  var uni = null;
+  var SCORE_LOOK = [
+    ["total", "star", "#F5B547"],
+    ["economy", "swap", "#7FB8FF"],
+    ["research", "eye", "#4FE0B0"],
+    ["lifeform", "user", "#E58CDB"],
+    ["military", "fleet", "#FF7A7A"]
+  ];
   var CSS = `
-:host { --panel-w: 760px; }
-.sub-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 10px 0; }
-.chip { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 9px; border-radius: 7px; border: 1px solid var(--line); background: var(--bg); color: var(--text-2); font: 12px Arial, sans-serif; cursor: pointer; }
-.chip:hover, .chip:focus-visible { border-color: var(--accent); color: var(--text); outline: none; }
-.chip[aria-pressed="true"] { border-color: currentColor; background: var(--accent-soft); color: var(--text); }
-.chip .n { color: var(--muted); font-family: var(--mono); font-size: 11px; }
-.rows { display: flex; flex-direction: column; gap: 1px; background: var(--line-soft); border: 1px solid var(--line-soft); border-radius: 8px; overflow: hidden; }
-.row { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--surface); }
-.row .idx { width: 22px; color: var(--faint); font: 11px var(--mono); text-align: right; }
-.row .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.row button.name { all: unset; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; color: var(--text); font-weight: 700; }
-.row button.name:hover, .row button.name:focus-visible { color: var(--accent); text-decoration: underline; }
-.row .who { color: var(--muted); font-size: 12px; }
-.coords { color: var(--accent); font: 12px var(--mono); text-decoration: none; }
-.coords:hover, .coords:focus-visible { color: var(--text); text-decoration: underline; }
-.moon-ico { color: var(--muted); vertical-align: -1px; margin-right: 3px; }
-.group { margin-top: 6px; }
+:host { all: initial; }
+* { box-sizing: border-box; }
+.side {
+  position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000000; width: ${SIDE_W}px; display: flex; flex-direction: column; gap: 6px;
+  padding: 8px; background: #0B121D; border-right: 1px solid #1F2C40; box-shadow: 6px 0 24px rgba(0,0,0,0.45);
+  font: 11px Arial, Helvetica, sans-serif; color: #C9D4E2; overflow: hidden;
+}
+button { font: inherit; color: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -1px; }
+.mono, .coords, .num { font-family: Consolas, "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; }
+
+/* Head: back, title, close: the planet menu's toolbar look. */
+.head { display: flex; align-items: center; gap: 4px; min-height: 30px; padding: 0 2px 0 4px; border: 1px solid #1F2C40; border-radius: 6px; background: #111B2A; }
+.title { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 4px; font: 700 12px Arial, sans-serif; color: #E6EDF5; white-space: nowrap; overflow: hidden; }
+.title .name { overflow: hidden; text-overflow: ellipsis; }
+.title a { color: #8A9BB0; font-weight: 400; text-decoration: none; }
+.title a:hover { color: #4FD1E8; }
+.ib { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 5px; background: none; color: #8A9BB0; cursor: pointer; flex: none; text-decoration: none; }
+.ib:hover { background: #16243A; color: #E6EDF5; }
+
+/* Tabs and filters: the settings chips of the planet menu. */
+.chips { display: flex; flex-wrap: wrap; gap: 3px; }
+.chip { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: 1 0 auto; min-width: 30px; height: 24px; padding: 0 6px; border-radius: 5px; border: 1px solid #1F2C40; background: #0A111C; color: #B4C2D3; cursor: pointer; }
+.chip:hover { border-color: #2C5A73; }
+.chip[aria-pressed="true"] { border-color: currentColor; background: #12283A; color: #E6EDF5; font-weight: 700; }
+.chip .n { font: 10px Consolas, monospace; color: #8A9BB0; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #1F2C40; border-radius: 6px; overflow: hidden; }
+.seg button { height: 24px; border: 0; background: #0B121D; color: #8A9BB0; cursor: pointer; }
+.seg button + button { border-left: 1px solid #1F2C40; }
+.seg button[aria-pressed="true"] { background: #12283A; color: #E6EDF5; font-weight: 700; box-shadow: inset 0 -2px 0 #4FD1E8; }
+
+/* Scores: the toolbar cells, two per line. */
+.scores { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.score { display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 8px; border: 1px solid #1F2C40; border-radius: 6px; background: #111B2A; min-width: 0; }
+.score b { flex: 1; text-align: right; font: 700 12px Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.score i { font: normal 10px Consolas, monospace; color: #8A9BB0; }
+.actions { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid #1F2C40; border-radius: 6px; background: #0B121D; overflow: hidden; }
+.actions a, .actions button { display: flex; align-items: center; justify-content: center; height: 26px; border: 0; background: none; color: #8A9BB0; text-decoration: none; cursor: pointer; }
+.actions > * + * { border-left: 1px solid #1F2C40 !important; }
+.actions a:hover, .actions button:hover { background: #111D2D; color: #E6EDF5; }
+
+.range { display: flex; align-items: center; gap: 4px; color: #8A9BB0; }
+.range input { width: 64px; height: 22px; padding: 0 5px; border: 1px solid #1F2C40; border-radius: 5px; background: #0A111C; color: #E6EDF5; font: 11px Consolas, monospace; }
+
+/* Rows: the planet menu's .fut-row, one line each. */
+.scroll { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding-right: 2px; scrollbar-color: #2A3B55 #0B121D; scrollbar-width: thin; }
+.cols, .row { display: grid; align-items: center; gap: 4px; min-height: 26px; padding: 0 4px; }
+.cols { min-height: 18px; color: #4A5B72; font-size: 10px; }
+.row { border: 1px solid #1F2C40; border-radius: 6px; background: #111B2A; }
+.row.gap { margin-top: 4px; }
+.row.active { border-color: #4FD1E8; background: rgba(79,209,232,0.14); box-shadow: inset 3px 0 0 #4FD1E8; }
+.pl .cols, .pl .row { grid-template-columns: 18px 64px 1fr 34px 34px 40px; }
+.tg .cols, .tg .row { grid-template-columns: 18px 64px 1fr 34px 40px 20px; }
+.ps .row { grid-template-columns: 18px 1fr auto auto; }
+.idx { color: #4A5B72; font: 10px Consolas, monospace; text-align: right; }
+.coords { all: unset; display: inline-flex; align-items: center; gap: 3px; padding: 2px 4px; border-radius: 4px; color: #C9D4E2; font: 11px Consolas, monospace; cursor: pointer; }
+.coords:hover { background: #1D3350; color: #E6EDF5; }
+.row.active .coords { color: #8BE4F2; }
+.coords.new::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #4FD1E8; }
+.cell-r { text-align: right; font: 11px Consolas, monospace; color: #8A9BB0; white-space: nowrap; overflow: hidden; }
+.cell-r.has { color: #C9D4E2; }
+.cell-r.big { color: #F5B547; font-weight: 700; }
+.txt { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E6EDF5; }
+.txt .who { color: #8A9BB0; }
+.pname { all: unset; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E6EDF5; font-weight: 700; cursor: pointer; }
+.pname:hover, .pname:focus-visible { color: #4FD1E8; }
+.rank { color: #8A9BB0; font: 10px Consolas, monospace; }
+.act { display: inline-flex; align-items: center; justify-content: flex-end; gap: 2px; height: 20px; padding: 0 3px; border-radius: 4px; font: 700 11px Consolas, monospace; text-decoration: none; color: #4A5B72; }
+.act svg { color: #617C8D; flex: none; }
+a.act:hover { background: #1D3350; }
+.act.on { color: #EF7676; } .act.mid { color: #E3BB28; } .act.off { color: #38C56E; } .act.unknown { color: #617C8D; font-weight: 400; }
+.age { text-align: right; font: 10px Consolas, monospace; }
+.age.fresh { color: #38C56E; } .age.warm { color: #E3BB28; } .age.old { color: #EF7676; } .age.none { color: #4A5B72; }
 .st-inactive { color: #9BE36D !important; } .st-longinactive { color: #8A9BB0 !important; } .st-vacation { color: #7FDBFF !important; } .st-banned { color: #FF7A7A !important; text-decoration: line-through; }
-.range { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 0; color: var(--muted); font-size: 12px; }
-.range input { width: 70px; height: 26px; padding: 0 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: 12px var(--mono); }
-.range input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.dot { width: 10px; height: 10px; border-radius: 50%; }
-.sheet-head { display: flex; align-items: center; gap: 8px; margin: 6px 0 10px; }
-.sheet-head h3 { margin: 0; font-size: 16px; color: var(--text); }
-.links { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-.links a { display: inline-flex; align-items: center; height: 26px; padding: 0 9px; border-radius: 7px; border: 1px solid var(--line); color: var(--text-2); text-decoration: none; font-size: 12px; }
-.links a:hover, .links a:focus-visible { border-color: var(--accent); color: var(--text); }
-.scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin-bottom: 12px; background: var(--line-soft); border-radius: 8px; overflow: hidden; }
-.scores div { padding: 6px 10px; background: var(--surface); }
-.scores span { display: block; color: var(--muted); font-size: 11px; }
-.scores b { color: var(--text); font-family: var(--mono); }
-.scores i { color: var(--muted); font: normal 11px var(--mono); margin-left: 4px; }
-.back { all: unset; display: inline-flex; align-items: center; gap: 4px; color: var(--muted); cursor: pointer; font-size: 12px; }
-.back:hover, .back:focus-visible { color: var(--text); }
+.foot { display: flex; justify-content: space-between; gap: 6px; color: #617C8D; font-size: 10px; }
+kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background: #0D1522; color: #C9D4E2; font: 10px Consolas, monospace; }
+.empty { margin: 4px 0; padding: 14px 10px; border: 1px dashed #1F2C40; border-radius: 6px; color: #8A9BB0; text-align: center; line-height: 1.4; }
+.err { color: #EF7676; }
+.fut-mk { margin: 0; }
 ` + MARKS_CSS;
   function h(doc, tag, cls = "", text) {
     const n = doc.createElement(tag);
@@ -3184,272 +3363,371 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     const [g, s, p] = coords.split(":");
     return `/game/index.php?page=ingame&component=galaxy&galaxy=${g}&system=${s}&position=${p}`;
   };
-  function closeTargets(doc) {
-    doc.getElementById(TARGETS_ID)?.remove();
-    if (keyHandler) doc.removeEventListener("keydown", keyHandler, true);
-    keyHandler = null;
-    sheetId = null;
+  var fleetHref = (coords, type) => {
+    const [g, s, p] = coords.split(":");
+    return `/game/index.php?page=ingame&component=fleetdispatch&galaxy=${g}&system=${s}&position=${p}&type=${type}`;
+  };
+  var readView = (o) => {
+    return { open: false, tab: "players", flagTab: "watch", player: null, from: "", to: "", tags: [...TAGS], hide: ["vacation", "banned"], ...o.store.get(VIEW_KEY, {}) };
+  };
+  var readMarks2 = (store) => loadMarks(store.get(MARKS_KEY, null));
+  function shownSystem(doc) {
+    const g = doc.getElementById("galaxy_input")?.value;
+    const s = doc.getElementById("system_input")?.value;
+    return doc.getElementById("galaxyContent") && g && s ? `${Number(g)}:${Number(s)}` : null;
   }
-  function openTargets(o) {
-    const { doc, store, t, locale } = o;
-    const keepScroll = doc.getElementById(TARGETS_ID)?.shadowRoot?.querySelector(".backdrop")?.scrollTop ?? 0;
-    doc.getElementById(TARGETS_ID)?.remove();
-    const [hg] = o.here.split(":");
-    const view = { tab: "players", flagTab: "watch", from: `${hg ?? 1}:1`, to: `${hg ?? 1}:499`, tags: [...TAGS], hide: ["vacation", "banned"], ...store.get(VIEW_KEY, {}) };
-    const save = (next) => {
-      store.set(VIEW_KEY, { ...view, ...next });
-      openTargets(o);
-    };
-    const marks = loadMarks(store.get(MARKS_KEY, null));
-    const redraw = () => openTargets(o);
-    const picker = { doc, store, t, onChange: redraw };
-    const host = doc.createElement("div");
-    host.id = TARGETS_ID;
-    host.lang = locale;
-    const root = host.attachShadow({ mode: "open" });
-    const style = h(doc, "style");
-    style.textContent = WINDOW_SHEET + CSS;
-    const backdrop = h(doc, "div", "backdrop");
-    const panel = h(doc, "section", "panel");
-    panel.setAttribute("role", "dialog");
-    panel.setAttribute("aria-label", t("marks.title"));
-    backdrop.append(panel);
-    root.append(style, backdrop);
-    if (!keyHandler) {
-      keyHandler = (e) => {
-        if (e.key === "Escape" && !doc.getElementById("fut-mk-pop")) closeTargets(doc);
-      };
-      doc.addEventListener("keydown", keyHandler, true);
-    }
-    backdrop.addEventListener("click", (e) => {
-      if (e.target === backdrop) closeTargets(doc);
+  var onGo = null;
+  function onSideNavigate(fn) {
+    onGo = fn;
+  }
+  function showInGalaxy(doc, coords) {
+    const [g, s] = coords.split(":").map(Number);
+    const win = pageWindow();
+    if (shownSystem(doc) && typeof win.loadContentNew === "function" && g && s) {
+      onGo?.(coords);
+      const gi = doc.getElementById("galaxy_input");
+      const si = doc.getElementById("system_input");
+      if (gi) gi.value = String(g);
+      if (si) si.value = String(s);
+      win.galaxy = g;
+      win.system = s;
+      win.loadContentNew(g, s);
+    } else doc.location.assign(galaxyHref(coords));
+  }
+  function isSideOpen(doc) {
+    return !!doc.getElementById(SIDE_ID);
+  }
+  function closeSide(doc, store) {
+    doc.getElementById(SIDE_ID)?.remove();
+    store.set(VIEW_KEY, { ...store.get(VIEW_KEY, {}), open: false });
+  }
+  function toggleSide(o) {
+    if (isSideOpen(o.doc)) closeSide(o.doc, o.store);
+    else openSide(o, { open: true });
+  }
+  function restoreSide(o) {
+    if (readView(o).open) openSide(o, {});
+  }
+  function refreshSide() {
+    if (last && isSideOpen(last.doc)) openSide(last, {});
+  }
+  function nextInSide(doc) {
+    const root = doc.getElementById(SIDE_ID)?.shadowRoot;
+    const all2 = [...root?.querySelectorAll("[data-coords]") ?? []];
+    if (!all2.length) return false;
+    let at = -1;
+    all2.forEach((e, i) => {
+      if (e.closest(".row")?.classList.contains("active")) at = i;
     });
-    const head = h(doc, "header", "head");
-    const titles = h(doc, "div", "titles");
-    titles.append(h(doc, "h2", "", t("marks.title")), h(doc, "span", "sub", t("marks.sub", { players: Object.keys(marks.players).length, planets: Object.keys(marks.planets).length })));
-    const x = h(doc, "button", "close");
-    x.type = "button";
-    x.setAttribute("aria-label", t("dash.close"));
-    x.append(icon(doc, "close", 16));
-    x.addEventListener("click", () => closeTargets(doc));
-    head.append(titles, x);
-    panel.append(head);
-    const tabs = h(doc, "nav", "tabs");
-    for (const id of ["players", "planets"]) {
-      const b = h(doc, "button", "tab", t(`marks.tab.${id}`));
-      b.type = "button";
-      b.setAttribute("aria-pressed", String(view.tab === id));
-      b.addEventListener("click", () => {
-        sheetId = null;
-        save({ tab: id });
-      });
-      tabs.append(b);
-    }
-    panel.append(tabs);
-    const body = h(doc, "div", "tab-body");
-    if (view.tab === "players" && sheetId !== null) playerSheet(o, body, sheetId, marks, picker);
-    else if (view.tab === "players") playersTab(o, body, view, marks, picker, save);
-    else planetsTab(o, body, view, marks, picker, save);
-    panel.append(body);
-    doc.body.append(host);
-    backdrop.scrollTop = keepScroll;
+    const target = all2[(at + 1) % all2.length];
+    showInGalaxy(doc, target.dataset.coords);
+    return true;
   }
-  function playersTab(o, body, view, marks, picker, save) {
-    const { doc, t } = o;
-    const sub = h(doc, "div", "sub-tabs");
+  function openSide(o, change) {
+    last = o;
+    const { doc, store, t, locale } = o;
+    const view = { ...readView(o), ...change, open: true };
+    store.set(VIEW_KEY, view);
+    const keepScroll = doc.getElementById(SIDE_ID)?.shadowRoot?.querySelector(".scroll")?.scrollTop ?? 0;
+    const marks = readMarks2(store);
+    const positions = store.get(POSITIONS_KEY, {});
+    const go = (next) => openSide(o, next);
+    const picker = { doc, store, t, onChange: () => openSide(o, {}) };
+    const here = shownSystem(doc);
+    let host = doc.getElementById(SIDE_ID);
+    if (!host) {
+      host = h(doc, "div");
+      host.id = SIDE_ID;
+      host.lang = locale;
+      host.attachShadow({ mode: "open" });
+      doc.body.append(host);
+    }
+    const root = host.shadowRoot;
+    const style = h(doc, "style");
+    style.textContent = CSS;
+    const side = h(doc, "aside", "side");
+    side.setAttribute("aria-label", t("marks.title"));
+    const head = h(doc, "header", "head");
+    const title = h(doc, "div", "title");
+    if (view.player !== null) {
+      const back = iconButton(doc, "back", t("marks.back"));
+      back.addEventListener("click", () => go({ player: null }));
+      head.append(back);
+    } else head.append(h(doc, "span", "ib"));
+    head.append(title);
+    const x = iconButton(doc, "close", t("dash.close"));
+    x.addEventListener("click", () => closeSide(doc, store));
+    head.append(x);
+    side.append(head);
+    const scroll = h(doc, "div", "scroll");
+    if (view.player !== null) playerSheet(o, side, scroll, title, view.player, marks, positions, picker, here);
+    else {
+      title.append(h(doc, "span", "name", t("marks.title")));
+      const seg = h(doc, "div", "seg");
+      for (const id of ["players", "planets"]) {
+        const b = h(doc, "button", "", t(`marks.tab.${id}`));
+        b.type = "button";
+        b.setAttribute("aria-pressed", String(view.tab === id));
+        b.addEventListener("click", () => go({ tab: id }));
+        seg.append(b);
+      }
+      side.append(seg);
+      if (view.tab === "players") playersList(o, side, scroll, view, marks, picker, go);
+      else taggedList(o, side, scroll, view, marks, positions, picker, go, here);
+    }
+    side.append(scroll);
+    const foot = h(doc, "div", "foot");
+    const key2 = h(doc, "span", "");
+    key2.append(h(doc, "kbd", "", "M"), doc.createTextNode(` ${t("marks.keyNext")}`));
+    foot.append(key2, h(doc, "span", "", t("marks.footData")));
+    side.append(foot);
+    root.replaceChildren(style, side);
+    scroll.scrollTop = keepScroll;
+  }
+  function iconButton(doc, name, label) {
+    const b = h(doc, "button", "ib");
+    b.type = "button";
+    b.title = label;
+    b.setAttribute("aria-label", label);
+    b.append(icon(doc, name, 14));
+    return b;
+  }
+  function playersList(o, side, scroll, view, marks, picker, go) {
+    const { doc, t, locale } = o;
+    const chips = h(doc, "div", "chips");
     const counts = Object.values(marks.players).reduce((c, p) => (c[p.flag] = (c[p.flag] ?? 0) + 1, c), {});
     for (const f of [...FLAGS, "recent"]) {
       const b = h(doc, "button", "chip");
       b.type = "button";
+      b.title = t(f === "recent" ? "marks.recent" : `mark.flag.${f}`);
+      b.setAttribute("aria-label", b.title);
       b.setAttribute("aria-pressed", String(view.flagTab === f));
       if (f !== "recent") b.style.color = FLAG_COLORS[f];
-      b.append(icon(doc, f === "recent" ? "eye" : FLAG_ICONS[f], 12), h(doc, "span", "", t(f === "recent" ? "marks.recent" : `mark.flag.${f}`)), h(doc, "span", "n", String(f === "recent" ? marks.recent.length : counts[f] ?? 0)));
-      b.addEventListener("click", () => save({ flagTab: f }));
-      sub.append(b);
+      b.append(icon(doc, f === "recent" ? "eye" : FLAG_ICONS[f], 12), h(doc, "span", "n", String(f === "recent" ? marks.recent.length : counts[f] ?? 0)));
+      b.addEventListener("click", () => go({ flagTab: f }));
+      chips.append(b);
     }
-    body.append(sub);
+    side.append(chips);
     const list = view.flagTab === "recent" ? marks.recent : Object.entries(marks.players).filter(([, p]) => p.flag === view.flagTab).map(([id, p]) => ({ id: Number(id), name: p.name })).sort((a, b) => a.name.localeCompare(b.name));
     if (!list.length) {
-      body.append(h(doc, "p", "empty", t(view.flagTab === "recent" ? "marks.noRecent" : "marks.noPlayers")));
+      scroll.append(h(doc, "p", "empty", t(view.flagTab === "recent" ? "marks.noRecent" : "marks.noPlayers")));
       return;
     }
-    const rows = h(doc, "div", "rows");
+    const cache = o.store.get(PLAYER_SCORES_KEY, {});
+    const wrap = h(doc, "div", "ps");
     list.forEach((p, i) => {
       const row = h(doc, "div", "row");
-      const name = h(doc, "button", "name", p.name || `#${p.id}`);
+      const name = h(doc, "button", "pname", p.name || `#${p.id}`);
       name.type = "button";
       name.title = t("marks.openSheet");
-      name.addEventListener("click", () => {
-        sheetId = p.id;
-        openTargets(o);
-      });
-      row.append(h(doc, "span", "idx", String(i + 1)), name, flagButton(picker, p.id, p.name));
-      rows.append(row);
+      name.addEventListener("click", () => go({ player: p.id }));
+      const rank = cache[String(p.id)]?.scores.total?.rank;
+      row.append(h(doc, "span", "idx", String(i + 1)), name, h(doc, "span", "rank", rank ? `#${rank.toLocaleString(locale)}` : ""), flagButton(picker, p.id, p.name));
+      wrap.append(row);
     });
-    body.append(rows);
-    body.append(h(doc, "p", "hint", t("marks.playersHint")));
+    scroll.append(wrap);
   }
-  function playerSheet(o, body, id, marks, picker) {
+  function activityCell(doc, t, coords, type, value, seen, now) {
+    const a = h(doc, "a", "act");
+    a.href = fleetHref(coords, type);
+    a.title = t(type === 1 ? "marks.fleetPlanet" : "marks.fleetMoon", { coords });
+    a.append(icon(doc, type === 1 ? "planet" : "moon", 10));
+    if (!seen || now - seen.at > HOUR) {
+      a.classList.add("unknown");
+      a.append(doc.createTextNode("?"));
+    } else {
+      a.classList.add(value === "*" ? "on" : value === null ? "off" : "mid");
+      a.append(doc.createTextNode(value === null ? "60" : String(value)));
+    }
+    return a;
+  }
+  function ageCell(doc, t, seen, now, locale) {
+    if (!seen) return h(doc, "span", "age none", "\u2014");
+    const ms = now - seen.at;
+    const { n, unit } = ageParts(ms);
+    const el5 = h(doc, "span", `age ${ms < HOUR ? "fresh" : ms < 3 * 864e5 ? "warm" : "old"}`, t("marks.ago", { n, u: t(`marks.unit.${unit}`) }));
+    el5.title = new Date(seen.at).toLocaleString(locale);
+    return el5;
+  }
+  function coordsButton(doc, t, coords, fresh = false) {
+    const b = h(doc, "button", `coords${fresh ? " new" : ""}`, coords);
+    b.type = "button";
+    b.dataset.coords = coords;
+    b.title = fresh ? t("marks.seenOnly") : t("marks.showSystem");
+    b.addEventListener("click", () => showInGalaxy(doc, coords));
+    return b;
+  }
+  function playerSheet(o, side, scroll, title, id, marks, positions, picker, here) {
     const { doc, store, t, locale } = o;
-    const back = h(doc, "button", "back", `\u2190 ${t("marks.back")}`);
-    back.type = "button";
-    back.addEventListener("click", () => {
-      sheetId = null;
-      openTargets(o);
-    });
-    body.append(back);
     const known = marks.players[String(id)]?.name || marks.recent.find((r) => r.id === id)?.name || "";
-    const head = h(doc, "div", "sheet-head");
-    const title = h(doc, "h3", "", known || `#${id}`);
-    head.append(title, flagButton(picker, id, known));
-    body.append(head);
-    const links = h(doc, "div", "links");
-    const link = (text, href) => {
-      const a = h(doc, "a", "", text);
+    const data = sheetData.get(id);
+    const name = data?.name || known || `#${id}`;
+    title.append(h(doc, "span", "name", name));
+    const rank = data?.scores.total?.rank;
+    if (rank) {
+      const a = h(doc, "a", "mono", `#${rank.toLocaleString(locale)}`);
+      a.href = `/game/index.php?page=ingame&component=highscore&site=${Math.max(1, Math.ceil(rank / 100))}&category=1&searchRelId=${id}`;
+      a.title = t("marks.rank");
+      title.append(a);
+    }
+    title.append(flagButton(picker, id, name));
+    if (!sheetData.has(id)) {
+      scroll.append(h(doc, "p", "empty", t("galaxy.loading")));
+      void playerScores(o.guard, store, doc.location.origin, id, Date.now()).catch(() => null).then((fresh) => {
+        sheetData.set(id, fresh);
+        if (fresh) {
+          let m = rememberRecent(readMarks2(store), id, fresh.name || known);
+          const flagged = m.players[String(id)];
+          if (flagged && !flagged.name) m = flagPlayer(m, id, fresh.name, flagged.flag, Date.now());
+          store.set(MARKS_KEY, m);
+        }
+        refreshSide();
+      });
+      return;
+    }
+    const scores = h(doc, "div", "scores");
+    for (const [key2, ico, color] of SCORE_LOOK) {
+      const v = data?.scores[key2];
+      const cell = h(doc, "div", "score");
+      cell.title = t(`galaxy.score.${key2}`);
+      const ic = icon(doc, ico, 12);
+      ic.style.color = color;
+      const b = h(doc, "b", "", v ? formatUnits(v.points, locale) : "\u2014");
+      b.style.color = color;
+      cell.append(ic, b);
+      if (v) cell.append(h(doc, "i", "", `#${v.rank.toLocaleString(locale)}`));
+      scores.append(cell);
+    }
+    const ships = h(doc, "div", "score");
+    ships.title = t("marks.ships");
+    ships.append(icon(doc, "fleet", 12), h(doc, "b", "", data?.ships ? data.ships.toLocaleString(locale) : "\u2014"));
+    scores.append(ships);
+    side.append(scores);
+    const actions = h(doc, "div", "actions");
+    const link = (ico, label, href) => {
+      const a = h(doc, "a");
       a.href = href;
-      links.append(a);
+      a.title = label;
+      a.setAttribute("aria-label", label);
+      a.append(icon(doc, ico, 13));
+      actions.append(a);
     };
-    link(t("marks.write"), `/game/index.php?page=ingame&component=chat&playerId=${id}`);
-    link(t("marks.profile"), `/game/index.php?page=ingame&component=playerprofile&profileId=${id}`);
-    body.append(links);
-    const holder = h(doc, "div", "");
-    holder.append(h(doc, "p", "empty", t("galaxy.loading")));
-    body.append(holder);
-    void playerScores(o.guard, store, doc.location.origin, id, Date.now()).catch(() => null).then((data) => {
-      if (sheetId !== id || !holder.isConnected) return;
-      holder.replaceChildren();
-      if (!data) {
-        holder.append(h(doc, "p", "empty", t("galaxy.apiError")));
-        return;
-      }
-      title.textContent = data.name || known;
-      let m = rememberRecent(loadMarks(store.get(MARKS_KEY, null)), id, data.name || known);
-      if (m.players[String(id)] && !m.players[String(id)].name) m = flagPlayer(m, id, data.name, m.players[String(id)].flag, Date.now());
-      store.set(MARKS_KEY, m);
-      const rank = data.scores.total?.rank;
-      if (rank) link(`${t("marks.rank")} #${rank.toLocaleString(locale)}`, `/game/index.php?page=ingame&component=highscore&site=${Math.max(1, Math.ceil(rank / 100))}&category=1&searchRelId=${id}`);
-      const scores = h(doc, "div", "scores");
-      for (const key2 of Object.keys(SCORE_TYPES)) {
-        const v = data.scores[key2];
-        if (!v) continue;
-        const cell = h(doc, "div", "");
-        const b = h(doc, "b", "", formatUnits(v.points, locale));
-        b.append(h(doc, "i", "", `#${v.rank.toLocaleString(locale)}`));
-        cell.append(h(doc, "span", "", t(`galaxy.score.${key2}`)), b);
-        scores.append(cell);
-      }
-      if (data.ships) {
-        const cell = h(doc, "div", "");
-        cell.append(h(doc, "span", "", t("marks.ships")), h(doc, "b", "", data.ships.toLocaleString(locale)));
-        scores.append(cell);
-      }
-      holder.append(scores);
-      const planets = [...data.planets ?? []].sort((a, b) => {
-        const v = (c) => c.split(":").reduce((s, n) => s * 1e3 + Number(n), 0);
-        return v(a.coords) - v(b.coords);
-      });
-      holder.append(h(doc, "h4", "", t("marks.planets", { n: planets.length, moons: planets.filter((p) => p.moon).length })));
-      let lastSystem = "";
-      let rows = h(doc, "div", "rows");
-      planets.forEach((p, i) => {
-        const system = p.coords.split(":").slice(0, 2).join(":");
-        if (system !== lastSystem && i > 0) {
-          holder.append(rows);
-          rows = h(doc, "div", "rows group");
-        }
-        lastSystem = system;
-        const row = h(doc, "div", "row");
-        const a = h(doc, "a", "coords", `[${p.coords}]`);
-        a.href = galaxyHref(p.coords);
-        const name = h(doc, "span", "name", p.name);
-        if (p.moon) {
-          const moon = h(doc, "span", "who");
-          moon.append(icon(doc, "moon", 10, "moon-ico"), doc.createTextNode(p.moon.name));
-          name.append(doc.createTextNode(" "), moon);
-        }
-        row.append(h(doc, "span", "idx", String(i + 1)), a, name, tagButton(picker, p.coords, { planet: p.name, player: data.name, playerId: id, statuses: [], moon: !!p.moon }));
-        rows.append(row);
-      });
-      holder.append(rows);
-      holder.append(h(doc, "p", "hint", t("galaxy.apiAge", { time: new Date(data.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) })));
+    link("pen", t("marks.write"), `/game/index.php?page=ingame&component=chat&playerId=${id}`);
+    link("user", t("marks.profile"), `/game/index.php?page=ingame&component=playerprofile&profileId=${id}`);
+    link("chart", t("marks.rank"), `/game/index.php?page=ingame&component=highscore&category=1&searchRelId=${id}${rank ? `&site=${Math.max(1, Math.ceil(rank / 100))}` : ""}`);
+    side.append(actions);
+    if (!data) {
+      scroll.append(h(doc, "p", "empty err", t("galaxy.apiError")));
+      return;
+    }
+    const lines = planetsOf(id, data, positions);
+    const now = Date.now();
+    const wrap = h(doc, "div", "pl");
+    const cols = h(doc, "div", "cols");
+    cols.append(h(doc, "span", ""), h(doc, "span", "", t("marks.col.coords")), h(doc, "span", "cell-r", t("marks.col.debris")), h(doc, "span", "cell-r", t("marks.col.planet")), h(doc, "span", "cell-r", t("marks.col.moon")), h(doc, "span", "cell-r", t("marks.col.seen")));
+    wrap.append(cols);
+    let lastSystem = "";
+    lines.forEach((p, i) => {
+      const system = p.coords.split(":").slice(0, 2).join(":");
+      const row = h(doc, "div", `row${i > 0 && system !== lastSystem ? " gap" : ""}${system === here ? " active" : ""}`);
+      lastSystem = system;
+      row.title = p.name;
+      const debris = p.seen?.debris ?? 0;
+      row.append(
+        h(doc, "span", "idx", String(i + 1)),
+        coordsButton(doc, t, p.coords, p.fresh),
+        h(doc, "span", `cell-r${debris ? " has" : ""}${debris >= 1e6 ? " big" : ""}`, p.seen ? formatUnits(debris, locale) : "\u2014"),
+        activityCell(doc, t, p.coords, 1, p.seen?.act[0] ?? null, p.seen, now),
+        p.moon ? activityCell(doc, t, p.coords, 3, p.seen?.act[1] ?? null, p.seen, now) : h(doc, "span", ""),
+        ageCell(doc, t, p.seen, now, locale)
+      );
+      wrap.append(row);
     });
+    scroll.append(wrap);
+    scroll.append(h(doc, "p", "foot", t("marks.planets", { n: lines.length, moons: lines.filter((l) => l.moon).length }) + " \xB7 " + t("galaxy.apiAge", { time: new Date(data.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) })));
   }
-  function planetsTab(o, body, view, marks, picker, save) {
-    const { doc, t } = o;
+  function taggedList(o, side, scroll, view, marks, positions, picker, go, here) {
+    const { doc, t, locale } = o;
     const range = h(doc, "div", "range");
-    const input = (value, label) => {
+    const input = (value, label, placeholder) => {
       const i = h(doc, "input");
       i.value = value;
+      i.placeholder = placeholder;
       i.inputMode = "numeric";
       i.setAttribute("aria-label", label);
       return i;
     };
-    const from = input(view.from, t("marks.from"));
-    const to = input(view.to, t("marks.to"));
+    const from = input(view.from, t("marks.from"), "1:1");
+    const to = input(view.to, t("marks.to"), "9:499");
     const apply = () => {
-      const ok = (v) => /^\d{1,2}:\d{1,3}$/.test(v.trim());
-      if (ok(from.value) && ok(to.value)) save({ from: from.value.trim(), to: to.value.trim() });
+      const ok = (v) => !v.trim() || /^\d{1,2}:\d{1,3}$/.test(v.trim());
+      if (ok(from.value) && ok(to.value)) go({ from: from.value.trim(), to: to.value.trim() });
     };
     for (const i of [from, to]) i.addEventListener("change", apply);
     range.append(h(doc, "span", "", t("marks.from")), from, h(doc, "span", "", t("marks.to")), to);
-    body.append(range);
-    const chips = h(doc, "div", "sub-tabs");
+    side.append(range);
+    const chips = h(doc, "div", "chips");
     for (const tag of TAGS) {
       const b = h(doc, "button", "chip");
       b.type = "button";
       const on = view.tags.includes(tag);
+      b.title = t(`mark.tag.${tag}`);
+      b.setAttribute("aria-label", b.title);
       b.setAttribute("aria-pressed", String(on));
-      const dot = h(doc, "span", "dot");
+      b.style.color = TAG_COLORS[tag];
+      const dot = h(doc, "span", "fut-mk-dot");
       dot.style.background = TAG_COLORS[tag];
-      b.append(dot, h(doc, "span", "", t(`mark.tag.${tag}`)));
-      b.addEventListener("click", () => save({ tags: on ? view.tags.filter((x) => x !== tag) : [...view.tags, tag] }));
+      dot.style.borderColor = "transparent";
+      b.append(dot);
+      b.addEventListener("click", () => go({ tags: on ? view.tags.filter((x) => x !== tag) : [...view.tags, tag] }));
       chips.append(b);
     }
+    side.append(chips);
+    const hides = h(doc, "div", "chips");
     for (const st of ["vacation", "banned", "inactive"]) {
-      const b = h(doc, "button", "chip");
+      const b = h(doc, "button", "chip", t(`marks.hide.${st}`));
       b.type = "button";
       const on = view.hide.includes(st);
       b.setAttribute("aria-pressed", String(on));
-      b.textContent = t(`marks.hide.${st}`);
-      b.addEventListener("click", () => save({ hide: on ? view.hide.filter((x) => x !== st) : [...view.hide, st] }));
-      chips.append(b);
+      b.addEventListener("click", () => go({ hide: on ? view.hide.filter((x) => x !== st) : [...view.hide, st] }));
+      hides.append(b);
     }
-    body.append(chips);
-    const holder = h(doc, "div", "");
-    body.append(holder);
-    const draw = (uni) => {
-      holder.replaceChildren();
-      const statusOf = (playerId, saved) => {
-        const row = playerId ? uni?.players[String(playerId)] : void 0;
-        return row ? statusNames(row[1]) : saved;
-      };
-      const withStatus = { ...marks, planets: Object.fromEntries(Object.entries(marks.planets).map(([c, p]) => [c, { ...p, statuses: statusOf(p.playerId, p.statuses) }])) };
-      const hide = view.hide.flatMap((s) => s === "inactive" ? ["inactive", "longinactive"] : [s]);
-      const list = planetsInRange(withStatus, view.from, view.to, { tags: view.tags, hide });
-      if (!list.length) {
-        holder.append(h(doc, "p", "empty", t(Object.keys(marks.planets).length ? "marks.noneInRange" : "marks.noPlanets")));
-        return;
-      }
-      const rows = h(doc, "div", "rows");
-      list.forEach(([coords, p], i) => {
-        const row = h(doc, "div", "row");
-        const a = h(doc, "a", "coords", `[${coords}]`);
-        a.href = galaxyHref(coords);
-        const name = h(doc, "span", "name", p.planet || "?");
-        const who = h(doc, "span", `who${p.statuses[0] ? ` st-${p.statuses[0]}` : ""}`, p.player ? ` \xB7 ${p.player}` : "");
-        name.append(who);
-        if (p.moon) name.prepend(icon(doc, "moon", 10, "moon-ico"));
-        row.append(h(doc, "span", "idx", String(i + 1)), a, name);
-        if (p.playerId) row.append(flagButton(picker, p.playerId, p.player));
-        row.append(tagButton(picker, coords, p));
-        rows.append(row);
-      });
-      holder.append(rows, h(doc, "p", "hint", t("marks.planetsHint", { n: list.length })));
+    side.append(hides);
+    const statusOf = (playerId, saved) => {
+      const row = playerId ? uni?.players[String(playerId)] : void 0;
+      return row ? statusNames(row[1]) : saved;
     };
-    draw(null);
-    void universePlayers({ guard: o.guard, store: o.store, origin: doc.location.origin }).catch(() => null).then((uni) => {
-      if (uni && holder.isConnected) draw(uni);
+    const withStatus = { ...marks, planets: Object.fromEntries(Object.entries(marks.planets).map(([c, p]) => [c, { ...p, statuses: statusOf(p.playerId, p.statuses) }])) };
+    const hide = view.hide.flatMap((s) => s === "inactive" ? ["inactive", "longinactive"] : [s]);
+    const list = planetsInRange(withStatus, view.from || "1:0", view.to || "99:999", { tags: view.tags, hide });
+    if (!uni) void universePlayers({ guard: o.guard, store: o.store, origin: doc.location.origin }).catch(() => null).then((u) => {
+      if (u) {
+        uni = u;
+        refreshSide();
+      }
     });
+    if (!list.length) {
+      scroll.append(h(doc, "p", "empty", t(Object.keys(marks.planets).length ? "marks.noneInRange" : "marks.noPlanets")));
+      return;
+    }
+    const now = Date.now();
+    const wrap = h(doc, "div", "tg");
+    const cols = h(doc, "div", "cols");
+    cols.append(h(doc, "span", ""), h(doc, "span", "", t("marks.col.coords")), h(doc, "span", "", t("marks.col.who")), h(doc, "span", "cell-r", t("marks.col.planet")), h(doc, "span", "cell-r", t("marks.col.seen")), h(doc, "span", ""));
+    wrap.append(cols);
+    list.forEach(([coords, p], i) => {
+      const system = coords.split(":").slice(0, 2).join(":");
+      const seenRaw = positions[coords];
+      const seen = seenRaw && (!p.playerId || seenRaw.player === p.playerId) ? seenRaw : null;
+      const row = h(doc, "div", `row${system === here ? " active" : ""}`);
+      const txt = h(doc, "span", "txt", p.planet || "?");
+      txt.append(h(doc, "span", `who${p.statuses[0] ? ` st-${p.statuses[0]}` : ""}`, p.player ? ` \xB7 ${p.player}` : ""));
+      txt.title = `${p.planet} \xB7 ${p.player}`;
+      row.append(h(doc, "span", "idx", String(i + 1)), coordsButton(doc, t, coords), txt, activityCell(doc, t, coords, 1, seen?.act[0] ?? null, seen, now), ageCell(doc, t, seen, now, locale), tagButton(picker, coords, p));
+      wrap.append(row);
+    });
+    scroll.append(wrap);
+    scroll.append(h(doc, "p", "foot", t("marks.planetsHint", { n: list.length })));
   }
 
   // src/data/queues.ts
@@ -3565,6 +3843,78 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   function expeditionItemBoost(items) {
     return (items?.uuids ?? []).reduce((sum, u) => sum + (EXPEDITION_ITEMS[u] ?? 0), 0);
   }
+
+  // src/core/sheet.ts
+  var WINDOW_SHEET = `
+:host {
+  all: initial;
+  --bg: #0B121D; --surface: #0D1522; --raised: #111B2A; --line: #1F2C40; --line-soft: #16202F;
+  --text: #E6EDF5; --text-2: #C9D4E2; --muted: #8A9BB0; --faint: #4A5B72;
+  --accent: #4FD1E8; --accent-soft: #12283A; --warn: #F5B547; --ok: #4FE0B0; --bad: #FF7A7A;
+  --m: #B8C2CC; --c: #7FB8FF; --d: #4FE0B0; --dm: #B58CDB;
+  --mono: Consolas, "JetBrains Mono", monospace;
+  --panel-w: 860px;
+}
+* { box-sizing: border-box; }
+.backdrop {
+  position: fixed; inset: 0; z-index: 1000001; display: flex; justify-content: center; align-items: flex-start;
+  padding: 40px 16px; background: rgba(3,6,12,0.72); overflow-y: auto;
+  font: 12px/1.35 Arial, Helvetica, sans-serif; color: var(--text-2);
+}
+/* The planet menu's language: a dark column of tiles (#111B2A, hairline #1F2C40, 6-7px corners),
+   small grey labels, monospace numbers, cyan for what is selected. */
+.panel {
+  width: min(var(--panel-w), 100%); display: flex; flex-direction: column; gap: 8px; padding: 8px;
+  border: 1px solid var(--line); border-radius: 9px; background: var(--bg); box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+.head { display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 4px 4px 4px 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); }
+.titles { flex: 1; display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; min-width: 0; }
+h2 { margin: 0; font-size: 14px; font-weight: 700; color: var(--text); }
+h3 { margin: 0 0 6px; font-size: 12px; font-weight: 700; color: var(--text); }
+h4 { margin: 10px 0 4px; font-size: 11px; font-weight: 700; color: var(--text-2); }
+.sub { color: var(--muted); font-size: 11px; }
+.close {
+  flex: none; width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 5px; border: 0; background: none; color: var(--muted); line-height: 1; cursor: pointer;
+}
+.close:hover { background: #16243A; color: var(--text); }
+.mono { font-family: var(--mono); }
+.m { color: var(--m); } .c { color: var(--c); } .d { color: var(--d); } .dm { color: var(--dm); }
+.neg { color: var(--bad); } .pos { color: var(--ok); }
+
+/* Tabs: one segmented strip, the one in use lit like the selected planet. */
+.tabs { display: flex; flex-wrap: wrap; gap: 0; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); overflow: hidden; }
+.tab { flex: 1 0 auto; height: 28px; padding: 0 12px; border: 0; border-right: 1px solid var(--line); background: none; color: var(--muted); font: 12px Arial, sans-serif; cursor: pointer; }
+.tab:last-child { border-right: 0; }
+.tab:hover { background: #111D2D; color: var(--text); }
+.tab[aria-pressed="true"] { background: var(--accent-soft); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
+
+/* Key numbers: the planet menu toolbar, one cell each. */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); overflow: hidden; }
+.kpi { display: flex; flex-direction: column; gap: 1px; padding: 6px 10px 7px; min-width: 0; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
+.kpi .label { color: var(--muted); font-size: 10px; }
+.kpi .value { font: 700 15px/18px var(--mono); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi .note, .kpi .detail { color: var(--muted); font-size: 10px; }
+.kpi.accent .value { color: var(--accent); }
+.kpi.warn .value { color: var(--warn); }
+
+/* Sections: tiles, like the planet rows. */
+.card { padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); min-width: 0; }
+.hint { margin: 6px 0 0; color: var(--muted); font-size: 10px; }
+.empty { margin: 0; padding: 14px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 7px; }
+
+/* Buttons: the settings chips. One filled action, ghost for the rest. */
+.act { height: 24px; padding: 0 10px; border: 1px solid #2B6F7D; border-radius: 5px; background: var(--accent-soft); color: var(--text); font: 700 11px Arial, sans-serif; cursor: pointer; }
+.act:hover { border-color: var(--accent); }
+.act.ghost { border-color: var(--line); background: #0A111C; color: #B4C2D3; font-weight: 400; }
+.act.ghost:hover, .act.danger { border-color: var(--bad); color: var(--bad); }
+
+/* Browser surfaces. */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
+.backdrop, .scroll, .table-wrap { scrollbar-color: #2A3B55 var(--bg); scrollbar-width: thin; }
+::selection { background: #2B6F7D; color: #fff; }
+.num, td, .value, .kpi-line { font-variant-numeric: tabular-nums; }
+`;
 
   // src/engines/account.ts
   var KEYS2 = ["metal", "crystal", "deuterium"];
@@ -3872,7 +4222,7 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     if (text !== void 0) node.textContent = text;
     return node;
   }
-  function iconButton(doc, icon2, title, onClick) {
+  function iconButton2(doc, icon2, title, onClick) {
     const button3 = el2(doc, "button", `fut-tool fut-tool-${icon2}`);
     button3.type = "button";
     button3.title = title;
@@ -4010,13 +4360,13 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     );
     const side = el2(doc, "div", "fut-side");
     const lastSync = o.snapshot ? t("toolbar.lastSync", { time: formatTime(o.snapshot.fetchedAt, o.locale) }) : "";
-    const sync = iconButton(doc, "sync", [t("sync.button"), lastSync].filter(Boolean).join(" \xB7 "), () => {
+    const sync = iconButton2(doc, "sync", [t("sync.button"), lastSync].filter(Boolean).join(" \xB7 "), () => {
       if (sync.classList.contains("fut-busy")) return;
       sync.classList.add("fut-busy");
       o.onSync().finally(() => sync.classList.remove("fut-busy"));
     });
     if (!o.snapshot || o.now - o.snapshot.fetchedAt > 36e5) sync.classList.add("fut-stale");
-    const gear = iconButton(doc, "settings", t("toolbar.settings"), () => {
+    const gear = iconButton2(doc, "settings", t("toolbar.settings"), () => {
       panelOpen = !panelOpen;
       gear.setAttribute("aria-expanded", String(panelOpen));
       doc.querySelector(".fut-settings")?.toggleAttribute("hidden", !panelOpen);
@@ -4924,8 +5274,8 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     if (winner === "won" && attacker) loot = taken;
     else if (winner === "lost" && defender.owner?.id === own) loot = { metal: -taken.metal, crystal: -taken.crystal, deuterium: -taken.deuterium };
     const lost = {};
-    const last = Array.isArray(rounds) ? rounds[rounds.length - 1] : void 0;
-    for (const f of last?.fleets ?? [])
+    const last2 = Array.isArray(rounds) ? rounds[rounds.length - 1] : void 0;
+    for (const f of last2?.fleets ?? [])
       if (ownIds.has(f.fleetId)) {
         for (const tech of f.technologies ?? []) if (tech.technologyId && tech.destroyedTotal) lost[tech.technologyId] = (lost[tech.technologyId] ?? 0) + tech.destroyedTotal;
       }
@@ -4940,43 +5290,6 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
   function isMessagesPage(doc) {
     const q = new URLSearchParams(doc.location?.search ?? "");
     return q.get("page") === "messages" || q.get("component") === "messages" || !!doc.querySelector("#messagecontainercomponent, #messagescomponent");
-  }
-
-  // src/data/fleet-dispatcher.ts
-  function pageWindow() {
-    return typeof unsafeWindow !== "undefined" && unsafeWindow || window;
-  }
-  function getDispatcher(win = pageWindow()) {
-    return win.fleetDispatcher ?? null;
-  }
-  function whenDispatcherReady(win = pageWindow(), timeoutMs = 5e3) {
-    const ready = getDispatcher(win);
-    if (ready) return Promise.resolve(ready);
-    return new Promise((resolve) => {
-      const started = Date.now();
-      const check = () => {
-        const fd = getDispatcher(win);
-        if (fd) return resolve(fd);
-        if (Date.now() - started > timeoutMs) return resolve(null);
-        setTimeout(check, 50);
-      };
-      check();
-    });
-  }
-  function shipCapacity(fd, id) {
-    const data = fd.fleetHelper.shipsData?.[String(id)];
-    return data?.cargoCapacity || data?.baseCargoCapacity || 0;
-  }
-  function shipsOnPlanet(fd) {
-    return Object.fromEntries(fd.shipsOnPlanet.map((s) => [String(s.id), s.number]));
-  }
-  var SHIPS_INFO_KEY = "ships.info";
-  function readShipsInfo(fd) {
-    const data = fd.fleetHelper?.shipsData;
-    if (!data) return null;
-    const out = {};
-    for (const [id, s] of Object.entries(data)) out[id] = { name: s.name ?? "", capacity: s.cargoCapacity || s.baseCargoCapacity || 0, speed: s.speed || 0 };
-    return Object.keys(out).length ? out : null;
   }
 
   // src/data/ship-icons.ts
@@ -5823,7 +6136,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
 .moon-ico { margin-right: 4px; vertical-align: -1px; color: var(--muted); }
 .kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 
-.cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 24px; }
+.cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .prod { margin-bottom: 10px; }
 .prod-top { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 4px; font-size: 12px; }
 .track { height: 6px; border-radius: 3px; background: #1A2638; overflow: hidden; }
@@ -5885,7 +6198,7 @@ td.queue { white-space: nowrap; }
 .matrix th.col.on .col-name { color: #4FD1E8; }
 .matrix th.col.on { box-shadow: inset 0 -2px 0 #4FD1E8; }
 .matrix td { padding: 4px 6px; }
-.matrix th.name, .matrix td.name { position: sticky; left: 0; z-index: 1; background: #0A111C; }
+.matrix th.name, .matrix td.name { position: sticky; left: 0; z-index: 1; background: var(--raised); }
 .matrix tr.moon td.name { background: #0F1828; }
 .matrix td.tech { color: #C9D4E2; font-weight: 400; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
 td.zero { color: #3A4A60; }
@@ -5941,7 +6254,7 @@ table.queues td.acts { width: 1%; text-align: right; }
   var tab = "summary";
   var scrapBody = null;
   var scrapRate = 35;
-  var keyHandler2 = null;
+  var keyHandler = null;
   function h3(tag, className = "", text) {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -5950,8 +6263,8 @@ table.queues td.acts { width: 1%; text-align: right; }
   }
   function closeDashboard(doc) {
     doc.getElementById(HOST_ID)?.remove();
-    if (keyHandler2) doc.removeEventListener("keydown", keyHandler2);
-    keyHandler2 = null;
+    if (keyHandler) doc.removeEventListener("keydown", keyHandler);
+    keyHandler = null;
   }
   function orderedBodies(snapshot, entries) {
     if (!snapshot) return [];
@@ -6027,10 +6340,10 @@ table.queues td.acts { width: 1%; text-align: right; }
     backdrop.append(panel);
     root.append(backdrop);
     const close = () => closeDashboard(doc);
-    keyHandler2 = (e) => {
+    keyHandler = (e) => {
       if (e.key === "Escape") close();
     };
-    doc.addEventListener("keydown", keyHandler2);
+    doc.addEventListener("keydown", keyHandler);
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop) close();
     });
@@ -7111,14 +7424,14 @@ table.queues td.acts { width: 1%; text-align: right; }
     }
     return { ...finish(fd, EXPEDITION, count2, 0), target };
   }
-  function prepareLast(fd, doc, profile, last) {
+  function prepareLast(fd, doc, profile, last2) {
     const left = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
     const ships = {};
-    for (const [id, n] of Object.entries(last.ships)) ships[Number(id)] = Math.min(n, left[Number(id)] ?? 0);
+    for (const [id, n] of Object.entries(last2.ships)) ships[Number(id)] = Math.min(n, left[Number(id)] ?? 0);
     const count2 = selectShips(fd, ships);
-    setTarget(fd, doc, last.target);
-    setSpeedBar(fd, last.speed);
-    return finish(fd, last.mission, count2, 0);
+    setTarget(fd, doc, last2.target);
+    setSpeedBar(fd, last2.speed);
+    return finish(fd, last2.mission, count2, 0);
   }
   function snapshotFleet(fd) {
     return {
@@ -7229,7 +7542,7 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-finfo { color: #8A9BB0; font-size: 11px; min-height: 14px; }
 .fut-finfo.err { color: #FF7A7A; }
 .fut-fmenu {
-  position: fixed; z-index: 100001; min-width: 220px; max-height: 320px; overflow-y: auto;
+  position: fixed; z-index: 1000002; min-width: 220px; max-height: 320px; overflow-y: auto;
   display: flex; flex-direction: column; padding: 4px; border: 1px solid #2C3E57; border-radius: 8px; background: #0A111C;
   box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
@@ -7830,10 +8143,10 @@ table.queues td.acts { width: 1%; text-align: right; }
         report(r, "fleet.ok.delivery", { left: left.toLocaleString(o.locale) });
       }),
       last: () => withDispatcher((fd) => {
-        const last = o.store.get(LAST_FLEET_KEY, null);
-        if (!last) return say(t("fleet.err.noLast"), true);
+        const last2 = o.store.get(LAST_FLEET_KEY, null);
+        if (!last2) return say(t("fleet.err.noLast"), true);
         begin("last");
-        report(prepareLast(fd, doc, profile, last), "fleet.ok.ships");
+        report(prepareLast(fd, doc, profile, last2), "fleet.ok.ships");
       })
     };
     const favRun = {
@@ -8482,18 +8795,18 @@ h3 { margin: 0; }
   function groupItems(items) {
     const out = [];
     items.forEach((item, index) => {
-      const last = out[out.length - 1];
-      if (last && item.level !== void 0 && last.id === item.id && last.to !== void 0 && item.level === last.to + 1) {
-        last.to = item.level;
-        last.cost = addCost(last.cost, item.cost);
-        last.indexes.push(index);
+      const last2 = out[out.length - 1];
+      if (last2 && item.level !== void 0 && last2.id === item.id && last2.to !== void 0 && item.level === last2.to + 1) {
+        last2.to = item.level;
+        last2.cost = addCost(last2.cost, item.cost);
+        last2.indexes.push(index);
         return;
       }
       out.push({ id: item.id, name: item.name, from: item.level, to: item.level, amount: item.amount, cost: { ...item.cost }, indexes: [index] });
     });
     return out;
   }
-  var keyHandler3 = null;
+  var keyHandler2 = null;
   function h4(tag, cls = "", text) {
     const node = document.createElement(tag);
     if (cls) node.className = cls;
@@ -8502,8 +8815,8 @@ h3 { margin: 0; }
   }
   function closePlanner(doc) {
     doc.getElementById(PLANNER_ID)?.remove();
-    if (keyHandler3) doc.removeEventListener("keydown", keyHandler3, true);
-    keyHandler3 = null;
+    if (keyHandler2) doc.removeEventListener("keydown", keyHandler2, true);
+    keyHandler2 = null;
   }
   function openPlanner(o) {
     const { doc, t, locale } = o;
@@ -8678,10 +8991,10 @@ h3 { margin: 0; }
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop) closePlanner(doc);
     });
-    keyHandler3 = (e) => {
+    keyHandler2 = (e) => {
       if (e.key === "Escape") closePlanner(doc);
     };
-    doc.addEventListener("keydown", keyHandler3, true);
+    doc.addEventListener("keydown", keyHandler2, true);
     draw();
   }
 
@@ -8690,7 +9003,7 @@ h3 { margin: 0; }
   var PERIOD_KEY = "exp.period";
   var PERIODS = ["today", "yesterday", "week", "month", "all"];
   var ORDER = ["resource", "darkmatter", "ship", "item", "trader", "early", "late", "pirate", "alien", "blackhole", "nothing", "artefact", "lifeform", "unknown"];
-  var keyHandler4 = null;
+  var keyHandler3 = null;
   function h5(tag, cls = "", text) {
     const node = document.createElement(tag);
     if (cls) node.className = cls;
@@ -8699,8 +9012,8 @@ h3 { margin: 0; }
   }
   function closeJournal(doc) {
     doc.getElementById(JOURNAL_ID)?.remove();
-    if (keyHandler4) doc.removeEventListener("keydown", keyHandler4, true);
-    keyHandler4 = null;
+    if (keyHandler3) doc.removeEventListener("keydown", keyHandler3, true);
+    keyHandler3 = null;
   }
   function openJournal(o) {
     const { doc, t, locale, store } = o;
@@ -8894,10 +9207,10 @@ h3 { margin: 0; }
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop) closeJournal(doc);
     });
-    keyHandler4 = (e) => {
+    keyHandler3 = (e) => {
       if (e.key === "Escape") closeJournal(doc);
     };
-    doc.addEventListener("keydown", keyHandler4, true);
+    doc.addEventListener("keydown", keyHandler3, true);
     draw();
   }
 
@@ -9083,7 +9396,7 @@ h3 { margin: 0; }
     const root = host.attachShadow({ mode: "open" });
     const style = doc.createElement("style");
     style.textContent = `
-.stack { position: fixed; right: 16px; bottom: 16px; z-index: 100000; display: flex; flex-direction: column; gap: 8px; max-width: 340px; }
+.stack { position: fixed; right: 16px; bottom: 16px; z-index: 1000002; display: flex; flex-direction: column; gap: 8px; max-width: 340px; }
 .toast { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 10px; background: #111B2A; border: 1px solid #4FD1E8;
   color: #E6EDF5; font: 13px Arial, sans-serif; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
 .toast svg { flex-shrink: 0; margin-top: 1px; color: #4FD1E8; }
@@ -9368,7 +9681,11 @@ h3 { margin: 0; }
     if (currentId) {
       watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), onPlanChange: () => draw() });
     }
-    const openTargetsHere = () => openTargets({ doc: document, store, guard, t, locale, here: document.querySelector('meta[name="ogame-planet-coordinates"]')?.getAttribute("content") ?? "1:1:1" });
+    const side = { doc: document, store, guard, t, locale };
+    const openTargetsHere = () => toggleSide(side);
+    onSideNavigate(highlightPosition);
+    restoreSide(side);
+    registerShortcuts(document, [{ key: "m", label: "shortcut.nextTarget", run: () => void nextInSide(document) }]);
     const pageMeta = (name) => document.querySelector(`meta[name="${name}"]`)?.getAttribute("content") ?? "";
     const reminders = { doc: document, store, t, locale, offset: clockOffset(document, Date.now()) };
     startReminders(reminders);
@@ -9395,7 +9712,7 @@ h3 { margin: 0; }
     }
     if (isGalaxyPage(document)) {
       const ownPlanetIds = new Set(readPlanetList(document).flatMap((e) => e.planetId ? [e.planetId] : []));
-      watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onOpenTargets: openTargetsHere });
+      watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onOpenTargets: openTargetsHere, onSystem: refreshSide });
     }
   }
   if (document.readyState === "loading") {

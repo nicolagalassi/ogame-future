@@ -497,5 +497,22 @@
   "marks.hide.inactive": "Hide inactive",
   "marks.noneInRange": "No coloured planet in this range with these filters.",
   "marks.noPlanets": "No coloured planet. In the galaxy view use the dot to the right of the planet name.",
-  "marks.planetsHint": "{n} planets. Coordinates open the galaxy view, where the game's probe is."
+  "marks.planetsHint": "{n} planets · coordinates show the system in the galaxy",
+  "marks.keyNext": "next position",
+  "marks.footData": "galaxy + public API",
+  "marks.fleetPlanet": "Fleet to planet {coords} (planet activity)",
+  "marks.fleetMoon": "Fleet to moon {coords} (moon activity)",
+  "marks.ago": "{n}{u}",
+  "marks.unit.m": "m",
+  "marks.unit.h": "h",
+  "marks.unit.d": "d",
+  "marks.seenOnly": "Seen in the galaxy, not in the API yet · click: show the system",
+  "marks.showSystem": "Show the system in the galaxy",
+  "marks.col.coords": "Coords",
+  "marks.col.debris": "DF",
+  "marks.col.planet": "Plan.",
+  "marks.col.moon": "Moon",
+  "marks.col.seen": "Seen",
+  "marks.col.who": "Planet · player",
+  "shortcut.nextTarget": "Targets: next position"
 }

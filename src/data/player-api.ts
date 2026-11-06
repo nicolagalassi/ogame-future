@@ -22,6 +22,8 @@ export interface PlayerScores {
   name: string;
   /** When Future read it (cache age). */
   at: number;
+  /** The file's own timestamp (ms): the API updates the planet list about once a week. */
+  updated?: number;
   scores: Partial<Record<ScoreType, { points: number; rank: number }>>;
   /** Ships counted in the military score. */
   ships: number | null;
@@ -53,7 +55,8 @@ export function parsePlayerData(xml: string, now: number): PlayerScores | null {
       moon: m ? { id: Number(m.getAttribute('id')) || 0, name: m.getAttribute('name') ?? '', size: Number(m.getAttribute('size')) || 0 } : null,
     };
   }).filter((p) => /^\d+:\d+:\d+$/.test(p.coords));
-  return { id, name: root.getAttribute('name') ?? '', at: now, scores, ships: Number.isFinite(ships) && ships > 0 ? ships : null, planets };
+  const ts = Number(root.getAttribute('timestamp'));
+  return { id, name: root.getAttribute('name') ?? '', at: now, updated: ts > 0 ? ts * 1000 : undefined, scores, ships: Number.isFinite(ships) && ships > 0 ? ships : null, planets };
 }
 
 /** The cached scores if younger than an hour, else asks the API once and caches the answer. */

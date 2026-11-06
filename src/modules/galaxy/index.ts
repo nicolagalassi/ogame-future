@@ -8,6 +8,7 @@
  * points at a rank badge. No game action, no game request.
  */
 import { loadMarks, MARKS_KEY, type Marks } from '../../engines/marks';
+import { POSITIONS_KEY, recordSystem, type Positions } from '../../engines/positions';
 import { ensureMarksStyle, flagButton, TAG_COLORS, tagButton } from '../marks/picker';
 import type { NetworkGuard } from '../../core/guard';
 import type { Store } from '../../core/storage';
@@ -29,8 +30,16 @@ export interface GalaxyOptions {
   ownPlanetIds: Set<number>;
   locale: string;
   t: (key: string, vars?: Record<string, string | number>) => string;
-  /** Opens Future's targets window. */
+  /** Opens or closes Future's targets side bar. */
   onOpenTargets?: () => void;
+  /** After the game drew a system and Future read it (the side bar redraws). */
+  onSystem?: () => void;
+}
+
+/** Position to mark in the next system drawn ("g:s:p"): the one the side bar or the URL asked for. */
+let highlight = '';
+export function highlightPosition(coords: string): void {
+  highlight = coords;
 }
 
 export const isGalaxyPage = (doc: Document): boolean => new URL(doc.location?.href ?? 'http://x/').searchParams.get('component') === 'galaxy';
@@ -84,11 +93,18 @@ export function watchGalaxy(o: GalaxyOptions): void {
     doc.head.append(style);
   }
   ensureMarksStyle(doc);
+  highlight = (() => {
+    const q = new URL(doc.location.href).searchParams;
+    return q.get('galaxy') && q.get('system') && q.get('position') ? `${q.get('galaxy')}:${q.get('system')}:${q.get('position')}` : '';
+  })();
   let queued = false;
   const run = () => {
     queued = false;
     const content = doc.getElementById('galaxyContent');
-    if (content) decorate(o, content);
+    if (!content) return;
+    remember(o);
+    decorate(o, content);
+    o.onSystem?.();
   };
   // Event-driven, not polling: the game redraws the table each time the player moves to another system.
   new doc.defaultView.MutationObserver((records) => {
@@ -98,6 +114,21 @@ export function watchGalaxy(o: GalaxyOptions): void {
     setTimeout(run, 30);
   }).observe(component, { childList: true, subtree: true });
   run();
+}
+
+/**
+ * Keeps the system the game drew in Future's position memory, for the players and planets the
+ * player marked or opened lately (engines/positions). Only when the game redrew it.
+ */
+function remember(o: GalaxyOptions): void {
+  const s = readGalaxy(o.doc);
+  if (!s) return;
+  const marks = loadMarks(o.store.get<Partial<Marks> | null>(MARKS_KEY, null));
+  const recent = new Set(marks.recent.map((r) => r.id));
+  const keep = (id: number, coords: string) => !!marks.players[String(id)] || recent.has(id) || !!marks.planets[coords];
+  const rows = s.rows.filter((r) => !(r.planetId && o.ownPlanetIds.has(r.planetId))).map((r) => ({ ...r, debris: r.debris ? debrisMsu(r.debris) : 0 }));
+  const next = recordSystem(o.store.get<Positions>(POSITIONS_KEY, {}), s.galaxy, s.system, rows, keep, Date.now());
+  if (next) o.store.set(POSITIONS_KEY, next);
 }
 
 function decorate(o: GalaxyOptions, content: Element): void {
@@ -116,6 +147,7 @@ function decorate(o: GalaxyOptions, content: Element): void {
     r.row.classList.toggle('fut-g-own', own);
     r.row.classList.toggle('fut-g-inactive', inactive && !own);
     r.row.classList.toggle('fut-g-tagged', !!tag);
+    r.row.classList.toggle('fut-g-hl', coords === highlight);
     const rowStyle = (r.row as HTMLElement).style;
     if (tag) rowStyle.setProperty('--fut-tag', TAG_COLORS[tag]);
     else rowStyle.removeProperty('--fut-tag');

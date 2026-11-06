@@ -497,5 +497,22 @@
   "marks.hide.inactive": "Nascondi inattivi",
   "marks.noneInRange": "Nessun pianeta colorato in questo intervallo con questi filtri.",
   "marks.noPlanets": "Nessun pianeta colorato. In galassia usa il pallino a destra del nome del pianeta.",
-  "marks.planetsHint": "{n} pianeti. Le coordinate aprono la galassia, dove c'è la sonda del gioco."
+  "marks.planetsHint": "{n} pianeti · le coordinate mostrano il sistema in galassia",
+  "marks.keyNext": "prossima posizione",
+  "marks.footData": "galassia + API pubblica",
+  "marks.fleetPlanet": "Flotta verso il pianeta {coords} (attività del pianeta)",
+  "marks.fleetMoon": "Flotta verso la luna {coords} (attività della luna)",
+  "marks.ago": "{n}{u}",
+  "marks.unit.m": "m",
+  "marks.unit.h": "h",
+  "marks.unit.d": "g",
+  "marks.seenOnly": "Visto in galassia, l'API non lo elenca ancora · clic: mostra il sistema",
+  "marks.showSystem": "Mostra il sistema in galassia",
+  "marks.col.coords": "Coord.",
+  "marks.col.debris": "CD",
+  "marks.col.planet": "Pian.",
+  "marks.col.moon": "Luna",
+  "marks.col.seen": "Visto",
+  "marks.col.who": "Pianeta · giocatore",
+  "shortcut.nextTarget": "Bersagli: prossima posizione"
 }

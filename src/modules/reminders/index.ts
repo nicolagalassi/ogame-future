@@ -41,7 +41,7 @@ function toastHost(doc: Document): ShadowRoot {
   const root = host.attachShadow({ mode: 'open' });
   const style = doc.createElement('style');
   style.textContent = `
-.stack { position: fixed; right: 16px; bottom: 16px; z-index: 100000; display: flex; flex-direction: column; gap: 8px; max-width: 340px; }
+.stack { position: fixed; right: 16px; bottom: 16px; z-index: 1000002; display: flex; flex-direction: column; gap: 8px; max-width: 340px; }
 .toast { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 10px; background: #111B2A; border: 1px solid #4FD1E8;
   color: #E6EDF5; font: 13px Arial, sans-serif; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
 .toast svg { flex-shrink: 0; margin-top: 1px; color: #4FD1E8; }
