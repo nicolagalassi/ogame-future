@@ -1,5 +1,4 @@
 node_modules/
-dist/
 
 # dev browser capture of the LIVE game session (server, planet ids, coordinates): never publish
 devlog.jsonl
