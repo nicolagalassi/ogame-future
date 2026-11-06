@@ -14,6 +14,9 @@ import { JOURNAL_CSS, OUTCOME_COLORS } from './style';
 
 export const JOURNAL_ID = 'fut-journal';
 const PERIOD_KEY = 'exp.period';
+const KIND_KEY = 'exp.kind';
+/** Expeditions, discovery missions (artefacts, lifeform XP) and imported raids: each its own tab. */
+type Kind = 'expedition' | 'discovery' | 'raid';
 const PERIODS: Period[] = ['today', 'yesterday', 'week', 'month', 'all'];
 const ORDER: Outcome[] = ['resource', 'darkmatter', 'ship', 'item', 'trader', 'early', 'late', 'pirate', 'alien', 'blackhole', 'nothing', 'artefact', 'lifeform', 'unknown'];
 
@@ -59,11 +62,16 @@ export function openJournal(o: JournalOptions): void {
   let period = store.get<Period>(PERIOD_KEY, 'week');
   if (!PERIODS.includes(period)) period = 'week';
   let confirmClear = false;
+  let kind = store.get<Kind>(KIND_KEY, 'expedition');
 
   const draw = () => {
     const journal = store.get<Journal>(JOURNAL_KEY, {});
-    const entries = entriesIn(journal, periodRange(period, o.now));
+    const inPeriod = entriesIn(journal, periodRange(period, o.now));
+    const hasRaids = Object.values(journal).some((e) => e.kind === 'raid');
+    if (kind === 'raid' && !hasRaids) kind = 'expedition';
+    const entries = inPeriod.filter((e) => e.kind === kind);
     const s = periodStats(entries);
+    const isDisc = kind === 'discovery';
 
     const head = h('div', 'head');
     const titles = h('div', 'titles');
@@ -86,7 +94,21 @@ export function openJournal(o: JournalOptions): void {
       tabs.append(b);
     }
 
-    const parts: HTMLElement[] = [head, tabs];
+    const kinds = h('div', 'tabs');
+    for (const k of ['expedition', 'discovery', ...(hasRaids ? ['raid'] : [])] as Kind[]) {
+      const n = periodStats(inPeriod.filter((e) => e.kind === k));
+      const count = k === 'raid' ? raidStats(inPeriod).count : k === 'discovery' ? n.discoveries : n.count;
+      const b = h('button', 'tab', `${t(`exp.kind.${k}`)} · ${count.toLocaleString(locale)}`);
+      b.setAttribute('aria-pressed', String(k === kind));
+      b.addEventListener('click', () => {
+        kind = k;
+        store.set(KIND_KEY, k);
+        draw();
+      });
+      kinds.append(b);
+    }
+
+    const parts: HTMLElement[] = [head, kinds, tabs];
     if (!entries.length) {
       parts.push(h('p', 'empty', Object.keys(journal).length ? t('exp.emptyPeriod') : t('exp.empty')));
     } else {
@@ -102,9 +124,14 @@ export function openJournal(o: JournalOptions): void {
         d.append(h('span', 'm', fmt(r.metal)), h('span', 'c', fmt(r.crystal)), h('span', 'd', fmt(r.deuterium)));
         return d;
       };
-      const countDetail = h('div', 'detail');
-      if (s.discoveries) countDetail.append(h('span', '', t('exp.discoveries', { n: s.discoveries })));
-      kpi(t('exp.count'), s.count.toLocaleString(locale), '', countDetail);
+      if (isDisc) {
+        kpi(t('exp.kind.discovery'), s.discoveries.toLocaleString(locale));
+        kpi(t('exp.artefacts'), s.artefacts.toLocaleString(locale), 'pos');
+        kpi(t('exp.lfXp'), s.lfXp.toLocaleString(locale));
+        kpi(t('exp.artefactsAvg'), s.discoveries ? (s.artefacts / s.discoveries).toLocaleString(locale, { maximumFractionDigits: 2 }) : '—');
+      }
+      if (!isDisc && kind !== 'raid') {
+      kpi(t('exp.count'), s.count.toLocaleString(locale));
       kpi(t('exp.resources'), `${fmt(msu(s.res))} MSU`, '', triple(s.res));
       kpi(t('exp.dm'), fmt(s.res.darkMatter), 'dm');
       kpi(t('exp.shipsFound'), `${fmt(msu(s.shipsValue))} MSU`, 'pos', triple(s.shipsValue));
@@ -116,11 +143,12 @@ export function openJournal(o: JournalOptions): void {
         if (s.artefacts) d.append(h('span', '', t('msg.artefacts', { n: s.artefacts.toLocaleString(locale) })));
         kpi(t('exp.lfXp'), s.lfXp.toLocaleString(locale), '', d);
       }
-      parts.push(kpis);
+      }
+      if (kind !== 'raid') parts.push(kpis);
 
       // Outcomes: one bar, then each outcome with count and share.
       const outs = h('div', 'card');
-      outs.append(h('h3', '', t('exp.outcomes')));
+      if (kind !== 'raid') outs.append(h('h3', '', t('exp.outcomes')));
       const total = Object.values(s.outcomes).reduce((a, b) => a + (b ?? 0), 0) || 1;
       const bar = h('div', 'bar');
       const legend = h('div', 'legend');
@@ -138,7 +166,7 @@ export function openJournal(o: JournalOptions): void {
         row.append(dot, h('span', '', t(`msg.out.${key}`)), h('span', 'n', n.toLocaleString(locale)), h('span', 'pct', (n / total).toLocaleString(locale, { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 })));
         legend.append(row);
       }
-      outs.append(bar, legend);
+      if (kind !== 'raid') outs.append(bar, legend);
       const sized = s.sizes[0] + s.sizes[1] + s.sizes[2];
       if (sized) {
         const sizes = h('div', 'detail');
@@ -146,12 +174,12 @@ export function openJournal(o: JournalOptions): void {
         for (const i of [2, 1, 0] as const) sizes.append(h('span', '', `${t(`msg.size.${i}`)} ${s.sizes[i].toLocaleString(locale)} (${(s.sizes[i] / sized).toLocaleString(locale, { style: 'percent', maximumFractionDigits: 0 })})`));
         outs.append(sizes);
       }
-      parts.push(outs);
+      if (kind !== 'raid') parts.push(outs);
 
       // Ships found and lost.
       const found = Object.entries(s.shipsFound);
       const lost = Object.entries(s.lost);
-      if (found.length || lost.length) {
+      if (kind === 'expedition' && (found.length || lost.length)) {
         const card = h('div', 'card');
         card.append(h('h3', '', t('exp.ships')));
         // One tile per ship type, in the game's order: picture, how many, name.
@@ -177,7 +205,7 @@ export function openJournal(o: JournalOptions): void {
 
       // Raids imported from OGLight: their own strip, they are not expeditions.
       const r = raidStats(entries);
-      if (r.count || msu(r.res)) {
+      if (kind === 'raid') {
         const card = h('div', 'card');
         card.append(h('h3', '', t('exp.raids')));
         const strip = h('div', 'kpis');
@@ -197,17 +225,27 @@ export function openJournal(o: JournalOptions): void {
 
       // Day by day.
       const days = byDay(entries, 31);
-      if (days.length > 1 || period !== 'today') {
+      if (kind !== 'raid' && (days.length > 1 || period !== 'today')) {
         const card = h('div', 'card');
         card.append(h('h3', '', t('exp.byDay')));
         const scroll = h('div', 'scroll');
         const table = h('table');
         const hr = h('tr');
-        for (const label of [t('exp.day'), t('exp.countShort'), t('msg.res.metal'), t('msg.res.crystal'), t('msg.res.deuterium'), t('exp.dmShort'), t('exp.shipsShort'), 'MSU'])
-          hr.append(h('th', '', label));
+        const labels = isDisc ? [t('exp.day'), t('exp.countShort'), t('exp.artefacts'), t('exp.lfXp')] : [t('exp.day'), t('exp.countShort'), t('msg.res.metal'), t('msg.res.crystal'), t('msg.res.deuterium'), t('exp.dmShort'), t('exp.shipsShort'), 'MSU'];
+        for (const label of labels) hr.append(h('th', '', label));
         table.append(hr);
         for (const { day, stats } of days) {
           const tr = h('tr');
+          if (isDisc) {
+            tr.append(
+              h('td', '', new Date(day).toLocaleDateString(locale, { weekday: 'short', day: '2-digit', month: '2-digit' })),
+              h('td', '', stats.discoveries.toLocaleString(locale)),
+              h('td', 'pos', stats.artefacts.toLocaleString(locale)),
+              h('td', '', stats.lfXp.toLocaleString(locale)),
+            );
+            table.append(tr);
+            continue;
+          }
           tr.append(
             h('td', '', new Date(day).toLocaleDateString(locale, { weekday: 'short', day: '2-digit', month: '2-digit' })),
             h('td', '', String(stats.count)),

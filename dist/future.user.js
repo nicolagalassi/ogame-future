@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.0
+// @version      0.3.1
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -458,7 +458,7 @@
     "exp.period.month": "30 giorni",
     "exp.period.all": "Tutto",
     "exp.empty": "Ancora nessuna spedizione: apri la posta, scheda Flotte \u2192 Spedizioni, e i report entrano qui.",
-    "exp.emptyPeriod": "Nessuna spedizione in questo periodo.",
+    "exp.emptyPeriod": "Niente in questo periodo.",
     "exp.count": "Spedizioni",
     "exp.discoveries": "+ {n} scoperte",
     "exp.resources": "Risorse",
@@ -708,7 +708,12 @@
     "exp.raidCount": "Raid",
     "exp.raidLoot": "Bottino e detriti",
     "exp.raidLost": "Navi perse",
-    "exp.raidNet": "Netto raid"
+    "exp.raidNet": "Netto raid",
+    "exp.kind.expedition": "Spedizioni",
+    "exp.kind.discovery": "Missioni artefatti",
+    "exp.kind.raid": "Raid",
+    "exp.artefacts": "Artefatti",
+    "exp.artefactsAvg": "Artefatti a missione"
   };
 
   // src/i18n/en.json
@@ -1002,7 +1007,7 @@
     "exp.period.month": "30 days",
     "exp.period.all": "All",
     "exp.empty": "No expeditions yet: open the inbox, Fleets \u2192 Expeditions, and the reports land here.",
-    "exp.emptyPeriod": "No expeditions in this period.",
+    "exp.emptyPeriod": "Nothing in this period.",
     "exp.count": "Expeditions",
     "exp.discoveries": "+ {n} discoveries",
     "exp.resources": "Resources",
@@ -1252,7 +1257,12 @@
     "exp.raidCount": "Raids",
     "exp.raidLoot": "Loot and debris",
     "exp.raidLost": "Ships lost",
-    "exp.raidNet": "Raid net"
+    "exp.raidNet": "Raid net",
+    "exp.kind.expedition": "Expeditions",
+    "exp.kind.discovery": "Discovery missions",
+    "exp.kind.raid": "Raids",
+    "exp.artefacts": "Artefacts",
+    "exp.artefactsAvg": "Artefacts per mission"
   };
 
   // src/i18n/fr.json
@@ -1546,7 +1556,7 @@
     "exp.period.month": "30 jours",
     "exp.period.all": "Tout",
     "exp.empty": "Aucune exp\xE9dition : ouvrez la messagerie, Flottes \u2192 Exp\xE9ditions, et les rapports arrivent ici.",
-    "exp.emptyPeriod": "Aucune exp\xE9dition sur cette p\xE9riode.",
+    "exp.emptyPeriod": "Rien sur cette p\xE9riode.",
     "exp.count": "Exp\xE9ditions",
     "exp.discoveries": "+ {n} d\xE9couvertes",
     "exp.resources": "Ressources",
@@ -1796,7 +1806,12 @@
     "exp.raidCount": "Raids",
     "exp.raidLoot": "Butin et d\xE9bris",
     "exp.raidLost": "Vaisseaux perdus",
-    "exp.raidNet": "Net raids"
+    "exp.raidNet": "Net raids",
+    "exp.kind.expedition": "Exp\xE9ditions",
+    "exp.kind.discovery": "Missions d'exploration",
+    "exp.kind.raid": "Raids",
+    "exp.artefacts": "Artefacts",
+    "exp.artefactsAvg": "Artefacts par mission"
   };
 
   // src/i18n/de.json
@@ -2090,7 +2105,7 @@
     "exp.period.month": "30 Tage",
     "exp.period.all": "Alles",
     "exp.empty": "Noch keine Expeditionen: \xD6ffne das Postfach, Flotten \u2192 Expeditionen, dann landen die Berichte hier.",
-    "exp.emptyPeriod": "Keine Expeditionen in diesem Zeitraum.",
+    "exp.emptyPeriod": "Nichts in diesem Zeitraum.",
     "exp.count": "Expeditionen",
     "exp.discoveries": "+ {n} Entdeckungen",
     "exp.resources": "Rohstoffe",
@@ -2340,7 +2355,12 @@
     "exp.raidCount": "Raids",
     "exp.raidLoot": "Beute und Tr\xFCmmer",
     "exp.raidLost": "Verlorene Schiffe",
-    "exp.raidNet": "Raids netto"
+    "exp.raidNet": "Raids netto",
+    "exp.kind.expedition": "Expeditionen",
+    "exp.kind.discovery": "Erkundungsmissionen",
+    "exp.kind.raid": "Raids",
+    "exp.artefacts": "Artefakte",
+    "exp.artefactsAvg": "Artefakte pro Mission"
   };
 
   // src/core/i18n.ts
@@ -9353,6 +9373,7 @@ table.queues td.acts { width: 1%; text-align: right; }
   // src/modules/messages/journal-view.ts
   var JOURNAL_ID = "fut-journal";
   var PERIOD_KEY = "exp.period";
+  var KIND_KEY = "exp.kind";
   var PERIODS = ["today", "yesterday", "week", "month", "all"];
   var ORDER = ["resource", "darkmatter", "ship", "item", "trader", "early", "late", "pirate", "alien", "blackhole", "nothing", "artefact", "lifeform", "unknown"];
   var keyHandler3 = null;
@@ -9385,10 +9406,15 @@ table.queues td.acts { width: 1%; text-align: right; }
     let period = store.get(PERIOD_KEY, "week");
     if (!PERIODS.includes(period)) period = "week";
     let confirmClear = false;
+    let kind = store.get(KIND_KEY, "expedition");
     const draw = () => {
       const journal = store.get(JOURNAL_KEY, {});
-      const entries = entriesIn(journal, periodRange(period, o.now));
+      const inPeriod = entriesIn(journal, periodRange(period, o.now));
+      const hasRaids = Object.values(journal).some((e) => e.kind === "raid");
+      if (kind === "raid" && !hasRaids) kind = "expedition";
+      const entries = inPeriod.filter((e) => e.kind === kind);
       const s = periodStats(entries);
+      const isDisc = kind === "discovery";
       const head = h5("div", "head");
       const titles = h5("div", "titles");
       titles.append(h5("h2", "", t("exp.title")), h5("span", "sub", t("exp.sub")));
@@ -9408,7 +9434,20 @@ table.queues td.acts { width: 1%; text-align: right; }
         });
         tabs.append(b);
       }
-      const parts = [head, tabs];
+      const kinds = h5("div", "tabs");
+      for (const k of ["expedition", "discovery", ...hasRaids ? ["raid"] : []]) {
+        const n = periodStats(inPeriod.filter((e) => e.kind === k));
+        const count2 = k === "raid" ? raidStats(inPeriod).count : k === "discovery" ? n.discoveries : n.count;
+        const b = h5("button", "tab", `${t(`exp.kind.${k}`)} \xB7 ${count2.toLocaleString(locale)}`);
+        b.setAttribute("aria-pressed", String(k === kind));
+        b.addEventListener("click", () => {
+          kind = k;
+          store.set(KIND_KEY, k);
+          draw();
+        });
+        kinds.append(b);
+      }
+      const parts = [head, kinds, tabs];
       if (!entries.length) {
         parts.push(h5("p", "empty", Object.keys(journal).length ? t("exp.emptyPeriod") : t("exp.empty")));
       } else {
@@ -9424,23 +9463,29 @@ table.queues td.acts { width: 1%; text-align: right; }
           d.append(h5("span", "m", fmt(r2.metal)), h5("span", "c", fmt(r2.crystal)), h5("span", "d", fmt(r2.deuterium)));
           return d;
         };
-        const countDetail = h5("div", "detail");
-        if (s.discoveries) countDetail.append(h5("span", "", t("exp.discoveries", { n: s.discoveries })));
-        kpi(t("exp.count"), s.count.toLocaleString(locale), "", countDetail);
-        kpi(t("exp.resources"), `${fmt(msu(s.res))} MSU`, "", triple(s.res));
-        kpi(t("exp.dm"), fmt(s.res.darkMatter), "dm");
-        kpi(t("exp.shipsFound"), `${fmt(msu(s.shipsValue))} MSU`, "pos", triple(s.shipsValue));
-        kpi(t("exp.lost"), msu(s.lostValue) ? `\u2212${fmt(msu(s.lostValue))} MSU` : "\u2014", msu(s.lostValue) ? "neg" : "", msu(s.lostValue) ? triple(s.lostValue) : void 0);
-        kpi(t("exp.net"), `${fmt(s.netMsu)} MSU`, s.netMsu < 0 ? "neg" : "pos");
-        kpi(t("exp.average"), s.count ? `${fmt(s.netMsu / s.count)} MSU` : "\u2014");
-        if (s.lfXp || s.artefacts) {
-          const d = h5("div", "detail");
-          if (s.artefacts) d.append(h5("span", "", t("msg.artefacts", { n: s.artefacts.toLocaleString(locale) })));
-          kpi(t("exp.lfXp"), s.lfXp.toLocaleString(locale), "", d);
+        if (isDisc) {
+          kpi(t("exp.kind.discovery"), s.discoveries.toLocaleString(locale));
+          kpi(t("exp.artefacts"), s.artefacts.toLocaleString(locale), "pos");
+          kpi(t("exp.lfXp"), s.lfXp.toLocaleString(locale));
+          kpi(t("exp.artefactsAvg"), s.discoveries ? (s.artefacts / s.discoveries).toLocaleString(locale, { maximumFractionDigits: 2 }) : "\u2014");
         }
-        parts.push(kpis);
+        if (!isDisc && kind !== "raid") {
+          kpi(t("exp.count"), s.count.toLocaleString(locale));
+          kpi(t("exp.resources"), `${fmt(msu(s.res))} MSU`, "", triple(s.res));
+          kpi(t("exp.dm"), fmt(s.res.darkMatter), "dm");
+          kpi(t("exp.shipsFound"), `${fmt(msu(s.shipsValue))} MSU`, "pos", triple(s.shipsValue));
+          kpi(t("exp.lost"), msu(s.lostValue) ? `\u2212${fmt(msu(s.lostValue))} MSU` : "\u2014", msu(s.lostValue) ? "neg" : "", msu(s.lostValue) ? triple(s.lostValue) : void 0);
+          kpi(t("exp.net"), `${fmt(s.netMsu)} MSU`, s.netMsu < 0 ? "neg" : "pos");
+          kpi(t("exp.average"), s.count ? `${fmt(s.netMsu / s.count)} MSU` : "\u2014");
+          if (s.lfXp || s.artefacts) {
+            const d = h5("div", "detail");
+            if (s.artefacts) d.append(h5("span", "", t("msg.artefacts", { n: s.artefacts.toLocaleString(locale) })));
+            kpi(t("exp.lfXp"), s.lfXp.toLocaleString(locale), "", d);
+          }
+        }
+        if (kind !== "raid") parts.push(kpis);
         const outs = h5("div", "card");
-        outs.append(h5("h3", "", t("exp.outcomes")));
+        if (kind !== "raid") outs.append(h5("h3", "", t("exp.outcomes")));
         const total = Object.values(s.outcomes).reduce((a, b) => a + (b ?? 0), 0) || 1;
         const bar = h5("div", "bar");
         const legend = h5("div", "legend");
@@ -9458,7 +9503,7 @@ table.queues td.acts { width: 1%; text-align: right; }
           row.append(dot, h5("span", "", t(`msg.out.${key2}`)), h5("span", "n", n.toLocaleString(locale)), h5("span", "pct", (n / total).toLocaleString(locale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 })));
           legend.append(row);
         }
-        outs.append(bar, legend);
+        if (kind !== "raid") outs.append(bar, legend);
         const sized = s.sizes[0] + s.sizes[1] + s.sizes[2];
         if (sized) {
           const sizes = h5("div", "detail");
@@ -9466,10 +9511,10 @@ table.queues td.acts { width: 1%; text-align: right; }
           for (const i of [2, 1, 0]) sizes.append(h5("span", "", `${t(`msg.size.${i}`)} ${s.sizes[i].toLocaleString(locale)} (${(s.sizes[i] / sized).toLocaleString(locale, { style: "percent", maximumFractionDigits: 0 })})`));
           outs.append(sizes);
         }
-        parts.push(outs);
+        if (kind !== "raid") parts.push(outs);
         const found = Object.entries(s.shipsFound);
         const lost = Object.entries(s.lost);
-        if (found.length || lost.length) {
+        if (kind === "expedition" && (found.length || lost.length)) {
           const card = h5("div", "card");
           card.append(h5("h3", "", t("exp.ships")));
           const grid2 = (units, lost2) => {
@@ -9492,7 +9537,7 @@ table.queues td.acts { width: 1%; text-align: right; }
           parts.push(card);
         }
         const r = raidStats(entries);
-        if (r.count || msu(r.res)) {
+        if (kind === "raid") {
           const card = h5("div", "card");
           card.append(h5("h3", "", t("exp.raids")));
           const strip = h5("div", "kpis");
@@ -9510,17 +9555,27 @@ table.queues td.acts { width: 1%; text-align: right; }
           parts.push(card);
         }
         const days = byDay(entries, 31);
-        if (days.length > 1 || period !== "today") {
+        if (kind !== "raid" && (days.length > 1 || period !== "today")) {
           const card = h5("div", "card");
           card.append(h5("h3", "", t("exp.byDay")));
           const scroll = h5("div", "scroll");
           const table = h5("table");
           const hr = h5("tr");
-          for (const label of [t("exp.day"), t("exp.countShort"), t("msg.res.metal"), t("msg.res.crystal"), t("msg.res.deuterium"), t("exp.dmShort"), t("exp.shipsShort"), "MSU"])
-            hr.append(h5("th", "", label));
+          const labels = isDisc ? [t("exp.day"), t("exp.countShort"), t("exp.artefacts"), t("exp.lfXp")] : [t("exp.day"), t("exp.countShort"), t("msg.res.metal"), t("msg.res.crystal"), t("msg.res.deuterium"), t("exp.dmShort"), t("exp.shipsShort"), "MSU"];
+          for (const label of labels) hr.append(h5("th", "", label));
           table.append(hr);
           for (const { day, stats } of days) {
             const tr = h5("tr");
+            if (isDisc) {
+              tr.append(
+                h5("td", "", new Date(day).toLocaleDateString(locale, { weekday: "short", day: "2-digit", month: "2-digit" })),
+                h5("td", "", stats.discoveries.toLocaleString(locale)),
+                h5("td", "pos", stats.artefacts.toLocaleString(locale)),
+                h5("td", "", stats.lfXp.toLocaleString(locale))
+              );
+              table.append(tr);
+              continue;
+            }
             tr.append(
               h5("td", "", new Date(day).toLocaleDateString(locale, { weekday: "short", day: "2-digit", month: "2-digit" })),
               h5("td", "", String(stats.count)),

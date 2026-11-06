@@ -288,7 +288,7 @@
   "exp.period.month": "30 Tage",
   "exp.period.all": "Alles",
   "exp.empty": "Noch keine Expeditionen: Öffne das Postfach, Flotten → Expeditionen, dann landen die Berichte hier.",
-  "exp.emptyPeriod": "Keine Expeditionen in diesem Zeitraum.",
+  "exp.emptyPeriod": "Nichts in diesem Zeitraum.",
   "exp.count": "Expeditionen",
   "exp.discoveries": "+ {n} Entdeckungen",
   "exp.resources": "Rohstoffe",
@@ -538,5 +538,10 @@
   "exp.raidCount": "Raids",
   "exp.raidLoot": "Beute und Trümmer",
   "exp.raidLost": "Verlorene Schiffe",
-  "exp.raidNet": "Raids netto"
+  "exp.raidNet": "Raids netto",
+  "exp.kind.expedition": "Expeditionen",
+  "exp.kind.discovery": "Erkundungsmissionen",
+  "exp.kind.raid": "Raids",
+  "exp.artefacts": "Artefakte",
+  "exp.artefactsAvg": "Artefakte pro Mission"
 }

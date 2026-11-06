@@ -288,7 +288,7 @@
   "exp.period.month": "30 giorni",
   "exp.period.all": "Tutto",
   "exp.empty": "Ancora nessuna spedizione: apri la posta, scheda Flotte → Spedizioni, e i report entrano qui.",
-  "exp.emptyPeriod": "Nessuna spedizione in questo periodo.",
+  "exp.emptyPeriod": "Niente in questo periodo.",
   "exp.count": "Spedizioni",
   "exp.discoveries": "+ {n} scoperte",
   "exp.resources": "Risorse",
@@ -538,5 +538,10 @@
   "exp.raidCount": "Raid",
   "exp.raidLoot": "Bottino e detriti",
   "exp.raidLost": "Navi perse",
-  "exp.raidNet": "Netto raid"
+  "exp.raidNet": "Netto raid",
+  "exp.kind.expedition": "Spedizioni",
+  "exp.kind.discovery": "Missioni artefatti",
+  "exp.kind.raid": "Raid",
+  "exp.artefacts": "Artefatti",
+  "exp.artefactsAvg": "Artefatti a missione"
 }
