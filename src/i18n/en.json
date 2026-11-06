@@ -401,5 +401,18 @@
   "settings.backupImport": "Import",
   "settings.backupSaved": "Saved {n} values to the file",
   "settings.backupRestored": "Restored {n} values: reload the page",
-  "settings.backupBad": "The file is not a Future backup"
+  "settings.backupBad": "The file is not a Future backup",
+  "dash.tab.history": "History",
+  "dash.historyEmpty": "The history fills itself: one point a day whenever you open the Overview. Come back tomorrow to see the first changes.",
+  "dash.historySpan": "Last {n} d",
+  "dash.historyPerDay": "{v}/d",
+  "dash.historyUp": "↑{n} places",
+  "dash.historyDown": "↓{n} places",
+  "dash.historyReal": "over {n} d",
+  "dash.historyFew": "few days recorded",
+  "dash.historyProd": "Production per day (MSU)",
+  "dash.historyDays": "Recorded days",
+  "dash.historyDay": "Day",
+  "dash.historyDelta": "Change",
+  "dash.historyRank": "Rank"
 }

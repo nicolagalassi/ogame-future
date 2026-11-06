@@ -8,7 +8,8 @@ export function formatUnits(value: number, locale = 'it'): string {
     [1e3, 'k'],
   ];
   for (const [size, suffix] of units) {
-    if (abs >= size) {
+    // From 999.5 of the unit below, that unit would print "1000": show "1,0" of this one instead.
+    if (abs >= size * 0.9995) {
       const n = value / size;
       const digits = Math.abs(n) >= 100 ? 0 : 1;
       return `${n.toLocaleString(locale, { minimumFractionDigits: digits, maximumFractionDigits: digits })}${suffix}`;

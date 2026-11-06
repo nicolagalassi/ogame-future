@@ -96,4 +96,17 @@ table.scrap td.unit .unit-ico { margin: 0; width: 24px; height: 24px; }
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cols { grid-template-columns: 1fr; }
 }
+.charts { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 12px; }
+.chart { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
+.chart figcaption { margin-bottom: 6px; color: var(--text); font-weight: 700; font-size: 13px; }
+.plot { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart .grid { stroke: var(--line-soft); stroke-width: 1; }
+.chart .axis { fill: var(--muted); font: 10px var(--mono); }
+.chart .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .cross { stroke: var(--faint); stroke-width: 1; }
+.chart .dot { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.chart .tip { position: absolute; top: -4px; transform: translateX(-50%); padding: 3px 7px; border-radius: 6px; background: var(--raised); border: 1px solid var(--line); color: var(--text); font: 11px var(--mono); white-space: nowrap; pointer-events: none; }
+.kpi .value.neg, td.neg { color: var(--bad); }
+td.pos { color: var(--ok); }
 `;
