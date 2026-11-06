@@ -288,7 +288,7 @@
   "exp.period.month": "30 jours",
   "exp.period.all": "Tout",
   "exp.empty": "Aucune expédition : ouvrez la messagerie, Flottes → Expéditions, et les rapports arrivent ici.",
-  "exp.emptyPeriod": "Aucune expédition sur cette période.",
+  "exp.emptyPeriod": "Rien sur cette période.",
   "exp.count": "Expéditions",
   "exp.discoveries": "+ {n} découvertes",
   "exp.resources": "Ressources",
@@ -538,5 +538,10 @@
   "exp.raidCount": "Raids",
   "exp.raidLoot": "Butin et débris",
   "exp.raidLost": "Vaisseaux perdus",
-  "exp.raidNet": "Net raids"
+  "exp.raidNet": "Net raids",
+  "exp.kind.expedition": "Expéditions",
+  "exp.kind.discovery": "Missions d'exploration",
+  "exp.kind.raid": "Raids",
+  "exp.artefacts": "Artefacts",
+  "exp.artefactsAvg": "Artefacts par mission"
 }
