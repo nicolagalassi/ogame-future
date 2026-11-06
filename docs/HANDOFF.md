@@ -143,7 +143,11 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     (un universo, va importato nello stesso) diventa: pin → bandierine (rush/skull → Bersaglio, fridge → Frigo,
     star/ptre → Da controllare, money → Commercio), tag → colori (lime → verde, dblue → blu, …; gray no),
     `lastPinnedList` → Recenti, `pdb` → posizioni (solo giocatori/pianeti segnati). Quello che Future ha già
-    resta. Statistiche spedizioni/raid di OGLight non convertite.
+    resta. Statistiche (`stats`, aggregate per giorno): una voce riassuntiva per giorno nel Diario (`summary.count`
+    + esiti), spedizioni + detriti pos. 16, scoperte; i giorni già registrati da Future non si importano (doppi).
+    Raid + detriti raccolti → voci `kind: 'raid'`, riquadro "Raid" nel Diario (non contano come spedizioni).
+    Carburante (`conso`) non portato: il Diario di Future non lo conta. Prova sul file reale di Nicola (Nembus):
+    42 giocatori, 570 posizioni, 40.196 spedizioni, 14.178 scoperte, 138 raid su 220 giorni.
 
 ## Come si prova senza il gioco
 

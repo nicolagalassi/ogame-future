@@ -12,9 +12,13 @@ const DAY = 86_400_000;
 const KEEP_MS = 550 * DAY;
 const MAX_ENTRIES = 25_000;
 
-export type JournalEntry = Omit<ExpeditionMessage, 'id'> & {
+export type JournalEntry = Omit<ExpeditionMessage, 'id' | 'kind'> & {
+  /** 'raid' only comes from an OGLight import (Future does not read combat loot itself). */
+  kind: ExpeditionMessage['kind'] | 'raid';
   /** Losses from the combat report at position 16 (pirates/aliens), not a separate expedition. */
   combat?: boolean;
+  /** A whole day from OGLight's statistics: how many reports it stands for, and their outcomes. */
+  summary?: { count: number; outcomes: Partial<Record<Outcome, number>> };
 };
 export type Journal = Record<string, JournalEntry>;
 
@@ -112,9 +116,12 @@ export function periodStats(entries: JournalEntry[]): PeriodStats {
     netMsu: 0,
   };
   for (const e of entries) {
-    if (e.kind === 'discovery') s.discoveries++;
-    else if (!e.combat) s.count++;
-    if (!e.combat) s.outcomes[e.result] = (s.outcomes[e.result] ?? 0) + 1;
+    if (e.kind === 'raid') continue;
+    const n = e.summary ? e.summary.count : 1;
+    if (e.kind === 'discovery') s.discoveries += n;
+    else if (!e.combat) s.count += n;
+    if (e.summary) for (const [k, v] of Object.entries(e.summary.outcomes)) s.outcomes[k as Outcome] = (s.outcomes[k as Outcome] ?? 0) + (v ?? 0);
+    else if (!e.combat) s.outcomes[e.result] = (s.outcomes[e.result] ?? 0) + 1;
     s.res.metal += e.res.metal;
     s.res.crystal += e.res.crystal;
     s.res.deuterium += e.res.deuterium;
@@ -167,6 +174,7 @@ export function entriesIn(journal: Journal, [from, to]: [number, number]): Journ
 export function byDay(entries: JournalEntry[], limit = 14): { day: number; stats: PeriodStats }[] {
   const days = new Map<number, JournalEntry[]>();
   for (const e of entries) {
+    if (e.kind === 'raid') continue;
     const key = dayStart(e.at);
     const list = days.get(key) ?? [];
     list.push(e);
@@ -176,4 +184,28 @@ export function byDay(entries: JournalEntry[], limit = 14): { day: number; stats
     .sort((a, b) => b[0] - a[0])
     .slice(0, limit)
     .map(([day, list]) => ({ day, stats: periodStats(list) }));
+}
+
+/** Raids (from an OGLight import): how many, loot, ships lost. */
+export interface RaidStats {
+  count: number;
+  res: Res4;
+  lost: Record<number, number>;
+  lostValue: Res4;
+  netMsu: number;
+}
+
+export function raidStats(entries: JournalEntry[]): RaidStats {
+  const s: RaidStats = { count: 0, res: ZERO(), lost: {}, lostValue: ZERO(), netMsu: 0 };
+  for (const e of entries) {
+    if (e.kind !== 'raid') continue;
+    s.count += e.summary?.count ?? 1;
+    s.res.metal += e.res.metal;
+    s.res.crystal += e.res.crystal;
+    s.res.deuterium += e.res.deuterium;
+    for (const [id, n] of Object.entries(e.lost)) s.lost[Number(id)] = (s.lost[Number(id)] ?? 0) + n;
+  }
+  s.lostValue = unitsValue(s.lost);
+  s.netMsu = msu(s.res) - msu(s.lostValue);
+  return s;
 }

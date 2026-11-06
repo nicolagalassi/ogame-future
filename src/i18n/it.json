@@ -532,6 +532,11 @@
   "bar.targetsHint": "Barra laterale dei bersagli (giocatori segnati e pianeti colorati) · M: prossima posizione",
   "settings.oglight": "Da OGLight",
   "settings.oglightImport": "Importa export",
-  "settings.oglightDone": "Da OGLight: {players} giocatori, {planets} pianeti colorati, {seen} posizioni. Ricarica la pagina.",
-  "settings.backupImportHint": "Un backup di Future o il file «Export data» di OGLight (dello stesso universo)"
+  "settings.oglightDone": "Da OGLight: {players} giocatori, {planets} pianeti colorati, {seen} posizioni, {exp} spedizioni e {raids} raid su {days} giorni. Ricarica la pagina.",
+  "settings.backupImportHint": "Un backup di Future o il file «Export data» di OGLight (dello stesso universo)",
+  "exp.raids": "Raid (importati da OGLight)",
+  "exp.raidCount": "Raid",
+  "exp.raidLoot": "Bottino e detriti",
+  "exp.raidLost": "Navi perse",
+  "exp.raidNet": "Netto raid"
 }
