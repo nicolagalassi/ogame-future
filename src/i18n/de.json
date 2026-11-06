@@ -464,11 +464,12 @@
   "spy.from": "Von {name} [{coords}], Hinflug bei 100 %",
   "msg.combat.converter": "Konverter",
   "msg.combat.converterHint": "Öffnet den Bericht im Ogotcha-Konverter (neuer Tab)",
-  "hs.ahead": "{n} Punkte mehr als du",
-  "hs.behind": "{n} Punkte weniger als du",
   "hs.days": "eingeholt in {n} T",
-  "hs.today": "heute überholt",
+  "hs.today": "{n} Punkte seit Mitternacht (Basis {time})",
   "hs.never": "nicht bei diesem Tempo",
   "hs.etaMine": "Bei deinem Tempo der letzten 7 Tage (+{mine}/T)",
-  "hs.etaBoth": "Dein Tempo (+{mine}/T) minus seines (+{theirs}/T), letzte 7 Tage"
+  "hs.etaBoth": "Dein Tempo (+{mine}/T) minus seines (+{theirs}/T), letzte 7 Tage",
+  "hs.passToday": "heute überholt",
+  "hs.note": "Unter den Punkten: was jeder Spieler heute gemacht hat, laut öffentlicher Rangliste von {time}.",
+  "hs.noteWaiting": "Öffentliche Rangliste für die heutigen Punkte wird gelesen…"
 }

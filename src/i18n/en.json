@@ -464,11 +464,12 @@
   "spy.from": "From {name} [{coords}], one way at 100%",
   "msg.combat.converter": "Converter",
   "msg.combat.converterHint": "Opens the report in the Ogotcha converter (new tab)",
-  "hs.ahead": "{n} points more than you",
-  "hs.behind": "{n} points less than you",
   "hs.days": "catch up: {n} d",
-  "hs.today": "you pass today",
+  "hs.today": "{n} points since midnight (base at {time})",
   "hs.never": "not at this pace",
   "hs.etaMine": "At your pace of the last 7 days (+{mine}/d)",
-  "hs.etaBoth": "Your pace (+{mine}/d) minus theirs (+{theirs}/d), last 7 days"
+  "hs.etaBoth": "Your pace (+{mine}/d) minus theirs (+{theirs}/d), last 7 days",
+  "hs.passToday": "you pass today",
+  "hs.note": "Under the points: what each player made today, from the public highscore of {time}.",
+  "hs.noteWaiting": "Reading the public highscore for today's points…"
 }

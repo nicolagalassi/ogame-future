@@ -71,11 +71,11 @@
 
   // src/core/storage.ts
   var GMStore = class {
-    get(key, fallback) {
-      return GM_getValue(key, fallback);
+    get(key2, fallback) {
+      return GM_getValue(key2, fallback);
     }
-    set(key, value) {
-      GM_setValue(key, value);
+    set(key2, value) {
+      GM_setValue(key2, value);
     }
     keys() {
       return GM_listValues();
@@ -86,11 +86,11 @@
       this.kv = kv;
       this.namespace = namespace;
     }
-    get(key, fallback) {
-      return this.kv.get(`${this.namespace}:${key}`, fallback);
+    get(key2, fallback) {
+      return this.kv.get(`${this.namespace}:${key2}`, fallback);
     }
-    set(key, value) {
-      this.kv.set(`${this.namespace}:${key}`, value);
+    set(key2, value) {
+      this.kv.set(`${this.namespace}:${key2}`, value);
     }
   };
   function serverNamespace(doc) {
@@ -105,7 +105,7 @@
   var VERSION = 1;
   function exportBackup(kv, now) {
     const data = {};
-    for (const key of kv.keys().filter((k) => k.startsWith(PREFIX)).sort()) data[key] = kv.get(key, null);
+    for (const key2 of kv.keys().filter((k) => k.startsWith(PREFIX)).sort()) data[key2] = kv.get(key2, null);
     return { app: "future", version: VERSION, at: now, data };
   }
   function importBackup(kv, text) {
@@ -117,7 +117,7 @@
     }
     if (!file || file.app !== "future" || file.version !== VERSION || !file.data || typeof file.data !== "object" || Array.isArray(file.data)) throw new Error("backup: not a Future backup");
     const entries = Object.entries(file.data).filter(([k]) => k.startsWith(PREFIX));
-    for (const [key, value] of entries) kv.set(key, value);
+    for (const [key2, value] of entries) kv.set(key2, value);
     return entries.length;
   }
   var backupFileName = (now) => `future-backup-${new Date(now).toISOString().slice(0, 10)}.json`;
@@ -631,13 +631,14 @@
     "spy.from": "Da {name} [{coords}], andata al 100%",
     "msg.combat.converter": "Convertitore",
     "msg.combat.converterHint": "Apre il rapporto nel convertitore Ogotcha (nuova scheda)",
-    "hs.ahead": "{n} punti pi\xF9 di te",
-    "hs.behind": "{n} punti meno di te",
     "hs.days": "ti avvicini: {n} g",
-    "hs.today": "lo superi oggi",
+    "hs.today": "{n} punti da mezzanotte (base alle {time})",
     "hs.never": "al ritmo attuale no",
     "hs.etaMine": "Al tuo ritmo degli ultimi 7 giorni (+{mine}/g)",
-    "hs.etaBoth": "Al tuo ritmo (+{mine}/g) meno il suo (+{theirs}/g), ultimi 7 giorni"
+    "hs.etaBoth": "Al tuo ritmo (+{mine}/g) meno il suo (+{theirs}/g), ultimi 7 giorni",
+    "hs.passToday": "lo superi oggi",
+    "hs.note": "Sotto i punti: quanto ha fatto oggi ogni giocatore, dalla classifica pubblica delle {time}.",
+    "hs.noteWaiting": "Lettura della classifica pubblica per i punti di oggi\u2026"
   };
 
   // src/i18n/en.json
@@ -1107,13 +1108,14 @@
     "spy.from": "From {name} [{coords}], one way at 100%",
     "msg.combat.converter": "Converter",
     "msg.combat.converterHint": "Opens the report in the Ogotcha converter (new tab)",
-    "hs.ahead": "{n} points more than you",
-    "hs.behind": "{n} points less than you",
     "hs.days": "catch up: {n} d",
-    "hs.today": "you pass today",
+    "hs.today": "{n} points since midnight (base at {time})",
     "hs.never": "not at this pace",
     "hs.etaMine": "At your pace of the last 7 days (+{mine}/d)",
-    "hs.etaBoth": "Your pace (+{mine}/d) minus theirs (+{theirs}/d), last 7 days"
+    "hs.etaBoth": "Your pace (+{mine}/d) minus theirs (+{theirs}/d), last 7 days",
+    "hs.passToday": "you pass today",
+    "hs.note": "Under the points: what each player made today, from the public highscore of {time}.",
+    "hs.noteWaiting": "Reading the public highscore for today's points\u2026"
   };
 
   // src/i18n/fr.json
@@ -1583,13 +1585,14 @@
     "spy.from": "Depuis {name} [{coords}], aller \xE0 100 %",
     "msg.combat.converter": "Convertisseur",
     "msg.combat.converterHint": "Ouvre le rapport dans le convertisseur Ogotcha (nouvel onglet)",
-    "hs.ahead": "{n} points de plus que vous",
-    "hs.behind": "{n} points de moins que vous",
     "hs.days": "rattrap\xE9 en {n} j",
-    "hs.today": "d\xE9pass\xE9 aujourd'hui",
+    "hs.today": "{n} points depuis minuit (base \xE0 {time})",
     "hs.never": "pas \xE0 ce rythme",
     "hs.etaMine": "\xC0 votre rythme des 7 derniers jours (+{mine}/j)",
-    "hs.etaBoth": "Votre rythme (+{mine}/j) moins le sien (+{theirs}/j), 7 derniers jours"
+    "hs.etaBoth": "Votre rythme (+{mine}/j) moins le sien (+{theirs}/j), 7 derniers jours",
+    "hs.passToday": "d\xE9pass\xE9 aujourd'hui",
+    "hs.note": "Sous les points : ce que chaque joueur a fait aujourd'hui, d'apr\xE8s le classement public de {time}.",
+    "hs.noteWaiting": "Lecture du classement public pour les points du jour\u2026"
   };
 
   // src/i18n/de.json
@@ -2059,13 +2062,14 @@
     "spy.from": "Von {name} [{coords}], Hinflug bei 100 %",
     "msg.combat.converter": "Konverter",
     "msg.combat.converterHint": "\xD6ffnet den Bericht im Ogotcha-Konverter (neuer Tab)",
-    "hs.ahead": "{n} Punkte mehr als du",
-    "hs.behind": "{n} Punkte weniger als du",
     "hs.days": "eingeholt in {n} T",
-    "hs.today": "heute \xFCberholt",
+    "hs.today": "{n} Punkte seit Mitternacht (Basis {time})",
     "hs.never": "nicht bei diesem Tempo",
     "hs.etaMine": "Bei deinem Tempo der letzten 7 Tage (+{mine}/T)",
-    "hs.etaBoth": "Dein Tempo (+{mine}/T) minus seines (+{theirs}/T), letzte 7 Tage"
+    "hs.etaBoth": "Dein Tempo (+{mine}/T) minus seines (+{theirs}/T), letzte 7 Tage",
+    "hs.passToday": "heute \xFCberholt",
+    "hs.note": "Unter den Punkten: was jeder Spieler heute gemacht hat, laut \xF6ffentlicher Rangliste von {time}.",
+    "hs.noteWaiting": "\xD6ffentliche Rangliste f\xFCr die heutigen Punkte wird gelesen\u2026"
   };
 
   // src/core/i18n.ts
@@ -2077,8 +2081,8 @@
   }
   function translator(locale) {
     const dict = dictionaries[locale];
-    return (key, vars = {}) => {
-      const text = dict[key] ?? dictionaries.en[key] ?? key;
+    return (key2, vars = {}) => {
+      const text = dict[key2] ?? dictionaries.en[key2] ?? key2;
       return text.replace(/\{(\w+)\}/g, (_, name) => String(vars[name] ?? `{${name}}`));
     };
   }
@@ -2204,11 +2208,11 @@
   function estimateResources(body, now) {
     const seconds = Math.max(0, (now - body.resourcesAt) / 1e3);
     const out = { metal: 0, crystal: 0, deuterium: 0 };
-    for (const key of KEYS) {
-      const start = body.resources[key];
-      const grown = body.type === "planet" ? start + body.production[key] * seconds / 3600 : start;
-      const cap = effectiveStorage(body)[key];
-      out[key] = cap > 0 ? Math.max(start, Math.min(grown, cap)) : grown;
+    for (const key2 of KEYS) {
+      const start = body.resources[key2];
+      const grown = body.type === "planet" ? start + body.production[key2] * seconds / 3600 : start;
+      const cap = effectiveStorage(body)[key2];
+      out[key2] = cap > 0 ? Math.max(start, Math.min(grown, cap)) : grown;
     }
     return out;
   }
@@ -2351,11 +2355,11 @@
     const id = Number(root?.getAttribute("id"));
     if (!root || !id) return null;
     const scores = {};
-    for (const [key, type] of Object.entries(SCORE_TYPES)) {
+    for (const [key2, type] of Object.entries(SCORE_TYPES)) {
       const pos = root.querySelector(`positions position[type="${type}"]`);
       const points = Number(pos?.getAttribute("score"));
       const rank = Number(pos?.textContent?.trim());
-      if (pos && Number.isFinite(points) && Number.isFinite(rank)) scores[key] = { points: Math.floor(points), rank };
+      if (pos && Number.isFinite(points) && Number.isFinite(rank)) scores[key2] = { points: Math.floor(points), rank };
     }
     const ships = Number(root.querySelector('positions position[type="3"]')?.getAttribute("ships"));
     return { id, name: root.getAttribute("name") ?? "", at: now, scores, ships: Number.isFinite(ships) && ships > 0 ? ships : null };
@@ -2796,11 +2800,11 @@
       return;
     }
     const table = el(doc, "table");
-    for (const key of Object.keys(SCORE_TYPES)) {
-      const v = data.scores[key];
+    for (const key2 of Object.keys(SCORE_TYPES)) {
+      const v = data.scores[key2];
       if (!v) continue;
       const tr = el(doc, "tr");
-      tr.append(el(doc, "td", "", t(`galaxy.score.${key}`)), el(doc, "td", "", formatUnits(v.points, locale)), el(doc, "td", "r", `#${v.rank.toLocaleString(locale)}`));
+      tr.append(el(doc, "td", "", t(`galaxy.score.${key2}`)), el(doc, "td", "", formatUnits(v.points, locale)), el(doc, "td", "r", `#${v.rank.toLocaleString(locale)}`));
       table.append(tr);
     }
     note.before(table);
@@ -3061,8 +3065,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     const idle = planets.filter((r) => r.idle === true);
     const stale = rows.filter((r) => r.ageMinutes > STALE_MINUTES);
     const out = [];
-    const push = (level2, key, list) => {
-      if (list.length) out.push({ level: level2, key, count: list.length, names: list.map(label) });
+    const push = (level2, key2, list) => {
+      if (list.length) out.push({ level: level2, key: key2, count: list.length, names: list.map(label) });
     };
     push("warn", "alert.missing", missing2);
     push("warn", "alert.full", full);
@@ -3319,11 +3323,11 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     }
     const amount = estimateResources(body, now);
     const fill = withStorage ? storageFill(body, amount) : null;
-    const cell = (key, cls) => {
-      const full = fill !== null && fill[key] >= 0.9;
-      const node = el2(doc, "span", full ? `fut-cell ${cls} fut-full` : `fut-cell ${cls}`, formatUnits(amount[key], locale));
+    const cell = (key2, cls) => {
+      const full = fill !== null && fill[key2] >= 0.9;
+      const node = el2(doc, "span", full ? `fut-cell ${cls} fut-full` : `fut-cell ${cls}`, formatUnits(amount[key2], locale));
       if (fill !== null) {
-        const pct = Math.round(fill[key] * 100);
+        const pct = Math.round(fill[key2] * 100);
         node.style.setProperty("--fut-fill", `${pct}%`);
         node.classList.add("fut-has-fill");
         node.title = `${pct}%`;
@@ -3863,16 +3867,16 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
   var KEYS3 = ["metal", "crystal", "deuterium", "energy"];
   function main(cost) {
     let best = null;
-    for (const key of KEYS3) if (cost[key] > 0 && (best === null || cost[key] > cost[best])) best = key;
+    for (const key2 of KEYS3) if (cost[key2] > 0 && (best === null || cost[key2] > cost[best])) best = key2;
     return best;
   }
   function discountFrom(id, level2, shown) {
     const raw = rawCost(id, level2);
-    const key = main(raw);
-    if (!key) return null;
-    const value = shown[key];
+    const key2 = main(raw);
+    if (!key2) return null;
+    const value = shown[key2];
     if (value === void 0 || !(value > 0)) return null;
-    const ratio = value / raw[key];
+    const ratio = value / raw[key2];
     if (ratio > 1.001 || ratio < 0.2) return null;
     return Math.max(0, 1 - ratio);
   }
@@ -4121,9 +4125,9 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     return ids.length ? ids.sort((a, b) => slotOf(a) - slotOf(b)) : null;
   }
   function rememberLfSlots(slots, bodyId, ids) {
-    const key = String(bodyId);
-    if (slots[key]?.join() === ids.join()) return false;
-    slots[key] = ids;
+    const key2 = String(bodyId);
+    if (slots[key2]?.join() === ids.join()) return false;
+    slots[key2] = ids;
     return true;
   }
   var lvl = (b, id) => b.levels[String(id)] ?? 0;
@@ -4180,8 +4184,8 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
   }
   function readUnits(raw) {
     const out = {};
-    for (const [key, value] of Object.entries(raw)) {
-      const id = Math.abs(Number(key));
+    for (const [key2, value] of Object.entries(raw)) {
+      const id = Math.abs(Number(key2));
       const amount = typeof value === "object" && value ? num2(value.amount) : num2(value);
       if (id > 0 && amount) out[id] = (out[id] ?? 0) + amount;
     }
@@ -4342,8 +4346,8 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     const sides = new Set(mine.map((f) => f.side));
     const attacker = sides.has("attacker");
     const winner = result.winner === "none" ? "draw" : result.winner && sides.has(result.winner) ? "won" : result.winner ? "lost" : "unknown";
-    const pick = (list, key) => {
-      const of = (r) => num2(list?.find((x) => x.resource === r)?.[key]);
+    const pick = (list, key2) => {
+      const of = (r) => num2(list?.find((x) => x.resource === r)?.[key2]);
       return { metal: of("metal"), crystal: of("crystal"), deuterium: of("deuterium") };
     };
     let loot = { metal: 0, crystal: 0, deuterium: 0 };
@@ -4541,10 +4545,10 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
   function byDay(entries, limit = 14) {
     const days = /* @__PURE__ */ new Map();
     for (const e of entries) {
-      const key = dayStart(e.at);
-      const list = days.get(key) ?? [];
+      const key2 = dayStart(e.at);
+      const list = days.get(key2) ?? [];
       list.push(e);
-      days.set(key, list);
+      days.set(key2, list);
     }
     return [...days.entries()].sort((a, b) => b[0] - a[0]).slice(0, limit).map(([day, list]) => ({ day, stats: periodStats(list) }));
   }
@@ -4557,11 +4561,11 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     let changed = 0;
     for (const r of reports) {
       if (r.counter || !r.playerId) continue;
-      const key = spyKey(r.coords, r.moon);
-      const known = board[key];
+      const key2 = spyKey(r.coords, r.moon);
+      const known = board[key2];
       if (known && (known.at > r.at || known.at === r.at && (known.apiKey || !r.apiKey))) continue;
-      board[key] = {
-        key,
+      board[key2] = {
+        key: key2,
         id: r.id,
         at: r.at,
         coords: r.coords,
@@ -4578,8 +4582,8 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
       };
       changed++;
     }
-    for (const [key, e] of Object.entries(board)) if (now - e.at > SPY_MAX_AGE) {
-      delete board[key];
+    for (const [key2, e] of Object.entries(board)) if (now - e.at > SPY_MAX_AGE) {
+      delete board[key2];
       changed++;
     }
     return changed;
@@ -4931,12 +4935,12 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     }
     const cols = el5("div", "fut-sp-row fut-sp-cols");
     const headers = [["target", "spy.col.target"], ["age", "spy.col.age"], ["loot", "spy.col.loot"], [null, "spy.col.ships"], ["def", "spy.col.def"], ["rate", "spy.col.rate"], [null, "spy.col.actions"]];
-    for (const [key, label] of headers) {
-      const c = el5(key ? "button" : "span", `fut-sp-h${view.sort === key ? " sortBy" : ""}`, t(label));
-      if (key) {
+    for (const [key2, label] of headers) {
+      const c = el5(key2 ? "button" : "span", `fut-sp-h${view.sort === key2 ? " sortBy" : ""}`, t(label));
+      if (key2) {
         c.type = "button";
-        c.setAttribute("aria-sort", view.sort === key ? view.desc ? "descending" : "ascending" : "none");
-        c.addEventListener("click", () => redraw(view.sort === key ? { desc: !view.desc } : { sort: key, desc: key === "loot" || key === "rate" }));
+        c.setAttribute("aria-sort", view.sort === key2 ? view.desc ? "descending" : "ascending" : "none");
+        c.addEventListener("click", () => redraw(view.sort === key2 ? { desc: !view.desc } : { sort: key2, desc: key2 === "loot" || key2 === "rate" }));
       }
       cols.append(c);
     }
@@ -4978,13 +4982,13 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         }));
       }
       if (e.apiKey) {
-        const key = e.apiKey;
+        const key2 = e.apiKey;
         const open = (url) => doc.defaultView?.open(url, "_blank", "noopener");
         const prefill = () => simPrefill(spy.server, r.base ? { coords: r.base.coords, researches: spy.researches, classId: spy.classId } : null, e.coords);
         acts.append(
-          gameButton(gameIcon("speed"), t("spy.simGame"), () => open(gameSimLink(key))),
-          gameButton(el5("span", "fut-sp-tool", "OS"), t("spy.simOsims"), () => open(osimsLink(key, prefill()))),
-          gameButton(el5("span", "fut-sp-tool", "OT"), t("spy.simOgameTools"), () => open(ogameToolsSimLink(key, spy.lang, prefill())))
+          gameButton(gameIcon("speed"), t("spy.simGame"), () => open(gameSimLink(key2))),
+          gameButton(el5("span", "fut-sp-tool", "OS"), t("spy.simOsims"), () => open(osimsLink(key2, prefill()))),
+          gameButton(el5("span", "fut-sp-tool", "OT"), t("spy.simOgameTools"), () => open(ogameToolsSimLink(key2, spy.lang, prefill())))
         );
       }
       acts.append(gameButton(icon(doc, "close", 12), t("spy.remove"), () => {
@@ -5021,9 +5025,9 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
   function shipName(id, ships, t) {
     const name = ships[String(id)]?.name;
     if (name) return name;
-    const key = `ship.${id}`;
-    const fallback = t(key);
-    return fallback === key ? `#${id}` : fallback;
+    const key2 = `ship.${id}`;
+    const fallback = t(key2);
+    return fallback === key2 ? `#${id}` : fallback;
   }
   function summaryFor(doc, m, o) {
     const { t, locale } = o;
@@ -5053,11 +5057,11 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         ["darkMatter", "dm"]
       ];
       let any = false;
-      for (const [key, cls] of keys) {
-        const v = (r[key] ?? 0) * sign;
+      for (const [key2, cls] of keys) {
+        const v = (r[key2] ?? 0) * sign;
         if (!v) continue;
         any = true;
-        chip2(`${v > 0 && sign > 0 ? "+" : ""}${fmt(v)}`, `fut-msg-res fut-msg-${cls}${v < 0 ? " fut-msg-neg" : ""}`, `${t(`msg.res.${key}`)}: ${Math.round(v).toLocaleString(locale)}`);
+        chip2(`${v > 0 && sign > 0 ? "+" : ""}${fmt(v)}`, `fut-msg-res fut-msg-${cls}${v < 0 ? " fut-msg-neg" : ""}`, `${t(`msg.res.${key2}`)}: ${Math.round(v).toLocaleString(locale)}`);
       }
       return any;
     };
@@ -6202,22 +6206,22 @@ table.queues td.acts { width: 1%; text-align: right; }
   var PLAN_KEY = "planner";
   var isResearch = (id) => id > 100 && id < 200 || Math.floor(id % 1e3 / 100) === 2;
   function addToPlan(plan, bodyId, items) {
-    const key = String(bodyId);
-    const list = [...plan[key] ?? []];
+    const key2 = String(bodyId);
+    const list = [...plan[key2] ?? []];
     for (const item of items) {
       const same = item.level !== void 0 ? list.findIndex((x) => x.id === item.id && x.level === item.level) : -1;
       if (same >= 0) list[same] = item;
       else list.push(item);
     }
     list.sort((a, b) => a.added - b.added || a.id - b.id || (a.level ?? 0) - (b.level ?? 0));
-    return { ...plan, [key]: list };
+    return { ...plan, [key2]: list };
   }
   function removeFromPlan(plan, bodyId, index) {
-    const key = String(bodyId);
-    const list = (plan[key] ?? []).filter((_, i) => i !== index);
+    const key2 = String(bodyId);
+    const list = (plan[key2] ?? []).filter((_, i) => i !== index);
     const next = { ...plan };
-    if (list.length) next[key] = list;
-    else delete next[key];
+    if (list.length) next[key2] = list;
+    else delete next[key2];
     return next;
   }
   function clearBody(plan, bodyId) {
@@ -6228,10 +6232,10 @@ table.queues td.acts { width: 1%; text-align: right; }
   function prune(plan, bodyId, levels) {
     let changed = false;
     const next = {};
-    for (const [key, list] of Object.entries(plan)) {
+    for (const [key2, list] of Object.entries(plan)) {
       const kept = list.filter((item) => {
         if (item.level === void 0) return true;
-        const here = key === String(bodyId) || isResearch(item.id);
+        const here = key2 === String(bodyId) || isResearch(item.id);
         const reached = levels[item.id];
         if (here && reached !== void 0 && reached >= item.level) {
           changed = true;
@@ -6239,7 +6243,7 @@ table.queues td.acts { width: 1%; text-align: right; }
         }
         return true;
       });
-      if (kept.length) next[key] = kept;
+      if (kept.length) next[key2] = kept;
     }
     return { plan: changed ? next : plan, changed };
   }
@@ -6276,26 +6280,26 @@ table.queues td.acts { width: 1%; text-align: right; }
     const started = [];
     for (const [body, items] of Object.entries(queues)) for (const q of items) if (q.level > 0 && q.name) started.push({ body, name: norm(q.name), level: q.level });
     const next = {};
-    for (const [key, list] of Object.entries(plan)) {
+    for (const [key2, list] of Object.entries(plan)) {
       const kept = list.filter((item) => {
         if (item.level === void 0) return true;
-        const hit = started.some((s) => (s.body === key || isResearch(item.id)) && s.name === norm(item.name) && s.level >= item.level);
+        const hit = started.some((s) => (s.body === key2 || isResearch(item.id)) && s.name === norm(item.name) && s.level >= item.level);
         if (hit) changed = true;
         return !hit;
       });
-      if (kept.length) next[key] = kept;
+      if (kept.length) next[key2] = kept;
     }
     return { plan: changed ? next : plan, changed };
   }
   function startBuild(plan, bodyId, id, o) {
-    const key = String(bodyId);
+    const key2 = String(bodyId);
     let changed = false;
     const next = {};
     for (const [k, list] of Object.entries(plan)) {
       let left = o.amount ?? 0;
       const kept = [];
       for (const item of list) {
-        if (item.id !== id || k !== key && !isResearch(id)) {
+        if (item.id !== id || k !== key2 && !isResearch(id)) {
           kept.push(item);
           continue;
         }
@@ -6303,7 +6307,7 @@ table.queues td.acts { width: 1%; text-align: right; }
           changed = true;
           continue;
         }
-        if (item.amount !== void 0 && left > 0 && k === key) {
+        if (item.amount !== void 0 && left > 0 && k === key2) {
           changed = true;
           if (item.amount <= left) {
             left -= item.amount;
@@ -7210,12 +7214,12 @@ table.queues td.acts { width: 1%; text-align: right; }
     return `${b.name}${b.moonId === id ? " \u263E" : ""}`;
   }
   var FLEET_KEYS = { moon: "l", transport: "t", deploy: "d", expedition: "x", fleetsave: "e", all: "a", last: "p" };
-  function tile(doc, icon2, label, caption, title, onClick, cls = "", key = "") {
+  function tile(doc, icon2, label, caption, title, onClick, cls = "", key2 = "") {
     const b = el3(doc, "button", `fut-ftile ${cls}`.trim());
     b.type = "button";
-    b.title = key ? `${title} [${key.toUpperCase()}]` : title;
+    b.title = key2 ? `${title} [${key2.toUpperCase()}]` : title;
     b.innerHTML = iconSvg(icon2);
-    if (key) b.append(el3(doc, "kbd", "fut-fkey", key.toUpperCase()));
+    if (key2) b.append(el3(doc, "kbd", "fut-fkey", key2.toUpperCase()));
     b.append(el3(doc, "span", "fut-flabel", label));
     if (caption) b.append(el3(doc, "span", "fut-fcaption", caption));
     b.addEventListener("click", (e) => {
@@ -7361,13 +7365,13 @@ table.queues td.acts { width: 1%; text-align: right; }
       transport: () => settings.favTransport ? run.transport(settings.favTransport) : say(t("fleet.err.noDest"), true),
       deploy: () => settings.favDeploy ? run.deploy(settings.favDeploy) : say(t("fleet.err.noDest"), true)
     };
-    const setFav = (key, id) => {
-      o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: id });
+    const setFav = (key2, id) => {
+      o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key2]: id });
       redraw();
     };
-    const withCaret = (tileEl, key) => {
+    const withCaret = (tileEl, key2) => {
       const wrap = el3(doc, "span", "fut-ftilewrap");
-      const caret = iconToggle(doc, "caret", t("fleet.pickDest"), () => destinationMenu(o, wrap, settings[key], (id) => setFav(key, id)), "fut-fcaret");
+      const caret = iconToggle(doc, "caret", t("fleet.pickDest"), () => destinationMenu(o, wrap, settings[key2], (id) => setFav(key2, id)), "fut-fcaret");
       wrap.append(tileEl, caret);
       return wrap;
     };
@@ -7757,18 +7761,18 @@ h3 { margin: 0; }
     g.style.gridTemplateColumns = `auto repeat(${view.cols.length}, minmax(0, 1fr))`;
     g.append(el4(doc, "span", "fut-tp-h"));
     for (const h5 of view.heads) g.append(el4(doc, "span", "fut-tp-h", h5));
-    const rows = RES.filter(([key]) => view.cols.some((c) => !c.short && c.cost[key] > 0));
+    const rows = RES.filter(([key2]) => view.cols.some((c) => !c.short && c.cost[key2] > 0));
     const cell = (value, cls) => {
       const c = el4(doc, "span", `fut-tp-v ${cls}`, value ? formatUnits(value, locale) : "\u2014");
       c.title = Math.round(value).toLocaleString(locale);
       return c;
     };
-    for (const [key, cls] of rows) {
-      g.append(el4(doc, "span", `fut-tp-k fut-${cls}`, t(`tech.res.${key}`)));
+    for (const [key2, cls] of rows) {
+      g.append(el4(doc, "span", `fut-tp-k fut-${cls}`, t(`tech.res.${key2}`)));
       for (const col of view.cols) {
-        if (!col.short) g.append(cell(col.cost[key], col.cls ?? ""));
-        else if (key === "energy") g.append(el4(doc, "span", "fut-tp-v"));
-        else if (col.cost[key] > 0) g.append(cell(-col.cost[key], "fut-tp-short"));
+        if (!col.short) g.append(cell(col.cost[key2], col.cls ?? ""));
+        else if (key2 === "energy") g.append(el4(doc, "span", "fut-tp-v"));
+        else if (col.cost[key2] > 0) g.append(cell(-col.cost[key2], "fut-tp-short"));
         else g.append(okCell(doc, have, "fut-tp-v fut-tp-ok"));
       }
     }
@@ -8049,13 +8053,13 @@ h3 { margin: 0; }
     const seenAt = (id) => o.current && o.current.id === id ? o.now : byId.get(id)?.resourcesAt ?? 0;
     const timeOf = (ms) => new Date(ms).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
     const costCells = (row, cost, cls = "") => {
-      for (const [key, c] of [
+      for (const [key2, c] of [
         ["metal", "m"],
         ["crystal", "c"],
         ["deuterium", "d"]
       ]) {
-        const cell = h3("span", `num ${c} ${cls}`, cost[key] ? fmt(cost[key]) : "\u2014");
-        cell.title = Math.round(cost[key]).toLocaleString(locale);
+        const cell = h3("span", `num ${c} ${cls}`, cost[key2] ? fmt(cost[key2]) : "\u2014");
+        cell.title = Math.round(cost[key2]).toLocaleString(locale);
         row.append(cell);
       }
     };
@@ -8082,20 +8086,20 @@ h3 { margin: 0; }
         if (e.planetId) bodies.push({ id: e.planetId, label: `${e.name} [${e.coords}]` });
         if (e.moonId) bodies.push({ id: e.moonId, label: `${t("plan.moonOf", { name: e.name })} [${e.coords}]` });
       }
-      for (const key of Object.keys(plan)) if (!bodies.some((b) => String(b.id) === key)) bodies.push({ id: Number(key), label: `#${key}` });
+      for (const key2 of Object.keys(plan)) if (!bodies.some((b) => String(b.id) === key2)) bodies.push({ id: Number(key2), label: `#${key2}` });
       let grand = { ...ZERO_COST };
       let grandMissing = { ...ZERO_COST };
       const cards = [];
       const refs = o.entries.map((e) => ({ planetId: e.planetId, moonId: e.moonId }));
       const triple = (cost, cls = "") => {
         const box = h3("span", `triple ${cls}`);
-        for (const [key, c] of [
+        for (const [key2, c] of [
           ["metal", "m"],
           ["crystal", "c"],
           ["deuterium", "d"]
         ]) {
-          const v = h3("span", `num ${c}`, cost[key] ? fmt(cost[key]) : "\u2014");
-          v.title = `${t(`tech.res.${key}`)}: ${Math.round(cost[key]).toLocaleString(locale)}`;
+          const v = h3("span", `num ${c}`, cost[key2] ? fmt(cost[key2]) : "\u2014");
+          v.title = `${t(`tech.res.${key2}`)}: ${Math.round(cost[key2]).toLocaleString(locale)}`;
           box.append(v);
         }
         return box;
@@ -8180,13 +8184,13 @@ h3 { margin: 0; }
           const box = h3("div", `kpi ${cls}`);
           box.append(h3("span", "label", label));
           const line = h3("div", "kpi-line");
-          for (const [key, c] of [
+          for (const [key2, c] of [
             ["metal", "m"],
             ["crystal", "c"],
             ["deuterium", "d"]
           ]) {
-            const v = h3("span", `num ${c}`, fmt(cost[key]));
-            v.title = Math.round(cost[key]).toLocaleString(locale);
+            const v = h3("span", `num ${c}`, fmt(cost[key2]));
+            v.title = Math.round(cost[key2]).toLocaleString(locale);
             line.append(v);
           }
           box.append(line);
@@ -8300,18 +8304,18 @@ h3 { margin: 0; }
         const total = Object.values(s.outcomes).reduce((a, b) => a + (b ?? 0), 0) || 1;
         const bar = h4("div", "bar");
         const legend = h4("div", "legend");
-        for (const key of ORDER) {
-          const n = s.outcomes[key];
+        for (const key2 of ORDER) {
+          const n = s.outcomes[key2];
           if (!n) continue;
           const seg = h4("span");
           seg.style.width = `${n / total * 100}%`;
-          seg.style.background = OUTCOME_COLORS[key] ?? "#5B6B80";
-          seg.title = `${t(`msg.out.${key}`)}: ${n}`;
+          seg.style.background = OUTCOME_COLORS[key2] ?? "#5B6B80";
+          seg.title = `${t(`msg.out.${key2}`)}: ${n}`;
           bar.append(seg);
           const row = h4("div");
           const dot = h4("span", "dot");
-          dot.style.background = OUTCOME_COLORS[key] ?? "#5B6B80";
-          row.append(dot, h4("span", "", t(`msg.out.${key}`)), h4("span", "n", n.toLocaleString(locale)), h4("span", "pct", (n / total).toLocaleString(locale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 })));
+          dot.style.background = OUTCOME_COLORS[key2] ?? "#5B6B80";
+          row.append(dot, h4("span", "", t(`msg.out.${key2}`)), h4("span", "n", n.toLocaleString(locale)), h4("span", "pct", (n / total).toLocaleString(locale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 })));
           legend.append(row);
         }
         outs.append(bar, legend);
@@ -8427,7 +8431,7 @@ h3 { margin: 0; }
   function readHighscore(doc) {
     const table = doc.getElementById("ranks");
     if (!table || !doc.querySelector("#player.active")) return null;
-    const category = doc.querySelector("#categoryButtons a.active, a.stat_filter.active")?.id ?? "";
+    const category = doc.querySelector("a.stat_filter.active")?.id ?? "";
     const rows = [];
     for (const row of table.querySelectorAll('tbody tr[id^="position"]')) {
       const playerId = int3(row.id);
@@ -8437,7 +8441,8 @@ h3 { margin: 0; }
         playerId,
         rank: int3(row.querySelector("td.position")?.textContent),
         name: row.querySelector(".playername")?.textContent?.trim() ?? "",
-        score: int3(row.querySelector("td.score")?.textContent),
+        // The cell's own text only: Future adds its figures inside the same cell.
+        score: int3([...row.querySelector("td.score")?.childNodes ?? []].filter((n) => n.nodeType === 3).map((n) => n.textContent).join("")),
         mine: row.classList.contains("myrank")
       });
     }
@@ -8449,11 +8454,49 @@ h3 { margin: 0; }
     return closing > 0 ? gap / closing : null;
   }
 
+  // src/data/highscore-api.ts
+  var API_TYPES = { points: 0, economy: 1, research: 2, fleet: 3, lifeform: 8 };
+  var key = (type) => `hs.daily.${type}`;
+  var TTL3 = 36e5;
+  function parseHighscoreXml(xml, readAt) {
+    const doc = new DOMParser().parseFromString(xml, "text/html");
+    const root = doc.querySelector("highscore");
+    const ts = Number(root?.getAttribute("timestamp"));
+    if (!root || !ts) return null;
+    const scores = {};
+    for (const p of root.querySelectorAll("player")) {
+      const id = p.getAttribute("id");
+      const score = Number(p.getAttribute("score"));
+      if (id && Number.isFinite(score)) scores[id] = Math.floor(score);
+    }
+    return { at: ts * 1e3, readAt, scores };
+  }
+  function updateBase(prev, reading) {
+    const day = dayKey(reading.at);
+    if (prev && prev.day === day) return { ...prev, last: reading };
+    const lastHour = prev ? new Date(prev.last.at).getHours() : -1;
+    const base = prev && lastHour >= 23 && reading.at - prev.last.at < 2 * TTL3 ? prev.last : reading;
+    return { day, base, last: reading };
+  }
+  async function dailyBase(deps) {
+    const now = deps.now ?? Date.now();
+    const stored = deps.store.get(key(deps.type), null);
+    if (stored && now - stored.last.readAt < TTL3 && stored.day === dayKey(now)) return stored;
+    const res = await deps.guard.request(`${deps.origin}/api/highscore.xml?category=1&type=${deps.type}`, "user-view");
+    const reading = res.ok ? parseHighscoreXml(await res.text(), now) : null;
+    if (!reading) return stored;
+    const next = updateBase(stored, reading);
+    deps.store.set(key(deps.type), next);
+    return next;
+  }
+
   // src/modules/highscore/index.ts
+  var daily = null;
   var isHighscorePage = (doc) => new URL(doc.location?.href ?? "http://x/").searchParams.get("component") === "highscore";
   var CSS = `
 #ranks .fut-hs-gap { display: block; font-size: 10px; line-height: 1.3; }
-#ranks .fut-hs-gap.ahead { color: #7BC47F; } #ranks .fut-hs-gap.behind { color: #D86A6A; }
+#ranks .fut-hs-gap.up { color: #7BC47F; } #ranks .fut-hs-gap.down { color: #D86A6A; } #ranks .fut-hs-gap.flat { color: #6A7682; }
+.fut-hs-note { margin: 4px 0 6px; color: #848484; font: 11px Verdana, Arial, sans-serif; }
 #ranks .fut-hs-eta { display: block; font-size: 10px; color: #6F9FC8; }
 #ranks .fut-hs-star { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-left: 4px; padding: 0;
   border: 1px solid #2E4356; border-radius: 3px; background: #111A21; color: #848484; cursor: pointer; vertical-align: middle; }
@@ -8472,26 +8515,49 @@ h3 { margin: 0; }
     const total = hs.category === "points";
     const mine = hs.rows.find((r) => r.mine)?.score ?? (total ? store.get(SCORE_KEY, null)?.points : void 0);
     const myPace = total ? changeOver(store.get(HISTORY_KEY, []), 7)?.perDay ?? 0 : 0;
+    const now = o.now?.() ?? Date.now();
+    const type = API_TYPES[hs.category];
+    const loaded = daily && daily.type === type ? daily.base : null;
+    const today = loaded && loaded.day === dayKey(now) ? loaded : null;
+    const since = today ? new Date(today.base.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) : "";
+    const table = doc.getElementById("ranks");
+    let note = doc.querySelector(".fut-hs-note");
+    if (type !== void 0 && table) {
+      if (!note) {
+        note = doc.createElement("p");
+        note.className = "fut-hs-note";
+      }
+      note.textContent = today ? t("hs.note", { time: since }) : t("hs.noteWaiting");
+      if (note.nextElementSibling !== table) table.before(note);
+    } else note?.remove();
+    if (type !== void 0 && o.guard && (!daily || daily.type !== type)) {
+      daily = { type, base: null };
+      void dailyBase({ guard: o.guard, store, origin: doc.location.origin, type, now }).then((b) => {
+        if (daily?.type === type) daily = { type, base: b };
+      }).catch(() => {
+      }).finally(() => decorateHighscore(o));
+    }
     for (const r of hs.rows) {
       r.row.querySelectorAll(".fut-hs-gap, .fut-hs-eta, .fut-hs-star").forEach((n) => n.remove());
       r.row.classList.toggle("fut-hs-rival", rivalIds.has(r.playerId));
       const scoreCell = r.row.querySelector("td.score");
-      if (scoreCell && mine !== void 0 && !r.mine) {
-        const gap = r.score - mine;
+      const base = today?.base.scores[String(r.playerId)];
+      if (scoreCell && base !== void 0) {
+        const made = r.score - base;
         const g = doc.createElement("span");
-        g.className = `fut-hs-gap ${gap > 0 ? "ahead" : "behind"}`;
-        g.textContent = gap > 0 ? `+${fmt(gap)}` : `\u2212${fmt(-gap)}`;
-        g.title = t(gap > 0 ? "hs.ahead" : "hs.behind", { n: Math.abs(gap).toLocaleString(locale) });
+        g.className = `fut-hs-gap ${made > 0 ? "up" : made < 0 ? "down" : "flat"}`;
+        g.textContent = made > 0 ? `+${fmt(made)}` : made < 0 ? `\u2212${fmt(-made)}` : "0";
+        g.title = t("hs.today", { n: made.toLocaleString(locale), time: since });
         scoreCell.append(g);
-        if (total && gap > 0 && myPace > 0) {
-          const theirs = rivalIds.has(r.playerId) ? pointsPerDay(book, r.playerId, 7) ?? 0 : 0;
-          const days = daysToCatch(gap, myPace, theirs);
-          const e = doc.createElement("span");
-          e.className = "fut-hs-eta";
-          e.textContent = days === null ? t("hs.never") : days < 1 ? t("hs.today") : t("hs.days", { n: Math.ceil(days).toLocaleString(locale) });
-          e.title = t(theirs ? "hs.etaBoth" : "hs.etaMine", { mine: fmt(myPace), theirs: fmt(theirs) });
-          scoreCell.append(e);
-        }
+      }
+      if (scoreCell && mine !== void 0 && !r.mine && total && myPace > 0 && r.score > mine) {
+        const theirs = rivalIds.has(r.playerId) ? pointsPerDay(book, r.playerId, 7) ?? 0 : 0;
+        const days = daysToCatch(r.score - mine, myPace, theirs);
+        const e = doc.createElement("span");
+        e.className = "fut-hs-eta";
+        e.textContent = days === null ? t("hs.never") : days < 1 ? t("hs.passToday") : t("hs.days", { n: Math.ceil(days).toLocaleString(locale) });
+        e.title = t(theirs ? "hs.etaBoth" : "hs.etaMine", { mine: fmt(myPace), theirs: fmt(theirs) });
+        scoreCell.append(e);
       }
       const nameHolder = r.row.querySelector(".highscoreNameHolder");
       if (nameHolder && !r.mine) {
@@ -8741,8 +8807,8 @@ h3 { margin: 0; }
       const onScreen = readCurrentResources(document);
       let total = 0;
       let known = false;
-      for (const [key, items2] of Object.entries(plan)) {
-        const id = Number(key);
+      for (const [key2, items2] of Object.entries(plan)) {
+        const id = Number(key2);
         const body = snapshot?.bodies.find((b) => b.id === id);
         const have = here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
         if (!have || !items2.length) continue;
@@ -8855,7 +8921,7 @@ h3 { margin: 0; }
     const reminders = { doc: document, store, t, locale, offset: clockOffset(document, Date.now()) };
     startReminders(reminders);
     watchEventList(reminders);
-    if (isHighscorePage(document)) watchHighscore({ doc: document, store, locale, t });
+    if (isHighscorePage(document)) watchHighscore({ doc: document, store, locale, t, guard });
     if (isMessagesPage(document))
       watchMessages({
         doc: document,

@@ -464,11 +464,12 @@
   "spy.from": "Depuis {name} [{coords}], aller à 100 %",
   "msg.combat.converter": "Convertisseur",
   "msg.combat.converterHint": "Ouvre le rapport dans le convertisseur Ogotcha (nouvel onglet)",
-  "hs.ahead": "{n} points de plus que vous",
-  "hs.behind": "{n} points de moins que vous",
   "hs.days": "rattrapé en {n} j",
-  "hs.today": "dépassé aujourd'hui",
+  "hs.today": "{n} points depuis minuit (base à {time})",
   "hs.never": "pas à ce rythme",
   "hs.etaMine": "À votre rythme des 7 derniers jours (+{mine}/j)",
-  "hs.etaBoth": "Votre rythme (+{mine}/j) moins le sien (+{theirs}/j), 7 derniers jours"
+  "hs.etaBoth": "Votre rythme (+{mine}/j) moins le sien (+{theirs}/j), 7 derniers jours",
+  "hs.passToday": "dépassé aujourd'hui",
+  "hs.note": "Sous les points : ce que chaque joueur a fait aujourd'hui, d'après le classement public de {time}.",
+  "hs.noteWaiting": "Lecture du classement public pour les points du jour…"
 }
