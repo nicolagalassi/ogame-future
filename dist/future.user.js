@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.2
+// @version      0.3.3
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -3067,8 +3067,9 @@
 #galaxyContent .galaxyRow.fut-g-tagged .cellPlanetName { box-shadow: inset 3px 0 0 var(--fut-tag), inset 0 0 40px color-mix(in srgb, var(--fut-tag) 22%, transparent); }
 
 /* The position the side bar (or the link) asked for: the planet menu's cyan frame. */
-#galaxyContent .galaxyRow.fut-g-hl { box-shadow: inset 0 0 0 1px #4FD1E8, inset 3px 0 0 #4FD1E8; }
+/* On the cells, not the row: a frame on the row showed between the cells as odd blue brackets. */
 #galaxyContent .galaxyRow.fut-g-hl .galaxyCell { box-shadow: inset 0 0 0 100px rgba(79,209,232,0.10); }
+#galaxyContent .galaxyRow.fut-g-hl .cellPosition { box-shadow: inset 3px 0 0 #4FD1E8, inset 0 0 0 100px rgba(79,209,232,0.18); color: #8BE4F2; }
 
 #galaxyContent .cellPlanetName { position: relative; }
 /* Planet colour: at the right of the name, faint until the row is pointed at or the planet has one. */
@@ -3380,7 +3381,7 @@
 
   // src/modules/marks/side.ts
   var SIDE_ID = "fut-side";
-  var SIDE_W = 330;
+  var SIDE_W = 390;
   var VIEW_KEY = "marks.view";
   var HOUR = 36e5;
   var last = null;
@@ -3399,77 +3400,77 @@
 .side {
   position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000000; width: ${SIDE_W}px; display: flex; flex-direction: column; gap: 6px;
   padding: 8px; background: #0B121D; border-right: 1px solid #1F2C40; box-shadow: 6px 0 24px rgba(0,0,0,0.45);
-  font: 11px Arial, Helvetica, sans-serif; color: #C9D4E2; overflow: hidden;
+  font: 13px Arial, Helvetica, sans-serif; color: #C9D4E2; overflow: hidden;
 }
 button { font: inherit; color: inherit; }
 button:focus-visible, a:focus-visible, input:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -1px; }
 .mono, .coords, .num { font-family: Consolas, "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; }
 
 /* Head: back, title, close: the planet menu's toolbar look. */
-.head { display: flex; align-items: center; gap: 4px; min-height: 30px; padding: 0 2px 0 4px; border: 1px solid #1F2C40; border-radius: 6px; background: #111B2A; }
-.title { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 4px; font: 700 12px Arial, sans-serif; color: #E6EDF5; white-space: nowrap; overflow: hidden; }
+.head { display: flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 2px 0 4px; border: 1px solid #1F2C40; border-radius: 6px; background: #111B2A; }
+.title { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 4px; font: 700 14px Arial, sans-serif; color: #E6EDF5; white-space: nowrap; overflow: hidden; }
 .title .name { overflow: hidden; text-overflow: ellipsis; }
 .title a { color: #8A9BB0; font-weight: 400; text-decoration: none; }
 .title a:hover { color: #4FD1E8; }
-.ib { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 5px; background: none; color: #8A9BB0; cursor: pointer; flex: none; text-decoration: none; }
+.ib { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 5px; background: none; color: #8A9BB0; cursor: pointer; flex: none; text-decoration: none; }
 .ib:hover { background: #16243A; color: #E6EDF5; }
 
 /* Tabs and filters: the settings chips of the planet menu. */
 .chips { display: flex; flex-wrap: wrap; gap: 3px; }
-.chip { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: 1 0 auto; min-width: 30px; height: 24px; padding: 0 6px; border-radius: 5px; border: 1px solid #1F2C40; background: #0A111C; color: #B4C2D3; cursor: pointer; }
+.chip { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: 1 0 auto; min-width: 30px; height: 28px; padding: 0 6px; border-radius: 5px; border: 1px solid #1F2C40; background: #0A111C; color: #B4C2D3; cursor: pointer; }
 .chip:hover { border-color: #2C5A73; }
 .chip[aria-pressed="true"] { border-color: currentColor; background: #12283A; color: #E6EDF5; font-weight: 700; }
-.chip .n { font: 10px Consolas, monospace; color: #8A9BB0; }
+.chip .n { font: 12px Consolas, monospace; color: #8A9BB0; }
 .seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #1F2C40; border-radius: 6px; overflow: hidden; }
-.seg button { height: 24px; border: 0; background: #0B121D; color: #8A9BB0; cursor: pointer; }
+.seg button { height: 28px; border: 0; background: #0B121D; color: #8A9BB0; cursor: pointer; }
 .seg button + button { border-left: 1px solid #1F2C40; }
 .seg button[aria-pressed="true"] { background: #12283A; color: #E6EDF5; font-weight: 700; box-shadow: inset 0 -2px 0 #4FD1E8; }
 
 /* Scores: the toolbar cells, two per line. */
 .scores { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
-.score { display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 8px; border: 1px solid #1F2C40; border-radius: 6px; background: #111B2A; min-width: 0; }
-.score b { flex: 1; text-align: right; font: 700 12px Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.score i { font: normal 10px Consolas, monospace; color: #8A9BB0; }
+.score { display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 8px; border: 1px solid #1F2C40; border-radius: 6px; background: #111B2A; min-width: 0; }
+.score b { flex: 1; text-align: right; font: 700 14px Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.score i { font: normal 12px Consolas, monospace; color: #8A9BB0; }
 .actions { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid #1F2C40; border-radius: 6px; background: #0B121D; overflow: hidden; }
-.actions a, .actions button { display: flex; align-items: center; justify-content: center; height: 26px; border: 0; background: none; color: #8A9BB0; text-decoration: none; cursor: pointer; }
+.actions a, .actions button { display: flex; align-items: center; justify-content: center; height: 32px; border: 0; background: none; color: #8A9BB0; text-decoration: none; cursor: pointer; }
 .actions > * + * { border-left: 1px solid #1F2C40 !important; }
 .actions a:hover, .actions button:hover { background: #111D2D; color: #E6EDF5; }
 
 .range { display: flex; align-items: center; gap: 4px; color: #8A9BB0; }
-.range input { width: 64px; height: 22px; padding: 0 5px; border: 1px solid #1F2C40; border-radius: 5px; background: #0A111C; color: #E6EDF5; font: 11px Consolas, monospace; }
+.range input { width: 76px; height: 26px; padding: 0 5px; border: 1px solid #1F2C40; border-radius: 5px; background: #0A111C; color: #E6EDF5; font: 13px Consolas, monospace; }
 
 /* Rows: the planet menu's .fut-row, one line each. */
 .scroll { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding-right: 2px; scrollbar-color: #2A3B55 #0B121D; scrollbar-width: thin; }
-.cols, .row { display: grid; align-items: center; gap: 4px; min-height: 26px; padding: 0 4px; }
-.cols { min-height: 18px; color: #4A5B72; font-size: 10px; }
+.cols, .row { display: grid; align-items: center; gap: 4px; min-height: 32px; padding: 0 4px; }
+.cols { min-height: 18px; color: #4A5B72; font-size: 12px; }
 .row { border: 1px solid #1F2C40; border-radius: 6px; background: #111B2A; }
 .row.gap { margin-top: 4px; }
 .row.active { border-color: #4FD1E8; background: rgba(79,209,232,0.14); box-shadow: inset 3px 0 0 #4FD1E8; }
-.pl .cols, .pl .row { grid-template-columns: 18px 64px 1fr 34px 34px 40px; }
-.tg .cols, .tg .row { grid-template-columns: 18px 64px 1fr 34px 40px 20px; }
-.ps .row { grid-template-columns: 18px 1fr auto auto; }
-.idx { color: #4A5B72; font: 10px Consolas, monospace; text-align: right; }
-.coords { all: unset; display: inline-flex; align-items: center; gap: 3px; padding: 2px 4px; border-radius: 4px; color: #C9D4E2; font: 11px Consolas, monospace; cursor: pointer; }
+.pl .cols, .pl .row { grid-template-columns: 22px 80px 1fr 44px 44px 48px; }
+.tg .cols, .tg .row { grid-template-columns: 22px 80px 1fr 44px 48px 24px; }
+.ps .row { grid-template-columns: 22px 1fr auto auto; }
+.idx { color: #4A5B72; font: 12px Consolas, monospace; text-align: right; }
+.coords { all: unset; display: inline-flex; align-items: center; gap: 3px; padding: 2px 4px; border-radius: 4px; color: #C9D4E2; font: 13px Consolas, monospace; cursor: pointer; }
 .coords:hover { background: #1D3350; color: #E6EDF5; }
 .row.active .coords { color: #8BE4F2; }
 .coords.new::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #4FD1E8; }
-.cell-r { text-align: right; font: 11px Consolas, monospace; color: #8A9BB0; white-space: nowrap; overflow: hidden; }
+.cell-r { text-align: right; font: 13px Consolas, monospace; color: #8A9BB0; white-space: nowrap; overflow: hidden; }
 .cell-r.has { color: #C9D4E2; }
 .cell-r.big { color: #F5B547; font-weight: 700; }
 .txt { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E6EDF5; }
 .txt .who { color: #8A9BB0; }
 .pname { all: unset; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E6EDF5; font-weight: 700; cursor: pointer; }
 .pname:hover, .pname:focus-visible { color: #4FD1E8; }
-.rank { color: #8A9BB0; font: 10px Consolas, monospace; }
-.act { display: inline-flex; align-items: center; justify-content: flex-end; gap: 2px; height: 20px; padding: 0 3px; border-radius: 4px; font: 700 11px Consolas, monospace; text-decoration: none; color: #4A5B72; }
+.rank { color: #8A9BB0; font: 12px Consolas, monospace; }
+.act { display: inline-flex; align-items: center; justify-content: flex-end; gap: 2px; height: 24px; padding: 0 3px; border-radius: 4px; font: 700 13px Consolas, monospace; text-decoration: none; color: #4A5B72; }
 .act svg { color: #617C8D; flex: none; }
 a.act:hover { background: #1D3350; }
 .act.on { color: #EF7676; } .act.mid { color: #E3BB28; } .act.off { color: #38C56E; } .act.unknown { color: #617C8D; font-weight: 400; }
-.age { text-align: right; font: 10px Consolas, monospace; }
+.age { text-align: right; font: 13px Consolas, monospace; }
 .age.fresh { color: #38C56E; } .age.warm { color: #E3BB28; } .age.old { color: #EF7676; } .age.none { color: #4A5B72; }
 .st-inactive { color: #9BE36D !important; } .st-longinactive { color: #8A9BB0 !important; } .st-vacation { color: #7FDBFF !important; } .st-banned { color: #FF7A7A !important; text-decoration: line-through; }
-.foot { display: flex; justify-content: space-between; gap: 6px; color: #617C8D; font-size: 10px; }
-kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background: #0D1522; color: #C9D4E2; font: 10px Consolas, monospace; }
+.foot { display: flex; justify-content: space-between; gap: 6px; color: #617C8D; font-size: 12px; }
+kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background: #0D1522; color: #C9D4E2; font: 12px Consolas, monospace; }
 .empty { margin: 4px 0; padding: 14px 10px; border: 1px dashed #1F2C40; border-radius: 6px; color: #8A9BB0; text-align: center; line-height: 1.4; }
 .err { color: #EF7676; }
 .fut-mk { margin: 0; }
@@ -3610,7 +3611,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     b.type = "button";
     b.title = label;
     b.setAttribute("aria-label", label);
-    b.append(icon(doc, name, 14));
+    b.append(icon(doc, name, 16));
     return b;
   }
   function playersList(o, side, scroll, view, marks, picker, go) {
@@ -3652,7 +3653,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     const a = h(doc, "a", "act");
     a.href = fleetHref(coords, type);
     a.title = t(type === 1 ? "marks.fleetPlanet" : "marks.fleetMoon", { coords });
-    a.append(icon(doc, type === 1 ? "planet" : "moon", 10));
+    a.append(icon(doc, type === 1 ? "planet" : "moon", 12));
     if (!seen || now - seen.at > HOUR) {
       a.classList.add("unknown");
       a.append(doc.createTextNode("?"));
@@ -3711,7 +3712,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       const v = data?.scores[key2];
       const cell = h(doc, "div", "score");
       cell.title = t(`galaxy.score.${key2}`);
-      const ic = icon(doc, ico, 12);
+      const ic = icon(doc, ico, 14);
       ic.style.color = color;
       const b = h(doc, "b", "", v ? formatUnits(v.points, locale) : "\u2014");
       b.style.color = color;
@@ -3721,7 +3722,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     }
     const ships = h(doc, "div", "score");
     ships.title = t("marks.ships");
-    ships.append(icon(doc, "fleet", 12), h(doc, "b", "", data?.ships ? data.ships.toLocaleString(locale) : "\u2014"));
+    ships.append(icon(doc, "fleet", 14), h(doc, "b", "", data?.ships ? data.ships.toLocaleString(locale) : "\u2014"));
     scores.append(ships);
     side.append(scores);
     const actions = h(doc, "div", "actions");
@@ -3730,7 +3731,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       a.href = href;
       a.title = label;
       a.setAttribute("aria-label", label);
-      a.append(icon(doc, ico, 13));
+      a.append(icon(doc, ico, 15));
       actions.append(a);
     };
     link("pen", t("marks.write"), `/game/index.php?page=ingame&component=chat&playerId=${id}`);

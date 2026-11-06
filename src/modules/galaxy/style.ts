@@ -22,8 +22,9 @@ export const GALAXY_CSS = `
 #galaxyContent .galaxyRow.fut-g-tagged .cellPlanetName { box-shadow: inset 3px 0 0 var(--fut-tag), inset 0 0 40px color-mix(in srgb, var(--fut-tag) 22%, transparent); }
 
 /* The position the side bar (or the link) asked for: the planet menu's cyan frame. */
-#galaxyContent .galaxyRow.fut-g-hl { box-shadow: inset 0 0 0 1px #4FD1E8, inset 3px 0 0 #4FD1E8; }
+/* On the cells, not the row: a frame on the row showed between the cells as odd blue brackets. */
 #galaxyContent .galaxyRow.fut-g-hl .galaxyCell { box-shadow: inset 0 0 0 100px rgba(79,209,232,0.10); }
+#galaxyContent .galaxyRow.fut-g-hl .cellPosition { box-shadow: inset 3px 0 0 #4FD1E8, inset 0 0 0 100px rgba(79,209,232,0.18); color: #8BE4F2; }
 
 #galaxyContent .cellPlanetName { position: relative; }
 /* Planet colour: at the right of the name, faint until the row is pointed at or the planet has one. */
