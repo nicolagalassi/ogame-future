@@ -7,11 +7,15 @@
 import { icon } from '../../core/icons';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
-import { readMessage, type ExpeditionMessage, type ParsedMessage, type Res } from '../../data/messages';
+import { readMessage, type ExpeditionMessage, type ParsedMessage, type Res, type SpyMessage } from '../../data/messages';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { SHIP_ICONS } from '../../data/ship-icons';
 import { JOURNAL_KEY, record, recordCombat, trim, unitsValue, msu, type Journal } from '../../engines/expeditions';
+import { nearestBase, rememberSpies, SPY_BOARD_KEY, type SpyBoard, type Universe } from '../../engines/raids';
 import { MESSAGES_CSS } from './style';
+import { mountSpyPanel, universeOf, type SpyContext } from './spy-table';
+import { SERVER_DATA_KEY, type ServerData } from '../../data/server-data';
+import { converterLink, ogameToolsSimLink, osimsLink, simPrefill } from '../../engines/sim-links';
 
 export type T = (key: string, vars?: Record<string, string | number>) => string;
 
@@ -26,6 +30,8 @@ export interface MessagesOptions {
   now?: () => number;
   /** Called when new expeditions entered the journal. */
   onJournal?: (added: number) => void;
+  /** The spy table's data (bases, research, server); none = no table. */
+  spy?: SpyContext;
 }
 
 function h<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, cls = '', text?: string): HTMLElementTagNameMap[K] {
@@ -56,7 +62,7 @@ export function shipName(id: number, ships: ShipsInfo, t: T): string {
 }
 
 /** Summary line for one report, or null when there is nothing worth showing. */
-export function summaryFor(doc: Document, m: ParsedMessage, o: { locale: string; t: T; ships: ShipsInfo }): HTMLElement | null {
+export function summaryFor(doc: Document, m: ParsedMessage, o: { locale: string; t: T; ships: ShipsInfo; spy?: SpyContext; universe?: Universe }): HTMLElement | null {
   const { t, locale } = o;
   const fmt = (n: number) => formatUnits(n, locale);
   const box = h(doc, 'div', `fut-msg fut-msg-${m.kind}`);
@@ -67,6 +73,15 @@ export function summaryFor(doc: Document, m: ParsedMessage, o: { locale: string;
     if (title) c.title = title;
     into.append(c);
     return c;
+  };
+  /** A chip that opens an outside tool in a new tab (the player's click; see engines/sim-links). */
+  const linkChip = (text: string, href: string, title: string) => {
+    const a = h(doc, 'a', 'fut-msg-chip fut-msg-link', text);
+    a.href = href;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.title = title;
+    into.append(a);
   };
   const resChips = (r: Partial<Res & { food: number; darkMatter: number }>, sign = 1) => {
     const keys = [
@@ -144,6 +159,12 @@ export function summaryFor(doc: Document, m: ParsedMessage, o: { locale: string;
       chip(`${t('msg.spy.fleet')} ${m.fleetValue < 0 ? '?' : fmt(m.fleetValue)}`, m.fleetValue > 0 ? 'fut-msg-warn' : 'fut-msg-muted');
       chip(`${t('msg.spy.def')} ${m.defValue < 0 ? '?' : fmt(m.defValue)}`, m.defValue > 0 ? 'fut-msg-warn' : 'fut-msg-muted');
       if (m.attacked) chip(t('msg.spy.attacked'), 'fut-msg-muted');
+      if (m.apiKey && o.spy && o.universe) {
+        const base = nearestBase(o.spy.bases, m.coords, o.universe).base;
+        const prefill = simPrefill(o.spy.server, base ? { coords: base.coords, researches: o.spy.researches, classId: o.spy.classId } : null, m.coords);
+        linkChip('Osims', osimsLink(m.apiKey, prefill), t('spy.simOsims'));
+        linkChip('OGame Simulator', ogameToolsSimLink(m.apiKey, o.spy.lang, prefill), t('spy.simOgameTools'));
+      }
       return box;
     }
     case 'transport':
@@ -180,6 +201,7 @@ export function summaryFor(doc: Document, m: ParsedMessage, o: { locale: string;
       if (lost) chip(`${t('msg.combat.losses')} ${fmt(lost)} MSU`, 'fut-msg-neg', Object.entries(m.lost).map(([id, n]) => `${n.toLocaleString(locale)} ${shipName(Number(id), o.ships, t)}`).join(', '));
       const debris = m.debris.metal + m.debris.crystal + m.debris.deuterium;
       if (debris) chip(`${t('msg.combat.debris')} ${fmt(debris)}`, 'fut-msg-loot');
+      if (m.apiKey) linkChip(t('msg.combat.converter'), converterLink(m.apiKey, o.spy?.lang || locale), t('msg.combat.converterHint'));
       return box;
     }
   }
@@ -187,6 +209,10 @@ export function summaryFor(doc: Document, m: ParsedMessage, o: { locale: string;
 
 /** Where the summary goes: above the game's action bar, like OGLight. */
 function place(msg: Element, box: HTMLElement): void {
+  // List view (13.x, "collapsible" reports): the body stays hidden until opened, so the
+  // summary goes under the game's header row to be seen with the report closed.
+  const header = msg.querySelector(':scope > .msgFilteredHeaderRow');
+  if (header) return void header.after(box);
   const actions = msg.querySelector('.msg_actions, message-footer');
   if (actions?.parentElement) actions.before(box);
   else (msg.querySelector('.msgContent') ?? msg).after(box);
@@ -196,8 +222,10 @@ function place(msg: Element, box: HTMLElement): void {
 export function processMessages(o: MessagesOptions): number {
   const { doc, store, t, locale } = o;
   const ships = store.get<ShipsInfo>(SHIPS_INFO_KEY, {});
+  const universe = universeOf(doc, store.get<ServerData | null>(SERVER_DATA_KEY, null));
   const fold = store.get<boolean>(FOLD_KEY, true);
   const expeditions: ExpeditionMessage[] = [];
+  const spies: SpyMessage[] = [];
   let journal: Journal | null = null;
   let added = 0;
   for (const msg of Array.from(doc.querySelectorAll('.msg[data-msg-id]'))) {
@@ -205,11 +233,14 @@ export function processMessages(o: MessagesOptions): number {
     msg.setAttribute('data-fut-done', '');
     const parsed = readMessage(msg, o.playerId);
     if (!parsed) continue;
-    const box = summaryFor(doc, parsed, { locale, t, ships });
+    const box = summaryFor(doc, parsed, { locale, t, ships, spy: o.spy, universe });
     if (box) {
       box.title = [box.dataset.size, t('msg.toggle')].filter(Boolean).join(' · ');
       box.addEventListener('click', (e) => {
         if ((e.target as Element).closest('a, button')) return;
+        // List view: open/close the report the way the game's own header row does.
+        const cell = msg.querySelector<HTMLElement>(':scope > .msgFilteredHeaderRow .msgFilteredHeaderCell');
+        if (cell) return void cell.click();
         msg.classList.toggle('fut-msg-folded');
       });
       place(msg, box);
@@ -217,6 +248,7 @@ export function processMessages(o: MessagesOptions): number {
       if (fold && (parsed.kind === 'expedition' || parsed.kind === 'discovery' || parsed.kind === 'recycle' || parsed.kind === 'transport' || parsed.kind === 'deploy' || parsed.kind === 'return')) msg.classList.add('fut-msg-folded');
     }
     if (parsed.kind === 'expedition' || parsed.kind === 'discovery') expeditions.push(parsed);
+    if (parsed.kind === 'spy') spies.push(parsed);
     // Pirates and aliens: the losses are in the combat report at position 16.
     if (parsed.kind === 'combat' && parsed.coords?.split(':')[2] === '16' && Object.keys(parsed.lost).length) {
       journal ??= store.get<Journal>(JOURNAL_KEY, {});
@@ -231,6 +263,12 @@ export function processMessages(o: MessagesOptions): number {
     journal = r.journal;
     added += r.added;
   }
+  // Spy board: newest report per target, kept locally for the spy table (no network).
+  if (spies.length) {
+    const board = store.get<SpyBoard>(SPY_BOARD_KEY, {});
+    if (rememberSpies(board, spies, o.now?.() ?? Date.now())) store.set(SPY_BOARD_KEY, board);
+  }
+  if (o.spy) mountSpyPanel({ doc, store, t, locale, spy: o.spy, now: o.now });
   if (journal && added) {
     store.set(JOURNAL_KEY, trim(journal, o.now?.() ?? Date.now()));
     o.onJournal?.(added);

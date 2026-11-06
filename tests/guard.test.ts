@@ -45,4 +45,15 @@ describe('NetworkGuard', () => {
     expect(fetchImpl.mock.calls[0]?.[1]?.credentials).toBe('include');
     expect(fetchImpl.mock.calls[1]?.[1]?.credentials).toBe('omit');
   });
+
+  it('lets what the player points at read the public API only, without cookies', async () => {
+    const fetchImpl = ok();
+    const guard = new NetworkGuard(fetchImpl, ORIGIN);
+    guard.closePageLoadWindow();
+    await guard.request(`${ORIGIN}/api/playerData.xml?id=5`, 'user-view');
+    expect(fetchImpl.mock.calls[0]?.[1]?.credentials).toBe('omit');
+    await expect(guard.request('/game/index.php?page=x', 'user-view')).rejects.toThrow(/public API/);
+    await expect(guard.request('https://example.com/api/players.xml', 'user-view')).rejects.toThrow(/public API/);
+    expect(fetchImpl).toHaveBeenCalledOnce();
+  });
 });

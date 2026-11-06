@@ -13,8 +13,11 @@ import type { PlanetListEntry } from '../../data/planet-list';
 import type { Score } from '../../data/score';
 import { formatUnits } from '../../core/format';
 import { accountAlerts, bodyRows, msu, summarize } from '../../engines/account';
-import { activeItems, QUEUE_KINDS, type QueueSnapshot } from '../../data/queues';
+import { activeItems, QUEUE_KINDS, queueLabel, type QueueItem, type QueueSnapshot } from '../../data/queues';
+import { remaining } from '../planet-menu';
 import { bestUpgrades } from '../../engines/roi';
+import { changeOver, type History, type HistoryDay } from '../../engines/history';
+import type { Reminder } from '../../engines/reminders';
 import { rawCost } from '../../engines/tech';
 import {
   DEFENCES, MINES, MOON_FACILITIES, PLANET_FACILITIES, RESEARCH, SHIPS, SPECIES, speciesOf, techName, type TechNames,
@@ -28,6 +31,10 @@ export interface DashboardOptions {
   snapshot: AccountSnapshot | null;
   entries: PlanetListEntry[];
   score: Score | null;
+  /** One entry per day (engines/history). */
+  history?: History;
+  /** A reminder bell for one queue item (modules/reminders); none = no bells. */
+  bell?: (r: Reminder) => HTMLElement;
   queues?: QueueSnapshot | null;
   /** Technology names learned from the game's pages (player's language). */
   names?: TechNames;
@@ -38,7 +45,7 @@ export interface DashboardOptions {
   t: (key: string, vars?: Record<string, string | number>) => string;
 }
 
-export const TABS = ['summary', 'mines', 'facilities', 'lifeforms', 'ships', 'defence', 'scrap'] as const;
+export const TABS = ['summary', 'history', 'mines', 'facilities', 'lifeforms', 'ships', 'defence', 'scrap'] as const;
 export type Tab = (typeof TABS)[number];
 
 const HOST_ID = 'fut-dashboard';
@@ -99,6 +106,24 @@ export function unitsMsu(b: OwnBody, ids: readonly number[]): { msu: number; cou
     count += n;
   }
   return { msu: total, count };
+}
+
+/** Fleet of all bodies without solar satellites and crawlers, in MSU. */
+const COMBAT = SHIPS.filter((id) => id !== 212 && id !== 217);
+export function fleetMsu(bodies: readonly OwnBody[]): { msu: number; count: number } {
+  let out = { msu: 0, count: 0 };
+  for (const b of bodies) {
+    const f = unitsMsu(b, COMBAT);
+    out = { msu: out.msu + f.msu, count: out.count + f.count };
+  }
+  return out;
+}
+
+/** The figures the account history keeps for one day, from the stored snapshot. */
+export function dayFigures(snapshot: AccountSnapshot | null): { prodDay: number; fleet: number } {
+  if (!snapshot) return { prodDay: 0, fleet: 0 };
+  const prod = snapshot.bodies.reduce((s, b) => s + msu(b.production), 0) * 24;
+  return { prodDay: Math.round(prod), fleet: Math.round(fleetMsu(snapshot.bodies).msu) };
 }
 
 /** Resources the scrap merchant gives back for `amounts`, at `rate` percent. */
@@ -189,6 +214,7 @@ export function openDashboard(o: DashboardOptions): void {
   const body = h('div', 'tab-body');
   if (!o.snapshot) body.append(h('p', 'empty', t('dash.noData')));
   else if (tab === 'summary') summaryTab(body, ctx);
+  else if (tab === 'history') historyTab(body, ctx);
   else if (tab === 'mines') minesTab(body, ctx);
   else if (tab === 'facilities') facilitiesTab(body, ctx);
   else if (tab === 'lifeforms') lifeformsTab(body, ctx);
@@ -306,13 +332,10 @@ function summaryTab(parent: HTMLElement, ctx: Ctx): void {
   } else kpi(t('dash.points'), '—', t('dash.pointsHint'));
   kpi(t('dash.stock'), fmt(msu(sum.stock)), `${fmt(sum.stock.metal)} · ${fmt(sum.stock.crystal)} · ${fmt(sum.stock.deuterium)}`, 'accent');
   kpi(t('dash.prodDayK'), `+${fmt(msu(sum.perHour) * 24)}`, t('dash.prodHourNote', { value: fmt(msu(sum.perHour)) }), 'accent');
-  let fleet = { msu: 0, count: 0 };
+  const fleet = fleetMsu(ctx.bodies);
   let def = { msu: 0, count: 0 };
-  const combat = SHIPS.filter((id) => id !== 212 && id !== 217);
   for (const b of ctx.bodies) {
-    const f = unitsMsu(b, combat);
     const d = unitsMsu(b, DEFENCES.filter((id) => id < 500));
-    fleet = { msu: fleet.msu + f.msu, count: fleet.count + f.count };
     def = { msu: def.msu + d.msu, count: def.count + d.count };
   }
   kpi(t('dash.fleetValue'), fmt(fleet.msu), t('dash.unitsNote', { n: fmt(fleet.count) }));
@@ -385,6 +408,32 @@ function summaryTab(parent: HTMLElement, ctx: Ctx): void {
   cols.append(prod, movesCard, checks);
   parent.append(cols);
 
+  // Running queues, soonest first, each with a reminder bell.
+  const inQueue: { body: OwnBody; item: QueueItem }[] = [];
+  for (const b of ctx.bodies) for (const item of activeItems(o.queues?.bodies[String(b.id)], o.now)) inQueue.push({ body: b, item });
+  if (inQueue.length) {
+    inQueue.sort((a, b) => a.item.end - b.item.end);
+    const qs = section(parent, t('dash.queuesTitle'), o.bell ? t('dash.queuesHint') : undefined);
+    const wrap = h('div', 'table-wrap');
+    const table = h('table', 'queues');
+    const tbody = h('tbody');
+    for (const { body: b, item } of inQueue) {
+      const tr = h('tr', b.type === 'moon' ? 'moon' : '');
+      const name = h('td', 'name');
+      name.append(bodyLink(o.doc, b));
+      const what = queueLabel(item, o.locale);
+      const end = h('td', 'num', remaining(item.end, o.now));
+      end.title = new Date(item.end).toLocaleString(o.locale);
+      const bell = h('td', 'acts');
+      if (o.bell) bell.append(o.bell({ id: `q:${b.id}:${item.kind}:${item.name}:${item.level}:${Math.round(item.end / 60_000)}`, label: `${b.name}: ${what}`, at: item.end }));
+      tr.append(name, h('td', 'kind', t(`queue.${item.kind}`)), h('td', '', what), end, bell);
+      tbody.append(tr);
+    }
+    table.append(tbody);
+    wrap.append(table);
+    qs.append(wrap);
+  }
+
   // Research: account-wide, one compact list.
   const research = section(parent, t('dash.research'));
   const grid = h('div', 'levels');
@@ -395,6 +444,130 @@ function summaryTab(parent: HTMLElement, ctx: Ctx): void {
     grid.append(item);
   }
   research.append(grid);
+}
+
+const SVG = 'http://www.w3.org/2000/svg';
+function svg<K extends keyof SVGElementTagNameMap>(doc: Document, tag: K, attrs: Record<string, string | number>): SVGElementTagNameMap[K] {
+  const node = doc.createElementNS(SVG, tag);
+  for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, String(v));
+  return node;
+}
+
+/** One measure over the days: a 2px line, min/max on the axis, crosshair and tooltip on hover. */
+function lineChart(doc: Document, days: HistoryDay[], value: (d: HistoryDay) => number, fmt: (v: number) => string, label: string, locale: string): HTMLElement {
+  const W = 520, H = 140, L = 56, R = 8, T = 10, B = 22;
+  const pts = days.filter((d) => value(d) > 0);
+  const box = h('figure', 'chart');
+  box.append(h('figcaption', '', label));
+  if (pts.length < 2) {
+    box.append(h('p', 'hint', '—'));
+    return box;
+  }
+  const t0 = pts[0]!.at, t1 = pts.at(-1)!.at;
+  const vs = pts.map(value);
+  let lo = Math.min(...vs), hi = Math.max(...vs);
+  if (hi === lo) { lo *= 0.99; hi *= 1.01; }
+  const x = (at: number) => L + ((at - t0) / Math.max(1, t1 - t0)) * (W - L - R);
+  const y = (v: number) => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+  const chart = svg(doc, 'svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `${label}: ${fmt(vs[0]!)} → ${fmt(vs.at(-1)!)}` });
+  for (const v of [lo, hi]) {
+    chart.append(svg(doc, 'line', { x1: L, x2: W - R, y1: y(v), y2: y(v), class: 'grid' }));
+    const tx = svg(doc, 'text', { x: L - 6, y: y(v) + 4, 'text-anchor': 'end', class: 'axis' });
+    tx.textContent = fmt(v);
+    chart.append(tx);
+  }
+  const date = (at: number) => new Date(at).toLocaleDateString(locale, { day: 'numeric', month: 'short' });
+  for (const [at, anchor] of [[t0, 'start'], [t1, 'end']] as const) {
+    const tx = svg(doc, 'text', { x: x(at), y: H - 6, 'text-anchor': anchor, class: 'axis' });
+    tx.textContent = date(at);
+    chart.append(tx);
+  }
+  chart.append(svg(doc, 'polyline', { points: pts.map((d) => `${x(d.at).toFixed(1)},${y(value(d)).toFixed(1)}`).join(' '), class: 'line' }));
+  const cross = svg(doc, 'line', { y1: T, y2: H - B, class: 'cross', visibility: 'hidden' });
+  const dot = svg(doc, 'circle', { r: 4, class: 'dot', visibility: 'hidden' });
+  const hit = svg(doc, 'rect', { x: L, y: 0, width: W - L - R, height: H, fill: 'transparent' });
+  chart.append(cross, dot, hit);
+  const tip = h('div', 'tip');
+  tip.hidden = true;
+  hit.addEventListener('mousemove', (e) => {
+    const r = chart.getBoundingClientRect();
+    const px = ((e.clientX - r.left) / r.width) * W;
+    const d = pts.reduce((a, b) => (Math.abs(x(b.at) - px) < Math.abs(x(a.at) - px) ? b : a));
+    for (const n of [cross, dot]) n.setAttribute('visibility', 'visible');
+    cross.setAttribute('x1', String(x(d.at)));
+    cross.setAttribute('x2', String(x(d.at)));
+    dot.setAttribute('cx', String(x(d.at)));
+    dot.setAttribute('cy', String(y(value(d))));
+    tip.hidden = false;
+    tip.textContent = `${date(d.at)} · ${fmt(value(d))}`;
+    tip.style.left = `${(x(d.at) / W) * 100}%`;
+  });
+  hit.addEventListener('mouseleave', () => {
+    for (const n of [cross, dot]) n.setAttribute('visibility', 'hidden');
+    tip.hidden = true;
+  });
+  const plot = h('div', 'plot');
+  plot.append(chart, tip);
+  box.append(plot);
+  return box;
+}
+
+function historyTab(parent: HTMLElement, ctx: Ctx): void {
+  const { o, fmt } = ctx;
+  const { t, locale } = o;
+  const days = o.history ?? [];
+  if (days.length < 2) {
+    parent.append(h('p', 'empty', t('dash.historyEmpty')));
+    return;
+  }
+  const signed = (v: number, f: (n: number) => string) => (v > 0 ? `+${f(v)}` : v < 0 ? `−${f(-v)}` : '0');
+  const kpis = h('div', 'kpis');
+  for (const span of [1, 7, 30]) {
+    const c = changeOver(days, span);
+    const box = h('div', 'kpi');
+    box.append(h('span', 'label', t('dash.historySpan', { n: span })));
+    box.append(h('span', `value ${c && c.points < 0 ? 'neg' : ''}`, c ? signed(c.points, (n) => n.toLocaleString(locale)) : '—'));
+    const rank = c?.rank ? t(c.rank > 0 ? 'dash.historyUp' : 'dash.historyDown', { n: Math.abs(c.rank) }) : '';
+    box.append(h('span', 'note', c ? [t('dash.historyPerDay', { v: fmt(c.perDay) }), rank, c.days !== span ? t('dash.historyReal', { n: c.days }) : ''].filter(Boolean).join(' · ') : t('dash.historyFew')));
+    kpis.append(box);
+  }
+  parent.append(kpis);
+
+  const charts = h('div', 'cols charts');
+  charts.append(
+    lineChart(o.doc, days, (d) => d.points, (v) => formatUnits(v, locale), t('dash.points'), locale),
+    lineChart(o.doc, days, (d) => d.prodDay, (v) => formatUnits(v, locale), t('dash.historyProd'), locale),
+  );
+  parent.append(charts);
+
+  // The same numbers as a table: newest day first.
+  const s = section(parent, t('dash.historyDays'));
+  const wrap = h('div', 'table-wrap');
+  const table = h('table', 'history');
+  const head = h('tr');
+  for (const k of ['dash.historyDay', 'dash.points', 'dash.historyDelta', 'dash.historyRank', 'dash.historyProd', 'dash.fleetValue']) head.append(h('th', '', t(k)));
+  const thead = h('thead');
+  thead.append(head);
+  table.append(thead);
+  const tbody = h('tbody');
+  [...days].reverse().slice(0, 60).forEach((d, i, list) => {
+    const prev = list[i + 1];
+    const tr = h('tr');
+    const delta = prev ? d.points - prev.points : 0;
+    const rankMove = prev && d.rank !== null && prev.rank !== null ? prev.rank - d.rank : 0;
+    tr.append(
+      h('td', '', new Date(d.at).toLocaleDateString(locale)),
+      h('td', 'mono', d.points.toLocaleString(locale)),
+      h('td', `mono ${delta < 0 ? 'neg' : delta > 0 ? 'pos' : ''}`, prev ? signed(delta, (n) => n.toLocaleString(locale)) : ''),
+      h('td', 'mono', d.rank === null ? '—' : `${d.rank.toLocaleString(locale)}${rankMove ? ` (${rankMove > 0 ? '↑' : '↓'}${Math.abs(rankMove)})` : ''}`),
+      h('td', 'mono', d.prodDay ? `+${fmt(d.prodDay)}` : '—'),
+      h('td', 'mono', d.fleet ? fmt(d.fleet) : '—'),
+    );
+    tbody.append(tr);
+  });
+  table.append(tbody);
+  wrap.append(table);
+  s.append(wrap);
 }
 
 function minesTab(parent: HTMLElement, ctx: Ctx): void {

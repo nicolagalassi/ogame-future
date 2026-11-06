@@ -10,7 +10,7 @@
  */
 import type { AccountSnapshot, OwnBody } from '../../data/account-info';
 import type { PlanetListEntry } from '../../data/planet-list';
-import { activeItems, type QueueItem, type QueueSnapshot } from '../../data/queues';
+import { activeItems, queueLabel, type QueueItem, type QueueSnapshot } from '../../data/queues';
 import { formatUnits } from '../../core/format';
 import { estimateResources, storageFill, totals } from '../../engines/resources';
 import { MENU_WIDTH, NATIVE_WIDTH, PLANET_MENU_CSS } from './style';
@@ -35,10 +35,18 @@ export interface PlanetMenuOptions {
   locale: string;
   t: (key: string, vars?: Record<string, string | number>) => string;
   onSettingsChange: (next: MenuSettings) => void;
+  /** Saves every Future value as a local file; returns how many were saved. */
+  onBackupExport?: () => number;
+  /** Writes a backup file's text back (Future's, or OGLight's export converted); returns how many
+   * values were restored, or the message to show; throws on a bad file. */
+  onBackupImport?: (text: string) => number | string;
   /** Runs the user-initiated sync. Only ever called from the Sync button's click. */
   onSync: () => Promise<void>;
   /** Opens the account dashboard (Future's own panel, no game action). */
   onOpenDashboard?: () => void;
+  /** Opens or closes the targets side bar; `targetsCount` players and planets are marked. */
+  onOpenTargets?: () => void;
+  targetsCount?: number;
   /** Opens the construction plan; `planCount` items are planned in total. */
   onOpenPlanner?: () => void;
   planCount?: number;
@@ -174,11 +182,11 @@ export function remaining(end: number, now: number): string {
 }
 
 /** Coloured stripes, one per running queue kind (as OGLight), with the details in the tooltip. */
-function queueStripes(doc: Document, items: QueueItem[], now: number, t: PlanetMenuOptions['t']): HTMLElement | null {
+function queueStripes(doc: Document, items: QueueItem[], now: number, t: PlanetMenuOptions['t'], locale: string): HTMLElement | null {
   if (!items.length) return null;
   const box = el(doc, 'span', 'fut-queue');
   box.title = items
-    .map((i) => `${t(`queue.${i.kind}`)}: ${i.name}${i.level ? ` → ${i.level}` : ''} · ${remaining(i.end, now)}`)
+    .map((i) => `${t(`queue.${i.kind}`)}: ${queueLabel(i, locale)} · ${remaining(i.end, now)}`)
     .join('\n');
   for (const i of items) box.append(el(doc, 'span', `fut-q fut-q-${i.kind}`));
   return box;
@@ -212,8 +220,8 @@ function formatTime(at: number, locale: string): string {
 }
 
 /**
- * Toolbar: three buttons that already say something (production, what the plan misses,
- * today's expeditions) and open their window; sync and settings stacked on the right.
+ * Toolbar: four buttons in two rows that already say something (production, what the plan misses,
+ * today's expeditions, marked targets) and open their window; sync and settings stacked on the right.
  * The view switch lives in the settings panel: it is a preference, not an action.
  */
 function toolbar(o: PlanetMenuOptions, colonies: string): HTMLElement {
@@ -250,6 +258,9 @@ function toolbar(o: PlanetMenuOptions, colonies: string): HTMLElement {
     today && today.count ? `${t('exp.title')} · ${t('bar.journalHint', { n: today.count })}` : t('exp.title'),
     o.onOpenJournal,
   );
+
+  const marked = o.targetsCount ?? 0;
+  cell(t('bar.targets'), marked ? String(marked) : '—', '', t('bar.targetsHint'), o.onOpenTargets);
 
   const side = el(doc, 'div', 'fut-side');
   const lastSync = o.snapshot ? t('toolbar.lastSync', { time: formatTime(o.snapshot.fetchedAt, o.locale) }) : '';
@@ -305,6 +316,43 @@ function settingsPanel(o: PlanetMenuOptions, mode: MenuMode, roomy: boolean, col
     choice(t('settings.on'), o.settings.markIdle, () => o.onSettingsChange({ ...o.settings, markIdle: true })),
     choice(t('settings.off'), !o.settings.markIdle, () => o.onSettingsChange({ ...o.settings, markIdle: false })),
   );
+  if (o.onBackupExport && o.onBackupImport) {
+    const action = (text: string, onClick: () => void) => {
+      const b = el(doc, 'button', 'fut-chip', text);
+      b.type = 'button';
+      b.addEventListener('click', onClick);
+      return b;
+    };
+    const exportBackup = o.onBackupExport;
+    const importBackup = o.onBackupImport;
+    // Feedback on the player's own click only (AGENTS.md §1.4 allows it).
+    const note = el(doc, 'div', 'fut-set-note');
+    note.setAttribute('role', 'status');
+    const picker = el(doc, 'input', '');
+    picker.type = 'file';
+    // OGLight's export has no extension: any file is accepted, the content decides.
+    picker.title = t('settings.backupImportHint');
+    picker.hidden = true;
+    picker.addEventListener('change', () => {
+      const file = picker.files?.[0];
+      picker.value = '';
+      if (!file) return;
+      file.text().then((text) => {
+        const done = importBackup(text);
+        note.textContent = typeof done === 'string' ? done : t('settings.backupRestored', { n: done });
+      }).catch(() => { note.textContent = t('settings.backupBad'); });
+    });
+    row(
+      t('settings.backup'),
+      action(t('settings.backupExport'), () => { note.textContent = t('settings.backupSaved', { n: exportBackup() }); }),
+      action(t('settings.backupImport'), () => picker.click()),
+    );
+    row(
+      t('settings.oglight'),
+      action(t('settings.oglightImport'), () => picker.click()),
+    );
+    panel.append(picker, note);
+  }
   if (colonies) panel.append(el(doc, 'div', 'fut-set-note', colonies));
   if (o.snapshot) panel.append(el(doc, 'div', 'fut-set-note', t('toolbar.lastSync', { time: formatTime(o.snapshot.fetchedAt, o.locale) })));
   return panel;
@@ -348,7 +396,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true));
       const age = ageBadge(doc, planetBody, o.now, o.t);
       if (age) link.append(age);
-      const pq = entry.planetId ? queueStripes(doc, activeItems(o.queues?.bodies[String(entry.planetId)], o.now), o.now, o.t) : null;
+      const pq = entry.planetId ? queueStripes(doc, activeItems(o.queues?.bodies[String(entry.planetId)], o.now), o.now, o.t, o.locale) : null;
       if (pq) wrap.append(pq);
       // Queue: the game's construction icon stays as it is (its own link); a planet with
       // nothing in construction gets an amber dot.
@@ -366,7 +414,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       moon.append(resourceColumn(doc, moonBody, o.now, o.locale, false));
       const age = ageBadge(doc, moonBody, o.now, o.t);
       if (age) moon.append(age);
-      const mq = entry.moonId ? queueStripes(doc, activeItems(o.queues?.bodies[String(entry.moonId)], o.now), o.now, o.t) : null;
+      const mq = entry.moonId ? queueStripes(doc, activeItems(o.queues?.bodies[String(entry.moonId)], o.now), o.now, o.t, o.locale) : null;
       if (mq) moon.append(mq);
     } else {
       // Keeps the planet columns aligned on planets without a moon.

@@ -10,6 +10,13 @@ describe('formatUnits', () => {
     expect(formatUnits(9_500_000_000, 'it')).toBe('9,5G');
     expect(formatUnits(839, 'it')).toBe('839');
   });
+
+  it('moves to the next unit instead of printing 1000', () => {
+    expect(formatUnits(999_960_000, 'it')).toBe('1,0G');
+    expect(formatUnits(999_400_000, 'it')).toBe('999M');
+    expect(formatUnits(999.6, 'it')).toBe('1,0k');
+    expect(formatUnits(-999_700, 'it')).toBe('-1,0M');
+  });
 });
 
 describe('estimateResources', () => {

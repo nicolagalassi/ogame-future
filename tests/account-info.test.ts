@@ -56,4 +56,16 @@ describe('hydrateAccountOncePerSession', () => {
     expect(again?.bodies).toHaveLength(2);
     expect(String(fetchImpl.mock.calls[0]?.[0])).not.toContain('cp=');
   });
+
+  it.each([['An error has occured!\n'], [JSON.stringify({ planets: [], moons: [] })]])('keeps the stored snapshot and does not retry when the game answers %j', async (body) => {
+    const fetchImpl = vi.fn(async (_url: string, _init?: RequestInit) => new Response(body));
+    const store = new Store(new MemoryStore(), 'future:test:1');
+    const good = parseAccountInfo(sample, 1);
+    store.set('account.snapshot', good);
+    const deps = { guard: new NetworkGuard(fetchImpl, 'https://s1-it.ogame.gameforge.com'), store, session: new FakeSession() };
+    await expect(hydrateAccountOncePerSession(deps)).rejects.toThrow(/accountInfo/);
+    expect(store.get('account.snapshot', null)).toEqual(good);
+    expect(await hydrateAccountOncePerSession(deps)).toEqual(good);
+    expect(fetchImpl).toHaveBeenCalledOnce();
+  });
 });

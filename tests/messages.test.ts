@@ -148,6 +148,28 @@ describe('expedition journal', () => {
   });
 });
 
+describe('inbox page, list view', () => {
+  it('puts the summary under the header row and opens the report like the row does', () => {
+    // OGame 13 list view: header row always shown, body (.messageContentWrapper) hidden until opened.
+    const el = msg('30', { coordinates: '1:476:7', playername: 'el_loco', targetplayerid: '5', resources: '211740737', loot: '75', metal: '122942381', crystal: '25224981', deuterium: '63573375', fleetvalue: '0', defensevalue: '329025000', activity: '-1' });
+    el.querySelector('.msgContent')!.remove();
+    el.querySelector('message-footer')!.remove();
+    el.insertAdjacentHTML('beforeend', '<div class="msgFilteredHeaderRow"><div class="msgFilteredHeaderCell">el_loco</div></div><div class="messageContentWrapper"><message-footer class="msg_actions"></message-footer></div>');
+    let opened = 0;
+    el.querySelector<HTMLElement>('.msgFilteredHeaderCell')!.addEventListener('click', () => opened++);
+    document.body.innerHTML = '';
+    document.body.append(el);
+    const store = new Store(new MemoryStore(), 'test');
+    processMessages({ doc: document, store, playerId: OWN, locale: 'it', t });
+    expect(Object.keys(store.get('spy.board', {}))).toEqual(['1:476:7']);
+    const box = el.querySelector<HTMLElement>('.fut-msg-spy')!;
+    expect(box.previousElementSibling?.className).toBe('msgFilteredHeaderRow');
+    expect(box.textContent).toContain('264M');
+    box.click();
+    expect(opened).toBe(1);
+  });
+});
+
 describe('inbox page', () => {
   it('adds summaries, folds the text and fills the journal', () => {
     document.body.innerHTML = '';

@@ -109,17 +109,25 @@ const sessionKey = (store: Store) => `${store.namespace}:account.hydrated`;
 
 export async function fetchAccount(deps: HydrateDeps, reason: CallReason): Promise<AccountSnapshot> {
   const now = deps.now ?? (() => Date.now());
-  const response = await deps.guard.request(ACCOUNT_INFO_PATH, reason);
-  const snapshot = parseAccountInfo(await response.json(), now());
-  deps.store.set(SNAPSHOT_KEY, snapshot);
+  // Marked before the call: a failed read must not be retried on the next page (§4.1).
   deps.session.setItem(sessionKey(deps.store), '1');
+  const response = await deps.guard.request(ACCOUNT_INFO_PATH, reason);
+  // The game sometimes answers "An error has occured!" (HTML) or JSON without planets:
+  // an account always has a planet, so such an answer is a failure and must not replace
+  // the snapshot already stored. The session stays un-hydrated; only Sync retries (§4.1).
+  const text = await response.text();
+  let json: unknown;
+  try { json = JSON.parse(text); } catch { throw new Error(`accountInfo: not JSON (${text.slice(0, 40).trim()})`); }
+  const snapshot = parseAccountInfo(json, now());
+  if (!snapshot.bodies.some((b) => b.type === 'planet')) throw new Error('accountInfo: no planets in the answer');
+  deps.store.set(SNAPSHOT_KEY, snapshot);
   return snapshot;
 }
 
 /** Returns the stored snapshot, reading accountInfo only on the first page of the session. */
 export async function hydrateAccountOncePerSession(deps: HydrateDeps): Promise<AccountSnapshot | null> {
   const stored = deps.store.get<AccountSnapshot | null>(SNAPSHOT_KEY, null);
-  if (stored && deps.session.getItem(sessionKey(deps.store)) === '1') return stored;
+  if (deps.session.getItem(sessionKey(deps.store)) === '1') return stored;
   return fetchAccount(deps, 'page-load');
 }
 

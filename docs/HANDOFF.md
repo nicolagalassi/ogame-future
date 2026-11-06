@@ -47,6 +47,11 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
   sync e impostazioni a lato.
 - Flotta: i pulsanti preparano tutto in fleet1; fleetsave come PrOGect (galassia/sistema vuoti =
   quelli del pianeta di partenza); la riserva non vale per le spedizioni; "ignora cibo".
+- Regole per corpo (2026-11-06): navi, risorse, portale (lune) sono regole separate, ognuna con
+  un interruttore globale (barra flotta; il portale anche nel dialogo del salto); cibo = "ignora
+  cibo". Il fleetsave ha navi + risorse sue e ignora gli interruttori. "Copia su…" copia solo le
+  regole scelte sui corpi scelti; ogni regola mostra Attiva/Spenta/Vuota e su quali altri corpi
+  è uguale. Vecchi salvataggi: il portale usa le navi della riserva finché non ha la sua.
 - Diario spedizioni: niente lista "ultime spedizioni"; navi con le immagini del CDN del gioco.
 - Riepilogo spedizione in posta: esito e MSU sopra, navi centrate sotto, colore del riquadro
   per la dimensione (grigio normale, ciano grande, oro enorme), esaurimento sotto.
@@ -68,12 +73,86 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
    forme di vita solo in inglese finché il giocatore non apre la pagina).
 2. Telefono: barra d'azioni flotta fissa in basso con pulsanti grandi (serve una pagina
    flotta salvata da telefono).
-3. Galassia (serve una pagina galassia salvata con giocatori e un campo detriti).
-4. Verificare in gioco i riepiloghi di spionaggio su un giocatore vero.
+3. **Galassia** (fatta il 2026-11-05, `src/modules/galaxy`, dati in `src/data/galaxy.ts`): striscia di
+   riepilogo sopra la tabella (giocatori, inattivi, vacanza, lune, detriti in MSU), righe inattive e tue
+   tinte, valore MSU sotto ogni campo detriti, mirino per segnare bersagli (lista con link alle coordinate,
+   niente pulsante sonda), distintivo con la posizione accanto al giocatore: al passaggio del mouse una
+   scheda con punti e posizioni (generale, economia, ricerca, militare, forme di vita, navi) da
+   `/api/playerData.xml` come OGLight. Chiamata `user-view` del guard: solo API pubblica, senza cookie,
+   in cache un'ora per giocatore. Detriti in posizione 16: stesso markup `.debris-content` delle righe
+   (letto dal JS del gioco 13.1, test con quel markup).
+4. Riepiloghi di spionaggio verificati su giocatori veri (2026-11-06). Nella posta 13.x a lista il
+   riepilogo sta sotto la riga d'intestazione e il clic apre il report come la riga del gioco.
 5. Domanda aperta: plancia, piano e diario restano finestre sopra il gioco o diventano pannelli?
-6. Roadmap: classifiche e giocatori, storico account, confronto rivali, promemoria manuali,
-   backup/esportazione completa, nome definitivo, merge delle PR #1–#6, richiesta di
+6. Roadmap: nome definitivo, merge delle PR #1–#6, richiesta di
    tolleranza ai ToolDev (con le aree grigie: spostamento banner, "Ripeti" flotta).
+
+7. **Backup** (fatto il 2026-11-06, `src/core/backup.ts`): Impostazioni → Backup dati → Esporta/Importa.
+   File JSON locale con tutte le chiavi `future:*` (tutti gli universi e account); l'importazione unisce
+   e scrive solo chiavi `future:*`. Nuovo grant `GM_listValues`.
+8. accountInfo: a volte il gioco risponde "An error has occured!" (HTML). Ora quella risposta, o una
+   senza pianeti, non sostituisce lo snapshot salvato; niente nuovi tentativi fino a Sync.
+
+9. **Storico account** (2026-11-06, `src/engines/history.ts`): una voce al giorno (punti, posizione,
+   produzione, flotta) quando la Panoramica mostra i punti; scheda Storico nella Dashboard con due
+   grafici a una serie e la tabella dei giorni.
+10. **Tabella spiate** (2026-11-06, `src/engines/raids.ts`, `src/modules/messages/spy-table.ts`): pannello dentro la
+    scheda Spionaggio della posta, sopra l'intestazione colonne del gioco, con l'aspetto della posta e i pulsanti
+    `<gradient-button>` del gioco. Un bersaglio per pianeta/luna, 3 giorni, ordinato per MSU all'ora di volo dal
+    pianeta più vicino (formula verificata con `fleetHelper.calcDuration`). Per riga: attacco (fleet1 con `cp=`),
+    simulatore del gioco, Osims (OS), OGame Simulator (OT), togli; niente sonda (§1.5.1). Galassie, sistemi, anello
+    e velocità flotta da `/api/serverData.xml` (`src/data/server-data.ts`, al caricamento, cache 7 giorni).
+    Chiave API dei report = `data-raw-hashcode`. Link Osims/OGame Simulator anche nei riepiloghi di spionaggio,
+    link al convertitore Ogotcha (`ogotcha.oplanet.eu`) nei riepiloghi di combattimento: **da verificare** su un
+    CR vero (nessuno in posta il 2026-11-06). Il guard non manda mai i cookie all'API pubblica `/api/*.xml`.
+11. **Bersagli** (2026-11-06, al posto di rivali e mirino; `src/engines/marks.ts`, `src/engines/positions.ts`,
+    `src/modules/marks/`), come i pinned players e tagged planets di OGLight: bandierina per giocatore (Da
+    controllare, Bersaglio, Frigo, Pericolo, Amico, Commercio) in galassia, classifica e tabella spiate; colore
+    per pianeta in galassia; clic = scelta, Maiusc+clic = ultima usata. **Barra laterale** a sinistra (cella
+    Bersagli nella barra del menu pianeti, 2×2 con Dashboard/Piano/Diario), come il pannello di OGLight: resta aperta mentre si gira la galassia e tra le
+    pagine. Giocatori per bandierina + Recenti; scheda con punti e pianeti/lune = API `playerData` + posizioni
+    viste in galassia (nuove colonie col pallino, posizioni svuotate tolte), con detriti, attività pianeta/luna
+    (`*`, minuti, 60; `?` se la lettura ha più di un'ora) ed età della lettura. Pianeti colorati per intervallo,
+    colore e stato (`/api/players.xml`, cache 1 giorno). Clic sulle coordinate o tasto **M** = sistema in
+    galassia col loader del gioco (`loadContentNew`, come le sue frecce), posizione evidenziata. La memoria
+    posizioni registra solo giocatori segnati/recenti e pianeti colorati. Niente sonda (§1.5.1): le celle
+    attività aprono la pagina flotta su pianeta/luna (come OGLight). Migrazione una tantum: vecchi bersagli →
+    pianeti rossi, rivali → "Da controllare".
+12. **Promemoria** (2026-11-06, `src/modules/reminders`): campanelle su Code in corso (Dashboard) e sulle
+    flotte della lista eventi; avviso nella pagina. **Da verificare**: le campanelle sulla lista eventi,
+    scritte sul markup noto di OGame (`tr.eventFleet[data-arrival-time]`, `td.arrivalTime`) senza flotte
+    in volo da guardare.
+
+13. **Classifica** (2026-11-06, `src/modules/highscore`, `src/data/highscore.ts`, `src/data/highscore-api.ts`):
+    sotto ogni punteggio i punti fatti da mezzanotte (verde su, rosso giù). Base = prima lettura del giorno di
+    `/api/highscore.xml` (user-view all'apertura della Classifica, max 1/ora per categoria, senza cookie), o
+    l'ultima di ieri se presa dalle 23:00. Nicola non vuole servizi di altri (ostats non segue s808; PTRE, usato
+    da OGLight, ha la foto esatta delle 00:00): idea per dopo, un servizio nostro (cron orario su highscore.xml,
+    tabella, endpoint con CORS) su Proxmox o Supabase. In generale anche i giorni per raggiungere chi è davanti
+    e la stella rivale. **Nota dev**: dopo un cambio di ramo che ricrea `dist/` va riavviato `npm run dev`.
+
+15. **Piano** (2026-11-06, `src/modules/tech/planner-view.ts`, `groupByTech`/`accountGap` in `engines/planner.ts`):
+    una riga per tecnologia ("Miniera di metallo · su 14 corpi · liv. 46") aperta sui pianeti (aperta da sola fino
+    a 3), ogni costo mostrato una volta, rosso dove quel pianeta non ha le risorse (tooltip: quanto manca, le voci
+    precedenti del pianeta contate prima). In alto: costo del piano, risorse dell'account (tutti i corpi + in
+    viaggio), quanto manca all'account; la cella Piano della barra mostra questo (MSU). Icone: le tessere dello
+    sprite del gioco lette dagli stili calcolati quando si apre una pagina tecnologie (`data/tech-icons.ts`,
+    nessuna richiesta). Galassia: colonna giocatore come OGLight (stato prima del nome, rank e bandierina a
+    destra, colonna più larga del nome pianeta), via il pulsante Bersagli.
+14. **Grafica** (2026-11-06): tutte le finestre (`WINDOW_SHEET`) riprendono il menu pianeti: riquadri #111B2A
+    con bordo #1F2C40, schede a segmenti, numeri monospazio, ciano per la selezione. Pila z-index sopra il
+    footer del gioco (999999): barra laterale 1000000, finestre 1000001, popup 1000002-3.
+
+16. **Import da OGLight** (2026-11-06, `src/engines/oglight-import.ts`): impostazioni del menu pianeti → "Da
+    OGLight · Importa export" (anche "Importa" del backup riconosce il file). Il file "Export data" di OGLight
+    (un universo, va importato nello stesso) diventa: pin → bandierine (rush/skull → Bersaglio, fridge → Frigo,
+    star/ptre → Da controllare, money → Commercio), tag → colori (lime → verde, dblue → blu, …; gray no),
+    `lastPinnedList` → Recenti, `pdb` → posizioni (solo giocatori/pianeti segnati). Quello che Future ha già
+    resta. Statistiche (`stats`, aggregate per giorno): una voce riassuntiva per giorno nel Diario (`summary.count`
+    + esiti), spedizioni + detriti pos. 16, scoperte; i giorni già registrati da Future non si importano (doppi).
+    Raid + detriti raccolti → voci `kind: 'raid'`, riquadro "Raid" nel Diario (non contano come spedizioni).
+    Carburante (`conso`) non portato: il Diario di Future non lo conta. Prova sul file reale di Nicola (Nembus):
+    42 giocatori, 570 posizioni, 40.196 spedizioni, 14.178 scoperte, 138 raid su 220 giorni.
 
 ## Come si prova senza il gioco
 

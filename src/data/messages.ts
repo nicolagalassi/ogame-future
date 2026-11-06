@@ -50,6 +50,8 @@ export interface SpyMessage {
   moon: boolean;
   playerId: number;
   playerName: string;
+  /** Game status flags of the target player ("inactive", "longinactive", "vacation", …). */
+  statuses: string[];
   /** Own planet spied by someone else. */
   counter: boolean;
   sourceName: string;
@@ -63,6 +65,8 @@ export interface SpyMessage {
   fleetValue: number;
   defValue: number;
   attacked: boolean;
+  /** The report's API key ("sr-…", data-raw-hashcode), for the battle simulators; '' when absent. */
+  apiKey: string;
 }
 
 export interface Place {
@@ -99,6 +103,8 @@ export interface CombatMessage {
   /** Own units destroyed. */
   lost: Record<number, number>;
   debris: Res;
+  /** The report's API key ("cr-…"), for the combat report converter; '' when absent. */
+  apiKey: string;
 }
 
 export type ParsedMessage = ExpeditionMessage | SpyMessage | CargoMessage | CombatMessage;
@@ -227,6 +233,7 @@ export function readMessage(msg: Element, ownPlayerId: number): ParsedMessage | 
       moon: int(d.rawTargetplanettype) === 3,
       playerId: int(d.rawTargetplayerid),
       playerName: d.rawPlayername ?? '',
+      statuses: (json(d.rawPlayerstatus, []) as unknown[]).filter((x): x is string => typeof x === 'string'),
       counter,
       sourceName: d.rawSourceplayername ?? '',
       sourceCoords: d.rawSourceplanetcoordinates ?? '',
@@ -236,6 +243,7 @@ export function readMessage(msg: Element, ownPlayerId: number): ParsedMessage | 
       fleetValue: hiddenFleet ? -1 : int(d.rawFleetvalue),
       defValue: hiddenDef ? -1 : int(d.rawDefensevalue),
       attacked: int(d.rawAttacking) === 1,
+      apiKey: d.rawHashcode ?? '',
     };
   }
 
@@ -252,6 +260,7 @@ export function readMessage(msg: Element, ownPlayerId: number): ParsedMessage | 
       loot: { metal: 0, crystal: 0, deuterium: 0 },
       lost: readUnits(json(d.rawShipslost, {})),
       debris: { metal: 0, crystal: 0, deuterium: 0 },
+      apiKey: d.rawHashcode ?? '',
     };
 
   const place = (side: 'source' | 'target'): Place | null => {
@@ -334,7 +343,7 @@ function readCombat(id: string, at: number, d: DOMStringMap, own: number): Comba
     if (ownIds.has(f.fleetId)) for (const tech of f.technologies ?? []) if (tech.technologyId && tech.destroyedTotal) lost[tech.technologyId] = (lost[tech.technologyId] ?? 0) + tech.destroyedTotal;
   if (!attacker && defender.owner?.id === own)
     for (const r of result.repairedTechnologies ?? []) if (r.technologyId && lost[r.technologyId]) lost[r.technologyId] = Math.max(0, lost[r.technologyId]! - num(r.amount));
-  return { kind: 'combat', id, at, coords: d.rawCoords || null, attacker, winner, loot, lost, debris: pick(result.debris?.resources, 'remaining') };
+  return { kind: 'combat', id, at, coords: d.rawCoords || null, attacker, winner, loot, lost, debris: pick(result.debris?.resources, 'remaining'), apiKey: d.rawHashcode ?? '' };
 }
 
 /** The player's id, from the meta tag OGame puts on every game page. */

@@ -4,15 +4,23 @@
  */
 import { NetworkGuard } from './core/guard';
 import { GMStore, Store, serverNamespace } from './core/storage';
+import { downloadBackup, importBackup } from './core/backup';
 import { IdleSaver } from './core/idle-saver';
 import { detectLocale, translator } from './core/i18n';
 import { SNAPSHOT_KEY, hydrateAccountOncePerSession, syncAccountOnUserClick, type AccountSnapshot } from './data/account-info';
 import { currentBodyId, readCurrentResources, readPlanetList } from './data/planet-list';
 import { applyPageResources } from './engines/resources';
 import { SCORE_KEY, watchScore, type Score } from './data/score';
+import { HISTORY_KEY, recordDay, type History } from './engines/history';
+import { loadServerDataOnPageLoad } from './data/server-data';
+import { highlightPosition, isGalaxyPage, TARGETS_KEY, watchGalaxy } from './modules/galaxy';
+import { nextInSide, onSideNavigate, refreshSide, restoreSide, toggleSide } from './modules/marks/side';
+import { loadMarks, MARKS_KEY, migrateOld, type Marks } from './engines/marks';
+import { convertOglight, convertOglightStats, isOglightDb } from './engines/oglight-import';
+import { POSITIONS_KEY, type Positions } from './engines/positions';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
 import { ITEMS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems } from './data/bonuses';
-import { openDashboard } from './modules/dashboard';
+import { dayFigures, openDashboard } from './modules/dashboard';
 import { TECH_NAMES_KEY, learnTechNames, type TechNames } from './data/tech-names';
 import { readTechList } from './data/tech-details';
 import { LF_SLOTS_KEY, readLfSlots, rememberLfSlots, type LfSlots } from './data/lf-slots';
@@ -22,13 +30,15 @@ import { watchJumpgate } from './modules/fleet/jumpgate';
 import { registerShortcuts, switchBodyUrl } from './modules/shortcuts';
 import { nextBody } from './engines/fleet';
 import { watchTechPages } from './modules/tech';
-import { openPlanner } from './modules/tech/planner-view';
-import { PLAN_KEY, pendingFor, planCount, planMissing, pruneByQueues, SENT_KEY, type Plan, type Shipment } from './engines/planner';
+import { accountResources, openPlanner } from './modules/tech/planner-view';
+import { accountGap, PLAN_KEY, pendingFor, planCount, pruneByQueues, SENT_KEY, type Plan, type Shipment } from './engines/planner';
 import { estimateResources } from './engines/resources';
 import { entriesIn, JOURNAL_KEY, periodRange, periodStats, type Journal } from './engines/expeditions';
 import { isMessagesPage, ownPlayerId } from './data/messages';
 import { watchMessages } from './modules/messages';
 import { openJournal } from './modules/messages/journal-view';
+import { isHighscorePage, watchHighscore } from './modules/highscore';
+import { bellButton, clockOffset, startReminders, watchEventList } from './modules/reminders';
 import { renderPlanetMenu, type MenuMode, type MenuSettings } from './modules/planet-menu';
 
 async function bootstrap(): Promise<void> {
@@ -36,7 +46,19 @@ async function bootstrap(): Promise<void> {
   if (!namespace) return; // not a logged-in game page
 
   const guard = new NetworkGuard((input, init) => fetch(input, init), window.location.origin);
-  const store = new Store(new GMStore(), namespace);
+  const gm = new GMStore();
+  const store = new Store(gm, namespace);
+  // One-time move of the galaxy targets and rivals kept before 2026-11-06 into the new marks.
+  const moved = migrateOld(loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null)), {
+    targets: store.get<{ coords: string; planet: string; player: string; at: number }[]>(TARGETS_KEY, []),
+    rivals: store.get<{ id: number; name: string; at: number }[]>('rivals.list', []),
+  });
+  if (moved) {
+    store.set(MARKS_KEY, moved);
+    store.set(TARGETS_KEY, []);
+    store.set('rivals.list', []);
+  }
+  if (store.get('rivals.points', null) !== null) store.set('rivals.points', null);
   const locale = detectLocale(document);
   const t = translator(locale);
   let snapshot: AccountSnapshot | null = store.get<AccountSnapshot | null>(SNAPSHOT_KEY, null);
@@ -51,6 +73,8 @@ async function bootstrap(): Promise<void> {
       loadQueuesOnPageLoad({ guard, store, ids: bodyIds }),
       // Lifeform bonuses for the expedition size: once per session, like accountInfo.
       hydrateLfOncePerSession({ guard, store, session: window.sessionStorage }),
+      // Universe size and fleet speeds: public API, at most once a week.
+      loadServerDataOnPageLoad({ guard, store, origin: location.origin }),
     ]);
     if (lf.status === 'rejected') console.warn(`[${t('app.name')}]`, lf.reason);
     if (account.status === 'fulfilled') snapshot = account.value;
@@ -88,7 +112,11 @@ async function bootstrap(): Promise<void> {
   if (seenSlots && bodyId && rememberLfSlots(lfSlots, bodyId, seenSlots)) store.set(LF_SLOTS_KEY, lfSlots);
 
   // Points are on the overview page only, typed in by the game's own script after load: keep the last value seen.
-  watchScore(document, () => Date.now(), (score) => store.set(SCORE_KEY, score));
+  watchScore(document, () => Date.now(), (score) => {
+    store.set(SCORE_KEY, score);
+    // History: one entry per day from what is already known (page DOM + stored snapshot), no network.
+    store.set(HISTORY_KEY, recordDay(store.get<History>(HISTORY_KEY, []), { at: score.at, points: score.points, rank: score.rank, ...dayFigures(snapshot) }));
+  });
 
   const deps = { guard, store, session: window.sessionStorage };
   const storedMode = store.get<string>('planetMenu.mode', 'side');
@@ -98,26 +126,27 @@ async function bootstrap(): Promise<void> {
     showTotals: store.get<boolean>('planetMenu.totals', true),
     markIdle: store.get<boolean>('planetMenu.markIdle', false),
   };
-  /** What the plan still misses over all bodies, in MSU (resources on the way count as there). */
+  /** What the whole account still misses for the plan, in MSU (resources on the way count as there). */
   const planGap = (): number | null => {
     const plan = store.get<Plan>(PLAN_KEY, {});
     const sent = store.get<Shipment[]>(SENT_KEY, []);
     const now = Date.now();
     const here = currentBodyId(document);
     const onScreen = readCurrentResources(document);
-    let total = 0;
-    let known = false;
-    for (const [key, items] of Object.entries(plan)) {
-      const id = Number(key);
+    const stock = (id: number) => {
       const body = snapshot?.bodies.find((b) => b.id === id);
-      const have = here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
-      if (!have || !items.length) continue;
-      known = true;
-      const p = pendingFor(sent, id, here === id ? now : (body?.resourcesAt ?? 0));
-      const gap = planMissing(items, { metal: have.metal + p.metal, crystal: have.crystal + p.crystal, deuterium: have.deuterium + p.deuterium });
-      total += gap.metal + gap.crystal * 1.5 + gap.deuterium * 3;
+      return here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
+    };
+    const inFlight = { metal: 0, crystal: 0, deuterium: 0 };
+    for (const key of Object.keys(plan)) {
+      const id = Number(key);
+      const p = pendingFor(sent, id, here === id ? now : (snapshot?.bodies.find((b) => b.id === id)?.resourcesAt ?? 0));
+      inFlight.metal += p.metal;
+      inFlight.crystal += p.crystal;
+      inFlight.deuterium += p.deuterium;
     }
-    return known ? total : null;
+    const gap = accountGap(plan, accountResources(snapshot?.bodies ?? [], stock, inFlight)).missing;
+    return gap ? gap.metal + gap.crystal * 1.5 + gap.deuterium * 3 : null;
   };
   const draw = () =>
     renderPlanetMenu({
@@ -136,12 +165,27 @@ async function bootstrap(): Promise<void> {
         store.set('planetMenu.markIdle', next.markIdle);
         draw();
       },
+      onBackupExport: () => downloadBackup(document, gm, Date.now()),
+      onBackupImport: (text) => {
+        // OGLight's "Export data" file: converted into this universe's marks and positions.
+        let json: unknown = null;
+        try { json = JSON.parse(text); } catch { /* not JSON: importBackup says so */ }
+        if (!isOglightDb(json)) return importBackup(gm, text);
+        const out = convertOglight(json, loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null)), store.get<Positions>(POSITIONS_KEY, {}), Date.now());
+        store.set(MARKS_KEY, out.marks);
+        store.set(POSITIONS_KEY, out.positions);
+        const days = convertOglightStats(json.stats ?? {}, store.get<Journal>(JOURNAL_KEY, {}));
+        store.set(JOURNAL_KEY, days.journal);
+        return t('settings.oglightDone', { players: out.players, planets: out.planets, seen: out.seen, exp: days.expeditions.toLocaleString(locale), raids: days.raids.toLocaleString(locale), days: days.days });
+      },
       onOpenDashboard: () =>
         openDashboard({
           doc: document,
           snapshot,
           entries: readPlanetList(document),
           score: store.get<Score | null>(SCORE_KEY, null),
+          history: store.get<History>(HISTORY_KEY, []),
+          bell: (r) => bellButton(document, store, t, r),
           queues,
           names: techNames,
           lfSlots,
@@ -150,6 +194,11 @@ async function bootstrap(): Promise<void> {
           t,
         }),
       planCount: planCount(store.get<Plan>(PLAN_KEY, {})),
+      targetsCount: (() => {
+        const m = loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null));
+        return Object.keys(m.players).length + Object.keys(m.planets).length;
+      })(),
+      onOpenTargets: () => openTargetsHere(),
       planGap: planGap(),
       journalToday: (() => {
         const s = periodStats(entriesIn(store.get<Journal>(JOURNAL_KEY, {}), periodRange('today', Date.now())));
@@ -214,13 +263,45 @@ async function bootstrap(): Promise<void> {
     watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), onPlanChange: () => draw() });
   }
 
+  // Targets side bar: stays open across pages as the player left it; M = next position of its list.
+  const side = { doc: document, store, guard, t, locale };
+  const openTargetsHere = () => toggleSide(side);
+  onSideNavigate(highlightPosition);
+  restoreSide(side);
+  registerShortcuts(document, [{ key: 'm', label: 'shortcut.nextTarget', run: () => void nextInSide(document) }]);
+  const pageMeta = (name: string) => document.querySelector(`meta[name="${name}"]`)?.getAttribute('content') ?? '';
+
+  // Manual reminders: due ones are shown on the page; bells on the game's event list.
+  const reminders = { doc: document, store, t, locale, offset: clockOffset(document, Date.now()) };
+  startReminders(reminders);
+  watchEventList(reminders);
+
+  // Highscore: gap to the player, days to catch up, rival star.
+  if (isHighscorePage(document)) watchHighscore({ doc: document, store, locale, t, guard });
+
   // Inbox: a summary on each report; expedition reports go into the journal.
-  if (isMessagesPage(document)) watchMessages({ doc: document, store, playerId: ownPlayerId(document), locale, t });
+  if (isMessagesPage(document))
+    watchMessages({
+      doc: document, store, playerId: ownPlayerId(document), locale, t,
+      spy: {
+        bases: (snapshot?.bodies ?? []).map((b) => ({ id: b.id, name: b.name, coords: b.coords, moon: b.type === 'moon' })),
+        researches: snapshot?.researches ?? {},
+        classId: Number(pageMeta('ogame-player-characterclass-id')) || 0,
+        server: pageMeta('ogame-universe').split('.')[0] ?? '',
+        lang: pageMeta('ogame-ui-language') || pageMeta('ogame-language'),
+      },
+    });
 
   // Fleet page helpers: reserves and fleetsave, on the game's own form.
   if (isFleetDispatch(document) && currentId) {
     const bodies = readPlanetList(document).map(({ planetId, moonId, name, coords }) => ({ planetId, moonId, name, coords }));
     renderFleetTools({ doc: document, store, bodyId: currentId, bodies, t, locale });
+  }
+
+  // Galaxy view: system summary, marks, debris in MSU, targets and the scores card.
+  if (isGalaxyPage(document)) {
+    const ownPlanetIds = new Set(readPlanetList(document).flatMap((e) => (e.planetId ? [e.planetId] : [])));
+    watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onSystem: refreshSide });
   }
 }
 

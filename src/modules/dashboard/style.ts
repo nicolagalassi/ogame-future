@@ -4,7 +4,7 @@ export const DASHBOARD_CSS = `
 .moon-ico { margin-right: 4px; vertical-align: -1px; color: var(--muted); }
 .kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 
-.cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 24px; }
+.cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .prod { margin-bottom: 10px; }
 .prod-top { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 4px; font-size: 12px; }
 .track { height: 6px; border-radius: 3px; background: #1A2638; overflow: hidden; }
@@ -66,7 +66,7 @@ td.queue { white-space: nowrap; }
 .matrix th.col.on .col-name { color: #4FD1E8; }
 .matrix th.col.on { box-shadow: inset 0 -2px 0 #4FD1E8; }
 .matrix td { padding: 4px 6px; }
-.matrix th.name, .matrix td.name { position: sticky; left: 0; z-index: 1; background: #0A111C; }
+.matrix th.name, .matrix td.name { position: sticky; left: 0; z-index: 1; background: var(--raised); }
 .matrix tr.moon td.name { background: #0F1828; }
 .matrix td.tech { color: #C9D4E2; font-weight: 400; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
 td.zero { color: #3A4A60; }
@@ -96,4 +96,22 @@ table.scrap td.unit .unit-ico { margin: 0; width: 24px; height: 24px; }
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cols { grid-template-columns: 1fr; }
 }
+.charts { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 12px; }
+.chart { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
+.chart figcaption { margin-bottom: 6px; color: var(--text); font-weight: 700; font-size: 13px; }
+.plot { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart .grid { stroke: var(--line-soft); stroke-width: 1; }
+.chart .axis { fill: var(--muted); font: 10px var(--mono); }
+.chart .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .cross { stroke: var(--faint); stroke-width: 1; }
+.chart .dot { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.chart .tip { position: absolute; top: -4px; transform: translateX(-50%); padding: 3px 7px; border-radius: 6px; background: var(--raised); border: 1px solid var(--line); color: var(--text); font: 11px var(--mono); white-space: nowrap; pointer-events: none; }
+.kpi .value.neg, td.neg { color: var(--bad); }
+td.pos { color: var(--ok); }
+table.queues td.kind { color: var(--muted); }
+table.queues td.acts { width: 1%; text-align: right; }
+.fut-bell { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); cursor: pointer; }
+.fut-bell:hover, .fut-bell:focus-visible { border-color: var(--accent); color: var(--text); }
+.fut-bell.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
 `;

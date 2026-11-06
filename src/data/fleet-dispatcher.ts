@@ -38,7 +38,7 @@ export interface FleetDispatcher {
   maxFleetCount: number;
   expeditionCount: number;
   maxExpeditionCount: number;
-  fleetHelper: { shipsData?: Record<string, { cargoCapacity?: number; baseCargoCapacity?: number; name?: string }> };
+  fleetHelper: { shipsData?: Record<string, { cargoCapacity?: number; baseCargoCapacity?: number; name?: string; speed?: number }> };
   apiDataJson?: { characterClassId?: number; bonuses?: { characterClassBooster?: Record<string, number> } };
   resetShips(): void;
   resetCargo(): void;
@@ -91,13 +91,14 @@ export function shipsOnPlanet(fd: FleetDispatcher): Record<string, number> {
 }
 
 export const SHIPS_INFO_KEY = 'ships.info';
-export type ShipsInfo = Record<string, { name: string; capacity: number }>;
+/** speed: with the player's drive research, as the fleet page computes it (missing in data saved before 2026-11-06). */
+export type ShipsInfo = Record<string, { name: string; capacity: number; speed?: number }>;
 
 /** Ship names (in the game's language) and cargo capacities, as the fleet page knows them. */
 export function readShipsInfo(fd: FleetDispatcher): ShipsInfo | null {
   const data = fd.fleetHelper?.shipsData;
   if (!data) return null;
   const out: ShipsInfo = {};
-  for (const [id, s] of Object.entries(data)) out[id] = { name: s.name ?? '', capacity: s.cargoCapacity || s.baseCargoCapacity || 0 };
+  for (const [id, s] of Object.entries(data)) out[id] = { name: s.name ?? '', capacity: s.cargoCapacity || s.baseCargoCapacity || 0, speed: s.speed || 0 };
   return Object.keys(out).length ? out : null;
 }
