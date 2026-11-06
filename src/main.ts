@@ -32,6 +32,7 @@ import { entriesIn, JOURNAL_KEY, periodRange, periodStats, type Journal } from '
 import { isMessagesPage, ownPlayerId } from './data/messages';
 import { watchMessages } from './modules/messages';
 import { openJournal } from './modules/messages/journal-view';
+import { openSpyTable } from './modules/messages/spy-table';
 import { renderPlanetMenu, type MenuMode, type MenuSettings } from './modules/planet-menu';
 
 async function bootstrap(): Promise<void> {
@@ -226,7 +227,15 @@ async function bootstrap(): Promise<void> {
   }
 
   // Inbox: a summary on each report; expedition reports go into the journal.
-  if (isMessagesPage(document)) watchMessages({ doc: document, store, playerId: ownPlayerId(document), locale, t });
+  if (isMessagesPage(document))
+    watchMessages({
+      doc: document, store, playerId: ownPlayerId(document), locale, t,
+      onOpenSpyTable: () =>
+        openSpyTable({
+          doc: document, store, now: Date.now(), locale, t,
+          bases: (snapshot?.bodies ?? []).map((b) => ({ id: b.id, name: b.name, coords: b.coords, moon: b.type === 'moon' })),
+        }),
+    });
 
   // Fleet page helpers: reserves and fleetsave, on the game's own form.
   if (isFleetDispatch(document) && currentId) {
