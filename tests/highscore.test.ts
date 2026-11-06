@@ -7,7 +7,7 @@ import { NetworkGuard } from '../src/core/guard';
 import { MemoryStore, Store } from '../src/core/storage';
 import { translator } from '../src/core/i18n';
 import { dayKey, HISTORY_KEY, recordDay, type History } from '../src/engines/history';
-import { RIVALS_KEY } from '../src/engines/rivals';
+import { MARKS_KEY } from '../src/engines/marks';
 
 // Shape of the game's highscore table (OGame 13.1), made-up players.
 const row = (id: number, rank: number, name: string, score: number, mine = false) =>
@@ -33,7 +33,7 @@ describe('highscore page', () => {
     expect(daysToCatch(-5, 1)).toBe(0);
   });
 
-  it('shows the points made since midnight, days to catch up and the rival star', async () => {
+  it('shows the points made since midnight, days to catch up and the player flag', async () => {
     page();
     const now = new Date(2026, 10, 8, 15).getTime();
     const store = new Store(new MemoryStore(), 'x');
@@ -57,10 +57,9 @@ describe('highscore page', () => {
     expect(document.querySelector('#position3 .fut-hs-gap')?.className).toContain('down');
     expect(ahead.querySelector('.fut-hs-eta')?.textContent).toBe('ti avvicini: 10 g');
     expect(document.querySelector('.fut-hs-note')?.textContent).toContain('00:05');
-    expect(document.getElementById('position2')!.querySelector('.fut-hs-star')).toBeNull();
-    ahead.querySelector<HTMLButtonElement>('.fut-hs-star')!.click();
-    expect(store.get<{ id: number }[]>(RIVALS_KEY, []).map((r) => r.id)).toEqual([1]);
-    expect(document.getElementById('position1')!.classList.contains('fut-hs-rival')).toBe(true);
+    expect(document.getElementById('position2')!.querySelector('.fut-mk-flag')).toBeNull();
+    (ahead.querySelector<HTMLButtonElement>('.fut-mk-flag')!).dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true }));
+    expect(store.get<{ players: Record<string, { flag: string }> }>(MARKS_KEY, { players: {} }).players['1']?.flag).toBe('watch');
     expect(document.querySelectorAll('#position1 .fut-hs-gap')).toHaveLength(1);
   });
 });

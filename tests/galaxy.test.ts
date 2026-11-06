@@ -3,7 +3,7 @@ import { debrisMsu, readGalaxy } from '../src/data/galaxy';
 import { parsePlayerData, playerScores } from '../src/data/player-api';
 import { NetworkGuard } from '../src/core/guard';
 import { MemoryStore, Store } from '../src/core/storage';
-import { systemSummary, toggleTarget } from '../src/modules/galaxy';
+import { systemSummary } from '../src/modules/galaxy';
 
 // Shape of the game's #galaxyContent (OGame 13), with made-up players.
 const row = (pos: number, inner: string, cls = '') => `<div class="galaxyRow ctContentRow ${cls}" id="galaxyRow${pos}"><div class="galaxyCell cellPosition">${pos}</div>${inner}</div>`;
@@ -64,12 +64,6 @@ describe('galaxy view', () => {
     expect(systemSummary(s, new Set()).deep).toBe(1_830_000);
   });
 
-  it('toggles a target', () => {
-    const t = { coords: '1:300:5', planet: 'Kepler', player: 'Kublai', at: 1 };
-    const one = toggleTarget([], t);
-    expect(one).toEqual([t]);
-    expect(toggleTarget(one, { ...t, at: 2 })).toEqual([]);
-  });
 });
 
 const XML = `<?xml version="1.0" encoding="UTF-8"?><playerData id="110977" name="Dalinar" timestamp="1793799377" serverId="en808"><positions>

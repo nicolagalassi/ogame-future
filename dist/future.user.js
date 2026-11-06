@@ -549,9 +549,6 @@
     "galaxy.deep": "Spazio profondo {msu} MSU",
     "galaxy.noDebris": "Nessun campo detriti",
     "galaxy.targets": "Bersagli ({count})",
-    "galaxy.noTargets": "Nessun bersaglio. Segna un pianeta con il mirino accanto al nome.",
-    "galaxy.targetAdd": "Segna come bersaglio",
-    "galaxy.targetRemove": "Togli dai bersagli",
     "galaxy.rankTitle": "Punti e classifiche di {name}",
     "galaxy.score.total": "Generale",
     "galaxy.score.economy": "Economia",
@@ -608,15 +605,6 @@
     "spy.status.honorableTarget": "o",
     "spy.status.outlaw": "fuorilegge",
     "spy.status.admin": "admin",
-    "dash.tab.rivals": "Rivali",
-    "dash.rivalsLoading": "Lettura dei punti dall'API pubblica\u2026",
-    "dash.rivalsNone": "Nessun rivale. In galassia clicca la posizione (#) accanto a un giocatore per seguirlo qui.",
-    "dash.rivalsPlayer": "Giocatore",
-    "dash.rivalsGrowth": "Crescita 7 g",
-    "dash.rivalsRemove": "Smetti di seguire",
-    "dash.rivalsHint": "Punti e posizioni dall'API pubblica, aggiornata dal gioco circa ogni ora. Sotto ogni valore la distanza da te: arancio se il rivale \xE8 avanti, verde se \xE8 dietro. La crescita usa le letture gi\xE0 fatte.",
-    "galaxy.rivalAdd": "Clic: segui come rivale",
-    "galaxy.rivalRemove": "Clic: smetti di seguire",
     "dash.queuesTitle": "Code in corso",
     "dash.queuesHint": "Campanella: avviso nella pagina quando finisce.",
     "remind.add": "Avvisami quando finisce",
@@ -635,10 +623,48 @@
     "hs.today": "{n} punti da mezzanotte (base alle {time})",
     "hs.never": "al ritmo attuale no",
     "hs.etaMine": "Al tuo ritmo degli ultimi 7 giorni (+{mine}/g)",
-    "hs.etaBoth": "Al tuo ritmo (+{mine}/g) meno il suo (+{theirs}/g), ultimi 7 giorni",
     "hs.passToday": "lo superi oggi",
     "hs.note": "Sotto i punti: quanto ha fatto oggi ogni giocatore, dalla classifica pubblica delle {time}.",
-    "hs.noteWaiting": "Lettura della classifica pubblica per i punti di oggi\u2026"
+    "hs.noteWaiting": "Lettura della classifica pubblica per i punti di oggi\u2026",
+    "mark.flag.watch": "Da controllare",
+    "mark.flag.target": "Bersaglio",
+    "mark.flag.farm": "Frigo",
+    "mark.flag.danger": "Pericolo",
+    "mark.flag.friend": "Amico",
+    "mark.flag.trade": "Commercio",
+    "mark.tag.red": "Rosso",
+    "mark.tag.orange": "Arancio",
+    "mark.tag.yellow": "Giallo",
+    "mark.tag.green": "Verde",
+    "mark.tag.blue": "Blu",
+    "mark.tag.violet": "Viola",
+    "mark.none": "Togli",
+    "mark.change": "clic per cambiare, Maiusc+clic per l'ultimo usato",
+    "mark.flagAdd": "Segna il giocatore (Maiusc+clic: l'ultima bandierina)",
+    "mark.tagAdd": "Colora il pianeta (Maiusc+clic: l'ultimo colore)",
+    "marks.title": "Bersagli",
+    "marks.sub": "{players} giocatori \xB7 {planets} pianeti",
+    "marks.tab.players": "Giocatori",
+    "marks.tab.planets": "Pianeti",
+    "marks.recent": "Recenti",
+    "marks.noRecent": "Nessun giocatore aperto di recente.",
+    "marks.noPlayers": "Nessun giocatore con questa bandierina. Mettila dalla galassia, dalla classifica o dalla tabella spiate.",
+    "marks.openSheet": "Apri la scheda del giocatore",
+    "marks.playersHint": "Clic sul nome: punti, posizioni e tutti i pianeti e lune dall'API pubblica.",
+    "marks.back": "Torna all'elenco",
+    "marks.write": "Scrivi messaggio",
+    "marks.profile": "Profilo",
+    "marks.rank": "Classifica",
+    "marks.ships": "Navi",
+    "marks.planets": "Pianeti {n} \xB7 lune {moons}",
+    "marks.from": "Da",
+    "marks.to": "a",
+    "marks.hide.vacation": "Nascondi vacanza",
+    "marks.hide.banned": "Nascondi bannati",
+    "marks.hide.inactive": "Nascondi inattivi",
+    "marks.noneInRange": "Nessun pianeta colorato in questo intervallo con questi filtri.",
+    "marks.noPlanets": "Nessun pianeta colorato. In galassia usa il pallino a destra del nome del pianeta.",
+    "marks.planetsHint": "{n} pianeti. Le coordinate aprono la galassia, dove c'\xE8 la sonda del gioco."
   };
 
   // src/i18n/en.json
@@ -1026,9 +1052,6 @@
     "galaxy.deep": "Deep space {msu} MSU",
     "galaxy.noDebris": "No debris fields",
     "galaxy.targets": "Targets ({count})",
-    "galaxy.noTargets": "No targets yet. Mark a planet with the crosshair next to its name.",
-    "galaxy.targetAdd": "Mark as target",
-    "galaxy.targetRemove": "Remove from targets",
     "galaxy.rankTitle": "Points and ranks of {name}",
     "galaxy.score.total": "Overall",
     "galaxy.score.economy": "Economy",
@@ -1085,15 +1108,6 @@
     "spy.status.honorableTarget": "h",
     "spy.status.outlaw": "outlaw",
     "spy.status.admin": "admin",
-    "dash.tab.rivals": "Rivals",
-    "dash.rivalsLoading": "Reading points from the public API\u2026",
-    "dash.rivalsNone": "No rivals yet. In the galaxy view click the rank (#) next to a player to follow them here.",
-    "dash.rivalsPlayer": "Player",
-    "dash.rivalsGrowth": "Growth 7 d",
-    "dash.rivalsRemove": "Stop following",
-    "dash.rivalsHint": "Points and ranks from the public API, which the game updates about every hour. Under each value the gap to you: orange when the rival is ahead, green when behind. Growth uses the readings already made.",
-    "galaxy.rivalAdd": "Click: follow as a rival",
-    "galaxy.rivalRemove": "Click: stop following",
     "dash.queuesTitle": "Running queues",
     "dash.queuesHint": "Bell: a message on the page when it ends.",
     "remind.add": "Remind me when it ends",
@@ -1112,10 +1126,48 @@
     "hs.today": "{n} points since midnight (base at {time})",
     "hs.never": "not at this pace",
     "hs.etaMine": "At your pace of the last 7 days (+{mine}/d)",
-    "hs.etaBoth": "Your pace (+{mine}/d) minus theirs (+{theirs}/d), last 7 days",
     "hs.passToday": "you pass today",
     "hs.note": "Under the points: what each player made today, from the public highscore of {time}.",
-    "hs.noteWaiting": "Reading the public highscore for today's points\u2026"
+    "hs.noteWaiting": "Reading the public highscore for today's points\u2026",
+    "mark.flag.watch": "Watch",
+    "mark.flag.target": "Target",
+    "mark.flag.farm": "Farm",
+    "mark.flag.danger": "Danger",
+    "mark.flag.friend": "Friend",
+    "mark.flag.trade": "Trade",
+    "mark.tag.red": "Red",
+    "mark.tag.orange": "Orange",
+    "mark.tag.yellow": "Yellow",
+    "mark.tag.green": "Green",
+    "mark.tag.blue": "Blue",
+    "mark.tag.violet": "Violet",
+    "mark.none": "Remove",
+    "mark.change": "click to change, Shift+click for the last one used",
+    "mark.flagAdd": "Flag the player (Shift+click: last flag)",
+    "mark.tagAdd": "Colour the planet (Shift+click: last colour)",
+    "marks.title": "Targets",
+    "marks.sub": "{players} players \xB7 {planets} planets",
+    "marks.tab.players": "Players",
+    "marks.tab.planets": "Planets",
+    "marks.recent": "Recent",
+    "marks.noRecent": "No player opened lately.",
+    "marks.noPlayers": "No player with this flag. Set it from the galaxy, the highscore or the spy table.",
+    "marks.openSheet": "Open the player's sheet",
+    "marks.playersHint": "Click a name: points, ranks and every planet and moon from the public API.",
+    "marks.back": "Back to the list",
+    "marks.write": "Write message",
+    "marks.profile": "Profile",
+    "marks.rank": "Highscore",
+    "marks.ships": "Ships",
+    "marks.planets": "Planets {n} \xB7 moons {moons}",
+    "marks.from": "From",
+    "marks.to": "to",
+    "marks.hide.vacation": "Hide vacation",
+    "marks.hide.banned": "Hide banned",
+    "marks.hide.inactive": "Hide inactive",
+    "marks.noneInRange": "No coloured planet in this range with these filters.",
+    "marks.noPlanets": "No coloured planet. In the galaxy view use the dot to the right of the planet name.",
+    "marks.planetsHint": "{n} planets. Coordinates open the galaxy view, where the game's probe is."
   };
 
   // src/i18n/fr.json
@@ -1503,9 +1555,6 @@
     "galaxy.deep": "Espace lointain {msu} MSU",
     "galaxy.noDebris": "Aucun champ de d\xE9bris",
     "galaxy.targets": "Cibles ({count})",
-    "galaxy.noTargets": "Aucune cible. Marquez une plan\xE8te avec le viseur \xE0 c\xF4t\xE9 de son nom.",
-    "galaxy.targetAdd": "Marquer comme cible",
-    "galaxy.targetRemove": "Retirer des cibles",
     "galaxy.rankTitle": "Points et classements de {name}",
     "galaxy.score.total": "G\xE9n\xE9ral",
     "galaxy.score.economy": "\xC9conomie",
@@ -1562,15 +1611,6 @@
     "spy.status.honorableTarget": "h",
     "spy.status.outlaw": "hors-la-loi",
     "spy.status.admin": "admin",
-    "dash.tab.rivals": "Rivaux",
-    "dash.rivalsLoading": "Lecture des points depuis l'API publique\u2026",
-    "dash.rivalsNone": "Aucun rival. Dans la galaxie, cliquez sur le classement (#) \xE0 c\xF4t\xE9 d'un joueur pour le suivre ici.",
-    "dash.rivalsPlayer": "Joueur",
-    "dash.rivalsGrowth": "Croissance 7 j",
-    "dash.rivalsRemove": "Ne plus suivre",
-    "dash.rivalsHint": "Points et classements de l'API publique, mise \xE0 jour par le jeu environ toutes les heures. Sous chaque valeur l'\xE9cart avec vous : orange si le rival est devant, vert s'il est derri\xE8re. La croissance utilise les lectures d\xE9j\xE0 faites.",
-    "galaxy.rivalAdd": "Clic : suivre comme rival",
-    "galaxy.rivalRemove": "Clic : ne plus suivre",
     "dash.queuesTitle": "Files en cours",
     "dash.queuesHint": "Cloche : un message sur la page \xE0 la fin.",
     "remind.add": "Me pr\xE9venir \xE0 la fin",
@@ -1589,10 +1629,48 @@
     "hs.today": "{n} points depuis minuit (base \xE0 {time})",
     "hs.never": "pas \xE0 ce rythme",
     "hs.etaMine": "\xC0 votre rythme des 7 derniers jours (+{mine}/j)",
-    "hs.etaBoth": "Votre rythme (+{mine}/j) moins le sien (+{theirs}/j), 7 derniers jours",
     "hs.passToday": "d\xE9pass\xE9 aujourd'hui",
     "hs.note": "Sous les points : ce que chaque joueur a fait aujourd'hui, d'apr\xE8s le classement public de {time}.",
-    "hs.noteWaiting": "Lecture du classement public pour les points du jour\u2026"
+    "hs.noteWaiting": "Lecture du classement public pour les points du jour\u2026",
+    "mark.flag.watch": "\xC0 surveiller",
+    "mark.flag.target": "Cible",
+    "mark.flag.farm": "Ferme",
+    "mark.flag.danger": "Danger",
+    "mark.flag.friend": "Ami",
+    "mark.flag.trade": "Commerce",
+    "mark.tag.red": "Rouge",
+    "mark.tag.orange": "Orange",
+    "mark.tag.yellow": "Jaune",
+    "mark.tag.green": "Vert",
+    "mark.tag.blue": "Bleu",
+    "mark.tag.violet": "Violet",
+    "mark.none": "Retirer",
+    "mark.change": "clic pour changer, Maj+clic pour le dernier utilis\xE9",
+    "mark.flagAdd": "Marquer le joueur (Maj+clic : dernier drapeau)",
+    "mark.tagAdd": "Colorer la plan\xE8te (Maj+clic : derni\xE8re couleur)",
+    "marks.title": "Cibles",
+    "marks.sub": "{players} joueurs \xB7 {planets} plan\xE8tes",
+    "marks.tab.players": "Joueurs",
+    "marks.tab.planets": "Plan\xE8tes",
+    "marks.recent": "R\xE9cents",
+    "marks.noRecent": "Aucun joueur ouvert r\xE9cemment.",
+    "marks.noPlayers": "Aucun joueur avec ce drapeau. Ajoutez-le depuis la galaxie, le classement ou le tableau d'espionnage.",
+    "marks.openSheet": "Ouvrir la fiche du joueur",
+    "marks.playersHint": "Clic sur un nom : points, classements et toutes les plan\xE8tes et lunes depuis l'API publique.",
+    "marks.back": "Retour \xE0 la liste",
+    "marks.write": "\xC9crire un message",
+    "marks.profile": "Profil",
+    "marks.rank": "Classement",
+    "marks.ships": "Vaisseaux",
+    "marks.planets": "Plan\xE8tes {n} \xB7 lunes {moons}",
+    "marks.from": "De",
+    "marks.to": "\xE0",
+    "marks.hide.vacation": "Masquer vacances",
+    "marks.hide.banned": "Masquer bannis",
+    "marks.hide.inactive": "Masquer inactifs",
+    "marks.noneInRange": "Aucune plan\xE8te color\xE9e dans cette zone avec ces filtres.",
+    "marks.noPlanets": "Aucune plan\xE8te color\xE9e. Dans la galaxie, utilisez le point \xE0 droite du nom de la plan\xE8te.",
+    "marks.planetsHint": "{n} plan\xE8tes. Les coordonn\xE9es ouvrent la galaxie, o\xF9 se trouve la sonde du jeu."
   };
 
   // src/i18n/de.json
@@ -1980,9 +2058,6 @@
     "galaxy.deep": "Tiefer Raum {msu} MSU",
     "galaxy.noDebris": "Keine Tr\xFCmmerfelder",
     "galaxy.targets": "Ziele ({count})",
-    "galaxy.noTargets": "Noch keine Ziele. Markiere einen Planeten mit dem Fadenkreuz neben dem Namen.",
-    "galaxy.targetAdd": "Als Ziel markieren",
-    "galaxy.targetRemove": "Aus den Zielen entfernen",
     "galaxy.rankTitle": "Punkte und R\xE4nge von {name}",
     "galaxy.score.total": "Gesamt",
     "galaxy.score.economy": "Wirtschaft",
@@ -2039,15 +2114,6 @@
     "spy.status.honorableTarget": "e",
     "spy.status.outlaw": "Ge\xE4chtet",
     "spy.status.admin": "Admin",
-    "dash.tab.rivals": "Rivalen",
-    "dash.rivalsLoading": "Punkte werden aus der \xF6ffentlichen API gelesen\u2026",
-    "dash.rivalsNone": "Noch keine Rivalen. Klicke in der Galaxie auf den Rang (#) neben einem Spieler, um ihm hier zu folgen.",
-    "dash.rivalsPlayer": "Spieler",
-    "dash.rivalsGrowth": "Wachstum 7 T",
-    "dash.rivalsRemove": "Nicht mehr folgen",
-    "dash.rivalsHint": "Punkte und R\xE4nge aus der \xF6ffentlichen API, die das Spiel etwa st\xFCndlich aktualisiert. Unter jedem Wert der Abstand zu dir: orange, wenn der Rivale vorn liegt, gr\xFCn, wenn er dahinter ist. Das Wachstum nutzt die bereits gemachten Abfragen.",
-    "galaxy.rivalAdd": "Klick: als Rivalen folgen",
-    "galaxy.rivalRemove": "Klick: nicht mehr folgen",
     "dash.queuesTitle": "Laufende Auftr\xE4ge",
     "dash.queuesHint": "Glocke: eine Meldung auf der Seite, wenn es fertig ist.",
     "remind.add": "Erinnere mich, wenn es fertig ist",
@@ -2066,10 +2132,48 @@
     "hs.today": "{n} Punkte seit Mitternacht (Basis {time})",
     "hs.never": "nicht bei diesem Tempo",
     "hs.etaMine": "Bei deinem Tempo der letzten 7 Tage (+{mine}/T)",
-    "hs.etaBoth": "Dein Tempo (+{mine}/T) minus seines (+{theirs}/T), letzte 7 Tage",
     "hs.passToday": "heute \xFCberholt",
     "hs.note": "Unter den Punkten: was jeder Spieler heute gemacht hat, laut \xF6ffentlicher Rangliste von {time}.",
-    "hs.noteWaiting": "\xD6ffentliche Rangliste f\xFCr die heutigen Punkte wird gelesen\u2026"
+    "hs.noteWaiting": "\xD6ffentliche Rangliste f\xFCr die heutigen Punkte wird gelesen\u2026",
+    "mark.flag.watch": "Beobachten",
+    "mark.flag.target": "Ziel",
+    "mark.flag.farm": "Farm",
+    "mark.flag.danger": "Gefahr",
+    "mark.flag.friend": "Freund",
+    "mark.flag.trade": "Handel",
+    "mark.tag.red": "Rot",
+    "mark.tag.orange": "Orange",
+    "mark.tag.yellow": "Gelb",
+    "mark.tag.green": "Gr\xFCn",
+    "mark.tag.blue": "Blau",
+    "mark.tag.violet": "Violett",
+    "mark.none": "Entfernen",
+    "mark.change": "Klick zum \xC4ndern, Umschalt+Klick f\xFCr die zuletzt benutzte",
+    "mark.flagAdd": "Spieler markieren (Umschalt+Klick: letzte Flagge)",
+    "mark.tagAdd": "Planet f\xE4rben (Umschalt+Klick: letzte Farbe)",
+    "marks.title": "Ziele",
+    "marks.sub": "{players} Spieler \xB7 {planets} Planeten",
+    "marks.tab.players": "Spieler",
+    "marks.tab.planets": "Planeten",
+    "marks.recent": "Zuletzt",
+    "marks.noRecent": "Zuletzt kein Spieler ge\xF6ffnet.",
+    "marks.noPlayers": "Kein Spieler mit dieser Flagge. Setze sie in der Galaxie, der Rangliste oder der Spionagetabelle.",
+    "marks.openSheet": "Spielerblatt \xF6ffnen",
+    "marks.playersHint": "Klick auf einen Namen: Punkte, R\xE4nge und alle Planeten und Monde aus der \xF6ffentlichen API.",
+    "marks.back": "Zur\xFCck zur Liste",
+    "marks.write": "Nachricht schreiben",
+    "marks.profile": "Profil",
+    "marks.rank": "Rangliste",
+    "marks.ships": "Schiffe",
+    "marks.planets": "Planeten {n} \xB7 Monde {moons}",
+    "marks.from": "Von",
+    "marks.to": "bis",
+    "marks.hide.vacation": "Urlaub ausblenden",
+    "marks.hide.banned": "Gesperrte ausblenden",
+    "marks.hide.inactive": "Inaktive ausblenden",
+    "marks.noneInRange": "Kein gef\xE4rbter Planet in diesem Bereich mit diesen Filtern.",
+    "marks.noPlanets": "Kein gef\xE4rbter Planet. Nutze in der Galaxie den Punkt rechts vom Planetennamen.",
+    "marks.planetsHint": "{n} Planeten. Koordinaten \xF6ffnen die Galaxie, wo die Sonde des Spiels ist."
   };
 
   // src/core/i18n.ts
@@ -2310,80 +2414,9 @@
     };
   }
 
-  // src/engines/rivals.ts
-  var RIVALS_KEY = "rivals.list";
-  var RIVAL_POINTS_KEY = "rivals.points";
-  var RIVALS_MAX = 10;
-  var DAYS_KEPT = 90;
-  function toggleRival(list, rival) {
-    if (list.some((r) => r.id === rival.id)) return list.filter((r) => r.id !== rival.id);
-    return list.length >= RIVALS_MAX ? list : [rival, ...list];
-  }
-  function recordPoints(book, scores) {
-    const points = scores.scores.total?.points;
-    if (points === void 0) return book;
-    const day = dayKey(scores.at);
-    const list = (book[String(scores.id)] ?? []).filter((d) => d.day !== day).concat({ day, at: scores.at, points });
-    return { ...book, [String(scores.id)]: list.sort((a, b) => a.at - b.at).slice(-DAYS_KEPT) };
-  }
-  function pointsPerDay(book, id, days) {
-    const list = book[String(id)] ?? [];
-    const last = list.at(-1);
-    if (!last) return null;
-    const first = list.find((d) => last.at - d.at <= days * 864e5 + 36e5);
-    if (!first || first === last) return null;
-    return (last.points - first.points) / Math.max(1, (last.at - first.at) / 864e5);
-  }
-  var COMPARED = ["total", "economy", "research", "military", "lifeform"];
-  function gaps(me, rival) {
-    const out = {};
-    for (const k of COMPARED) {
-      const a = me?.scores[k]?.points, b = rival.scores[k]?.points;
-      out[k] = a === void 0 || b === void 0 ? null : b - a;
-    }
-    return out;
-  }
-
-  // src/data/player-api.ts
-  var PLAYER_SCORES_KEY = "galaxy.players";
-  var TTL = 60 * 60 * 1e3;
-  var KEEP = 400;
-  var SCORE_TYPES = { total: 0, economy: 1, research: 2, military: 3, lifeform: 8 };
-  function parsePlayerData(xml, now) {
-    const doc = new DOMParser().parseFromString(xml, "text/html");
-    const root = doc.querySelector("playerdata");
-    const id = Number(root?.getAttribute("id"));
-    if (!root || !id) return null;
-    const scores = {};
-    for (const [key2, type] of Object.entries(SCORE_TYPES)) {
-      const pos = root.querySelector(`positions position[type="${type}"]`);
-      const points = Number(pos?.getAttribute("score"));
-      const rank = Number(pos?.textContent?.trim());
-      if (pos && Number.isFinite(points) && Number.isFinite(rank)) scores[key2] = { points: Math.floor(points), rank };
-    }
-    const ships = Number(root.querySelector('positions position[type="3"]')?.getAttribute("ships"));
-    return { id, name: root.getAttribute("name") ?? "", at: now, scores, ships: Number.isFinite(ships) && ships > 0 ? ships : null };
-  }
-  async function playerScores(guard, store, origin, id, now) {
-    const cache = store.get(PLAYER_SCORES_KEY, {});
-    const hit = cache[String(id)];
-    if (hit && now - hit.at < TTL) return hit;
-    const res = await guard.request(`${origin}/api/playerData.xml?id=${id}`, "user-view");
-    if (!res.ok) return hit ?? null;
-    const fresh = parsePlayerData(await res.text(), now);
-    if (!fresh) return hit ?? null;
-    cache[String(id)] = fresh;
-    const own = Number(store.namespace.split(":").pop());
-    if (id === own || store.get(RIVALS_KEY, []).some((r) => r.id === id)) store.set(RIVAL_POINTS_KEY, recordPoints(store.get(RIVAL_POINTS_KEY, {}), fresh));
-    const ids = Object.keys(cache).sort((a, b) => (cache[b]?.at ?? 0) - (cache[a]?.at ?? 0));
-    for (const old of ids.slice(KEEP)) delete cache[old];
-    store.set(PLAYER_SCORES_KEY, cache);
-    return fresh;
-  }
-
   // src/data/server-data.ts
   var SERVER_DATA_KEY = "server.data";
-  var TTL2 = 7 * 24 * 36e5;
+  var TTL = 7 * 24 * 36e5;
   function parseServerData(xml, now) {
     const doc = new DOMParser().parseFromString(xml, "text/html");
     const root = doc.querySelector("serverdata");
@@ -2403,12 +2436,243 @@
   async function loadServerDataOnPageLoad(deps) {
     const now = deps.now ?? Date.now();
     const cached = deps.store.get(SERVER_DATA_KEY, null);
-    if (cached && now - cached.at < TTL2) return cached;
+    if (cached && now - cached.at < TTL) return cached;
     const res = await deps.guard.request(`${deps.origin}/api/serverData.xml`, "page-load");
     const fresh = res.ok ? parseServerData(await res.text(), now) : null;
     if (!fresh) return cached;
     deps.store.set(SERVER_DATA_KEY, fresh);
     return fresh;
+  }
+
+  // src/engines/marks.ts
+  var FLAGS = ["watch", "target", "farm", "danger", "friend", "trade"];
+  var TAGS = ["red", "orange", "yellow", "green", "blue", "violet"];
+  var MARKS_KEY = "marks";
+  var RECENT_MAX = 30;
+  var EMPTY_MARKS = { players: {}, planets: {}, recent: [], lastFlag: "watch", lastTag: "red" };
+  var loadMarks = (stored) => ({ ...EMPTY_MARKS, ...stored ?? {}, players: { ...stored?.players ?? {} }, planets: { ...stored?.planets ?? {} }, recent: [...stored?.recent ?? []] });
+  function flagPlayer(m, id, name, flag, now) {
+    const players = { ...m.players };
+    if (flag) players[String(id)] = { flag, name: name || players[String(id)]?.name || "", at: now };
+    else delete players[String(id)];
+    return { ...m, players, lastFlag: flag ?? m.lastFlag };
+  }
+  function tagPlanet(m, coords, tag, info, now) {
+    const planets = { ...m.planets };
+    if (tag) planets[coords] = { ...info, tag, at: now };
+    else delete planets[coords];
+    return { ...m, planets, lastTag: tag ?? m.lastTag };
+  }
+  function rememberRecent(m, id, name) {
+    return { ...m, recent: [{ id, name }, ...m.recent.filter((r) => r.id !== id)].slice(0, RECENT_MAX) };
+  }
+  var coordsValue = (c) => {
+    const [g, s, p] = c.split(":").map(Number);
+    return (g ?? 0) * 1e6 + (s ?? 0) * 1e3 + (p ?? 0);
+  };
+  function planetsInRange(m, from, to, filter = {}) {
+    const lo = Math.min(coordsValue(`${from}:0`), coordsValue(`${to}:0`));
+    const hi = Math.max(coordsValue(`${from}:999`), coordsValue(`${to}:999`));
+    return Object.entries(m.planets).filter(([c, p]) => {
+      const v = coordsValue(c);
+      return v >= lo && v <= hi && (!filter.tags || filter.tags.includes(p.tag)) && !p.statuses.some((s) => filter.hide?.includes(s));
+    }).sort((a, b) => coordsValue(a[0]) - coordsValue(b[0]));
+  }
+  function migrateOld(m, old) {
+    if (!old.targets.length && !old.rivals.length) return null;
+    let next = m;
+    for (const x of old.targets) if (!next.planets[x.coords]) next = tagPlanet(next, x.coords, "red", { planet: x.planet, player: x.player, playerId: null, statuses: [], moon: false }, x.at);
+    for (const r of old.rivals) if (!next.players[String(r.id)]) next = flagPlayer(next, r.id, r.name, "watch", r.at);
+    return { ...next, lastFlag: m.lastFlag, lastTag: m.lastTag };
+  }
+
+  // src/core/icons.ts
+  var PATHS = {
+    close: '<path d="M6 6l12 12M18 6L6 18"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    moon: '<path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z"/>',
+    eye: '<path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>',
+    warn: '<path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.2v.3"/>',
+    farm: '<path d="M4 20.5V10l8-5.5 8 5.5v10.5z"/><path d="M9.5 20.5v-6h5v6"/>',
+    user: '<circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5c.8-4 3.8-6 7.5-6s6.7 2 7.5 6"/>',
+    swap: '<path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/>',
+    flag: '<path d="M5.5 21V4M5.5 4.5h11l-2.5 4 2.5 4h-11"/>',
+    star: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
+    bell: '<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
+    target: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>'
+  };
+  function icon(doc, name, size = 14, cls = "fut-ico") {
+    const svg2 = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg2.setAttribute("viewBox", "0 0 24 24");
+    svg2.setAttribute("width", String(size));
+    svg2.setAttribute("height", String(size));
+    svg2.setAttribute("fill", "none");
+    svg2.setAttribute("stroke", "currentColor");
+    svg2.setAttribute("stroke-width", "2.2");
+    svg2.setAttribute("stroke-linecap", "round");
+    svg2.setAttribute("stroke-linejoin", "round");
+    svg2.setAttribute("aria-hidden", "true");
+    svg2.setAttribute("class", cls);
+    svg2.innerHTML = PATHS[name];
+    return svg2;
+  }
+
+  // src/modules/marks/picker.ts
+  var FLAG_ICONS = { watch: "eye", target: "target", farm: "farm", danger: "warn", friend: "user", trade: "swap" };
+  var FLAG_COLORS = { watch: "#4FD1E8", target: "#FF7A7A", farm: "#7BC47F", danger: "#F5B547", friend: "#7FB8FF", trade: "#B58CDB" };
+  var TAG_COLORS = { red: "#E5484D", orange: "#F08A3C", yellow: "#E3C52B", green: "#46B35E", blue: "#3E8EDE", violet: "#9A6BD8" };
+  var POP_ID = "fut-mk-pop";
+  var MARKS_CSS = `
+.fut-mk { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin: 0 2px; padding: 0;
+  border: 1px solid #2E4356; border-radius: 4px; background: #0D1522; color: #4A5B72; cursor: pointer; vertical-align: middle; }
+.fut-mk:hover, .fut-mk:focus-visible { border-color: #617C8D; color: #C9D4E2; outline: none; }
+.fut-mk.on { border-color: currentColor; background: #0D1522; }
+.fut-mk-dot { width: 9px; height: 9px; border-radius: 50%; border: 1px solid #4A5B72; }
+.fut-mk.on .fut-mk-dot { border-color: transparent; }
+#fut-mk-pop { position: fixed; z-index: 100002; display: flex; gap: 3px; padding: 5px; border: 1px solid #2E4356; border-radius: 8px;
+  background: #111B2A; box-shadow: 0 8px 22px rgba(0,0,0,0.55); font: 11px Verdana, Arial, sans-serif; }
+#fut-mk-pop button { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; padding: 0; border: 1px solid #1F2C40;
+  border-radius: 6px; background: #0A111C; color: #8A9BB0; cursor: pointer; }
+#fut-mk-pop button:hover, #fut-mk-pop button:focus-visible { border-color: currentColor; outline: none; }
+#fut-mk-pop button[aria-pressed="true"] { background: #12283A; border-color: currentColor; }
+#fut-mk-pop .fut-mk-dot { width: 12px; height: 12px; }`;
+  function ensureMarksStyle(doc) {
+    if (doc.getElementById("fut-mk-style")) return;
+    const style = doc.createElement("style");
+    style.id = "fut-mk-style";
+    style.textContent = MARKS_CSS;
+    doc.head.append(style);
+  }
+  var readMarks = (store) => loadMarks(store.get(MARKS_KEY, null));
+  function closePop(doc) {
+    doc.getElementById(POP_ID)?.remove();
+  }
+  function openPop(doc, anchor, items) {
+    closePop(doc);
+    const pop = doc.createElement("div");
+    pop.id = POP_ID;
+    pop.setAttribute("role", "menu");
+    pop.append(...items);
+    doc.body.append(pop);
+    const box = anchor.getBoundingClientRect();
+    const view = doc.defaultView;
+    pop.style.left = `${Math.max(6, Math.min(box.left - 4, (view?.innerWidth ?? 1200) - pop.offsetWidth - 6))}px`;
+    pop.style.top = `${box.bottom + 4 + pop.offsetHeight > (view?.innerHeight ?? 800) ? box.top - 4 - pop.offsetHeight : box.bottom + 4}px`;
+    items.find((b) => b.getAttribute("aria-pressed") === "true")?.focus() ?? items[0]?.focus();
+    const away = (e) => {
+      if (e instanceof KeyboardEvent ? e.key === "Escape" : !pop.contains(e.target)) {
+        closePop(doc);
+        doc.removeEventListener("mousedown", away, true);
+        doc.removeEventListener("keydown", away, true);
+        if (e instanceof KeyboardEvent) anchor.focus();
+      }
+    };
+    doc.addEventListener("mousedown", away, true);
+    doc.addEventListener("keydown", away, true);
+  }
+  function paintFlag(b, flag, t, name) {
+    b.replaceChildren(icon(b.ownerDocument, flag ? FLAG_ICONS[flag] : "flag", 11));
+    b.classList.toggle("on", !!flag);
+    b.style.color = flag ? FLAG_COLORS[flag] : "";
+    b.title = flag ? `${t(`mark.flag.${flag}`)} \xB7 ${t("mark.change")}` : t("mark.flagAdd");
+    b.setAttribute("aria-label", `${b.title}: ${name}`);
+  }
+  function paintTag(b, tag, t, coords) {
+    const dot = b.ownerDocument.createElement("span");
+    dot.className = "fut-mk-dot";
+    if (tag) dot.style.background = TAG_COLORS[tag];
+    b.replaceChildren(dot);
+    b.classList.toggle("on", !!tag);
+    b.title = tag ? `${t(`mark.tag.${tag}`)} \xB7 ${t("mark.change")}` : t("mark.tagAdd");
+    b.setAttribute("aria-label", `${b.title}: [${coords}]`);
+  }
+  var all = (root, sel) => [...root.querySelectorAll(sel)];
+  function everyRoot(doc) {
+    return [doc, ...[...doc.querySelectorAll('[id^="fut-"]')].map((h6) => h6.shadowRoot).filter((r) => !!r)];
+  }
+  function flagButton(o, id, name) {
+    const { doc, store, t } = o;
+    const b = doc.createElement("button");
+    b.type = "button";
+    b.className = "fut-mk fut-mk-flag";
+    b.dataset.futFlag = String(id);
+    b.setAttribute("aria-haspopup", "menu");
+    paintFlag(b, readMarks(store).players[String(id)]?.flag, t, name);
+    const set = (flag) => {
+      const next = flagPlayer(readMarks(store), id, name, flag, Date.now());
+      store.set(MARKS_KEY, next);
+      for (const root of everyRoot(doc)) for (const x of all(root, `[data-fut-flag="${id}"]`)) paintFlag(x, flag ?? void 0, t, name);
+      o.onChange?.();
+    };
+    b.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const m = readMarks(store);
+      const current2 = m.players[String(id)]?.flag;
+      if (e.shiftKey) return set(current2 === m.lastFlag ? null : m.lastFlag);
+      const items = [...FLAGS, null].map((flag) => {
+        const it = doc.createElement("button");
+        it.type = "button";
+        it.setAttribute("role", "menuitemradio");
+        it.setAttribute("aria-pressed", String((current2 ?? null) === flag));
+        it.title = flag ? t(`mark.flag.${flag}`) : t("mark.none");
+        it.setAttribute("aria-label", it.title);
+        it.append(icon(doc, flag ? FLAG_ICONS[flag] : "close", 13));
+        if (flag) it.style.color = FLAG_COLORS[flag];
+        it.addEventListener("click", () => {
+          closePop(doc);
+          set(flag);
+          b.focus();
+        });
+        return it;
+      });
+      openPop(doc, b, items);
+    });
+    return b;
+  }
+  function tagButton(o, coords, info) {
+    const { doc, store, t } = o;
+    const b = doc.createElement("button");
+    b.type = "button";
+    b.className = "fut-mk fut-mk-tag";
+    b.dataset.futTag = coords;
+    b.setAttribute("aria-haspopup", "menu");
+    paintTag(b, readMarks(store).planets[coords]?.tag, t, coords);
+    const set = (tag) => {
+      store.set(MARKS_KEY, tagPlanet(readMarks(store), coords, tag, info, Date.now()));
+      for (const root of everyRoot(doc)) for (const x of all(root, `[data-fut-tag="${coords}"]`)) paintTag(x, tag ?? void 0, t, coords);
+      o.onChange?.();
+    };
+    b.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const m = readMarks(store);
+      const current2 = m.planets[coords]?.tag;
+      if (e.shiftKey) return set(current2 === m.lastTag ? null : m.lastTag);
+      const items = [...TAGS, null].map((tag) => {
+        const it = doc.createElement("button");
+        it.type = "button";
+        it.setAttribute("role", "menuitemradio");
+        it.setAttribute("aria-pressed", String((current2 ?? null) === tag));
+        it.title = tag ? t(`mark.tag.${tag}`) : t("mark.none");
+        it.setAttribute("aria-label", it.title);
+        if (tag) {
+          const dot = doc.createElement("span");
+          dot.className = "fut-mk-dot";
+          dot.style.background = TAG_COLORS[tag];
+          dot.style.borderColor = "transparent";
+          it.append(dot);
+        } else it.append(icon(doc, "close", 13));
+        it.addEventListener("click", () => {
+          closePop(doc);
+          set(tag);
+          b.focus();
+        });
+        return it;
+      });
+      openPop(doc, b, items);
+    });
+    return b;
   }
 
   // src/core/format.ts
@@ -2428,31 +2692,6 @@
       }
     }
     return Math.round(value).toLocaleString(locale);
-  }
-
-  // src/core/icons.ts
-  var PATHS = {
-    close: '<path d="M6 6l12 12M18 6L6 18"/>',
-    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
-    moon: '<path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z"/>',
-    star: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
-    bell: '<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
-    target: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>'
-  };
-  function icon(doc, name, size = 14, cls = "fut-ico") {
-    const svg2 = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg2.setAttribute("viewBox", "0 0 24 24");
-    svg2.setAttribute("width", String(size));
-    svg2.setAttribute("height", String(size));
-    svg2.setAttribute("fill", "none");
-    svg2.setAttribute("stroke", "currentColor");
-    svg2.setAttribute("stroke-width", "2.2");
-    svg2.setAttribute("stroke-linecap", "round");
-    svg2.setAttribute("stroke-linejoin", "round");
-    svg2.setAttribute("aria-hidden", "true");
-    svg2.setAttribute("class", cls);
-    svg2.innerHTML = PATHS[name];
-    return svg2;
   }
 
   // src/data/galaxy.ts
@@ -2511,6 +2750,50 @@
   }
   var debrisMsu = (d) => d.metal + d.crystal * 1.5 + d.deuterium * 3;
 
+  // src/data/player-api.ts
+  var PLAYER_SCORES_KEY = "galaxy.players";
+  var TTL2 = 60 * 60 * 1e3;
+  var KEEP = 400;
+  var SCORE_TYPES = { total: 0, economy: 1, research: 2, military: 3, lifeform: 8 };
+  function parsePlayerData(xml, now) {
+    const doc = new DOMParser().parseFromString(xml, "text/html");
+    const root = doc.querySelector("playerdata");
+    const id = Number(root?.getAttribute("id"));
+    if (!root || !id) return null;
+    const scores = {};
+    for (const [key2, type] of Object.entries(SCORE_TYPES)) {
+      const pos = root.querySelector(`positions position[type="${type}"]`);
+      const points = Number(pos?.getAttribute("score"));
+      const rank = Number(pos?.textContent?.trim());
+      if (pos && Number.isFinite(points) && Number.isFinite(rank)) scores[key2] = { points: Math.floor(points), rank };
+    }
+    const ships = Number(root.querySelector('positions position[type="3"]')?.getAttribute("ships"));
+    const planets = [...root.querySelectorAll("planets planet")].map((p) => {
+      const m = p.querySelector("moon");
+      return {
+        id: Number(p.getAttribute("id")) || 0,
+        name: p.getAttribute("name") ?? "",
+        coords: p.getAttribute("coords") ?? "",
+        moon: m ? { id: Number(m.getAttribute("id")) || 0, name: m.getAttribute("name") ?? "", size: Number(m.getAttribute("size")) || 0 } : null
+      };
+    }).filter((p) => /^\d+:\d+:\d+$/.test(p.coords));
+    return { id, name: root.getAttribute("name") ?? "", at: now, scores, ships: Number.isFinite(ships) && ships > 0 ? ships : null, planets };
+  }
+  async function playerScores(guard, store, origin, id, now) {
+    const cache = store.get(PLAYER_SCORES_KEY, {});
+    const hit = cache[String(id)];
+    if (hit && hit.planets && now - hit.at < TTL2) return hit;
+    const res = await guard.request(`${origin}/api/playerData.xml?id=${id}`, "user-view");
+    if (!res.ok) return hit ?? null;
+    const fresh = parsePlayerData(await res.text(), now);
+    if (!fresh) return hit ?? null;
+    cache[String(id)] = fresh;
+    const ids = Object.keys(cache).sort((a, b) => (cache[b]?.at ?? 0) - (cache[a]?.at ?? 0));
+    for (const old of ids.slice(KEEP)) delete cache[old];
+    store.set(PLAYER_SCORES_KEY, cache);
+    return fresh;
+  }
+
   // src/modules/galaxy/style.ts
   var GALAXY_CSS = `
 .fut-g-bar {
@@ -2528,39 +2811,24 @@
   border: 1px solid #2A3B55; border-radius: 6px; background: #0A111C; color: #C9D4E2; font: 12px Arial, sans-serif; cursor: pointer;
 }
 .fut-g-tgtbtn:hover, .fut-g-tgtbtn[aria-expanded="true"] { border-color: #4FD1E8; color: #E6EDF5; }
-.fut-g-list { flex-basis: 100%; display: flex; flex-direction: column; margin-top: 4px; border-top: 1px solid #1F2C40; }
-.fut-g-list[hidden] { display: none; }
-.fut-g-item { display: flex; align-items: center; gap: 10px; padding: 4px 0; border-bottom: 1px solid #16202F; }
-.fut-g-item a { color: #4FD1E8; font-family: Consolas, "JetBrains Mono", monospace; text-decoration: none; }
-.fut-g-item a:hover { color: #8BE4F2; }
-.fut-g-item span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fut-g-x { width: 22px; height: 22px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
-  border: 1px solid transparent; border-radius: 5px; background: none; color: #8A9BB0; cursor: pointer; }
-.fut-g-x:hover { border-color: #FF7A7A; color: #FF7A7A; }
-.fut-g-empty { padding: 6px 0; color: #8A9BB0; }
 
 /* Rows: a light tint on the cells, the game's own colours stay. */
 #galaxyContent .galaxyRow.fut-g-inactive .galaxyCell { background-color: rgba(155,227,109,0.07); }
 #galaxyContent .galaxyRow.fut-g-own .galaxyCell { background-color: rgba(79,209,232,0.08); }
-#galaxyContent .galaxyRow.fut-g-target .cellPlanetName { box-shadow: inset 0 0 0 1px #F5B547; }
+#galaxyContent .galaxyRow.fut-g-tagged .cellPlanetName { box-shadow: inset 3px 0 0 var(--fut-tag); }
 
 #galaxyContent .cellPlanetName { position: relative; }
-.fut-g-mark {
-  position: absolute; right: 3px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; padding: 0;
-  display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 4px; background: none;
-  color: #5B6B80; cursor: pointer; opacity: 0; transition: opacity 120ms ease-out;
-}
-#galaxyContent .galaxyRow:hover .fut-g-mark, .fut-g-mark:focus-visible, .fut-g-mark.on { opacity: 1; }
-.fut-g-mark:hover { color: #E6EDF5; }
-.fut-g-mark.on { color: #F5B547; }
-.fut-g-mark:focus-visible, .fut-g-rank:focus-visible, .fut-g-tgtbtn:focus-visible, .fut-g-x:focus-visible { outline: 2px solid #4FD1E8; outline-offset: 1px; }
+/* Planet colour: at the right of the name, faint until the row is pointed at or the planet has one. */
+#galaxyContent .cellPlanetName .fut-mk-tag { position: absolute; right: 3px; top: 50%; transform: translateY(-50%); margin: 0; opacity: 0; transition: opacity 120ms ease-out; }
+#galaxyContent .galaxyRow:hover .fut-mk-tag, #galaxyContent .fut-mk-tag:focus-visible, #galaxyContent .fut-mk-tag.on { opacity: 1; }
+#galaxyContent .cellPlayerName .fut-mk-flag { width: 16px; height: 16px; }
+.fut-g-rank:focus-visible, .fut-g-tgtbtn:focus-visible { outline: 2px solid #4FD1E8; outline-offset: 1px; }
 
 .fut-g-rank {
   margin-left: 4px; padding: 0 4px; border: 1px solid #2A3B55; border-radius: 4px; background: rgba(10,17,28,0.8);
-  color: #C9D4E2; font: 10px/14px Consolas, "JetBrains Mono", monospace; cursor: pointer; vertical-align: 1px;
+  color: #C9D4E2; font: 10px/14px Consolas, "JetBrains Mono", monospace; cursor: help; vertical-align: 1px;
 }
 .fut-g-rank:hover { border-color: #4FD1E8; color: #E6EDF5; }
-.fut-g-rank.rival { border-color: #F5B547; color: #F5B547; }
 #galaxyContent .cellDebris { position: relative; }
 .fut-g-dval { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); padding: 0 3px; border-radius: 3px; background: rgba(5,10,18,0.85);
   color: #C9D4E2; font: 10px/12px Consolas, "JetBrains Mono", monospace; white-space: nowrap; pointer-events: none; }
@@ -2585,9 +2853,6 @@
   var BIG_DEBRIS = 1e6;
   var isGalaxyPage = (doc) => new URL(doc.location?.href ?? "http://x/").searchParams.get("component") === "galaxy";
   var coordsOf = (s, r) => `${s.galaxy}:${s.system}:${r.position}`;
-  function toggleTarget(list, target) {
-    return list.some((x) => x.coords === target.coords) ? list.filter((x) => x.coords !== target.coords) : [target, ...list];
-  }
   function systemSummary(s, ownPlanetIds) {
     const players = /* @__PURE__ */ new Set();
     const inactive = /* @__PURE__ */ new Set();
@@ -2617,7 +2882,7 @@
     if (text) n.textContent = text;
     return n;
   }
-  var isOurs = (n) => n instanceof Element && /(^|\s)fut-g-/.test(n.className);
+  var isOurs = (n) => n instanceof Element && (/(^|\s)fut-/.test(n.getAttribute("class") ?? "") || !!n.closest('.fut-mk, [class*="fut-g-"]'));
   function watchGalaxy(o) {
     const { doc } = o;
     const component = doc.getElementById("galaxycomponent") ?? doc.getElementById("galaxyContent")?.parentElement;
@@ -2628,12 +2893,12 @@
       style.textContent = GALAXY_CSS;
       doc.head.append(style);
     }
-    let listOpen = false;
+    ensureMarksStyle(doc);
     let queued = false;
     const run = () => {
       queued = false;
       const content = doc.getElementById("galaxyContent");
-      if (content) decorate(o, content, () => listOpen, (v) => listOpen = v);
+      if (content) decorate(o, content);
     };
     new doc.defaultView.MutationObserver((records) => {
       const theirs = records.some((r) => ![...r.addedNodes, ...r.removedNodes].every(isOurs));
@@ -2643,68 +2908,41 @@
     }).observe(component, { childList: true, subtree: true });
     run();
   }
-  function decorate(o, content, isOpen, setOpen) {
+  function decorate(o, content) {
     const { doc, store, t, locale } = o;
     const s = readGalaxy(doc);
     if (!s) return;
-    const targets = store.get(TARGETS_KEY, []);
-    const rivals = new Set(store.get(RIVALS_KEY, []).map((x) => x.id));
-    const redraw = () => decorate(o, content, isOpen, setOpen);
+    const marks = loadMarks(store.get(MARKS_KEY, null));
+    const redraw = () => decorate(o, content);
+    const picker = { doc, store, t, onChange: redraw };
     for (const r of s.rows) {
       const coords = coordsOf(s, r);
       const own = r.planetId !== null && o.ownPlanetIds.has(r.planetId);
       const inactive = !r.statuses.includes("vacation") && (r.statuses.includes("inactive") || r.statuses.includes("longinactive"));
-      const isTarget = targets.some((x) => x.coords === coords);
+      const tag = marks.planets[coords]?.tag;
       r.row.classList.toggle("fut-g-own", own);
       r.row.classList.toggle("fut-g-inactive", inactive && !own);
-      r.row.classList.toggle("fut-g-target", isTarget);
+      r.row.classList.toggle("fut-g-tagged", !!tag);
+      const rowStyle = r.row.style;
+      if (tag) rowStyle.setProperty("--fut-tag", TAG_COLORS[tag]);
+      else rowStyle.removeProperty("--fut-tag");
       const nameCell = r.row.querySelector(".cellPlanetName");
-      let mark = nameCell?.querySelector(".fut-g-mark") ?? null;
-      if (nameCell && r.planetId && !own) {
-        if (!mark) {
-          mark = el(doc, "button", "fut-g-mark");
-          mark.type = "button";
-          mark.append(icon(doc, "target", 14));
-          nameCell.append(mark);
-        }
-        mark.classList.toggle("on", isTarget);
-        mark.setAttribute("aria-pressed", String(isTarget));
-        const label = t(isTarget ? "galaxy.targetRemove" : "galaxy.targetAdd");
-        mark.title = label;
-        mark.setAttribute("aria-label", `${label}: ${r.planetName} [${coords}]`);
-        mark.onclick = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          store.set(TARGETS_KEY, toggleTarget(store.get(TARGETS_KEY, []), { coords, planet: r.planetName, player: r.playerName, at: Date.now() }));
-          redraw();
-        };
-      } else mark?.remove();
+      if (nameCell && r.planetId && !own && !nameCell.querySelector(".fut-mk-tag"))
+        nameCell.append(tagButton(picker, coords, { planet: r.planetName, player: r.playerName, playerId: r.playerId, statuses: r.statuses, moon: !!r.moonId }));
+      else if (nameCell && (own || !r.planetId)) nameCell.querySelector(".fut-mk-tag")?.remove();
       const playerCell = r.row.querySelector(".cellPlayerName");
-      if (playerCell && r.playerId && r.rank) {
+      if (playerCell && r.playerId && r.rank && !playerCell.querySelector(".fut-g-rank")) {
         const id = r.playerId;
-        let badge = playerCell.querySelector(".fut-g-rank");
-        if (!badge) {
-          const b = el(doc, "button", "fut-g-rank", `#${r.rank.toLocaleString(locale)}`);
-          b.type = "button";
-          const show2 = () => void openCard(o, b, id, r.playerName);
-          b.addEventListener("mouseenter", show2);
-          b.addEventListener("focus", show2);
-          b.addEventListener("mouseleave", () => closeCard(doc));
-          b.addEventListener("blur", () => closeCard(doc));
-          b.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            store.set(RIVALS_KEY, toggleRival(store.get(RIVALS_KEY, []), { id, name: r.playerName, at: Date.now() }));
-            redraw();
-          });
-          playerCell.querySelector(".playerName")?.after(b);
-          badge = b;
-        }
-        const rival = rivals.has(id);
-        badge.classList.toggle("rival", rival);
-        badge.setAttribute("aria-pressed", String(rival));
-        badge.title = t(rival ? "galaxy.rivalRemove" : "galaxy.rivalAdd");
-        badge.setAttribute("aria-label", `${t("galaxy.rankTitle", { name: r.playerName })} \xB7 ${badge.title}`);
+        const badge = el(doc, "button", "fut-g-rank", `#${r.rank.toLocaleString(locale)}`);
+        badge.type = "button";
+        badge.setAttribute("aria-label", t("galaxy.rankTitle", { name: r.playerName }));
+        const show2 = () => void openCard(o, badge, id, r.playerName);
+        badge.addEventListener("mouseenter", show2);
+        badge.addEventListener("focus", show2);
+        badge.addEventListener("mouseleave", () => closeCard(doc));
+        badge.addEventListener("blur", () => closeCard(doc));
+        playerCell.querySelector(".playerName")?.after(badge);
+        if (!own) badge.after(flagButton(picker, id, r.playerName));
       }
       const debrisCell = r.row.querySelector(".cellDebris");
       if (debrisCell && r.debris && !debrisCell.querySelector(".fut-g-dval")) {
@@ -2712,51 +2950,28 @@
         debrisCell.append(el(doc, "span", `fut-g-dval${msu4 >= BIG_DEBRIS ? " big" : ""}`, formatUnits(msu4, locale)));
       }
     }
-    renderBar(o, content, s, targets, isOpen, setOpen, redraw);
+    renderBar(o, content, s, marks);
   }
-  function renderBar(o, content, s, targets, isOpen, setOpen, redraw) {
-    const { doc, store, t, locale } = o;
+  function renderBar(o, content, s, marks) {
+    const { doc, t, locale } = o;
     const sum = systemSummary(s, o.ownPlanetIds);
     const bar = el(doc, "div", "fut-g-bar");
     bar.id = "fut-galaxy-bar";
     const part = (cls, text) => bar.append(el(doc, "span", cls, text));
-    const coords = el(doc, "b", "", `${s.galaxy}:${s.system}`);
-    bar.append(coords);
+    bar.append(el(doc, "b", "", `${s.galaxy}:${s.system}`));
     part("", t("galaxy.players", { count: sum.players }));
     part("fut-g-inact", t("galaxy.inactive", { count: sum.inactive }) + (sum.longInactive ? ` (${t("galaxy.longInactive", { count: sum.longInactive })})` : ""));
     part("fut-g-vac", t("galaxy.vacation", { count: sum.vacation }));
     part("fut-g-muted", t("galaxy.moons", { count: sum.moons }));
     part(sum.debris >= BIG_DEBRIS ? "fut-g-deb" : "fut-g-muted", sum.fields ? t("galaxy.debris", { msu: formatUnits(sum.debris, locale), count: sum.fields }) : t("galaxy.noDebris"));
     if (sum.deep) part(sum.deep >= BIG_DEBRIS ? "fut-g-deb" : "fut-g-muted", t("galaxy.deep", { msu: formatUnits(sum.deep, locale) }));
-    const toggle = el(doc, "button", "fut-g-tgtbtn");
-    toggle.type = "button";
-    toggle.append(icon(doc, "target", 13), doc.createTextNode(t("galaxy.targets", { count: targets.length })));
-    toggle.setAttribute("aria-expanded", String(isOpen()));
-    const list = el(doc, "div", "fut-g-list");
-    list.id = "fut-galaxy-targets";
-    toggle.setAttribute("aria-controls", list.id);
-    list.hidden = !isOpen();
-    toggle.addEventListener("click", () => {
-      setOpen(!isOpen());
-      redraw();
-    });
-    bar.append(toggle, list);
-    if (!targets.length) list.append(el(doc, "div", "fut-g-empty", t("galaxy.noTargets")));
-    for (const x of targets) {
-      const [g, sys, pos] = x.coords.split(":");
-      const item = el(doc, "div", "fut-g-item");
-      const link = el(doc, "a", "", `[${x.coords}]`);
-      link.href = `index.php?page=ingame&component=galaxy&galaxy=${g}&system=${sys}&position=${pos}`;
-      const del = el(doc, "button", "fut-g-x");
-      del.type = "button";
-      del.setAttribute("aria-label", `${t("galaxy.targetRemove")}: [${x.coords}]`);
-      del.append(icon(doc, "close", 12));
-      del.addEventListener("click", () => {
-        store.set(TARGETS_KEY, store.get(TARGETS_KEY, []).filter((y) => y.coords !== x.coords));
-        redraw();
-      });
-      item.append(link, el(doc, "span", "", [x.planet, x.player].filter(Boolean).join(" \xB7 ")), del);
-      list.append(item);
+    if (o.onOpenTargets) {
+      const open = el(doc, "button", "fut-g-tgtbtn");
+      open.type = "button";
+      const n = Object.keys(marks.players).length + Object.keys(marks.planets).length;
+      open.append(icon(doc, "target", 13), doc.createTextNode(t("galaxy.targets", { count: n })));
+      open.addEventListener("click", () => o.onOpenTargets?.());
+      bar.append(open);
     }
     doc.getElementById(bar.id)?.remove();
     content.before(bar);
@@ -2781,10 +2996,10 @@
     const place2 = () => {
       const box = anchor.getBoundingClientRect();
       const view = doc.defaultView;
-      const h5 = card.offsetHeight;
-      const below = box.bottom + 6 + h5 <= (view?.innerHeight ?? 800);
+      const h6 = card.offsetHeight;
+      const below = box.bottom + 6 + h6 <= (view?.innerHeight ?? 800);
       card.style.left = `${Math.max(8, Math.min(box.left, (view?.innerWidth ?? 1200) - card.offsetWidth - 8))}px`;
-      card.style.top = `${below ? box.bottom + 6 : Math.max(8, box.top - 6 - h5)}px`;
+      card.style.top = `${below ? box.bottom + 6 : Math.max(8, box.top - 6 - h6)}px`;
     };
     place2();
     let data = null;
@@ -2812,6 +3027,429 @@
     if (data.ships) parts.unshift(t("galaxy.ships", { count: data.ships.toLocaleString(locale) }));
     note.textContent = parts.join(" \xB7 ");
     place2();
+  }
+
+  // src/core/sheet.ts
+  var WINDOW_SHEET = `
+:host {
+  all: initial;
+  --bg: #0A111C; --surface: #0D1522; --raised: #111B2A; --line: #1F2C40; --line-soft: #16202F;
+  --text: #E6EDF5; --text-2: #C9D4E2; --muted: #8A9BB0; --faint: #4A5B72;
+  --accent: #4FD1E8; --accent-soft: #12283A; --warn: #F5B547; --ok: #4FE0B0; --bad: #FF7A7A;
+  --m: #B8C2CC; --c: #7FB8FF; --d: #4FE0B0; --dm: #B58CDB;
+  --mono: "JetBrains Mono", Consolas, monospace;
+  --panel-w: 860px;
+}
+* { box-sizing: border-box; }
+.backdrop {
+  position: fixed; inset: 0; z-index: 100000; display: flex; justify-content: center; align-items: flex-start;
+  padding: 48px 16px; background: rgba(3,6,12,0.72); overflow-y: auto;
+  font: 13px/1.4 Arial, Helvetica, sans-serif; color: var(--text);
+}
+.panel {
+  width: min(var(--panel-w), 100%); display: flex; flex-direction: column; gap: 12px; padding: 18px;
+  border: 1px solid var(--line); border-radius: 14px; background: var(--bg); box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+.head { display: flex; align-items: flex-start; gap: 12px; }
+.titles { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+h2 { margin: 0; font-size: 20px; font-weight: 700; }
+h3 { margin: 0 0 8px; font-size: 14px; font-weight: 700; color: var(--text-2); }
+h4 { margin: 12px 0 4px; font-size: 12px; font-weight: 700; color: var(--text-2); }
+.sub { color: var(--muted); font-size: 12px; }
+.close {
+  flex: none; width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 8px; border: 1px solid var(--line); background: var(--raised); color: #B4C2D3; line-height: 1; cursor: pointer;
+}
+.close:hover { border-color: var(--accent); color: var(--text); }
+.mono { font-family: var(--mono); }
+.m { color: var(--m); } .c { color: var(--c); } .d { color: var(--d); } .dm { color: var(--dm); }
+.neg { color: var(--bad); } .pos { color: var(--ok); }
+
+/* Tabs: an underline under the one in use. */
+.tabs { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid var(--line); }
+.tab { padding: 7px 12px; margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--muted); font: 13px Arial, sans-serif; cursor: pointer; }
+.tab:hover { color: var(--text); }
+.tab[aria-pressed="true"] { border-bottom-color: var(--accent); color: var(--text); font-weight: 700; }
+
+/* Key numbers: one strip split by hairlines. */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow: hidden; }
+.kpi { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; min-width: 0; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
+.kpi .label { color: var(--muted); font-size: 12px; }
+.kpi .value { font-size: 20px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi .note, .kpi .detail { color: var(--muted); font-size: 11px; }
+.kpi.accent .value { color: var(--accent); }
+.kpi.warn .value { color: var(--warn); }
+
+/* Sections, not cards inside the window: a hairline on top and air around. */
+.card { padding: 12px 0 4px; border-top: 1px solid var(--line); min-width: 0; }
+.hint { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
+.empty { margin: 0; padding: 18px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 10px; }
+
+/* Buttons: one filled action, ghost for the rest. */
+.act { padding: 5px 10px; border: 1px solid #2B6F7D; border-radius: 6px; background: #0F2A33; color: var(--text); font: 700 12px Arial, sans-serif; cursor: pointer; }
+.act:hover { border-color: var(--accent); }
+.act.ghost { border-color: var(--line); background: none; color: var(--muted); font-weight: 400; }
+.act.ghost:hover, .act.danger { border-color: var(--bad); color: var(--bad); }
+
+/* Browser surfaces. */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.backdrop, .scroll, .table-wrap { scrollbar-color: #2A3B55 var(--bg); scrollbar-width: thin; }
+::selection { background: #2B6F7D; color: #fff; }
+.num, td, .value, .kpi-line { font-variant-numeric: tabular-nums; }
+`;
+
+  // src/data/universe-players.ts
+  var UNIVERSE_PLAYERS_KEY = "universe.players";
+  var TTL3 = 24 * 36e5;
+  function parsePlayersXml(xml, now) {
+    const doc = new DOMParser().parseFromString(xml, "text/html");
+    const root = doc.querySelector("players");
+    if (!root) return null;
+    const players = {};
+    for (const p of root.querySelectorAll("player")) {
+      const id = p.getAttribute("id");
+      if (id) players[id] = [p.getAttribute("name") ?? "", p.getAttribute("status") ?? ""];
+    }
+    return Object.keys(players).length ? { at: now, players } : null;
+  }
+  function statusNames(letters) {
+    const out = [];
+    if (letters.includes("v")) out.push("vacation");
+    if (letters.includes("b")) out.push("banned");
+    if (letters.includes("I")) out.push("longinactive");
+    else if (letters.includes("i")) out.push("inactive");
+    if (letters.includes("o")) out.push("outlaw");
+    if (letters.includes("a")) out.push("admin");
+    return out;
+  }
+  async function universePlayers(deps) {
+    const now = deps.now ?? Date.now();
+    const cached = deps.store.get(UNIVERSE_PLAYERS_KEY, null);
+    if (cached && now - cached.at < TTL3) return cached;
+    const res = await deps.guard.request(`${deps.origin}/api/players.xml`, "user-view");
+    const fresh = res.ok ? parsePlayersXml(await res.text(), now) : null;
+    if (!fresh) return cached;
+    deps.store.set(UNIVERSE_PLAYERS_KEY, fresh);
+    return fresh;
+  }
+
+  // src/modules/marks/targets-view.ts
+  var TARGETS_ID = "fut-targets";
+  var VIEW_KEY = "marks.view";
+  var keyHandler = null;
+  var sheetId = null;
+  var CSS = `
+:host { --panel-w: 760px; }
+.sub-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 10px 0; }
+.chip { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 9px; border-radius: 7px; border: 1px solid var(--line); background: var(--bg); color: var(--text-2); font: 12px Arial, sans-serif; cursor: pointer; }
+.chip:hover, .chip:focus-visible { border-color: var(--accent); color: var(--text); outline: none; }
+.chip[aria-pressed="true"] { border-color: currentColor; background: var(--accent-soft); color: var(--text); }
+.chip .n { color: var(--muted); font-family: var(--mono); font-size: 11px; }
+.rows { display: flex; flex-direction: column; gap: 1px; background: var(--line-soft); border: 1px solid var(--line-soft); border-radius: 8px; overflow: hidden; }
+.row { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--surface); }
+.row .idx { width: 22px; color: var(--faint); font: 11px var(--mono); text-align: right; }
+.row .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row button.name { all: unset; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; color: var(--text); font-weight: 700; }
+.row button.name:hover, .row button.name:focus-visible { color: var(--accent); text-decoration: underline; }
+.row .who { color: var(--muted); font-size: 12px; }
+.coords { color: var(--accent); font: 12px var(--mono); text-decoration: none; }
+.coords:hover, .coords:focus-visible { color: var(--text); text-decoration: underline; }
+.moon-ico { color: var(--muted); vertical-align: -1px; margin-right: 3px; }
+.group { margin-top: 6px; }
+.st-inactive { color: #9BE36D !important; } .st-longinactive { color: #8A9BB0 !important; } .st-vacation { color: #7FDBFF !important; } .st-banned { color: #FF7A7A !important; text-decoration: line-through; }
+.range { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 0; color: var(--muted); font-size: 12px; }
+.range input { width: 70px; height: 26px; padding: 0 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: 12px var(--mono); }
+.range input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.sheet-head { display: flex; align-items: center; gap: 8px; margin: 6px 0 10px; }
+.sheet-head h3 { margin: 0; font-size: 16px; color: var(--text); }
+.links { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.links a { display: inline-flex; align-items: center; height: 26px; padding: 0 9px; border-radius: 7px; border: 1px solid var(--line); color: var(--text-2); text-decoration: none; font-size: 12px; }
+.links a:hover, .links a:focus-visible { border-color: var(--accent); color: var(--text); }
+.scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin-bottom: 12px; background: var(--line-soft); border-radius: 8px; overflow: hidden; }
+.scores div { padding: 6px 10px; background: var(--surface); }
+.scores span { display: block; color: var(--muted); font-size: 11px; }
+.scores b { color: var(--text); font-family: var(--mono); }
+.scores i { color: var(--muted); font: normal 11px var(--mono); margin-left: 4px; }
+.back { all: unset; display: inline-flex; align-items: center; gap: 4px; color: var(--muted); cursor: pointer; font-size: 12px; }
+.back:hover, .back:focus-visible { color: var(--text); }
+` + MARKS_CSS;
+  function h(doc, tag, cls = "", text) {
+    const n = doc.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== void 0) n.textContent = text;
+    return n;
+  }
+  var galaxyHref = (coords) => {
+    const [g, s, p] = coords.split(":");
+    return `/game/index.php?page=ingame&component=galaxy&galaxy=${g}&system=${s}&position=${p}`;
+  };
+  function closeTargets(doc) {
+    doc.getElementById(TARGETS_ID)?.remove();
+    if (keyHandler) doc.removeEventListener("keydown", keyHandler, true);
+    keyHandler = null;
+    sheetId = null;
+  }
+  function openTargets(o) {
+    const { doc, store, t, locale } = o;
+    const keepScroll = doc.getElementById(TARGETS_ID)?.shadowRoot?.querySelector(".backdrop")?.scrollTop ?? 0;
+    doc.getElementById(TARGETS_ID)?.remove();
+    const [hg] = o.here.split(":");
+    const view = { tab: "players", flagTab: "watch", from: `${hg ?? 1}:1`, to: `${hg ?? 1}:499`, tags: [...TAGS], hide: ["vacation", "banned"], ...store.get(VIEW_KEY, {}) };
+    const save = (next) => {
+      store.set(VIEW_KEY, { ...view, ...next });
+      openTargets(o);
+    };
+    const marks = loadMarks(store.get(MARKS_KEY, null));
+    const redraw = () => openTargets(o);
+    const picker = { doc, store, t, onChange: redraw };
+    const host = doc.createElement("div");
+    host.id = TARGETS_ID;
+    host.lang = locale;
+    const root = host.attachShadow({ mode: "open" });
+    const style = h(doc, "style");
+    style.textContent = WINDOW_SHEET + CSS;
+    const backdrop = h(doc, "div", "backdrop");
+    const panel = h(doc, "section", "panel");
+    panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-label", t("marks.title"));
+    backdrop.append(panel);
+    root.append(style, backdrop);
+    if (!keyHandler) {
+      keyHandler = (e) => {
+        if (e.key === "Escape" && !doc.getElementById("fut-mk-pop")) closeTargets(doc);
+      };
+      doc.addEventListener("keydown", keyHandler, true);
+    }
+    backdrop.addEventListener("click", (e) => {
+      if (e.target === backdrop) closeTargets(doc);
+    });
+    const head = h(doc, "header", "head");
+    const titles = h(doc, "div", "titles");
+    titles.append(h(doc, "h2", "", t("marks.title")), h(doc, "span", "sub", t("marks.sub", { players: Object.keys(marks.players).length, planets: Object.keys(marks.planets).length })));
+    const x = h(doc, "button", "close");
+    x.type = "button";
+    x.setAttribute("aria-label", t("dash.close"));
+    x.append(icon(doc, "close", 16));
+    x.addEventListener("click", () => closeTargets(doc));
+    head.append(titles, x);
+    panel.append(head);
+    const tabs = h(doc, "nav", "tabs");
+    for (const id of ["players", "planets"]) {
+      const b = h(doc, "button", "tab", t(`marks.tab.${id}`));
+      b.type = "button";
+      b.setAttribute("aria-pressed", String(view.tab === id));
+      b.addEventListener("click", () => {
+        sheetId = null;
+        save({ tab: id });
+      });
+      tabs.append(b);
+    }
+    panel.append(tabs);
+    const body = h(doc, "div", "tab-body");
+    if (view.tab === "players" && sheetId !== null) playerSheet(o, body, sheetId, marks, picker);
+    else if (view.tab === "players") playersTab(o, body, view, marks, picker, save);
+    else planetsTab(o, body, view, marks, picker, save);
+    panel.append(body);
+    doc.body.append(host);
+    backdrop.scrollTop = keepScroll;
+  }
+  function playersTab(o, body, view, marks, picker, save) {
+    const { doc, t } = o;
+    const sub = h(doc, "div", "sub-tabs");
+    const counts = Object.values(marks.players).reduce((c, p) => (c[p.flag] = (c[p.flag] ?? 0) + 1, c), {});
+    for (const f of [...FLAGS, "recent"]) {
+      const b = h(doc, "button", "chip");
+      b.type = "button";
+      b.setAttribute("aria-pressed", String(view.flagTab === f));
+      if (f !== "recent") b.style.color = FLAG_COLORS[f];
+      b.append(icon(doc, f === "recent" ? "eye" : FLAG_ICONS[f], 12), h(doc, "span", "", t(f === "recent" ? "marks.recent" : `mark.flag.${f}`)), h(doc, "span", "n", String(f === "recent" ? marks.recent.length : counts[f] ?? 0)));
+      b.addEventListener("click", () => save({ flagTab: f }));
+      sub.append(b);
+    }
+    body.append(sub);
+    const list = view.flagTab === "recent" ? marks.recent : Object.entries(marks.players).filter(([, p]) => p.flag === view.flagTab).map(([id, p]) => ({ id: Number(id), name: p.name })).sort((a, b) => a.name.localeCompare(b.name));
+    if (!list.length) {
+      body.append(h(doc, "p", "empty", t(view.flagTab === "recent" ? "marks.noRecent" : "marks.noPlayers")));
+      return;
+    }
+    const rows = h(doc, "div", "rows");
+    list.forEach((p, i) => {
+      const row = h(doc, "div", "row");
+      const name = h(doc, "button", "name", p.name || `#${p.id}`);
+      name.type = "button";
+      name.title = t("marks.openSheet");
+      name.addEventListener("click", () => {
+        sheetId = p.id;
+        openTargets(o);
+      });
+      row.append(h(doc, "span", "idx", String(i + 1)), name, flagButton(picker, p.id, p.name));
+      rows.append(row);
+    });
+    body.append(rows);
+    body.append(h(doc, "p", "hint", t("marks.playersHint")));
+  }
+  function playerSheet(o, body, id, marks, picker) {
+    const { doc, store, t, locale } = o;
+    const back = h(doc, "button", "back", `\u2190 ${t("marks.back")}`);
+    back.type = "button";
+    back.addEventListener("click", () => {
+      sheetId = null;
+      openTargets(o);
+    });
+    body.append(back);
+    const known = marks.players[String(id)]?.name || marks.recent.find((r) => r.id === id)?.name || "";
+    const head = h(doc, "div", "sheet-head");
+    const title = h(doc, "h3", "", known || `#${id}`);
+    head.append(title, flagButton(picker, id, known));
+    body.append(head);
+    const links = h(doc, "div", "links");
+    const link = (text, href) => {
+      const a = h(doc, "a", "", text);
+      a.href = href;
+      links.append(a);
+    };
+    link(t("marks.write"), `/game/index.php?page=ingame&component=chat&playerId=${id}`);
+    link(t("marks.profile"), `/game/index.php?page=ingame&component=playerprofile&profileId=${id}`);
+    body.append(links);
+    const holder = h(doc, "div", "");
+    holder.append(h(doc, "p", "empty", t("galaxy.loading")));
+    body.append(holder);
+    void playerScores(o.guard, store, doc.location.origin, id, Date.now()).catch(() => null).then((data) => {
+      if (sheetId !== id || !holder.isConnected) return;
+      holder.replaceChildren();
+      if (!data) {
+        holder.append(h(doc, "p", "empty", t("galaxy.apiError")));
+        return;
+      }
+      title.textContent = data.name || known;
+      let m = rememberRecent(loadMarks(store.get(MARKS_KEY, null)), id, data.name || known);
+      if (m.players[String(id)] && !m.players[String(id)].name) m = flagPlayer(m, id, data.name, m.players[String(id)].flag, Date.now());
+      store.set(MARKS_KEY, m);
+      const rank = data.scores.total?.rank;
+      if (rank) link(`${t("marks.rank")} #${rank.toLocaleString(locale)}`, `/game/index.php?page=ingame&component=highscore&site=${Math.max(1, Math.ceil(rank / 100))}&category=1&searchRelId=${id}`);
+      const scores = h(doc, "div", "scores");
+      for (const key2 of Object.keys(SCORE_TYPES)) {
+        const v = data.scores[key2];
+        if (!v) continue;
+        const cell = h(doc, "div", "");
+        const b = h(doc, "b", "", formatUnits(v.points, locale));
+        b.append(h(doc, "i", "", `#${v.rank.toLocaleString(locale)}`));
+        cell.append(h(doc, "span", "", t(`galaxy.score.${key2}`)), b);
+        scores.append(cell);
+      }
+      if (data.ships) {
+        const cell = h(doc, "div", "");
+        cell.append(h(doc, "span", "", t("marks.ships")), h(doc, "b", "", data.ships.toLocaleString(locale)));
+        scores.append(cell);
+      }
+      holder.append(scores);
+      const planets = [...data.planets ?? []].sort((a, b) => {
+        const v = (c) => c.split(":").reduce((s, n) => s * 1e3 + Number(n), 0);
+        return v(a.coords) - v(b.coords);
+      });
+      holder.append(h(doc, "h4", "", t("marks.planets", { n: planets.length, moons: planets.filter((p) => p.moon).length })));
+      let lastSystem = "";
+      let rows = h(doc, "div", "rows");
+      planets.forEach((p, i) => {
+        const system = p.coords.split(":").slice(0, 2).join(":");
+        if (system !== lastSystem && i > 0) {
+          holder.append(rows);
+          rows = h(doc, "div", "rows group");
+        }
+        lastSystem = system;
+        const row = h(doc, "div", "row");
+        const a = h(doc, "a", "coords", `[${p.coords}]`);
+        a.href = galaxyHref(p.coords);
+        const name = h(doc, "span", "name", p.name);
+        if (p.moon) {
+          const moon = h(doc, "span", "who");
+          moon.append(icon(doc, "moon", 10, "moon-ico"), doc.createTextNode(p.moon.name));
+          name.append(doc.createTextNode(" "), moon);
+        }
+        row.append(h(doc, "span", "idx", String(i + 1)), a, name, tagButton(picker, p.coords, { planet: p.name, player: data.name, playerId: id, statuses: [], moon: !!p.moon }));
+        rows.append(row);
+      });
+      holder.append(rows);
+      holder.append(h(doc, "p", "hint", t("galaxy.apiAge", { time: new Date(data.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) })));
+    });
+  }
+  function planetsTab(o, body, view, marks, picker, save) {
+    const { doc, t } = o;
+    const range = h(doc, "div", "range");
+    const input = (value, label) => {
+      const i = h(doc, "input");
+      i.value = value;
+      i.inputMode = "numeric";
+      i.setAttribute("aria-label", label);
+      return i;
+    };
+    const from = input(view.from, t("marks.from"));
+    const to = input(view.to, t("marks.to"));
+    const apply = () => {
+      const ok = (v) => /^\d{1,2}:\d{1,3}$/.test(v.trim());
+      if (ok(from.value) && ok(to.value)) save({ from: from.value.trim(), to: to.value.trim() });
+    };
+    for (const i of [from, to]) i.addEventListener("change", apply);
+    range.append(h(doc, "span", "", t("marks.from")), from, h(doc, "span", "", t("marks.to")), to);
+    body.append(range);
+    const chips = h(doc, "div", "sub-tabs");
+    for (const tag of TAGS) {
+      const b = h(doc, "button", "chip");
+      b.type = "button";
+      const on = view.tags.includes(tag);
+      b.setAttribute("aria-pressed", String(on));
+      const dot = h(doc, "span", "dot");
+      dot.style.background = TAG_COLORS[tag];
+      b.append(dot, h(doc, "span", "", t(`mark.tag.${tag}`)));
+      b.addEventListener("click", () => save({ tags: on ? view.tags.filter((x) => x !== tag) : [...view.tags, tag] }));
+      chips.append(b);
+    }
+    for (const st of ["vacation", "banned", "inactive"]) {
+      const b = h(doc, "button", "chip");
+      b.type = "button";
+      const on = view.hide.includes(st);
+      b.setAttribute("aria-pressed", String(on));
+      b.textContent = t(`marks.hide.${st}`);
+      b.addEventListener("click", () => save({ hide: on ? view.hide.filter((x) => x !== st) : [...view.hide, st] }));
+      chips.append(b);
+    }
+    body.append(chips);
+    const holder = h(doc, "div", "");
+    body.append(holder);
+    const draw = (uni) => {
+      holder.replaceChildren();
+      const statusOf = (playerId, saved) => {
+        const row = playerId ? uni?.players[String(playerId)] : void 0;
+        return row ? statusNames(row[1]) : saved;
+      };
+      const withStatus = { ...marks, planets: Object.fromEntries(Object.entries(marks.planets).map(([c, p]) => [c, { ...p, statuses: statusOf(p.playerId, p.statuses) }])) };
+      const hide = view.hide.flatMap((s) => s === "inactive" ? ["inactive", "longinactive"] : [s]);
+      const list = planetsInRange(withStatus, view.from, view.to, { tags: view.tags, hide });
+      if (!list.length) {
+        holder.append(h(doc, "p", "empty", t(Object.keys(marks.planets).length ? "marks.noneInRange" : "marks.noPlanets")));
+        return;
+      }
+      const rows = h(doc, "div", "rows");
+      list.forEach(([coords, p], i) => {
+        const row = h(doc, "div", "row");
+        const a = h(doc, "a", "coords", `[${coords}]`);
+        a.href = galaxyHref(coords);
+        const name = h(doc, "span", "name", p.planet || "?");
+        const who = h(doc, "span", `who${p.statuses[0] ? ` st-${p.statuses[0]}` : ""}`, p.player ? ` \xB7 ${p.player}` : "");
+        name.append(who);
+        if (p.moon) name.prepend(icon(doc, "moon", 10, "moon-ico"));
+        row.append(h(doc, "span", "idx", String(i + 1)), a, name);
+        if (p.playerId) row.append(flagButton(picker, p.playerId, p.player));
+        row.append(tagButton(picker, coords, p));
+        rows.append(row);
+      });
+      holder.append(rows, h(doc, "p", "hint", t("marks.planetsHint", { n: list.length })));
+    };
+    draw(null);
+    void universePlayers({ guard: o.guard, store: o.store, origin: doc.location.origin }).catch(() => null).then((uni) => {
+      if (uni && holder.isConnected) draw(uni);
+    });
   }
 
   // src/data/queues.ts
@@ -2928,75 +3566,6 @@
     return (items?.uuids ?? []).reduce((sum, u) => sum + (EXPEDITION_ITEMS[u] ?? 0), 0);
   }
 
-  // src/core/sheet.ts
-  var WINDOW_SHEET = `
-:host {
-  all: initial;
-  --bg: #0A111C; --surface: #0D1522; --raised: #111B2A; --line: #1F2C40; --line-soft: #16202F;
-  --text: #E6EDF5; --text-2: #C9D4E2; --muted: #8A9BB0; --faint: #4A5B72;
-  --accent: #4FD1E8; --accent-soft: #12283A; --warn: #F5B547; --ok: #4FE0B0; --bad: #FF7A7A;
-  --m: #B8C2CC; --c: #7FB8FF; --d: #4FE0B0; --dm: #B58CDB;
-  --mono: "JetBrains Mono", Consolas, monospace;
-  --panel-w: 860px;
-}
-* { box-sizing: border-box; }
-.backdrop {
-  position: fixed; inset: 0; z-index: 100000; display: flex; justify-content: center; align-items: flex-start;
-  padding: 48px 16px; background: rgba(3,6,12,0.72); overflow-y: auto;
-  font: 13px/1.4 Arial, Helvetica, sans-serif; color: var(--text);
-}
-.panel {
-  width: min(var(--panel-w), 100%); display: flex; flex-direction: column; gap: 12px; padding: 18px;
-  border: 1px solid var(--line); border-radius: 14px; background: var(--bg); box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-}
-.head { display: flex; align-items: flex-start; gap: 12px; }
-.titles { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-h2 { margin: 0; font-size: 20px; font-weight: 700; }
-h3 { margin: 0 0 8px; font-size: 14px; font-weight: 700; color: var(--text-2); }
-h4 { margin: 12px 0 4px; font-size: 12px; font-weight: 700; color: var(--text-2); }
-.sub { color: var(--muted); font-size: 12px; }
-.close {
-  flex: none; width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 8px; border: 1px solid var(--line); background: var(--raised); color: #B4C2D3; line-height: 1; cursor: pointer;
-}
-.close:hover { border-color: var(--accent); color: var(--text); }
-.mono { font-family: var(--mono); }
-.m { color: var(--m); } .c { color: var(--c); } .d { color: var(--d); } .dm { color: var(--dm); }
-.neg { color: var(--bad); } .pos { color: var(--ok); }
-
-/* Tabs: an underline under the one in use. */
-.tabs { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid var(--line); }
-.tab { padding: 7px 12px; margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--muted); font: 13px Arial, sans-serif; cursor: pointer; }
-.tab:hover { color: var(--text); }
-.tab[aria-pressed="true"] { border-bottom-color: var(--accent); color: var(--text); font-weight: 700; }
-
-/* Key numbers: one strip split by hairlines. */
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow: hidden; }
-.kpi { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; min-width: 0; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
-.kpi .label { color: var(--muted); font-size: 12px; }
-.kpi .value { font-size: 20px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kpi .note, .kpi .detail { color: var(--muted); font-size: 11px; }
-.kpi.accent .value { color: var(--accent); }
-.kpi.warn .value { color: var(--warn); }
-
-/* Sections, not cards inside the window: a hairline on top and air around. */
-.card { padding: 12px 0 4px; border-top: 1px solid var(--line); min-width: 0; }
-.hint { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
-.empty { margin: 0; padding: 18px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 10px; }
-
-/* Buttons: one filled action, ghost for the rest. */
-.act { padding: 5px 10px; border: 1px solid #2B6F7D; border-radius: 6px; background: #0F2A33; color: var(--text); font: 700 12px Arial, sans-serif; cursor: pointer; }
-.act:hover { border-color: var(--accent); }
-.act.ghost { border-color: var(--line); background: none; color: var(--muted); font-weight: 400; }
-.act.ghost:hover, .act.danger { border-color: var(--bad); color: var(--bad); }
-
-/* Browser surfaces. */
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.backdrop, .scroll, .table-wrap { scrollbar-color: #2A3B55 var(--bg); scrollbar-width: thin; }
-::selection { background: #2B6F7D; color: #fff; }
-.num, td, .value, .kpi-line { font-variant-numeric: tabular-nums; }
-`;
-
   // src/engines/account.ts
   var KEYS2 = ["metal", "crystal", "deuterium"];
   var msu = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
@@ -3057,7 +3626,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     const missing2 = entries.filter((e) => e.planetId && !known.has(e.planetId) || e.moonId && !known.has(e.moonId));
     const planets = rows.filter((r) => r.type === "planet");
     const minHours = (r) => {
-      const hours = KEYS2.map((k) => r.hoursToFull[k]).filter((h5) => h5 !== null);
+      const hours = KEYS2.map((k) => r.hoursToFull[k]).filter((h6) => h6 !== null);
       return hours.length ? Math.min(...hours) : null;
     };
     const full = planets.filter((r) => minHours(r) === 0 || r.fill !== null && KEYS2.some((k) => r.fill[k] >= 0.9));
@@ -3937,8 +4506,8 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
   function isoDurationMs(value) {
     const m = /^P(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$/.exec(value.trim());
     if (!m) return null;
-    const [w = 0, d = 0, h5 = 0, min = 0, s = 0] = m.slice(1).map((x) => Number(x ?? 0));
-    return ((((w * 7 + d) * 24 + h5) * 60 + min) * 60 + s) * 1e3;
+    const [w = 0, d = 0, h6 = 0, min = 0, s = 0] = m.slice(1).map((x) => Number(x ?? 0));
+    return ((((w * 7 + d) * 24 + h6) * 60 + min) * 60 + s) * 1e3;
   }
 
   // src/data/tech-names.ts
@@ -4799,7 +5368,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
 
   // src/modules/messages/spy-table.ts
   var SPY_PANEL_ID = "fut-spypanel";
-  var VIEW_KEY = "spy.view";
+  var VIEW_KEY2 = "spy.view";
   var DEFAULT_VIEW = { sort: "rate", desc: true, ship: 203, hideDefended: false, inactiveOnly: false, open: true };
   function universeOf(doc, data) {
     const meta = (name) => doc.querySelector(`meta[name="${name}"]`)?.getAttribute("content") ?? "";
@@ -4843,6 +5412,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
   var isSpyTab = (doc) => !!doc.querySelector('[data-subtab-id="20"].active, [data-subtab-id="20"][aria-selected="true"]');
   function mountSpyPanel(o) {
     const { doc } = o;
+    ensureMarksStyle(doc);
     const holder = doc.querySelector("#messages .messagesHolder");
     const sortRow = doc.querySelector("#messages #filteredHeadersRow");
     const anchor = sortRow && sortRow.parentElement === holder?.parentElement ? sortRow : holder;
@@ -4852,7 +5422,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
       return;
     }
     const board = o.store.get(SPY_BOARD_KEY, {});
-    const view = { ...DEFAULT_VIEW, ...o.store.get(VIEW_KEY, {}) };
+    const view = { ...DEFAULT_VIEW, ...o.store.get(VIEW_KEY2, {}) };
     const sig = JSON.stringify([Object.values(board).map((e) => e.id), view, Math.floor((o.now?.() ?? Date.now()) / 6e4)]);
     if (old && old.dataset.sig === sig && old.nextElementSibling === anchor) return;
     const panel = renderPanel(o, board, view);
@@ -4871,7 +5441,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
       return n;
     };
     const redraw = (next = {}) => {
-      store.set(VIEW_KEY, { ...view, ...next });
+      store.set(VIEW_KEY2, { ...view, ...next });
       mountSpyPanel(o);
     };
     const gameButton = (child, title, onClick, cls = "") => {
@@ -4900,8 +5470,8 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     const info = ships[String(view.ship)];
     const capacity = info?.capacity || (view.ship === 202 ? 5e3 : 25e3);
     const universe = universeOf(doc, store.get(SERVER_DATA_KEY, null));
-    const all = targetRows(board, spy.bases, { capacity, speed: info?.speed ?? 0, universe, now });
-    const rows = sortRows(all.filter((r) => (!view.hideDefended || !defended(r)) && (!view.inactiveOnly || r.entry.statuses.some((s) => INACTIVE.includes(s)))), view);
+    const all2 = targetRows(board, spy.bases, { capacity, speed: info?.speed ?? 0, universe, now });
+    const rows = sortRows(all2.filter((r) => (!view.hideDefended || !defended(r)) && (!view.inactiveOnly || r.entry.statuses.some((s) => INACTIVE.includes(s)))), view);
     const panel = el5("div", "fut-sp");
     panel.id = SPY_PANEL_ID;
     const head = el5("div", "fut-sp-head");
@@ -4930,7 +5500,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     if (!view.open) return panel;
     if (!info?.speed) panel.append(el5("p", "fut-sp-note", t("spy.noSpeed")));
     if (!rows.length) {
-      panel.append(el5("p", "fut-sp-note", t(all.length ? "spy.noneFiltered" : "spy.none")));
+      panel.append(el5("p", "fut-sp-note", t(all2.length ? "spy.noneFiltered" : "spy.none")));
       return panel;
     }
     const cols = el5("div", "fut-sp-row fut-sp-cols");
@@ -4952,7 +5522,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
       const row = el5("div", `fut-sp-row${defended(r) ? " defended" : ""}`);
       const who = el5("div", "fut-sp-who");
       const name = el5("span", "fut-sp-name", e.playerName || "?");
-      who.append(name);
+      who.append(name, flagButton({ doc, store, t }, e.playerId, e.playerName));
       for (const st of e.statuses.filter((x) => x !== "active")) who.append(el5("span", `fut-sp-st st-${st}`, t(`spy.status.${st}`)));
       const gal = el5("a", "fut-sp-coords", `[${e.coords}]`);
       gal.href = `/game/index.php?page=ingame&component=galaxy&galaxy=${g}&system=${s}`;
@@ -5006,7 +5576,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
 
   // src/modules/messages/index.ts
   var FOLD_KEY = "msg.fold";
-  function h(doc, tag, cls = "", text) {
+  function h2(doc, tag, cls = "", text) {
     const node = doc.createElement(tag);
     if (cls) node.className = cls;
     if (text !== void 0) node.textContent = text;
@@ -5014,8 +5584,8 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
   }
   function shipIcon(doc, id, name, cls) {
     const url = SHIP_ICONS[id];
-    if (!url) return h(doc, "span", `${cls} ${cls}-none`, name.slice(0, 3));
-    const img = h(doc, "img", cls);
+    if (!url) return h2(doc, "span", `${cls} ${cls}-none`, name.slice(0, 3));
+    const img = h2(doc, "img", cls);
     img.src = url;
     img.alt = name;
     img.title = name;
@@ -5032,16 +5602,16 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
   function summaryFor(doc, m, o) {
     const { t, locale } = o;
     const fmt = (n) => formatUnits(n, locale);
-    const box = h(doc, "div", `fut-msg fut-msg-${m.kind}`);
+    const box = h2(doc, "div", `fut-msg fut-msg-${m.kind}`);
     let into = box;
     const chip2 = (text, cls = "", title) => {
-      const c = h(doc, "span", `fut-msg-chip ${cls}`.trim(), text);
+      const c = h2(doc, "span", `fut-msg-chip ${cls}`.trim(), text);
       if (title) c.title = title;
       into.append(c);
       return c;
     };
     const linkChip = (text, href, title) => {
-      const a = h(doc, "a", "fut-msg-chip fut-msg-link", text);
+      const a = h2(doc, "a", "fut-msg-chip fut-msg-link", text);
       a.href = href;
       a.target = "_blank";
       a.rel = "noopener noreferrer";
@@ -5081,7 +5651,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
           box.dataset.size = t(`msg.size.${m.size}`);
         }
         const row = (cls) => {
-          const r = h(doc, "div", `fut-msg-row ${cls}`);
+          const r = h2(doc, "div", `fut-msg-row ${cls}`);
           box.append(r);
           into = r;
           return r;
@@ -5137,11 +5707,11 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         if (m.from && m.to) {
           const route = chip2("", "fut-msg-route");
           const place2 = (p) => {
-            const s = h(doc, "span", "fut-msg-place", `${p.name ? `${p.name} ` : ""}[${p.coords}]`);
+            const s = h2(doc, "span", "fut-msg-place", `${p.name ? `${p.name} ` : ""}[${p.coords}]`);
             if (p.moon) s.prepend(icon(doc, "moon", 10, "fut-msg-moon"));
             return s;
           };
-          route.append(place2(m.from), h(doc, "span", "fut-msg-arrow", "\u2192"), place2(m.to));
+          route.append(place2(m.from), h2(doc, "span", "fut-msg-arrow", "\u2192"), place2(m.to));
         }
         const any = resChips(m.res);
         if (any) chip2(`${fmt(msu2(m.res))} MSU`, "fut-msg-msu", t("msg.msuHint"));
@@ -5229,7 +5799,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
   function watchMessages(o) {
     const { doc } = o;
     if (!doc.getElementById("fut-msg-style")) {
-      const style = h(doc, "style");
+      const style = h2(doc, "style");
       style.id = "fut-msg-style";
       style.textContent = MESSAGES_CSS;
       doc.head.append(style);
@@ -5358,14 +5928,6 @@ table.scrap td.unit .unit-ico { margin: 0; width: 24px; height: 24px; }
 .chart .tip { position: absolute; top: -4px; transform: translateX(-50%); padding: 3px 7px; border-radius: 6px; background: var(--raised); border: 1px solid var(--line); color: var(--text); font: 11px var(--mono); white-space: nowrap; pointer-events: none; }
 .kpi .value.neg, td.neg { color: var(--bad); }
 td.pos { color: var(--ok); }
-table.rivals td.num b { display: block; color: var(--text); }
-table.rivals .rank { display: block; color: var(--muted); font-size: 10px; }
-table.rivals .gap { display: block; font-size: 10px; }
-table.rivals .gap.ahead { color: var(--warn); }
-table.rivals .gap.behind { color: var(--ok); }
-table.rivals tr.me td { background: var(--accent-soft); }
-table.rivals td.name { color: var(--text); font-weight: 700; }
-table.rivals th.num, table.rivals td.num { text-align: right; vertical-align: top; }
 table.queues td.kind { color: var(--muted); }
 table.queues td.acts { width: 1%; text-align: right; }
 .fut-bell { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); cursor: pointer; }
@@ -5374,27 +5936,22 @@ table.queues td.acts { width: 1%; text-align: right; }
 `;
 
   // src/modules/dashboard/index.ts
-  var TABS = ["summary", "history", "rivals", "mines", "facilities", "lifeforms", "ships", "defence", "scrap"];
+  var TABS = ["summary", "history", "mines", "facilities", "lifeforms", "ships", "defence", "scrap"];
   var HOST_ID = "fut-dashboard";
   var tab = "summary";
   var scrapBody = null;
   var scrapRate = 35;
-  var keyHandler = null;
-  function h2(tag, className = "", text) {
+  var keyHandler2 = null;
+  function h3(tag, className = "", text) {
     const node = document.createElement(tag);
     if (className) node.className = className;
     if (text !== void 0) node.textContent = text;
     return node;
   }
-  function isDashboardOpen(doc) {
-    return doc.getElementById(HOST_ID) !== null;
-  }
-  var rivalsData = null;
-  var rivalsLoading = false;
   function closeDashboard(doc) {
     doc.getElementById(HOST_ID)?.remove();
-    if (keyHandler) doc.removeEventListener("keydown", keyHandler);
-    keyHandler = null;
+    if (keyHandler2) doc.removeEventListener("keydown", keyHandler2);
+    keyHandler2 = null;
   }
   function orderedBodies(snapshot, entries) {
     if (!snapshot) return [];
@@ -5460,48 +6017,47 @@ table.queues td.acts { width: 1%; text-align: right; }
     host.id = HOST_ID;
     host.lang = locale;
     const root = host.attachShadow({ mode: "open" });
-    const style = h2("style");
+    const style = h3("style");
     style.textContent = WINDOW_SHEET + DASHBOARD_CSS;
     root.append(style);
-    const backdrop = h2("div", "backdrop");
-    const panel = h2("section", "panel");
+    const backdrop = h3("div", "backdrop");
+    const panel = h3("section", "panel");
     panel.setAttribute("role", "dialog");
     panel.setAttribute("aria-label", t("dash.title"));
     backdrop.append(panel);
     root.append(backdrop);
     const close = () => closeDashboard(doc);
-    keyHandler = (e) => {
+    keyHandler2 = (e) => {
       if (e.key === "Escape") close();
     };
-    doc.addEventListener("keydown", keyHandler);
+    doc.addEventListener("keydown", keyHandler2);
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop) close();
     });
     const redraw = () => openDashboard(o);
-    const header = h2("header", "head");
-    const titles = h2("div", "titles");
-    titles.append(h2("h2", "", t("dash.title")));
+    const header = h3("header", "head");
+    const titles = h3("div", "titles");
+    titles.append(h3("h2", "", t("dash.title")));
     const universe = doc.querySelector('meta[name="ogame-universe-name"]')?.getAttribute("content") ?? "";
     const player = doc.querySelector('meta[name="ogame-player-name"]')?.getAttribute("content") ?? "";
     const sub = [player, universe, o.snapshot ? t("toolbar.lastSync", { time: new Date(o.snapshot.fetchedAt).toLocaleString(locale) }) : t("dash.noData")].filter(Boolean).join(" \xB7 ");
-    titles.append(h2("span", "sub", sub));
-    const x = h2("button", "close");
+    titles.append(h3("span", "sub", sub));
+    const x = h3("button", "close");
     x.append(icon(doc, "close", 16));
     x.type = "button";
     x.setAttribute("aria-label", t("dash.close"));
     x.addEventListener("click", close);
     header.append(titles, x);
     panel.append(header);
-    const tabs = h2("nav", "tabs");
+    const tabs = h3("nav", "tabs");
     tabs.setAttribute("role", "tablist");
     for (const id of TABS) {
-      const b = h2("button", "tab", t(`dash.tab.${id}`));
+      const b = h3("button", "tab", t(`dash.tab.${id}`));
       b.type = "button";
       b.dataset.tab = id;
       b.setAttribute("aria-pressed", String(id === tab));
       b.addEventListener("click", () => {
         tab = id;
-        if (id === "rivals") rivalsData = null;
         redraw();
       });
       tabs.append(b);
@@ -5514,11 +6070,10 @@ table.queues td.acts { width: 1%; text-align: right; }
       name: (id) => techName(id, locale, o.names ?? {}, t),
       redraw
     };
-    const body = h2("div", "tab-body");
-    if (!o.snapshot) body.append(h2("p", "empty", t("dash.noData")));
+    const body = h3("div", "tab-body");
+    if (!o.snapshot) body.append(h3("p", "empty", t("dash.noData")));
     else if (tab === "summary") summaryTab(body, ctx);
     else if (tab === "history") historyTab(body, ctx);
-    else if (tab === "rivals") rivalsTab(body, ctx);
     else if (tab === "mines") minesTab(body, ctx);
     else if (tab === "facilities") facilitiesTab(body, ctx);
     else if (tab === "lifeforms") lifeformsTab(body, ctx);
@@ -5530,40 +6085,40 @@ table.queues td.acts { width: 1%; text-align: right; }
     backdrop.scrollTop = keepScroll;
   }
   function section(parent, title, hint) {
-    const s = h2("div", "card");
-    s.append(h2("h3", "", title));
+    const s = h3("div", "card");
+    s.append(h3("h3", "", title));
     parent.append(s);
     if (hint) s.dataset.hint = hint;
     return s;
   }
   function bodyLink(doc, b) {
-    const cell = h2("td", "name");
-    const link = h2("a", "", b.name);
+    const cell = h3("td", "name");
+    const link = h3("a", "", b.name);
     if (b.type === "moon") link.prepend(icon(doc, "moon", 11, "moon-ico"));
     link.href = `${doc.location?.origin ?? ""}/game/index.php?page=ingame&component=overview&cp=${b.id}`;
-    cell.append(link, h2("span", "coords", `[${b.coords}]`));
+    cell.append(link, h3("span", "coords", `[${b.coords}]`));
     return cell;
   }
   function levelCell(v, max, fmt) {
-    const cell = h2("td", `num mono${v === 0 ? " zero" : v === max && max > 0 ? " top" : ""}`, v === 0 ? "\xB7" : fmt ? fmt(v) : String(v));
+    const cell = h3("td", `num mono${v === 0 ? " zero" : v === max && max > 0 ? " top" : ""}`, v === 0 ? "\xB7" : fmt ? fmt(v) : String(v));
     return cell;
   }
   function bodyMatrix(ctx, bodies, ids, opts = {}) {
     const { doc, t } = ctx.o;
-    const wrap = h2("div", "table-wrap");
-    const table = h2("table", "matrix");
-    const hr = h2("tr");
-    hr.append(h2("th", "name", t("dash.colBody")));
+    const wrap = h3("div", "table-wrap");
+    const table = h3("table", "matrix");
+    const hr = h3("tr");
+    hr.append(h3("th", "name", t("dash.colBody")));
     for (const id of ids) {
-      const th = h2("th", "num col");
+      const th = h3("th", "num col");
       const head = opts.head ? opts.head(id) : ctx.name(id);
-      if (typeof head === "string") th.append(h2("span", "col-name", head));
+      if (typeof head === "string") th.append(h3("span", "col-name", head));
       else th.append(head);
       th.title = ctx.name(id);
       hr.append(th);
     }
-    for (const e of opts.extra ?? []) hr.append(h2("th", "num", e.label));
-    const thead = h2("thead");
+    for (const e of opts.extra ?? []) hr.append(h3("th", "num", e.label));
+    const thead = h3("thead");
     thead.append(hr);
     table.append(thead);
     const max = new Map(ids.map((id) => {
@@ -5571,25 +6126,25 @@ table.queues td.acts { width: 1%; text-align: right; }
       const top = Math.max(0, ...values);
       return [id, values.every((v) => v === top) ? -1 : top];
     }));
-    const tbody = h2("tbody");
+    const tbody = h3("tbody");
     for (const b of bodies) {
-      const tr = h2("tr", b.type);
+      const tr = h3("tr", b.type);
       tr.append(bodyLink(doc, b));
       for (const id of ids) tr.append(levelCell(level(b, id), opts.units ? -1 : max.get(id), opts.units ? count : void 0));
-      for (const e of opts.extra ?? []) tr.append(h2("td", `num mono ${e.cls ?? ""}`, e.value(b)));
+      for (const e of opts.extra ?? []) tr.append(h3("td", `num mono ${e.cls ?? ""}`, e.value(b)));
       tbody.append(tr);
     }
     table.append(tbody);
     if (opts.foot && bodies.length) {
-      const fr = h2("tr");
-      fr.append(h2("td", "name", t(opts.foot === "sum" ? "dash.total" : "dash.average")));
+      const fr = h3("tr");
+      fr.append(h3("td", "name", t(opts.foot === "sum" ? "dash.total" : "dash.average")));
       for (const id of ids) {
         const values = bodies.map((b) => level(b, id));
         const total = values.reduce((a, v) => a + v, 0);
-        fr.append(h2("td", "num mono", opts.foot === "sum" ? total ? count(total) : "\xB7" : (total / values.length).toLocaleString(ctx.o.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })));
+        fr.append(h3("td", "num mono", opts.foot === "sum" ? total ? count(total) : "\xB7" : (total / values.length).toLocaleString(ctx.o.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })));
       }
-      for (let i = 0; i < (opts.extra ?? []).length; i++) fr.append(h2("td"));
-      const tfoot = h2("tfoot");
+      for (let i = 0; i < (opts.extra ?? []).length; i++) fr.append(h3("td"));
+      const tfoot = h3("tfoot");
       tfoot.append(fr);
       table.append(tfoot);
     }
@@ -5602,10 +6157,10 @@ table.queues td.acts { width: 1%; text-align: right; }
     const rows = bodyRows(o.snapshot, o.entries, o.now, o.queues ?? null);
     const sum = summarize(rows);
     const alerts = accountAlerts(rows, o.snapshot, o.entries);
-    const kpis = h2("div", "kpis");
+    const kpis = h3("div", "kpis");
     const kpi = (label, value, note, cls = "") => {
-      const box = h2("div", `kpi ${cls}`);
-      box.append(h2("span", "label", label), h2("span", "value", value), h2("span", "note", note));
+      const box = h3("div", `kpi ${cls}`);
+      box.append(h3("span", "label", label), h3("span", "value", value), h3("span", "note", note));
       kpis.append(box);
     };
     if (o.score) {
@@ -5632,16 +6187,16 @@ table.queues td.acts { width: 1%; text-align: right; }
     const breakdown = QUEUE_KINDS.filter((k) => running.has(k)).map((k) => `${running.get(k)} ${t(`queue.${k}`).toLowerCase()}`).join(" \xB7 ");
     kpi(t("dash.queues"), o.queues ? String(busy) : "\u2014", o.queues ? breakdown || t("dash.queuesNone") : t("dash.queuesUnknown"), "accent");
     parent.append(kpis);
-    const cols = h2("div", "cols");
-    const prod = h2("div", "card");
-    prod.append(h2("h3", "", t("dash.production")));
+    const cols = h3("div", "cols");
+    const prod = h3("div", "card");
+    prod.append(h3("h3", "", t("dash.production")));
     const maxRate = Math.max(1, sum.perHour.metal, sum.perHour.crystal * 1.5, sum.perHour.deuterium * 3);
     const bar = (label, perHour, weight, cls) => {
-      const line = h2("div", `prod ${cls}`);
-      const top = h2("div", "prod-top");
-      top.append(h2("span", "", label), h2("span", "mono", `+${fmt(perHour * 24)}/${t("dash.dayShort")}`));
-      const track = h2("div", "track");
-      const fill = h2("div", "fill");
+      const line = h3("div", `prod ${cls}`);
+      const top = h3("div", "prod-top");
+      top.append(h3("span", "", label), h3("span", "mono", `+${fmt(perHour * 24)}/${t("dash.dayShort")}`));
+      const track = h3("div", "track");
+      const fill = h3("div", "fill");
       fill.style.width = `${Math.round(perHour * weight / maxRate * 100)}%`;
       track.append(fill);
       line.append(top, track);
@@ -5653,33 +6208,33 @@ table.queues td.acts { width: 1%; text-align: right; }
     const bySpecies = /* @__PURE__ */ new Map();
     for (const b of ctx.bodies) if (b.type === "planet" && b.species) bySpecies.set(b.species, (bySpecies.get(b.species) ?? 0) + 1);
     if (bySpecies.size) {
-      const lf = h2("p", "hint");
+      const lf = h3("p", "hint");
       lf.textContent = SPECIES.filter((s) => bySpecies.has(s)).map((s) => `${t(`lf.${s}`)} ${bySpecies.get(s)}`).join(" \xB7 ");
-      prod.append(h2("h4", "", t("dash.tab.lifeforms")), lf);
+      prod.append(h3("h4", "", t("dash.tab.lifeforms")), lf);
     }
-    const movesCard = h2("div", "card");
-    movesCard.append(h2("h3", "", t("dash.moves")));
+    const movesCard = h3("div", "card");
+    movesCard.append(h3("h3", "", t("dash.moves")));
     const moves = bestUpgrades(o.snapshot, o.entries, 5);
-    if (!moves.length) movesCard.append(h2("p", "hint", t("dash.movesNone")));
+    if (!moves.length) movesCard.append(h3("p", "hint", t("dash.movesNone")));
     moves.forEach((m, i) => {
-      const line = h2("div", "move");
-      line.append(h2("span", "n", String(i + 1)));
-      const text = h2("div", "move-text");
-      text.append(h2("strong", "", `${t(`mine.${m.mine}`)} ${m.from} \u2192 ${m.from + 1}`));
-      text.append(h2("span", "", `${m.name} [${m.coords}] \xB7 ${fmt(m.cost.metal)} M \xB7 ${fmt(m.cost.crystal)} C`));
-      line.append(text, h2("span", "roi mono", m.days < 1 ? `<1 ${t("dash.daysShort")}` : `${m.days.toLocaleString(ctx.o.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${t("dash.daysShort")}`));
+      const line = h3("div", "move");
+      line.append(h3("span", "n", String(i + 1)));
+      const text = h3("div", "move-text");
+      text.append(h3("strong", "", `${t(`mine.${m.mine}`)} ${m.from} \u2192 ${m.from + 1}`));
+      text.append(h3("span", "", `${m.name} [${m.coords}] \xB7 ${fmt(m.cost.metal)} M \xB7 ${fmt(m.cost.crystal)} C`));
+      line.append(text, h3("span", "roi mono", m.days < 1 ? `<1 ${t("dash.daysShort")}` : `${m.days.toLocaleString(ctx.o.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${t("dash.daysShort")}`));
       movesCard.append(line);
     });
-    movesCard.append(h2("p", "hint", t("dash.movesHint")));
-    const checks = h2("div", "card");
-    checks.append(h2("h3", "", t("dash.checks")));
-    if (!alerts.length) checks.append(h2("p", "ok", t("dash.allGood")));
+    movesCard.append(h3("p", "hint", t("dash.movesHint")));
+    const checks = h3("div", "card");
+    checks.append(h3("h3", "", t("dash.checks")));
+    if (!alerts.length) checks.append(h3("p", "ok", t("dash.allGood")));
     for (const a of alerts) {
-      const item = h2("div", `alert ${a.level}`);
-      item.append(h2("span", "dot"));
-      const text = h2("div", "");
-      text.append(h2("strong", "", t(a.key, { count: a.count })));
-      text.append(h2("span", "", a.names.slice(0, 6).join(", ") + (a.names.length > 6 ? ` +${a.names.length - 6}` : "")));
+      const item = h3("div", `alert ${a.level}`);
+      item.append(h3("span", "dot"));
+      const text = h3("div", "");
+      text.append(h3("strong", "", t(a.key, { count: a.count })));
+      text.append(h3("span", "", a.names.slice(0, 6).join(", ") + (a.names.length > 6 ? ` +${a.names.length - 6}` : "")));
       item.append(text);
       checks.append(item);
     }
@@ -5690,19 +6245,19 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (inQueue.length) {
       inQueue.sort((a, b) => a.item.end - b.item.end);
       const qs = section(parent, t("dash.queuesTitle"), o.bell ? t("dash.queuesHint") : void 0);
-      const wrap = h2("div", "table-wrap");
-      const table = h2("table", "queues");
-      const tbody = h2("tbody");
+      const wrap = h3("div", "table-wrap");
+      const table = h3("table", "queues");
+      const tbody = h3("tbody");
       for (const { body: b, item } of inQueue) {
-        const tr = h2("tr", b.type === "moon" ? "moon" : "");
-        const name = h2("td", "name");
+        const tr = h3("tr", b.type === "moon" ? "moon" : "");
+        const name = h3("td", "name");
         name.append(bodyLink(o.doc, b));
         const what = queueLabel(item, o.locale);
-        const end = h2("td", "num", remaining(item.end, o.now));
+        const end = h3("td", "num", remaining(item.end, o.now));
         end.title = new Date(item.end).toLocaleString(o.locale);
-        const bell = h2("td", "acts");
+        const bell = h3("td", "acts");
         if (o.bell) bell.append(o.bell({ id: `q:${b.id}:${item.kind}:${item.name}:${item.level}:${Math.round(item.end / 6e4)}`, label: `${b.name}: ${what}`, at: item.end }));
-        tr.append(name, h2("td", "kind", t(`queue.${item.kind}`)), h2("td", "", what), end, bell);
+        tr.append(name, h3("td", "kind", t(`queue.${item.kind}`)), h3("td", "", what), end, bell);
         tbody.append(tr);
       }
       table.append(tbody);
@@ -5710,11 +6265,11 @@ table.queues td.acts { width: 1%; text-align: right; }
       qs.append(wrap);
     }
     const research = section(parent, t("dash.research"));
-    const grid2 = h2("div", "levels");
+    const grid2 = h3("div", "levels");
     for (const id of RESEARCH) {
       const v = o.snapshot?.researches[String(id)] ?? 0;
-      const item = h2("div", `lv${v ? "" : " zero"}`);
-      item.append(h2("span", "", ctx.name(id)), h2("b", "mono", String(v)));
+      const item = h3("div", `lv${v ? "" : " zero"}`);
+      item.append(h3("span", "", ctx.name(id)), h3("b", "mono", String(v)));
       grid2.append(item);
     }
     research.append(grid2);
@@ -5728,10 +6283,10 @@ table.queues td.acts { width: 1%; text-align: right; }
   function lineChart(doc, days, value, fmt, label, locale) {
     const W = 520, H = 140, L2 = 56, R = 8, T = 10, B = 22;
     const pts = days.filter((d) => value(d) > 0);
-    const box = h2("figure", "chart");
-    box.append(h2("figcaption", "", label));
+    const box = h3("figure", "chart");
+    box.append(h3("figcaption", "", label));
     if (pts.length < 2) {
-      box.append(h2("p", "hint", "\u2014"));
+      box.append(h3("p", "hint", "\u2014"));
       return box;
     }
     const t0 = pts[0].at, t1 = pts.at(-1).at;
@@ -5761,7 +6316,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const dot = svg(doc, "circle", { r: 4, class: "dot", visibility: "hidden" });
     const hit = svg(doc, "rect", { x: L2, y: 0, width: W - L2 - R, height: H, fill: "transparent" });
     chart.append(cross, dot, hit);
-    const tip = h2("div", "tip");
+    const tip = h3("div", "tip");
     tip.hidden = true;
     hit.addEventListener("mousemove", (e) => {
       const r = chart.getBoundingClientRect();
@@ -5780,7 +6335,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       for (const n of [cross, dot]) n.setAttribute("visibility", "hidden");
       tip.hidden = true;
     });
-    const plot = h2("div", "plot");
+    const plot = h3("div", "plot");
     plot.append(chart, tip);
     box.append(plot);
     return box;
@@ -5790,134 +6345,54 @@ table.queues td.acts { width: 1%; text-align: right; }
     const { t, locale } = o;
     const days = o.history ?? [];
     if (days.length < 2) {
-      parent.append(h2("p", "empty", t("dash.historyEmpty")));
+      parent.append(h3("p", "empty", t("dash.historyEmpty")));
       return;
     }
     const signed = (v, f) => v > 0 ? `+${f(v)}` : v < 0 ? `\u2212${f(-v)}` : "0";
-    const kpis = h2("div", "kpis");
+    const kpis = h3("div", "kpis");
     for (const span of [1, 7, 30]) {
       const c = changeOver(days, span);
-      const box = h2("div", "kpi");
-      box.append(h2("span", "label", t("dash.historySpan", { n: span })));
-      box.append(h2("span", `value ${c && c.points < 0 ? "neg" : ""}`, c ? signed(c.points, (n) => n.toLocaleString(locale)) : "\u2014"));
+      const box = h3("div", "kpi");
+      box.append(h3("span", "label", t("dash.historySpan", { n: span })));
+      box.append(h3("span", `value ${c && c.points < 0 ? "neg" : ""}`, c ? signed(c.points, (n) => n.toLocaleString(locale)) : "\u2014"));
       const rank = c?.rank ? t(c.rank > 0 ? "dash.historyUp" : "dash.historyDown", { n: Math.abs(c.rank) }) : "";
-      box.append(h2("span", "note", c ? [t("dash.historyPerDay", { v: fmt(c.perDay) }), rank, c.days !== span ? t("dash.historyReal", { n: c.days }) : ""].filter(Boolean).join(" \xB7 ") : t("dash.historyFew")));
+      box.append(h3("span", "note", c ? [t("dash.historyPerDay", { v: fmt(c.perDay) }), rank, c.days !== span ? t("dash.historyReal", { n: c.days }) : ""].filter(Boolean).join(" \xB7 ") : t("dash.historyFew")));
       kpis.append(box);
     }
     parent.append(kpis);
-    const charts = h2("div", "cols charts");
+    const charts = h3("div", "cols charts");
     charts.append(
       lineChart(o.doc, days, (d) => d.points, (v) => formatUnits(v, locale), t("dash.points"), locale),
       lineChart(o.doc, days, (d) => d.prodDay, (v) => formatUnits(v, locale), t("dash.historyProd"), locale)
     );
     parent.append(charts);
     const s = section(parent, t("dash.historyDays"));
-    const wrap = h2("div", "table-wrap");
-    const table = h2("table", "history");
-    const head = h2("tr");
-    for (const k of ["dash.historyDay", "dash.points", "dash.historyDelta", "dash.historyRank", "dash.historyProd", "dash.fleetValue"]) head.append(h2("th", "", t(k)));
-    const thead = h2("thead");
+    const wrap = h3("div", "table-wrap");
+    const table = h3("table", "history");
+    const head = h3("tr");
+    for (const k of ["dash.historyDay", "dash.points", "dash.historyDelta", "dash.historyRank", "dash.historyProd", "dash.fleetValue"]) head.append(h3("th", "", t(k)));
+    const thead = h3("thead");
     thead.append(head);
     table.append(thead);
-    const tbody = h2("tbody");
+    const tbody = h3("tbody");
     [...days].reverse().slice(0, 60).forEach((d, i, list) => {
       const prev = list[i + 1];
-      const tr = h2("tr");
+      const tr = h3("tr");
       const delta = prev ? d.points - prev.points : 0;
       const rankMove = prev && d.rank !== null && prev.rank !== null ? prev.rank - d.rank : 0;
       tr.append(
-        h2("td", "", new Date(d.at).toLocaleDateString(locale)),
-        h2("td", "mono", d.points.toLocaleString(locale)),
-        h2("td", `mono ${delta < 0 ? "neg" : delta > 0 ? "pos" : ""}`, prev ? signed(delta, (n) => n.toLocaleString(locale)) : ""),
-        h2("td", "mono", d.rank === null ? "\u2014" : `${d.rank.toLocaleString(locale)}${rankMove ? ` (${rankMove > 0 ? "\u2191" : "\u2193"}${Math.abs(rankMove)})` : ""}`),
-        h2("td", "mono", d.prodDay ? `+${fmt(d.prodDay)}` : "\u2014"),
-        h2("td", "mono", d.fleet ? fmt(d.fleet) : "\u2014")
+        h3("td", "", new Date(d.at).toLocaleDateString(locale)),
+        h3("td", "mono", d.points.toLocaleString(locale)),
+        h3("td", `mono ${delta < 0 ? "neg" : delta > 0 ? "pos" : ""}`, prev ? signed(delta, (n) => n.toLocaleString(locale)) : ""),
+        h3("td", "mono", d.rank === null ? "\u2014" : `${d.rank.toLocaleString(locale)}${rankMove ? ` (${rankMove > 0 ? "\u2191" : "\u2193"}${Math.abs(rankMove)})` : ""}`),
+        h3("td", "mono", d.prodDay ? `+${fmt(d.prodDay)}` : "\u2014"),
+        h3("td", "mono", d.fleet ? fmt(d.fleet) : "\u2014")
       );
       tbody.append(tr);
     });
     table.append(tbody);
     wrap.append(table);
     s.append(wrap);
-  }
-  function rivalsTab(parent, ctx) {
-    const { o, fmt } = ctx;
-    const { t, locale } = o;
-    if (!o.loadRivals) return;
-    if (!rivalsData) {
-      parent.append(h2("p", "empty", t("dash.rivalsLoading")));
-      if (!rivalsLoading) {
-        rivalsLoading = true;
-        o.loadRivals().then((d) => {
-          rivalsData = d;
-        }).catch(() => {
-          rivalsData = { me: null, rivals: [], points: {} };
-        }).finally(() => {
-          rivalsLoading = false;
-          if (tab === "rivals" && isDashboardOpen(o.doc)) ctx.redraw();
-        });
-      }
-      return;
-    }
-    const { me, rivals, points } = rivalsData;
-    if (!rivals.length) {
-      parent.append(h2("p", "empty", t("dash.rivalsNone")));
-      return;
-    }
-    const signed = (v) => v > 0 ? `+${fmt(v)}` : v < 0 ? `\u2212${fmt(-v)}` : "0";
-    const wrap = h2("div", "table-wrap");
-    const table = h2("table", "rivals");
-    const hr = h2("tr");
-    hr.append(h2("th", "", t("dash.rivalsPlayer")));
-    for (const k of COMPARED) hr.append(h2("th", "num", t(`galaxy.score.${k}`)));
-    hr.append(h2("th", "num", t("dash.rivalsGrowth")), h2("th", ""));
-    const thead = h2("thead");
-    thead.append(hr);
-    table.append(thead);
-    const tbody = h2("tbody");
-    const ownId = me?.id ?? 0;
-    const row = (name, s, id, isMe) => {
-      const tr = h2("tr", isMe ? "me" : "");
-      tr.append(h2("td", "name", name));
-      const gap = s && !isMe ? gaps(me, s) : {};
-      for (const k of COMPARED) {
-        const sc = s?.scores[k];
-        const td = h2("td", "num");
-        if (!sc) td.textContent = "\u2014";
-        else {
-          td.append(h2("b", "", fmt(sc.points)), h2("span", "rank", `#${sc.rank.toLocaleString(locale)}`));
-          const g = gap[k];
-          if (g !== void 0 && g !== null) td.append(h2("span", `gap ${g > 0 ? "ahead" : g < 0 ? "behind" : ""}`, signed(g)));
-        }
-        tr.append(td);
-      }
-      const growth = pointsPerDay(points, id, 7);
-      tr.append(h2("td", "num", growth === null ? "\u2014" : `${signed(growth)}/${t("dash.dayShort")}`));
-      const acts = h2("td", "acts");
-      if (!isMe && o.onRemoveRival) {
-        const del = h2("button", "act ghost");
-        del.type = "button";
-        del.append(icon(o.doc, "close", 12));
-        del.title = t("dash.rivalsRemove");
-        del.setAttribute("aria-label", `${t("dash.rivalsRemove")}: ${name}`);
-        del.addEventListener("click", () => {
-          o.onRemoveRival?.(id);
-          if (rivalsData) rivalsData = { ...rivalsData, rivals: rivalsData.rivals.filter((r) => r.rival.id !== id) };
-          ctx.redraw();
-        });
-        acts.append(del);
-      }
-      tr.append(acts);
-      tbody.append(tr);
-    };
-    row(me?.name || t("galaxy.own"), me, ownId, true);
-    const total = me?.scores.total?.points ?? 0;
-    for (const r of [...rivals].sort((a, b) => Math.abs((a.scores?.scores.total?.points ?? 0) - total) - Math.abs((b.scores?.scores.total?.points ?? 0) - total))) {
-      row(r.scores?.name || r.rival.name, r.scores, r.rival.id, false);
-    }
-    table.append(tbody);
-    wrap.append(table);
-    parent.append(wrap);
-    parent.append(h2("p", "hint", t("dash.rivalsHint")));
   }
   function minesTab(parent, ctx) {
     const { t } = ctx.o;
@@ -5933,7 +6408,7 @@ table.queues td.acts { width: 1%; text-align: right; }
         ]
       })
     );
-    s.append(h2("p", "hint", t("dash.minesHint")));
+    s.append(h3("p", "hint", t("dash.minesHint")));
   }
   function facilitiesTab(parent, ctx) {
     const { t } = ctx.o;
@@ -5947,36 +6422,36 @@ table.queues td.acts { width: 1%; text-align: right; }
     const { t, doc } = o;
     const planets = ctx.bodies.filter((b) => b.type === "planet");
     const active = new Map(planets.map((p) => [p.id, { b: activeLfBuildings(p), r: activeLfResearch(p, o.lfSlots?.[String(p.id)]) }]));
-    parent.append(h2("p", "hint", t("dash.lfHint")));
+    parent.append(h3("p", "hint", t("dash.lfHint")));
     const table = (title, pick) => {
       const s = section(parent, title);
       const ids = [...new Set(planets.flatMap((p) => pick(p).filter((a) => a.level > 0).map((a) => a.id)))].sort(
         (a, b) => a % 100 - b % 100 || a - b
       );
       if (!ids.length) {
-        s.append(h2("p", "hint", t("dash.lfNone")));
+        s.append(h3("p", "hint", t("dash.lfNone")));
         return;
       }
-      const wrap = h2("div", "table-wrap");
-      const tab2 = h2("table", "matrix lf");
-      const hr = h2("tr");
-      hr.append(h2("th", "name", ""));
+      const wrap = h3("div", "table-wrap");
+      const tab2 = h3("table", "matrix lf");
+      const hr = h3("tr");
+      hr.append(h3("th", "name", ""));
       for (const p of planets) {
-        const th = h2("th", "num col");
-        const a = h2("a", "col-name", p.name);
+        const th = h3("th", "num col");
+        const a = h3("a", "col-name", p.name);
         a.href = `${doc.location?.origin ?? ""}/game/index.php?page=ingame&component=lfresearch&cp=${p.id}`;
         th.append(a);
         th.title = `${p.name} [${p.coords}]${p.species ? ` \xB7 ${t(`lf.${p.species}`)}` : ""}`;
         hr.append(th);
       }
-      const thead = h2("thead");
+      const thead = h3("thead");
       thead.append(hr);
       tab2.append(thead);
-      const tbody = h2("tbody");
+      const tbody = h3("tbody");
       for (const id of ids) {
-        const tr = h2("tr");
+        const tr = h3("tr");
         const sp = speciesOf(id);
-        tr.append(h2("td", "name tech", `${name(id)}${sp ? ` \xB7 ${t(`lf.${sp}`)}` : ""}`));
+        tr.append(h3("td", "name tech", `${name(id)}${sp ? ` \xB7 ${t(`lf.${sp}`)}` : ""}`));
         const on = planets.map((p) => pick(p).find((a) => a.id === id));
         const values = on.flatMap((a) => a ? [a.level] : []);
         const max = values.length > 1 && values.some((v) => v !== Math.max(...values)) ? Math.max(...values) : -1;
@@ -6002,7 +6477,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const shown = ids.filter((id) => ctx.bodies.some((b) => level(b, id) > 0));
     const s = section(parent, t(ships ? "dash.tab.ships" : "dash.tab.defence"));
     if (!shown.length) {
-      s.append(h2("p", "hint", t("dash.unitsNone")));
+      s.append(h3("p", "hint", t("dash.unitsNone")));
       return;
     }
     const bodies = ctx.bodies.filter((b) => shown.some((id) => level(b, id) > 0));
@@ -6020,17 +6495,17 @@ table.queues td.acts { width: 1%; text-align: right; }
     const units = [...SHIPS, ...DEFENCES.filter((id) => id < 500)];
     const owners = ctx.bodies.filter((b) => units.some((id) => level(b, id) > 0));
     const s = section(parent, t("dash.tab.scrap"));
-    s.append(h2("p", "hint", t("dash.scrapHint")));
+    s.append(h3("p", "hint", t("dash.scrapHint")));
     if (!owners.length) {
-      s.append(h2("p", "hint", t("dash.unitsNone")));
+      s.append(h3("p", "hint", t("dash.unitsNone")));
       return;
     }
     if (!owners.some((b) => b.id === scrapBody)) scrapBody = owners[0].id;
     const body = owners.find((b) => b.id === scrapBody);
-    const bar = h2("div", "scrap-bar");
-    const pick = h2("select", "field");
+    const bar = h3("div", "scrap-bar");
+    const pick = h3("select", "field");
     for (const b of owners) {
-      const opt = h2("option", "", `${b.type === "moon" ? `${t("dash.moon")} ` : ""}${b.name} [${b.coords}]`);
+      const opt = h3("option", "", `${b.type === "moon" ? `${t("dash.moon")} ` : ""}${b.name} [${b.coords}]`);
       opt.value = String(b.id);
       opt.selected = b.id === body.id;
       pick.append(opt);
@@ -6039,63 +6514,63 @@ table.queues td.acts { width: 1%; text-align: right; }
       scrapBody = Number(pick.value);
       ctx.redraw();
     });
-    const rateLabel = h2("label", "field-label", t("dash.scrapRate"));
-    const rate = h2("input", "field rate");
+    const rateLabel = h3("label", "field-label", t("dash.scrapRate"));
+    const rate = h3("input", "field rate");
     rate.type = "number";
     rate.min = "35";
     rate.max = "75";
     rate.step = "1";
     rate.value = String(scrapRate);
-    rateLabel.append(rate, h2("span", "", "%"));
-    const all = h2("button", "chip", t("dash.scrapAll"));
-    all.type = "button";
-    const none = h2("button", "chip", t("dash.scrapNone"));
+    rateLabel.append(rate, h3("span", "", "%"));
+    const all2 = h3("button", "chip", t("dash.scrapAll"));
+    all2.type = "button";
+    const none = h3("button", "chip", t("dash.scrapNone"));
     none.type = "button";
-    bar.append(pick, rateLabel, all, none);
+    bar.append(pick, rateLabel, all2, none);
     s.append(bar);
-    const wrap = h2("div", "table-wrap");
-    const table = h2("table", "scrap");
-    const hr = h2("tr");
-    for (const [label, cls] of [[t("dash.unit"), ""], [t("dash.owned"), "num"], [t("dash.toScrap"), "num"], [t("res.metal"), "num"], [t("res.crystal"), "num"], [t("res.deuterium"), "num"]]) hr.append(h2("th", cls, label));
-    const thead = h2("thead");
+    const wrap = h3("div", "table-wrap");
+    const table = h3("table", "scrap");
+    const hr = h3("tr");
+    for (const [label, cls] of [[t("dash.unit"), ""], [t("dash.owned"), "num"], [t("dash.toScrap"), "num"], [t("res.metal"), "num"], [t("res.crystal"), "num"], [t("res.deuterium"), "num"]]) hr.append(h3("th", cls, label));
+    const thead = h3("thead");
     thead.append(hr);
     table.append(thead);
-    const tbody = h2("tbody");
+    const tbody = h3("tbody");
     const inputs = /* @__PURE__ */ new Map();
     const outs = /* @__PURE__ */ new Map();
     for (const id of units) {
       const owned = level(body, id);
       if (!owned) continue;
-      const tr = h2("tr");
-      const nameCell = h2("td", "unit");
-      const label = h2("span", "unit-label");
+      const tr = h3("tr");
+      const nameCell = h3("td", "unit");
+      const label = h3("span", "unit-label");
       if (id < 400) label.append(shipIcon(ctx.o.doc, id, ctx.name(id), "unit-ico"));
-      label.append(h2("span", "", ctx.name(id)));
+      label.append(h3("span", "", ctx.name(id)));
       nameCell.append(label);
-      tr.append(nameCell, h2("td", "num mono", count(owned)));
-      const qty = h2("input", "field qty");
+      tr.append(nameCell, h3("td", "num mono", count(owned)));
+      const qty = h3("input", "field qty");
       qty.type = "number";
       qty.min = "0";
       qty.max = String(owned);
       qty.value = "0";
       qty.setAttribute("aria-label", ctx.name(id));
       inputs.set(id, qty);
-      const qCell = h2("td", "num");
+      const qCell = h3("td", "num");
       qCell.append(qty);
       tr.append(qCell);
-      const cells = [h2("td", "num mono m"), h2("td", "num mono c"), h2("td", "num mono d")];
+      const cells = [h3("td", "num mono m"), h3("td", "num mono c"), h3("td", "num mono d")];
       outs.set(id, cells);
       tr.append(...cells);
       tbody.append(tr);
     }
     table.append(tbody);
-    const fr = h2("tr");
-    const totalCells = [h2("td", "num mono m"), h2("td", "num mono c"), h2("td", "num mono d")];
-    const msuCell = h2("span", "mono msu");
-    const totalName = h2("td", "name", `${t("dash.total")} `);
+    const fr = h3("tr");
+    const totalCells = [h3("td", "num mono m"), h3("td", "num mono c"), h3("td", "num mono d")];
+    const msuCell = h3("span", "mono msu");
+    const totalName = h3("td", "name", `${t("dash.total")} `);
     totalName.append(msuCell);
-    fr.append(totalName, h2("td"), h2("td"), ...totalCells);
-    const tfoot = h2("tfoot");
+    fr.append(totalName, h3("td"), h3("td"), ...totalCells);
+    const tfoot = h3("tfoot");
     tfoot.append(fr);
     table.append(tfoot);
     wrap.append(table);
@@ -6120,7 +6595,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     };
     for (const input of inputs.values()) input.addEventListener("input", update);
     rate.addEventListener("input", update);
-    all.addEventListener("click", () => {
+    all2.addEventListener("click", () => {
       for (const [id, input] of inputs) input.value = String(level(body, id));
       update();
     });
@@ -7041,15 +7516,15 @@ table.queues td.acts { width: 1%; text-align: right; }
     const actions = el3(doc, "div", "fut-factions");
     actions.append(
       button(doc, t("fleet.save"), () => {
-        const all = loadProfiles(o.store);
-        all[String(o.bodyId)] = read();
-        o.store.set(PROFILES_KEY, all);
+        const all2 = loadProfiles(o.store);
+        all2[String(o.bodyId)] = read();
+        o.store.set(PROFILES_KEY, all2);
         onSaved(t("fleet.saved"));
       }, "primary"),
       button(doc, t(moon ? "fleet.copyMoons" : "fleet.copyPlanets", { count: same.length }), () => {
-        const all = loadProfiles(o.store);
-        all[String(o.bodyId)] = read();
-        o.store.set(PROFILES_KEY, copyProfileToAll(all, o.bodyId, same));
+        const all2 = loadProfiles(o.store);
+        all2[String(o.bodyId)] = read();
+        o.store.set(PROFILES_KEY, copyProfileToAll(all2, o.bodyId, same));
         onSaved(t("fleet.copied", { count: same.length }));
       })
     );
@@ -7556,7 +8031,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       doc.head.append(style);
     }
     const reserve = profileFor(loadProfiles(store), bodyId).reserve;
-    const all = {};
+    const all2 = {};
     let kept = 0;
     gate.querySelectorAll(".ship_input_row").forEach((row) => {
       const head = row.previousElementSibling;
@@ -7581,9 +8056,9 @@ table.queues td.acts { width: 1%; text-align: right; }
       }
       note.textContent = keep ? `\u2212${keep.toLocaleString()}` : "";
       note.title = t("fleet.jumpgateKeep");
-      all[id] = amount;
+      all2[id] = amount;
     });
-    gate.querySelector("#sendall")?.setAttribute("onclick", `setMaxIntInput("#jumpgateForm", ${JSON.stringify(all)})`);
+    gate.querySelector("#sendall")?.setAttribute("onclick", `setMaxIntInput("#jumpgateForm", ${JSON.stringify(all2)})`);
     return kept;
   }
   function watchJumpgate(doc, store, bodyId, t) {
@@ -7760,7 +8235,7 @@ h3 { margin: 0; }
     const g = el4(doc, "div", "fut-tp-grid");
     g.style.gridTemplateColumns = `auto repeat(${view.cols.length}, minmax(0, 1fr))`;
     g.append(el4(doc, "span", "fut-tp-h"));
-    for (const h5 of view.heads) g.append(el4(doc, "span", "fut-tp-h", h5));
+    for (const h6 of view.heads) g.append(el4(doc, "span", "fut-tp-h", h6));
     const rows = RES.filter(([key2]) => view.cols.some((c) => !c.short && c.cost[key2] > 0));
     const cell = (value, cls) => {
       const c = el4(doc, "span", `fut-tp-v ${cls}`, value ? formatUnits(value, locale) : "\u2014");
@@ -8018,8 +8493,8 @@ h3 { margin: 0; }
     });
     return out;
   }
-  var keyHandler2 = null;
-  function h3(tag, cls = "", text) {
+  var keyHandler3 = null;
+  function h4(tag, cls = "", text) {
     const node = document.createElement(tag);
     if (cls) node.className = cls;
     if (text !== void 0) node.textContent = text;
@@ -8027,8 +8502,8 @@ h3 { margin: 0; }
   }
   function closePlanner(doc) {
     doc.getElementById(PLANNER_ID)?.remove();
-    if (keyHandler2) doc.removeEventListener("keydown", keyHandler2, true);
-    keyHandler2 = null;
+    if (keyHandler3) doc.removeEventListener("keydown", keyHandler3, true);
+    keyHandler3 = null;
   }
   function openPlanner(o) {
     const { doc, t, locale } = o;
@@ -8036,10 +8511,10 @@ h3 { margin: 0; }
     const host = doc.createElement("div");
     host.id = PLANNER_ID;
     const root = host.attachShadow({ mode: "open" });
-    const style = h3("style");
+    const style = h4("style");
     style.textContent = WINDOW_SHEET + PLANNER_CSS;
-    const backdrop = h3("div", "backdrop");
-    const panel = h3("div", "panel");
+    const backdrop = h4("div", "backdrop");
+    const panel = h4("div", "panel");
     backdrop.append(panel);
     root.append(style, backdrop);
     doc.body.append(host);
@@ -8058,7 +8533,7 @@ h3 { margin: 0; }
         ["crystal", "c"],
         ["deuterium", "d"]
       ]) {
-        const cell = h3("span", `num ${c} ${cls}`, cost[key2] ? fmt(cost[key2]) : "\u2014");
+        const cell = h4("span", `num ${c} ${cls}`, cost[key2] ? fmt(cost[key2]) : "\u2014");
         cell.title = Math.round(cost[key2]).toLocaleString(locale);
         row.append(cell);
       }
@@ -8073,10 +8548,10 @@ h3 { margin: 0; }
         o.onChange?.();
         draw();
       };
-      const head = h3("div", "head");
-      const titles = h3("div", "titles");
-      titles.append(h3("h2", "", t("plan.title")), h3("span", "sub", t("plan.sub")));
-      const close = h3("button", "close");
+      const head = h4("div", "head");
+      const titles = h4("div", "titles");
+      titles.append(h4("h2", "", t("plan.title")), h4("span", "sub", t("plan.sub")));
+      const close = h4("button", "close");
       close.append(icon(doc, "close", 16));
       close.title = t("fleet.close");
       close.addEventListener("click", () => closePlanner(doc));
@@ -8092,13 +8567,13 @@ h3 { margin: 0; }
       const cards = [];
       const refs = o.entries.map((e) => ({ planetId: e.planetId, moonId: e.moonId }));
       const triple = (cost, cls = "") => {
-        const box = h3("span", `triple ${cls}`);
+        const box = h4("span", `triple ${cls}`);
         for (const [key2, c] of [
           ["metal", "m"],
           ["crystal", "c"],
           ["deuterium", "d"]
         ]) {
-          const v = h3("span", `num ${c}`, cost[key2] ? fmt(cost[key2]) : "\u2014");
+          const v = h4("span", `num ${c}`, cost[key2] ? fmt(cost[key2]) : "\u2014");
           v.title = `${t(`tech.res.${key2}`)}: ${Math.round(cost[key2]).toLocaleString(locale)}`;
           box.append(v);
         }
@@ -8115,13 +8590,13 @@ h3 { margin: 0; }
         const short = gap ? gap.metal + gap.crystal + gap.deuterium : 0;
         grand = addCost(grand, total);
         if (gap) grandMissing = addCost(grandMissing, gap);
-        const card = h3("div", "card");
-        const top = h3("div", "card-head");
-        const title = h3("div", "card-title");
-        title.append(h3("h3", "", body.label), h3("span", "count", t("plan.items", { n: items.length })));
-        const acts = h3("div", "card-acts");
+        const card = h4("div", "card");
+        const top = h4("div", "card-head");
+        const title = h4("div", "card-title");
+        title.append(h4("h3", "", body.label), h4("span", "count", t("plan.items", { n: items.length })));
+        const acts = h4("div", "card-acts");
         if (gap && short > 0 && o.navigate && o.href) {
-          const bring = h3("button", "act", pendingSum > 0 ? t("plan.complete") : t("plan.bring"));
+          const bring = h4("button", "act", pendingSum > 0 ? t("plan.complete") : t("plan.bring"));
           bring.title = t("plan.bringHint");
           bring.addEventListener("click", () => {
             const here = o.current?.id ?? null;
@@ -8133,14 +8608,14 @@ h3 { margin: 0; }
           });
           acts.append(bring);
         }
-        const clear = h3("button", "act ghost", t("plan.clear"));
+        const clear = h4("button", "act ghost", t("plan.clear"));
         clear.addEventListener("click", () => save(clearBody(plan, body.id)));
         acts.append(clear);
         top.append(title, acts);
-        const sums = h3("div", "sums");
+        const sums = h4("div", "sums");
         const sumBox = (label, cost, cls) => {
-          const b = h3("div", `sum ${cls}`);
-          b.append(h3("span", "label", label));
+          const b = h4("div", `sum ${cls}`);
+          b.append(h4("span", "label", label));
           if (cost) b.append(triple(cost, cls === "warn" ? "short" : ""));
           return b;
         };
@@ -8157,13 +8632,13 @@ h3 { margin: 0; }
           if (short > 0) sums.append(sumBox(pendingSum > 0 ? t("plan.missingAfterSent") : t("plan.missingHere"), gap, "warn"));
           else sums.append(sumBox(pendingSum > 0 ? t("plan.allSent") : t("plan.ready"), null, "ok"));
         } else sums.append(sumBox(t("plan.unknownHere"), null, "muted"));
-        const rows = h3("div", "rows");
+        const rows = h4("div", "rows");
         for (const g of groupItems(items)) {
-          const row = h3("div", "row");
-          const name = h3("span", "name");
+          const row = h4("div", "row");
+          const name = h4("span", "name");
           const what = g.amount !== void 0 ? `\xD7${g.amount.toLocaleString(locale)}` : g.from === g.to ? t("plan.level", { level: g.from ?? 0 }) : t("plan.levels", { from: g.from ?? 0, to: g.to ?? 0 });
-          name.append(h3("span", "", g.name), h3("span", "lv", what));
-          const remove = h3("button", "x");
+          name.append(h4("span", "", g.name), h4("span", "lv", what));
+          const remove = h4("button", "x");
           remove.append(icon(doc, "close", 13));
           remove.title = t("plan.remove");
           remove.addEventListener("click", () => {
@@ -8177,19 +8652,19 @@ h3 { margin: 0; }
         card.append(top, sums, rows);
         cards.push(card);
       }
-      const summary2 = h3("div", "summary");
-      if (!cards.length) summary2.append(h3("p", "empty", t("plan.empty")));
+      const summary2 = h4("div", "summary");
+      if (!cards.length) summary2.append(h4("p", "empty", t("plan.empty")));
       else {
         const tile2 = (label, cost, cls) => {
-          const box = h3("div", `kpi ${cls}`);
-          box.append(h3("span", "label", label));
-          const line = h3("div", "kpi-line");
+          const box = h4("div", `kpi ${cls}`);
+          box.append(h4("span", "label", label));
+          const line = h4("div", "kpi-line");
           for (const [key2, c] of [
             ["metal", "m"],
             ["crystal", "c"],
             ["deuterium", "d"]
           ]) {
-            const v = h3("span", `num ${c}`, fmt(cost[key2]));
+            const v = h4("span", `num ${c}`, fmt(cost[key2]));
             v.title = Math.round(cost[key2]).toLocaleString(locale);
             line.append(v);
           }
@@ -8203,10 +8678,10 @@ h3 { margin: 0; }
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop) closePlanner(doc);
     });
-    keyHandler2 = (e) => {
+    keyHandler3 = (e) => {
       if (e.key === "Escape") closePlanner(doc);
     };
-    doc.addEventListener("keydown", keyHandler2, true);
+    doc.addEventListener("keydown", keyHandler3, true);
     draw();
   }
 
@@ -8215,8 +8690,8 @@ h3 { margin: 0; }
   var PERIOD_KEY = "exp.period";
   var PERIODS = ["today", "yesterday", "week", "month", "all"];
   var ORDER = ["resource", "darkmatter", "ship", "item", "trader", "early", "late", "pirate", "alien", "blackhole", "nothing", "artefact", "lifeform", "unknown"];
-  var keyHandler3 = null;
-  function h4(tag, cls = "", text) {
+  var keyHandler4 = null;
+  function h5(tag, cls = "", text) {
     const node = document.createElement(tag);
     if (cls) node.className = cls;
     if (text !== void 0) node.textContent = text;
@@ -8224,8 +8699,8 @@ h3 { margin: 0; }
   }
   function closeJournal(doc) {
     doc.getElementById(JOURNAL_ID)?.remove();
-    if (keyHandler3) doc.removeEventListener("keydown", keyHandler3, true);
-    keyHandler3 = null;
+    if (keyHandler4) doc.removeEventListener("keydown", keyHandler4, true);
+    keyHandler4 = null;
   }
   function openJournal(o) {
     const { doc, t, locale, store } = o;
@@ -8233,10 +8708,10 @@ h3 { margin: 0; }
     const host = doc.createElement("div");
     host.id = JOURNAL_ID;
     const root = host.attachShadow({ mode: "open" });
-    const style = h4("style");
+    const style = h5("style");
     style.textContent = WINDOW_SHEET + JOURNAL_CSS;
-    const backdrop = h4("div", "backdrop");
-    const panel = h4("div", "panel");
+    const backdrop = h5("div", "backdrop");
+    const panel = h5("div", "panel");
     backdrop.append(panel);
     root.append(style, backdrop);
     doc.body.append(host);
@@ -8249,17 +8724,17 @@ h3 { margin: 0; }
       const journal = store.get(JOURNAL_KEY, {});
       const entries = entriesIn(journal, periodRange(period, o.now));
       const s = periodStats(entries);
-      const head = h4("div", "head");
-      const titles = h4("div", "titles");
-      titles.append(h4("h2", "", t("exp.title")), h4("span", "sub", t("exp.sub")));
-      const close = h4("button", "close");
+      const head = h5("div", "head");
+      const titles = h5("div", "titles");
+      titles.append(h5("h2", "", t("exp.title")), h5("span", "sub", t("exp.sub")));
+      const close = h5("button", "close");
       close.append(icon(doc, "close", 16));
       close.title = t("fleet.close");
       close.addEventListener("click", () => closeJournal(doc));
       head.append(titles, close);
-      const tabs = h4("div", "tabs");
+      const tabs = h5("div", "tabs");
       for (const p of PERIODS) {
-        const b = h4("button", "tab", t(`exp.period.${p}`));
+        const b = h5("button", "tab", t(`exp.period.${p}`));
         b.setAttribute("aria-pressed", String(p === period));
         b.addEventListener("click", () => {
           period = p;
@@ -8270,22 +8745,22 @@ h3 { margin: 0; }
       }
       const parts = [head, tabs];
       if (!entries.length) {
-        parts.push(h4("p", "empty", Object.keys(journal).length ? t("exp.emptyPeriod") : t("exp.empty")));
+        parts.push(h5("p", "empty", Object.keys(journal).length ? t("exp.emptyPeriod") : t("exp.empty")));
       } else {
-        const kpis = h4("div", "kpis");
+        const kpis = h5("div", "kpis");
         const kpi = (label, value, cls = "", detail) => {
-          const box2 = h4("div", "kpi");
-          box2.append(h4("span", "label", label), h4("span", `value ${cls}`, value));
+          const box2 = h5("div", "kpi");
+          box2.append(h5("span", "label", label), h5("span", `value ${cls}`, value));
           if (detail) box2.append(detail);
           kpis.append(box2);
         };
         const triple = (r) => {
-          const d = h4("div", "detail");
-          d.append(h4("span", "m", fmt(r.metal)), h4("span", "c", fmt(r.crystal)), h4("span", "d", fmt(r.deuterium)));
+          const d = h5("div", "detail");
+          d.append(h5("span", "m", fmt(r.metal)), h5("span", "c", fmt(r.crystal)), h5("span", "d", fmt(r.deuterium)));
           return d;
         };
-        const countDetail = h4("div", "detail");
-        if (s.discoveries) countDetail.append(h4("span", "", t("exp.discoveries", { n: s.discoveries })));
+        const countDetail = h5("div", "detail");
+        if (s.discoveries) countDetail.append(h5("span", "", t("exp.discoveries", { n: s.discoveries })));
         kpi(t("exp.count"), s.count.toLocaleString(locale), "", countDetail);
         kpi(t("exp.resources"), `${fmt(msu2(s.res))} MSU`, "", triple(s.res));
         kpi(t("exp.dm"), fmt(s.res.darkMatter), "dm");
@@ -8294,51 +8769,51 @@ h3 { margin: 0; }
         kpi(t("exp.net"), `${fmt(s.netMsu)} MSU`, s.netMsu < 0 ? "neg" : "pos");
         kpi(t("exp.average"), s.count ? `${fmt(s.netMsu / s.count)} MSU` : "\u2014");
         if (s.lfXp || s.artefacts) {
-          const d = h4("div", "detail");
-          if (s.artefacts) d.append(h4("span", "", t("msg.artefacts", { n: s.artefacts.toLocaleString(locale) })));
+          const d = h5("div", "detail");
+          if (s.artefacts) d.append(h5("span", "", t("msg.artefacts", { n: s.artefacts.toLocaleString(locale) })));
           kpi(t("exp.lfXp"), s.lfXp.toLocaleString(locale), "", d);
         }
         parts.push(kpis);
-        const outs = h4("div", "card");
-        outs.append(h4("h3", "", t("exp.outcomes")));
+        const outs = h5("div", "card");
+        outs.append(h5("h3", "", t("exp.outcomes")));
         const total = Object.values(s.outcomes).reduce((a, b) => a + (b ?? 0), 0) || 1;
-        const bar = h4("div", "bar");
-        const legend = h4("div", "legend");
+        const bar = h5("div", "bar");
+        const legend = h5("div", "legend");
         for (const key2 of ORDER) {
           const n = s.outcomes[key2];
           if (!n) continue;
-          const seg = h4("span");
+          const seg = h5("span");
           seg.style.width = `${n / total * 100}%`;
           seg.style.background = OUTCOME_COLORS[key2] ?? "#5B6B80";
           seg.title = `${t(`msg.out.${key2}`)}: ${n}`;
           bar.append(seg);
-          const row = h4("div");
-          const dot = h4("span", "dot");
+          const row = h5("div");
+          const dot = h5("span", "dot");
           dot.style.background = OUTCOME_COLORS[key2] ?? "#5B6B80";
-          row.append(dot, h4("span", "", t(`msg.out.${key2}`)), h4("span", "n", n.toLocaleString(locale)), h4("span", "pct", (n / total).toLocaleString(locale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 })));
+          row.append(dot, h5("span", "", t(`msg.out.${key2}`)), h5("span", "n", n.toLocaleString(locale)), h5("span", "pct", (n / total).toLocaleString(locale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 })));
           legend.append(row);
         }
         outs.append(bar, legend);
         const sized = s.sizes[0] + s.sizes[1] + s.sizes[2];
         if (sized) {
-          const sizes = h4("div", "detail");
+          const sizes = h5("div", "detail");
           sizes.style.cssText = "display:flex;gap:12px;margin-top:8px;color:#8A9BB0;font-size:12px";
-          for (const i of [2, 1, 0]) sizes.append(h4("span", "", `${t(`msg.size.${i}`)} ${s.sizes[i].toLocaleString(locale)} (${(s.sizes[i] / sized).toLocaleString(locale, { style: "percent", maximumFractionDigits: 0 })})`));
+          for (const i of [2, 1, 0]) sizes.append(h5("span", "", `${t(`msg.size.${i}`)} ${s.sizes[i].toLocaleString(locale)} (${(s.sizes[i] / sized).toLocaleString(locale, { style: "percent", maximumFractionDigits: 0 })})`));
           outs.append(sizes);
         }
         parts.push(outs);
         const found = Object.entries(s.shipsFound);
         const lost = Object.entries(s.lost);
         if (found.length || lost.length) {
-          const card = h4("div", "card");
-          card.append(h4("h3", "", t("exp.ships")));
+          const card = h5("div", "card");
+          card.append(h5("h3", "", t("exp.ships")));
           const grid2 = (units, lost2) => {
-            const list = h4("div", `ships${lost2 ? " lost" : ""}`);
+            const list = h5("div", `ships${lost2 ? " lost" : ""}`);
             for (const [id, n] of units.sort((x, y) => Number(x[0]) - Number(y[0]))) {
               const name = shipName(Number(id), ships, t);
-              const tile2 = h4("div", "ship");
-              const info = h4("div", "ship-info");
-              info.append(h4("b", lost2 ? "neg" : "pos", `${lost2 ? "\u2212" : "+"}${n.toLocaleString(locale)}`), h4("span", "ship-name", name));
+              const tile2 = h5("div", "ship");
+              const info = h5("div", "ship-info");
+              info.append(h5("b", lost2 ? "neg" : "pos", `${lost2 ? "\u2212" : "+"}${n.toLocaleString(locale)}`), h5("span", "ship-name", name));
               tile2.append(shipIcon(doc, Number(id), name, "ship-img"), info);
               list.append(tile2);
             }
@@ -8346,32 +8821,32 @@ h3 { margin: 0; }
           };
           if (found.length) card.append(grid2(found, false));
           if (lost.length) {
-            card.append(h4("h4", "lost", t("exp.lost")));
+            card.append(h5("h4", "lost", t("exp.lost")));
             card.append(grid2(lost, true));
           }
           parts.push(card);
         }
         const days = byDay(entries, 31);
         if (days.length > 1 || period !== "today") {
-          const card = h4("div", "card");
-          card.append(h4("h3", "", t("exp.byDay")));
-          const scroll = h4("div", "scroll");
-          const table = h4("table");
-          const hr = h4("tr");
+          const card = h5("div", "card");
+          card.append(h5("h3", "", t("exp.byDay")));
+          const scroll = h5("div", "scroll");
+          const table = h5("table");
+          const hr = h5("tr");
           for (const label of [t("exp.day"), t("exp.countShort"), t("msg.res.metal"), t("msg.res.crystal"), t("msg.res.deuterium"), t("exp.dmShort"), t("exp.shipsShort"), "MSU"])
-            hr.append(h4("th", "", label));
+            hr.append(h5("th", "", label));
           table.append(hr);
           for (const { day, stats } of days) {
-            const tr = h4("tr");
+            const tr = h5("tr");
             tr.append(
-              h4("td", "", new Date(day).toLocaleDateString(locale, { weekday: "short", day: "2-digit", month: "2-digit" })),
-              h4("td", "", String(stats.count)),
-              h4("td", "m", fmt(stats.res.metal)),
-              h4("td", "c", fmt(stats.res.crystal)),
-              h4("td", "d", fmt(stats.res.deuterium)),
-              h4("td", "dm", fmt(stats.res.darkMatter)),
-              h4("td", "pos", fmt(msu2(stats.shipsValue) - msu2(stats.lostValue))),
-              h4("td", stats.netMsu < 0 ? "neg" : "", fmt(stats.netMsu))
+              h5("td", "", new Date(day).toLocaleDateString(locale, { weekday: "short", day: "2-digit", month: "2-digit" })),
+              h5("td", "", String(stats.count)),
+              h5("td", "m", fmt(stats.res.metal)),
+              h5("td", "c", fmt(stats.res.crystal)),
+              h5("td", "d", fmt(stats.res.deuterium)),
+              h5("td", "dm", fmt(stats.res.darkMatter)),
+              h5("td", "pos", fmt(msu2(stats.shipsValue) - msu2(stats.lostValue))),
+              h5("td", stats.netMsu < 0 ? "neg" : "", fmt(stats.netMsu))
             );
             table.append(tr);
           }
@@ -8380,15 +8855,15 @@ h3 { margin: 0; }
           parts.push(card);
         }
       }
-      const foot = h4("div", "foot");
-      const opt = h4("label", "opt");
-      const box = h4("input");
+      const foot = h5("div", "foot");
+      const opt = h5("label", "opt");
+      const box = h5("input");
       box.type = "checkbox";
       box.checked = store.get(FOLD_KEY, true);
       box.addEventListener("change", () => store.set(FOLD_KEY, box.checked));
       opt.append(box, document.createTextNode(t("exp.fold")));
-      const acts = h4("div", "acts");
-      const exp = h4("button", "act", t("exp.export"));
+      const acts = h5("div", "acts");
+      const exp = h5("button", "act", t("exp.export"));
       exp.title = t("exp.exportHint");
       exp.addEventListener("click", () => {
         const blob = new Blob([JSON.stringify({ app: "future", kind: "expedition-journal", exportedAt: o.now, entries: journal }, null, 1)], { type: "application/json" });
@@ -8400,7 +8875,7 @@ h3 { margin: 0; }
         a.remove();
         setTimeout(() => URL.revokeObjectURL(a.href), 1e3);
       });
-      const clear = h4("button", confirmClear ? "act danger" : "act ghost", confirmClear ? t("exp.clearConfirm") : t("exp.clear"));
+      const clear = h5("button", confirmClear ? "act danger" : "act ghost", confirmClear ? t("exp.clearConfirm") : t("exp.clear"));
       clear.addEventListener("click", () => {
         if (!confirmClear) {
           confirmClear = true;
@@ -8419,10 +8894,10 @@ h3 { margin: 0; }
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop) closeJournal(doc);
     });
-    keyHandler3 = (e) => {
+    keyHandler4 = (e) => {
       if (e.key === "Escape") closeJournal(doc);
     };
-    doc.addEventListener("keydown", keyHandler3, true);
+    doc.addEventListener("keydown", keyHandler4, true);
     draw();
   }
 
@@ -8457,7 +8932,7 @@ h3 { margin: 0; }
   // src/data/highscore-api.ts
   var API_TYPES = { points: 0, economy: 1, research: 2, fleet: 3, lifeform: 8 };
   var key = (type) => `hs.daily.${type}`;
-  var TTL3 = 36e5;
+  var TTL4 = 36e5;
   function parseHighscoreXml(xml, readAt) {
     const doc = new DOMParser().parseFromString(xml, "text/html");
     const root = doc.querySelector("highscore");
@@ -8475,13 +8950,13 @@ h3 { margin: 0; }
     const day = dayKey(reading.at);
     if (prev && prev.day === day) return { ...prev, last: reading };
     const lastHour = prev ? new Date(prev.last.at).getHours() : -1;
-    const base = prev && lastHour >= 23 && reading.at - prev.last.at < 2 * TTL3 ? prev.last : reading;
+    const base = prev && lastHour >= 23 && reading.at - prev.last.at < 2 * TTL4 ? prev.last : reading;
     return { day, base, last: reading };
   }
   async function dailyBase(deps) {
     const now = deps.now ?? Date.now();
     const stored = deps.store.get(key(deps.type), null);
-    if (stored && now - stored.last.readAt < TTL3 && stored.day === dayKey(now)) return stored;
+    if (stored && now - stored.last.readAt < TTL4 && stored.day === dayKey(now)) return stored;
     const res = await deps.guard.request(`${deps.origin}/api/highscore.xml?category=1&type=${deps.type}`, "user-view");
     const reading = res.ok ? parseHighscoreXml(await res.text(), now) : null;
     if (!reading) return stored;
@@ -8493,25 +8968,17 @@ h3 { margin: 0; }
   // src/modules/highscore/index.ts
   var daily = null;
   var isHighscorePage = (doc) => new URL(doc.location?.href ?? "http://x/").searchParams.get("component") === "highscore";
-  var CSS = `
+  var CSS2 = `
 #ranks .fut-hs-gap { display: block; font-size: 10px; line-height: 1.3; }
 #ranks .fut-hs-gap.up { color: #7BC47F; } #ranks .fut-hs-gap.down { color: #D86A6A; } #ranks .fut-hs-gap.flat { color: #6A7682; }
 .fut-hs-note { margin: 4px 0 6px; color: #848484; font: 11px Verdana, Arial, sans-serif; }
 #ranks .fut-hs-eta { display: block; font-size: 10px; color: #6F9FC8; }
-#ranks .fut-hs-star { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-left: 4px; padding: 0;
-  border: 1px solid #2E4356; border-radius: 3px; background: #111A21; color: #848484; cursor: pointer; vertical-align: middle; }
-#ranks .fut-hs-star:hover, #ranks .fut-hs-star:focus-visible { border-color: #617C8D; color: #F1F1F1; }
-#ranks .fut-hs-star.on { border-color: #E3BB28; color: #E3BB28; }
-#ranks tr.fut-hs-rival td { box-shadow: inset 0 1px 0 #3A3220, inset 0 -1px 0 #3A3220; }
-#ranks tr.fut-hs-rival .playername { color: #E3BB28; }`;
+#ranks .highscoreNameHolder .fut-mk-flag { margin-left: 4px; }`;
   function decorateHighscore(o) {
     const { doc, store, t, locale } = o;
     const hs = readHighscore(doc);
     if (!hs) return;
     const fmt = (n) => formatUnits(n, locale);
-    const rivals = store.get(RIVALS_KEY, []);
-    const rivalIds = new Set(rivals.map((r) => r.id));
-    const book = store.get(RIVAL_POINTS_KEY, {});
     const total = hs.category === "points";
     const mine = hs.rows.find((r) => r.mine)?.score ?? (total ? store.get(SCORE_KEY, null)?.points : void 0);
     const myPace = total ? changeOver(store.get(HISTORY_KEY, []), 7)?.perDay ?? 0 : 0;
@@ -8538,8 +9005,7 @@ h3 { margin: 0; }
       }).finally(() => decorateHighscore(o));
     }
     for (const r of hs.rows) {
-      r.row.querySelectorAll(".fut-hs-gap, .fut-hs-eta, .fut-hs-star").forEach((n) => n.remove());
-      r.row.classList.toggle("fut-hs-rival", rivalIds.has(r.playerId));
+      r.row.querySelectorAll(".fut-hs-gap, .fut-hs-eta").forEach((n) => n.remove());
       const scoreCell = r.row.querySelector("td.score");
       const base = today?.base.scores[String(r.playerId)];
       if (scoreCell && base !== void 0) {
@@ -8551,46 +9017,30 @@ h3 { margin: 0; }
         scoreCell.append(g);
       }
       if (scoreCell && mine !== void 0 && !r.mine && total && myPace > 0 && r.score > mine) {
-        const theirs = rivalIds.has(r.playerId) ? pointsPerDay(book, r.playerId, 7) ?? 0 : 0;
-        const days = daysToCatch(r.score - mine, myPace, theirs);
+        const days = daysToCatch(r.score - mine, myPace);
         const e = doc.createElement("span");
         e.className = "fut-hs-eta";
         e.textContent = days === null ? t("hs.never") : days < 1 ? t("hs.passToday") : t("hs.days", { n: Math.ceil(days).toLocaleString(locale) });
-        e.title = t(theirs ? "hs.etaBoth" : "hs.etaMine", { mine: fmt(myPace), theirs: fmt(theirs) });
+        e.title = t("hs.etaMine", { mine: fmt(myPace) });
         scoreCell.append(e);
       }
       const nameHolder = r.row.querySelector(".highscoreNameHolder");
-      if (nameHolder && !r.mine) {
-        const on = rivalIds.has(r.playerId);
-        const star = doc.createElement("button");
-        star.type = "button";
-        star.className = `fut-hs-star${on ? " on" : ""}`;
-        star.setAttribute("aria-pressed", String(on));
-        star.title = t(on ? "galaxy.rivalRemove" : "galaxy.rivalAdd");
-        star.setAttribute("aria-label", `${star.title}: ${r.name}`);
-        star.append(icon(doc, "star", 11));
-        star.addEventListener("click", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          store.set(RIVALS_KEY, toggleRival(store.get(RIVALS_KEY, []), { id: r.playerId, name: r.name, at: Date.now() }));
-          decorateHighscore(o);
-        });
-        nameHolder.append(star);
-      }
+      if (nameHolder && !r.mine && !nameHolder.querySelector(".fut-mk-flag")) nameHolder.append(flagButton({ doc, store, t }, r.playerId, r.name));
     }
   }
   function watchHighscore(o) {
+    ensureMarksStyle(o.doc);
     if (!o.doc.getElementById("fut-hs-style")) {
       const style = o.doc.createElement("style");
       style.id = "fut-hs-style";
-      style.textContent = CSS;
+      style.textContent = CSS2;
       o.doc.head.append(style);
     }
     decorateHighscore(o);
     const box = o.doc.getElementById("stat_list_content") ?? o.doc.body;
     let queued = false;
     new MutationObserver((list) => {
-      if (queued || list.every((m) => [...m.addedNodes].every((n) => n instanceof Element && n.className?.toString().startsWith("fut-hs")))) return;
+      if (queued || list.every((m) => [...m.addedNodes].every((n) => n instanceof Element && (/^fut-(hs|mk)/.test(n.getAttribute("class") ?? "") || !!n.closest(".fut-mk"))))) return;
       queued = true;
       setTimeout(() => {
         queued = false;
@@ -8748,6 +9198,16 @@ h3 { margin: 0; }
     const guard = new NetworkGuard((input, init) => fetch(input, init), window.location.origin);
     const gm = new GMStore();
     const store = new Store(gm, namespace);
+    const moved = migrateOld(loadMarks(store.get(MARKS_KEY, null)), {
+      targets: store.get(TARGETS_KEY, []),
+      rivals: store.get("rivals.list", [])
+    });
+    if (moved) {
+      store.set(MARKS_KEY, moved);
+      store.set(TARGETS_KEY, []);
+      store.set("rivals.list", []);
+    }
+    if (store.get("rivals.points", null) !== null) store.set("rivals.points", null);
     const locale = detectLocale(document);
     const t = translator(locale);
     let snapshot = store.get(SNAPSHOT_KEY, null);
@@ -8843,16 +9303,7 @@ h3 { margin: 0; }
         entries: readPlanetList(document),
         score: store.get(SCORE_KEY, null),
         history: store.get(HISTORY_KEY, []),
-        // Rivals tab: one public-API read per player, only on the player's click, cached an hour.
-        loadRivals: async () => {
-          const now = Date.now();
-          const me = await playerScores(guard, store, location.origin, ownPlayerId(document), now).catch(() => null);
-          const rivals = [];
-          for (const rival of store.get(RIVALS_KEY, [])) rivals.push({ rival, scores: await playerScores(guard, store, location.origin, rival.id, now).catch(() => null) });
-          return { me, rivals, points: store.get(RIVAL_POINTS_KEY, {}) };
-        },
         bell: (r) => bellButton(document, store, t, r),
-        onRemoveRival: (id) => store.set(RIVALS_KEY, store.get(RIVALS_KEY, []).filter((r) => r.id !== id)),
         queues,
         names: techNames,
         lfSlots,
@@ -8917,6 +9368,7 @@ h3 { margin: 0; }
     if (currentId) {
       watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), onPlanChange: () => draw() });
     }
+    const openTargetsHere = () => openTargets({ doc: document, store, guard, t, locale, here: document.querySelector('meta[name="ogame-planet-coordinates"]')?.getAttribute("content") ?? "1:1:1" });
     const pageMeta = (name) => document.querySelector(`meta[name="${name}"]`)?.getAttribute("content") ?? "";
     const reminders = { doc: document, store, t, locale, offset: clockOffset(document, Date.now()) };
     startReminders(reminders);
@@ -8943,7 +9395,7 @@ h3 { margin: 0; }
     }
     if (isGalaxyPage(document)) {
       const ownPlanetIds = new Set(readPlanetList(document).flatMap((e) => e.planetId ? [e.planetId] : []));
-      watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t });
+      watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onOpenTargets: openTargetsHere });
     }
   }
   if (document.readyState === "loading") {

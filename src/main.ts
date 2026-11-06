@@ -12,10 +12,10 @@ import { currentBodyId, readCurrentResources, readPlanetList } from './data/plan
 import { applyPageResources } from './engines/resources';
 import { SCORE_KEY, watchScore, type Score } from './data/score';
 import { HISTORY_KEY, recordDay, type History } from './engines/history';
-import { RIVAL_POINTS_KEY, RIVALS_KEY, type Rival, type RivalPoints } from './engines/rivals';
-import { playerScores } from './data/player-api';
 import { loadServerDataOnPageLoad } from './data/server-data';
-import { isGalaxyPage, watchGalaxy } from './modules/galaxy';
+import { isGalaxyPage, TARGETS_KEY, watchGalaxy } from './modules/galaxy';
+import { openTargets } from './modules/marks/targets-view';
+import { loadMarks, MARKS_KEY, migrateOld, type Marks } from './engines/marks';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
 import { ITEMS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems } from './data/bonuses';
 import { dayFigures, openDashboard } from './modules/dashboard';
@@ -46,6 +46,17 @@ async function bootstrap(): Promise<void> {
   const guard = new NetworkGuard((input, init) => fetch(input, init), window.location.origin);
   const gm = new GMStore();
   const store = new Store(gm, namespace);
+  // One-time move of the galaxy targets and rivals kept before 2026-11-06 into the new marks.
+  const moved = migrateOld(loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null)), {
+    targets: store.get<{ coords: string; planet: string; player: string; at: number }[]>(TARGETS_KEY, []),
+    rivals: store.get<{ id: number; name: string; at: number }[]>('rivals.list', []),
+  });
+  if (moved) {
+    store.set(MARKS_KEY, moved);
+    store.set(TARGETS_KEY, []);
+    store.set('rivals.list', []);
+  }
+  if (store.get('rivals.points', null) !== null) store.set('rivals.points', null);
   const locale = detectLocale(document);
   const t = translator(locale);
   let snapshot: AccountSnapshot | null = store.get<AccountSnapshot | null>(SNAPSHOT_KEY, null);
@@ -160,16 +171,7 @@ async function bootstrap(): Promise<void> {
           entries: readPlanetList(document),
           score: store.get<Score | null>(SCORE_KEY, null),
           history: store.get<History>(HISTORY_KEY, []),
-          // Rivals tab: one public-API read per player, only on the player's click, cached an hour.
-          loadRivals: async () => {
-            const now = Date.now();
-            const me = await playerScores(guard, store, location.origin, ownPlayerId(document), now).catch(() => null);
-            const rivals = [];
-            for (const rival of store.get<Rival[]>(RIVALS_KEY, [])) rivals.push({ rival, scores: await playerScores(guard, store, location.origin, rival.id, now).catch(() => null) });
-            return { me, rivals, points: store.get<RivalPoints>(RIVAL_POINTS_KEY, {}) };
-          },
           bell: (r) => bellButton(document, store, t, r),
-          onRemoveRival: (id) => store.set(RIVALS_KEY, store.get<Rival[]>(RIVALS_KEY, []).filter((r) => r.id !== id)),
           queues,
           names: techNames,
           lfSlots,
@@ -242,6 +244,7 @@ async function bootstrap(): Promise<void> {
     watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), onPlanChange: () => draw() });
   }
 
+  const openTargetsHere = () => openTargets({ doc: document, store, guard, t, locale, here: document.querySelector('meta[name="ogame-planet-coordinates"]')?.getAttribute('content') ?? '1:1:1' });
   const pageMeta = (name: string) => document.querySelector(`meta[name="${name}"]`)?.getAttribute('content') ?? '';
 
   // Manual reminders: due ones are shown on the page; bells on the game's event list.
@@ -274,7 +277,7 @@ async function bootstrap(): Promise<void> {
   // Galaxy view: system summary, marks, debris in MSU, targets and the scores card.
   if (isGalaxyPage(document)) {
     const ownPlanetIds = new Set(readPlanetList(document).flatMap((e) => (e.planetId ? [e.planetId] : [])));
-    watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t });
+    watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onOpenTargets: openTargetsHere });
   }
 }
 
