@@ -51,6 +51,19 @@ describe('galaxy view', () => {
     expect(sum).toMatchObject({ players: 3, inactive: 2, longInactive: 1, vacation: 1, moons: 2, fields: 1, debris: 70_700, deep: 0 });
   });
 
+  it('reads deep-space debris (position 16) as the game appends it', () => {
+    // Markup from the game's galaxy JS (13.1): #expeditionDebris with getDebrisTooltip() inside,
+    // the same .debris-content items as a planet row plus a pathfinder count that must not be read.
+    document.getElementById('expeditionDebrisSlotDebrisContainer')!.innerHTML = `
+      <div id="expeditionDebris" class="name float_left tooltipRel" rel="debris16"><div><img width="30" height="30"></div>
+        <div class="htmlTooltip galaxyTooltip" id="debris16"><h1>Detriti <span>[1:300:16]</span></h1><div class="splitLine"></div>
+          <ul class="ListLinks"><li class="debris-content">Metallo: 1.200.000</li><li class="debris-content">Cristallo: 400.000</li>
+          <li class="debris-content">Deuterio: 10.000</li><li class="debris-recyclers">Pathfinder necessari: 34</li></ul></div></div>`;
+    const s = readGalaxy(document)!;
+    expect(s.deepDebris).toEqual({ metal: 1_200_000, crystal: 400_000, deuterium: 10_000 });
+    expect(systemSummary(s, new Set()).deep).toBe(1_830_000);
+  });
+
   it('toggles a target', () => {
     const t = { coords: '1:300:5', planet: 'Kepler', player: 'Kublai', at: 1 };
     const one = toggleTarget([], t);

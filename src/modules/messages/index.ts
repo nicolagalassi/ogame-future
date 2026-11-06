@@ -187,6 +187,10 @@ export function summaryFor(doc: Document, m: ParsedMessage, o: { locale: string;
 
 /** Where the summary goes: above the game's action bar, like OGLight. */
 function place(msg: Element, box: HTMLElement): void {
+  // List view (13.x, "collapsible" reports): the body stays hidden until opened, so the
+  // summary goes under the game's header row to be seen with the report closed.
+  const header = msg.querySelector(':scope > .msgFilteredHeaderRow');
+  if (header) return void header.after(box);
   const actions = msg.querySelector('.msg_actions, message-footer');
   if (actions?.parentElement) actions.before(box);
   else (msg.querySelector('.msgContent') ?? msg).after(box);
@@ -210,6 +214,9 @@ export function processMessages(o: MessagesOptions): number {
       box.title = [box.dataset.size, t('msg.toggle')].filter(Boolean).join(' · ');
       box.addEventListener('click', (e) => {
         if ((e.target as Element).closest('a, button')) return;
+        // List view: open/close the report the way the game's own header row does.
+        const cell = msg.querySelector<HTMLElement>(':scope > .msgFilteredHeaderRow .msgFilteredHeaderCell');
+        if (cell) return void cell.click();
         msg.classList.toggle('fut-msg-folded');
       });
       place(msg, box);
