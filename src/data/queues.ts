@@ -14,7 +14,7 @@ export type QueueKind = 'building' | 'research' | 'ship' | 'lfbuilding' | 'lfres
 export interface QueueItem {
   kind: QueueKind;
   name: string;
-  /** Target level; 0 for ships and defences. */
+  /** Target level; for the shipyard (ships and defences) the amount ordered, as the game shows it. */
   level: number;
   /** End time, ms since epoch (server clock). */
   end: number;
@@ -61,6 +61,10 @@ export function parseProductionQueue(html: string, ids: number[], now: number): 
 }
 
 /** Kinds still running at `now`, in display order. */
+/** "Metal Mine → 31" or "42.171× Light Laser". */
+export const queueLabel = (i: QueueItem, locale: string): string =>
+  i.kind === 'ship' ? `${i.level ? `${i.level.toLocaleString(locale)}× ` : ''}${i.name}` : `${i.name}${i.level ? ` → ${i.level}` : ''}`;
+
 export function activeItems(items: QueueItem[] | undefined, now: number): QueueItem[] {
   return (items ?? [])
     .filter((i) => i.end > now)

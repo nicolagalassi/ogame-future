@@ -453,5 +453,13 @@
   "dash.rivalsRemove": "Ne plus suivre",
   "dash.rivalsHint": "Points et classements de l'API publique, mise à jour par le jeu environ toutes les heures. Sous chaque valeur l'écart avec vous : orange si le rival est devant, vert s'il est derrière. La croissance utilise les lectures déjà faites.",
   "galaxy.rivalAdd": "Clic : suivre comme rival",
-  "galaxy.rivalRemove": "Clic : ne plus suivre"
+  "galaxy.rivalRemove": "Clic : ne plus suivre",
+  "dash.queuesTitle": "Files en cours",
+  "dash.queuesHint": "Cloche : un message sur la page à la fin.",
+  "remind.add": "Me prévenir à la fin",
+  "remind.remove": "Retirer le rappel",
+  "remind.now": "Maintenant ({time})",
+  "remind.late": "Terminé à {time}",
+  "remind.ok": "OK",
+  "remind.return": "(retour)"
 }

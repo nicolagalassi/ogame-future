@@ -117,4 +117,9 @@ table.rivals .gap.behind { color: var(--ok); }
 table.rivals tr.me td { background: var(--accent-soft); }
 table.rivals td.name { color: var(--text); font-weight: 700; }
 table.rivals th.num, table.rivals td.num { text-align: right; vertical-align: top; }
+table.queues td.kind { color: var(--muted); }
+table.queues td.acts { width: 1%; text-align: right; }
+.fut-bell { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); cursor: pointer; }
+.fut-bell:hover, .fut-bell:focus-visible { border-color: var(--accent); color: var(--text); }
+.fut-bell.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
 `;

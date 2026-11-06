@@ -35,6 +35,7 @@ import { isMessagesPage, ownPlayerId } from './data/messages';
 import { watchMessages } from './modules/messages';
 import { openJournal } from './modules/messages/journal-view';
 import { openSpyTable } from './modules/messages/spy-table';
+import { bellButton, clockOffset, startReminders, watchEventList } from './modules/reminders';
 import { renderPlanetMenu, type MenuMode, type MenuSettings } from './modules/planet-menu';
 
 async function bootstrap(): Promise<void> {
@@ -164,6 +165,7 @@ async function bootstrap(): Promise<void> {
             for (const rival of store.get<Rival[]>(RIVALS_KEY, [])) rivals.push({ rival, scores: await playerScores(guard, store, location.origin, rival.id, now).catch(() => null) });
             return { me, rivals, points: store.get<RivalPoints>(RIVAL_POINTS_KEY, {}) };
           },
+          bell: (r) => bellButton(document, store, t, r),
           onRemoveRival: (id) => store.set(RIVALS_KEY, store.get<Rival[]>(RIVALS_KEY, []).filter((r) => r.id !== id)),
           queues,
           names: techNames,
@@ -236,6 +238,11 @@ async function bootstrap(): Promise<void> {
   if (currentId) {
     watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), onPlanChange: () => draw() });
   }
+
+  // Manual reminders: due ones are shown on the page; bells on the game's event list.
+  const reminders = { doc: document, store, t, locale, offset: clockOffset(document, Date.now()) };
+  startReminders(reminders);
+  watchEventList(reminders);
 
   // Inbox: a summary on each report; expedition reports go into the journal.
   if (isMessagesPage(document))
