@@ -74,12 +74,19 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
    niente pulsante sonda), distintivo con la posizione accanto al giocatore: al passaggio del mouse una
    scheda con punti e posizioni (generale, economia, ricerca, militare, forme di vita, navi) da
    `/api/playerData.xml` come OGLight. Chiamata `user-view` del guard: solo API pubblica, senza cookie,
-   in cache un'ora per giocatore. Da verificare: detriti in posizione 16 (markup mai visto pieno).
-4. Verificare in gioco i riepiloghi di spionaggio su un giocatore vero.
+   in cache un'ora per giocatore. Detriti in posizione 16: stesso markup `.debris-content` delle righe
+   (letto dal JS del gioco 13.1, test con quel markup).
+4. Riepiloghi di spionaggio verificati su giocatori veri (2026-11-06). Nella posta 13.x a lista il
+   riepilogo sta sotto la riga d'intestazione e il clic apre il report come la riga del gioco.
 5. Domanda aperta: plancia, piano e diario restano finestre sopra il gioco o diventano pannelli?
-6. Roadmap: classifiche e giocatori, storico account, confronto rivali, promemoria manuali,
-   backup/esportazione completa, nome definitivo, merge delle PR #1–#6, richiesta di
+6. Roadmap: classifiche e giocatori, storico account, confronto rivali, promemoria manuali, nome definitivo, merge delle PR #1–#6, richiesta di
    tolleranza ai ToolDev (con le aree grigie: spostamento banner, "Ripeti" flotta).
+
+7. **Backup** (fatto il 2026-11-06, `src/core/backup.ts`): Impostazioni → Backup dati → Esporta/Importa.
+   File JSON locale con tutte le chiavi `future:*` (tutti gli universi e account); l'importazione unisce
+   e scrive solo chiavi `future:*`. Nuovo grant `GM_listValues`.
+8. accountInfo: a volte il gioco risponde "An error has occured!" (HTML). Ora quella risposta, o una
+   senza pianeti, non sostituisce lo snapshot salvato; niente nuovi tentativi fino a Sync.
 
 ## Come si prova senza il gioco
 

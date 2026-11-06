@@ -7,6 +7,8 @@
 export interface KeyValueStore {
   get<T>(key: string, fallback: T): T;
   set(key: string, value: unknown): void;
+  /** Every key held, across all universes and players (for the backup). */
+  keys(): string[];
 }
 
 export class GMStore implements KeyValueStore {
@@ -15,6 +17,9 @@ export class GMStore implements KeyValueStore {
   }
   set(key: string, value: unknown): void {
     GM_setValue(key, value);
+  }
+  keys(): string[] {
+    return GM_listValues();
   }
 }
 
@@ -25,6 +30,9 @@ export class MemoryStore implements KeyValueStore {
   }
   set(key: string, value: unknown): void {
     this.data.set(key, value);
+  }
+  keys(): string[] {
+    return [...this.data.keys()];
   }
 }
 

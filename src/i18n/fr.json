@@ -395,5 +395,11 @@
   "galaxy.loading": "Lecture de l'API publique…",
   "galaxy.apiError": "API publique injoignable. Réessayez plus tard.",
   "galaxy.apiAge": "API publique, {time}",
-  "galaxy.own": "À vous"
+  "galaxy.own": "À vous",
+  "settings.backup": "Sauvegarde des données",
+  "settings.backupExport": "Exporter",
+  "settings.backupImport": "Importer",
+  "settings.backupSaved": "{n} valeurs enregistrées dans le fichier",
+  "settings.backupRestored": "{n} valeurs restaurées : rechargez la page",
+  "settings.backupBad": "Ce fichier n'est pas une sauvegarde de Future"
 }

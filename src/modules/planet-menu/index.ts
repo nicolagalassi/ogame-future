@@ -35,6 +35,10 @@ export interface PlanetMenuOptions {
   locale: string;
   t: (key: string, vars?: Record<string, string | number>) => string;
   onSettingsChange: (next: MenuSettings) => void;
+  /** Saves every Future value as a local file; returns how many were saved. */
+  onBackupExport?: () => number;
+  /** Writes a backup file's text back; returns how many values were restored, throws on a bad file. */
+  onBackupImport?: (text: string) => number;
   /** Runs the user-initiated sync. Only ever called from the Sync button's click. */
   onSync: () => Promise<void>;
   /** Opens the account dashboard (Future's own panel, no game action). */
@@ -305,6 +309,37 @@ function settingsPanel(o: PlanetMenuOptions, mode: MenuMode, roomy: boolean, col
     choice(t('settings.on'), o.settings.markIdle, () => o.onSettingsChange({ ...o.settings, markIdle: true })),
     choice(t('settings.off'), !o.settings.markIdle, () => o.onSettingsChange({ ...o.settings, markIdle: false })),
   );
+  if (o.onBackupExport && o.onBackupImport) {
+    const action = (text: string, onClick: () => void) => {
+      const b = el(doc, 'button', 'fut-chip', text);
+      b.type = 'button';
+      b.addEventListener('click', onClick);
+      return b;
+    };
+    const exportBackup = o.onBackupExport;
+    const importBackup = o.onBackupImport;
+    // Feedback on the player's own click only (AGENTS.md §1.4 allows it).
+    const note = el(doc, 'div', 'fut-set-note');
+    note.setAttribute('role', 'status');
+    const picker = el(doc, 'input', '');
+    picker.type = 'file';
+    picker.accept = 'application/json,.json';
+    picker.hidden = true;
+    picker.addEventListener('change', () => {
+      const file = picker.files?.[0];
+      picker.value = '';
+      if (!file) return;
+      file.text().then((text) => {
+        note.textContent = t('settings.backupRestored', { n: importBackup(text) });
+      }).catch(() => { note.textContent = t('settings.backupBad'); });
+    });
+    row(
+      t('settings.backup'),
+      action(t('settings.backupExport'), () => { note.textContent = t('settings.backupSaved', { n: exportBackup() }); }),
+      action(t('settings.backupImport'), () => picker.click()),
+    );
+    panel.append(picker, note);
+  }
   if (colonies) panel.append(el(doc, 'div', 'fut-set-note', colonies));
   if (o.snapshot) panel.append(el(doc, 'div', 'fut-set-note', t('toolbar.lastSync', { time: formatTime(o.snapshot.fetchedAt, o.locale) })));
   return panel;

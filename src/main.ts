@@ -4,6 +4,7 @@
  */
 import { NetworkGuard } from './core/guard';
 import { GMStore, Store, serverNamespace } from './core/storage';
+import { downloadBackup, importBackup } from './core/backup';
 import { IdleSaver } from './core/idle-saver';
 import { detectLocale, translator } from './core/i18n';
 import { SNAPSHOT_KEY, hydrateAccountOncePerSession, syncAccountOnUserClick, type AccountSnapshot } from './data/account-info';
@@ -37,7 +38,8 @@ async function bootstrap(): Promise<void> {
   if (!namespace) return; // not a logged-in game page
 
   const guard = new NetworkGuard((input, init) => fetch(input, init), window.location.origin);
-  const store = new Store(new GMStore(), namespace);
+  const gm = new GMStore();
+  const store = new Store(gm, namespace);
   const locale = detectLocale(document);
   const t = translator(locale);
   let snapshot: AccountSnapshot | null = store.get<AccountSnapshot | null>(SNAPSHOT_KEY, null);
@@ -137,6 +139,8 @@ async function bootstrap(): Promise<void> {
         store.set('planetMenu.markIdle', next.markIdle);
         draw();
       },
+      onBackupExport: () => downloadBackup(document, gm, Date.now()),
+      onBackupImport: (text) => importBackup(gm, text),
       onOpenDashboard: () =>
         openDashboard({
           doc: document,
