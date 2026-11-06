@@ -395,5 +395,11 @@
   "galaxy.loading": "Reading the public API…",
   "galaxy.apiError": "Public API unreachable. Try again later.",
   "galaxy.apiAge": "Public API, {time}",
-  "galaxy.own": "Yours"
+  "galaxy.own": "Yours",
+  "settings.backup": "Data backup",
+  "settings.backupExport": "Export",
+  "settings.backupImport": "Import",
+  "settings.backupSaved": "Saved {n} values to the file",
+  "settings.backupRestored": "Restored {n} values: reload the page",
+  "settings.backupBad": "The file is not a Future backup"
 }

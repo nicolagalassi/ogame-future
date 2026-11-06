@@ -395,5 +395,11 @@
   "galaxy.loading": "Lese die öffentliche API…",
   "galaxy.apiError": "Öffentliche API nicht erreichbar. Später erneut versuchen.",
   "galaxy.apiAge": "Öffentliche API, {time}",
-  "galaxy.own": "Deins"
+  "galaxy.own": "Deins",
+  "settings.backup": "Datensicherung",
+  "settings.backupExport": "Exportieren",
+  "settings.backupImport": "Importieren",
+  "settings.backupSaved": "{n} Werte in der Datei gespeichert",
+  "settings.backupRestored": "{n} Werte wiederhergestellt: Seite neu laden",
+  "settings.backupBad": "Die Datei ist keine Future-Sicherung"
 }

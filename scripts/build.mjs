@@ -16,6 +16,7 @@ const header = `// ==UserScript==
 // @match        https://*.ogame.gameforge.com/game/*
 // @grant        GM_getValue
 // @grant        GM_setValue
+// @grant        GM_listValues
 // @grant        unsafeWindow
 // @run-at       document-start
 // ==/UserScript==
