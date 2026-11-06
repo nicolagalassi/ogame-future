@@ -463,5 +463,12 @@
   "spy.simOgameTools": "Simula con OGame Simulator (nuova scheda, con le tue ricerche di combattimento)",
   "spy.from": "Da {name} [{coords}], andata al 100%",
   "msg.combat.converter": "Convertitore",
-  "msg.combat.converterHint": "Apre il rapporto nel convertitore Ogotcha (nuova scheda)"
+  "msg.combat.converterHint": "Apre il rapporto nel convertitore Ogotcha (nuova scheda)",
+  "hs.ahead": "{n} punti più di te",
+  "hs.behind": "{n} punti meno di te",
+  "hs.days": "ti avvicini: {n} g",
+  "hs.today": "lo superi oggi",
+  "hs.never": "al ritmo attuale no",
+  "hs.etaMine": "Al tuo ritmo degli ultimi 7 giorni (+{mine}/g)",
+  "hs.etaBoth": "Al tuo ritmo (+{mine}/g) meno il suo (+{theirs}/g), ultimi 7 giorni"
 }

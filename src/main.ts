@@ -35,6 +35,7 @@ import { entriesIn, JOURNAL_KEY, periodRange, periodStats, type Journal } from '
 import { isMessagesPage, ownPlayerId } from './data/messages';
 import { watchMessages } from './modules/messages';
 import { openJournal } from './modules/messages/journal-view';
+import { isHighscorePage, watchHighscore } from './modules/highscore';
 import { bellButton, clockOffset, startReminders, watchEventList } from './modules/reminders';
 import { renderPlanetMenu, type MenuMode, type MenuSettings } from './modules/planet-menu';
 
@@ -247,6 +248,9 @@ async function bootstrap(): Promise<void> {
   const reminders = { doc: document, store, t, locale, offset: clockOffset(document, Date.now()) };
   startReminders(reminders);
   watchEventList(reminders);
+
+  // Highscore: gap to the player, days to catch up, rival star.
+  if (isHighscorePage(document)) watchHighscore({ doc: document, store, locale, t });
 
   // Inbox: a summary on each report; expedition reports go into the journal.
   if (isMessagesPage(document))
