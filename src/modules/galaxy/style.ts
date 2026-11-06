@@ -10,14 +10,20 @@ export const GALAXY_CSS = `
 .fut-g-inact { color: #9BE36D; }
 .fut-g-vac { color: #7FB8FF; }
 .fut-g-deb { color: #F5B547; }
-/* Rows: a light tint on the cells, the game's own colours stay. */
-#galaxyContent .galaxyRow.fut-g-inactive .galaxyCell { background-color: rgba(155,227,109,0.07); }
-#galaxyContent .galaxyRow.fut-g-own .galaxyCell { background-color: rgba(79,209,232,0.08); }
-#galaxyContent .galaxyRow.fut-g-tagged .cellPlanetName { box-shadow: inset 3px 0 0 var(--fut-tag); }
+/* Dark table, as OGLight: flat dark cells on an almost black table, empty positions darker still.
+   Row marks are inset shadows, so they sit over the cell's own background. */
+#galaxycomponent .galaxyTable, #galaxyContent .expeditionDebrisSlotBox { background: #0C1117 !important; }
+#galaxyContent .ctContentRow .galaxyCell { background: linear-gradient(192deg, #1C2430, #131920 70%) !important; border-radius: 2px !important; }
+#galaxyContent .ctContentRow[class*="filtered_filter_empty"] .galaxyCell { background: #10151B !important; }
+#galaxyContent .ctContentRow .cellPlanetName { justify-content: flex-start !important; padding: 0 5px; box-sizing: border-box; }
+#galaxyContent .galaxyRow.fut-g-inactive .galaxyCell { box-shadow: inset 0 0 0 100px rgba(155,227,109,0.06); }
+#galaxyContent .galaxyRow.fut-g-own .galaxyCell { box-shadow: inset 0 0 0 100px rgba(79,209,232,0.07); }
+#galaxyContent .galaxyRow.fut-g-tagged .galaxyCell { box-shadow: inset 0 0 40px color-mix(in srgb, var(--fut-tag) 22%, transparent); }
+#galaxyContent .galaxyRow.fut-g-tagged .cellPlanetName { box-shadow: inset 3px 0 0 var(--fut-tag), inset 0 0 40px color-mix(in srgb, var(--fut-tag) 22%, transparent); }
 
 /* The position the side bar (or the link) asked for: the planet menu's cyan frame. */
 #galaxyContent .galaxyRow.fut-g-hl { box-shadow: inset 0 0 0 1px #4FD1E8, inset 3px 0 0 #4FD1E8; }
-#galaxyContent .galaxyRow.fut-g-hl .galaxyCell { background-color: rgba(79,209,232,0.12); }
+#galaxyContent .galaxyRow.fut-g-hl .galaxyCell { box-shadow: inset 0 0 0 100px rgba(79,209,232,0.10); }
 
 #galaxyContent .cellPlanetName { position: relative; }
 /* Planet colour: at the right of the name, faint until the row is pointed at or the planet has one. */

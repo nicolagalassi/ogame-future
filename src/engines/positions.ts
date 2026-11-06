@@ -15,7 +15,7 @@ export interface Seen {
   /** Planet name. */
   name: string;
   moon: boolean;
-  /** Debris on the position, in MSU. */
+  /** Debris on the position: metal + crystal + deuterium. */
   debris: number;
   /** Activity of the planet and of the moon. */
   act: [Activity, Activity];

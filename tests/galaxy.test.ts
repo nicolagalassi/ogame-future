@@ -48,7 +48,7 @@ describe('galaxy view', () => {
 
   it('sums the system: vacation does not count as inactive, own planets are left out', () => {
     const sum = systemSummary(readGalaxy(document)!, new Set([71]));
-    expect(sum).toMatchObject({ players: 3, inactive: 2, longInactive: 1, vacation: 1, moons: 2, fields: 1, debris: 70_700, deep: 0 });
+    expect(sum).toMatchObject({ players: 3, inactive: 2, longInactive: 1, vacation: 1, moons: 2, fields: 1, debris: 63_800, deep: 0 });
   });
 
   it('reads deep-space debris (position 16) as the game appends it', () => {
@@ -61,7 +61,7 @@ describe('galaxy view', () => {
           <li class="debris-content">Deuterio: 10.000</li><li class="debris-recyclers">Pathfinder necessari: 34</li></ul></div></div>`;
     const s = readGalaxy(document)!;
     expect(s.deepDebris).toEqual({ metal: 1_200_000, crystal: 400_000, deuterium: 10_000 });
-    expect(systemSummary(s, new Set()).deep).toBe(1_830_000);
+    expect(systemSummary(s, new Set()).deep).toBe(1_610_000);
   });
 
 });
