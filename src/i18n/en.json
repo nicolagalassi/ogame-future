@@ -532,6 +532,11 @@
   "bar.targetsHint": "Targets side bar (flagged players and coloured planets) · M: next position",
   "settings.oglight": "From OGLight",
   "settings.oglightImport": "Import export",
-  "settings.oglightDone": "From OGLight: {players} players, {planets} coloured planets, {seen} positions. Reload the page.",
-  "settings.backupImportHint": "A Future backup or OGLight's “Export data” file (same universe)"
+  "settings.oglightDone": "From OGLight: {players} players, {planets} coloured planets, {seen} positions, {exp} expeditions and {raids} raids over {days} days. Reload the page.",
+  "settings.backupImportHint": "A Future backup or OGLight's “Export data” file (same universe)",
+  "exp.raids": "Raids (imported from OGLight)",
+  "exp.raidCount": "Raids",
+  "exp.raidLoot": "Loot and debris",
+  "exp.raidLost": "Ships lost",
+  "exp.raidNet": "Raid net"
 }

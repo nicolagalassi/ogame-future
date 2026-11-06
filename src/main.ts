@@ -16,7 +16,7 @@ import { loadServerDataOnPageLoad } from './data/server-data';
 import { highlightPosition, isGalaxyPage, TARGETS_KEY, watchGalaxy } from './modules/galaxy';
 import { nextInSide, onSideNavigate, refreshSide, restoreSide, toggleSide } from './modules/marks/side';
 import { loadMarks, MARKS_KEY, migrateOld, type Marks } from './engines/marks';
-import { convertOglight, isOglightDb } from './engines/oglight-import';
+import { convertOglight, convertOglightStats, isOglightDb } from './engines/oglight-import';
 import { POSITIONS_KEY, type Positions } from './engines/positions';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
 import { ITEMS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems } from './data/bonuses';
@@ -174,7 +174,9 @@ async function bootstrap(): Promise<void> {
         const out = convertOglight(json, loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null)), store.get<Positions>(POSITIONS_KEY, {}), Date.now());
         store.set(MARKS_KEY, out.marks);
         store.set(POSITIONS_KEY, out.positions);
-        return t('settings.oglightDone', { players: out.players, planets: out.planets, seen: out.seen });
+        const days = convertOglightStats(json.stats ?? {}, store.get<Journal>(JOURNAL_KEY, {}));
+        store.set(JOURNAL_KEY, days.journal);
+        return t('settings.oglightDone', { players: out.players, planets: out.planets, seen: out.seen, exp: days.expeditions.toLocaleString(locale), raids: days.raids.toLocaleString(locale), days: days.days });
       },
       onOpenDashboard: () =>
         openDashboard({

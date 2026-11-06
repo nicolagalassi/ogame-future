@@ -8,7 +8,7 @@ import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import type { Outcome } from '../../data/messages';
-import { byDay, entriesIn, JOURNAL_KEY, msu, periodRange, periodStats, type Journal, type Period } from '../../engines/expeditions';
+import { byDay, entriesIn, JOURNAL_KEY, msu, periodRange, periodStats, raidStats, type Journal, type Period } from '../../engines/expeditions';
 import { FOLD_KEY, shipIcon, shipName, type T } from './index';
 import { JOURNAL_CSS, OUTCOME_COLORS } from './style';
 
@@ -172,6 +172,26 @@ export function openJournal(o: JournalOptions): void {
           card.append(h('h4', 'lost', t('exp.lost')));
           card.append(grid(lost, true));
         }
+        parts.push(card);
+      }
+
+      // Raids imported from OGLight: their own strip, they are not expeditions.
+      const r = raidStats(entries);
+      if (r.count || msu(r.res)) {
+        const card = h('div', 'card');
+        card.append(h('h3', '', t('exp.raids')));
+        const strip = h('div', 'kpis');
+        const cell = (label: string, value: string, cls = '', detail?: HTMLElement) => {
+          const box = h('div', 'kpi');
+          box.append(h('span', 'label', label), h('span', `value ${cls}`, value));
+          if (detail) box.append(detail);
+          strip.append(box);
+        };
+        cell(t('exp.raidCount'), r.count.toLocaleString(locale));
+        cell(t('exp.raidLoot'), `${fmt(msu(r.res))} MSU`, '', triple(r.res));
+        cell(t('exp.raidLost'), msu(r.lostValue) ? `−${fmt(msu(r.lostValue))} MSU` : '—', msu(r.lostValue) ? 'neg' : '');
+        cell(t('exp.raidNet'), `${fmt(r.netMsu)} MSU`, r.netMsu < 0 ? 'neg' : 'pos');
+        card.append(strip);
         parts.push(card);
       }
 
