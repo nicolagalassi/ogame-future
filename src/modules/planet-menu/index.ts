@@ -43,6 +43,9 @@ export interface PlanetMenuOptions {
   onSync: () => Promise<void>;
   /** Opens the account dashboard (Future's own panel, no game action). */
   onOpenDashboard?: () => void;
+  /** Opens or closes the targets side bar; `targetsCount` players and planets are marked. */
+  onOpenTargets?: () => void;
+  targetsCount?: number;
   /** Opens the construction plan; `planCount` items are planned in total. */
   onOpenPlanner?: () => void;
   planCount?: number;
@@ -216,8 +219,8 @@ function formatTime(at: number, locale: string): string {
 }
 
 /**
- * Toolbar: three buttons that already say something (production, what the plan misses,
- * today's expeditions) and open their window; sync and settings stacked on the right.
+ * Toolbar: four buttons in two rows that already say something (production, what the plan misses,
+ * today's expeditions, marked targets) and open their window; sync and settings stacked on the right.
  * The view switch lives in the settings panel: it is a preference, not an action.
  */
 function toolbar(o: PlanetMenuOptions, colonies: string): HTMLElement {
@@ -254,6 +257,9 @@ function toolbar(o: PlanetMenuOptions, colonies: string): HTMLElement {
     today && today.count ? `${t('exp.title')} · ${t('bar.journalHint', { n: today.count })}` : t('exp.title'),
     o.onOpenJournal,
   );
+
+  const marked = o.targetsCount ?? 0;
+  cell(t('bar.targets'), marked ? String(marked) : '—', '', t('bar.targetsHint'), o.onOpenTargets);
 
   const side = el(doc, 'div', 'fut-side');
   const lastSync = o.snapshot ? t('toolbar.lastSync', { time: formatTime(o.snapshot.fetchedAt, o.locale) }) : '';

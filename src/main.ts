@@ -28,8 +28,8 @@ import { watchJumpgate } from './modules/fleet/jumpgate';
 import { registerShortcuts, switchBodyUrl } from './modules/shortcuts';
 import { nextBody } from './engines/fleet';
 import { watchTechPages } from './modules/tech';
-import { openPlanner } from './modules/tech/planner-view';
-import { PLAN_KEY, pendingFor, planCount, planMissing, pruneByQueues, SENT_KEY, type Plan, type Shipment } from './engines/planner';
+import { accountResources, openPlanner } from './modules/tech/planner-view';
+import { accountGap, PLAN_KEY, pendingFor, planCount, pruneByQueues, SENT_KEY, type Plan, type Shipment } from './engines/planner';
 import { estimateResources } from './engines/resources';
 import { entriesIn, JOURNAL_KEY, periodRange, periodStats, type Journal } from './engines/expeditions';
 import { isMessagesPage, ownPlayerId } from './data/messages';
@@ -124,26 +124,27 @@ async function bootstrap(): Promise<void> {
     showTotals: store.get<boolean>('planetMenu.totals', true),
     markIdle: store.get<boolean>('planetMenu.markIdle', false),
   };
-  /** What the plan still misses over all bodies, in MSU (resources on the way count as there). */
+  /** What the whole account still misses for the plan, in MSU (resources on the way count as there). */
   const planGap = (): number | null => {
     const plan = store.get<Plan>(PLAN_KEY, {});
     const sent = store.get<Shipment[]>(SENT_KEY, []);
     const now = Date.now();
     const here = currentBodyId(document);
     const onScreen = readCurrentResources(document);
-    let total = 0;
-    let known = false;
-    for (const [key, items] of Object.entries(plan)) {
-      const id = Number(key);
+    const stock = (id: number) => {
       const body = snapshot?.bodies.find((b) => b.id === id);
-      const have = here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
-      if (!have || !items.length) continue;
-      known = true;
-      const p = pendingFor(sent, id, here === id ? now : (body?.resourcesAt ?? 0));
-      const gap = planMissing(items, { metal: have.metal + p.metal, crystal: have.crystal + p.crystal, deuterium: have.deuterium + p.deuterium });
-      total += gap.metal + gap.crystal * 1.5 + gap.deuterium * 3;
+      return here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
+    };
+    const inFlight = { metal: 0, crystal: 0, deuterium: 0 };
+    for (const key of Object.keys(plan)) {
+      const id = Number(key);
+      const p = pendingFor(sent, id, here === id ? now : (snapshot?.bodies.find((b) => b.id === id)?.resourcesAt ?? 0));
+      inFlight.metal += p.metal;
+      inFlight.crystal += p.crystal;
+      inFlight.deuterium += p.deuterium;
     }
-    return known ? total : null;
+    const gap = accountGap(plan, accountResources(snapshot?.bodies ?? [], stock, inFlight)).missing;
+    return gap ? gap.metal + gap.crystal * 1.5 + gap.deuterium * 3 : null;
   };
   const draw = () =>
     renderPlanetMenu({
@@ -180,6 +181,11 @@ async function bootstrap(): Promise<void> {
           t,
         }),
       planCount: planCount(store.get<Plan>(PLAN_KEY, {})),
+      targetsCount: (() => {
+        const m = loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null));
+        return Object.keys(m.players).length + Object.keys(m.planets).length;
+      })(),
+      onOpenTargets: () => openTargetsHere(),
       planGap: planGap(),
       journalToday: (() => {
         const s = periodStats(entriesIn(store.get<Journal>(JOURNAL_KEY, {}), periodRange('today', Date.now())));
@@ -282,7 +288,7 @@ async function bootstrap(): Promise<void> {
   // Galaxy view: system summary, marks, debris in MSU, targets and the scores card.
   if (isGalaxyPage(document)) {
     const ownPlanetIds = new Set(readPlanetList(document).flatMap((e) => (e.planetId ? [e.planetId] : [])));
-    watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onOpenTargets: openTargetsHere, onSystem: refreshSide });
+    watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onSystem: refreshSide });
   }
 }
 

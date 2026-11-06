@@ -103,8 +103,8 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
 11. **Bersagli** (2026-11-06, al posto di rivali e mirino; `src/engines/marks.ts`, `src/engines/positions.ts`,
     `src/modules/marks/`), come i pinned players e tagged planets di OGLight: bandierina per giocatore (Da
     controllare, Bersaglio, Frigo, Pericolo, Amico, Commercio) in galassia, classifica e tabella spiate; colore
-    per pianeta in galassia; clic = scelta, Maiusc+clic = ultima usata. **Barra laterale** a sinistra (pulsante
-    Bersagli nella barra galassia), come il pannello di OGLight: resta aperta mentre si gira la galassia e tra le
+    per pianeta in galassia; clic = scelta, Maiusc+clic = ultima usata. **Barra laterale** a sinistra (cella
+    Bersagli nella barra del menu pianeti, 2×2 con Dashboard/Piano/Diario), come il pannello di OGLight: resta aperta mentre si gira la galassia e tra le
     pagine. Giocatori per bandierina + Recenti; scheda con punti e pianeti/lune = API `playerData` + posizioni
     viste in galassia (nuove colonie col pallino, posizioni svuotate tolte), con detriti, attività pianeta/luna
     (`*`, minuti, 60; `?` se la lettura ha più di un'ora) ed età della lettura. Pianeti colorati per intervallo,
@@ -126,6 +126,14 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     tabella, endpoint con CORS) su Proxmox o Supabase. In generale anche i giorni per raggiungere chi è davanti
     e la stella rivale. **Nota dev**: dopo un cambio di ramo che ricrea `dist/` va riavviato `npm run dev`.
 
+15. **Piano** (2026-11-06, `src/modules/tech/planner-view.ts`, `groupByTech`/`accountGap` in `engines/planner.ts`):
+    una riga per tecnologia ("Miniera di metallo · su 14 corpi · liv. 46") aperta sui pianeti (aperta da sola fino
+    a 3), ogni costo mostrato una volta, rosso dove quel pianeta non ha le risorse (tooltip: quanto manca, le voci
+    precedenti del pianeta contate prima). In alto: costo del piano, risorse dell'account (tutti i corpi + in
+    viaggio), quanto manca all'account; la cella Piano della barra mostra questo (MSU). Icone: le tessere dello
+    sprite del gioco lette dagli stili calcolati quando si apre una pagina tecnologie (`data/tech-icons.ts`,
+    nessuna richiesta). Galassia: colonna giocatore come OGLight (stato prima del nome, rank e bandierina a
+    destra, colonna più larga del nome pianeta), via il pulsante Bersagli.
 14. **Grafica** (2026-11-06): tutte le finestre (`WINDOW_SHEET`) riprendono il menu pianeti: riquadri #111B2A
     con bordo #1F2C40, schede a segmenti, numeri monospazio, ciano per la selezione. Pila z-index sopra il
     footer del gioco (999999): barra laterale 1000000, finestre 1000001, popup 1000002-3.

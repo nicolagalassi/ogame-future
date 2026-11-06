@@ -363,7 +363,7 @@
     "tech.added": "Aggiunto \u2713",
     "plan.title": "Piano di costruzione",
     "plan.titleCount": "Piano di costruzione ({n})",
-    "plan.sub": "Livelli e unit\xE0 pianificati, con quanto manca su ogni pianeta e luna. I livelli raggiunti si tolgono da soli.",
+    "plan.sub": "Una riga per cosa da fare, aperta sui pianeti. In rosso quello che manca su quel pianeta.",
     "plan.moonOf": "Luna di {name}",
     "plan.clear": "Svuota",
     "plan.colItem": "Cosa",
@@ -501,7 +501,7 @@
     "bar.plan": "Piano \xB7 {n}",
     "bar.planEmpty": "Piano",
     "bar.ready": "Pronto",
-    "bar.planHint": "quanto manca, in MSU, contando le risorse in viaggio",
+    "bar.planHint": "quanto manca all'account, in MSU, contando le risorse in viaggio",
     "bar.journal": "Diario oggi",
     "bar.journalHint": "{n} spedizioni oggi, guadagno netto in MSU",
     "dash.tab.summary": "Riepilogo",
@@ -681,7 +681,22 @@
     "marks.col.moon": "Luna",
     "marks.col.seen": "Visto",
     "marks.col.who": "Pianeta \xB7 giocatore",
-    "shortcut.nextTarget": "Bersagli: prossima posizione"
+    "shortcut.nextTarget": "Bersagli: prossima posizione",
+    "plan.lacksHere": "qui mancano {n}",
+    "plan.clearAll": "Svuota piano",
+    "plan.clearConfirm": "Sicuro? Clic di nuovo",
+    "plan.account": "Risorse dell'account",
+    "plan.accountNote": "tutti i pianeti e lune + in viaggio",
+    "plan.accountUnknown": "premi Aggiorna per leggerle",
+    "plan.accountCovered": "L'account copre il piano",
+    "plan.accountMissing": "Mancano all'account",
+    "plan.onBodies": "su {n} corpi",
+    "plan.collapse": "Chiudi i pianeti",
+    "plan.expand": "Mostra i pianeti",
+    "plan.removeAll": "Togli da tutti i {n} corpi",
+    "plan.readyHere": "Qui le risorse bastano",
+    "bar.targets": "Bersagli",
+    "bar.targetsHint": "Barra laterale dei bersagli (giocatori segnati e pianeti colorati) \xB7 M: prossima posizione"
   };
 
   // src/i18n/en.json
@@ -883,7 +898,7 @@
     "tech.added": "Added \u2713",
     "plan.title": "Construction plan",
     "plan.titleCount": "Construction plan ({n})",
-    "plan.sub": "Planned levels and units, with what is missing on each planet and moon. Reached levels drop off by themselves.",
+    "plan.sub": "One line per thing to build, opening onto its planets. Red: what that planet lacks.",
     "plan.moonOf": "Moon of {name}",
     "plan.clear": "Clear",
     "plan.colItem": "What",
@@ -1021,7 +1036,7 @@
     "bar.plan": "Plan \xB7 {n}",
     "bar.planEmpty": "Plan",
     "bar.ready": "Ready",
-    "bar.planHint": "still missing in MSU, resources on the way included",
+    "bar.planHint": "what the account still misses, in MSU, resources on the way included",
     "bar.journal": "Today",
     "bar.journalHint": "{n} expeditions today, net gain in MSU",
     "dash.tab.summary": "Summary",
@@ -1201,7 +1216,22 @@
     "marks.col.moon": "Moon",
     "marks.col.seen": "Seen",
     "marks.col.who": "Planet \xB7 player",
-    "shortcut.nextTarget": "Targets: next position"
+    "shortcut.nextTarget": "Targets: next position",
+    "plan.lacksHere": "{n} missing here",
+    "plan.clearAll": "Clear plan",
+    "plan.clearConfirm": "Sure? Click again",
+    "plan.account": "Account resources",
+    "plan.accountNote": "all planets and moons + on the way",
+    "plan.accountUnknown": "press Sync to read them",
+    "plan.accountCovered": "The account covers the plan",
+    "plan.accountMissing": "Account still misses",
+    "plan.onBodies": "on {n} bodies",
+    "plan.collapse": "Hide the planets",
+    "plan.expand": "Show the planets",
+    "plan.removeAll": "Remove from all {n} bodies",
+    "plan.readyHere": "Enough resources here",
+    "bar.targets": "Targets",
+    "bar.targetsHint": "Targets side bar (flagged players and coloured planets) \xB7 M: next position"
   };
 
   // src/i18n/fr.json
@@ -1403,7 +1433,7 @@
     "tech.added": "Ajout\xE9 \u2713",
     "plan.title": "Plan de construction",
     "plan.titleCount": "Plan de construction ({n})",
-    "plan.sub": "Niveaux et unit\xE9s planifi\xE9s, avec ce qui manque sur chaque plan\xE8te et lune. Les niveaux atteints disparaissent seuls.",
+    "plan.sub": "Une ligne par chose \xE0 construire, ouverte sur ses plan\xE8tes. En rouge : ce qui manque sur cette plan\xE8te.",
     "plan.moonOf": "Lune de {name}",
     "plan.clear": "Vider",
     "plan.colItem": "Quoi",
@@ -1541,7 +1571,7 @@
     "bar.plan": "Plan \xB7 {n}",
     "bar.planEmpty": "Plan",
     "bar.ready": "Pr\xEAt",
-    "bar.planHint": "ce qui manque en MSU, ressources en route comprises",
+    "bar.planHint": "ce qui manque au compte, en MSU, ressources en route comprises",
     "bar.journal": "Aujourd'hui",
     "bar.journalHint": "{n} exp\xE9ditions aujourd'hui, gain net en MSU",
     "dash.tab.summary": "R\xE9sum\xE9",
@@ -1721,7 +1751,22 @@
     "marks.col.moon": "Lune",
     "marks.col.seen": "Vu",
     "marks.col.who": "Plan\xE8te \xB7 joueur",
-    "shortcut.nextTarget": "Cibles : position suivante"
+    "shortcut.nextTarget": "Cibles : position suivante",
+    "plan.lacksHere": "il manque {n} ici",
+    "plan.clearAll": "Vider le plan",
+    "plan.clearConfirm": "S\xFBr ? Cliquez encore",
+    "plan.account": "Ressources du compte",
+    "plan.accountNote": "toutes les plan\xE8tes et lunes + en route",
+    "plan.accountUnknown": "appuyez sur Actualiser",
+    "plan.accountCovered": "Le compte couvre le plan",
+    "plan.accountMissing": "Manque au compte",
+    "plan.onBodies": "sur {n} corps",
+    "plan.collapse": "Masquer les plan\xE8tes",
+    "plan.expand": "Afficher les plan\xE8tes",
+    "plan.removeAll": "Retirer des {n} corps",
+    "plan.readyHere": "Ressources suffisantes ici",
+    "bar.targets": "Cibles",
+    "bar.targetsHint": "Barre lat\xE9rale des cibles (joueurs marqu\xE9s et plan\xE8tes color\xE9es) \xB7 M : position suivante"
   };
 
   // src/i18n/de.json
@@ -1923,7 +1968,7 @@
     "tech.added": "Hinzugef\xFCgt \u2713",
     "plan.title": "Bauplan",
     "plan.titleCount": "Bauplan ({n})",
-    "plan.sub": "Geplante Stufen und Einheiten, mit dem, was auf jedem Planeten und Mond fehlt. Erreichte Stufen verschwinden von selbst.",
+    "plan.sub": "Eine Zeile pro Bauvorhaben, aufklappbar auf die Planeten. Rot: was auf diesem Planeten fehlt.",
     "plan.moonOf": "Mond von {name}",
     "plan.clear": "Leeren",
     "plan.colItem": "Was",
@@ -2061,7 +2106,7 @@
     "bar.plan": "Plan \xB7 {n}",
     "bar.planEmpty": "Plan",
     "bar.ready": "Bereit",
-    "bar.planHint": "was noch fehlt in MSU, inkl. unterwegs",
+    "bar.planHint": "was dem Konto fehlt, in MSU, inkl. unterwegs",
     "bar.journal": "Heute",
     "bar.journalHint": "{n} Expeditionen heute, Nettogewinn in MSU",
     "dash.tab.summary": "\xDCbersicht",
@@ -2241,7 +2286,22 @@
     "marks.col.moon": "Mond",
     "marks.col.seen": "Gesehen",
     "marks.col.who": "Planet \xB7 Spieler",
-    "shortcut.nextTarget": "Ziele: n\xE4chste Position"
+    "shortcut.nextTarget": "Ziele: n\xE4chste Position",
+    "plan.lacksHere": "hier fehlen {n}",
+    "plan.clearAll": "Plan leeren",
+    "plan.clearConfirm": "Sicher? Nochmal klicken",
+    "plan.account": "Ressourcen des Kontos",
+    "plan.accountNote": "alle Planeten und Monde + unterwegs",
+    "plan.accountUnknown": "Aktualisieren dr\xFCcken",
+    "plan.accountCovered": "Das Konto deckt den Plan",
+    "plan.accountMissing": "Dem Konto fehlen",
+    "plan.onBodies": "auf {n} K\xF6rpern",
+    "plan.collapse": "Planeten ausblenden",
+    "plan.expand": "Planeten zeigen",
+    "plan.removeAll": "Von allen {n} K\xF6rpern entfernen",
+    "plan.readyHere": "Hier reichen die Ressourcen",
+    "bar.targets": "Ziele",
+    "bar.targetsHint": "Seitenleiste der Ziele (markierte Spieler und farbige Planeten) \xB7 M: n\xE4chste Position"
   };
 
   // src/core/i18n.ts
@@ -2936,12 +2996,6 @@
 .fut-g-inact { color: #9BE36D; }
 .fut-g-vac { color: #7FB8FF; }
 .fut-g-deb { color: #F5B547; }
-.fut-g-tgtbtn {
-  margin-left: auto; height: 24px; padding: 0 10px; display: inline-flex; align-items: center; gap: 6px;
-  border: 1px solid #2A3B55; border-radius: 6px; background: #0A111C; color: #C9D4E2; font: 12px Arial, sans-serif; cursor: pointer;
-}
-.fut-g-tgtbtn:hover, .fut-g-tgtbtn[aria-expanded="true"] { border-color: #4FD1E8; color: #E6EDF5; }
-
 /* Rows: a light tint on the cells, the game's own colours stay. */
 #galaxyContent .galaxyRow.fut-g-inactive .galaxyCell { background-color: rgba(155,227,109,0.07); }
 #galaxyContent .galaxyRow.fut-g-own .galaxyCell { background-color: rgba(79,209,232,0.08); }
@@ -2955,14 +3009,24 @@
 /* Planet colour: at the right of the name, faint until the row is pointed at or the planet has one. */
 #galaxyContent .cellPlanetName .fut-mk-tag { position: absolute; right: 3px; top: 50%; transform: translateY(-50%); margin: 0; opacity: 0; transition: opacity 120ms ease-out; }
 #galaxyContent .galaxyRow:hover .fut-mk-tag, #galaxyContent .fut-mk-tag:focus-visible, #galaxyContent .fut-mk-tag.on { opacity: 1; }
-#galaxyContent .cellPlayerName .fut-mk-flag { width: 16px; height: 16px; }
-.fut-g-rank:focus-visible, .fut-g-tgtbtn:focus-visible { outline: 2px solid #4FD1E8; outline-offset: 1px; }
+.fut-g-rank:focus-visible { outline: 2px solid #4FD1E8; outline-offset: 1px; }
 
+/* Player column, as OGLight lays it out: status first, the name with all the room left, rank and
+   flag on the right. The planet name gives up some width to the player name. */
+#galaxyContent .galaxyRow .cellPlanetName { flex: 0.72 1 0% !important; }
+#galaxyContent .galaxyRow .cellPlayerName { flex: 1.28 1 0% !important; }
+#galaxyContent .galaxyRow.ctContentRow .cellPlayerName { justify-content: flex-start !important; gap: 3px; padding: 0 3px 0 5px; box-sizing: border-box; }
+#galaxyContent .cellPlayerName > pre { order: -1; flex: none; margin: 0; }
+#galaxyContent .cellPlayerName > .playerName { flex: 0 1 auto; min-width: 0; }
 .fut-g-rank {
-  margin-left: 4px; padding: 0 4px; border: 1px solid #2A3B55; border-radius: 4px; background: rgba(10,17,28,0.8);
-  color: #C9D4E2; font: 10px/14px Consolas, "JetBrains Mono", monospace; cursor: help; vertical-align: 1px;
+  margin-left: auto; flex: none; padding: 0 2px; border: 0; border-radius: 3px; background: none;
+  color: #8A9BB0; font: 10px/14px Consolas, "JetBrains Mono", monospace; cursor: help;
 }
-.fut-g-rank:hover { border-color: #4FD1E8; color: #E6EDF5; }
+.fut-g-rank:hover { background: #16243A; color: #E6EDF5; }
+/* The flag stays out of the way until the row is pointed at, or the player has one. */
+#galaxyContent .cellPlayerName .fut-mk-flag { flex: none; width: 16px; height: 16px; margin: 0; border-color: transparent; background: none; opacity: 0; transition: opacity 120ms ease-out; }
+#galaxyContent .galaxyRow:hover .fut-mk-flag, #galaxyContent .fut-mk-flag:focus-visible { opacity: 1; }
+#galaxyContent .cellPlayerName .fut-mk-flag.on { opacity: 1; border-color: transparent; }
 #galaxyContent .cellDebris { position: relative; }
 .fut-g-dval { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); padding: 0 3px; border-radius: 3px; background: rgba(5,10,18,0.85);
   color: #C9D4E2; font: 10px/12px Consolas, "JetBrains Mono", monospace; white-space: nowrap; pointer-events: none; }
@@ -3106,9 +3170,9 @@
         debrisCell.append(el(doc, "span", `fut-g-dval${msu4 >= BIG_DEBRIS ? " big" : ""}`, formatUnits(msu4, locale)));
       }
     }
-    renderBar(o, content, s, marks);
+    renderBar(o, content, s);
   }
-  function renderBar(o, content, s, marks) {
+  function renderBar(o, content, s) {
     const { doc, t, locale } = o;
     const sum = systemSummary(s, o.ownPlanetIds);
     const bar = el(doc, "div", "fut-g-bar");
@@ -3121,14 +3185,6 @@
     part("fut-g-muted", t("galaxy.moons", { count: sum.moons }));
     part(sum.debris >= BIG_DEBRIS ? "fut-g-deb" : "fut-g-muted", sum.fields ? t("galaxy.debris", { msu: formatUnits(sum.debris, locale), count: sum.fields }) : t("galaxy.noDebris"));
     if (sum.deep) part(sum.deep >= BIG_DEBRIS ? "fut-g-deb" : "fut-g-muted", t("galaxy.deep", { msu: formatUnits(sum.deep, locale) }));
-    if (o.onOpenTargets) {
-      const open = el(doc, "button", "fut-g-tgtbtn");
-      open.type = "button";
-      const n = Object.keys(marks.players).length + Object.keys(marks.planets).length;
-      open.append(icon(doc, "target", 13), doc.createTextNode(t("galaxy.targets", { count: n })));
-      open.addEventListener("click", () => o.onOpenTargets?.());
-      bar.append(open);
-    }
     doc.getElementById(bar.id)?.remove();
     content.before(bar);
   }
@@ -4148,14 +4204,15 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
 
 /* Toolbar: replaces the colony counter. Three data buttons, then sync and settings stacked. */
 #planetbarcomponent .fut-toolbar {
-  box-sizing: border-box; display: grid !important; height: auto !important; padding: 0 !important; grid-template-columns: repeat(3, minmax(0, 1fr)) 22px; margin: 0 0 3px;
+  box-sizing: border-box; display: grid !important; height: auto !important; padding: 0 !important; grid-template-columns: repeat(2, minmax(0, 1fr)) 24px; margin: 0 0 3px;
   border: 1px solid #1F2C40; border-radius: 6px; background: #0B121D; overflow: hidden;
 }
 #planetbarcomponent .fut-cell {
   box-sizing: border-box !important; height: auto !important; width: auto !important; box-shadow: none !important; border-radius: 0 !important; font: inherit;
   display: flex; flex-direction: column; align-items: flex-start; gap: 1px; min-width: 0; padding: 4px 6px 5px; margin: 0;
-  border: 0 !important; border-right: 1px solid #1F2C40 !important; background: none !important; color: inherit; text-align: left; cursor: pointer;
+  border: 0 !important; border-right: 1px solid #1F2C40 !important; border-bottom: 1px solid #1F2C40 !important; background: none !important; color: inherit; text-align: left; cursor: pointer;
 }
+#planetbarcomponent .fut-toolbar > .fut-cell:nth-child(n+3) { border-bottom: 0 !important; }
 #planetbarcomponent .fut-cell:hover:not(:disabled) { background: #111D2D !important; }
 #planetbarcomponent .fut-cell:hover:not(:disabled) .fut-cell-k { color: #C9D4E2; }
 #planetbarcomponent .fut-cell:focus-visible, #planetbarcomponent .fut-tool:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -2px; }
@@ -4163,7 +4220,7 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
 #planetbarcomponent .fut-cell-k { max-width: 100%; font: 10px/12px Arial, sans-serif; color: #8A9BB0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #planetbarcomponent .fut-cell-v { max-width: 100%; font: 700 12px/14px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #planetbarcomponent .fut-cell-v.fut-warn { color: #F5B547; } .fut-cell-v.fut-ok { color: #4FE0B0; }
-#planetbarcomponent .fut-side { display: flex; flex-direction: column; }
+#planetbarcomponent .fut-side { display: flex; flex-direction: column; grid-column: 3; grid-row: 1 / span 2; }
 #planetbarcomponent .fut-tool {
   position: relative; flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; padding: 0;
   border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; color: #8A9BB0; cursor: pointer; height: auto !important; min-height: 0 !important;
@@ -4358,6 +4415,8 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
       today && today.count ? `${t("exp.title")} \xB7 ${t("bar.journalHint", { n: today.count })}` : t("exp.title"),
       o.onOpenJournal
     );
+    const marked = o.targetsCount ?? 0;
+    cell(t("bar.targets"), marked ? String(marked) : "\u2014", "", t("bar.targetsHint"), o.onOpenTargets);
     const side = el2(doc, "div", "fut-side");
     const lastSync = o.snapshot ? t("toolbar.lastSync", { time: formatTime(o.snapshot.fetchedAt, o.locale) }) : "";
     const sync = iconButton2(doc, "sync", [t("sync.button"), lastSync].filter(Boolean).join(" \xB7 "), () => {
@@ -7012,11 +7071,6 @@ table.queues td.acts { width: 1%; text-align: right; }
     else delete next[key2];
     return next;
   }
-  function clearBody(plan, bodyId) {
-    const next = { ...plan };
-    delete next[String(bodyId)];
-    return next;
-  }
   function prune(plan, bodyId, levels) {
     let changed = false;
     const next = {};
@@ -7112,6 +7166,37 @@ table.queues td.acts { width: 1%; text-align: right; }
       if (kept.length) next[k] = kept;
     }
     return { plan: changed ? next : plan, changed };
+  }
+  function groupByTech(plan, haveOf) {
+    const groups = /* @__PURE__ */ new Map();
+    for (const [key2, items] of Object.entries(plan)) {
+      const bodyId = Number(key2);
+      const have = haveOf(bodyId);
+      let spent = { ...ZERO_COST };
+      let before = have ? missing(spent, have) : null;
+      items.forEach((item, index) => {
+        spent = addCost(spent, item.cost);
+        const after = have ? missing(spent, have) : null;
+        const short = after && before ? { metal: after.metal - before.metal, crystal: after.crystal - before.crystal, deuterium: after.deuterium - before.deuterium, energy: 0 } : null;
+        before = after;
+        let g = groups.get(item.id);
+        if (!g) groups.set(item.id, g = { id: item.id, name: item.name, cost: { ...ZERO_COST }, rows: [], added: item.added });
+        g.cost = addCost(g.cost, item.cost);
+        g.added = Math.min(g.added, item.added);
+        const last2 = g.rows[g.rows.length - 1];
+        if (last2 && last2.bodyId === bodyId && item.level !== void 0 && last2.to !== void 0 && item.level === last2.to + 1) {
+          last2.to = item.level;
+          last2.cost = addCost(last2.cost, item.cost);
+          last2.indexes.push(index);
+          last2.short = last2.short && short ? addCost(last2.short, short) : null;
+        } else g.rows.push({ bodyId, from: item.level, to: item.level, amount: item.amount, cost: { ...item.cost }, indexes: [index], short });
+      });
+    }
+    return [...groups.values()].sort((a, b) => a.added - b.added || a.id - b.id);
+  }
+  function accountGap(plan, account) {
+    const total = Object.values(plan).reduce((sum, items) => addCost(sum, planTotal(items)), { ...ZERO_COST });
+    return { total, missing: account ? missing(total, account) : null };
   }
 
   // src/engines/fleet.ts
@@ -8390,6 +8475,40 @@ table.queues td.acts { width: 1%; text-align: right; }
     win.initJumpgate = wrapped;
   }
 
+  // src/data/tech-icons.ts
+  var TECH_ICONS_KEY = "tech.icons";
+  function readTechIcons(doc) {
+    const view = doc.defaultView;
+    const out = {};
+    if (!view) return out;
+    for (const tech of doc.querySelectorAll("#technologies .technology[data-technology]")) {
+      const tile2 = tech.querySelector(".icon");
+      if (!tile2) continue;
+      const cs = view.getComputedStyle(tile2);
+      const url = /url\("?([^")]+)"?\)/.exec(cs.backgroundImage)?.[1];
+      const w = parseFloat(cs.width);
+      if (url && w > 0) out[tech.dataset.technology] = { url, pos: cs.backgroundPosition, size: cs.backgroundSize, w };
+    }
+    return out;
+  }
+  function rememberTechIcons(doc, store) {
+    const seen = readTechIcons(doc);
+    if (!Object.keys(seen).length) return;
+    const known = store.get(TECH_ICONS_KEY, {});
+    if (Object.entries(seen).every(([id, i]) => JSON.stringify(known[id]) === JSON.stringify(i))) return;
+    store.set(TECH_ICONS_KEY, { ...known, ...seen });
+  }
+  function techIconEl(doc, icon2, px, cls = "tico") {
+    const box = doc.createElement("span");
+    box.className = cls;
+    box.style.cssText = `display:inline-block;flex:none;width:${px}px;height:${px}px;overflow:hidden;border-radius:4px;background:#16243A;vertical-align:middle;`;
+    if (!icon2) return box;
+    const tile2 = doc.createElement("span");
+    tile2.style.cssText = `display:block;width:${icon2.w}px;height:${icon2.w}px;background-image:url("${icon2.url}");background-position:${icon2.pos};background-size:${icon2.size};background-repeat:no-repeat;transform:scale(${px / icon2.w});transform-origin:0 0;`;
+    box.append(tile2);
+    return box;
+  }
+
   // src/modules/tech/style.ts
   var TECH_CSS = `
 /* The game's own cost list and detail lines give way to the panel (their data is in it). */
@@ -8444,38 +8563,36 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-tp-amount:focus { outline: none; border-color: #4FD1E8; }
 `;
   var PLANNER_CSS = `
-:host { --panel-w: 760px; }
-h3 { margin: 0; }
-.summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border: 1px solid #1F2C40; border-radius: 10px; background: #0D1522; overflow: hidden; }
-.summary > .empty { grid-column: span 2; border: 0; border-radius: 0; }
-.kpi { gap: 4px; }
-.kpi-line { display: flex; gap: 14px; font-size: 16px; font-weight: 700; }
-.kpi.warn .label { color: #F5B547; }
-.card { display: flex; flex-direction: column; gap: 8px; }
-.card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.card-title { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
-.count { color: #8A9BB0; font-size: 12px; white-space: nowrap; }
-.card-acts { display: flex; gap: 6px; flex: none; }
-.sums { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0; border: 1px solid #1F2C40; border-radius: 8px; background: #0D1522; overflow: hidden; }
-.sum.sent .label { color: #4FD1E8; }
-.sum { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; box-shadow: 1px 0 0 #1F2C40, 0 1px 0 #1F2C40; }
-.sum .label { color: #8A9BB0; font-size: 11px; }
-.sum.warn .label { color: #F5B547; }
-.sum.ok .label { color: #4FE0B0; font-size: 13px; font-weight: 700; }
-.sum.muted .label { color: #8A9BB0; }
-.triple { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.sum .triple { font-size: 14px; font-weight: 700; }
-.triple.short .num { color: #FF7A7A; }
-.rows { display: flex; flex-direction: column; }
-.row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.6fr) 24px; gap: 10px; align-items: center; padding: 4px 0; border-top: 1px solid #172334; }
-.row:first-child { border-top: 0; }
-.name { display: flex; gap: 8px; align-items: baseline; min-width: 0; }
-.name > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lv { color: #4FD1E8; font-size: 11px; white-space: nowrap; }
-.num { text-align: right; font-family: "JetBrains Mono", Consolas, monospace; white-space: nowrap; }
-.x { width: 22px; height: 22px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 6px; background: none; color: #8A9BB0; cursor: pointer; }
-.x:hover { border-color: #FF7A7A; color: #FF7A7A; }
-@media (max-width: 560px) { .summary, .sums { grid-template-columns: 1fr; } .summary > .empty { grid-column: auto; } .card-head { flex-wrap: wrap; } }
+:host { --panel-w: 820px; }
+.head .act { flex: none; }
+.kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.kpi-line { display: flex; gap: 12px; font: 700 14px/18px var(--mono); }
+.kpi.warn .label { color: var(--warn); }
+.kpi.ok .label { color: var(--ok); }
+.okv { color: var(--ok); }
+.groups { display: flex; flex-direction: column; gap: 3px; }
+/* One tile per technology, the planet menu's rows. */
+.group { border: 1px solid var(--line); border-radius: 7px; background: var(--raised); overflow: hidden; }
+.ghead, .grow { display: grid; grid-template-columns: 28px minmax(0, 1fr) 70px 70px 70px 68px; gap: 8px; align-items: center; padding: 4px 6px; }
+.grow { grid-template-columns: minmax(0, 1fr) 70px 70px 70px 68px; min-height: 26px; padding: 2px 6px 2px 42px; border-top: 1px solid var(--line-soft); background: var(--surface); }
+.ghead.clickable .gname { cursor: pointer; }
+.ghead.clickable .gname:hover .gtitle { color: var(--accent); }
+.gname { display: flex; flex-direction: column; min-width: 0; }
+.gtitle { font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gmeta { color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gbody { display: flex; gap: 8px; align-items: baseline; min-width: 0; color: var(--text-2); }
+.gbody > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lv { color: var(--accent); font-size: 11px; white-space: nowrap; }
+.num { text-align: right; font-family: var(--mono); white-space: nowrap; }
+.num.short { color: var(--bad) !important; }
+.acts { display: flex; justify-content: flex-end; align-items: center; gap: 2px; }
+.ib, .x { width: 22px; height: 22px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 5px; background: none; color: var(--muted); cursor: pointer; font: 11px Arial, sans-serif; }
+.ib:hover { border-color: var(--accent); color: var(--text); }
+.ib.bring { color: var(--warn); }
+.x:hover { border-color: var(--bad); color: var(--bad); }
+.sent { display: inline-flex; color: var(--accent); }
+.okmark { display: inline-flex; width: 22px; justify-content: center; color: var(--ok); }
+@media (max-width: 640px) { .kpis { grid-template-columns: 1fr; } }
 `;
 
   // src/modules/tech/index.ts
@@ -8760,6 +8877,7 @@ h3 { margin: 0; }
       o.onPlanChange?.();
     }
     injectStyle(doc);
+    rememberTechIcons(doc, o.store);
     doc.addEventListener(
       "click",
       (e) => {
@@ -8791,21 +8909,9 @@ h3 { margin: 0; }
   }
 
   // src/modules/tech/planner-view.ts
+  var RES2 = [["metal", "m"], ["crystal", "c"], ["deuterium", "d"]];
+  var toggled = /* @__PURE__ */ new Set();
   var PLANNER_ID = "fut-planner";
-  function groupItems(items) {
-    const out = [];
-    items.forEach((item, index) => {
-      const last2 = out[out.length - 1];
-      if (last2 && item.level !== void 0 && last2.id === item.id && last2.to !== void 0 && item.level === last2.to + 1) {
-        last2.to = item.level;
-        last2.cost = addCost(last2.cost, item.cost);
-        last2.indexes.push(index);
-        return;
-      }
-      out.push({ id: item.id, name: item.name, from: item.level, to: item.level, amount: item.amount, cost: { ...item.cost }, indexes: [index] });
-    });
-    return out;
-  }
   var keyHandler2 = null;
   function h4(tag, cls = "", text) {
     const node = document.createElement(tag);
@@ -8817,6 +8923,18 @@ h3 { margin: 0; }
     doc.getElementById(PLANNER_ID)?.remove();
     if (keyHandler2) doc.removeEventListener("keydown", keyHandler2, true);
     keyHandler2 = null;
+  }
+  function accountResources(bodies, haveOf, inFlight) {
+    if (!bodies.length) return null;
+    const sum = { ...inFlight };
+    for (const b of bodies) {
+      const r = haveOf(b.id);
+      if (!r) continue;
+      sum.metal += r.metal;
+      sum.crystal += r.crystal;
+      sum.deuterium += r.deuterium;
+    }
+    return sum;
   }
   function openPlanner(o) {
     const { doc, t, locale } = o;
@@ -8833,24 +8951,35 @@ h3 { margin: 0; }
     doc.body.append(host);
     const fmt = (n) => formatUnits(n, locale);
     const byId = new Map((o.snapshot?.bodies ?? []).map((b) => [b.id, b]));
-    const haveOf = (id) => {
+    const stock2 = (id) => {
       if (o.current && o.current.id === id) return o.current.resources;
       const body = byId.get(id);
       return body ? estimateResources(body, o.now) : null;
     };
     const seenAt = (id) => o.current && o.current.id === id ? o.now : byId.get(id)?.resourcesAt ?? 0;
     const timeOf = (ms) => new Date(ms).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
-    const costCells = (row, cost, cls = "") => {
-      for (const [key2, c] of [
-        ["metal", "m"],
-        ["crystal", "c"],
-        ["deuterium", "d"]
-      ]) {
-        const cell = h4("span", `num ${c} ${cls}`, cost[key2] ? fmt(cost[key2]) : "\u2014");
-        cell.title = Math.round(cost[key2]).toLocaleString(locale);
-        row.append(cell);
+    const icons = o.store.get(TECH_ICONS_KEY, {});
+    let confirmClear = false;
+    const labels = /* @__PURE__ */ new Map();
+    for (const e of o.entries) {
+      if (e.planetId) labels.set(e.planetId, `${e.name} [${e.coords}]`);
+      if (e.moonId) labels.set(e.moonId, `${t("plan.moonOf", { name: e.name })} [${e.coords}]`);
+    }
+    const labelOf = (id) => labels.get(id) ?? `#${id}`;
+    const order = new Map([...labels.keys()].map((id, i) => [id, i]));
+    const byList = (a, b) => (order.get(a.bodyId) ?? 1e9) - (order.get(b.bodyId) ?? 1e9);
+    const refs = o.entries.map((e) => ({ planetId: e.planetId, moonId: e.moonId }));
+    const triple = (cost, short) => {
+      const out = [];
+      for (const [key2, c] of RES2) {
+        const lack = short ? short[key2] : 0;
+        const v = h4("span", `num ${c}${lack > 0 ? " short" : ""}`, cost[key2] ? fmt(cost[key2]) : "\u2014");
+        v.title = `${t(`tech.res.${key2}`)}: ${Math.round(cost[key2]).toLocaleString(locale)}${lack > 0 ? ` \xB7 ${t("plan.lacksHere", { n: fmt(lack) })}` : ""}`;
+        out.push(v);
       }
+      return out;
     };
+    const what = (r) => r.amount !== void 0 ? `\xD7${r.amount.toLocaleString(locale)}` : r.from === r.to ? t("plan.level", { level: r.from ?? 0 }) : t("plan.levels", { from: r.from ?? 0, to: r.to ?? 0 });
     const draw = () => {
       const plan = o.store.get(PLAN_KEY, {});
       const allSent = o.store.get(SENT_KEY, []);
@@ -8861,132 +8990,180 @@ h3 { margin: 0; }
         o.onChange?.();
         draw();
       };
+      const pendingOf = (id) => pendingFor(sent, id, seenAt(id));
+      const haveOf = (id) => {
+        const r = stock2(id);
+        if (!r) return null;
+        const p = pendingOf(id);
+        return { metal: r.metal + p.metal, crystal: r.crystal + p.crystal, deuterium: r.deuterium + p.deuterium };
+      };
+      const inFlight = Object.keys(plan).reduce((s, k) => {
+        const p = pendingOf(Number(k));
+        return { metal: s.metal + p.metal, crystal: s.crystal + p.crystal, deuterium: s.deuterium + p.deuterium };
+      }, { metal: 0, crystal: 0, deuterium: 0 });
+      const account = accountResources(o.snapshot?.bodies ?? [], stock2, inFlight);
+      const { total, missing: missing2 } = accountGap(plan, account);
+      const groups = groupByTech(plan, haveOf);
       const head = h4("div", "head");
       const titles = h4("div", "titles");
       titles.append(h4("h2", "", t("plan.title")), h4("span", "sub", t("plan.sub")));
+      head.append(titles);
+      if (groups.length) {
+        const clear = h4("button", `act ghost${confirmClear ? " danger" : ""}`, confirmClear ? t("plan.clearConfirm") : t("plan.clearAll"));
+        clear.type = "button";
+        clear.addEventListener("click", () => {
+          if (!confirmClear) {
+            confirmClear = true;
+            return draw();
+          }
+          confirmClear = false;
+          save({});
+        });
+        head.append(clear);
+      }
       const close = h4("button", "close");
+      close.type = "button";
       close.append(icon(doc, "close", 16));
       close.title = t("fleet.close");
       close.addEventListener("click", () => closePlanner(doc));
-      head.append(titles, close);
-      const bodies = [];
-      for (const e of o.entries) {
-        if (e.planetId) bodies.push({ id: e.planetId, label: `${e.name} [${e.coords}]` });
-        if (e.moonId) bodies.push({ id: e.moonId, label: `${t("plan.moonOf", { name: e.name })} [${e.coords}]` });
+      head.append(close);
+      if (!groups.length) {
+        panel.replaceChildren(head, h4("p", "empty", t("plan.empty")));
+        return;
       }
-      for (const key2 of Object.keys(plan)) if (!bodies.some((b) => String(b.id) === key2)) bodies.push({ id: Number(key2), label: `#${key2}` });
-      let grand = { ...ZERO_COST };
-      let grandMissing = { ...ZERO_COST };
-      const cards = [];
-      const refs = o.entries.map((e) => ({ planetId: e.planetId, moonId: e.moonId }));
-      const triple = (cost, cls = "") => {
-        const box = h4("span", `triple ${cls}`);
-        for (const [key2, c] of [
-          ["metal", "m"],
-          ["crystal", "c"],
-          ["deuterium", "d"]
-        ]) {
-          const v = h4("span", `num ${c}`, cost[key2] ? fmt(cost[key2]) : "\u2014");
-          v.title = `${t(`tech.res.${key2}`)}: ${Math.round(cost[key2]).toLocaleString(locale)}`;
-          box.append(v);
+      const kpis = h4("div", "kpis");
+      const kpi = (label, cost, cls, note) => {
+        const box = h4("div", `kpi ${cls}`);
+        box.append(h4("span", "label", label));
+        const line = h4("div", "kpi-line");
+        if (cost) for (const [key2, c] of RES2) {
+          const v = h4("span", `num ${c}`, fmt(cost[key2]));
+          v.title = Math.round(cost[key2]).toLocaleString(locale);
+          line.append(v);
         }
+        else line.append(h4("span", "num", "?"));
+        box.append(line);
+        if (note) box.append(h4("span", "note", note));
         return box;
       };
-      for (const body of bodies) {
-        const items = plan[String(body.id)];
-        if (!items?.length) continue;
-        const total = planTotal(items);
-        const have = haveOf(body.id);
-        const pending = pendingFor(sent, body.id, seenAt(body.id));
-        const pendingSum = pending.metal + pending.crystal + pending.deuterium;
-        const gap = have ? planMissing(items, { metal: have.metal + pending.metal, crystal: have.crystal + pending.crystal, deuterium: have.deuterium + pending.deuterium }) : null;
-        const short = gap ? gap.metal + gap.crystal + gap.deuterium : 0;
-        grand = addCost(grand, total);
-        if (gap) grandMissing = addCost(grandMissing, gap);
-        const card = h4("div", "card");
-        const top = h4("div", "card-head");
-        const title = h4("div", "card-title");
-        title.append(h4("h3", "", body.label), h4("span", "count", t("plan.items", { n: items.length })));
-        const acts = h4("div", "card-acts");
-        if (gap && short > 0 && o.navigate && o.href) {
-          const bring = h4("button", "act", pendingSum > 0 ? t("plan.complete") : t("plan.bring"));
-          bring.title = t("plan.bringHint");
-          bring.addEventListener("click", () => {
-            const here = o.current?.id ?? null;
-            const source = here !== null && here !== body.id ? here : nextBody(refs, here ?? body.id, { skip: body.id });
-            if (!source) return;
-            const delivery = { target: body.id, need: { metal: Math.ceil(gap.metal), crystal: Math.ceil(gap.crystal), deuterium: Math.ceil(gap.deuterium) } };
-            o.store.set(DELIVERY_KEY, delivery);
-            o.navigate(repeatUrl(o.href, source, { mode: "plan", first: source, dest: body.id }));
-          });
-          acts.append(bring);
-        }
-        const clear = h4("button", "act ghost", t("plan.clear"));
-        clear.addEventListener("click", () => save(clearBody(plan, body.id)));
-        acts.append(clear);
-        top.append(title, acts);
-        const sums = h4("div", "sums");
-        const sumBox = (label, cost, cls) => {
-          const b = h4("div", `sum ${cls}`);
-          b.append(h4("span", "label", label));
-          if (cost) b.append(triple(cost, cls === "warn" ? "short" : ""));
-          return b;
+      const covered = missing2 && missing2.metal + missing2.crystal + missing2.deuterium === 0;
+      kpis.append(
+        kpi(t("plan.grandTotal"), total, ""),
+        kpi(t("plan.account"), account, "", account ? t("plan.accountNote") : t("plan.accountUnknown")),
+        covered ? kpi(t("plan.accountCovered"), null, "ok") : kpi(t("plan.accountMissing"), missing2, "warn")
+      );
+      if (covered) kpis.lastElementChild.querySelector(".kpi-line").replaceChildren(h4("span", "num okv", "\u2713"));
+      const list = h4("div", "groups");
+      for (const g of groups) list.append(groupTile(g, plan, haveOf, pendingOf, save));
+      panel.replaceChildren(head, kpis, list);
+    };
+    const groupTile = (g, plan, haveOf, pendingOf, save) => {
+      const tile2 = h4("div", "group");
+      const one = g.rows.length === 1 ? g.rows[0] : null;
+      const open = one ? false : toggled.has(g.id) ? g.rows.length > 3 : g.rows.length <= 3;
+      const top = h4("div", "ghead");
+      const name = h4("div", "gname");
+      const titleLine = h4("span", "gtitle", g.name);
+      const meta = h4("span", "gmeta", one ? `${labelOf(one.bodyId)} \xB7 ${what(one)}` : t("plan.onBodies", { n: g.rows.length }) + " \xB7 " + levelsSummary(g.rows));
+      name.append(titleLine, meta);
+      top.append(techIconEl(doc, icons[String(g.id)], 28), name, ...triple(g.cost, one?.short));
+      const acts = h4("div", "acts");
+      if (one) acts.append(...rowActions(one, plan, haveOf, pendingOf, save));
+      else {
+        const caret = h4("button", "ib");
+        caret.type = "button";
+        caret.setAttribute("aria-expanded", String(open));
+        caret.title = t(open ? "plan.collapse" : "plan.expand");
+        caret.textContent = open ? "\u25B4" : "\u25BE";
+        const flip = () => {
+          if (toggled.has(g.id)) toggled.delete(g.id);
+          else toggled.add(g.id);
+          draw();
         };
-        sums.append(sumBox(t("plan.total"), total, ""));
-        if (pendingSum > 0) {
-          const box = sumBox(
-            pending.arriveAt > o.now ? t("plan.sentArriving", { time: timeOf(pending.arriveAt) }) : t("plan.sentArrived"),
-            { ...pending, energy: 0 },
-            "sent"
-          );
-          sums.append(box);
-        }
-        if (gap) {
-          if (short > 0) sums.append(sumBox(pendingSum > 0 ? t("plan.missingAfterSent") : t("plan.missingHere"), gap, "warn"));
-          else sums.append(sumBox(pendingSum > 0 ? t("plan.allSent") : t("plan.ready"), null, "ok"));
-        } else sums.append(sumBox(t("plan.unknownHere"), null, "muted"));
-        const rows = h4("div", "rows");
-        for (const g of groupItems(items)) {
-          const row = h4("div", "row");
-          const name = h4("span", "name");
-          const what = g.amount !== void 0 ? `\xD7${g.amount.toLocaleString(locale)}` : g.from === g.to ? t("plan.level", { level: g.from ?? 0 }) : t("plan.levels", { from: g.from ?? 0, to: g.to ?? 0 });
-          name.append(h4("span", "", g.name), h4("span", "lv", what));
-          const remove = h4("button", "x");
-          remove.append(icon(doc, "close", 13));
-          remove.title = t("plan.remove");
-          remove.addEventListener("click", () => {
-            let next = plan;
-            for (const i of [...g.indexes].reverse()) next = removeFromPlan(next, body.id, i);
-            save(next);
-          });
-          row.append(name, triple(g.cost), remove);
+        caret.addEventListener("click", flip);
+        top.classList.add("clickable");
+        name.addEventListener("click", flip);
+        const remove = h4("button", "x");
+        remove.type = "button";
+        remove.append(icon(doc, "close", 13));
+        remove.title = t("plan.removeAll", { n: g.rows.length });
+        remove.addEventListener("click", () => {
+          let next = plan;
+          for (const r of g.rows) for (const i of [...r.indexes].reverse()) next = removeFromPlan(next, r.bodyId, i);
+          save(next);
+        });
+        acts.append(caret, remove);
+      }
+      top.append(acts);
+      tile2.append(top);
+      if (open) {
+        const rows = h4("div", "grows");
+        for (const r of [...g.rows].sort(byList)) {
+          const row = h4("div", "grow");
+          const label = h4("span", "gbody");
+          label.append(h4("span", "", labelOf(r.bodyId)), h4("span", "lv", what(r)));
+          row.append(label, ...triple(r.cost, r.short));
+          const a = h4("div", "acts");
+          a.append(...rowActions(r, plan, haveOf, pendingOf, save));
+          row.append(a);
           rows.append(row);
         }
-        card.append(top, sums, rows);
-        cards.push(card);
+        tile2.append(rows);
       }
-      const summary2 = h4("div", "summary");
-      if (!cards.length) summary2.append(h4("p", "empty", t("plan.empty")));
-      else {
-        const tile2 = (label, cost, cls) => {
-          const box = h4("div", `kpi ${cls}`);
-          box.append(h4("span", "label", label));
-          const line = h4("div", "kpi-line");
-          for (const [key2, c] of [
-            ["metal", "m"],
-            ["crystal", "c"],
-            ["deuterium", "d"]
-          ]) {
-            const v = h4("span", `num ${c}`, fmt(cost[key2]));
-            v.title = Math.round(cost[key2]).toLocaleString(locale);
-            line.append(v);
-          }
-          box.append(line);
-          return box;
-        };
-        summary2.append(tile2(t("plan.grandTotal"), grand, ""), tile2(t("plan.grandMissing"), grandMissing, "warn"));
+      return tile2;
+    };
+    const levelsSummary = (rows) => {
+      const levels = rows.flatMap((r) => r.from !== void 0 ? [r.from, r.to ?? r.from] : []);
+      if (!levels.length) return `\xD7${rows.reduce((n, r) => n + (r.amount ?? 0), 0).toLocaleString(locale)}`;
+      const lo = Math.min(...levels);
+      const hi = Math.max(...levels);
+      return lo === hi ? t("plan.level", { level: lo }) : t("plan.levels", { from: lo, to: hi });
+    };
+    const rowActions = (r, plan, haveOf, pendingOf, save) => {
+      const out = [];
+      const items = plan[String(r.bodyId)] ?? [];
+      const have = haveOf(r.bodyId);
+      const gap = have ? planMissing(items, have) : null;
+      const short = gap ? gap.metal + gap.crystal + gap.deuterium : 0;
+      const p = pendingOf(r.bodyId);
+      if (p.metal + p.crystal + p.deuterium > 0) {
+        const s = h4("span", "sent");
+        s.append(icon(doc, "fleet", 12));
+        s.title = `${p.arriveAt > o.now ? t("plan.sentArriving", { time: timeOf(p.arriveAt) }) : t("plan.sentArrived")}: ${fmt(p.metal)} \xB7 ${fmt(p.crystal)} \xB7 ${fmt(p.deuterium)}`;
+        out.push(s);
       }
-      panel.replaceChildren(head, summary2, ...cards);
+      if (gap && short > 0 && o.navigate && o.href) {
+        const bring = h4("button", "ib bring");
+        bring.type = "button";
+        bring.append(icon(doc, "swap", 13));
+        bring.title = `${p.metal + p.crystal + p.deuterium > 0 ? t("plan.complete") : t("plan.bring")} \xB7 ${labelOf(r.bodyId)} \xB7 ${t("plan.bringHint")}`;
+        bring.setAttribute("aria-label", bring.title);
+        bring.addEventListener("click", () => {
+          const here = o.current?.id ?? null;
+          const source = here !== null && here !== r.bodyId ? here : nextBody(refs, here ?? r.bodyId, { skip: r.bodyId });
+          if (!source) return;
+          const delivery = { target: r.bodyId, need: { metal: Math.ceil(gap.metal), crystal: Math.ceil(gap.crystal), deuterium: Math.ceil(gap.deuterium) } };
+          o.store.set(DELIVERY_KEY, delivery);
+          o.navigate(repeatUrl(o.href, source, { mode: "plan", first: source, dest: r.bodyId }));
+        });
+        out.push(bring);
+      } else if (gap && short === 0) {
+        const ok = h4("span", "okmark");
+        ok.append(icon(doc, "check", 12));
+        ok.title = t("plan.readyHere");
+        out.push(ok);
+      }
+      const remove = h4("button", "x");
+      remove.type = "button";
+      remove.append(icon(doc, "close", 13));
+      remove.title = t("plan.remove");
+      remove.addEventListener("click", () => {
+        let next = plan;
+        for (const i of [...r.indexes].reverse()) next = removeFromPlan(next, r.bodyId, i);
+        save(next);
+      });
+      out.push(remove);
+      return out;
     };
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop) closePlanner(doc);
@@ -9578,19 +9755,20 @@ h3 { margin: 0; }
       const now = Date.now();
       const here = currentBodyId(document);
       const onScreen = readCurrentResources(document);
-      let total = 0;
-      let known = false;
-      for (const [key2, items2] of Object.entries(plan)) {
-        const id = Number(key2);
+      const stock2 = (id) => {
         const body = snapshot?.bodies.find((b) => b.id === id);
-        const have = here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
-        if (!have || !items2.length) continue;
-        known = true;
-        const p = pendingFor(sent, id, here === id ? now : body?.resourcesAt ?? 0);
-        const gap = planMissing(items2, { metal: have.metal + p.metal, crystal: have.crystal + p.crystal, deuterium: have.deuterium + p.deuterium });
-        total += gap.metal + gap.crystal * 1.5 + gap.deuterium * 3;
+        return here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
+      };
+      const inFlight = { metal: 0, crystal: 0, deuterium: 0 };
+      for (const key2 of Object.keys(plan)) {
+        const id = Number(key2);
+        const p = pendingFor(sent, id, here === id ? now : snapshot?.bodies.find((b) => b.id === id)?.resourcesAt ?? 0);
+        inFlight.metal += p.metal;
+        inFlight.crystal += p.crystal;
+        inFlight.deuterium += p.deuterium;
       }
-      return known ? total : null;
+      const gap = accountGap(plan, accountResources(snapshot?.bodies ?? [], stock2, inFlight)).missing;
+      return gap ? gap.metal + gap.crystal * 1.5 + gap.deuterium * 3 : null;
     };
     const draw = () => renderPlanetMenu({
       doc: document,
@@ -9625,6 +9803,11 @@ h3 { margin: 0; }
         t
       }),
       planCount: planCount(store.get(PLAN_KEY, {})),
+      targetsCount: (() => {
+        const m = loadMarks(store.get(MARKS_KEY, null));
+        return Object.keys(m.players).length + Object.keys(m.planets).length;
+      })(),
+      onOpenTargets: () => openTargetsHere(),
       planGap: planGap(),
       journalToday: (() => {
         const s = periodStats(entriesIn(store.get(JOURNAL_KEY, {}), periodRange("today", Date.now())));
@@ -9712,7 +9895,7 @@ h3 { margin: 0; }
     }
     if (isGalaxyPage(document)) {
       const ownPlanetIds = new Set(readPlanetList(document).flatMap((e) => e.planetId ? [e.planetId] : []));
-      watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onOpenTargets: openTargetsHere, onSystem: refreshSide });
+      watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onSystem: refreshSide });
     }
   }
   if (document.readyState === "loading") {

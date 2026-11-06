@@ -13,7 +13,6 @@ import { ensureMarksStyle, flagButton, TAG_COLORS, tagButton } from '../marks/pi
 import type { NetworkGuard } from '../../core/guard';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
-import { icon } from '../../core/icons';
 import { debrisMsu, readGalaxy, type GalaxyRow, type GalaxySystem } from '../../data/galaxy';
 import { playerScores, SCORE_TYPES, type PlayerScores, type ScoreType } from '../../data/player-api';
 import { GALAXY_CSS } from './style';
@@ -30,8 +29,6 @@ export interface GalaxyOptions {
   ownPlanetIds: Set<number>;
   locale: string;
   t: (key: string, vars?: Record<string, string | number>) => string;
-  /** Opens or closes Future's targets side bar. */
-  onOpenTargets?: () => void;
   /** After the game drew a system and Future read it (the side bar redraws). */
   onSystem?: () => void;
 }
@@ -182,10 +179,10 @@ function decorate(o: GalaxyOptions, content: Element): void {
     }
   }
 
-  renderBar(o, content, s, marks);
+  renderBar(o, content, s);
 }
 
-function renderBar(o: GalaxyOptions, content: Element, s: GalaxySystem, marks: Marks): void {
+function renderBar(o: GalaxyOptions, content: Element, s: GalaxySystem): void {
   const { doc, t, locale } = o;
   const sum = systemSummary(s, o.ownPlanetIds);
   const bar = el(doc, 'div', 'fut-g-bar');
@@ -198,14 +195,6 @@ function renderBar(o: GalaxyOptions, content: Element, s: GalaxySystem, marks: M
   part('fut-g-muted', t('galaxy.moons', { count: sum.moons }));
   part(sum.debris >= BIG_DEBRIS ? 'fut-g-deb' : 'fut-g-muted', sum.fields ? t('galaxy.debris', { msu: formatUnits(sum.debris, locale), count: sum.fields }) : t('galaxy.noDebris'));
   if (sum.deep) part(sum.deep >= BIG_DEBRIS ? 'fut-g-deb' : 'fut-g-muted', t('galaxy.deep', { msu: formatUnits(sum.deep, locale) }));
-  if (o.onOpenTargets) {
-    const open = el(doc, 'button', 'fut-g-tgtbtn');
-    open.type = 'button';
-    const n = Object.keys(marks.players).length + Object.keys(marks.planets).length;
-    open.append(icon(doc, 'target', 13), doc.createTextNode(t('galaxy.targets', { count: n })));
-    open.addEventListener('click', () => o.onOpenTargets?.());
-    bar.append(open);
-  }
   doc.getElementById(bar.id)?.remove();
   content.before(bar);
 }
