@@ -44,9 +44,10 @@ export const GALAXY_CSS = `
 
 .fut-g-rank {
   margin-left: 4px; padding: 0 4px; border: 1px solid #2A3B55; border-radius: 4px; background: rgba(10,17,28,0.8);
-  color: #C9D4E2; font: 10px/14px Consolas, "JetBrains Mono", monospace; cursor: help; vertical-align: 1px;
+  color: #C9D4E2; font: 10px/14px Consolas, "JetBrains Mono", monospace; cursor: pointer; vertical-align: 1px;
 }
 .fut-g-rank:hover { border-color: #4FD1E8; color: #E6EDF5; }
+.fut-g-rank.rival { border-color: #F5B547; color: #F5B547; }
 #galaxyContent .cellDebris { position: relative; }
 .fut-g-dval { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); padding: 0 3px; border-radius: 3px; background: rgba(5,10,18,0.85);
   color: #C9D4E2; font: 10px/12px Consolas, "JetBrains Mono", monospace; white-space: nowrap; pointer-events: none; }

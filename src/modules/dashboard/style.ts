@@ -109,4 +109,12 @@ table.scrap td.unit .unit-ico { margin: 0; width: 24px; height: 24px; }
 .chart .tip { position: absolute; top: -4px; transform: translateX(-50%); padding: 3px 7px; border-radius: 6px; background: var(--raised); border: 1px solid var(--line); color: var(--text); font: 11px var(--mono); white-space: nowrap; pointer-events: none; }
 .kpi .value.neg, td.neg { color: var(--bad); }
 td.pos { color: var(--ok); }
+table.rivals td.num b { display: block; color: var(--text); }
+table.rivals .rank { display: block; color: var(--muted); font-size: 10px; }
+table.rivals .gap { display: block; font-size: 10px; }
+table.rivals .gap.ahead { color: var(--warn); }
+table.rivals .gap.behind { color: var(--ok); }
+table.rivals tr.me td { background: var(--accent-soft); }
+table.rivals td.name { color: var(--text); font-weight: 700; }
+table.rivals th.num, table.rivals td.num { text-align: right; vertical-align: top; }
 `;

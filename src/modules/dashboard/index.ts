@@ -16,6 +16,8 @@ import { accountAlerts, bodyRows, msu, summarize } from '../../engines/account';
 import { activeItems, QUEUE_KINDS, type QueueSnapshot } from '../../data/queues';
 import { bestUpgrades } from '../../engines/roi';
 import { changeOver, type History, type HistoryDay } from '../../engines/history';
+import { COMPARED, gaps, pointsPerDay, type Rival, type RivalPoints } from '../../engines/rivals';
+import type { PlayerScores } from '../../data/player-api';
 import { rawCost } from '../../engines/tech';
 import {
   DEFENCES, MINES, MOON_FACILITIES, PLANET_FACILITIES, RESEARCH, SHIPS, SPECIES, speciesOf, techName, type TechNames,
@@ -31,6 +33,13 @@ export interface DashboardOptions {
   score: Score | null;
   /** One entry per day (engines/history). */
   history?: History;
+  /**
+   * Reads the player's and the rivals' public scores (cached an hour). Called only when the
+   * player opens the Rivals tab: a user action, public API only (AGENTS.md §4, §6).
+   */
+  loadRivals?: () => Promise<RivalsData>;
+  /** Removes a rival from the list. */
+  onRemoveRival?: (id: number) => void;
   queues?: QueueSnapshot | null;
   /** Technology names learned from the game's pages (player's language). */
   names?: TechNames;
@@ -41,7 +50,13 @@ export interface DashboardOptions {
   t: (key: string, vars?: Record<string, string | number>) => string;
 }
 
-export const TABS = ['summary', 'history', 'mines', 'facilities', 'lifeforms', 'ships', 'defence', 'scrap'] as const;
+export interface RivalsData {
+  me: PlayerScores | null;
+  rivals: { rival: Rival; scores: PlayerScores | null }[];
+  points: RivalPoints;
+}
+
+export const TABS = ['summary', 'history', 'rivals', 'mines', 'facilities', 'lifeforms', 'ships', 'defence', 'scrap'] as const;
 export type Tab = (typeof TABS)[number];
 
 const HOST_ID = 'fut-dashboard';
@@ -60,6 +75,10 @@ function h<K extends keyof HTMLElementTagNameMap>(tag: K, className = '', text?:
 export function isDashboardOpen(doc: Document): boolean {
   return doc.getElementById(HOST_ID) !== null;
 }
+
+/** Rivals' scores read in this page; asked again only when the tab is opened anew. */
+let rivalsData: RivalsData | null = null;
+let rivalsLoading = false;
 
 export function closeDashboard(doc: Document): void {
   doc.getElementById(HOST_ID)?.remove();
@@ -194,6 +213,7 @@ export function openDashboard(o: DashboardOptions): void {
     b.setAttribute('aria-pressed', String(id === tab));
     b.addEventListener('click', () => {
       tab = id;
+      if (id === 'rivals') rivalsData = null;
       redraw();
     });
     tabs.append(b);
@@ -211,6 +231,7 @@ export function openDashboard(o: DashboardOptions): void {
   if (!o.snapshot) body.append(h('p', 'empty', t('dash.noData')));
   else if (tab === 'summary') summaryTab(body, ctx);
   else if (tab === 'history') historyTab(body, ctx);
+  else if (tab === 'rivals') rivalsTab(body, ctx);
   else if (tab === 'mines') minesTab(body, ctx);
   else if (tab === 'facilities') facilitiesTab(body, ctx);
   else if (tab === 'lifeforms') lifeformsTab(body, ctx);
@@ -538,6 +559,88 @@ function historyTab(parent: HTMLElement, ctx: Ctx): void {
   table.append(tbody);
   wrap.append(table);
   s.append(wrap);
+}
+
+function rivalsTab(parent: HTMLElement, ctx: Ctx): void {
+  const { o, fmt } = ctx;
+  const { t, locale } = o;
+  if (!o.loadRivals) return;
+  if (!rivalsData) {
+    parent.append(h('p', 'empty', t('dash.rivalsLoading')));
+    if (!rivalsLoading) {
+      rivalsLoading = true;
+      o.loadRivals()
+        .then((d) => { rivalsData = d; })
+        .catch(() => { rivalsData = { me: null, rivals: [], points: {} }; })
+        .finally(() => {
+          rivalsLoading = false;
+          if (tab === 'rivals' && isDashboardOpen(o.doc)) ctx.redraw();
+        });
+    }
+    return;
+  }
+  const { me, rivals, points } = rivalsData;
+  if (!rivals.length) {
+    parent.append(h('p', 'empty', t('dash.rivalsNone')));
+    return;
+  }
+  const signed = (v: number) => (v > 0 ? `+${fmt(v)}` : v < 0 ? `−${fmt(-v)}` : '0');
+  const wrap = h('div', 'table-wrap');
+  const table = h('table', 'rivals');
+  const hr = h('tr');
+  hr.append(h('th', '', t('dash.rivalsPlayer')));
+  for (const k of COMPARED) hr.append(h('th', 'num', t(`galaxy.score.${k}`)));
+  hr.append(h('th', 'num', t('dash.rivalsGrowth')), h('th', ''));
+  const thead = h('thead');
+  thead.append(hr);
+  table.append(thead);
+  const tbody = h('tbody');
+  const ownId = me?.id ?? 0;
+  const row = (name: string, s: PlayerScores | null, id: number, isMe: boolean) => {
+    const tr = h('tr', isMe ? 'me' : '');
+    tr.append(h('td', 'name', name));
+    const gap = s && !isMe ? gaps(me, s) : {};
+    for (const k of COMPARED) {
+      const sc = s?.scores[k];
+      const td = h('td', 'num');
+      if (!sc) td.textContent = '—';
+      else {
+        td.append(h('b', '', fmt(sc.points)), h('span', 'rank', `#${sc.rank.toLocaleString(locale)}`));
+        const g = gap[k];
+        // Gap from the player's side: positive = the rival is ahead.
+        if (g !== undefined && g !== null) td.append(h('span', `gap ${g > 0 ? 'ahead' : g < 0 ? 'behind' : ''}`, signed(g)));
+      }
+      tr.append(td);
+    }
+    const growth = pointsPerDay(points, id, 7);
+    tr.append(h('td', 'num', growth === null ? '—' : `${signed(growth)}/${t('dash.dayShort')}`));
+    const acts = h('td', 'acts');
+    if (!isMe && o.onRemoveRival) {
+      const del = h('button', 'act ghost');
+      del.type = 'button';
+      del.append(icon(o.doc, 'close', 12));
+      del.title = t('dash.rivalsRemove');
+      del.setAttribute('aria-label', `${t('dash.rivalsRemove')}: ${name}`);
+      del.addEventListener('click', () => {
+        o.onRemoveRival?.(id);
+        if (rivalsData) rivalsData = { ...rivalsData, rivals: rivalsData.rivals.filter((r) => r.rival.id !== id) };
+        ctx.redraw();
+      });
+      acts.append(del);
+    }
+    tr.append(acts);
+    tbody.append(tr);
+  };
+  row(me?.name || t('galaxy.own'), me, ownId, true);
+  // Closest rival in total points first.
+  const total = me?.scores.total?.points ?? 0;
+  for (const r of [...rivals].sort((a, b) => Math.abs((a.scores?.scores.total?.points ?? 0) - total) - Math.abs((b.scores?.scores.total?.points ?? 0) - total))) {
+    row(r.scores?.name || r.rival.name, r.scores, r.rival.id, false);
+  }
+  table.append(tbody);
+  wrap.append(table);
+  parent.append(wrap);
+  parent.append(h('p', 'hint', t('dash.rivalsHint')));
 }
 
 function minesTab(parent: HTMLElement, ctx: Ctx): void {

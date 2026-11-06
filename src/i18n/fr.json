@@ -444,5 +444,14 @@
   "spy.status.strong": "f",
   "spy.status.honorableTarget": "h",
   "spy.status.outlaw": "hors-la-loi",
-  "spy.status.admin": "admin"
+  "spy.status.admin": "admin",
+  "dash.tab.rivals": "Rivaux",
+  "dash.rivalsLoading": "Lecture des points depuis l'API publique…",
+  "dash.rivalsNone": "Aucun rival. Dans la galaxie, cliquez sur le classement (#) à côté d'un joueur pour le suivre ici.",
+  "dash.rivalsPlayer": "Joueur",
+  "dash.rivalsGrowth": "Croissance 7 j",
+  "dash.rivalsRemove": "Ne plus suivre",
+  "dash.rivalsHint": "Points et classements de l'API publique, mise à jour par le jeu environ toutes les heures. Sous chaque valeur l'écart avec vous : orange si le rival est devant, vert s'il est derrière. La croissance utilise les lectures déjà faites.",
+  "galaxy.rivalAdd": "Clic : suivre comme rival",
+  "galaxy.rivalRemove": "Clic : ne plus suivre"
 }
