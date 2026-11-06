@@ -529,5 +529,9 @@
   "plan.removeAll": "Remove from all {n} bodies",
   "plan.readyHere": "Enough resources here",
   "bar.targets": "Targets",
-  "bar.targetsHint": "Targets side bar (flagged players and coloured planets) · M: next position"
+  "bar.targetsHint": "Targets side bar (flagged players and coloured planets) · M: next position",
+  "settings.oglight": "From OGLight",
+  "settings.oglightImport": "Import export",
+  "settings.oglightDone": "From OGLight: {players} players, {planets} coloured planets, {seen} positions. Reload the page.",
+  "settings.backupImportHint": "A Future backup or OGLight's “Export data” file (same universe)"
 }

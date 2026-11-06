@@ -16,6 +16,8 @@ import { loadServerDataOnPageLoad } from './data/server-data';
 import { highlightPosition, isGalaxyPage, TARGETS_KEY, watchGalaxy } from './modules/galaxy';
 import { nextInSide, onSideNavigate, refreshSide, restoreSide, toggleSide } from './modules/marks/side';
 import { loadMarks, MARKS_KEY, migrateOld, type Marks } from './engines/marks';
+import { convertOglight, isOglightDb } from './engines/oglight-import';
+import { POSITIONS_KEY, type Positions } from './engines/positions';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
 import { ITEMS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems } from './data/bonuses';
 import { dayFigures, openDashboard } from './modules/dashboard';
@@ -164,7 +166,16 @@ async function bootstrap(): Promise<void> {
         draw();
       },
       onBackupExport: () => downloadBackup(document, gm, Date.now()),
-      onBackupImport: (text) => importBackup(gm, text),
+      onBackupImport: (text) => {
+        // OGLight's "Export data" file: converted into this universe's marks and positions.
+        let json: unknown = null;
+        try { json = JSON.parse(text); } catch { /* not JSON: importBackup says so */ }
+        if (!isOglightDb(json)) return importBackup(gm, text);
+        const out = convertOglight(json, loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null)), store.get<Positions>(POSITIONS_KEY, {}), Date.now());
+        store.set(MARKS_KEY, out.marks);
+        store.set(POSITIONS_KEY, out.positions);
+        return t('settings.oglightDone', { players: out.players, planets: out.planets, seen: out.seen });
+      },
       onOpenDashboard: () =>
         openDashboard({
           doc: document,

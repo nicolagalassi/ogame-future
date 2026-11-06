@@ -37,8 +37,9 @@ export interface PlanetMenuOptions {
   onSettingsChange: (next: MenuSettings) => void;
   /** Saves every Future value as a local file; returns how many were saved. */
   onBackupExport?: () => number;
-  /** Writes a backup file's text back; returns how many values were restored, throws on a bad file. */
-  onBackupImport?: (text: string) => number;
+  /** Writes a backup file's text back (Future's, or OGLight's export converted); returns how many
+   * values were restored, or the message to show; throws on a bad file. */
+  onBackupImport?: (text: string) => number | string;
   /** Runs the user-initiated sync. Only ever called from the Sync button's click. */
   onSync: () => Promise<void>;
   /** Opens the account dashboard (Future's own panel, no game action). */
@@ -329,20 +330,26 @@ function settingsPanel(o: PlanetMenuOptions, mode: MenuMode, roomy: boolean, col
     note.setAttribute('role', 'status');
     const picker = el(doc, 'input', '');
     picker.type = 'file';
-    picker.accept = 'application/json,.json';
+    // OGLight's export has no extension: any file is accepted, the content decides.
+    picker.title = t('settings.backupImportHint');
     picker.hidden = true;
     picker.addEventListener('change', () => {
       const file = picker.files?.[0];
       picker.value = '';
       if (!file) return;
       file.text().then((text) => {
-        note.textContent = t('settings.backupRestored', { n: importBackup(text) });
+        const done = importBackup(text);
+        note.textContent = typeof done === 'string' ? done : t('settings.backupRestored', { n: done });
       }).catch(() => { note.textContent = t('settings.backupBad'); });
     });
     row(
       t('settings.backup'),
       action(t('settings.backupExport'), () => { note.textContent = t('settings.backupSaved', { n: exportBackup() }); }),
       action(t('settings.backupImport'), () => picker.click()),
+    );
+    row(
+      t('settings.oglight'),
+      action(t('settings.oglightImport'), () => picker.click()),
     );
     panel.append(picker, note);
   }

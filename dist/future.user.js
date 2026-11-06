@@ -696,7 +696,11 @@
     "plan.removeAll": "Togli da tutti i {n} corpi",
     "plan.readyHere": "Qui le risorse bastano",
     "bar.targets": "Bersagli",
-    "bar.targetsHint": "Barra laterale dei bersagli (giocatori segnati e pianeti colorati) \xB7 M: prossima posizione"
+    "bar.targetsHint": "Barra laterale dei bersagli (giocatori segnati e pianeti colorati) \xB7 M: prossima posizione",
+    "settings.oglight": "Da OGLight",
+    "settings.oglightImport": "Importa export",
+    "settings.oglightDone": "Da OGLight: {players} giocatori, {planets} pianeti colorati, {seen} posizioni. Ricarica la pagina.",
+    "settings.backupImportHint": "Un backup di Future o il file \xABExport data\xBB di OGLight (dello stesso universo)"
   };
 
   // src/i18n/en.json
@@ -1231,7 +1235,11 @@
     "plan.removeAll": "Remove from all {n} bodies",
     "plan.readyHere": "Enough resources here",
     "bar.targets": "Targets",
-    "bar.targetsHint": "Targets side bar (flagged players and coloured planets) \xB7 M: next position"
+    "bar.targetsHint": "Targets side bar (flagged players and coloured planets) \xB7 M: next position",
+    "settings.oglight": "From OGLight",
+    "settings.oglightImport": "Import export",
+    "settings.oglightDone": "From OGLight: {players} players, {planets} coloured planets, {seen} positions. Reload the page.",
+    "settings.backupImportHint": "A Future backup or OGLight's \u201CExport data\u201D file (same universe)"
   };
 
   // src/i18n/fr.json
@@ -1766,7 +1774,11 @@
     "plan.removeAll": "Retirer des {n} corps",
     "plan.readyHere": "Ressources suffisantes ici",
     "bar.targets": "Cibles",
-    "bar.targetsHint": "Barre lat\xE9rale des cibles (joueurs marqu\xE9s et plan\xE8tes color\xE9es) \xB7 M : position suivante"
+    "bar.targetsHint": "Barre lat\xE9rale des cibles (joueurs marqu\xE9s et plan\xE8tes color\xE9es) \xB7 M : position suivante",
+    "settings.oglight": "Depuis OGLight",
+    "settings.oglightImport": "Importer l'export",
+    "settings.oglightDone": "Depuis OGLight : {players} joueurs, {planets} plan\xE8tes color\xE9es, {seen} positions. Rechargez la page.",
+    "settings.backupImportHint": "Une sauvegarde Future ou le fichier \xAB Export data \xBB d'OGLight (m\xEAme univers)"
   };
 
   // src/i18n/de.json
@@ -2301,7 +2313,11 @@
     "plan.removeAll": "Von allen {n} K\xF6rpern entfernen",
     "plan.readyHere": "Hier reichen die Ressourcen",
     "bar.targets": "Ziele",
-    "bar.targetsHint": "Seitenleiste der Ziele (markierte Spieler und farbige Planeten) \xB7 M: n\xE4chste Position"
+    "bar.targetsHint": "Seitenleiste der Ziele (markierte Spieler und farbige Planeten) \xB7 M: n\xE4chste Position",
+    "settings.oglight": "Aus OGLight",
+    "settings.oglightImport": "Export importieren",
+    "settings.oglightDone": "Aus OGLight: {players} Spieler, {planets} farbige Planeten, {seen} Positionen. Seite neu laden.",
+    "settings.backupImportHint": "Ein Future-Backup oder die \u201EExport data\u201C-Datei von OGLight (gleiches Universum)"
   };
 
   // src/core/i18n.ts
@@ -3786,6 +3802,49 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     scroll.append(h(doc, "p", "foot", t("marks.planetsHint", { n: list.length })));
   }
 
+  // src/engines/oglight-import.ts
+  var PINS = { friend: "friend", rush: "target", danger: "danger", skull: "target", fridge: "farm", star: "watch", trade: "trade", money: "trade", ptre: "watch" };
+  var TAGS2 = { red: "red", pink: "red", orange: "orange", brown: "orange", yellow: "yellow", lime: "green", green: "green", blue: "blue", dblue: "blue", violet: "violet", magenta: "violet" };
+  function isOglightDb(x) {
+    return !!x && typeof x === "object" && typeof x.dataFormat === "number" && typeof x.udb === "object" && typeof x.pdb === "object";
+  }
+  var STATUS = { v: "vacation", b: "banned", I: "longinactive", i: "inactive", o: "outlaw", a: "admin" };
+  var coordsOk = (c) => /^\d+:\d+:\d+$/.test(c);
+  var act = (v) => v === "*" ? "*" : Number(v) > 0 && Number(v) < 60 ? Number(v) : null;
+  function convertOglight(db, marks, positions, now) {
+    let m = marks;
+    let players = 0;
+    let planets = 0;
+    const udb = db.udb ?? {};
+    const pdb = db.pdb ?? {};
+    for (const [id, p] of Object.entries(udb)) {
+      const flag = p.pin ? PINS[p.pin] : void 0;
+      if (!flag || m.players[id]) continue;
+      m = flagPlayer(m, Number(id), p.name ?? "", flag, now);
+      players++;
+    }
+    for (const [coords, x] of Object.entries(db.tdb ?? {})) {
+      const tag = x.tag ? TAGS2[x.tag] : void 0;
+      if (!tag || !coordsOk(coords) || m.planets[coords]) continue;
+      const owner = pdb[coords]?.uid;
+      const who = owner ? udb[String(owner)] : void 0;
+      m = tagPlanet(m, coords, tag, { planet: "", player: who?.name ?? "", playerId: owner && owner > 0 ? owner : null, statuses: who?.status && STATUS[who.status] ? [STATUS[who.status]] : [], moon: (pdb[coords]?.mid ?? -1) > 0 }, now);
+      planets++;
+    }
+    const recent = [...m.recent];
+    for (const id of db.lastPinnedList ?? []) if (!recent.some((r) => r.id === Number(id))) recent.push({ id: Number(id), name: udb[String(id)]?.name ?? "" });
+    m = { ...m, recent: recent.slice(0, RECENT_MAX), lastFlag: marks.lastFlag, lastTag: marks.lastTag };
+    const next = { ...positions };
+    let seen = 0;
+    for (const [coords, x] of Object.entries(pdb)) {
+      const uid = Number(x.uid);
+      if (!coordsOk(coords) || !(uid > 0) || next[coords] || !(m.players[String(uid)] || m.planets[coords] || m.recent.some((r) => r.id === uid))) continue;
+      next[coords] = { player: uid, name: "", moon: (x.mid ?? -1) > 0, debris: Math.round(Number(x.debris) || 0), act: [act(x.acti?.[0]), act(x.acti?.[1])], at: Number(x.acti?.[2]) || Number(x.api) || 0 };
+      seen++;
+    }
+    return { marks: m, positions: next, players, planets, seen };
+  }
+
   // src/data/queues.ts
   var QUEUES_KEY = "queues";
   var PRODUCTION_QUEUE_PATH = "/game/index.php?page=ajax&component=productionqueue&ajax=1";
@@ -4480,14 +4539,15 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
       note.setAttribute("role", "status");
       const picker = el2(doc, "input", "");
       picker.type = "file";
-      picker.accept = "application/json,.json";
+      picker.title = t("settings.backupImportHint");
       picker.hidden = true;
       picker.addEventListener("change", () => {
         const file = picker.files?.[0];
         picker.value = "";
         if (!file) return;
         file.text().then((text) => {
-          note.textContent = t("settings.backupRestored", { n: importBackup2(text) });
+          const done = importBackup2(text);
+          note.textContent = typeof done === "string" ? done : t("settings.backupRestored", { n: done });
         }).catch(() => {
           note.textContent = t("settings.backupBad");
         });
@@ -4498,6 +4558,10 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
           note.textContent = t("settings.backupSaved", { n: exportBackup2() });
         }),
         action(t("settings.backupImport"), () => picker.click())
+      );
+      row(
+        t("settings.oglight"),
+        action(t("settings.oglightImport"), () => picker.click())
       );
       panel.append(picker, note);
     }
@@ -6051,8 +6115,8 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
           chip2(t("msg.spy.counter", { name: m.sourceName || "?", coords: m.sourceCoords || "?" }), "fut-msg-out fut-out-alien");
           return box;
         }
-        const act = m.activity === 0 ? t("msg.spy.active") : m.activity >= 60 ? t("msg.spy.inactive") : t("msg.spy.activity", { n: m.activity });
-        chip2(act, m.activity === 0 ? "fut-msg-out fut-out-pirate" : m.activity < 60 ? "fut-msg-out fut-out-late" : "fut-msg-out fut-out-nothing");
+        const act2 = m.activity === 0 ? t("msg.spy.active") : m.activity >= 60 ? t("msg.spy.inactive") : t("msg.spy.activity", { n: m.activity });
+        chip2(act2, m.activity === 0 ? "fut-msg-out fut-out-pirate" : m.activity < 60 ? "fut-msg-out fut-out-late" : "fut-msg-out fut-out-nothing");
         const total = m.res.metal + m.res.crystal + m.res.deuterium;
         const loot = Math.floor(total * m.loot);
         chip2(`${t("msg.spy.loot")} ${fmt(loot)}`, "fut-msg-loot", `${Math.round(m.loot * 100)}% \xB7 ${Math.round(loot).toLocaleString(locale)}`);
@@ -9787,7 +9851,18 @@ table.queues td.acts { width: 1%; text-align: right; }
         draw();
       },
       onBackupExport: () => downloadBackup(document, gm, Date.now()),
-      onBackupImport: (text) => importBackup(gm, text),
+      onBackupImport: (text) => {
+        let json2 = null;
+        try {
+          json2 = JSON.parse(text);
+        } catch {
+        }
+        if (!isOglightDb(json2)) return importBackup(gm, text);
+        const out = convertOglight(json2, loadMarks(store.get(MARKS_KEY, null)), store.get(POSITIONS_KEY, {}), Date.now());
+        store.set(MARKS_KEY, out.marks);
+        store.set(POSITIONS_KEY, out.positions);
+        return t("settings.oglightDone", { players: out.players, planets: out.planets, seen: out.seen });
+      },
       onOpenDashboard: () => openDashboard({
         doc: document,
         snapshot,

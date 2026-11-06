@@ -138,6 +138,13 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     con bordo #1F2C40, schede a segmenti, numeri monospazio, ciano per la selezione. Pila z-index sopra il
     footer del gioco (999999): barra laterale 1000000, finestre 1000001, popup 1000002-3.
 
+16. **Import da OGLight** (2026-11-06, `src/engines/oglight-import.ts`): impostazioni del menu pianeti → "Da
+    OGLight · Importa export" (anche "Importa" del backup riconosce il file). Il file "Export data" di OGLight
+    (un universo, va importato nello stesso) diventa: pin → bandierine (rush/skull → Bersaglio, fridge → Frigo,
+    star/ptre → Da controllare, money → Commercio), tag → colori (lime → verde, dblue → blu, …; gray no),
+    `lastPinnedList` → Recenti, `pdb` → posizioni (solo giocatori/pianeti segnati). Quello che Future ha già
+    resta. Statistiche spedizioni/raid di OGLight non convertite.
+
 ## Come si prova senza il gioco
 
 I test (`npm test`, vitest + jsdom) usano fixture in `tests/`. Le anteprime grafiche sono state

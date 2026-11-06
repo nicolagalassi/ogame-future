@@ -529,5 +529,9 @@
   "plan.removeAll": "Retirer des {n} corps",
   "plan.readyHere": "Ressources suffisantes ici",
   "bar.targets": "Cibles",
-  "bar.targetsHint": "Barre latérale des cibles (joueurs marqués et planètes colorées) · M : position suivante"
+  "bar.targetsHint": "Barre latérale des cibles (joueurs marqués et planètes colorées) · M : position suivante",
+  "settings.oglight": "Depuis OGLight",
+  "settings.oglightImport": "Importer l'export",
+  "settings.oglightDone": "Depuis OGLight : {players} joueurs, {planets} planètes colorées, {seen} positions. Rechargez la page.",
+  "settings.backupImportHint": "Une sauvegarde Future ou le fichier « Export data » d'OGLight (même univers)"
 }
