@@ -1,82 +1,78 @@
 /**
- * Spy table: every target spied in the last three days, one row per planet or moon (newest
- * report wins), ranked by loot per hour of flight from the player's nearest body.
- * Idea from OGLight's spy table; the twist is the ranking by MSU per hour and the board that
- * survives deleting the reports.
+ * Spy table, inside the inbox's Espionage tab above the reports, drawn like the game's own list.
+ * Every target spied in the last three days, one row per planet or moon (newest report wins),
+ * ranked by loot per hour of flight from the player's nearest body. Idea from OGLight's spy
+ * table; the twist is the ranking by MSU per hour and a board that survives deleting the reports.
  *
- * COMPLIANCE: stored data only, no network call (§4). No probe button (§1.5.1): the row links
- * to the galaxy view and to the game's fleet page with the target filled in. That is one
- * normal navigation per click (`cp=` only in a link the player clicks, §4.2); choosing ships
- * and pressing Send stay with the player (§1.1).
+ * COMPLIANCE: stored data only, no network call (§4). No probe button (§1.5.1): rows link to the
+ * galaxy view, to the game's fleet page with the target filled in (one normal navigation, `cp=`
+ * only in a link the player clicks, §4.2; ships and Send stay with the player, §1.1) and to battle
+ * simulators with the report's API key (opened by the player, see engines/sim-links).
  */
 import { icon } from '../../core/icons';
-import { WINDOW_SHEET } from '../../core/sheet';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
+import { SERVER_DATA_KEY, type ServerData } from '../../data/server-data';
 import { SPY_BOARD_KEY, targetRows, type Base, type SpyBoard, type TargetRow, type Universe } from '../../engines/raids';
+import { gameSimLink, ogameToolsSimLink, osimsLink, simPrefill } from '../../engines/sim-links';
 import { shipName, type T } from './index';
-import { SPY_TABLE_CSS } from './style';
 
-export const SPY_TABLE_ID = 'fut-spytable';
+export const SPY_PANEL_ID = 'fut-spypanel';
 const VIEW_KEY = 'spy.view';
 
-type SortKey = 'target' | 'age' | 'activity' | 'loot' | 'def' | 'flight' | 'rate';
-interface View {
+type SortKey = 'target' | 'age' | 'loot' | 'def' | 'flight' | 'rate';
+export interface View {
   sort: SortKey;
   desc: boolean;
   /** Cargo ship used for the count and the flight time: 202 small, 203 large. */
   ship: 202 | 203;
   hideDefended: boolean;
   inactiveOnly: boolean;
+  open: boolean;
 }
-const DEFAULT_VIEW: View = { sort: 'rate', desc: true, ship: 203, hideDefended: false, inactiveOnly: false };
+const DEFAULT_VIEW: View = { sort: 'rate', desc: true, ship: 203, hideDefended: false, inactiveOnly: false, open: true };
 
-export interface SpyTableOptions {
+/** What the table needs from the rest of Future (built once per page in main). */
+export interface SpyContext {
+  bases: Base[];
+  /** Combat research levels and character class, for the simulators' attacker side. */
+  researches: Record<string, number>;
+  classId: number;
+  /** Server id for the simulators ("s808-en") and the player's interface language. */
+  server: string;
+  lang: string;
+}
+
+export interface SpyPanelOptions {
   doc: Document;
   store: Store;
-  bases: Base[];
-  now: number;
   locale: string;
   t: T;
+  spy: SpyContext;
+  now?: () => number;
 }
 
-let keyHandler: ((e: KeyboardEvent) => void) | null = null;
-
-function h<K extends keyof HTMLElementTagNameMap>(tag: K, cls = '', text?: string): HTMLElementTagNameMap[K] {
-  const node = document.createElement(tag);
-  if (cls) node.className = cls;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
-
-/** Universe shape from the game's meta tags; 9 galaxies × 499 systems when the page does not say. */
-export function universeOf(doc: Document): Universe {
+/** Universe shape from the public API (cached), else from the page's meta tags. */
+export function universeOf(doc: Document, data: ServerData | null): Universe {
   const meta = (name: string) => doc.querySelector(`meta[name="${name}"]`)?.getAttribute('content') ?? '';
   return {
-    galaxies: Number(meta('ogame-universe-galaxies')) || 9,
-    systems: Number(meta('ogame-universe-systems')) || 499,
-    donutGalaxy: meta('ogame-donut-galaxy') !== '0',
-    donutSystem: meta('ogame-donut-system') !== '0',
-    fleetSpeed: Number(meta('ogame-universe-speed-fleet-war')) || 1,
+    galaxies: data?.galaxies || 9,
+    systems: data?.systems || 499,
+    donutGalaxy: data ? data.donutGalaxy : meta('ogame-donut-galaxy') !== '0',
+    donutSystem: data ? data.donutSystem : meta('ogame-donut-system') !== '0',
+    fleetSpeed: data?.speedFleetWar || Number(meta('ogame-universe-speed-fleet-war')) || 1,
   };
-}
-
-export function closeSpyTable(doc: Document): void {
-  doc.getElementById(SPY_TABLE_ID)?.remove();
-  if (keyHandler) doc.removeEventListener('keydown', keyHandler, true);
-  keyHandler = null;
 }
 
 const INACTIVE = ['inactive', 'longinactive'];
 const defended = (r: TargetRow) => r.entry.defValue !== 0 || r.entry.fleetValue !== 0;
 
-export function sortRows(rows: TargetRow[], view: View): TargetRow[] {
+export function sortRows(rows: TargetRow[], view: Pick<View, 'sort' | 'desc'>): TargetRow[] {
   const val = (r: TargetRow): number | string => {
     switch (view.sort) {
       case 'target': return r.entry.playerName.toLowerCase();
       case 'age': return r.ageMinutes;
-      case 'activity': return r.entry.activity;
       case 'loot': return r.lootMsu;
       case 'def': return Math.max(0, r.entry.defValue) + Math.max(0, r.entry.fleetValue);
       case 'flight': return r.flight ?? Infinity;
@@ -95,151 +91,190 @@ const duration = (s: number) => {
   return hh ? `${hh}h ${String(mm).padStart(2, '0')}m` : `${mm}m ${String(ss).padStart(2, '0')}s`;
 };
 
-export function openSpyTable(o: SpyTableOptions): void {
-  const { doc, store, t, locale } = o;
+const isSpyTab = (doc: Document) => !!doc.querySelector('[data-subtab-id="20"].active, [data-subtab-id="20"][aria-selected="true"]');
+
+/**
+ * Draws the panel above the reports when the Espionage tab is open, removes it elsewhere.
+ * Idempotent: called after every change the game makes to the inbox, it redraws only when the
+ * board or the view changed.
+ */
+export function mountSpyPanel(o: SpyPanelOptions): void {
+  const { doc } = o;
+  const holder = doc.querySelector('#messages .messagesHolder');
+  // Above the game's own column headers (sort row), which belong to the reports below.
+  const sortRow = doc.querySelector('#messages #filteredHeadersRow');
+  const anchor = sortRow && sortRow.parentElement === holder?.parentElement ? sortRow : holder;
+  const old = doc.getElementById(SPY_PANEL_ID);
+  if (!holder || !isSpyTab(doc)) {
+    old?.remove();
+    return;
+  }
+  const board = o.store.get<SpyBoard>(SPY_BOARD_KEY, {});
+  const view: View = { ...DEFAULT_VIEW, ...o.store.get<Partial<View>>(VIEW_KEY, {}) };
+  const sig = JSON.stringify([Object.values(board).map((e) => e.id), view, Math.floor((o.now?.() ?? Date.now()) / 60_000)]);
+  if (old && old.dataset.sig === sig && old.nextElementSibling === anchor) return;
+  const panel = renderPanel(o, board, view);
+  panel.dataset.sig = sig;
+  if (old) old.replaceWith(panel);
+  anchor!.before(panel);
+}
+
+function renderPanel(o: SpyPanelOptions, board: SpyBoard, view: View): HTMLElement {
+  const { doc, store, t, locale, spy } = o;
+  const now = o.now?.() ?? Date.now();
   const fmt = (n: number) => formatUnits(n, locale);
-  const keepScroll = doc.getElementById(SPY_TABLE_ID)?.shadowRoot?.querySelector('.backdrop')?.scrollTop ?? 0;
-  closeSpyTable(doc);
-  const view: View = { ...DEFAULT_VIEW, ...store.get<Partial<View>>(VIEW_KEY, {}) };
-  const save = (next: Partial<View>) => {
-    store.set(VIEW_KEY, { ...view, ...next });
-    openSpyTable(o);
+  const el = <K extends keyof HTMLElementTagNameMap>(tag: K, cls = '', text?: string) => {
+    const n = doc.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
   };
-  const board = store.get<SpyBoard>(SPY_BOARD_KEY, {});
+  const redraw = (next: Partial<View> = {}) => {
+    store.set(VIEW_KEY, { ...view, ...next });
+    mountSpyPanel(o);
+  };
+  /** A button in the game's own style (its <gradient-button> element). */
+  const gameButton = (child: Node, title: string, onClick: () => void, cls = '') => {
+    const wrap = el('gradient-button' as 'span', cls);
+    wrap.setAttribute('sq20', '');
+    const b = el('button', 'custom_btn');
+    b.type = 'button';
+    b.title = title;
+    b.setAttribute('aria-label', title);
+    b.append(child);
+    b.addEventListener('click', (e) => {
+      e.preventDefault();
+      onClick();
+    });
+    wrap.append(b);
+    return wrap;
+  };
+  const gameIcon = (name: string) => {
+    const img = el('img');
+    img.src = `/cdn/img/icons/basic/${name}.png`;
+    img.alt = '';
+    img.width = img.height = 16;
+    return img;
+  };
+
   const ships = store.get<ShipsInfo>(SHIPS_INFO_KEY, {});
   const info = ships[String(view.ship)];
   const capacity = info?.capacity || (view.ship === 202 ? 5000 : 25000);
-  const all = targetRows(board, o.bases, { capacity, speed: info?.speed ?? 0, universe: universeOf(doc), now: o.now });
+  const universe = universeOf(doc, store.get<ServerData | null>(SERVER_DATA_KEY, null));
+  const all = targetRows(board, spy.bases, { capacity, speed: info?.speed ?? 0, universe, now });
   const rows = sortRows(all.filter((r) => (!view.hideDefended || !defended(r)) && (!view.inactiveOnly || r.entry.statuses.some((s) => INACTIVE.includes(s)))), view);
 
-  const host = doc.createElement('div');
-  host.id = SPY_TABLE_ID;
-  host.lang = locale;
-  const root = host.attachShadow({ mode: 'open' });
-  const style = h('style');
-  style.textContent = WINDOW_SHEET + SPY_TABLE_CSS;
-  const backdrop = h('div', 'backdrop');
-  const panel = h('section', 'panel');
-  panel.setAttribute('role', 'dialog');
-  panel.setAttribute('aria-label', t('spy.title'));
-  backdrop.append(panel);
-  root.append(style, backdrop);
-  const close = () => closeSpyTable(doc);
-  keyHandler = (e) => { if (e.key === 'Escape') close(); };
-  doc.addEventListener('keydown', keyHandler, true);
-  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
+  const panel = el('div', 'fut-sp');
+  panel.id = SPY_PANEL_ID;
 
-  const head = h('header', 'head');
-  const titles = h('div', 'titles');
-  const total = rows.reduce((s, r) => s + r.lootMsu, 0);
-  titles.append(h('h2', '', t('spy.title')), h('span', 'sub', t('spy.sub', { n: rows.length, msu: fmt(total) })));
-  const x = h('button', 'close');
-  x.type = 'button';
-  x.setAttribute('aria-label', t('dash.close'));
-  x.append(icon(doc, 'close', 16));
-  x.addEventListener('click', close);
-  head.append(titles, x);
-  panel.append(head);
-
-  // Filters in one row above the table.
-  const bar = h('div', 'filters');
-  const chip = (text: string, pressed: boolean, onClick: () => void) => {
-    const b = h('button', 'chip', text);
-    b.type = 'button';
-    b.setAttribute('aria-pressed', String(pressed));
-    b.addEventListener('click', onClick);
-    return b;
-  };
-  bar.append(
-    chip(shipName(203, ships, t), view.ship === 203, () => save({ ship: 203 })),
-    chip(shipName(202, ships, t), view.ship === 202, () => save({ ship: 202 })),
-    h('span', 'sep'),
-    chip(t('spy.hideDefended'), view.hideDefended, () => save({ hideDefended: !view.hideDefended })),
-    chip(t('spy.inactiveOnly'), view.inactiveOnly, () => save({ inactiveOnly: !view.inactiveOnly })),
-  );
-  panel.append(bar);
-  if (!info?.speed) panel.append(h('p', 'hint', t('spy.noSpeed')));
-
-  const body = h('div', 'tab-body');
-  if (!rows.length) body.append(h('p', 'empty', t(all.length ? 'spy.noneFiltered' : 'spy.none')));
-  else {
-    const wrap = h('div', 'table-wrap');
-    const table = h('table', 'spy');
-    const thead = h('thead');
-    const hr = h('tr');
-    const cols: [SortKey | null, string][] = [
-      ['target', 'spy.col.target'], ['age', 'spy.col.age'], ['activity', 'spy.col.activity'], ['loot', 'spy.col.loot'],
-      [null, 'spy.col.ships'], ['def', 'spy.col.def'], ['flight', 'spy.col.flight'], ['rate', 'spy.col.rate'], [null, 'spy.col.actions'],
-    ];
-    for (const [key, label] of cols) {
-      const th = h('th', key === 'target' || label === 'spy.col.actions' ? '' : 'num');
-      if (key) {
-        const b = h('button', 'sort', t(label) + (view.sort === key ? (view.desc ? ' ↓' : ' ↑') : ''));
-        b.type = 'button';
-        th.setAttribute('aria-sort', view.sort === key ? (view.desc ? 'descending' : 'ascending') : 'none');
-        b.addEventListener('click', () => save(view.sort === key ? { desc: !view.desc } : { sort: key, desc: key !== 'target' && key !== 'age' && key !== 'flight' && key !== 'def' }));
-        th.append(b);
-      } else th.textContent = t(label);
-      hr.append(th);
-    }
-    thead.append(hr);
-    table.append(thead);
-    const tbody = h('tbody');
-    for (const r of rows) {
-      const e = r.entry;
-      const [g, s, p] = e.coords.split(':');
-      const tr = h('tr', defended(r) ? 'defended' : '');
-      const who = h('td', 'who');
-      who.append(h('strong', '', e.playerName || '?'));
-      for (const st of e.statuses.filter((x) => x !== 'active')) who.append(h('span', `st st-${st}`, t(`spy.status.${st}`)));
-      const gal = h('a', 'coords', `[${e.coords}]`);
-      gal.href = `/game/index.php?page=ingame&component=galaxy&galaxy=${g}&system=${s}`;
-      if (e.moon) gal.prepend(icon(doc, 'moon', 10, 'moon'));
-      who.append(gal);
-      const age = h('td', `num ${r.ageMinutes > 360 ? 'old' : r.ageMinutes > 60 ? 'warm' : 'fresh'}`, r.ageMinutes < 60 ? `${r.ageMinutes}m` : `${Math.floor(r.ageMinutes / 60)}h`);
-      age.title = new Date(e.at).toLocaleString(locale);
-      const act = h('td', `num ${e.activity === 0 ? 'bad' : e.activity < 60 ? 'warn' : ''}`, e.activity === 0 ? t('msg.spy.active') : e.activity >= 60 ? '>60m' : `${e.activity}m`);
-      const loot = h('td', 'num');
-      loot.append(h('b', '', fmt(r.lootMsu)), h('span', 'res', `${fmt(e.res.metal * e.loot)} · ${fmt(e.res.crystal * e.loot)} · ${fmt(e.res.deuterium * e.loot)}`));
-      loot.title = `${Math.round(e.loot * 100)}% · ${r.lootRes.toLocaleString(locale)}`;
-      const def = h('td', 'num', e.defValue < 0 || e.fleetValue < 0 ? '?' : defended(r) ? fmt(Math.max(0, e.defValue) + Math.max(0, e.fleetValue)) : '0');
-      def.title = `${t('msg.spy.fleet')} ${e.fleetValue < 0 ? '?' : fmt(e.fleetValue)} · ${t('msg.spy.def')} ${e.defValue < 0 ? '?' : fmt(e.defValue)}`;
-      const flight = h('td', 'num');
-      if (r.base) {
-        const from = h('span', 'res', r.base.name);
-        if (r.base.moon) from.prepend(icon(doc, 'moon', 10, 'moon'));
-        flight.append(h('span', '', r.flight !== null ? duration(r.flight) : '—'), from);
-        flight.title = `${r.base.name} [${r.base.coords}]`;
-      } else flight.textContent = '—';
-      const rate = h('td', 'num rate', r.msuPerHour !== null ? `${fmt(r.msuPerHour)}/h` : '—');
-      const acts = h('td', 'acts');
-      if (r.base) {
-        const go = h('a', 'act', t('spy.attack'));
-        go.href = `/game/index.php?page=ingame&component=fleetdispatch&cp=${r.base.id}&galaxy=${g}&system=${s}&position=${p}&type=${e.moon ? 3 : 1}&mission=1`;
-        go.title = t('spy.attackHint', { name: r.base.name });
-        acts.append(go);
-      }
-      const del = h('button', 'act ghost');
-      del.append(icon(doc, 'close', 12));
-      del.type = 'button';
-      del.setAttribute('aria-label', t('spy.remove'));
-      del.title = t('spy.remove');
-      del.addEventListener('click', () => {
-        const b = store.get<SpyBoard>(SPY_BOARD_KEY, {});
-        delete b[e.key];
-        store.set(SPY_BOARD_KEY, b);
-        openSpyTable(o);
-      });
-      acts.append(del);
-      tr.append(who, age, act, loot, h('td', 'num', r.ships ? `${r.ships.toLocaleString(locale)}×` : '0'), def, flight, rate, acts);
-      tbody.append(tr);
-    }
-    table.append(tbody);
-    wrap.append(table);
-    body.append(wrap);
+  // Head: title with totals (opens/closes), then the filters in one row.
+  const head = el('div', 'fut-sp-head');
+  const toggle = el('button', 'fut-sp-title');
+  toggle.type = 'button';
+  toggle.setAttribute('aria-expanded', String(view.open));
+  toggle.append(el('b', '', t('spy.title')), el('span', '', t('spy.sub', { n: rows.length, msu: fmt(rows.reduce((s, r) => s + r.lootMsu, 0)) })));
+  toggle.addEventListener('click', () => redraw({ open: !view.open }));
+  head.append(toggle);
+  if (view.open) {
+    const chip = (text: string, pressed: boolean, next: Partial<View>) => {
+      const b = el('button', 'fut-sp-chip', text);
+      b.type = 'button';
+      b.setAttribute('aria-pressed', String(pressed));
+      b.addEventListener('click', () => redraw(next));
+      return b;
+    };
+    head.append(
+      chip(shipName(203, ships, t), view.ship === 203, { ship: 203 }),
+      chip(shipName(202, ships, t), view.ship === 202, { ship: 202 }),
+      chip(t('spy.hideDefended'), view.hideDefended, { hideDefended: !view.hideDefended }),
+      chip(t('spy.inactiveOnly'), view.inactiveOnly, { inactiveOnly: !view.inactiveOnly }),
+    );
   }
-  body.append(h('p', 'hint', t('spy.hint')));
-  panel.append(body);
-  doc.body.append(host);
-  backdrop.scrollTop = keepScroll;
+  panel.append(head);
+  if (!view.open) return panel;
+
+  if (!info?.speed) panel.append(el('p', 'fut-sp-note', t('spy.noSpeed')));
+  if (!rows.length) {
+    panel.append(el('p', 'fut-sp-note', t(all.length ? 'spy.noneFiltered' : 'spy.none')));
+    return panel;
+  }
+
+  // Column headers, sortable, like the game's own header row.
+  const cols = el('div', 'fut-sp-row fut-sp-cols');
+  const headers: [SortKey | null, string][] = [['target', 'spy.col.target'], ['age', 'spy.col.age'], ['loot', 'spy.col.loot'], [null, 'spy.col.ships'], ['def', 'spy.col.def'], ['rate', 'spy.col.rate'], [null, 'spy.col.actions']];
+  for (const [key, label] of headers) {
+    const c = el(key ? 'button' : 'span', `fut-sp-h${view.sort === key ? ' sortBy' : ''}`, t(label));
+    if (key) {
+      (c as HTMLButtonElement).type = 'button';
+      c.setAttribute('aria-sort', view.sort === key ? (view.desc ? 'descending' : 'ascending') : 'none');
+      c.addEventListener('click', () => redraw(view.sort === key ? { desc: !view.desc } : { sort: key, desc: key === 'loot' || key === 'rate' }));
+    }
+    cols.append(c);
+  }
+  panel.append(cols);
+
+  const list = el('div', 'fut-sp-list');
+  for (const r of rows) {
+    const e = r.entry;
+    const [g, s, p] = e.coords.split(':');
+    const row = el('div', `fut-sp-row${defended(r) ? ' defended' : ''}`);
+
+    const who = el('div', 'fut-sp-who');
+    const name = el('span', 'fut-sp-name', e.playerName || '?');
+    who.append(name);
+    for (const st of e.statuses.filter((x) => x !== 'active')) who.append(el('span', `fut-sp-st st-${st}`, t(`spy.status.${st}`)));
+    const gal = el('a', 'fut-sp-coords', `[${e.coords}]`);
+    gal.href = `/game/index.php?page=ingame&component=galaxy&galaxy=${g}&system=${s}`;
+    if (e.moon) gal.prepend(icon(doc, 'moon', 10, 'fut-sp-moon'));
+    who.append(gal);
+
+    const age = el('div', 'fut-sp-num');
+    age.append(
+      el('span', r.ageMinutes > 360 ? 'old' : r.ageMinutes > 60 ? 'warm' : 'fresh', r.ageMinutes < 60 ? `${r.ageMinutes}m` : `${Math.floor(r.ageMinutes / 60)}h`),
+      el('small', e.activity === 0 ? 'bad' : e.activity < 60 ? 'warm' : '', e.activity === 0 ? t('msg.spy.active') : e.activity >= 60 ? '>60m' : `${e.activity}m`),
+    );
+    age.title = new Date(e.at).toLocaleString(locale);
+
+    const loot = el('div', 'fut-sp-num');
+    loot.append(el('b', '', fmt(r.lootMsu)), el('small', '', `${fmt(e.res.metal * e.loot)} · ${fmt(e.res.crystal * e.loot)} · ${fmt(e.res.deuterium * e.loot)}`));
+    loot.title = `${Math.round(e.loot * 100)}% · ${r.lootRes.toLocaleString(locale)}`;
+
+    const cargo = el('div', 'fut-sp-num', r.ships ? `${r.ships.toLocaleString(locale)}×` : '0');
+    cargo.title = shipName(view.ship, ships, t);
+    const def = el('div', `fut-sp-num${defended(r) ? ' warm' : ''}`, e.defValue < 0 || e.fleetValue < 0 ? '?' : defended(r) ? fmt(Math.max(0, e.defValue) + Math.max(0, e.fleetValue)) : '0');
+    def.title = `${t('msg.spy.fleet')} ${e.fleetValue < 0 ? '?' : fmt(e.fleetValue)} · ${t('msg.spy.def')} ${e.defValue < 0 ? '?' : fmt(e.defValue)}`;
+
+    const rate = el('div', 'fut-sp-num');
+    rate.append(el('b', 'rate', r.msuPerHour !== null ? `${fmt(r.msuPerHour)}/h` : '—'), el('small', '', r.flight !== null ? duration(r.flight) : '—'));
+    if (r.base) rate.title = t('spy.from', { name: r.base.name, coords: r.base.coords });
+
+    const acts = el('div', 'fut-sp-acts');
+    if (r.base) {
+      const base = r.base;
+      acts.append(gameButton(gameIcon('attack'), t('spy.attackHint', { name: base.name }), () => {
+        doc.location.assign(`/game/index.php?page=ingame&component=fleetdispatch&cp=${base.id}&galaxy=${g}&system=${s}&position=${p}&type=${e.moon ? 3 : 1}&mission=1`);
+      }));
+    }
+    if (e.apiKey) {
+      const key = e.apiKey;
+      const open = (url: string) => doc.defaultView?.open(url, '_blank', 'noopener');
+      const prefill = () => simPrefill(spy.server, r.base ? { coords: r.base.coords, researches: spy.researches, classId: spy.classId } : null, e.coords);
+      acts.append(
+        gameButton(gameIcon('speed'), t('spy.simGame'), () => open(gameSimLink(key))),
+        gameButton(el('span', 'fut-sp-tool', 'OS'), t('spy.simOsims'), () => open(osimsLink(key, prefill()))),
+        gameButton(el('span', 'fut-sp-tool', 'OT'), t('spy.simOgameTools'), () => open(ogameToolsSimLink(key, spy.lang, prefill()))),
+      );
+    }
+    acts.append(gameButton(icon(doc, 'close', 12), t('spy.remove'), () => {
+      const b = store.get<SpyBoard>(SPY_BOARD_KEY, {});
+      delete b[e.key];
+      store.set(SPY_BOARD_KEY, b);
+      mountSpyPanel(o);
+    }, 'fut-sp-del'));
+
+    row.append(who, age, loot, cargo, def, rate, acts);
+    list.append(row);
+  }
+  panel.append(list, el('p', 'fut-sp-note', t('spy.hint')));
+  return panel;
 }
