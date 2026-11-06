@@ -107,10 +107,13 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     scritte sul markup noto di OGame (`tr.eventFleet[data-arrival-time]`, `td.arrivalTime`) senza flotte
     in volo da guardare.
 
-13. **Classifica** (2026-11-06, `src/modules/highscore`, `src/data/highscore.ts`): sotto ogni punteggio la
-    distanza da te; in classifica generale i giorni per raggiungere chi è davanti (tuo ritmo a 7 giorni dallo
-    storico, meno il loro se sono rivali); stella per seguire come rivale. Solo DOM e dati salvati.
-    **Nota dev**: dopo un cambio di ramo che ricrea `dist/` va riavviato `npm run dev` (il watcher perde la cartella).
+13. **Classifica** (2026-11-06, `src/modules/highscore`, `src/data/highscore.ts`, `src/data/highscore-api.ts`):
+    sotto ogni punteggio i punti fatti da mezzanotte (verde su, rosso giù). Base = prima lettura del giorno di
+    `/api/highscore.xml` (user-view all'apertura della Classifica, max 1/ora per categoria, senza cookie), o
+    l'ultima di ieri se presa dalle 23:00. Nicola non vuole servizi di altri (ostats non segue s808; PTRE, usato
+    da OGLight, ha la foto esatta delle 00:00): idea per dopo, un servizio nostro (cron orario su highscore.xml,
+    tabella, endpoint con CORS) su Proxmox o Supabase. In generale anche i giorni per raggiungere chi è davanti
+    e la stella rivale. **Nota dev**: dopo un cambio di ramo che ricrea `dist/` va riavviato `npm run dev`.
 
 ## Come si prova senza il gioco
 

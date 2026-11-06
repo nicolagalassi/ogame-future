@@ -1,16 +1,20 @@
 /**
- * Highscore page (players): under each score the gap to the player, on the total points the days
- * needed to catch those ahead at the current pace, and a star to follow someone as a rival.
+ * Highscore page (players): under each score the points made since midnight (green up, red
+ * down), on the total points the days needed to catch those ahead at the current pace, and a star
+ * to follow someone as a rival.
  *
- * COMPLIANCE: reads the page the player opened and Future's stored data (score, history, rivals);
- * no network call (§4). The star only edits Future's own list.
+ * COMPLIANCE: reads the page the player opened, Future's stored data and the public highscore
+ * (data/highscore-api: 'user-view', at most once an hour per category, no cookies). The star only
+ * edits Future's own list.
  */
 import { icon } from '../../core/icons';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
 import { daysToCatch, readHighscore } from '../../data/highscore';
+import { API_TYPES, dailyBase, type DailyBase } from '../../data/highscore-api';
+import type { NetworkGuard } from '../../core/guard';
 import { SCORE_KEY, type Score } from '../../data/score';
-import { changeOver, HISTORY_KEY, type History } from '../../engines/history';
+import { changeOver, dayKey, HISTORY_KEY, type History } from '../../engines/history';
 import { pointsPerDay, RIVAL_POINTS_KEY, RIVALS_KEY, toggleRival, type Rival, type RivalPoints } from '../../engines/rivals';
 
 type T = (key: string, vars?: Record<string, string | number>) => string;
@@ -20,13 +24,19 @@ export interface HighscoreOptions {
   store: Store;
   locale: string;
   t: T;
+  guard?: NetworkGuard;
+  now?: () => number;
 }
+
+/** The day's base for the category on screen, once loaded (null = none yet / not available). */
+let daily: { type: number; base: DailyBase | null } | null = null;
 
 export const isHighscorePage = (doc: Document) => new URL(doc.location?.href ?? 'http://x/').searchParams.get('component') === 'highscore';
 
 const CSS = `
 #ranks .fut-hs-gap { display: block; font-size: 10px; line-height: 1.3; }
-#ranks .fut-hs-gap.ahead { color: #7BC47F; } #ranks .fut-hs-gap.behind { color: #D86A6A; }
+#ranks .fut-hs-gap.up { color: #7BC47F; } #ranks .fut-hs-gap.down { color: #D86A6A; } #ranks .fut-hs-gap.flat { color: #6A7682; }
+.fut-hs-note { margin: 4px 0 6px; color: #848484; font: 11px Verdana, Arial, sans-serif; }
 #ranks .fut-hs-eta { display: block; font-size: 10px; color: #6F9FC8; }
 #ranks .fut-hs-star { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-left: 4px; padding: 0;
   border: 1px solid #2E4356; border-radius: 3px; background: #111A21; color: #848484; cursor: pointer; vertical-align: middle; }
@@ -47,27 +57,52 @@ export function decorateHighscore(o: HighscoreOptions): void {
   // My score in this category: my own row when on the page, else (total points only) the stored one.
   const mine = hs.rows.find((r) => r.mine)?.score ?? (total ? store.get<Score | null>(SCORE_KEY, null)?.points : undefined);
   const myPace = total ? changeOver(store.get<History>(HISTORY_KEY, []), 7)?.perDay ?? 0 : 0;
+  const now = o.now?.() ?? Date.now();
+  const type = API_TYPES[hs.category];
+  const loaded = daily && daily.type === type ? daily.base : null;
+  // Only a base taken today counts (the file may still be yesterday's just after midnight).
+  const today = loaded && loaded.day === dayKey(now) ? loaded : null;
+  const since = today ? new Date(today.base.at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) : '';
+  const table = doc.getElementById('ranks');
+  let note = doc.querySelector<HTMLElement>('.fut-hs-note');
+  if (type !== undefined && table) {
+    if (!note) {
+      note = doc.createElement('p');
+      note.className = 'fut-hs-note';
+    }
+    note.textContent = today ? t('hs.note', { time: since }) : t('hs.noteWaiting');
+    if (note.nextElementSibling !== table) table.before(note);
+  } else note?.remove();
+  if (type !== undefined && o.guard && (!daily || daily.type !== type)) {
+    daily = { type, base: null };
+    void dailyBase({ guard: o.guard, store, origin: doc.location.origin, type, now })
+      .then((b) => { if (daily?.type === type) daily = { type, base: b }; })
+      .catch(() => {})
+      .finally(() => decorateHighscore(o));
+  }
 
   for (const r of hs.rows) {
     r.row.querySelectorAll('.fut-hs-gap, .fut-hs-eta, .fut-hs-star').forEach((n) => n.remove());
     r.row.classList.toggle('fut-hs-rival', rivalIds.has(r.playerId));
     const scoreCell = r.row.querySelector('td.score');
-    if (scoreCell && mine !== undefined && !r.mine) {
-      const gap = r.score - mine;
+    // Points made since midnight: score on the page now − score at the day's base.
+    const base = today?.base.scores[String(r.playerId)];
+    if (scoreCell && base !== undefined) {
+      const made = r.score - base;
       const g = doc.createElement('span');
-      g.className = `fut-hs-gap ${gap > 0 ? 'ahead' : 'behind'}`;
-      g.textContent = gap > 0 ? `+${fmt(gap)}` : `−${fmt(-gap)}`;
-      g.title = t(gap > 0 ? 'hs.ahead' : 'hs.behind', { n: Math.abs(gap).toLocaleString(locale) });
+      g.className = `fut-hs-gap ${made > 0 ? 'up' : made < 0 ? 'down' : 'flat'}`;
+      g.textContent = made > 0 ? `+${fmt(made)}` : made < 0 ? `−${fmt(-made)}` : '0';
+      g.title = t('hs.today', { n: made.toLocaleString(locale), time: since });
       scoreCell.append(g);
-      if (total && gap > 0 && myPace > 0) {
-        const theirs = rivalIds.has(r.playerId) ? pointsPerDay(book, r.playerId, 7) ?? 0 : 0;
-        const days = daysToCatch(gap, myPace, theirs);
-        const e = doc.createElement('span');
-        e.className = 'fut-hs-eta';
-        e.textContent = days === null ? t('hs.never') : days < 1 ? t('hs.today') : t('hs.days', { n: Math.ceil(days).toLocaleString(locale) });
-        e.title = t(theirs ? 'hs.etaBoth' : 'hs.etaMine', { mine: fmt(myPace), theirs: fmt(theirs) });
-        scoreCell.append(e);
-      }
+    }
+    if (scoreCell && mine !== undefined && !r.mine && total && myPace > 0 && r.score > mine) {
+      const theirs = rivalIds.has(r.playerId) ? pointsPerDay(book, r.playerId, 7) ?? 0 : 0;
+      const days = daysToCatch(r.score - mine, myPace, theirs);
+      const e = doc.createElement('span');
+      e.className = 'fut-hs-eta';
+      e.textContent = days === null ? t('hs.never') : days < 1 ? t('hs.passToday') : t('hs.days', { n: Math.ceil(days).toLocaleString(locale) });
+      e.title = t(theirs ? 'hs.etaBoth' : 'hs.etaMine', { mine: fmt(myPace), theirs: fmt(theirs) });
+      scoreCell.append(e);
     }
     const nameHolder = r.row.querySelector('.highscoreNameHolder');
     if (nameHolder && !r.mine) {

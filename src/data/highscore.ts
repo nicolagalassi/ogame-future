@@ -22,7 +22,8 @@ const int = (text: string | null | undefined) => Number((text ?? '').replace(/[^
 export function readHighscore(doc: Document): Highscore | null {
   const table = doc.getElementById('ranks');
   if (!table || !doc.querySelector('#player.active')) return null;
-  const category = doc.querySelector('#categoryButtons a.active, a.stat_filter.active')?.id ?? '';
+  // Category buttons (points, economy, …) are the .stat_filter ones; #categoryButtons holds player/alliance.
+  const category = doc.querySelector('a.stat_filter.active')?.id ?? '';
   const rows: HighscoreRow[] = [];
   for (const row of table.querySelectorAll<HTMLElement>('tbody tr[id^="position"]')) {
     const playerId = int(row.id);
@@ -32,7 +33,8 @@ export function readHighscore(doc: Document): Highscore | null {
       playerId,
       rank: int(row.querySelector('td.position')?.textContent),
       name: row.querySelector('.playername')?.textContent?.trim() ?? '',
-      score: int(row.querySelector('td.score')?.textContent),
+      // The cell's own text only: Future adds its figures inside the same cell.
+      score: int([...(row.querySelector('td.score')?.childNodes ?? [])].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('')),
       mine: row.classList.contains('myrank'),
     });
   }

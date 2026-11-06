@@ -250,7 +250,7 @@ async function bootstrap(): Promise<void> {
   watchEventList(reminders);
 
   // Highscore: gap to the player, days to catch up, rival star.
-  if (isHighscorePage(document)) watchHighscore({ doc: document, store, locale, t });
+  if (isHighscorePage(document)) watchHighscore({ doc: document, store, locale, t, guard });
 
   // Inbox: a summary on each report; expedition reports go into the journal.
   if (isMessagesPage(document))
