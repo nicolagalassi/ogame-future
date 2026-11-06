@@ -2,7 +2,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   EMPTY_RESERVE,
-  copyProfileToAll,
+  activeProfile,
+  copySections,
+  sameSection,
+  sectionEmpty,
+  settingsFrom,
   parseAmount,
   profileFor,
   resolveTarget,
@@ -48,13 +52,44 @@ describe('fleet engine', () => {
     expect(resolveTarget({ ...save, galaxy: 3, system: 7 }, { galaxy: 5, system: 185 })).toMatchObject({ galaxy: 3, system: 7 });
   });
 
-  it('copies one profile to every body as independent copies', () => {
-    const p: FleetProfile = { reserve: reserve({ '203': 10 }), save: null };
-    const out = copyProfileToAll({ '1': p }, 1, [1, 2, 3]);
-    expect(Object.keys(out)).toEqual(['1', '2', '3']);
+  it('copies only the chosen rules onto the chosen bodies, as independent copies', () => {
+    const save = { galaxy: null, system: null, position: 16, type: 2 as const, mission: 8, speed: 10 };
+    const src: FleetProfile = { reserve: reserve({ '203': 10 }, { metal: 5, crystal: 0, deuterium: 0 }), gate: { '214': 1 }, save };
+    const other: FleetProfile = { reserve: reserve({ '202': 3 }, { metal: 9, crystal: 9, deuterium: 9 }), gate: {}, save: null };
+    const out = copySections({ '1': src, '2': other, '3': other }, 1, [2], ['ships', 'fleetsave']);
+    expect(out['2']!.reserve).toEqual(reserve({ '203': 10 }, { metal: 9, crystal: 9, deuterium: 9 }));
+    expect(out['2']!.save).toEqual(save);
+    expect(out['2']!.gate).toEqual({});
+    expect(out['3']).toBe(other);
     out['2']!.reserve.ships['203'] = 99;
-    expect(out['3']!.reserve.ships['203']).toBe(10);
+    expect(src.reserve.ships['203']).toBe(10);
     expect(profileFor({}, 7).save).toBeNull();
+  });
+
+  it('tells where else the same rule is set', () => {
+    const a: FleetProfile = { reserve: reserve({ '203': 10, '202': 0 }), save: null };
+    const b: FleetProfile = { reserve: reserve({ '203': 10 }, { metal: 1, crystal: 0, deuterium: 0 }), save: null };
+    const profiles = { '1': a, '2': b, '3': { reserve: reserve({}), save: null } };
+    expect(sameSection(profiles, 1, [1, 2, 3], 'ships')).toEqual([2]);
+    expect(sameSection(profiles, 1, [1, 2, 3], 'resources')).toEqual([3]);
+    expect(sectionEmpty(profileFor(profiles, 3), 'ships')).toBe(true);
+    expect(sectionEmpty(profileFor(profiles, 1), 'fleetsave')).toBe(true);
+  });
+
+  it('keeps old saves working: the gate keeps the ships rule until it has its own', () => {
+    expect(profileFor({ '1': { reserve: reserve({ '203': 4 }), save: null } }, 1).gate).toEqual({ '203': 4 });
+    expect(profileFor({ '1': { reserve: reserve({ '203': 4 }), gate: {}, save: null } }, 1).gate).toEqual({});
+    expect(settingsFrom({ reserveOn: false } as never)).toMatchObject({ shipsOn: false, resourcesOn: false, gateOn: true });
+    expect(settingsFrom({ reserveOn: false, shipsOn: true } as never).shipsOn).toBe(true);
+  });
+
+  it('switches ships and resources apart; the fleetsave ignores the switches', () => {
+    const p = profileFor({ '1': { reserve: reserve({ '203': 4 }, { metal: 7, crystal: 0, deuterium: 0 }), saveReserve: reserve({ '202': 1 }), save: null } }, 1);
+    const onlyRes = activeProfile(p, { shipsOn: false, resourcesOn: true, gateOn: false });
+    expect(onlyRes.reserve).toEqual(reserve({}, { metal: 7, crystal: 0, deuterium: 0 }));
+    expect(onlyRes.gate).toEqual({});
+    expect(onlyRes.saveReserve).toEqual(reserve({ '202': 1 }));
+    expect(activeProfile(p, { shipsOn: true, resourcesOn: false, gateOn: true }).reserve).toEqual(reserve({ '203': 4 }));
   });
 });
 
@@ -364,7 +399,7 @@ describe('shortcuts, last fleet and jump gate', () => {
     expect(snapshotFleet(fd)).toMatchObject({ ships: { '203': 10 }, mission: 3, speed: 50 });
   });
 
-  it('keeps reserve 1 in the jump gate dialog', async () => {
+  it('keeps the gate rule in the jump gate dialog', async () => {
     const { applyJumpgateReserve } = await import('../src/modules/fleet/jumpgate');
     document.body.innerHTML = `<div id="jumpgate"><form id="jumpgateForm"><table>
       <tr><td><a></a><span class="quantity"></span></td></tr><tr class="ship_input_row"><td><input id="ship_203" rel="100" value="100"></td></tr>
@@ -378,6 +413,10 @@ describe('shortcuts, last fleet and jump gate', () => {
     expect(input.getAttribute('rel')).toBe('70');
     expect(input.value).toBe('70');
     expect(document.getElementById('sendall')!.getAttribute('onclick')).toBe('setMaxIntInput("#jumpgateForm", {"203":70})');
+    // The switch in the dialog turns the gate rule off and gives the ships back.
+    (document.querySelector('.fut-jgbar button') as HTMLButtonElement).click();
+    expect(input.getAttribute('rel')).toBe('100');
+    expect((store.get('fleet.settings') as { gateOn: boolean }).gateOn).toBe(false);
   });
 });
 
@@ -390,5 +429,37 @@ describe('whole numbers in the game form', () => {
     expect(d.metal).toBe(2821980);
     const c = cargoLoad({ metal: 10.7, crystal: 3.2, deuterium: 9.9 }, none, 0, 100);
     expect([c.metal, c.crystal, c.deuterium].every(Number.isInteger)).toBe(true);
+  });
+});
+
+describe('rules window', () => {
+  it('shows where each rule stands and copies only the chosen rules onto the chosen bodies', async () => {
+    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    const doc = fleetPage();
+    const store = new Store(new MemoryStore(), 'x');
+    const same = { reserve: reserve({ '203': 10 }), save: null };
+    store.set('fleet.profiles', { '1': same, '2': same, '3': { reserve: reserve({}), save: null } });
+    store.set('fleet.settings', { resourcesOn: false });
+    const bodies = [
+      { planetId: 1, moonId: 11, name: 'Casa', coords: '5:185:8' },
+      { planetId: 2, moonId: null, name: 'Colonia', coords: '5:186:8' },
+      { planetId: 3, moonId: null, name: 'Terza', coords: '5:187:8' },
+    ];
+    renderFleetTools({ doc, store, bodyId: 1, bodies, t: (k, v) => (v ? `${k}:${Object.values(v).join('|')}` : k), locale: 'it', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch' });
+    (doc.querySelector('.fut-fside button:last-child') as HTMLButtonElement).click();
+    const root = doc.getElementById('fut-fleet-modal')!.shadowRoot!;
+    const badges = [...root.querySelectorAll('.fut-fbadge')].map((b) => b.textContent);
+    expect(badges[0]).toBe('fleet.rule.on · fleet.rule.alsoOn:Colonia');
+    expect(badges[1]).toBe('fleet.rule.empty');
+    // Copy the ships rule onto Terza only.
+    const copy = root.querySelector('.fut-fcopy')!;
+    const checks = [...copy.querySelectorAll<HTMLInputElement>('input[type=checkbox]')];
+    const labels = [...copy.querySelectorAll('.fut-fcheck')].map((l) => l.textContent);
+    checks.forEach((c, i) => (c.checked = labels[i] === 'fleet.rule.ships' || labels[i]!.startsWith('Terza')));
+    (copy.querySelector('.fut-factions:last-child button') as HTMLButtonElement).click();
+    const profiles = store.get<Record<string, FleetProfile>>('fleet.profiles', {});
+    expect(profiles['3']!.reserve.ships).toEqual({ '203': 10 });
+    expect(profiles['11']).toBeUndefined();
+    expect(root.querySelector('.fut-fbadge')!.textContent).toBe('fleet.rule.on · fleet.rule.alsoOn:Colonia, Terza');
   });
 });

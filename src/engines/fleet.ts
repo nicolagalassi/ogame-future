@@ -24,9 +24,14 @@ export interface FleetsaveProfile {
 }
 
 export interface FleetProfile {
-  /** Reserve 1: kept by transports, deployments, expeditions, "all ships". */
+  /**
+   * Kept by transports, deployments, "all ships", "last fleet" and planner deliveries.
+   * Ships and resources are two separate rules, each with its own switch (FleetSettings).
+   */
   reserve: Reserve;
-  /** Reserve 2: kept by the fleetsave only (absent = keep nothing back). */
+  /** Ships kept home by the jump gate dialog (moons). Absent in old saves: see profileFor. */
+  gate?: Record<string, number>;
+  /** Kept by the fleetsave only, ships and resources together; it ignores the switches. */
   saveReserve?: Reserve;
   save: FleetsaveProfile | null;
 }
@@ -34,8 +39,83 @@ export interface FleetProfile {
 export const EMPTY_RESERVE: Reserve = { ships: {}, resources: { metal: 0, crystal: 0, deuterium: 0 } };
 export const PROFILES_KEY = 'fleet.profiles';
 
-export function profileFor(profiles: Record<string, FleetProfile>, bodyId: number): FleetProfile {
-  return profiles[String(bodyId)] ?? { reserve: structuredClone(EMPTY_RESERVE), save: null };
+/**
+ * The stored profile of a body, always complete. Before the jump gate had its own rule it
+ * kept the ships of the main reserve: a profile saved back then keeps doing so.
+ */
+export function profileFor(profiles: Record<string, FleetProfile>, bodyId: number): Required<FleetProfile> {
+  const p = profiles[String(bodyId)] ?? { reserve: structuredClone(EMPTY_RESERVE), save: null };
+  return { ...p, gate: p.gate ?? { ...p.reserve.ships }, saveReserve: p.saveReserve ?? structuredClone(EMPTY_RESERVE) };
+}
+
+/** What the switches leave of a profile: an off rule keeps nothing back. The fleetsave ignores them. */
+export function activeProfile(p: Required<FleetProfile>, s: Pick<FleetSettings, 'shipsOn' | 'resourcesOn' | 'gateOn'>): Required<FleetProfile> {
+  return {
+    ...p,
+    reserve: { ships: s.shipsOn ? p.reserve.ships : {}, resources: s.resourcesOn ? p.reserve.resources : { ...EMPTY_RESERVE.resources } },
+    gate: s.gateOn ? p.gate : {},
+  };
+}
+
+/** The parts of a profile that are shown, switched and copied one by one. */
+export type ReserveSection = 'ships' | 'resources' | 'gate' | 'fleetsave';
+export const RESERVE_SECTIONS: ReserveSection[] = ['ships', 'resources', 'gate', 'fleetsave'];
+
+const positive = (ships: Record<string, number>) => Object.fromEntries(Object.entries(ships).filter(([, n]) => n > 0));
+
+function sectionValue(p: Required<FleetProfile>, section: ReserveSection): unknown {
+  switch (section) {
+    case 'ships':
+      return positive(p.reserve.ships);
+    case 'resources':
+      return p.reserve.resources;
+    case 'gate':
+      return positive(p.gate);
+    case 'fleetsave':
+      return { save: p.save, ships: positive(p.saveReserve.ships), resources: p.saveReserve.resources };
+  }
+}
+
+/** JSON with sorted keys, so two equal rules compare equal whatever order they were typed in. */
+function canonical(v: unknown): string {
+  if (v === null || typeof v !== 'object') return JSON.stringify(v ?? null);
+  return `{${Object.keys(v)
+    .sort()
+    .map((k) => `${JSON.stringify(k)}:${canonical((v as Record<string, unknown>)[k])}`)
+    .join(',')}}`;
+}
+
+/** True when the rule keeps nothing back (fleetsave: no target and no reserve). */
+export function sectionEmpty(p: Required<FleetProfile>, section: ReserveSection): boolean {
+  const v = sectionValue(p, section) as Record<string, unknown>;
+  if (section === 'resources') return !Object.values(v).some(Boolean);
+  if (section === 'fleetsave') return v.save === null && canonical({ ships: v.ships, resources: v.resources }) === canonical({ ships: {}, resources: EMPTY_RESERVE.resources });
+  return Object.keys(v).length === 0;
+}
+
+/** The other bodies whose rule is the same as this body's. */
+export function sameSection(profiles: Record<string, FleetProfile>, fromId: number, ids: number[], section: ReserveSection): number[] {
+  const mine = canonical(sectionValue(profileFor(profiles, fromId), section));
+  return ids.filter((id) => id !== fromId && canonical(sectionValue(profileFor(profiles, id), section)) === mine);
+}
+
+/** Copies the chosen rules of one body onto the chosen bodies, leaving their other rules alone. */
+export function copySections(profiles: Record<string, FleetProfile>, fromId: number, ids: number[], sections: ReserveSection[]): Record<string, FleetProfile> {
+  const src = structuredClone(profileFor(profiles, fromId));
+  const out = { ...profiles };
+  for (const id of ids) {
+    if (id === fromId) continue;
+    const p = structuredClone(profileFor(profiles, id));
+    if (sections.includes('ships')) p.reserve.ships = { ...src.reserve.ships };
+    if (sections.includes('resources')) p.reserve.resources = { ...src.reserve.resources };
+    if (sections.includes('gate')) p.gate = { ...src.gate };
+    if (sections.includes('fleetsave')) {
+      p.save = structuredClone(src.save);
+      p.saveReserve = structuredClone(src.saveReserve);
+    }
+    out[String(id)] = p;
+  }
+  return out;
 }
 
 /** Ships to select: everything on the planet minus the reserve, never below 0. */
@@ -83,14 +163,6 @@ export function parseAmount(text: string): number {
   return Number.isFinite(value) ? Math.floor(value) : 0;
 }
 
-/** Copies one planet's profile to every other body id. */
-export function copyProfileToAll(profiles: Record<string, FleetProfile>, fromId: number, ids: number[]): Record<string, FleetProfile> {
-  const src = profileFor(profiles, fromId);
-  const out = { ...profiles };
-  for (const id of ids) out[String(id)] = structuredClone(src);
-  return out;
-}
-
 /* ------------------------------------------------------------------ */
 /* Global fleet settings (one set for the whole account).              */
 /* ------------------------------------------------------------------ */
@@ -113,8 +185,10 @@ export interface FleetSettings {
   expeditionExtras: boolean;
   /** After a send from a Future button, open the next planet or moon ready with the same action. */
   repeat: boolean;
-  /** Reserves (1 and 2) on or off, without forgetting them. */
-  reserveOn: boolean;
+  /** Each rule on or off, without forgetting it: ships, resources, jump gate. Not the fleetsave's. */
+  shipsOn: boolean;
+  resourcesOn: boolean;
+  gateOn: boolean;
   /** Food stays home in every fleet, also with the game's own buttons (OGLight precedent). */
   ignoreFood: boolean;
 }
@@ -130,9 +204,18 @@ export const DEFAULT_SETTINGS: FleetSettings = {
   expeditionValue: '',
   expeditionExtras: true,
   repeat: false,
-  reserveOn: true,
+  shipsOn: true,
+  resourcesOn: true,
+  gateOn: true,
   ignoreFood: false,
 };
+
+/** Stored settings with the defaults; the old single "reserves" switch becomes the ships and resources ones. */
+export function settingsFrom(stored: Partial<FleetSettings> & { reserveOn?: boolean }): FleetSettings {
+  const { reserveOn, ...rest } = stored;
+  const legacy = reserveOn === undefined ? {} : { shipsOn: reserveOn, resourcesOn: reserveOn };
+  return { ...DEFAULT_SETTINGS, ...legacy, ...rest };
+}
 
 /** Resources still to bring to a planned body (planner "Porta risorse"). */
 export interface Delivery {

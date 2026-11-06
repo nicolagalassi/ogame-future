@@ -8,7 +8,9 @@
  * - Spedizione: best ship and expedition cargo, position 16 of this system.
  * - Fleetsave: the per-body profile (empty galaxy/system = this body's, as in PrOGect).
  * - Tutte − riserva: every ship minus the reserve.
- * Reserves (ships and resources to keep) are per body and copied planet→planets, moon→moons.
+ * Rules per body, each with its own global switch: ships to keep, resources to keep, ships
+ * the jump gate keeps (moons). The fleetsave has its own ships + resources and ignores the
+ * switches. Any rule can be copied onto any chosen bodies; each shows where else it is set.
  * "Ripeti" (global): after the send, the next planet or moon opens already prepared.
  *
  * COMPLIANCE: one click prepares one fleet; the player always presses the game's own
@@ -23,9 +25,12 @@ import type { Store } from '../../core/storage';
 import {
   CARGO_SHIPS,
   cargoLoad,
-  copyProfileToAll,
-  DEFAULT_SETTINGS,
-  EMPTY_RESERVE,
+  activeProfile,
+  copySections,
+  RESERVE_SECTIONS,
+  sameSection,
+  sectionEmpty,
+  settingsFrom,
   parseAmount,
   PROFILES_KEY,
   profileFor,
@@ -36,6 +41,7 @@ import {
   type LastFleet,
   type FleetProfile,
   type Reserve,
+  type ReserveSection,
   type FleetSettings,
   type FleetsaveProfile,
 } from '../../engines/fleet';
@@ -122,7 +128,7 @@ export function loadProfiles(store: Store): Record<string, FleetProfile> {
 }
 
 export function loadSettings(store: Store): FleetSettings {
-  return { ...DEFAULT_SETTINGS, ...store.get<Partial<FleetSettings>>(SETTINGS_KEY, {}) };
+  return settingsFrom(store.get<Partial<FleetSettings>>(SETTINGS_KEY, {}));
 }
 
 function button(doc: Document, text: string, onClick: () => void, cls = '', title = ''): HTMLButtonElement {
@@ -219,40 +225,104 @@ function bodyLabel(o: FleetOptions, id: number): string {
 /* Panels                                                              */
 /* ------------------------------------------------------------------ */
 
-/** Ships and resources to keep on the body, as a block of fields. */
-function reserveFields(o: FleetOptions, reserve: Reserve, title: string, hint: string): { el: HTMLElement; read: () => Reserve } {
-  const { doc, t } = o;
-  const box = el(doc, 'div', 'fut-freserve');
-  box.append(el(doc, 'h5', '', title), el(doc, 'p', 'fut-fnote', hint));
-  const shipGrid = el(doc, 'div', 'fut-fgrid');
-  const shipInputs: [string, HTMLInputElement][] = [];
-  // Every ship type, not only those on this body: the reserve is copied to other bodies too.
-  for (const slot of readShipSlots(doc)) {
-    const [wrap, input] = numberField(doc, slot.name, reserve.ships[slot.id] ?? null, '0');
-    shipGrid.append(wrap);
-    shipInputs.push([slot.id, input]);
+/** One number per ship type, for a ships rule. */
+function shipFields(o: FleetOptions, ships: Record<string, number>): { el: HTMLElement; read: () => Record<string, number> } {
+  const grid = el(o.doc, 'div', 'fut-fgrid');
+  const inputs: [string, HTMLInputElement][] = [];
+  // Every ship type, not only those on this body: the rule can be copied to other bodies.
+  for (const slot of readShipSlots(o.doc)) {
+    const [wrap, input] = numberField(o.doc, slot.name, ships[slot.id] ?? null, '0');
+    grid.append(wrap);
+    inputs.push([slot.id, input]);
   }
-  if (!shipInputs.length) shipGrid.append(el(doc, 'span', 'fut-fnote', t('fleet.noShips')));
-  const resGrid = el(doc, 'div', 'fut-fgrid');
-  const resInputs = (['metal', 'crystal', 'deuterium'] as const).map((k) => {
-    const [wrap, input] = numberField(doc, t(`res.${k}`), reserve.resources[k] || null, '0');
-    resGrid.append(wrap);
-    return [k, input] as const;
-  });
-  box.append(el(doc, 'h6', '', t('fleet.reserveShips')), shipGrid, el(doc, 'h6', '', t('fleet.reserveRes')), resGrid);
+  if (!inputs.length) grid.append(el(o.doc, 'span', 'fut-fnote', o.t('fleet.noShips')));
   return {
-    el: box,
+    el: grid,
     read: () => {
-      const ships: Record<string, number> = {};
-      for (const [id, input] of shipInputs) {
+      const out: Record<string, number> = {};
+      for (const [id, input] of inputs) {
         const n = parseAmount(input.value);
-        if (n > 0) ships[id] = n;
+        if (n > 0) out[id] = n;
       }
-      const resources = { metal: 0, crystal: 0, deuterium: 0 };
-      for (const [k, input] of resInputs) resources[k] = parseAmount(input.value);
-      return { ships, resources };
+      return out;
     },
   };
+}
+
+/** Metal, crystal, deuterium to keep. */
+function resourceFields(o: FleetOptions, res: Reserve['resources']): { el: HTMLElement; read: () => Reserve['resources'] } {
+  const grid = el(o.doc, 'div', 'fut-fgrid');
+  const inputs = (['metal', 'crystal', 'deuterium'] as const).map((k) => {
+    const [wrap, input] = numberField(o.doc, o.t(`res.${k}`), res[k] || null, '0');
+    grid.append(wrap);
+    return [k, input] as const;
+  });
+  return {
+    el: grid,
+    read: () => {
+      const out = { metal: 0, crystal: 0, deuterium: 0 };
+      for (const [k, input] of inputs) out[k] = parseAmount(input.value);
+      return out;
+    },
+  };
+}
+
+/** Short name of a body for the lists: "Colonia" or "Colonia ☾". */
+function shortName(o: FleetOptions, id: number): string {
+  const b = o.bodies.find((x) => x.planetId === id || x.moonId === id);
+  return b ? `${b.name}${b.moonId === id ? ' ☾' : ''}` : String(id);
+}
+
+const SWITCH: Partial<Record<ReserveSection, 'shipsOn' | 'resourcesOn' | 'gateOn'>> = { ships: 'shipsOn', resources: 'resourcesOn', gate: 'gateOn' };
+
+/**
+ * Where a rule stands: on or off (the fleetsave has no switch), and whether the same rule is
+ * set on other bodies too or only on this one.
+ */
+function ruleBadge(o: FleetOptions, section: ReserveSection): HTMLElement {
+  const { doc, t } = o;
+  const profiles = loadProfiles(o.store);
+  const settings = loadSettings(o.store);
+  const key = SWITCH[section];
+  const badge = el(doc, 'span', 'fut-fbadge');
+  if (sectionEmpty(profileFor(profiles, o.bodyId), section)) {
+    badge.classList.add('empty');
+    badge.textContent = t('fleet.rule.empty');
+    return badge;
+  }
+  const on = key ? settings[key] : true;
+  badge.classList.add(on ? 'on' : 'off');
+  const ids = o.bodies.flatMap((b) => [b.planetId, b.moonId]).filter((x): x is number => x !== null);
+  const same = sameSection(profiles, o.bodyId, ids, section);
+  const names = same.map((id) => shortName(o, id));
+  const where = same.length
+    ? t('fleet.rule.alsoOn', { list: names.slice(0, 3).join(', ') + (names.length > 3 ? ` +${names.length - 3}` : '') })
+    : t('fleet.rule.onlyHere');
+  badge.textContent = `${on ? t('fleet.rule.on') : t('fleet.rule.off')} · ${where}`;
+  badge.title = same.length ? `${t('fleet.rule.sameTitle')}\n${names.join('\n')}` : t('fleet.rule.onlyHereTitle');
+  return badge;
+}
+
+/** A box for one rule: title, where it stands, its switch (global), a hint and its fields. */
+function ruleBox(o: FleetOptions, section: ReserveSection, title: string, hint: string, fields: HTMLElement[], onSwitch: () => void): HTMLElement {
+  const { doc, t } = o;
+  const box = el(doc, 'div', 'fut-freserve');
+  const head = el(doc, 'div', 'fut-frulehead');
+  head.append(el(doc, 'h5', '', title), ruleBadge(o, section));
+  const key = SWITCH[section];
+  if (key) {
+    const [wrap, input] = checkField(doc, t('fleet.rule.switch'), loadSettings(o.store)[key]);
+    wrap.title = t('fleet.rule.switchHint');
+    input.addEventListener('change', () => {
+      o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: input.checked });
+      // Only the badge changes: the fields may hold edits not saved yet.
+      head.querySelector('.fut-fbadge')?.replaceWith(ruleBadge(o, section));
+      onSwitch();
+    });
+    head.append(wrap);
+  }
+  box.append(head, el(doc, 'p', 'fut-fnote', hint), ...fields);
+  return box;
 }
 
 function reserveEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLElement {
@@ -261,11 +331,18 @@ function reserveEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEle
   const moon = isMoon(o.bodies, o.bodyId);
   const panel = el(doc, 'div', 'fut-feditor');
   panel.append(el(doc, 'h4', '', t(moon ? 'fleet.editTitleMoon' : 'fleet.editTitlePlanet', { body: bodyLabel(o, o.bodyId) })));
+  const refresh = () => onSaved('');
 
-  // Reserve 1: Trasporto, Schiera, Su luna, Spedizione, Tutte. Reserve 2: Fleetsave only.
-  const r1 = reserveFields(o, profile.reserve, t('fleet.reserve1Title'), t('fleet.reserve1Hint'));
-  panel.append(r1.el);
-  panel.append(el(doc, 'h5', '', t('fleet.fleetsave')));
+  // Ships and resources are separate rules: either can be switched off alone.
+  const ships = shipFields(o, profile.reserve.ships);
+  panel.append(ruleBox(o, 'ships', t('fleet.rule.ships'), t('fleet.rule.shipsHint'), [ships.el], refresh));
+  const res = resourceFields(o, profile.reserve.resources);
+  panel.append(ruleBox(o, 'resources', t('fleet.rule.resources'), t('fleet.rule.resourcesHint'), [res.el], refresh));
+  // The jump gate only exists on moons.
+  const gate = moon ? shipFields(o, profile.gate) : null;
+  if (gate) panel.append(ruleBox(o, 'gate', t('fleet.rule.gate'), t('fleet.rule.gateHint'), [gate.el], refresh));
+
+  // Fleetsave: target plus its own ships and resources to keep; no switch, it ignores the others.
   const saveGrid = el(doc, 'div', 'fut-fgrid');
   const origin = originCoords(doc);
   const [gWrap, gIn] = numberField(doc, t('fleet.galaxy'), profile.save?.galaxy ?? null, origin ? String(origin.galaxy) : '');
@@ -285,10 +362,17 @@ function reserveEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEle
     String(profile.save?.speed ?? 10),
   );
   saveGrid.append(gWrap, sWrap, pWrap, typeWrap, misWrap, spdWrap);
-  panel.append(saveGrid);
-  panel.append(el(doc, 'p', 'fut-fnote', t('fleet.fleetsaveHint')));
-  const r2 = reserveFields(o, profile.saveReserve ?? EMPTY_RESERVE, t('fleet.reserve2Title'), t('fleet.reserve2Hint'));
-  panel.append(r2.el);
+  const saveShips = shipFields(o, profile.saveReserve.ships);
+  const saveRes = resourceFields(o, profile.saveReserve.resources);
+  panel.append(
+    ruleBox(o, 'fleetsave', t('fleet.fleetsave'), t('fleet.fleetsaveHint'), [
+      saveGrid,
+      el(doc, 'h6', '', t('fleet.rule.saveShips')),
+      saveShips.el,
+      el(doc, 'h6', '', t('fleet.rule.saveResources')),
+      saveRes.el,
+    ], refresh),
+  );
 
   const read = (): FleetProfile => {
     const position = parseAmount(pIn.value);
@@ -303,27 +387,92 @@ function reserveEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEle
             speed: Number(spdSel.value),
           }
         : null;
-    return { reserve: r1.read(), saveReserve: r2.read(), save };
+    return {
+      reserve: { ships: ships.read(), resources: res.read() },
+      gate: gate ? gate.read() : profile.gate,
+      saveReserve: { ships: saveShips.read(), resources: saveRes.read() },
+      save,
+    };
+  };
+  const store = () => {
+    const all = loadProfiles(o.store);
+    all[String(o.bodyId)] = read();
+    o.store.set(PROFILES_KEY, all);
+    return all;
   };
 
-  const same = sameTypeIds(o.bodies, o.bodyId);
+  const copyBox = copyPanel(o, moon, (sections, ids) => {
+    o.store.set(PROFILES_KEY, copySections(store(), o.bodyId, ids, sections));
+    onSaved(t('fleet.copied', { count: ids.length }));
+  });
+  copyBox.hidden = true;
   const actions = el(doc, 'div', 'fut-factions');
   actions.append(
     button(doc, t('fleet.save'), () => {
-      const all = loadProfiles(o.store);
-      all[String(o.bodyId)] = read();
-      o.store.set(PROFILES_KEY, all);
+      store();
       onSaved(t('fleet.saved'));
     }, 'primary'),
-    button(doc, t(moon ? 'fleet.copyMoons' : 'fleet.copyPlanets', { count: same.length }), () => {
-      const all = loadProfiles(o.store);
-      all[String(o.bodyId)] = read();
-      o.store.set(PROFILES_KEY, copyProfileToAll(all, o.bodyId, same));
-      onSaved(t('fleet.copied', { count: same.length }));
+    button(doc, t('fleet.copyTo'), () => {
+      copyBox.hidden = !copyBox.hidden;
     }),
   );
-  panel.append(actions);
+  panel.append(actions, copyBox);
   return panel;
+}
+
+/**
+ * "Copia su…": which rules, onto which bodies. Nothing is preselected; the quick buttons pick
+ * all planets or all moons. The other rules of the chosen bodies stay as they are.
+ */
+function copyPanel(o: FleetOptions, moon: boolean, onCopy: (sections: ReserveSection[], ids: number[]) => void): HTMLElement {
+  const { doc, t } = o;
+  const box = el(doc, 'div', 'fut-freserve fut-fcopy');
+  box.append(el(doc, 'h5', '', t('fleet.copyTitle')), el(doc, 'p', 'fut-fnote', t('fleet.copyHint')));
+  const secRow = el(doc, 'div', 'fut-fchecks');
+  const sections = RESERVE_SECTIONS.filter((s) => s !== 'gate' || moon).map((s) => {
+    const [wrap, input] = checkField(doc, t(s === 'fleetsave' ? 'fleet.fleetsave' : `fleet.rule.${s}`), true);
+    secRow.append(wrap);
+    return [s, input] as const;
+  });
+  box.append(el(doc, 'h6', '', t('fleet.copyWhat')), secRow);
+
+  const bodyRow = el(doc, 'div', 'fut-fchecks');
+  const targets: [number, boolean, HTMLInputElement][] = [];
+  for (const b of o.bodies) {
+    for (const [id, isMoonId] of [[b.planetId, false], [b.moonId, true]] as const) {
+      if (id === null || id === o.bodyId) continue;
+      const [wrap, input] = checkField(doc, `${shortName(o, id)} [${b.coords}]`, false);
+      bodyRow.append(wrap);
+      targets.push([id, isMoonId, input]);
+    }
+  }
+  const pick = (which: 'planets' | 'moons' | 'none') => {
+    for (const [, isMoonId, input] of targets) input.checked = which === 'moons' ? isMoonId : which === 'planets' ? !isMoonId : false;
+  };
+  const quick = el(doc, 'div', 'fut-factions');
+  quick.append(
+    button(doc, t('fleet.pickPlanets'), () => pick('planets')),
+    button(doc, t('fleet.pickMoons'), () => pick('moons')),
+    button(doc, t('fleet.pickNone'), () => pick('none')),
+  );
+  box.append(el(doc, 'h6', '', t('fleet.copyWhere')), quick, bodyRow);
+
+  const status = el(doc, 'span', 'fut-fnote');
+  const go = el(doc, 'div', 'fut-factions');
+  go.append(
+    button(doc, t('fleet.copyGo'), () => {
+      const chosen = sections.filter(([, i]) => i.checked).map(([s]) => s);
+      const ids = targets.filter(([, , i]) => i.checked).map(([id]) => id);
+      if (!chosen.length || !ids.length) {
+        status.textContent = t('fleet.copyNothing');
+        return;
+      }
+      onCopy(chosen, ids);
+    }, 'primary'),
+    status,
+  );
+  box.append(go);
+  return box;
 }
 
 function settingsEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLElement {
@@ -416,14 +565,20 @@ function settingsEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEl
 /* Bar                                                                 */
 /* ------------------------------------------------------------------ */
 
-function summary(o: FleetOptions, profile: FleetProfile): string {
-  const ships = Object.values(profile.reserve.ships).reduce((a, b) => a + b, 0);
-  const r = profile.reserve.resources;
+/** What the rules keep back here right now, rule by rule; switched-off rules are named as such. */
+function summary(o: FleetOptions, stored: Required<FleetProfile>, settings: FleetSettings): string {
+  const { t } = o;
   const fmt = (n: number) => n.toLocaleString(o.locale);
-  const parts = [];
-  if (ships) parts.push(o.t('fleet.summaryShips', { count: fmt(ships) }));
-  if (r.metal || r.crystal || r.deuterium) parts.push(`${fmt(r.metal)} / ${fmt(r.crystal)} / ${fmt(r.deuterium)}`);
-  return parts.length ? `${o.t('fleet.reserve')}: ${parts.join(' · ')}` : o.t('fleet.noReserve');
+  const parts: string[] = [];
+  const off: string[] = [];
+  const ships = Object.values(stored.reserve.ships).reduce((a, b) => a + b, 0);
+  if (ships) (settings.shipsOn ? parts.push(`${t('fleet.rule.ships')}: ${fmt(ships)}`) : off.push(t('fleet.rule.ships')));
+  const r = stored.reserve.resources;
+  if (r.metal || r.crystal || r.deuterium)
+    settings.resourcesOn ? parts.push(`${t('fleet.rule.resources')}: ${fmt(r.metal)} / ${fmt(r.crystal)} / ${fmt(r.deuterium)}`) : off.push(t('fleet.rule.resources'));
+  if (settings.ignoreFood) parts.push(t('fleet.foodShort'));
+  const text = parts.length ? `${t('fleet.reserve')}: ${parts.join(' · ')}` : t('fleet.noReserve');
+  return off.length ? `${text} · ${t('fleet.rule.offList', { list: off.join(', ') })}` : text;
 }
 
 function universeSpeed(doc: Document): number {
@@ -467,9 +622,15 @@ function openSettings(o: FleetOptions, tab: 'body' | 'general', onChange: () => 
   const body = el(doc, 'div', 'body');
   const show = (which: 'body' | 'general') => {
     tabs.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tab === which)));
+    // A message means something was saved or copied: redraw so every rule shows where it stands now.
     const saved = (msg: string) => {
-      status.textContent = msg;
       onChange();
+      if (msg && which === 'body') {
+        const top = backdrop.scrollTop;
+        show(which);
+        backdrop.scrollTop = top;
+      }
+      status.textContent = msg;
     };
     body.replaceChildren(which === 'body' ? reserveEditor(o, saved) : settingsEditor(o, saved));
   };
@@ -591,8 +752,8 @@ export function renderFleetTools(o: FleetOptions): void {
   const navigate = o.navigate ?? ((url: string) => doc.location.assign(url));
   const settings = loadSettings(o.store);
   const stored = profileFor(loadProfiles(o.store), o.bodyId);
-  // Reserves switched off: kept in the settings, not applied.
-  const profile: FleetProfile = settings.reserveOn ? stored : { ...stored, reserve: EMPTY_RESERVE, saveReserve: EMPTY_RESERVE };
+  // Switched-off rules are kept in the settings, not applied. The fleetsave's own reserve always is.
+  const profile = activeProfile(stored, settings);
   const redraw = () => renderFleetTools(o);
 
   const fleet1 = doc.getElementById('fleet1');
@@ -608,7 +769,7 @@ export function renderFleetTools(o: FleetOptions): void {
   state.o = o;
   pageState.set(doc, state);
 
-  const info = el(doc, 'span', 'fut-finfo', settings.reserveOn ? summary(o, profile) : t('fleet.reserveOff'));
+  const info = el(doc, 'span', 'fut-finfo', summary(o, stored, settings));
   const say = (text: string, err = false) => {
     info.textContent = text;
     info.classList.toggle('err', err);
@@ -748,10 +909,13 @@ export function renderFleetTools(o: FleetOptions): void {
     ]);
     const side = el(doc, 'div', 'fut-fside');
     side.append(
-      iconToggle(doc, 'reserve', `${t('fleet.reserveShort')}: ${settings.reserveOn ? t('fleet.on') : t('fleet.off')}. ${t('fleet.reserveToggleHint')}`, () => {
-        o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), reserveOn: !loadSettings(o.store).reserveOn });
-        redraw();
-      }, settings.reserveOn ? 'on' : ''),
+      ...(['shipsOn', 'resourcesOn', 'gateOn'] as const).map((key) => {
+        const name = key === 'shipsOn' ? 'ships' : key === 'resourcesOn' ? 'resources' : 'gate';
+        return iconToggle(doc, name, `${t(`fleet.rule.${name}`)}: ${settings[key] ? t('fleet.on') : t('fleet.off')}. ${t(`fleet.rule.${name}Hint`)}`, () => {
+          o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: !loadSettings(o.store)[key] });
+          redraw();
+        }, settings[key] ? 'on' : '');
+      }),
       iconToggle(doc, 'food', `${t('fleet.foodShort')}: ${settings.ignoreFood ? t('fleet.on') : t('fleet.off')}. ${t('fleet.foodHint')}`, () => {
         o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), ignoreFood: !loadSettings(o.store).ignoreFood });
         applyFood(o.store);
@@ -772,7 +936,7 @@ export function renderFleetTools(o: FleetOptions): void {
   if (fleet2 && anchor2) {
     const bar = el(doc, 'div', 'fut-fbar');
     const row = el(doc, 'div', 'fut-frow');
-    const info2 = el(doc, 'span', 'fut-finfo', settings.reserveOn ? summary(o, profile) : t('fleet.reserveOff'));
+    const info2 = el(doc, 'span', 'fut-finfo', summary(o, stored, settings));
     const tiles = el(doc, 'div', 'fut-ftiles');
     tiles.append(
       tile(doc, 'cargo', t('fleet.resMinusReserve'), '', t('fleet.tip.cargo'), () => {

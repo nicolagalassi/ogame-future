@@ -22,7 +22,7 @@ export const FLEET_CSS = `
   color: #8A9BB0; font: 10px/13px Consolas, monospace;
 }
 .fut-flabel { color: #E6EDF5; font-weight: 700; white-space: nowrap; }
-.fut-fcaption { color: #8A9BB0; font-size: 10px; max-width: 76px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fut-fcaption { color: #8A9BB0; font-size: 10px; max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fut-ftilewrap .fut-ftile { padding-right: 16px; }
 .fut-fcaret {
   position: absolute; right: 2px; top: 2px; width: 16px; height: 20px; padding: 0; border: 0; background: none;
@@ -30,7 +30,7 @@ export const FLEET_CSS = `
 }
 .fut-fcaret:hover { color: #E6EDF5; }
 .fut-fcaret svg { width: 14px; height: 14px; }
-.fut-fside { display: grid; grid-template-columns: repeat(2, auto); gap: 4px; align-content: start; }
+.fut-fside { display: grid; grid-template-columns: repeat(3, auto); gap: 4px; align-content: start; }
 .fut-ficon {
   width: 30px; height: 26px; display: inline-flex; align-items: center; justify-content: center; padding: 0;
   border-radius: 7px; border: 1px solid #24344B; background: #0A111C; color: #8A9BB0; cursor: pointer;
@@ -75,7 +75,15 @@ export const MODAL_CSS = `
 .fut-ffield input:focus, .fut-ffield select:focus { outline: none; border-color: #4FD1E8; }
 .fut-fcheck { display: flex; align-items: center; gap: 6px; color: #C9D4E2; font-size: 12px; align-self: end; min-height: 26px; }
 .fut-freserve { margin-top: 12px; padding: 10px; border: 1px solid #1F2C40; border-radius: 8px; background: #0D1522; }
-.fut-freserve h5 { margin-top: 0; }
+.fut-freserve h5 { margin: 0; }
+.fut-frulehead { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.fut-frulehead .fut-fcheck { margin-left: auto; min-height: 0; }
+.fut-fbadge { padding: 1px 7px; border-radius: 9px; border: 1px solid #2C3E57; color: #8A9BB0; font-size: 11px; cursor: default; }
+.fut-fbadge.on { border-color: #38C56E; color: #38C56E; }
+.fut-fbadge.off { border-color: #C9853A; color: #FFB15C; }
+.fut-fchecks { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 2px 12px; }
+.fut-fchecks .fut-fcheck { align-self: auto; min-height: 22px; }
+.fut-fcopy .fut-factions { margin-top: 6px; }
 .fut-feditor h6 { margin: 10px 0 4px; font-size: 11px; font-weight: 400; color: #8A9BB0; }
 .fut-fkeys { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 12px; }
 .fut-fkeyrow { display: flex; align-items: center; gap: 8px; color: #C9D4E2; }
