@@ -401,5 +401,18 @@
   "settings.backupImport": "Importer",
   "settings.backupSaved": "{n} valeurs enregistrées dans le fichier",
   "settings.backupRestored": "{n} valeurs restaurées : rechargez la page",
-  "settings.backupBad": "Ce fichier n'est pas une sauvegarde de Future"
+  "settings.backupBad": "Ce fichier n'est pas une sauvegarde de Future",
+  "dash.tab.history": "Historique",
+  "dash.historyEmpty": "L'historique se remplit tout seul : un point par jour chaque fois que vous ouvrez la Vue d'ensemble. Revenez demain pour voir les premières variations.",
+  "dash.historySpan": "{n} derniers j",
+  "dash.historyPerDay": "{v}/j",
+  "dash.historyUp": "↑{n} places",
+  "dash.historyDown": "↓{n} places",
+  "dash.historyReal": "sur {n} j",
+  "dash.historyFew": "peu de jours enregistrés",
+  "dash.historyProd": "Production par jour (MSU)",
+  "dash.historyDays": "Jours enregistrés",
+  "dash.historyDay": "Jour",
+  "dash.historyDelta": "Variation",
+  "dash.historyRank": "Classement"
 }

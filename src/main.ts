@@ -11,10 +11,11 @@ import { SNAPSHOT_KEY, hydrateAccountOncePerSession, syncAccountOnUserClick, typ
 import { currentBodyId, readCurrentResources, readPlanetList } from './data/planet-list';
 import { applyPageResources } from './engines/resources';
 import { SCORE_KEY, watchScore, type Score } from './data/score';
+import { HISTORY_KEY, recordDay, type History } from './engines/history';
 import { isGalaxyPage, watchGalaxy } from './modules/galaxy';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
 import { ITEMS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems } from './data/bonuses';
-import { openDashboard } from './modules/dashboard';
+import { dayFigures, openDashboard } from './modules/dashboard';
 import { TECH_NAMES_KEY, learnTechNames, type TechNames } from './data/tech-names';
 import { readTechList } from './data/tech-details';
 import { LF_SLOTS_KEY, readLfSlots, rememberLfSlots, type LfSlots } from './data/lf-slots';
@@ -91,7 +92,11 @@ async function bootstrap(): Promise<void> {
   if (seenSlots && bodyId && rememberLfSlots(lfSlots, bodyId, seenSlots)) store.set(LF_SLOTS_KEY, lfSlots);
 
   // Points are on the overview page only, typed in by the game's own script after load: keep the last value seen.
-  watchScore(document, () => Date.now(), (score) => store.set(SCORE_KEY, score));
+  watchScore(document, () => Date.now(), (score) => {
+    store.set(SCORE_KEY, score);
+    // History: one entry per day from what is already known (page DOM + stored snapshot), no network.
+    store.set(HISTORY_KEY, recordDay(store.get<History>(HISTORY_KEY, []), { at: score.at, points: score.points, rank: score.rank, ...dayFigures(snapshot) }));
+  });
 
   const deps = { guard, store, session: window.sessionStorage };
   const storedMode = store.get<string>('planetMenu.mode', 'side');
@@ -147,6 +152,7 @@ async function bootstrap(): Promise<void> {
           snapshot,
           entries: readPlanetList(document),
           score: store.get<Score | null>(SCORE_KEY, null),
+          history: store.get<History>(HISTORY_KEY, []),
           queues,
           names: techNames,
           lfSlots,
