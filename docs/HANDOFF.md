@@ -79,7 +79,7 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
 4. Riepiloghi di spionaggio verificati su giocatori veri (2026-11-06). Nella posta 13.x a lista il
    riepilogo sta sotto la riga d'intestazione e il clic apre il report come la riga del gioco.
 5. Domanda aperta: plancia, piano e diario restano finestre sopra il gioco o diventano pannelli?
-6. Roadmap: classifiche e giocatori, storico account, confronto rivali, promemoria manuali, nome definitivo, merge delle PR #1–#6, richiesta di
+6. Roadmap: classifiche e giocatori, nome definitivo, merge delle PR #1–#6, richiesta di
    tolleranza ai ToolDev (con le aree grigie: spostamento banner, "Ripeti" flotta).
 
 7. **Backup** (fatto il 2026-11-06, `src/core/backup.ts`): Impostazioni → Backup dati → Esporta/Importa.
@@ -87,6 +87,21 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
    e scrive solo chiavi `future:*`. Nuovo grant `GM_listValues`.
 8. accountInfo: a volte il gioco risponde "An error has occured!" (HTML). Ora quella risposta, o una
    senza pianeti, non sostituisce lo snapshot salvato; niente nuovi tentativi fino a Sync.
+
+9. **Storico account** (2026-11-06, `src/engines/history.ts`): una voce al giorno (punti, posizione,
+   produzione, flotta) quando la Panoramica mostra i punti; scheda Storico nella Dashboard con due
+   grafici a una serie e la tabella dei giorni.
+10. **Tabella spiate** (2026-11-06, `src/engines/raids.ts`, `src/modules/messages/spy-table.ts`): pulsante
+    accanto a "Filtri" in posta. Un bersaglio per pianeta/luna, 3 giorni, ordinato per MSU all'ora di volo
+    dal pianeta più vicino. Formula del volo verificata con `fleetHelper.calcDuration` del gioco (s808).
+    "Attacca" = link a fleet1 con `cp=` del pianeta più vicino e bersaglio inserito; niente sonda (§1.5.1).
+    Universi con galassie/sistemi diversi da 9×499: il meta non lo dice, si assume 9×499.
+11. **Rivali** (2026-11-06, `src/engines/rivals.ts`): clic sulla posizione (#) in galassia; scheda Rivali
+    nella Dashboard, `playerData` come la scheda in galassia (user-view, cache 1h, solo al clic).
+12. **Promemoria** (2026-11-06, `src/modules/reminders`): campanelle su Code in corso (Dashboard) e sulle
+    flotte della lista eventi; avviso nella pagina. **Da verificare**: le campanelle sulla lista eventi,
+    scritte sul markup noto di OGame (`tr.eventFleet[data-arrival-time]`, `td.arrivalTime`) senza flotte
+    in volo da guardare.
 
 ## Come si prova senza il gioco
 
