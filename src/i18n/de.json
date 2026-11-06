@@ -444,5 +444,14 @@
   "spy.status.strong": "s",
   "spy.status.honorableTarget": "e",
   "spy.status.outlaw": "Geächtet",
-  "spy.status.admin": "Admin"
+  "spy.status.admin": "Admin",
+  "dash.tab.rivals": "Rivalen",
+  "dash.rivalsLoading": "Punkte werden aus der öffentlichen API gelesen…",
+  "dash.rivalsNone": "Noch keine Rivalen. Klicke in der Galaxie auf den Rang (#) neben einem Spieler, um ihm hier zu folgen.",
+  "dash.rivalsPlayer": "Spieler",
+  "dash.rivalsGrowth": "Wachstum 7 T",
+  "dash.rivalsRemove": "Nicht mehr folgen",
+  "dash.rivalsHint": "Punkte und Ränge aus der öffentlichen API, die das Spiel etwa stündlich aktualisiert. Unter jedem Wert der Abstand zu dir: orange, wenn der Rivale vorn liegt, grün, wenn er dahinter ist. Das Wachstum nutzt die bereits gemachten Abfragen.",
+  "galaxy.rivalAdd": "Klick: als Rivalen folgen",
+  "galaxy.rivalRemove": "Klick: nicht mehr folgen"
 }

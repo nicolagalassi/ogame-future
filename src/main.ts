@@ -12,6 +12,8 @@ import { currentBodyId, readCurrentResources, readPlanetList } from './data/plan
 import { applyPageResources } from './engines/resources';
 import { SCORE_KEY, watchScore, type Score } from './data/score';
 import { HISTORY_KEY, recordDay, type History } from './engines/history';
+import { RIVAL_POINTS_KEY, RIVALS_KEY, type Rival, type RivalPoints } from './engines/rivals';
+import { playerScores } from './data/player-api';
 import { isGalaxyPage, watchGalaxy } from './modules/galaxy';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
 import { ITEMS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems } from './data/bonuses';
@@ -154,6 +156,15 @@ async function bootstrap(): Promise<void> {
           entries: readPlanetList(document),
           score: store.get<Score | null>(SCORE_KEY, null),
           history: store.get<History>(HISTORY_KEY, []),
+          // Rivals tab: one public-API read per player, only on the player's click, cached an hour.
+          loadRivals: async () => {
+            const now = Date.now();
+            const me = await playerScores(guard, store, location.origin, ownPlayerId(document), now).catch(() => null);
+            const rivals = [];
+            for (const rival of store.get<Rival[]>(RIVALS_KEY, [])) rivals.push({ rival, scores: await playerScores(guard, store, location.origin, rival.id, now).catch(() => null) });
+            return { me, rivals, points: store.get<RivalPoints>(RIVAL_POINTS_KEY, {}) };
+          },
+          onRemoveRival: (id) => store.set(RIVALS_KEY, store.get<Rival[]>(RIVALS_KEY, []).filter((r) => r.id !== id)),
           queues,
           names: techNames,
           lfSlots,

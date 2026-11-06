@@ -7,6 +7,7 @@
  * public API card (`playerScores`, reason 'user-view', cached an hour), asked when the player
  * points at a rank badge. No game action, no game request.
  */
+import { RIVALS_KEY, toggleRival, type Rival } from '../../engines/rivals';
 import type { NetworkGuard } from '../../core/guard';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
@@ -112,6 +113,7 @@ function decorate(o: GalaxyOptions, content: Element, isOpen: () => boolean, set
   const s = readGalaxy(doc);
   if (!s) return;
   const targets = store.get<Target[]>(TARGETS_KEY, []);
+  const rivals = new Set(store.get<Rival[]>(RIVALS_KEY, []).map((x) => x.id));
   const redraw = () => decorate(o, content, isOpen, setOpen);
 
   for (const r of s.rows) {
@@ -146,19 +148,33 @@ function decorate(o: GalaxyOptions, content: Element, isOpen: () => boolean, set
       };
     } else mark?.remove();
 
-    // Rank badge: hovering or focusing it opens the scores card.
+    // Rank badge: hovering or focusing it opens the scores card; a click marks the player as a rival.
     const playerCell = r.row.querySelector('.cellPlayerName');
-    if (playerCell && r.playerId && r.rank && !playerCell.querySelector('.fut-g-rank')) {
-      const badge = el(doc, 'button', 'fut-g-rank', `#${r.rank.toLocaleString(locale)}`);
-      badge.type = 'button';
-      badge.setAttribute('aria-label', t('galaxy.rankTitle', { name: r.playerName }));
+    if (playerCell && r.playerId && r.rank) {
       const id = r.playerId;
-      const show = () => void openCard(o, badge, id, r.playerName);
-      badge.addEventListener('mouseenter', show);
-      badge.addEventListener('focus', show);
-      badge.addEventListener('mouseleave', () => closeCard(doc));
-      badge.addEventListener('blur', () => closeCard(doc));
-      playerCell.querySelector('.playerName')?.after(badge);
+      let badge = playerCell.querySelector<HTMLButtonElement>('.fut-g-rank');
+      if (!badge) {
+        const b = el(doc, 'button', 'fut-g-rank', `#${r.rank.toLocaleString(locale)}`);
+        b.type = 'button';
+        const show = () => void openCard(o, b, id, r.playerName);
+        b.addEventListener('mouseenter', show);
+        b.addEventListener('focus', show);
+        b.addEventListener('mouseleave', () => closeCard(doc));
+        b.addEventListener('blur', () => closeCard(doc));
+        b.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          store.set(RIVALS_KEY, toggleRival(store.get<Rival[]>(RIVALS_KEY, []), { id, name: r.playerName, at: Date.now() }));
+          redraw();
+        });
+        playerCell.querySelector('.playerName')?.after(b);
+        badge = b;
+      }
+      const rival = rivals.has(id);
+      badge.classList.toggle('rival', rival);
+      badge.setAttribute('aria-pressed', String(rival));
+      badge.title = t(rival ? 'galaxy.rivalRemove' : 'galaxy.rivalAdd');
+      badge.setAttribute('aria-label', `${t('galaxy.rankTitle', { name: r.playerName })} · ${badge.title}`);
     }
 
     // Debris value under the game's icon.

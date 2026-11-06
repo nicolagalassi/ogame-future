@@ -8,6 +8,7 @@
  */
 import type { NetworkGuard } from '../core/guard';
 import type { Store } from '../core/storage';
+import { recordPoints, RIVAL_POINTS_KEY, RIVALS_KEY, type Rival, type RivalPoints } from '../engines/rivals';
 
 export const PLAYER_SCORES_KEY = 'galaxy.players';
 const TTL = 60 * 60 * 1000;
@@ -55,6 +56,9 @@ export async function playerScores(guard: NetworkGuard, store: Store, origin: st
   const fresh = parsePlayerData(await res.text(), now);
   if (!fresh) return hit ?? null;
   cache[String(id)] = fresh;
+  // Points over time, for rivals and the player only (the dashboard's rivals tab).
+  const own = Number(store.namespace.split(':').pop());
+  if (id === own || store.get<Rival[]>(RIVALS_KEY, []).some((r) => r.id === id)) store.set(RIVAL_POINTS_KEY, recordPoints(store.get<RivalPoints>(RIVAL_POINTS_KEY, {}), fresh));
   // Keep the most recent players only.
   const ids = Object.keys(cache).sort((a, b) => (cache[b]?.at ?? 0) - (cache[a]?.at ?? 0));
   for (const old of ids.slice(KEEP)) delete cache[old];
