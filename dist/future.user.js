@@ -1,10 +1,13 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.1.0
+// @version      0.2.0
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
+// @homepageURL  https://github.com/nicolagalassi/ogame-future
+// @updateURL    https://raw.githubusercontent.com/nicolagalassi/ogame-future/main/dist/future.user.js
+// @downloadURL  https://raw.githubusercontent.com/nicolagalassi/ogame-future/main/dist/future.user.js
 // @match        https://*.ogame.gameforge.com/game/*
 // @grant        GM_getValue
 // @grant        GM_setValue
