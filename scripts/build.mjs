@@ -1,5 +1,6 @@
 // Builds dist/future.user.js: one readable (NOT minified) userscript.
 // COMPLIANCE: AGENTS.md §0 — the reviewed source must stay human-readable.
+// Version: bump package.json "version" on every push to main, or Tampermonkey will not update.
 // --watch rebuilds on every change in src/ (used by `npm run dev`; the dev browser picks it up on the next page load).
 import { context } from 'esbuild';
 import { readFileSync } from 'node:fs';
@@ -13,6 +14,9 @@ const header = `// ==UserScript==
 // @description  ${pkg.description}
 // @author       Nicola Galassi
 // @license      MIT
+// @homepageURL  https://github.com/nicolagalassi/ogame-future
+// @updateURL    https://raw.githubusercontent.com/nicolagalassi/ogame-future/main/dist/future.user.js
+// @downloadURL  https://raw.githubusercontent.com/nicolagalassi/ogame-future/main/dist/future.user.js
 // @match        https://*.ogame.gameforge.com/game/*
 // @grant        GM_getValue
 // @grant        GM_setValue
