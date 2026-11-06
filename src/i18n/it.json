@@ -529,5 +529,9 @@
   "plan.removeAll": "Togli da tutti i {n} corpi",
   "plan.readyHere": "Qui le risorse bastano",
   "bar.targets": "Bersagli",
-  "bar.targetsHint": "Barra laterale dei bersagli (giocatori segnati e pianeti colorati) · M: prossima posizione"
+  "bar.targetsHint": "Barra laterale dei bersagli (giocatori segnati e pianeti colorati) · M: prossima posizione",
+  "settings.oglight": "Da OGLight",
+  "settings.oglightImport": "Importa export",
+  "settings.oglightDone": "Da OGLight: {players} giocatori, {planets} pianeti colorati, {seen} posizioni. Ricarica la pagina.",
+  "settings.backupImportHint": "Un backup di Future o il file «Export data» di OGLight (dello stesso universo)"
 }

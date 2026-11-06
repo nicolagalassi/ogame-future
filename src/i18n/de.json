@@ -529,5 +529,9 @@
   "plan.removeAll": "Von allen {n} Körpern entfernen",
   "plan.readyHere": "Hier reichen die Ressourcen",
   "bar.targets": "Ziele",
-  "bar.targetsHint": "Seitenleiste der Ziele (markierte Spieler und farbige Planeten) · M: nächste Position"
+  "bar.targetsHint": "Seitenleiste der Ziele (markierte Spieler und farbige Planeten) · M: nächste Position",
+  "settings.oglight": "Aus OGLight",
+  "settings.oglightImport": "Export importieren",
+  "settings.oglightDone": "Aus OGLight: {players} Spieler, {planets} farbige Planeten, {seen} Positionen. Seite neu laden.",
+  "settings.backupImportHint": "Ein Future-Backup oder die „Export data“-Datei von OGLight (gleiches Universum)"
 }
