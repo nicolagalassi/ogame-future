@@ -497,5 +497,22 @@
   "marks.hide.inactive": "Inaktive ausblenden",
   "marks.noneInRange": "Kein gefärbter Planet in diesem Bereich mit diesen Filtern.",
   "marks.noPlanets": "Kein gefärbter Planet. Nutze in der Galaxie den Punkt rechts vom Planetennamen.",
-  "marks.planetsHint": "{n} Planeten. Koordinaten öffnen die Galaxie, wo die Sonde des Spiels ist."
+  "marks.planetsHint": "{n} Planeten · Koordinaten zeigen das System in der Galaxie",
+  "marks.keyNext": "nächste Position",
+  "marks.footData": "Galaxie + öffentliche API",
+  "marks.fleetPlanet": "Flotte zum Planeten {coords} (Aktivität des Planeten)",
+  "marks.fleetMoon": "Flotte zum Mond {coords} (Aktivität des Mondes)",
+  "marks.ago": "{n}{u}",
+  "marks.unit.m": "m",
+  "marks.unit.h": "h",
+  "marks.unit.d": "T",
+  "marks.seenOnly": "In der Galaxie gesehen, noch nicht in der API · Klick: System zeigen",
+  "marks.showSystem": "System in der Galaxie zeigen",
+  "marks.col.coords": "Koord.",
+  "marks.col.debris": "TF",
+  "marks.col.planet": "Plan.",
+  "marks.col.moon": "Mond",
+  "marks.col.seen": "Gesehen",
+  "marks.col.who": "Planet · Spieler",
+  "shortcut.nextTarget": "Ziele: nächste Position"
 }

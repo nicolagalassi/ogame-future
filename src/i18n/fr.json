@@ -497,5 +497,22 @@
   "marks.hide.inactive": "Masquer inactifs",
   "marks.noneInRange": "Aucune planète colorée dans cette zone avec ces filtres.",
   "marks.noPlanets": "Aucune planète colorée. Dans la galaxie, utilisez le point à droite du nom de la planète.",
-  "marks.planetsHint": "{n} planètes. Les coordonnées ouvrent la galaxie, où se trouve la sonde du jeu."
+  "marks.planetsHint": "{n} planètes · les coordonnées affichent le système en galaxie",
+  "marks.keyNext": "position suivante",
+  "marks.footData": "galaxie + API publique",
+  "marks.fleetPlanet": "Flotte vers la planète {coords} (activité de la planète)",
+  "marks.fleetMoon": "Flotte vers la lune {coords} (activité de la lune)",
+  "marks.ago": "{n}{u}",
+  "marks.unit.m": "m",
+  "marks.unit.h": "h",
+  "marks.unit.d": "j",
+  "marks.seenOnly": "Vue en galaxie, pas encore dans l'API · clic : afficher le système",
+  "marks.showSystem": "Afficher le système en galaxie",
+  "marks.col.coords": "Coord.",
+  "marks.col.debris": "CDR",
+  "marks.col.planet": "Plan.",
+  "marks.col.moon": "Lune",
+  "marks.col.seen": "Vu",
+  "marks.col.who": "Planète · joueur",
+  "shortcut.nextTarget": "Cibles : position suivante"
 }

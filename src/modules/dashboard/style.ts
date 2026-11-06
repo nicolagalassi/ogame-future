@@ -4,7 +4,7 @@ export const DASHBOARD_CSS = `
 .moon-ico { margin-right: 4px; vertical-align: -1px; color: var(--muted); }
 .kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 
-.cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 24px; }
+.cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .prod { margin-bottom: 10px; }
 .prod-top { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 4px; font-size: 12px; }
 .track { height: 6px; border-radius: 3px; background: #1A2638; overflow: hidden; }
@@ -66,7 +66,7 @@ td.queue { white-space: nowrap; }
 .matrix th.col.on .col-name { color: #4FD1E8; }
 .matrix th.col.on { box-shadow: inset 0 -2px 0 #4FD1E8; }
 .matrix td { padding: 4px 6px; }
-.matrix th.name, .matrix td.name { position: sticky; left: 0; z-index: 1; background: #0A111C; }
+.matrix th.name, .matrix td.name { position: sticky; left: 0; z-index: 1; background: var(--raised); }
 .matrix tr.moon td.name { background: #0F1828; }
 .matrix td.tech { color: #C9D4E2; font-weight: 400; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
 td.zero { color: #3A4A60; }

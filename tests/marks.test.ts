@@ -2,7 +2,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EMPTY_MARKS, flagPlayer, loadMarks, MARKS_KEY, migrateOld, planetsInRange, rememberRecent, RECENT_MAX, tagPlanet, type Marks } from '../src/engines/marks';
 import { flagButton, tagButton } from '../src/modules/marks/picker';
-import { closeTargets, openTargets, TARGETS_ID } from '../src/modules/marks/targets-view';
+import { closeSide, isSideOpen, nextInSide, openSide, restoreSide, SIDE_ID, toggleSide } from '../src/modules/marks/side';
+import { POSITIONS_KEY } from '../src/engines/positions';
 import { parsePlayerData } from '../src/data/player-api';
 import { parsePlayersXml, statusNames } from '../src/data/universe-players';
 import { MemoryStore, Store } from '../src/core/storage';
@@ -11,7 +12,7 @@ import { translator } from '../src/core/i18n';
 
 const t = translator('it');
 const info = (player = 'Bob', playerId: number | null = 5, statuses: string[] = []) => ({ planet: 'P', player, playerId, statuses, moon: false });
-afterEach(() => { document.body.innerHTML = ''; closeTargets(document); });
+afterEach(() => { document.body.innerHTML = ''; });
 
 describe('marks', () => {
   it('flags players and colours planets, remembering the last choice', () => {
@@ -86,7 +87,7 @@ describe('public API readers', () => {
   });
 });
 
-describe('targets window', () => {
+describe('targets side bar', () => {
   it('lists flagged players and coloured planets, statuses from the public API', async () => {
     const store = new Store(new MemoryStore(), 'x');
     let m = flagPlayer(EMPTY_MARKS, 5, 'Bob', 'watch', 1);
@@ -95,14 +96,45 @@ describe('targets window', () => {
     store.set(MARKS_KEY, m);
     const fetchImpl = vi.fn(async (_u: string, _i?: RequestInit) => new Response('<?xml version="1.0"?><players timestamp="1"><player id="5" name="Bob" status=""/><player id="6" name="Al" status="v"/></players>'));
     const guard = new NetworkGuard(fetchImpl, 'http://localhost:3000');
-    openTargets({ doc: document, store, guard, t, locale: 'it', here: '1:300:7' });
-    const root = () => document.getElementById(TARGETS_ID)!.shadowRoot!;
-    expect(root().querySelector('.row .name')?.textContent).toBe('Bob');
-    root().querySelectorAll<HTMLButtonElement>('.tab')[1]!.click();
-    expect(root().querySelectorAll('.rows .row')).toHaveLength(2);
+    const o = { doc: document, store, guard, t, locale: 'it'};
+    toggleSide(o);
+    const root = () => document.getElementById(SIDE_ID)!.shadowRoot!;
+    expect(root().querySelector('.row .pname')?.textContent).toBe('Bob');
+    root().querySelectorAll<HTMLButtonElement>('.seg button')[1]!.click();
+    expect(root().querySelectorAll('.tg .row')).toHaveLength(2);
     // Al is on vacation today: hidden by the default filter once players.xml is read.
-    await vi.waitFor(() => expect(root().querySelectorAll('.rows .row')).toHaveLength(1));
+    await vi.waitFor(() => expect(root().querySelectorAll('.tg .row')).toHaveLength(1));
     expect(fetchImpl.mock.calls[0]![1]?.credentials).toBe('omit');
-    expect(root().querySelector('.coords')?.getAttribute('href')).toContain('component=galaxy&galaxy=1&system=300&position=4');
+    expect(root().querySelector<HTMLElement>('[data-coords]')?.dataset.coords).toBe('1:300:4');
+    // Left open: it comes back on the next page; the button closes it.
+    document.body.innerHTML = '';
+    restoreSide(o);
+    expect(isSideOpen(document)).toBe(true);
+    toggleSide(o);
+    expect(isSideOpen(document)).toBe(false);
+    restoreSide(o);
+    expect(isSideOpen(document)).toBe(false);
+  });
+
+  it('player sheet: API planets plus the ones seen in the galaxy, M walks them', async () => {
+    const store = new Store(new MemoryStore(), 'y');
+    store.set(POSITIONS_KEY, { '2:10:8': { player: 5, name: 'New', moon: false, debris: 2_000_000, act: ['*', null], at: Date.now() } });
+    const xml = '<?xml version="1.0"?><playerData id="5" name="Bob" timestamp="1"><positions><position type="0" score="1000">12</position></positions><planets><planet id="1" name="Home" coords="1:300:4"/></planets></playerData>';
+    const guard = new NetworkGuard(vi.fn(async () => new Response(xml)), 'http://localhost:3000');
+    // The galaxy page shows 1:300: its row is the current one, M goes to the next.
+    document.body.innerHTML = '<input id="galaxy_input" value="1"><input id="system_input" value="300"><div id="galaxyContent"></div>';
+    const assign = vi.fn();
+    Object.defineProperty(window, 'loadContentNew', { value: assign, configurable: true });
+    openSide({ doc: document, store, guard, t, locale: 'it'}, { player: 5 });
+    const root = () => document.getElementById(SIDE_ID)!.shadowRoot!;
+    await vi.waitFor(() => expect(root().querySelectorAll('.pl .row')).toHaveLength(2));
+    const rows = [...root().querySelectorAll('.pl .row')];
+    expect(rows[0]!.classList.contains('active')).toBe(true);
+    expect(rows[1]!.querySelector('.coords.new')).not.toBeNull();
+    expect(rows[1]!.querySelector('.act.on')?.textContent).toBe('*');
+    expect(rows[1]!.querySelector<HTMLAnchorElement>('a.act')?.getAttribute('href')).toContain('component=fleetdispatch&galaxy=2&system=10&position=8&type=1');
+    expect(nextInSide(document)).toBe(true);
+    expect(assign).toHaveBeenCalledWith(2, 10);
+    closeSide(document, store);
   });
 });

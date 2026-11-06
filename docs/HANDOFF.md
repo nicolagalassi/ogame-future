@@ -100,14 +100,19 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     Chiave API dei report = `data-raw-hashcode`. Link Osims/OGame Simulator anche nei riepiloghi di spionaggio,
     link al convertitore Ogotcha (`ogotcha.oplanet.eu`) nei riepiloghi di combattimento: **da verificare** su un
     CR vero (nessuno in posta il 2026-11-06). Il guard non manda mai i cookie all'API pubblica `/api/*.xml`.
-11. **Bersagli** (2026-11-06, al posto di rivali e mirino; `src/engines/marks.ts`, `src/modules/marks/`), come i
-    pinned players e tagged planets di OGLight: bandierina per giocatore (Da controllare, Bersaglio, Frigo,
-    Pericolo, Amico, Commercio) in galassia, classifica e tabella spiate; colore per pianeta in galassia;
-    clic = scelta, Maiusc+clic = ultima usata. Finestra Bersagli (pulsante nella barra galassia): Giocatori per
-    bandierina + Recenti, scheda con punti e tutti i pianeti/lune da `playerData` (raggruppati per sistema);
-    Pianeti per intervallo di coordinate, colori e stato (oggi da `/api/players.xml`, cache 1 giorno). Niente
-    sonda (§1.5.1): le coordinate aprono la galassia. Migrazione una tantum: vecchi bersagli → pianeti rossi,
-    rivali → "Da controllare". Da fare dopo: "prossimo bersaglio rapido" di OGLight con scorciatoia.
+11. **Bersagli** (2026-11-06, al posto di rivali e mirino; `src/engines/marks.ts`, `src/engines/positions.ts`,
+    `src/modules/marks/`), come i pinned players e tagged planets di OGLight: bandierina per giocatore (Da
+    controllare, Bersaglio, Frigo, Pericolo, Amico, Commercio) in galassia, classifica e tabella spiate; colore
+    per pianeta in galassia; clic = scelta, Maiusc+clic = ultima usata. **Barra laterale** a sinistra (pulsante
+    Bersagli nella barra galassia), come il pannello di OGLight: resta aperta mentre si gira la galassia e tra le
+    pagine. Giocatori per bandierina + Recenti; scheda con punti e pianeti/lune = API `playerData` + posizioni
+    viste in galassia (nuove colonie col pallino, posizioni svuotate tolte), con detriti, attività pianeta/luna
+    (`*`, minuti, 60; `?` se la lettura ha più di un'ora) ed età della lettura. Pianeti colorati per intervallo,
+    colore e stato (`/api/players.xml`, cache 1 giorno). Clic sulle coordinate o tasto **M** = sistema in
+    galassia col loader del gioco (`loadContentNew`, come le sue frecce), posizione evidenziata. La memoria
+    posizioni registra solo giocatori segnati/recenti e pianeti colorati. Niente sonda (§1.5.1): le celle
+    attività aprono la pagina flotta su pianeta/luna (come OGLight). Migrazione una tantum: vecchi bersagli →
+    pianeti rossi, rivali → "Da controllare".
 12. **Promemoria** (2026-11-06, `src/modules/reminders`): campanelle su Code in corso (Dashboard) e sulle
     flotte della lista eventi; avviso nella pagina. **Da verificare**: le campanelle sulla lista eventi,
     scritte sul markup noto di OGame (`tr.eventFleet[data-arrival-time]`, `td.arrivalTime`) senza flotte
@@ -120,6 +125,10 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     da OGLight, ha la foto esatta delle 00:00): idea per dopo, un servizio nostro (cron orario su highscore.xml,
     tabella, endpoint con CORS) su Proxmox o Supabase. In generale anche i giorni per raggiungere chi è davanti
     e la stella rivale. **Nota dev**: dopo un cambio di ramo che ricrea `dist/` va riavviato `npm run dev`.
+
+14. **Grafica** (2026-11-06): tutte le finestre (`WINDOW_SHEET`) riprendono il menu pianeti: riquadri #111B2A
+    con bordo #1F2C40, schede a segmenti, numeri monospazio, ciano per la selezione. Pila z-index sopra il
+    footer del gioco (999999): barra laterale 1000000, finestre 1000001, popup 1000002-3.
 
 ## Come si prova senza il gioco
 

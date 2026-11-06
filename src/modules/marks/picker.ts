@@ -24,7 +24,7 @@ export const MARKS_CSS = `
 .fut-mk.on { border-color: currentColor; background: #0D1522; }
 .fut-mk-dot { width: 9px; height: 9px; border-radius: 50%; border: 1px solid #4A5B72; }
 .fut-mk.on .fut-mk-dot { border-color: transparent; }
-#fut-mk-pop { position: fixed; z-index: 100002; display: flex; gap: 3px; padding: 5px; border: 1px solid #2E4356; border-radius: 8px;
+#fut-mk-pop { position: fixed; z-index: 1000003; display: flex; gap: 3px; padding: 5px; border: 1px solid #2E4356; border-radius: 8px;
   background: #111B2A; box-shadow: 0 8px 22px rgba(0,0,0,0.55); font: 11px Verdana, Arial, sans-serif; }
 #fut-mk-pop button { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; padding: 0; border: 1px solid #1F2C40;
   border-radius: 6px; background: #0A111C; color: #8A9BB0; cursor: pointer; }

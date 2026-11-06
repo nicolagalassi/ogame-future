@@ -2,7 +2,7 @@
 export const GALAXY_CSS = `
 .fut-g-bar {
   display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin: 4px 0 6px; padding: 6px 10px;
-  border: 1px solid #1F2C40; border-radius: 8px; background: #0D1522;
+  border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A;
   font: 12px/16px Arial, Helvetica, sans-serif; color: #C9D4E2; text-align: left;
 }
 .fut-g-bar b { color: #E6EDF5; font-family: Consolas, "JetBrains Mono", monospace; }
@@ -20,6 +20,10 @@ export const GALAXY_CSS = `
 #galaxyContent .galaxyRow.fut-g-inactive .galaxyCell { background-color: rgba(155,227,109,0.07); }
 #galaxyContent .galaxyRow.fut-g-own .galaxyCell { background-color: rgba(79,209,232,0.08); }
 #galaxyContent .galaxyRow.fut-g-tagged .cellPlanetName { box-shadow: inset 3px 0 0 var(--fut-tag); }
+
+/* The position the side bar (or the link) asked for: the planet menu's cyan frame. */
+#galaxyContent .galaxyRow.fut-g-hl { box-shadow: inset 0 0 0 1px #4FD1E8, inset 3px 0 0 #4FD1E8; }
+#galaxyContent .galaxyRow.fut-g-hl .galaxyCell { background-color: rgba(79,209,232,0.12); }
 
 #galaxyContent .cellPlanetName { position: relative; }
 /* Planet colour: at the right of the name, faint until the row is pointed at or the planet has one. */
@@ -39,7 +43,7 @@ export const GALAXY_CSS = `
 .fut-g-dval.big { color: #F5B547; font-weight: 700; }
 
 .fut-g-card {
-  position: fixed; z-index: 100001; width: 250px; padding: 10px 12px; border: 1px solid #2C3E57; border-radius: 8px;
+  position: fixed; z-index: 1000002; width: 250px; padding: 10px 12px; border: 1px solid #2C3E57; border-radius: 8px;
   background: #0A111C; box-shadow: 0 10px 30px rgba(0,0,0,0.6); font: 12px/16px Arial, Helvetica, sans-serif; color: #C9D4E2;
   text-align: left; pointer-events: none;
 }

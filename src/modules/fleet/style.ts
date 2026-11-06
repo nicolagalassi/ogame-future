@@ -40,7 +40,7 @@ export const FLEET_CSS = `
 .fut-finfo { color: #8A9BB0; font-size: 11px; min-height: 14px; }
 .fut-finfo.err { color: #FF7A7A; }
 .fut-fmenu {
-  position: fixed; z-index: 100001; min-width: 220px; max-height: 320px; overflow-y: auto;
+  position: fixed; z-index: 1000002; min-width: 220px; max-height: 320px; overflow-y: auto;
   display: flex; flex-direction: column; padding: 4px; border: 1px solid #2C3E57; border-radius: 8px; background: #0A111C;
   box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
