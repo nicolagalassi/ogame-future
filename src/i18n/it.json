@@ -453,5 +453,13 @@
   "dash.rivalsRemove": "Smetti di seguire",
   "dash.rivalsHint": "Punti e posizioni dall'API pubblica, aggiornata dal gioco circa ogni ora. Sotto ogni valore la distanza da te: arancio se il rivale è avanti, verde se è dietro. La crescita usa le letture già fatte.",
   "galaxy.rivalAdd": "Clic: segui come rivale",
-  "galaxy.rivalRemove": "Clic: smetti di seguire"
+  "galaxy.rivalRemove": "Clic: smetti di seguire",
+  "dash.queuesTitle": "Code in corso",
+  "dash.queuesHint": "Campanella: avviso nella pagina quando finisce.",
+  "remind.add": "Avvisami quando finisce",
+  "remind.remove": "Togli il promemoria",
+  "remind.now": "Adesso ({time})",
+  "remind.late": "Finito alle {time}",
+  "remind.ok": "OK",
+  "remind.return": "(ritorno)"
 }

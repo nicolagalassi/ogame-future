@@ -10,7 +10,7 @@
  */
 import type { AccountSnapshot, OwnBody } from '../../data/account-info';
 import type { PlanetListEntry } from '../../data/planet-list';
-import { activeItems, type QueueItem, type QueueSnapshot } from '../../data/queues';
+import { activeItems, queueLabel, type QueueItem, type QueueSnapshot } from '../../data/queues';
 import { formatUnits } from '../../core/format';
 import { estimateResources, storageFill, totals } from '../../engines/resources';
 import { MENU_WIDTH, NATIVE_WIDTH, PLANET_MENU_CSS } from './style';
@@ -178,11 +178,11 @@ export function remaining(end: number, now: number): string {
 }
 
 /** Coloured stripes, one per running queue kind (as OGLight), with the details in the tooltip. */
-function queueStripes(doc: Document, items: QueueItem[], now: number, t: PlanetMenuOptions['t']): HTMLElement | null {
+function queueStripes(doc: Document, items: QueueItem[], now: number, t: PlanetMenuOptions['t'], locale: string): HTMLElement | null {
   if (!items.length) return null;
   const box = el(doc, 'span', 'fut-queue');
   box.title = items
-    .map((i) => `${t(`queue.${i.kind}`)}: ${i.name}${i.level ? ` → ${i.level}` : ''} · ${remaining(i.end, now)}`)
+    .map((i) => `${t(`queue.${i.kind}`)}: ${queueLabel(i, locale)} · ${remaining(i.end, now)}`)
     .join('\n');
   for (const i of items) box.append(el(doc, 'span', `fut-q fut-q-${i.kind}`));
   return box;
@@ -383,7 +383,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true));
       const age = ageBadge(doc, planetBody, o.now, o.t);
       if (age) link.append(age);
-      const pq = entry.planetId ? queueStripes(doc, activeItems(o.queues?.bodies[String(entry.planetId)], o.now), o.now, o.t) : null;
+      const pq = entry.planetId ? queueStripes(doc, activeItems(o.queues?.bodies[String(entry.planetId)], o.now), o.now, o.t, o.locale) : null;
       if (pq) wrap.append(pq);
       // Queue: the game's construction icon stays as it is (its own link); a planet with
       // nothing in construction gets an amber dot.
@@ -401,7 +401,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       moon.append(resourceColumn(doc, moonBody, o.now, o.locale, false));
       const age = ageBadge(doc, moonBody, o.now, o.t);
       if (age) moon.append(age);
-      const mq = entry.moonId ? queueStripes(doc, activeItems(o.queues?.bodies[String(entry.moonId)], o.now), o.now, o.t) : null;
+      const mq = entry.moonId ? queueStripes(doc, activeItems(o.queues?.bodies[String(entry.moonId)], o.now), o.now, o.t, o.locale) : null;
       if (mq) moon.append(mq);
     } else {
       // Keeps the planet columns aligned on planets without a moon.

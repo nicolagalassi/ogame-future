@@ -13,11 +13,13 @@ import type { PlanetListEntry } from '../../data/planet-list';
 import type { Score } from '../../data/score';
 import { formatUnits } from '../../core/format';
 import { accountAlerts, bodyRows, msu, summarize } from '../../engines/account';
-import { activeItems, QUEUE_KINDS, type QueueSnapshot } from '../../data/queues';
+import { activeItems, QUEUE_KINDS, queueLabel, type QueueItem, type QueueSnapshot } from '../../data/queues';
+import { remaining } from '../planet-menu';
 import { bestUpgrades } from '../../engines/roi';
 import { changeOver, type History, type HistoryDay } from '../../engines/history';
 import { COMPARED, gaps, pointsPerDay, type Rival, type RivalPoints } from '../../engines/rivals';
 import type { PlayerScores } from '../../data/player-api';
+import type { Reminder } from '../../engines/reminders';
 import { rawCost } from '../../engines/tech';
 import {
   DEFENCES, MINES, MOON_FACILITIES, PLANET_FACILITIES, RESEARCH, SHIPS, SPECIES, speciesOf, techName, type TechNames,
@@ -38,6 +40,8 @@ export interface DashboardOptions {
    * player opens the Rivals tab: a user action, public API only (AGENTS.md §4, §6).
    */
   loadRivals?: () => Promise<RivalsData>;
+  /** A reminder bell for one queue item (modules/reminders); none = no bells. */
+  bell?: (r: Reminder) => HTMLElement;
   /** Removes a rival from the list. */
   onRemoveRival?: (id: number) => void;
   queues?: QueueSnapshot | null;
@@ -424,6 +428,32 @@ function summaryTab(parent: HTMLElement, ctx: Ctx): void {
   }
   cols.append(prod, movesCard, checks);
   parent.append(cols);
+
+  // Running queues, soonest first, each with a reminder bell.
+  const inQueue: { body: OwnBody; item: QueueItem }[] = [];
+  for (const b of ctx.bodies) for (const item of activeItems(o.queues?.bodies[String(b.id)], o.now)) inQueue.push({ body: b, item });
+  if (inQueue.length) {
+    inQueue.sort((a, b) => a.item.end - b.item.end);
+    const qs = section(parent, t('dash.queuesTitle'), o.bell ? t('dash.queuesHint') : undefined);
+    const wrap = h('div', 'table-wrap');
+    const table = h('table', 'queues');
+    const tbody = h('tbody');
+    for (const { body: b, item } of inQueue) {
+      const tr = h('tr', b.type === 'moon' ? 'moon' : '');
+      const name = h('td', 'name');
+      name.append(bodyLink(o.doc, b));
+      const what = queueLabel(item, o.locale);
+      const end = h('td', 'num', remaining(item.end, o.now));
+      end.title = new Date(item.end).toLocaleString(o.locale);
+      const bell = h('td', 'acts');
+      if (o.bell) bell.append(o.bell({ id: `q:${b.id}:${item.kind}:${item.name}:${item.level}:${Math.round(item.end / 60_000)}`, label: `${b.name}: ${what}`, at: item.end }));
+      tr.append(name, h('td', 'kind', t(`queue.${item.kind}`)), h('td', '', what), end, bell);
+      tbody.append(tr);
+    }
+    table.append(tbody);
+    wrap.append(table);
+    qs.append(wrap);
+  }
 
   // Research: account-wide, one compact list.
   const research = section(parent, t('dash.research'));

@@ -453,5 +453,13 @@
   "dash.rivalsRemove": "Stop following",
   "dash.rivalsHint": "Points and ranks from the public API, which the game updates about every hour. Under each value the gap to you: orange when the rival is ahead, green when behind. Growth uses the readings already made.",
   "galaxy.rivalAdd": "Click: follow as a rival",
-  "galaxy.rivalRemove": "Click: stop following"
+  "galaxy.rivalRemove": "Click: stop following",
+  "dash.queuesTitle": "Running queues",
+  "dash.queuesHint": "Bell: a message on the page when it ends.",
+  "remind.add": "Remind me when it ends",
+  "remind.remove": "Remove the reminder",
+  "remind.now": "Now ({time})",
+  "remind.late": "Ended at {time}",
+  "remind.ok": "OK",
+  "remind.return": "(return)"
 }
