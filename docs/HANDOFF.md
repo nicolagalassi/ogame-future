@@ -91,11 +91,15 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
 9. **Storico account** (2026-11-06, `src/engines/history.ts`): una voce al giorno (punti, posizione,
    produzione, flotta) quando la Panoramica mostra i punti; scheda Storico nella Dashboard con due
    grafici a una serie e la tabella dei giorni.
-10. **Tabella spiate** (2026-11-06, `src/engines/raids.ts`, `src/modules/messages/spy-table.ts`): pulsante
-    accanto a "Filtri" in posta. Un bersaglio per pianeta/luna, 3 giorni, ordinato per MSU all'ora di volo
-    dal pianeta più vicino. Formula del volo verificata con `fleetHelper.calcDuration` del gioco (s808).
-    "Attacca" = link a fleet1 con `cp=` del pianeta più vicino e bersaglio inserito; niente sonda (§1.5.1).
-    Universi con galassie/sistemi diversi da 9×499: il meta non lo dice, si assume 9×499.
+10. **Tabella spiate** (2026-11-06, `src/engines/raids.ts`, `src/modules/messages/spy-table.ts`): pannello dentro la
+    scheda Spionaggio della posta, sopra l'intestazione colonne del gioco, con l'aspetto della posta e i pulsanti
+    `<gradient-button>` del gioco. Un bersaglio per pianeta/luna, 3 giorni, ordinato per MSU all'ora di volo dal
+    pianeta più vicino (formula verificata con `fleetHelper.calcDuration`). Per riga: attacco (fleet1 con `cp=`),
+    simulatore del gioco, Osims (OS), OGame Simulator (OT), togli; niente sonda (§1.5.1). Galassie, sistemi, anello
+    e velocità flotta da `/api/serverData.xml` (`src/data/server-data.ts`, al caricamento, cache 7 giorni).
+    Chiave API dei report = `data-raw-hashcode`. Link Osims/OGame Simulator anche nei riepiloghi di spionaggio,
+    link al convertitore Ogotcha (`ogotcha.oplanet.eu`) nei riepiloghi di combattimento: **da verificare** su un
+    CR vero (nessuno in posta il 2026-11-06). Il guard non manda mai i cookie all'API pubblica `/api/*.xml`.
 11. **Rivali** (2026-11-06, `src/engines/rivals.ts`): clic sulla posizione (#) in galassia; scheda Rivali
     nella Dashboard, `playerData` come la scheda in galassia (user-view, cache 1h, solo al clic).
 12. **Promemoria** (2026-11-06, `src/modules/reminders`): campanelle su Code in corso (Dashboard) e sulle

@@ -24,6 +24,8 @@ export interface SpyEntry {
   loot: number;
   fleetValue: number;
   defValue: number;
+  /** API key of the report, for the simulators ('' in entries saved before 2026-11-06). */
+  apiKey?: string;
 }
 
 export type SpyBoard = Record<string, SpyEntry>;
@@ -40,10 +42,12 @@ export function rememberSpies(board: SpyBoard, reports: SpyMessage[], now: numbe
   for (const r of reports) {
     if (r.counter || !r.playerId) continue;
     const key = spyKey(r.coords, r.moon);
-    if ((board[key]?.at ?? 0) >= r.at) continue;
+    const known = board[key];
+    // Same report seen again: skip, unless the stored copy predates the API key.
+    if (known && (known.at > r.at || (known.at === r.at && (known.apiKey || !r.apiKey)))) continue;
     board[key] = {
       key, id: r.id, at: r.at, coords: r.coords, moon: r.moon, playerId: r.playerId, playerName: r.playerName, statuses: r.statuses,
-      activity: r.activity, res: { metal: r.res.metal, crystal: r.res.crystal, deuterium: r.res.deuterium }, loot: r.loot, fleetValue: r.fleetValue, defValue: r.defValue,
+      activity: r.activity, res: { metal: r.res.metal, crystal: r.res.crystal, deuterium: r.res.deuterium }, loot: r.loot, fleetValue: r.fleetValue, defValue: r.defValue, apiKey: r.apiKey,
     };
     changed++;
   }
@@ -84,6 +88,17 @@ export interface Base {
   moon: boolean;
 }
 
+/** The player's planet or moon closest to `coords`. */
+export function nearestBase(bases: Base[], coords: string, u: Universe): { base: Base | null; dist: number } {
+  let base: Base | null = null;
+  let dist = Infinity;
+  for (const b of bases) {
+    const d = distance(b.coords, coords, u);
+    if (d < dist) { dist = d; base = b; }
+  }
+  return { base, dist };
+}
+
 export interface TargetRow {
   entry: SpyEntry;
   /** Resources the attack can take. */
@@ -104,13 +119,8 @@ export function targetRows(board: SpyBoard, bases: Base[], o: { capacity: number
   return Object.values(board).map((entry) => {
     const lootRes = Math.floor((entry.res.metal + entry.res.crystal + entry.res.deuterium) * entry.loot);
     const lootMsu = (entry.res.metal + entry.res.crystal * 1.5 + entry.res.deuterium * 3) * entry.loot;
-    let base: Base | null = null;
-    let best = Infinity;
-    for (const b of bases) {
-      const d = distance(b.coords, entry.coords, o.universe);
-      if (d < best) { best = d; base = b; }
-    }
-    const flight = base && o.speed > 0 ? flightSeconds(best, o.speed, o.universe) : null;
+    const { base, dist } = nearestBase(bases, entry.coords, o.universe);
+    const flight = base && o.speed > 0 ? flightSeconds(dist, o.speed, o.universe) : null;
     return {
       entry,
       lootRes,

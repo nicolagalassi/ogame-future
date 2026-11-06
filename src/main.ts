@@ -14,6 +14,7 @@ import { SCORE_KEY, watchScore, type Score } from './data/score';
 import { HISTORY_KEY, recordDay, type History } from './engines/history';
 import { RIVAL_POINTS_KEY, RIVALS_KEY, type Rival, type RivalPoints } from './engines/rivals';
 import { playerScores } from './data/player-api';
+import { loadServerDataOnPageLoad } from './data/server-data';
 import { isGalaxyPage, watchGalaxy } from './modules/galaxy';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
 import { ITEMS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems } from './data/bonuses';
@@ -34,7 +35,6 @@ import { entriesIn, JOURNAL_KEY, periodRange, periodStats, type Journal } from '
 import { isMessagesPage, ownPlayerId } from './data/messages';
 import { watchMessages } from './modules/messages';
 import { openJournal } from './modules/messages/journal-view';
-import { openSpyTable } from './modules/messages/spy-table';
 import { bellButton, clockOffset, startReminders, watchEventList } from './modules/reminders';
 import { renderPlanetMenu, type MenuMode, type MenuSettings } from './modules/planet-menu';
 
@@ -59,6 +59,8 @@ async function bootstrap(): Promise<void> {
       loadQueuesOnPageLoad({ guard, store, ids: bodyIds }),
       // Lifeform bonuses for the expedition size: once per session, like accountInfo.
       hydrateLfOncePerSession({ guard, store, session: window.sessionStorage }),
+      // Universe size and fleet speeds: public API, at most once a week.
+      loadServerDataOnPageLoad({ guard, store, origin: location.origin }),
     ]);
     if (lf.status === 'rejected') console.warn(`[${t('app.name')}]`, lf.reason);
     if (account.status === 'fulfilled') snapshot = account.value;
@@ -239,6 +241,8 @@ async function bootstrap(): Promise<void> {
     watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), onPlanChange: () => draw() });
   }
 
+  const pageMeta = (name: string) => document.querySelector(`meta[name="${name}"]`)?.getAttribute('content') ?? '';
+
   // Manual reminders: due ones are shown on the page; bells on the game's event list.
   const reminders = { doc: document, store, t, locale, offset: clockOffset(document, Date.now()) };
   startReminders(reminders);
@@ -248,11 +252,13 @@ async function bootstrap(): Promise<void> {
   if (isMessagesPage(document))
     watchMessages({
       doc: document, store, playerId: ownPlayerId(document), locale, t,
-      onOpenSpyTable: () =>
-        openSpyTable({
-          doc: document, store, now: Date.now(), locale, t,
-          bases: (snapshot?.bodies ?? []).map((b) => ({ id: b.id, name: b.name, coords: b.coords, moon: b.type === 'moon' })),
-        }),
+      spy: {
+        bases: (snapshot?.bodies ?? []).map((b) => ({ id: b.id, name: b.name, coords: b.coords, moon: b.type === 'moon' })),
+        researches: snapshot?.researches ?? {},
+        classId: Number(pageMeta('ogame-player-characterclass-id')) || 0,
+        server: pageMeta('ogame-universe').split('.')[0] ?? '',
+        lang: pageMeta('ogame-ui-language') || pageMeta('ogame-language'),
+      },
     });
 
   // Fleet page helpers: reserves and fleetsave, on the game's own form.

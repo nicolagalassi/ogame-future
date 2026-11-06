@@ -58,7 +58,8 @@ export class NetworkGuard {
     this.log.push({ at: this.now(), url, reason, allowed: refusal === null, why: refusal ?? undefined });
     if (refusal !== null) throw new GuardError(refusal);
 
-    const isGame = this.isGameUrl(url) && reason !== 'user-view';
+    // The universe's public API (/api/*.xml) never gets the session cookies, whatever the reason.
+    const isGame = this.isGameUrl(url) && !this.isPublicApi(url);
     return this.fetchImpl(url, {
       ...init,
       credentials: isGame ? 'include' : 'omit',
@@ -70,13 +71,17 @@ export class NetworkGuard {
     if (reason === 'page-load' && !this.pageLoadOpen) {
       return 'Background call refused: the page has finished loading (AGENTS.md §4).';
     }
-    if (reason === 'user-view' && !(this.isGameUrl(url) && /^\/api\/\w+\.xml$/.test(new URL(url, this.gameOrigin).pathname))) {
+    if (reason === 'user-view' && !this.isPublicApi(url)) {
       return "Call refused: 'user-view' reaches only the universe's public API (AGENTS.md §6).";
     }
     if (this.isGameUrl(url) && new URL(url, this.gameOrigin).searchParams.has('cp')) {
       return 'Call refused: the cp parameter changes the active planet (AGENTS.md §4.2).';
     }
     return null;
+  }
+
+  private isPublicApi(url: string): boolean {
+    return this.isGameUrl(url) && /^\/api\/\w+\.xml$/.test(new URL(url, this.gameOrigin).pathname);
   }
 
   private isGameUrl(url: string): boolean {

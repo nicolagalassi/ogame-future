@@ -6,7 +6,7 @@ import { sortRows } from '../src/modules/messages/spy-table';
 const U: Universe = { galaxies: 9, systems: 499, donutGalaxy: true, donutSystem: true, fleetSpeed: 2 };
 const spy = (over: Partial<SpyMessage>): SpyMessage => ({
   kind: 'spy', id: '1', at: 1000, coords: '1:476:11', moon: false, playerId: 5, playerName: 'Bob', statuses: ['inactive'], counter: false,
-  sourceName: '', sourceCoords: '', activity: 60, res: { metal: 1000, crystal: 1000, deuterium: 1000, food: 0 }, loot: 0.5, fleetValue: 0, defValue: 0, attacked: false, ...over,
+  sourceName: '', sourceCoords: '', activity: 60, res: { metal: 1000, crystal: 1000, deuterium: 1000, food: 0 }, loot: 0.5, fleetValue: 0, defValue: 0, attacked: false, apiKey: 'sr-en-808-abc', ...over,
 });
 
 describe('spy board', () => {
@@ -42,7 +42,7 @@ describe('spy board', () => {
     expect(near).toMatchObject({ lootRes: 1500, lootMsu: 2750, ships: 2, flight: 1806, ageMinutes: 1 });
     expect(near.base?.name).toBe('Home');
     expect(near.msuPerHour).toBeCloseTo(2750 / ((2 * 1806) / 3600));
-    const sorted = sortRows(rows, { sort: 'rate', desc: true, ship: 203, hideDefended: false, inactiveOnly: false });
+    const sorted = sortRows(rows, { sort: 'rate', desc: true });
     expect(sorted[0]!.entry.coords).toBe('1:476:11');
     expect(targetRows(board, bases, { capacity: 1000, speed: 0, universe: U, now: 0 })[0]!.msuPerHour).toBeNull();
   });
