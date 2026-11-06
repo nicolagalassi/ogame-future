@@ -112,3 +112,6 @@ export function readGalaxy(doc: Document): GalaxySystem | null {
 
 /** Debris in metal-standard units (metal 1, crystal 1.5, deuterium 3), as elsewhere in Future. */
 export const debrisMsu = (d: Debris): number => d.metal + d.crystal * 1.5 + d.deuterium * 3;
+
+/** Debris as it lies in space: metal + crystal + deuterium (what recyclers pick up), as OGLight shows it. */
+export const debrisTotal = (d: Debris): number => d.metal + d.crystal + d.deuterium;

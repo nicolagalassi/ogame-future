@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.1
+// @version      0.3.2
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -548,8 +548,8 @@
     "galaxy.longInactive": "di cui {count} da 28 giorni",
     "galaxy.vacation": "{count} in vacanza",
     "galaxy.moons": "{count} lune",
-    "galaxy.debris": "Detriti {msu} MSU in {count} campi",
-    "galaxy.deep": "Spazio profondo {msu} MSU",
+    "galaxy.debris": "Detriti {msu} in {count} campi",
+    "galaxy.deep": "Spazio profondo {msu}",
     "galaxy.noDebris": "Nessun campo detriti",
     "galaxy.targets": "Bersagli ({count})",
     "galaxy.rankTitle": "Punti e classifiche di {name}",
@@ -1097,8 +1097,8 @@
     "galaxy.longInactive": "{count} for 28+ days",
     "galaxy.vacation": "{count} on vacation",
     "galaxy.moons": "{count} moons",
-    "galaxy.debris": "Debris {msu} MSU in {count} fields",
-    "galaxy.deep": "Deep space {msu} MSU",
+    "galaxy.debris": "Debris {msu} in {count} fields",
+    "galaxy.deep": "Deep space {msu}",
     "galaxy.noDebris": "No debris fields",
     "galaxy.targets": "Targets ({count})",
     "galaxy.rankTitle": "Points and ranks of {name}",
@@ -1646,8 +1646,8 @@
     "galaxy.longInactive": "dont {count} depuis 28 jours",
     "galaxy.vacation": "{count} en vacances",
     "galaxy.moons": "{count} lunes",
-    "galaxy.debris": "D\xE9bris {msu} MSU dans {count} champs",
-    "galaxy.deep": "Espace lointain {msu} MSU",
+    "galaxy.debris": "D\xE9bris {msu} dans {count} champs",
+    "galaxy.deep": "Espace lointain {msu}",
     "galaxy.noDebris": "Aucun champ de d\xE9bris",
     "galaxy.targets": "Cibles ({count})",
     "galaxy.rankTitle": "Points et classements de {name}",
@@ -2195,8 +2195,8 @@
     "galaxy.longInactive": "davon {count} seit 28 Tagen",
     "galaxy.vacation": "{count} im Urlaub",
     "galaxy.moons": "{count} Monde",
-    "galaxy.debris": "Tr\xFCmmer {msu} MSU in {count} Feldern",
-    "galaxy.deep": "Tiefer Raum {msu} MSU",
+    "galaxy.debris": "Tr\xFCmmer {msu} in {count} Feldern",
+    "galaxy.deep": "Tiefer Raum {msu}",
     "galaxy.noDebris": "Keine Tr\xFCmmerfelder",
     "galaxy.targets": "Ziele ({count})",
     "galaxy.rankTitle": "Punkte und R\xE4nge von {name}",
@@ -2996,7 +2996,7 @@
     }
     return { galaxy, system, rows, deepDebris: readDebris(doc.getElementById("expeditionDebrisSlotDebrisContainer")) };
   }
-  var debrisMsu = (d) => d.metal + d.crystal * 1.5 + d.deuterium * 3;
+  var debrisTotal = (d) => d.metal + d.crystal + d.deuterium;
 
   // src/data/player-api.ts
   var PLAYER_SCORES_KEY = "galaxy.players";
@@ -3055,14 +3055,20 @@
 .fut-g-inact { color: #9BE36D; }
 .fut-g-vac { color: #7FB8FF; }
 .fut-g-deb { color: #F5B547; }
-/* Rows: a light tint on the cells, the game's own colours stay. */
-#galaxyContent .galaxyRow.fut-g-inactive .galaxyCell { background-color: rgba(155,227,109,0.07); }
-#galaxyContent .galaxyRow.fut-g-own .galaxyCell { background-color: rgba(79,209,232,0.08); }
-#galaxyContent .galaxyRow.fut-g-tagged .cellPlanetName { box-shadow: inset 3px 0 0 var(--fut-tag); }
+/* Dark table, as OGLight: flat dark cells on an almost black table, empty positions darker still.
+   Row marks are inset shadows, so they sit over the cell's own background. */
+#galaxycomponent .galaxyTable, #galaxyContent .expeditionDebrisSlotBox { background: #0C1117 !important; }
+#galaxyContent .ctContentRow .galaxyCell { background: linear-gradient(192deg, #1C2430, #131920 70%) !important; border-radius: 2px !important; }
+#galaxyContent .ctContentRow[class*="filtered_filter_empty"] .galaxyCell { background: #10151B !important; }
+#galaxyContent .ctContentRow .cellPlanetName { justify-content: flex-start !important; padding: 0 5px; box-sizing: border-box; }
+#galaxyContent .galaxyRow.fut-g-inactive .galaxyCell { box-shadow: inset 0 0 0 100px rgba(155,227,109,0.06); }
+#galaxyContent .galaxyRow.fut-g-own .galaxyCell { box-shadow: inset 0 0 0 100px rgba(79,209,232,0.07); }
+#galaxyContent .galaxyRow.fut-g-tagged .galaxyCell { box-shadow: inset 0 0 40px color-mix(in srgb, var(--fut-tag) 22%, transparent); }
+#galaxyContent .galaxyRow.fut-g-tagged .cellPlanetName { box-shadow: inset 3px 0 0 var(--fut-tag), inset 0 0 40px color-mix(in srgb, var(--fut-tag) 22%, transparent); }
 
 /* The position the side bar (or the link) asked for: the planet menu's cyan frame. */
 #galaxyContent .galaxyRow.fut-g-hl { box-shadow: inset 0 0 0 1px #4FD1E8, inset 3px 0 0 #4FD1E8; }
-#galaxyContent .galaxyRow.fut-g-hl .galaxyCell { background-color: rgba(79,209,232,0.12); }
+#galaxyContent .galaxyRow.fut-g-hl .galaxyCell { box-shadow: inset 0 0 0 100px rgba(79,209,232,0.10); }
 
 #galaxyContent .cellPlanetName { position: relative; }
 /* Planet colour: at the right of the name, faint until the row is pointed at or the planet has one. */
@@ -3127,7 +3133,7 @@
       if (r.moonId) moons++;
       if (r.debris) {
         fields++;
-        debris += debrisMsu(r.debris);
+        debris += debrisTotal(r.debris);
       }
       if (!who || r.planetId && ownPlanetIds.has(r.planetId)) continue;
       players.add(who);
@@ -3135,7 +3141,7 @@
       else if (r.statuses.includes("longinactive")) longInactive.add(who);
       if (!r.statuses.includes("vacation") && (r.statuses.includes("inactive") || r.statuses.includes("longinactive"))) inactive.add(who);
     }
-    return { players: players.size, inactive: inactive.size, longInactive: longInactive.size, vacation: vacation.size, moons, debris, fields, deep: s.deepDebris ? debrisMsu(s.deepDebris) : 0 };
+    return { players: players.size, inactive: inactive.size, longInactive: longInactive.size, vacation: vacation.size, moons, debris, fields, deep: s.deepDebris ? debrisTotal(s.deepDebris) : 0 };
   }
   function el(doc, tag, cls = "", text = "") {
     const n = doc.createElement(tag);
@@ -3182,7 +3188,7 @@
     const marks = loadMarks(o.store.get(MARKS_KEY, null));
     const recent = new Set(marks.recent.map((r) => r.id));
     const keep = (id, coords) => !!marks.players[String(id)] || recent.has(id) || !!marks.planets[coords];
-    const rows = s.rows.filter((r) => !(r.planetId && o.ownPlanetIds.has(r.planetId))).map((r) => ({ ...r, debris: r.debris ? debrisMsu(r.debris) : 0 }));
+    const rows = s.rows.filter((r) => !(r.planetId && o.ownPlanetIds.has(r.planetId))).map((r) => ({ ...r, debris: r.debris ? debrisTotal(r.debris) : 0 }));
     const next = recordSystem(o.store.get(POSITIONS_KEY, {}), s.galaxy, s.system, rows, keep, Date.now());
     if (next) o.store.set(POSITIONS_KEY, next);
   }
@@ -3225,8 +3231,8 @@
       }
       const debrisCell = r.row.querySelector(".cellDebris");
       if (debrisCell && r.debris && !debrisCell.querySelector(".fut-g-dval")) {
-        const msu4 = debrisMsu(r.debris);
-        debrisCell.append(el(doc, "span", `fut-g-dval${msu4 >= BIG_DEBRIS ? " big" : ""}`, formatUnits(msu4, locale)));
+        const total = debrisTotal(r.debris);
+        debrisCell.append(el(doc, "span", `fut-g-dval${total >= BIG_DEBRIS ? " big" : ""}`, formatUnits(total, locale)));
       }
     }
     renderBar(o, content, s);

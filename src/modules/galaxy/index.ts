@@ -1,6 +1,6 @@
 /**
  * Galaxy view helpers, as in OGLight: a summary of the system on screen, a light mark on inactive
- * players and on the player's own planets, debris in MSU, a flag on players and a colour on planets
+ * players and on the player's own planets, debris (metal + crystal + deuterium), a flag on players and a colour on planets
  * (Future's targets, no probe button: AGENTS.md §1.5.1) and a card with the player's points and ranks.
  *
  * COMPLIANCE: everything is read from the system the game drew itself. The only call is the
@@ -13,13 +13,13 @@ import { ensureMarksStyle, flagButton, TAG_COLORS, tagButton } from '../marks/pi
 import type { NetworkGuard } from '../../core/guard';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
-import { debrisMsu, readGalaxy, type GalaxyRow, type GalaxySystem } from '../../data/galaxy';
+import { debrisTotal, readGalaxy, type GalaxyRow, type GalaxySystem } from '../../data/galaxy';
 import { playerScores, SCORE_TYPES, type PlayerScores, type ScoreType } from '../../data/player-api';
 import { GALAXY_CSS } from './style';
 
 /** Galaxy targets saved before 2026-11-06, moved into the planet marks (engines/marks). */
 export const TARGETS_KEY = 'galaxy.targets';
-/** Debris worth a second look, in MSU. */
+/** Debris worth a second look (metal + crystal + deuterium). */
 const BIG_DEBRIS = 1_000_000;
 
 export interface GalaxyOptions {
@@ -57,7 +57,7 @@ export function systemSummary(s: GalaxySystem, ownPlanetIds: Set<number>) {
     if (r.moonId) moons++;
     if (r.debris) {
       fields++;
-      debris += debrisMsu(r.debris);
+      debris += debrisTotal(r.debris);
     }
     if (!who || (r.planetId && ownPlanetIds.has(r.planetId))) continue;
     players.add(who);
@@ -65,7 +65,7 @@ export function systemSummary(s: GalaxySystem, ownPlanetIds: Set<number>) {
     else if (r.statuses.includes('longinactive')) longInactive.add(who);
     if (!r.statuses.includes('vacation') && (r.statuses.includes('inactive') || r.statuses.includes('longinactive'))) inactive.add(who);
   }
-  return { players: players.size, inactive: inactive.size, longInactive: longInactive.size, vacation: vacation.size, moons, debris, fields, deep: s.deepDebris ? debrisMsu(s.deepDebris) : 0 };
+  return { players: players.size, inactive: inactive.size, longInactive: longInactive.size, vacation: vacation.size, moons, debris, fields, deep: s.deepDebris ? debrisTotal(s.deepDebris) : 0 };
 }
 
 function el<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, cls = '', text = ''): HTMLElementTagNameMap[K] {
@@ -123,7 +123,7 @@ function remember(o: GalaxyOptions): void {
   const marks = loadMarks(o.store.get<Partial<Marks> | null>(MARKS_KEY, null));
   const recent = new Set(marks.recent.map((r) => r.id));
   const keep = (id: number, coords: string) => !!marks.players[String(id)] || recent.has(id) || !!marks.planets[coords];
-  const rows = s.rows.filter((r) => !(r.planetId && o.ownPlanetIds.has(r.planetId))).map((r) => ({ ...r, debris: r.debris ? debrisMsu(r.debris) : 0 }));
+  const rows = s.rows.filter((r) => !(r.planetId && o.ownPlanetIds.has(r.planetId))).map((r) => ({ ...r, debris: r.debris ? debrisTotal(r.debris) : 0 }));
   const next = recordSystem(o.store.get<Positions>(POSITIONS_KEY, {}), s.galaxy, s.system, rows, keep, Date.now());
   if (next) o.store.set(POSITIONS_KEY, next);
 }
@@ -174,8 +174,8 @@ function decorate(o: GalaxyOptions, content: Element): void {
     // Debris value under the game's icon.
     const debrisCell = r.row.querySelector('.cellDebris');
     if (debrisCell && r.debris && !debrisCell.querySelector('.fut-g-dval')) {
-      const msu = debrisMsu(r.debris);
-      debrisCell.append(el(doc, 'span', `fut-g-dval${msu >= BIG_DEBRIS ? ' big' : ''}`, formatUnits(msu, locale)));
+      const total = debrisTotal(r.debris);
+      debrisCell.append(el(doc, 'span', `fut-g-dval${total >= BIG_DEBRIS ? ' big' : ''}`, formatUnits(total, locale)));
     }
   }
 
