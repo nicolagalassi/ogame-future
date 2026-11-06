@@ -3,3 +3,4 @@ node_modules/
 # dev browser capture of the LIVE game session (server, planet ids, coordinates): never publish
 devlog.jsonl
 devharness.log
+OGLight-*.user.js

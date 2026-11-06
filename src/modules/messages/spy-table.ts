@@ -17,6 +17,7 @@ import { SERVER_DATA_KEY, type ServerData } from '../../data/server-data';
 import { SPY_BOARD_KEY, targetRows, type Base, type SpyBoard, type TargetRow, type Universe } from '../../engines/raids';
 import { gameSimLink, ogameToolsSimLink, osimsLink, simPrefill } from '../../engines/sim-links';
 import { shipName, type T } from './index';
+import { ensureMarksStyle, flagButton } from '../marks/picker';
 
 export const SPY_PANEL_ID = 'fut-spypanel';
 const VIEW_KEY = 'spy.view';
@@ -100,6 +101,7 @@ const isSpyTab = (doc: Document) => !!doc.querySelector('[data-subtab-id="20"].a
  */
 export function mountSpyPanel(o: SpyPanelOptions): void {
   const { doc } = o;
+  ensureMarksStyle(doc);
   const holder = doc.querySelector('#messages .messagesHolder');
   // Above the game's own column headers (sort row), which belong to the reports below.
   const sortRow = doc.querySelector('#messages #filteredHeadersRow');
@@ -221,7 +223,7 @@ function renderPanel(o: SpyPanelOptions, board: SpyBoard, view: View): HTMLEleme
 
     const who = el('div', 'fut-sp-who');
     const name = el('span', 'fut-sp-name', e.playerName || '?');
-    who.append(name);
+    who.append(name, flagButton({ doc, store, t }, e.playerId, e.playerName));
     for (const st of e.statuses.filter((x) => x !== 'active')) who.append(el('span', `fut-sp-st st-${st}`, t(`spy.status.${st}`)));
     const gal = el('a', 'fut-sp-coords', `[${e.coords}]`);
     gal.href = `/game/index.php?page=ingame&component=galaxy&galaxy=${g}&system=${s}`;

@@ -100,8 +100,14 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     Chiave API dei report = `data-raw-hashcode`. Link Osims/OGame Simulator anche nei riepiloghi di spionaggio,
     link al convertitore Ogotcha (`ogotcha.oplanet.eu`) nei riepiloghi di combattimento: **da verificare** su un
     CR vero (nessuno in posta il 2026-11-06). Il guard non manda mai i cookie all'API pubblica `/api/*.xml`.
-11. **Rivali** (2026-11-06, `src/engines/rivals.ts`): clic sulla posizione (#) in galassia; scheda Rivali
-    nella Dashboard, `playerData` come la scheda in galassia (user-view, cache 1h, solo al clic).
+11. **Bersagli** (2026-11-06, al posto di rivali e mirino; `src/engines/marks.ts`, `src/modules/marks/`), come i
+    pinned players e tagged planets di OGLight: bandierina per giocatore (Da controllare, Bersaglio, Frigo,
+    Pericolo, Amico, Commercio) in galassia, classifica e tabella spiate; colore per pianeta in galassia;
+    clic = scelta, Maiusc+clic = ultima usata. Finestra Bersagli (pulsante nella barra galassia): Giocatori per
+    bandierina + Recenti, scheda con punti e tutti i pianeti/lune da `playerData` (raggruppati per sistema);
+    Pianeti per intervallo di coordinate, colori e stato (oggi da `/api/players.xml`, cache 1 giorno). Niente
+    sonda (§1.5.1): le coordinate aprono la galassia. Migrazione una tantum: vecchi bersagli → pianeti rossi,
+    rivali → "Da controllare". Da fare dopo: "prossimo bersaglio rapido" di OGLight con scorciatoia.
 12. **Promemoria** (2026-11-06, `src/modules/reminders`): campanelle su Code in corso (Dashboard) e sulle
     flotte della lista eventi; avviso nella pagina. **Da verificare**: le campanelle sulla lista eventi,
     scritte sul markup noto di OGame (`tr.eventFleet[data-arrival-time]`, `td.arrivalTime`) senza flotte

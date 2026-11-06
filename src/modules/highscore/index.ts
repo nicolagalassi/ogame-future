@@ -1,13 +1,12 @@
 /**
  * Highscore page (players): under each score the points made since midnight (green up, red
- * down), on the total points the days needed to catch those ahead at the current pace, and a star
- * to follow someone as a rival.
+ * down), on the total points the days needed to catch those ahead at the player's pace, and the
+ * player flag of Future's targets (modules/marks).
  *
  * COMPLIANCE: reads the page the player opened, Future's stored data and the public highscore
- * (data/highscore-api: 'user-view', at most once an hour per category, no cookies). The star only
+ * (data/highscore-api: 'user-view', at most once an hour per category, no cookies). The flag only
  * edits Future's own list.
  */
-import { icon } from '../../core/icons';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
 import { daysToCatch, readHighscore } from '../../data/highscore';
@@ -15,7 +14,7 @@ import { API_TYPES, dailyBase, type DailyBase } from '../../data/highscore-api';
 import type { NetworkGuard } from '../../core/guard';
 import { SCORE_KEY, type Score } from '../../data/score';
 import { changeOver, dayKey, HISTORY_KEY, type History } from '../../engines/history';
-import { pointsPerDay, RIVAL_POINTS_KEY, RIVALS_KEY, toggleRival, type Rival, type RivalPoints } from '../../engines/rivals';
+import { ensureMarksStyle, flagButton } from '../marks/picker';
 
 type T = (key: string, vars?: Record<string, string | number>) => string;
 
@@ -38,21 +37,13 @@ const CSS = `
 #ranks .fut-hs-gap.up { color: #7BC47F; } #ranks .fut-hs-gap.down { color: #D86A6A; } #ranks .fut-hs-gap.flat { color: #6A7682; }
 .fut-hs-note { margin: 4px 0 6px; color: #848484; font: 11px Verdana, Arial, sans-serif; }
 #ranks .fut-hs-eta { display: block; font-size: 10px; color: #6F9FC8; }
-#ranks .fut-hs-star { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-left: 4px; padding: 0;
-  border: 1px solid #2E4356; border-radius: 3px; background: #111A21; color: #848484; cursor: pointer; vertical-align: middle; }
-#ranks .fut-hs-star:hover, #ranks .fut-hs-star:focus-visible { border-color: #617C8D; color: #F1F1F1; }
-#ranks .fut-hs-star.on { border-color: #E3BB28; color: #E3BB28; }
-#ranks tr.fut-hs-rival td { box-shadow: inset 0 1px 0 #3A3220, inset 0 -1px 0 #3A3220; }
-#ranks tr.fut-hs-rival .playername { color: #E3BB28; }`;
+#ranks .highscoreNameHolder .fut-mk-flag { margin-left: 4px; }`;
 
 export function decorateHighscore(o: HighscoreOptions): void {
   const { doc, store, t, locale } = o;
   const hs = readHighscore(doc);
   if (!hs) return;
   const fmt = (n: number) => formatUnits(n, locale);
-  const rivals = store.get<Rival[]>(RIVALS_KEY, []);
-  const rivalIds = new Set(rivals.map((r) => r.id));
-  const book = store.get<RivalPoints>(RIVAL_POINTS_KEY, {});
   const total = hs.category === 'points';
   // My score in this category: my own row when on the page, else (total points only) the stored one.
   const mine = hs.rows.find((r) => r.mine)?.score ?? (total ? store.get<Score | null>(SCORE_KEY, null)?.points : undefined);
@@ -82,8 +73,7 @@ export function decorateHighscore(o: HighscoreOptions): void {
   }
 
   for (const r of hs.rows) {
-    r.row.querySelectorAll('.fut-hs-gap, .fut-hs-eta, .fut-hs-star').forEach((n) => n.remove());
-    r.row.classList.toggle('fut-hs-rival', rivalIds.has(r.playerId));
+    r.row.querySelectorAll('.fut-hs-gap, .fut-hs-eta').forEach((n) => n.remove());
     const scoreCell = r.row.querySelector('td.score');
     // Points made since midnight: score on the page now − score at the day's base.
     const base = today?.base.scores[String(r.playerId)];
@@ -96,37 +86,21 @@ export function decorateHighscore(o: HighscoreOptions): void {
       scoreCell.append(g);
     }
     if (scoreCell && mine !== undefined && !r.mine && total && myPace > 0 && r.score > mine) {
-      const theirs = rivalIds.has(r.playerId) ? pointsPerDay(book, r.playerId, 7) ?? 0 : 0;
-      const days = daysToCatch(r.score - mine, myPace, theirs);
+      const days = daysToCatch(r.score - mine, myPace);
       const e = doc.createElement('span');
       e.className = 'fut-hs-eta';
       e.textContent = days === null ? t('hs.never') : days < 1 ? t('hs.passToday') : t('hs.days', { n: Math.ceil(days).toLocaleString(locale) });
-      e.title = t(theirs ? 'hs.etaBoth' : 'hs.etaMine', { mine: fmt(myPace), theirs: fmt(theirs) });
+      e.title = t('hs.etaMine', { mine: fmt(myPace) });
       scoreCell.append(e);
     }
     const nameHolder = r.row.querySelector('.highscoreNameHolder');
-    if (nameHolder && !r.mine) {
-      const on = rivalIds.has(r.playerId);
-      const star = doc.createElement('button');
-      star.type = 'button';
-      star.className = `fut-hs-star${on ? ' on' : ''}`;
-      star.setAttribute('aria-pressed', String(on));
-      star.title = t(on ? 'galaxy.rivalRemove' : 'galaxy.rivalAdd');
-      star.setAttribute('aria-label', `${star.title}: ${r.name}`);
-      star.append(icon(doc, 'star', 11));
-      star.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        store.set(RIVALS_KEY, toggleRival(store.get<Rival[]>(RIVALS_KEY, []), { id: r.playerId, name: r.name, at: Date.now() }));
-        decorateHighscore(o);
-      });
-      nameHolder.append(star);
-    }
+    if (nameHolder && !r.mine && !nameHolder.querySelector('.fut-mk-flag')) nameHolder.append(flagButton({ doc, store, t }, r.playerId, r.name));
   }
 }
 
 /** The game swaps the table on category and page changes without reloading: redraw each time. */
 export function watchHighscore(o: HighscoreOptions): void {
+  ensureMarksStyle(o.doc);
   if (!o.doc.getElementById('fut-hs-style')) {
     const style = o.doc.createElement('style');
     style.id = 'fut-hs-style';
@@ -138,7 +112,7 @@ export function watchHighscore(o: HighscoreOptions): void {
   let queued = false;
   new MutationObserver((list) => {
     // Our own nodes do not count: only a table the game drew anew.
-    if (queued || list.every((m) => [...m.addedNodes].every((n) => n instanceof Element && n.className?.toString().startsWith('fut-hs')))) return;
+    if (queued || list.every((m) => [...m.addedNodes].every((n) => n instanceof Element && (/^fut-(hs|mk)/.test(n.getAttribute('class') ?? '') || !!n.closest('.fut-mk'))))) return;
     queued = true;
     setTimeout(() => {
       queued = false;

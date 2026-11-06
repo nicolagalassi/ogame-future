@@ -8,7 +8,6 @@
  */
 import type { NetworkGuard } from '../core/guard';
 import type { Store } from '../core/storage';
-import { recordPoints, RIVAL_POINTS_KEY, RIVALS_KEY, type Rival, type RivalPoints } from '../engines/rivals';
 
 export const PLAYER_SCORES_KEY = 'galaxy.players';
 const TTL = 60 * 60 * 1000;
@@ -26,6 +25,8 @@ export interface PlayerScores {
   scores: Partial<Record<ScoreType, { points: number; rank: number }>>;
   /** Ships counted in the military score. */
   ships: number | null;
+  /** Planets and moons as the API lists them (missing in answers cached before 2026-11-06). */
+  planets?: { id: number; name: string; coords: string; moon: { id: number; name: string; size: number } | null }[];
 }
 
 /** Parses playerData.xml; null when the answer is not a player (unknown id, error page). */
@@ -43,22 +44,28 @@ export function parsePlayerData(xml: string, now: number): PlayerScores | null {
     if (pos && Number.isFinite(points) && Number.isFinite(rank)) scores[key] = { points: Math.floor(points), rank };
   }
   const ships = Number(root.querySelector('positions position[type="3"]')?.getAttribute('ships'));
-  return { id, name: root.getAttribute('name') ?? '', at: now, scores, ships: Number.isFinite(ships) && ships > 0 ? ships : null };
+  const planets = [...root.querySelectorAll('planets planet')].map((p) => {
+    const m = p.querySelector('moon');
+    return {
+      id: Number(p.getAttribute('id')) || 0,
+      name: p.getAttribute('name') ?? '',
+      coords: p.getAttribute('coords') ?? '',
+      moon: m ? { id: Number(m.getAttribute('id')) || 0, name: m.getAttribute('name') ?? '', size: Number(m.getAttribute('size')) || 0 } : null,
+    };
+  }).filter((p) => /^\d+:\d+:\d+$/.test(p.coords));
+  return { id, name: root.getAttribute('name') ?? '', at: now, scores, ships: Number.isFinite(ships) && ships > 0 ? ships : null, planets };
 }
 
 /** The cached scores if younger than an hour, else asks the API once and caches the answer. */
 export async function playerScores(guard: NetworkGuard, store: Store, origin: string, id: number, now: number): Promise<PlayerScores | null> {
   const cache = store.get<Record<string, PlayerScores>>(PLAYER_SCORES_KEY, {});
   const hit = cache[String(id)];
-  if (hit && now - hit.at < TTL) return hit;
+  if (hit && hit.planets && now - hit.at < TTL) return hit;
   const res = await guard.request(`${origin}/api/playerData.xml?id=${id}`, 'user-view');
   if (!res.ok) return hit ?? null;
   const fresh = parsePlayerData(await res.text(), now);
   if (!fresh) return hit ?? null;
   cache[String(id)] = fresh;
-  // Points over time, for rivals and the player only (the dashboard's rivals tab).
-  const own = Number(store.namespace.split(':').pop());
-  if (id === own || store.get<Rival[]>(RIVALS_KEY, []).some((r) => r.id === id)) store.set(RIVAL_POINTS_KEY, recordPoints(store.get<RivalPoints>(RIVAL_POINTS_KEY, {}), fresh));
   // Keep the most recent players only.
   const ids = Object.keys(cache).sort((a, b) => (cache[b]?.at ?? 0) - (cache[a]?.at ?? 0));
   for (const old of ids.slice(KEEP)) delete cache[old];
