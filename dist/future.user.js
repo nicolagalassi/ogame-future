@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.3
+// @version      0.3.4
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -244,8 +244,6 @@
     "mine.metal": "Miniera di metallo",
     "mine.crystal": "Miniera di cristallo",
     "mine.deuterium": "Sintetizzatore di deuterio",
-    "fleet.reserveShips": "Navi",
-    "fleet.reserveRes": "Risorse",
     "fleet.noShips": "Nessuna nave su questo pianeta.",
     "fleet.fleetsave": "Fleetsave",
     "fleet.galaxy": "Galassia (vuoto = questa)",
@@ -257,13 +255,12 @@
     "fleet.typeDebris": "Campo detriti",
     "fleet.mission": "Missione",
     "fleet.speed": "Velocit\xE0",
-    "fleet.fleetsaveHint": "Lascia vuoti galassia e sistema per usare quelli del pianeta da cui parti, come in PrOGect. Senza posizione il fleetsave \xE8 spento.",
+    "fleet.fleetsaveHint": "Ha le sue navi e risorse da lasciare e ignora gli interruttori di navi, risorse e portale. Galassia e sistema vuoti = quelli del pianeta da cui parti, come in PrOGect. Senza posizione il fleetsave \xE8 spento.",
     "fleet.save": "Salva",
     "fleet.saved": "Salvato.",
     "fleet.copied": "Copiato su {count} corpi.",
     "fleet.reserve": "Riserva",
-    "fleet.summaryShips": "{count} navi",
-    "fleet.noReserve": "Nessuna riserva impostata",
+    "fleet.noReserve": "Nessuna regola attiva",
     "fleet.resMinusReserve": "Risorse \u2212 riserva",
     "fleet.resLoaded": "Caricate {cargo} risorse: controlla e premi Invia flotta",
     "mission.1": "Attacco",
@@ -275,8 +272,6 @@
     "mission.15": "Spedizione",
     "fleet.editTitlePlanet": "Riserve e fleetsave di {body}",
     "fleet.editTitleMoon": "Riserve e fleetsave della luna {body}",
-    "fleet.copyPlanets": "Copia su tutti i pianeti ({count})",
-    "fleet.copyMoons": "Copia su tutte le lune ({count})",
     "fleet.settingsTitle": "Impostazioni flotta",
     "fleet.transportTitle": "Trasporti e schieramenti",
     "fleet.mainShip": "Nave principale",
@@ -329,14 +324,10 @@
     "fleet.favTransport": "Trasporto verso",
     "fleet.favDeploy": "Schiera verso",
     "fleet.tip.cargo": "Carica le risorse lasciando la riserva e il deuterio per il volo",
-    "fleet.reserve1Title": "Riserva 1 \xB7 trasporti e schieramenti",
-    "fleet.reserve1Hint": "Resta sul corpo con Su luna, Trasporto, Schiera, Spedizione e Tutte \u2212 riserva.",
-    "fleet.reserve2Title": "Riserva 2 \xB7 solo fleetsave",
-    "fleet.reserve2Hint": "Resta sul corpo solo quando premi Fleetsave. Vuota = parte tutto.",
     "fleet.btn.last": "Ultima",
     "fleet.tip.last": "Ripete l'ultima flotta inviata: stesse navi, destinazione, missione e velocit\xE0",
     "fleet.err.noLast": "Nessuna flotta inviata finora",
-    "fleet.jumpgateKeep": "Riserva 1 di questa luna",
+    "fleet.jumpgateKeep": "Riserva portale di questa luna",
     "shortcut.prev": "Pianeta precedente",
     "shortcut.next": "Pianeta successivo",
     "fleet.shortcutsTitle": "Scorciatoie da tastiera",
@@ -381,9 +372,6 @@
     "tech.rangeShort": "{from}\u2192{to}",
     "tech.rangeHint": "Totale dei livelli da {from} a {to}",
     "tech.discountShort": "\u2212{pct}%",
-    "fleet.reserveOff": "Riserve spente: partono anche le navi e le risorse in riserva.",
-    "fleet.reserveShort": "Riserve",
-    "fleet.reserveToggleHint": "Accende o spegne le riserve 1 e 2 senza cancellarle. Le spedizioni non usano mai la riserva.",
     "fleet.foodShort": "Ignora cibo",
     "fleet.foodHint": "Il cibo resta sul pianeta in ogni flotta, anche con i tasti del gioco.",
     "fleet.err.noDelivery": "Nessuna consegna del piano in corso.",
@@ -713,7 +701,37 @@
     "exp.kind.discovery": "Missioni artefatti",
     "exp.kind.raid": "Raid",
     "exp.artefacts": "Artefatti",
-    "exp.artefactsAvg": "Artefatti a missione"
+    "exp.artefactsAvg": "Artefatti a missione",
+    "fleet.jumpgateKept": "Restano qui {count} navi",
+    "fleet.jumpgateOff": "Riserva portale spenta: possono saltare tutte le navi",
+    "fleet.rule.ships": "Navi",
+    "fleet.rule.resources": "Risorse",
+    "fleet.rule.gate": "Portale",
+    "fleet.rule.shipsHint": "Navi che restano sul corpo con Su luna, Trasporto, Schiera, Tutte \u2212 riserva, Ultima e Porta qui le risorse. Le spedizioni non la usano.",
+    "fleet.rule.resourcesHint": "Risorse che restano sul corpo con Su luna, Trasporto, Schiera, Porta qui le risorse e Risorse \u2212 riserva.",
+    "fleet.rule.gateHint": "Navi che restano sulla luna quando usi il portale del gioco.",
+    "fleet.rule.saveShips": "Navi da lasciare",
+    "fleet.rule.saveResources": "Risorse da lasciare",
+    "fleet.rule.empty": "Vuota",
+    "fleet.rule.on": "Attiva",
+    "fleet.rule.off": "Spenta",
+    "fleet.rule.onlyHere": "solo qui",
+    "fleet.rule.alsoOn": "uguale su {list}",
+    "fleet.rule.sameTitle": "Stessa regola salvata anche su:",
+    "fleet.rule.onlyHereTitle": "Nessun altro pianeta o luna ha questa stessa regola.",
+    "fleet.rule.switch": "Attiva",
+    "fleet.rule.switchHint": "Interruttore unico per tutti i pianeti e le lune: spegne la regola senza cancellarla.",
+    "fleet.rule.offList": "spente: {list}",
+    "fleet.copyTo": "Copia su\u2026",
+    "fleet.copyTitle": "Copia su altri pianeti o lune",
+    "fleet.copyHint": "Prima salva quello che hai scritto qui, poi copia solo le regole scelte. Le altre regole dei corpi scelti restano come sono.",
+    "fleet.copyWhat": "Regole da copiare",
+    "fleet.copyWhere": "Su quali corpi",
+    "fleet.pickPlanets": "Tutti i pianeti",
+    "fleet.pickMoons": "Tutte le lune",
+    "fleet.pickNone": "Nessuno",
+    "fleet.copyGo": "Copia",
+    "fleet.copyNothing": "Scegli almeno una regola e un corpo."
   };
 
   // src/i18n/en.json
@@ -793,8 +811,6 @@
     "mine.metal": "Metal mine",
     "mine.crystal": "Crystal mine",
     "mine.deuterium": "Deuterium synthesizer",
-    "fleet.reserveShips": "Ships",
-    "fleet.reserveRes": "Resources",
     "fleet.noShips": "No ships on this planet.",
     "fleet.fleetsave": "Fleetsave",
     "fleet.galaxy": "Galaxy (empty = this one)",
@@ -806,13 +822,12 @@
     "fleet.typeDebris": "Debris field",
     "fleet.mission": "Mission",
     "fleet.speed": "Speed",
-    "fleet.fleetsaveHint": "Leave galaxy and system empty to use the origin planet's, as in PrOGect. No position = fleetsave off.",
+    "fleet.fleetsaveHint": "It has its own ships and resources to keep and ignores the ships, resources and jump gate switches. Empty galaxy and system = the origin planet's, as in PrOGect. No position = fleetsave off.",
     "fleet.save": "Save",
     "fleet.saved": "Saved.",
     "fleet.copied": "Copied to {count} bodies.",
     "fleet.reserve": "Reserve",
-    "fleet.summaryShips": "{count} ships",
-    "fleet.noReserve": "No reserve set",
+    "fleet.noReserve": "No rule active",
     "fleet.resMinusReserve": "Resources \u2212 reserve",
     "fleet.resLoaded": "Loaded {cargo} resources: check and press Send fleet",
     "mission.1": "Attack",
@@ -824,8 +839,6 @@
     "mission.15": "Expedition",
     "fleet.editTitlePlanet": "Reserves and fleetsave of {body}",
     "fleet.editTitleMoon": "Reserves and fleetsave of moon {body}",
-    "fleet.copyPlanets": "Copy to all planets ({count})",
-    "fleet.copyMoons": "Copy to all moons ({count})",
     "fleet.settingsTitle": "Fleet settings",
     "fleet.transportTitle": "Transports and deployments",
     "fleet.mainShip": "Main ship",
@@ -878,14 +891,10 @@
     "fleet.favTransport": "Transport to",
     "fleet.favDeploy": "Deploy to",
     "fleet.tip.cargo": "Load the resources, keeping the reserve and the flight's deuterium",
-    "fleet.reserve1Title": "Reserve 1 \xB7 transports and deployments",
-    "fleet.reserve1Hint": "Stays here with To moon, Transport, Deploy, Expedition and All \u2212 reserve.",
-    "fleet.reserve2Title": "Reserve 2 \xB7 fleetsave only",
-    "fleet.reserve2Hint": "Stays here only when you press Fleetsave. Empty = everything leaves.",
     "fleet.btn.last": "Last",
     "fleet.tip.last": "Repeat the last fleet sent: same ships, target, mission and speed",
     "fleet.err.noLast": "No fleet sent yet",
-    "fleet.jumpgateKeep": "Reserve 1 of this moon",
+    "fleet.jumpgateKeep": "Jump gate reserve of this moon",
     "shortcut.prev": "Previous planet",
     "shortcut.next": "Next planet",
     "fleet.shortcutsTitle": "Keyboard shortcuts",
@@ -930,9 +939,6 @@
     "tech.rangeShort": "{from}\u2192{to}",
     "tech.rangeHint": "Total of levels {from} to {to}",
     "tech.discountShort": "\u2212{pct}%",
-    "fleet.reserveOff": "Reserves off: ships and resources in reserve leave too.",
-    "fleet.reserveShort": "Reserves",
-    "fleet.reserveToggleHint": "Turns reserves 1 and 2 on or off without deleting them. Expeditions never use the reserve.",
     "fleet.foodShort": "Ignore food",
     "fleet.foodHint": "Food stays on the planet in every fleet, also with the game's own buttons.",
     "fleet.err.noDelivery": "No plan delivery in progress.",
@@ -1262,7 +1268,37 @@
     "exp.kind.discovery": "Discovery missions",
     "exp.kind.raid": "Raids",
     "exp.artefacts": "Artefacts",
-    "exp.artefactsAvg": "Artefacts per mission"
+    "exp.artefactsAvg": "Artefacts per mission",
+    "fleet.jumpgateKept": "{count} ships stay here",
+    "fleet.jumpgateOff": "Jump gate reserve off: every ship can jump",
+    "fleet.rule.ships": "Ships",
+    "fleet.rule.resources": "Resources",
+    "fleet.rule.gate": "Jump gate",
+    "fleet.rule.shipsHint": "Ships that stay here with To moon, Transport, Deploy, All \u2212 reserve, Last fleet and Bring resources. Expeditions do not use it.",
+    "fleet.rule.resourcesHint": "Resources that stay here with To moon, Transport, Deploy, Bring resources and Resources \u2212 reserve.",
+    "fleet.rule.gateHint": "Ships that stay on the moon when you use the game's jump gate.",
+    "fleet.rule.saveShips": "Ships to keep",
+    "fleet.rule.saveResources": "Resources to keep",
+    "fleet.rule.empty": "Empty",
+    "fleet.rule.on": "On",
+    "fleet.rule.off": "Off",
+    "fleet.rule.onlyHere": "only here",
+    "fleet.rule.alsoOn": "same on {list}",
+    "fleet.rule.sameTitle": "The same rule is saved on:",
+    "fleet.rule.onlyHereTitle": "No other planet or moon has this same rule.",
+    "fleet.rule.switch": "On",
+    "fleet.rule.switchHint": "One switch for every planet and moon: turns the rule off without deleting it.",
+    "fleet.rule.offList": "off: {list}",
+    "fleet.copyTo": "Copy to\u2026",
+    "fleet.copyTitle": "Copy to other planets or moons",
+    "fleet.copyHint": "What you typed here is saved first, then only the chosen rules are copied. The other rules of the chosen bodies stay as they are.",
+    "fleet.copyWhat": "Rules to copy",
+    "fleet.copyWhere": "Onto which bodies",
+    "fleet.pickPlanets": "All planets",
+    "fleet.pickMoons": "All moons",
+    "fleet.pickNone": "None",
+    "fleet.copyGo": "Copy",
+    "fleet.copyNothing": "Pick at least one rule and one body."
   };
 
   // src/i18n/fr.json
@@ -1342,8 +1378,6 @@
     "mine.metal": "Mine de m\xE9tal",
     "mine.crystal": "Mine de cristal",
     "mine.deuterium": "Synth\xE9tiseur de deut\xE9rium",
-    "fleet.reserveShips": "Vaisseaux",
-    "fleet.reserveRes": "Ressources",
     "fleet.noShips": "Aucun vaisseau ici.",
     "fleet.fleetsave": "Fleetsave",
     "fleet.galaxy": "Galaxie (vide = celle-ci)",
@@ -1355,13 +1389,12 @@
     "fleet.typeDebris": "Champ de d\xE9bris",
     "fleet.mission": "Mission",
     "fleet.speed": "Vitesse",
-    "fleet.fleetsaveHint": "Galaxie et syst\xE8me vides = ceux de la plan\xE8te de d\xE9part. Sans position, fleetsave d\xE9sactiv\xE9.",
+    "fleet.fleetsaveHint": "Il a ses propres vaisseaux et ressources \xE0 garder et ignore les interrupteurs vaisseaux, ressources et porte de saut. Galaxie et syst\xE8me vides = ceux de la plan\xE8te de d\xE9part. Sans position, fleetsave d\xE9sactiv\xE9.",
     "fleet.save": "Enregistrer",
     "fleet.saved": "Enregistr\xE9.",
     "fleet.copied": "Copi\xE9 sur {count} corps.",
     "fleet.reserve": "R\xE9serve",
-    "fleet.summaryShips": "{count} vaisseaux",
-    "fleet.noReserve": "Aucune r\xE9serve",
+    "fleet.noReserve": "Aucune r\xE8gle active",
     "fleet.resMinusReserve": "Ressources \u2212 r\xE9serve",
     "fleet.resLoaded": "{cargo} ressources charg\xE9es : v\xE9rifiez et envoyez",
     "mission.1": "Attaquer",
@@ -1373,8 +1406,6 @@
     "mission.15": "Exp\xE9dition",
     "fleet.editTitlePlanet": "R\xE9serves et fleetsave de {body}",
     "fleet.editTitleMoon": "R\xE9serves et fleetsave de la lune {body}",
-    "fleet.copyPlanets": "Copier sur toutes les plan\xE8tes ({count})",
-    "fleet.copyMoons": "Copier sur toutes les lunes ({count})",
     "fleet.settingsTitle": "R\xE9glages flotte",
     "fleet.transportTitle": "Transports et stationnements",
     "fleet.mainShip": "Vaisseau principal",
@@ -1427,14 +1458,10 @@
     "fleet.favTransport": "Transport vers",
     "fleet.favDeploy": "Stationner vers",
     "fleet.tip.cargo": "Charger les ressources en gardant la r\xE9serve et le deut\xE9rium du vol",
-    "fleet.reserve1Title": "R\xE9serve 1 \xB7 transports et stationnements",
-    "fleet.reserve1Hint": "Reste ici avec Vers lune, Transport, Stationner, Exp\xE9dition et Tout \u2212 r\xE9serve.",
-    "fleet.reserve2Title": "R\xE9serve 2 \xB7 fleetsave uniquement",
-    "fleet.reserve2Hint": "Reste ici uniquement avec Fleetsave. Vide = tout part.",
     "fleet.btn.last": "Derni\xE8re",
     "fleet.tip.last": "R\xE9p\xE9ter la derni\xE8re flotte : m\xEAmes vaisseaux, cible, mission et vitesse",
     "fleet.err.noLast": "Aucune flotte envoy\xE9e",
-    "fleet.jumpgateKeep": "R\xE9serve 1 de cette lune",
+    "fleet.jumpgateKeep": "R\xE9serve porte de saut de cette lune",
     "shortcut.prev": "Plan\xE8te pr\xE9c\xE9dente",
     "shortcut.next": "Plan\xE8te suivante",
     "fleet.shortcutsTitle": "Raccourcis clavier",
@@ -1479,9 +1506,6 @@
     "tech.rangeShort": "{from}\u2192{to}",
     "tech.rangeHint": "Total des niveaux {from} \xE0 {to}",
     "tech.discountShort": "\u2212{pct}%",
-    "fleet.reserveOff": "R\xE9serves d\xE9sactiv\xE9es : vaisseaux et ressources en r\xE9serve partent aussi.",
-    "fleet.reserveShort": "R\xE9serves",
-    "fleet.reserveToggleHint": "Active ou d\xE9sactive les r\xE9serves 1 et 2 sans les effacer. Les exp\xE9ditions n'utilisent jamais la r\xE9serve.",
     "fleet.foodShort": "Ignorer la nourriture",
     "fleet.foodHint": "La nourriture reste sur la plan\xE8te dans chaque flotte, m\xEAme avec les boutons du jeu.",
     "fleet.err.noDelivery": "Aucune livraison du plan en cours.",
@@ -1811,7 +1835,37 @@
     "exp.kind.discovery": "Missions d'exploration",
     "exp.kind.raid": "Raids",
     "exp.artefacts": "Artefacts",
-    "exp.artefactsAvg": "Artefacts par mission"
+    "exp.artefactsAvg": "Artefacts par mission",
+    "fleet.jumpgateKept": "{count} vaisseaux restent ici",
+    "fleet.jumpgateOff": "R\xE9serve porte de saut d\xE9sactiv\xE9e : tous les vaisseaux peuvent sauter",
+    "fleet.rule.ships": "Vaisseaux",
+    "fleet.rule.resources": "Ressources",
+    "fleet.rule.gate": "Porte de saut",
+    "fleet.rule.shipsHint": "Vaisseaux qui restent ici avec Vers lune, Transport, Stationner, Tout \u2212 r\xE9serve, Derni\xE8re flotte et Apporter les ressources. Les exp\xE9ditions ne l'utilisent pas.",
+    "fleet.rule.resourcesHint": "Ressources qui restent ici avec Vers lune, Transport, Stationner, Apporter les ressources et Ressources \u2212 r\xE9serve.",
+    "fleet.rule.gateHint": "Vaisseaux qui restent sur la lune quand tu utilises la porte de saut du jeu.",
+    "fleet.rule.saveShips": "Vaisseaux \xE0 garder",
+    "fleet.rule.saveResources": "Ressources \xE0 garder",
+    "fleet.rule.empty": "Vide",
+    "fleet.rule.on": "Active",
+    "fleet.rule.off": "D\xE9sactiv\xE9e",
+    "fleet.rule.onlyHere": "seulement ici",
+    "fleet.rule.alsoOn": "identique sur {list}",
+    "fleet.rule.sameTitle": "La m\xEAme r\xE8gle est enregistr\xE9e sur :",
+    "fleet.rule.onlyHereTitle": "Aucune autre plan\xE8te ou lune n'a cette r\xE8gle.",
+    "fleet.rule.switch": "Active",
+    "fleet.rule.switchHint": "Un seul interrupteur pour toutes les plan\xE8tes et lunes : d\xE9sactive la r\xE8gle sans l'effacer.",
+    "fleet.rule.offList": "d\xE9sactiv\xE9es : {list}",
+    "fleet.copyTo": "Copier sur\u2026",
+    "fleet.copyTitle": "Copier sur d'autres plan\xE8tes ou lunes",
+    "fleet.copyHint": "Ce que tu as saisi ici est d'abord enregistr\xE9, puis seules les r\xE8gles choisies sont copi\xE9es. Les autres r\xE8gles des corps choisis ne changent pas.",
+    "fleet.copyWhat": "R\xE8gles \xE0 copier",
+    "fleet.copyWhere": "Sur quels corps",
+    "fleet.pickPlanets": "Toutes les plan\xE8tes",
+    "fleet.pickMoons": "Toutes les lunes",
+    "fleet.pickNone": "Aucun",
+    "fleet.copyGo": "Copier",
+    "fleet.copyNothing": "Choisis au moins une r\xE8gle et un corps."
   };
 
   // src/i18n/de.json
@@ -1891,8 +1945,6 @@
     "mine.metal": "Metallmine",
     "mine.crystal": "Kristallmine",
     "mine.deuterium": "Deuteriumsynthetisierer",
-    "fleet.reserveShips": "Schiffe",
-    "fleet.reserveRes": "Rohstoffe",
     "fleet.noShips": "Keine Schiffe hier.",
     "fleet.fleetsave": "Fleetsave",
     "fleet.galaxy": "Galaxie (leer = diese)",
@@ -1904,13 +1956,12 @@
     "fleet.typeDebris": "Tr\xFCmmerfeld",
     "fleet.mission": "Auftrag",
     "fleet.speed": "Geschwindigkeit",
-    "fleet.fleetsaveHint": "Galaxie und System leer = die des Startplaneten. Ohne Position ist Fleetsave aus.",
+    "fleet.fleetsaveHint": "Er hat eigene Schiffe und Rohstoffe zum Behalten und ignoriert die Schalter f\xFCr Schiffe, Rohstoffe und Sprungtor. Galaxie und System leer = die des Startplaneten. Ohne Position ist Fleetsave aus.",
     "fleet.save": "Speichern",
     "fleet.saved": "Gespeichert.",
     "fleet.copied": "Auf {count} K\xF6rper kopiert.",
     "fleet.reserve": "Reserve",
-    "fleet.summaryShips": "{count} Schiffe",
-    "fleet.noReserve": "Keine Reserve",
+    "fleet.noReserve": "Keine Regel aktiv",
     "fleet.resMinusReserve": "Rohstoffe \u2212 Reserve",
     "fleet.resLoaded": "{cargo} Rohstoffe geladen: pr\xFCfen und senden",
     "mission.1": "Angreifen",
@@ -1922,8 +1973,6 @@
     "mission.15": "Expedition",
     "fleet.editTitlePlanet": "Reserven und Fleetsave von {body}",
     "fleet.editTitleMoon": "Reserven und Fleetsave des Mondes {body}",
-    "fleet.copyPlanets": "Auf alle Planeten kopieren ({count})",
-    "fleet.copyMoons": "Auf alle Monde kopieren ({count})",
     "fleet.settingsTitle": "Flotteneinstellungen",
     "fleet.transportTitle": "Transporte und Stationierungen",
     "fleet.mainShip": "Hauptschiff",
@@ -1976,14 +2025,10 @@
     "fleet.favTransport": "Transport nach",
     "fleet.favDeploy": "Stationieren nach",
     "fleet.tip.cargo": "Rohstoffe laden, Reserve und Flug-Deuterium bleiben",
-    "fleet.reserve1Title": "Reserve 1 \xB7 Transporte und Stationierungen",
-    "fleet.reserve1Hint": "Bleibt hier bei Zum Mond, Transport, Stationieren, Expedition und Alle \u2212 Reserve.",
-    "fleet.reserve2Title": "Reserve 2 \xB7 nur Fleetsave",
-    "fleet.reserve2Hint": "Bleibt nur beim Fleetsave hier. Leer = alles fliegt.",
     "fleet.btn.last": "Letzte",
     "fleet.tip.last": "Letzte Flotte wiederholen: gleiche Schiffe, Ziel, Mission und Geschwindigkeit",
     "fleet.err.noLast": "Noch keine Flotte gesendet",
-    "fleet.jumpgateKeep": "Reserve 1 dieses Mondes",
+    "fleet.jumpgateKeep": "Sprungtor-Reserve dieses Mondes",
     "shortcut.prev": "Vorheriger Planet",
     "shortcut.next": "N\xE4chster Planet",
     "fleet.shortcutsTitle": "Tastenk\xFCrzel",
@@ -2028,9 +2073,6 @@
     "tech.rangeShort": "{from}\u2192{to}",
     "tech.rangeHint": "Summe der Stufen {from} bis {to}",
     "tech.discountShort": "\u2212{pct}%",
-    "fleet.reserveOff": "Reserven aus: auch Schiffe und Ressourcen in Reserve fliegen mit.",
-    "fleet.reserveShort": "Reserven",
-    "fleet.reserveToggleHint": "Schaltet Reserve 1 und 2 ein oder aus, ohne sie zu l\xF6schen. Expeditionen nutzen nie die Reserve.",
     "fleet.foodShort": "Nahrung ignorieren",
     "fleet.foodHint": "Nahrung bleibt bei jeder Flotte auf dem Planeten, auch mit den Kn\xF6pfen des Spiels.",
     "fleet.err.noDelivery": "Keine Plan-Lieferung aktiv.",
@@ -2360,7 +2402,37 @@
     "exp.kind.discovery": "Erkundungsmissionen",
     "exp.kind.raid": "Raids",
     "exp.artefacts": "Artefakte",
-    "exp.artefactsAvg": "Artefakte pro Mission"
+    "exp.artefactsAvg": "Artefakte pro Mission",
+    "fleet.jumpgateKept": "{count} Schiffe bleiben hier",
+    "fleet.jumpgateOff": "Sprungtor-Reserve aus: alle Schiffe k\xF6nnen springen",
+    "fleet.rule.ships": "Schiffe",
+    "fleet.rule.resources": "Rohstoffe",
+    "fleet.rule.gate": "Sprungtor",
+    "fleet.rule.shipsHint": "Schiffe, die hier bleiben bei Zum Mond, Transport, Stationieren, Alle \u2212 Reserve, Letzte Flotte und Rohstoffe bringen. Expeditionen nutzen sie nicht.",
+    "fleet.rule.resourcesHint": "Rohstoffe, die hier bleiben bei Zum Mond, Transport, Stationieren, Rohstoffe bringen und Rohstoffe \u2212 Reserve.",
+    "fleet.rule.gateHint": "Schiffe, die auf dem Mond bleiben, wenn du das Sprungtor des Spiels nutzt.",
+    "fleet.rule.saveShips": "Schiffe behalten",
+    "fleet.rule.saveResources": "Rohstoffe behalten",
+    "fleet.rule.empty": "Leer",
+    "fleet.rule.on": "Aktiv",
+    "fleet.rule.off": "Aus",
+    "fleet.rule.onlyHere": "nur hier",
+    "fleet.rule.alsoOn": "gleich auf {list}",
+    "fleet.rule.sameTitle": "Dieselbe Regel ist auch gespeichert auf:",
+    "fleet.rule.onlyHereTitle": "Kein anderer Planet oder Mond hat dieselbe Regel.",
+    "fleet.rule.switch": "Aktiv",
+    "fleet.rule.switchHint": "Ein Schalter f\xFCr alle Planeten und Monde: schaltet die Regel aus, ohne sie zu l\xF6schen.",
+    "fleet.rule.offList": "aus: {list}",
+    "fleet.copyTo": "Kopieren auf\u2026",
+    "fleet.copyTitle": "Auf andere Planeten oder Monde kopieren",
+    "fleet.copyHint": "Was du hier eingegeben hast, wird zuerst gespeichert, dann werden nur die gew\xE4hlten Regeln kopiert. Die anderen Regeln der gew\xE4hlten K\xF6rper bleiben unver\xE4ndert.",
+    "fleet.copyWhat": "Zu kopierende Regeln",
+    "fleet.copyWhere": "Auf welche K\xF6rper",
+    "fleet.pickPlanets": "Alle Planeten",
+    "fleet.pickMoons": "Alle Monde",
+    "fleet.pickNone": "Keiner",
+    "fleet.copyGo": "Kopieren",
+    "fleet.copyNothing": "W\xE4hle mindestens eine Regel und einen K\xF6rper."
   };
 
   // src/core/i18n.ts
@@ -7405,7 +7477,60 @@ table.queues td.acts { width: 1%; text-align: right; }
   var EMPTY_RESERVE = { ships: {}, resources: { metal: 0, crystal: 0, deuterium: 0 } };
   var PROFILES_KEY = "fleet.profiles";
   function profileFor(profiles, bodyId) {
-    return profiles[String(bodyId)] ?? { reserve: structuredClone(EMPTY_RESERVE), save: null };
+    const p = profiles[String(bodyId)] ?? { reserve: structuredClone(EMPTY_RESERVE), save: null };
+    return { ...p, gate: p.gate ?? { ...p.reserve.ships }, saveReserve: p.saveReserve ?? structuredClone(EMPTY_RESERVE) };
+  }
+  function activeProfile(p, s) {
+    return {
+      ...p,
+      reserve: { ships: s.shipsOn ? p.reserve.ships : {}, resources: s.resourcesOn ? p.reserve.resources : { ...EMPTY_RESERVE.resources } },
+      gate: s.gateOn ? p.gate : {}
+    };
+  }
+  var RESERVE_SECTIONS = ["ships", "resources", "gate", "fleetsave"];
+  var positive = (ships) => Object.fromEntries(Object.entries(ships).filter(([, n]) => n > 0));
+  function sectionValue(p, section2) {
+    switch (section2) {
+      case "ships":
+        return positive(p.reserve.ships);
+      case "resources":
+        return p.reserve.resources;
+      case "gate":
+        return positive(p.gate);
+      case "fleetsave":
+        return { save: p.save, ships: positive(p.saveReserve.ships), resources: p.saveReserve.resources };
+    }
+  }
+  function canonical(v) {
+    if (v === null || typeof v !== "object") return JSON.stringify(v ?? null);
+    return `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${canonical(v[k])}`).join(",")}}`;
+  }
+  function sectionEmpty(p, section2) {
+    const v = sectionValue(p, section2);
+    if (section2 === "resources") return !Object.values(v).some(Boolean);
+    if (section2 === "fleetsave") return v.save === null && canonical({ ships: v.ships, resources: v.resources }) === canonical({ ships: {}, resources: EMPTY_RESERVE.resources });
+    return Object.keys(v).length === 0;
+  }
+  function sameSection(profiles, fromId, ids, section2) {
+    const mine = canonical(sectionValue(profileFor(profiles, fromId), section2));
+    return ids.filter((id) => id !== fromId && canonical(sectionValue(profileFor(profiles, id), section2)) === mine);
+  }
+  function copySections(profiles, fromId, ids, sections) {
+    const src = structuredClone(profileFor(profiles, fromId));
+    const out = { ...profiles };
+    for (const id of ids) {
+      if (id === fromId) continue;
+      const p = structuredClone(profileFor(profiles, id));
+      if (sections.includes("ships")) p.reserve.ships = { ...src.reserve.ships };
+      if (sections.includes("resources")) p.reserve.resources = { ...src.reserve.resources };
+      if (sections.includes("gate")) p.gate = { ...src.gate };
+      if (sections.includes("fleetsave")) {
+        p.save = structuredClone(src.save);
+        p.saveReserve = structuredClone(src.saveReserve);
+      }
+      out[String(id)] = p;
+    }
+    return out;
   }
   function shipsAfterReserve(available, reserve) {
     const out = {};
@@ -7440,12 +7565,6 @@ table.queues td.acts { width: 1%; text-align: right; }
     const value = Number(num4) * unit;
     return Number.isFinite(value) ? Math.floor(value) : 0;
   }
-  function copyProfileToAll(profiles, fromId, ids) {
-    const src = profileFor(profiles, fromId);
-    const out = { ...profiles };
-    for (const id of ids) out[String(id)] = structuredClone(src);
-    return out;
-  }
   var SETTINGS_KEY = "fleet.settings";
   var DEFAULT_SETTINGS = {
     mainShip: 203,
@@ -7457,9 +7576,16 @@ table.queues td.acts { width: 1%; text-align: right; }
     expeditionValue: "",
     expeditionExtras: true,
     repeat: false,
-    reserveOn: true,
+    shipsOn: true,
+    resourcesOn: true,
+    gateOn: true,
     ignoreFood: false
   };
+  function settingsFrom(stored) {
+    const { reserveOn, ...rest } = stored;
+    const legacy = reserveOn === void 0 ? {} : { shipsOn: reserveOn, resourcesOn: reserveOn };
+    return { ...DEFAULT_SETTINGS, ...legacy, ...rest };
+  }
   var DELIVERY_KEY = "plan.delivery";
   function deliveryLoad(onPlanet2, reserve, fuel, capacity, need) {
     const free = resourcesAfterReserve(onPlanet2, reserve, fuel);
@@ -7811,7 +7937,7 @@ table.queues td.acts { width: 1%; text-align: right; }
   color: #8A9BB0; font: 10px/13px Consolas, monospace;
 }
 .fut-flabel { color: #E6EDF5; font-weight: 700; white-space: nowrap; }
-.fut-fcaption { color: #8A9BB0; font-size: 10px; max-width: 76px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fut-fcaption { color: #8A9BB0; font-size: 10px; max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fut-ftilewrap .fut-ftile { padding-right: 16px; }
 .fut-fcaret {
   position: absolute; right: 2px; top: 2px; width: 16px; height: 20px; padding: 0; border: 0; background: none;
@@ -7819,7 +7945,7 @@ table.queues td.acts { width: 1%; text-align: right; }
 }
 .fut-fcaret:hover { color: #E6EDF5; }
 .fut-fcaret svg { width: 14px; height: 14px; }
-.fut-fside { display: grid; grid-template-columns: repeat(2, auto); gap: 4px; align-content: start; }
+.fut-fside { display: grid; grid-template-columns: repeat(3, auto); gap: 4px; align-content: start; }
 .fut-ficon {
   width: 30px; height: 26px; display: inline-flex; align-items: center; justify-content: center; padding: 0;
   border-radius: 7px; border: 1px solid #24344B; background: #0A111C; color: #8A9BB0; cursor: pointer;
@@ -7862,7 +7988,15 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-ffield input:focus, .fut-ffield select:focus { outline: none; border-color: #4FD1E8; }
 .fut-fcheck { display: flex; align-items: center; gap: 6px; color: #C9D4E2; font-size: 12px; align-self: end; min-height: 26px; }
 .fut-freserve { margin-top: 12px; padding: 10px; border: 1px solid #1F2C40; border-radius: 8px; background: #0D1522; }
-.fut-freserve h5 { margin-top: 0; }
+.fut-freserve h5 { margin: 0; }
+.fut-frulehead { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.fut-frulehead .fut-fcheck { margin-left: auto; min-height: 0; }
+.fut-fbadge { padding: 1px 7px; border-radius: 9px; border: 1px solid #2C3E57; color: #8A9BB0; font-size: 11px; cursor: default; }
+.fut-fbadge.on { border-color: #38C56E; color: #38C56E; }
+.fut-fbadge.off { border-color: #C9853A; color: #FFB15C; }
+.fut-fchecks { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 2px 12px; }
+.fut-fchecks .fut-fcheck { align-self: auto; min-height: 22px; }
+.fut-fcopy .fut-factions { margin-top: 6px; }
 .fut-feditor h6 { margin: 10px 0 4px; font-size: 11px; font-weight: 400; color: #8A9BB0; }
 .fut-fkeys { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 12px; }
 .fut-fkeyrow { display: flex; align-items: center; gap: 8px; color: #C9D4E2; }
@@ -7922,6 +8056,9 @@ table.queues td.acts { width: 1%; text-align: right; }
     last: '<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/>',
     caret: '<path d="M7 10l5 5 5-5"/>',
     reserve: '<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M8 12h8"/>',
+    ships: '<path d="M12 2c2.5 2 4 5 4 9v6l-4 3-4-3v-6c0-4 1.5-7 4-9z"/><path d="M8 13l-3 3v4l3-2M16 13l3 3v4l-3-2"/><circle cx="12" cy="9" r="1.5"/>',
+    resources: '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',
+    gate: '<ellipse cx="12" cy="12" rx="5" ry="9"/><path d="M2 12h6M16 12h6M19 9l3 3-3 3"/>',
     food: '<path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10"/><path d="M16 3c-1.7 1-2.5 3-2.5 6s1 4 2.5 4v8"/><path d="M4 20L20 4" stroke-width="1.4"/>'
   };
   function iconSvg(name, size = 20) {
@@ -7958,7 +8095,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     return store.get(PROFILES_KEY, {});
   }
   function loadSettings(store) {
-    return { ...DEFAULT_SETTINGS, ...store.get(SETTINGS_KEY, {}) };
+    return settingsFrom(store.get(SETTINGS_KEY, {}));
   }
   function button(doc, text, onClick, cls = "", title = "") {
     const b = el3(doc, "button", `fut-fbtn ${cls}`.trim(), text);
@@ -8026,47 +8163,93 @@ table.queues td.acts { width: 1%; text-align: right; }
   function isMoon(bodies, id) {
     return bodies.some((b) => b.moonId === id);
   }
-  function sameTypeIds(bodies, id) {
-    const moon = isMoon(bodies, id);
-    return bodies.map((b) => moon ? b.moonId : b.planetId).filter((x) => x !== null);
-  }
   function bodyLabel(o, id) {
     const b = o.bodies.find((x) => x.planetId === id || x.moonId === id);
     if (!b) return String(id);
     return `${b.name} [${b.coords}]${b.moonId === id ? ` \xB7 ${o.t("fleet.typeMoon")}` : ""}`;
   }
-  function reserveFields(o, reserve, title, hint) {
-    const { doc, t } = o;
-    const box = el3(doc, "div", "fut-freserve");
-    box.append(el3(doc, "h5", "", title), el3(doc, "p", "fut-fnote", hint));
-    const shipGrid = el3(doc, "div", "fut-fgrid");
-    const shipInputs = [];
-    for (const slot of readShipSlots(doc)) {
-      const [wrap, input] = numberField(doc, slot.name, reserve.ships[slot.id] ?? null, "0");
-      shipGrid.append(wrap);
-      shipInputs.push([slot.id, input]);
+  function shipFields(o, ships) {
+    const grid2 = el3(o.doc, "div", "fut-fgrid");
+    const inputs = [];
+    for (const slot of readShipSlots(o.doc)) {
+      const [wrap, input] = numberField(o.doc, slot.name, ships[slot.id] ?? null, "0");
+      grid2.append(wrap);
+      inputs.push([slot.id, input]);
     }
-    if (!shipInputs.length) shipGrid.append(el3(doc, "span", "fut-fnote", t("fleet.noShips")));
-    const resGrid = el3(doc, "div", "fut-fgrid");
-    const resInputs = ["metal", "crystal", "deuterium"].map((k) => {
-      const [wrap, input] = numberField(doc, t(`res.${k}`), reserve.resources[k] || null, "0");
-      resGrid.append(wrap);
-      return [k, input];
-    });
-    box.append(el3(doc, "h6", "", t("fleet.reserveShips")), shipGrid, el3(doc, "h6", "", t("fleet.reserveRes")), resGrid);
+    if (!inputs.length) grid2.append(el3(o.doc, "span", "fut-fnote", o.t("fleet.noShips")));
     return {
-      el: box,
+      el: grid2,
       read: () => {
-        const ships = {};
-        for (const [id, input] of shipInputs) {
+        const out = {};
+        for (const [id, input] of inputs) {
           const n = parseAmount(input.value);
-          if (n > 0) ships[id] = n;
+          if (n > 0) out[id] = n;
         }
-        const resources = { metal: 0, crystal: 0, deuterium: 0 };
-        for (const [k, input] of resInputs) resources[k] = parseAmount(input.value);
-        return { ships, resources };
+        return out;
       }
     };
+  }
+  function resourceFields(o, res) {
+    const grid2 = el3(o.doc, "div", "fut-fgrid");
+    const inputs = ["metal", "crystal", "deuterium"].map((k) => {
+      const [wrap, input] = numberField(o.doc, o.t(`res.${k}`), res[k] || null, "0");
+      grid2.append(wrap);
+      return [k, input];
+    });
+    return {
+      el: grid2,
+      read: () => {
+        const out = { metal: 0, crystal: 0, deuterium: 0 };
+        for (const [k, input] of inputs) out[k] = parseAmount(input.value);
+        return out;
+      }
+    };
+  }
+  function shortName(o, id) {
+    const b = o.bodies.find((x) => x.planetId === id || x.moonId === id);
+    return b ? `${b.name}${b.moonId === id ? " \u263E" : ""}` : String(id);
+  }
+  var SWITCH = { ships: "shipsOn", resources: "resourcesOn", gate: "gateOn" };
+  function ruleBadge(o, section2) {
+    const { doc, t } = o;
+    const profiles = loadProfiles(o.store);
+    const settings = loadSettings(o.store);
+    const key2 = SWITCH[section2];
+    const badge = el3(doc, "span", "fut-fbadge");
+    if (sectionEmpty(profileFor(profiles, o.bodyId), section2)) {
+      badge.classList.add("empty");
+      badge.textContent = t("fleet.rule.empty");
+      return badge;
+    }
+    const on = key2 ? settings[key2] : true;
+    badge.classList.add(on ? "on" : "off");
+    const ids = o.bodies.flatMap((b) => [b.planetId, b.moonId]).filter((x) => x !== null);
+    const same = sameSection(profiles, o.bodyId, ids, section2);
+    const names = same.map((id) => shortName(o, id));
+    const where = same.length ? t("fleet.rule.alsoOn", { list: names.slice(0, 3).join(", ") + (names.length > 3 ? ` +${names.length - 3}` : "") }) : t("fleet.rule.onlyHere");
+    badge.textContent = `${on ? t("fleet.rule.on") : t("fleet.rule.off")} \xB7 ${where}`;
+    badge.title = same.length ? `${t("fleet.rule.sameTitle")}
+${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
+    return badge;
+  }
+  function ruleBox(o, section2, title, hint, fields, onSwitch) {
+    const { doc, t } = o;
+    const box = el3(doc, "div", "fut-freserve");
+    const head = el3(doc, "div", "fut-frulehead");
+    head.append(el3(doc, "h5", "", title), ruleBadge(o, section2));
+    const key2 = SWITCH[section2];
+    if (key2) {
+      const [wrap, input] = checkField(doc, t("fleet.rule.switch"), loadSettings(o.store)[key2]);
+      wrap.title = t("fleet.rule.switchHint");
+      input.addEventListener("change", () => {
+        o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key2]: input.checked });
+        head.querySelector(".fut-fbadge")?.replaceWith(ruleBadge(o, section2));
+        onSwitch();
+      });
+      head.append(wrap);
+    }
+    box.append(head, el3(doc, "p", "fut-fnote", hint), ...fields);
+    return box;
   }
   function reserveEditor(o, onSaved) {
     const { doc, t } = o;
@@ -8074,9 +8257,13 @@ table.queues td.acts { width: 1%; text-align: right; }
     const moon = isMoon(o.bodies, o.bodyId);
     const panel = el3(doc, "div", "fut-feditor");
     panel.append(el3(doc, "h4", "", t(moon ? "fleet.editTitleMoon" : "fleet.editTitlePlanet", { body: bodyLabel(o, o.bodyId) })));
-    const r1 = reserveFields(o, profile.reserve, t("fleet.reserve1Title"), t("fleet.reserve1Hint"));
-    panel.append(r1.el);
-    panel.append(el3(doc, "h5", "", t("fleet.fleetsave")));
+    const refresh = () => onSaved("");
+    const ships = shipFields(o, profile.reserve.ships);
+    panel.append(ruleBox(o, "ships", t("fleet.rule.ships"), t("fleet.rule.shipsHint"), [ships.el], refresh));
+    const res = resourceFields(o, profile.reserve.resources);
+    panel.append(ruleBox(o, "resources", t("fleet.rule.resources"), t("fleet.rule.resourcesHint"), [res.el], refresh));
+    const gate = moon ? shipFields(o, profile.gate) : null;
+    if (gate) panel.append(ruleBox(o, "gate", t("fleet.rule.gate"), t("fleet.rule.gateHint"), [gate.el], refresh));
     const saveGrid = el3(doc, "div", "fut-fgrid");
     const origin = originCoords(doc);
     const [gWrap, gIn] = numberField(doc, t("fleet.galaxy"), profile.save?.galaxy ?? null, origin ? String(origin.galaxy) : "");
@@ -8096,10 +8283,17 @@ table.queues td.acts { width: 1%; text-align: right; }
       String(profile.save?.speed ?? 10)
     );
     saveGrid.append(gWrap, sWrap, pWrap, typeWrap, misWrap, spdWrap);
-    panel.append(saveGrid);
-    panel.append(el3(doc, "p", "fut-fnote", t("fleet.fleetsaveHint")));
-    const r2 = reserveFields(o, profile.saveReserve ?? EMPTY_RESERVE, t("fleet.reserve2Title"), t("fleet.reserve2Hint"));
-    panel.append(r2.el);
+    const saveShips = shipFields(o, profile.saveReserve.ships);
+    const saveRes = resourceFields(o, profile.saveReserve.resources);
+    panel.append(
+      ruleBox(o, "fleetsave", t("fleet.fleetsave"), t("fleet.fleetsaveHint"), [
+        saveGrid,
+        el3(doc, "h6", "", t("fleet.rule.saveShips")),
+        saveShips.el,
+        el3(doc, "h6", "", t("fleet.rule.saveResources")),
+        saveRes.el
+      ], refresh)
+    );
     const read = () => {
       const position = parseAmount(pIn.value);
       const save = position >= 1 && position <= 17 ? {
@@ -8110,26 +8304,84 @@ table.queues td.acts { width: 1%; text-align: right; }
         mission: Number(misSel.value),
         speed: Number(spdSel.value)
       } : null;
-      return { reserve: r1.read(), saveReserve: r2.read(), save };
+      return {
+        reserve: { ships: ships.read(), resources: res.read() },
+        gate: gate ? gate.read() : profile.gate,
+        saveReserve: { ships: saveShips.read(), resources: saveRes.read() },
+        save
+      };
     };
-    const same = sameTypeIds(o.bodies, o.bodyId);
+    const store = () => {
+      const all2 = loadProfiles(o.store);
+      all2[String(o.bodyId)] = read();
+      o.store.set(PROFILES_KEY, all2);
+      return all2;
+    };
+    const copyBox = copyPanel(o, moon, (sections, ids) => {
+      o.store.set(PROFILES_KEY, copySections(store(), o.bodyId, ids, sections));
+      onSaved(t("fleet.copied", { count: ids.length }));
+    });
+    copyBox.hidden = true;
     const actions = el3(doc, "div", "fut-factions");
     actions.append(
       button(doc, t("fleet.save"), () => {
-        const all2 = loadProfiles(o.store);
-        all2[String(o.bodyId)] = read();
-        o.store.set(PROFILES_KEY, all2);
+        store();
         onSaved(t("fleet.saved"));
       }, "primary"),
-      button(doc, t(moon ? "fleet.copyMoons" : "fleet.copyPlanets", { count: same.length }), () => {
-        const all2 = loadProfiles(o.store);
-        all2[String(o.bodyId)] = read();
-        o.store.set(PROFILES_KEY, copyProfileToAll(all2, o.bodyId, same));
-        onSaved(t("fleet.copied", { count: same.length }));
+      button(doc, t("fleet.copyTo"), () => {
+        copyBox.hidden = !copyBox.hidden;
       })
     );
-    panel.append(actions);
+    panel.append(actions, copyBox);
     return panel;
+  }
+  function copyPanel(o, moon, onCopy) {
+    const { doc, t } = o;
+    const box = el3(doc, "div", "fut-freserve fut-fcopy");
+    box.append(el3(doc, "h5", "", t("fleet.copyTitle")), el3(doc, "p", "fut-fnote", t("fleet.copyHint")));
+    const secRow = el3(doc, "div", "fut-fchecks");
+    const sections = RESERVE_SECTIONS.filter((s) => s !== "gate" || moon).map((s) => {
+      const [wrap, input] = checkField(doc, t(s === "fleetsave" ? "fleet.fleetsave" : `fleet.rule.${s}`), true);
+      secRow.append(wrap);
+      return [s, input];
+    });
+    box.append(el3(doc, "h6", "", t("fleet.copyWhat")), secRow);
+    const bodyRow = el3(doc, "div", "fut-fchecks");
+    const targets = [];
+    for (const b of o.bodies) {
+      for (const [id, isMoonId] of [[b.planetId, false], [b.moonId, true]]) {
+        if (id === null || id === o.bodyId) continue;
+        const [wrap, input] = checkField(doc, `${shortName(o, id)} [${b.coords}]`, false);
+        bodyRow.append(wrap);
+        targets.push([id, isMoonId, input]);
+      }
+    }
+    const pick = (which) => {
+      for (const [, isMoonId, input] of targets) input.checked = which === "moons" ? isMoonId : which === "planets" ? !isMoonId : false;
+    };
+    const quick = el3(doc, "div", "fut-factions");
+    quick.append(
+      button(doc, t("fleet.pickPlanets"), () => pick("planets")),
+      button(doc, t("fleet.pickMoons"), () => pick("moons")),
+      button(doc, t("fleet.pickNone"), () => pick("none"))
+    );
+    box.append(el3(doc, "h6", "", t("fleet.copyWhere")), quick, bodyRow);
+    const status = el3(doc, "span", "fut-fnote");
+    const go = el3(doc, "div", "fut-factions");
+    go.append(
+      button(doc, t("fleet.copyGo"), () => {
+        const chosen = sections.filter(([, i]) => i.checked).map(([s]) => s);
+        const ids = targets.filter(([, , i]) => i.checked).map(([id]) => id);
+        if (!chosen.length || !ids.length) {
+          status.textContent = t("fleet.copyNothing");
+          return;
+        }
+        onCopy(chosen, ids);
+      }, "primary"),
+      status
+    );
+    box.append(go);
+    return box;
   }
   function settingsEditor(o, onSaved) {
     const { doc, t } = o;
@@ -8207,14 +8459,19 @@ table.queues td.acts { width: 1%; text-align: right; }
     panel.append(actions);
     return panel;
   }
-  function summary(o, profile) {
-    const ships = Object.values(profile.reserve.ships).reduce((a, b) => a + b, 0);
-    const r = profile.reserve.resources;
+  function summary(o, stored, settings) {
+    const { t } = o;
     const fmt = (n) => n.toLocaleString(o.locale);
     const parts = [];
-    if (ships) parts.push(o.t("fleet.summaryShips", { count: fmt(ships) }));
-    if (r.metal || r.crystal || r.deuterium) parts.push(`${fmt(r.metal)} / ${fmt(r.crystal)} / ${fmt(r.deuterium)}`);
-    return parts.length ? `${o.t("fleet.reserve")}: ${parts.join(" \xB7 ")}` : o.t("fleet.noReserve");
+    const off = [];
+    const ships = Object.values(stored.reserve.ships).reduce((a, b) => a + b, 0);
+    if (ships) settings.shipsOn ? parts.push(`${t("fleet.rule.ships")}: ${fmt(ships)}`) : off.push(t("fleet.rule.ships"));
+    const r = stored.reserve.resources;
+    if (r.metal || r.crystal || r.deuterium)
+      settings.resourcesOn ? parts.push(`${t("fleet.rule.resources")}: ${fmt(r.metal)} / ${fmt(r.crystal)} / ${fmt(r.deuterium)}`) : off.push(t("fleet.rule.resources"));
+    if (settings.ignoreFood) parts.push(t("fleet.foodShort"));
+    const text = parts.length ? `${t("fleet.reserve")}: ${parts.join(" \xB7 ")}` : t("fleet.noReserve");
+    return off.length ? `${text} \xB7 ${t("fleet.rule.offList", { list: off.join(", ") })}` : text;
   }
   function universeSpeed(doc) {
     const n = Number(doc.querySelector('meta[name="ogame-universe-speed"]')?.getAttribute("content"));
@@ -8246,8 +8503,13 @@ table.queues td.acts { width: 1%; text-align: right; }
     const show2 = (which) => {
       tabs.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tab === which)));
       const saved = (msg) => {
-        status.textContent = msg;
         onChange();
+        if (msg && which === "body") {
+          const top = backdrop.scrollTop;
+          show2(which);
+          backdrop.scrollTop = top;
+        }
+        status.textContent = msg;
       };
       body.replaceChildren(which === "body" ? reserveEditor(o, saved) : settingsEditor(o, saved));
     };
@@ -8355,7 +8617,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const navigate = o.navigate ?? ((url) => doc.location.assign(url));
     const settings = loadSettings(o.store);
     const stored = profileFor(loadProfiles(o.store), o.bodyId);
-    const profile = settings.reserveOn ? stored : { ...stored, reserve: EMPTY_RESERVE, saveReserve: EMPTY_RESERVE };
+    const profile = activeProfile(stored, settings);
     const redraw = () => renderFleetTools(o);
     const fleet1 = doc.getElementById("fleet1");
     const anchor1 = fleet1?.querySelector("#technologies") ?? null;
@@ -8366,7 +8628,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const state = pageState.get(doc) ?? { active: incoming, o };
     state.o = o;
     pageState.set(doc, state);
-    const info = el3(doc, "span", "fut-finfo", settings.reserveOn ? summary(o, profile) : t("fleet.reserveOff"));
+    const info = el3(doc, "span", "fut-finfo", summary(o, stored, settings));
     const say = (text, err = false) => {
       info.textContent = text;
       info.classList.toggle("err", err);
@@ -8489,10 +8751,13 @@ table.queues td.acts { width: 1%; text-align: right; }
       ]);
       const side = el3(doc, "div", "fut-fside");
       side.append(
-        iconToggle(doc, "reserve", `${t("fleet.reserveShort")}: ${settings.reserveOn ? t("fleet.on") : t("fleet.off")}. ${t("fleet.reserveToggleHint")}`, () => {
-          o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), reserveOn: !loadSettings(o.store).reserveOn });
-          redraw();
-        }, settings.reserveOn ? "on" : ""),
+        ...["shipsOn", "resourcesOn", "gateOn"].map((key2) => {
+          const name = key2 === "shipsOn" ? "ships" : key2 === "resourcesOn" ? "resources" : "gate";
+          return iconToggle(doc, name, `${t(`fleet.rule.${name}`)}: ${settings[key2] ? t("fleet.on") : t("fleet.off")}. ${t(`fleet.rule.${name}Hint`)}`, () => {
+            o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key2]: !loadSettings(o.store)[key2] });
+            redraw();
+          }, settings[key2] ? "on" : "");
+        }),
         iconToggle(doc, "food", `${t("fleet.foodShort")}: ${settings.ignoreFood ? t("fleet.on") : t("fleet.off")}. ${t("fleet.foodHint")}`, () => {
           o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), ignoreFood: !loadSettings(o.store).ignoreFood });
           applyFood(o.store);
@@ -8512,7 +8777,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (fleet2 && anchor2) {
       const bar = el3(doc, "div", "fut-fbar");
       const row = el3(doc, "div", "fut-frow");
-      const info2 = el3(doc, "span", "fut-finfo", settings.reserveOn ? summary(o, profile) : t("fleet.reserveOff"));
+      const info2 = el3(doc, "span", "fut-finfo", summary(o, stored, settings));
       const tiles = el3(doc, "div", "fut-ftiles");
       tiles.append(
         tile(doc, "cargo", t("fleet.resMinusReserve"), "", t("fleet.tip.cargo"), () => {
@@ -8621,16 +8886,23 @@ table.queues td.acts { width: 1%; text-align: right; }
   }
 
   // src/modules/fleet/jumpgate.ts
+  var STYLE = `
+.fut-jgkeep { color: #FF9A6B; font: 11px Arial, sans-serif; text-align: right; }
+.fut-jgbar { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin: 4px 0; font: 11px Arial, sans-serif; color: #8A9BB0; }
+.fut-jgbar button { padding: 1px 8px; border: 1px solid #2C3E57; border-radius: 5px; background: #0A111C; color: #8A9BB0; font: 11px Arial, sans-serif; cursor: pointer; }
+.fut-jgbar button.on { border-color: #38C56E; color: #38C56E; }
+`;
   function applyJumpgateReserve(doc, store, bodyId, t) {
     const gate = doc.getElementById("jumpgate");
     if (!gate || doc.getElementById("jumpgateNotReady")) return 0;
     if (!doc.getElementById("fut-jg-style")) {
       const style = doc.createElement("style");
       style.id = "fut-jg-style";
-      style.textContent = ".fut-jgkeep { color: #FF9A6B; font: 11px Arial, sans-serif; text-align: right; }";
+      style.textContent = STYLE;
       doc.head.append(style);
     }
-    const reserve = profileFor(loadProfiles(store), bodyId).reserve;
+    const on = loadSettings(store).gateOn;
+    const reserve = on ? profileFor(loadProfiles(store), bodyId).gate : {};
     const all2 = {};
     let kept = 0;
     gate.querySelectorAll(".ship_input_row").forEach((row) => {
@@ -8641,7 +8913,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       const id = input.id.replace("ship_", "");
       if (!input.dataset.futMax) input.dataset.futMax = input.getAttribute("rel") ?? "0";
       const max = Number(input.dataset.futMax) || 0;
-      const keep = Math.min(max, reserve.ships[id] ?? 0);
+      const keep = Math.min(max, reserve[id] ?? 0);
       const amount = max - keep;
       kept += keep;
       input.setAttribute("rel", String(amount));
@@ -8659,7 +8931,28 @@ table.queues td.acts { width: 1%; text-align: right; }
       all2[id] = amount;
     });
     gate.querySelector("#sendall")?.setAttribute("onclick", `setMaxIntInput("#jumpgateForm", ${JSON.stringify(all2)})`);
+    switchBar(doc, gate, store, bodyId, t, on, kept);
     return kept;
+  }
+  function switchBar(doc, gate, store, bodyId, t, on, kept) {
+    let bar = gate.querySelector(".fut-jgbar");
+    if (!bar) {
+      bar = doc.createElement("div");
+      bar.className = "fut-jgbar";
+      gate.prepend(bar);
+    }
+    const label = doc.createElement("span");
+    label.textContent = on ? t("fleet.jumpgateKept", { count: kept.toLocaleString() }) : t("fleet.jumpgateOff");
+    const toggle = doc.createElement("button");
+    toggle.type = "button";
+    toggle.className = on ? "on" : "";
+    toggle.textContent = `${t("fleet.rule.gate")}: ${on ? t("fleet.on") : t("fleet.off")}`;
+    toggle.addEventListener("click", (e) => {
+      e.preventDefault();
+      store.set(SETTINGS_KEY, { ...loadSettings(store), gateOn: !loadSettings(store).gateOn });
+      applyJumpgateReserve(doc, store, bodyId, t);
+    });
+    bar.replaceChildren(label, toggle);
   }
   function watchJumpgate(doc, store, bodyId, t) {
     const win = pageWindow();

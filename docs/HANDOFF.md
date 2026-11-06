@@ -47,6 +47,11 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
   sync e impostazioni a lato.
 - Flotta: i pulsanti preparano tutto in fleet1; fleetsave come PrOGect (galassia/sistema vuoti =
   quelli del pianeta di partenza); la riserva non vale per le spedizioni; "ignora cibo".
+- Regole per corpo (2026-11-06): navi, risorse, portale (lune) sono regole separate, ognuna con
+  un interruttore globale (barra flotta; il portale anche nel dialogo del salto); cibo = "ignora
+  cibo". Il fleetsave ha navi + risorse sue e ignora gli interruttori. "Copia su…" copia solo le
+  regole scelte sui corpi scelti; ogni regola mostra Attiva/Spenta/Vuota e su quali altri corpi
+  è uguale. Vecchi salvataggi: il portale usa le navi della riserva finché non ha la sua.
 - Diario spedizioni: niente lista "ultime spedizioni"; navi con le immagini del CDN del gioco.
 - Riepilogo spedizione in posta: esito e MSU sopra, navi centrate sotto, colore del riquadro
   per la dimensione (grigio normale, ciano grande, oro enorme), esaurimento sotto.

@@ -157,7 +157,7 @@ export function prepareAllShips(fd: FleetDispatcher, profile: FleetProfile): Pre
 }
 
 export function prepareFleetsave(fd: FleetDispatcher, doc: Document, base: FleetProfile, save: FleetsaveProfile): PrepareResult {
-  // The fleetsave has its own reserve (reserve 2), separate from the one of transports.
+  // The fleetsave has its own reserve (ships and resources), and ignores the rules' switches.
   const profile: FleetProfile = { ...base, reserve: base.saveReserve ?? EMPTY_RESERVE };
   const ships = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
   const count = selectShips(fd, ships);
@@ -170,7 +170,7 @@ export function prepareFleetsave(fd: FleetDispatcher, doc: Document, base: Fleet
 
 /**
  * Planner delivery: brings what is still missing to the planned body, from this one. Ships
- * and resources respect reserve 1; the main cargo ship goes first, the second covers the rest.
+ * and resources respect the ships and resources rules; the main cargo ship goes first, the second covers the rest.
  */
 export function prepareDelivery(
   fd: FleetDispatcher,
@@ -236,7 +236,7 @@ export function prepareExpedition(
   return { ...finish(fd, EXPEDITION, count, 0), target };
 }
 
-/** "Ripeti ultima flotta": the same ships (within what is here after reserve 1), target, mission, speed. */
+/** "Ripeti ultima flotta": the same ships (within what is here after the ships rule), target, mission, speed. */
 export function prepareLast(fd: FleetDispatcher, doc: Document, profile: FleetProfile, last: LastFleet): PrepareResult {
   const left = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
   const ships: Record<number, number> = {};
