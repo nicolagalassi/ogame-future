@@ -630,7 +630,14 @@
     "spy.simOgameTools": "Simula con OGame Simulator (nuova scheda, con le tue ricerche di combattimento)",
     "spy.from": "Da {name} [{coords}], andata al 100%",
     "msg.combat.converter": "Convertitore",
-    "msg.combat.converterHint": "Apre il rapporto nel convertitore Ogotcha (nuova scheda)"
+    "msg.combat.converterHint": "Apre il rapporto nel convertitore Ogotcha (nuova scheda)",
+    "hs.ahead": "{n} punti pi\xF9 di te",
+    "hs.behind": "{n} punti meno di te",
+    "hs.days": "ti avvicini: {n} g",
+    "hs.today": "lo superi oggi",
+    "hs.never": "al ritmo attuale no",
+    "hs.etaMine": "Al tuo ritmo degli ultimi 7 giorni (+{mine}/g)",
+    "hs.etaBoth": "Al tuo ritmo (+{mine}/g) meno il suo (+{theirs}/g), ultimi 7 giorni"
   };
 
   // src/i18n/en.json
@@ -1099,7 +1106,14 @@
     "spy.simOgameTools": "Simulate with OGame Simulator (new tab, with your combat research)",
     "spy.from": "From {name} [{coords}], one way at 100%",
     "msg.combat.converter": "Converter",
-    "msg.combat.converterHint": "Opens the report in the Ogotcha converter (new tab)"
+    "msg.combat.converterHint": "Opens the report in the Ogotcha converter (new tab)",
+    "hs.ahead": "{n} points more than you",
+    "hs.behind": "{n} points less than you",
+    "hs.days": "catch up: {n} d",
+    "hs.today": "you pass today",
+    "hs.never": "not at this pace",
+    "hs.etaMine": "At your pace of the last 7 days (+{mine}/d)",
+    "hs.etaBoth": "Your pace (+{mine}/d) minus theirs (+{theirs}/d), last 7 days"
   };
 
   // src/i18n/fr.json
@@ -1568,7 +1582,14 @@
     "spy.simOgameTools": "Simuler avec OGame Simulator (nouvel onglet, avec vos recherches de combat)",
     "spy.from": "Depuis {name} [{coords}], aller \xE0 100 %",
     "msg.combat.converter": "Convertisseur",
-    "msg.combat.converterHint": "Ouvre le rapport dans le convertisseur Ogotcha (nouvel onglet)"
+    "msg.combat.converterHint": "Ouvre le rapport dans le convertisseur Ogotcha (nouvel onglet)",
+    "hs.ahead": "{n} points de plus que vous",
+    "hs.behind": "{n} points de moins que vous",
+    "hs.days": "rattrap\xE9 en {n} j",
+    "hs.today": "d\xE9pass\xE9 aujourd'hui",
+    "hs.never": "pas \xE0 ce rythme",
+    "hs.etaMine": "\xC0 votre rythme des 7 derniers jours (+{mine}/j)",
+    "hs.etaBoth": "Votre rythme (+{mine}/j) moins le sien (+{theirs}/j), 7 derniers jours"
   };
 
   // src/i18n/de.json
@@ -2037,7 +2058,14 @@
     "spy.simOgameTools": "Mit OGame Simulator simulieren (neuer Tab, mit deiner Kampfforschung)",
     "spy.from": "Von {name} [{coords}], Hinflug bei 100 %",
     "msg.combat.converter": "Konverter",
-    "msg.combat.converterHint": "\xD6ffnet den Bericht im Ogotcha-Konverter (neuer Tab)"
+    "msg.combat.converterHint": "\xD6ffnet den Bericht im Ogotcha-Konverter (neuer Tab)",
+    "hs.ahead": "{n} Punkte mehr als du",
+    "hs.behind": "{n} Punkte weniger als du",
+    "hs.days": "eingeholt in {n} T",
+    "hs.today": "heute \xFCberholt",
+    "hs.never": "nicht bei diesem Tempo",
+    "hs.etaMine": "Bei deinem Tempo der letzten 7 Tage (+{mine}/T)",
+    "hs.etaBoth": "Dein Tempo (+{mine}/T) minus seines (+{theirs}/T), letzte 7 Tage"
   };
 
   // src/core/i18n.ts
@@ -2403,6 +2431,7 @@
     close: '<path d="M6 6l12 12M18 6L6 18"/>',
     check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
     moon: '<path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z"/>',
+    star: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
     bell: '<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
     target: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>'
   };
@@ -8393,6 +8422,117 @@ h3 { margin: 0; }
     draw();
   }
 
+  // src/data/highscore.ts
+  var int3 = (text) => Number((text ?? "").replace(/[^\d]/g, "")) || 0;
+  function readHighscore(doc) {
+    const table = doc.getElementById("ranks");
+    if (!table || !doc.querySelector("#player.active")) return null;
+    const category = doc.querySelector("#categoryButtons a.active, a.stat_filter.active")?.id ?? "";
+    const rows = [];
+    for (const row of table.querySelectorAll('tbody tr[id^="position"]')) {
+      const playerId = int3(row.id);
+      if (!playerId) continue;
+      rows.push({
+        row,
+        playerId,
+        rank: int3(row.querySelector("td.position")?.textContent),
+        name: row.querySelector(".playername")?.textContent?.trim() ?? "",
+        score: int3(row.querySelector("td.score")?.textContent),
+        mine: row.classList.contains("myrank")
+      });
+    }
+    return { category, rows };
+  }
+  function daysToCatch(gap, mine, theirs = 0) {
+    const closing = mine - theirs;
+    if (gap <= 0) return 0;
+    return closing > 0 ? gap / closing : null;
+  }
+
+  // src/modules/highscore/index.ts
+  var isHighscorePage = (doc) => new URL(doc.location?.href ?? "http://x/").searchParams.get("component") === "highscore";
+  var CSS = `
+#ranks .fut-hs-gap { display: block; font-size: 10px; line-height: 1.3; }
+#ranks .fut-hs-gap.ahead { color: #E3BB28; } #ranks .fut-hs-gap.behind { color: #7BC47F; }
+#ranks .fut-hs-eta { display: block; font-size: 10px; color: #6F9FC8; }
+#ranks .fut-hs-star { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-left: 4px; padding: 0;
+  border: 1px solid #2E4356; border-radius: 3px; background: #111A21; color: #848484; cursor: pointer; vertical-align: middle; }
+#ranks .fut-hs-star:hover, #ranks .fut-hs-star:focus-visible { border-color: #617C8D; color: #F1F1F1; }
+#ranks .fut-hs-star.on { border-color: #E3BB28; color: #E3BB28; }
+#ranks tr.fut-hs-rival td { box-shadow: inset 0 1px 0 #3A3220, inset 0 -1px 0 #3A3220; }
+#ranks tr.fut-hs-rival .playername { color: #E3BB28; }`;
+  function decorateHighscore(o) {
+    const { doc, store, t, locale } = o;
+    const hs = readHighscore(doc);
+    if (!hs) return;
+    const fmt = (n) => formatUnits(n, locale);
+    const rivals = store.get(RIVALS_KEY, []);
+    const rivalIds = new Set(rivals.map((r) => r.id));
+    const book = store.get(RIVAL_POINTS_KEY, {});
+    const total = hs.category === "points";
+    const mine = hs.rows.find((r) => r.mine)?.score ?? (total ? store.get(SCORE_KEY, null)?.points : void 0);
+    const myPace = total ? changeOver(store.get(HISTORY_KEY, []), 7)?.perDay ?? 0 : 0;
+    for (const r of hs.rows) {
+      r.row.querySelectorAll(".fut-hs-gap, .fut-hs-eta, .fut-hs-star").forEach((n) => n.remove());
+      r.row.classList.toggle("fut-hs-rival", rivalIds.has(r.playerId));
+      const scoreCell = r.row.querySelector("td.score");
+      if (scoreCell && mine !== void 0 && !r.mine) {
+        const gap = r.score - mine;
+        const g = doc.createElement("span");
+        g.className = `fut-hs-gap ${gap > 0 ? "ahead" : "behind"}`;
+        g.textContent = gap > 0 ? `+${fmt(gap)}` : `\u2212${fmt(-gap)}`;
+        g.title = t(gap > 0 ? "hs.ahead" : "hs.behind", { n: Math.abs(gap).toLocaleString(locale) });
+        scoreCell.append(g);
+        if (total && gap > 0 && myPace > 0) {
+          const theirs = rivalIds.has(r.playerId) ? pointsPerDay(book, r.playerId, 7) ?? 0 : 0;
+          const days = daysToCatch(gap, myPace, theirs);
+          const e = doc.createElement("span");
+          e.className = "fut-hs-eta";
+          e.textContent = days === null ? t("hs.never") : days < 1 ? t("hs.today") : t("hs.days", { n: Math.ceil(days).toLocaleString(locale) });
+          e.title = t(theirs ? "hs.etaBoth" : "hs.etaMine", { mine: fmt(myPace), theirs: fmt(theirs) });
+          scoreCell.append(e);
+        }
+      }
+      const nameHolder = r.row.querySelector(".highscoreNameHolder");
+      if (nameHolder && !r.mine) {
+        const on = rivalIds.has(r.playerId);
+        const star = doc.createElement("button");
+        star.type = "button";
+        star.className = `fut-hs-star${on ? " on" : ""}`;
+        star.setAttribute("aria-pressed", String(on));
+        star.title = t(on ? "galaxy.rivalRemove" : "galaxy.rivalAdd");
+        star.setAttribute("aria-label", `${star.title}: ${r.name}`);
+        star.append(icon(doc, "star", 11));
+        star.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          store.set(RIVALS_KEY, toggleRival(store.get(RIVALS_KEY, []), { id: r.playerId, name: r.name, at: Date.now() }));
+          decorateHighscore(o);
+        });
+        nameHolder.append(star);
+      }
+    }
+  }
+  function watchHighscore(o) {
+    if (!o.doc.getElementById("fut-hs-style")) {
+      const style = o.doc.createElement("style");
+      style.id = "fut-hs-style";
+      style.textContent = CSS;
+      o.doc.head.append(style);
+    }
+    decorateHighscore(o);
+    const box = o.doc.getElementById("stat_list_content") ?? o.doc.body;
+    let queued = false;
+    new MutationObserver((list) => {
+      if (queued || list.every((m) => [...m.addedNodes].every((n) => n instanceof Element && n.className?.toString().startsWith("fut-hs")))) return;
+      queued = true;
+      setTimeout(() => {
+        queued = false;
+        decorateHighscore(o);
+      }, 50);
+    }).observe(box, { childList: true, subtree: true });
+  }
+
   // src/engines/reminders.ts
   var REMINDERS_KEY = "reminders";
   var KEEP_AFTER = 24 * 36e5;
@@ -8715,6 +8855,7 @@ h3 { margin: 0; }
     const reminders = { doc: document, store, t, locale, offset: clockOffset(document, Date.now()) };
     startReminders(reminders);
     watchEventList(reminders);
+    if (isHighscorePage(document)) watchHighscore({ doc: document, store, locale, t });
     if (isMessagesPage(document))
       watchMessages({
         doc: document,

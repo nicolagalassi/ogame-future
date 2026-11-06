@@ -79,7 +79,7 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
 4. Riepiloghi di spionaggio verificati su giocatori veri (2026-11-06). Nella posta 13.x a lista il
    riepilogo sta sotto la riga d'intestazione e il clic apre il report come la riga del gioco.
 5. Domanda aperta: plancia, piano e diario restano finestre sopra il gioco o diventano pannelli?
-6. Roadmap: classifiche e giocatori, nome definitivo, merge delle PR #1–#6, richiesta di
+6. Roadmap: nome definitivo, merge delle PR #1–#6, richiesta di
    tolleranza ai ToolDev (con le aree grigie: spostamento banner, "Ripeti" flotta).
 
 7. **Backup** (fatto il 2026-11-06, `src/core/backup.ts`): Impostazioni → Backup dati → Esporta/Importa.
@@ -106,6 +106,11 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     flotte della lista eventi; avviso nella pagina. **Da verificare**: le campanelle sulla lista eventi,
     scritte sul markup noto di OGame (`tr.eventFleet[data-arrival-time]`, `td.arrivalTime`) senza flotte
     in volo da guardare.
+
+13. **Classifica** (2026-11-06, `src/modules/highscore`, `src/data/highscore.ts`): sotto ogni punteggio la
+    distanza da te; in classifica generale i giorni per raggiungere chi è davanti (tuo ritmo a 7 giorni dallo
+    storico, meno il loro se sono rivali); stella per seguire come rivale. Solo DOM e dati salvati.
+    **Nota dev**: dopo un cambio di ramo che ricrea `dist/` va riavviato `npm run dev` (il watcher perde la cartella).
 
 ## Come si prova senza il gioco
 
