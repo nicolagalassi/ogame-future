@@ -7,10 +7,11 @@
 import { icon } from '../../core/icons';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
-import { readMessage, type ExpeditionMessage, type ParsedMessage, type Res } from '../../data/messages';
+import { readMessage, type ExpeditionMessage, type ParsedMessage, type Res, type SpyMessage } from '../../data/messages';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { SHIP_ICONS } from '../../data/ship-icons';
 import { JOURNAL_KEY, record, recordCombat, trim, unitsValue, msu, type Journal } from '../../engines/expeditions';
+import { rememberSpies, SPY_BOARD_KEY, type SpyBoard } from '../../engines/raids';
 import { MESSAGES_CSS } from './style';
 
 export type T = (key: string, vars?: Record<string, string | number>) => string;
@@ -26,6 +27,18 @@ export interface MessagesOptions {
   now?: () => number;
   /** Called when new expeditions entered the journal. */
   onJournal?: (added: number) => void;
+  /** Opens the spy table (Future's own window). */
+  onOpenSpyTable?: () => void;
+}
+
+/** Button next to the game's "Filters" in the inbox bar; the game redraws the bar on tab changes. */
+function mountSpyButton(o: MessagesOptions): void {
+  const bar = o.doc.querySelector('.messagesExtraBtns');
+  if (!o.onOpenSpyTable || !bar || bar.querySelector('.fut-spy-open')) return;
+  const b = h(o.doc, 'button', 'fut-spy-open', o.t('spy.open'));
+  b.type = 'button';
+  b.addEventListener('click', () => o.onOpenSpyTable?.());
+  bar.prepend(b);
 }
 
 function h<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, cls = '', text?: string): HTMLElementTagNameMap[K] {
@@ -199,9 +212,11 @@ function place(msg: Element, box: HTMLElement): void {
 /** Reads and summarises every report on the page not done yet. Returns new journal entries. */
 export function processMessages(o: MessagesOptions): number {
   const { doc, store, t, locale } = o;
+  mountSpyButton(o);
   const ships = store.get<ShipsInfo>(SHIPS_INFO_KEY, {});
   const fold = store.get<boolean>(FOLD_KEY, true);
   const expeditions: ExpeditionMessage[] = [];
+  const spies: SpyMessage[] = [];
   let journal: Journal | null = null;
   let added = 0;
   for (const msg of Array.from(doc.querySelectorAll('.msg[data-msg-id]'))) {
@@ -224,6 +239,7 @@ export function processMessages(o: MessagesOptions): number {
       if (fold && (parsed.kind === 'expedition' || parsed.kind === 'discovery' || parsed.kind === 'recycle' || parsed.kind === 'transport' || parsed.kind === 'deploy' || parsed.kind === 'return')) msg.classList.add('fut-msg-folded');
     }
     if (parsed.kind === 'expedition' || parsed.kind === 'discovery') expeditions.push(parsed);
+    if (parsed.kind === 'spy') spies.push(parsed);
     // Pirates and aliens: the losses are in the combat report at position 16.
     if (parsed.kind === 'combat' && parsed.coords?.split(':')[2] === '16' && Object.keys(parsed.lost).length) {
       journal ??= store.get<Journal>(JOURNAL_KEY, {});
@@ -237,6 +253,11 @@ export function processMessages(o: MessagesOptions): number {
     const r = record(journal, expeditions);
     journal = r.journal;
     added += r.added;
+  }
+  // Spy board: newest report per target, kept locally for the spy table (no network).
+  if (spies.length) {
+    const board = store.get<SpyBoard>(SPY_BOARD_KEY, {});
+    if (rememberSpies(board, spies, o.now?.() ?? Date.now())) store.set(SPY_BOARD_KEY, board);
   }
   if (journal && added) {
     store.set(JOURNAL_KEY, trim(journal, o.now?.() ?? Date.now()));

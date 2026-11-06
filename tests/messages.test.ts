@@ -159,7 +159,9 @@ describe('inbox page, list view', () => {
     el.querySelector<HTMLElement>('.msgFilteredHeaderCell')!.addEventListener('click', () => opened++);
     document.body.innerHTML = '';
     document.body.append(el);
-    processMessages({ doc: document, store: new Store(new MemoryStore(), 'test'), playerId: OWN, locale: 'it', t });
+    const store = new Store(new MemoryStore(), 'test');
+    processMessages({ doc: document, store, playerId: OWN, locale: 'it', t });
+    expect(Object.keys(store.get('spy.board', {}))).toEqual(['1:476:7']);
     const box = el.querySelector<HTMLElement>('.fut-msg-spy')!;
     expect(box.previousElementSibling?.className).toBe('msgFilteredHeaderRow');
     expect(box.textContent).toContain('264M');

@@ -50,6 +50,8 @@ export interface SpyMessage {
   moon: boolean;
   playerId: number;
   playerName: string;
+  /** Game status flags of the target player ("inactive", "longinactive", "vacation", …). */
+  statuses: string[];
   /** Own planet spied by someone else. */
   counter: boolean;
   sourceName: string;
@@ -227,6 +229,7 @@ export function readMessage(msg: Element, ownPlayerId: number): ParsedMessage | 
       moon: int(d.rawTargetplanettype) === 3,
       playerId: int(d.rawTargetplayerid),
       playerName: d.rawPlayername ?? '',
+      statuses: (json(d.rawPlayerstatus, []) as unknown[]).filter((x): x is string => typeof x === 'string'),
       counter,
       sourceName: d.rawSourceplayername ?? '',
       sourceCoords: d.rawSourceplanetcoordinates ?? '',
