@@ -189,3 +189,68 @@ export function startBuild(plan: Plan, bodyId: number, id: number, o: { level?: 
   }
   return { plan: changed ? next : plan, changed };
 }
+
+/* ------------------------------------------------------------------ */
+/* The plan seen by technology, against the whole account               */
+/* ------------------------------------------------------------------ */
+
+/** One body's share of a technology in the plan (consecutive levels together: "46–48"). */
+export interface TechRow {
+  bodyId: number;
+  from?: number;
+  to?: number;
+  amount?: number;
+  cost: Cost;
+  /** Indexes in the body's list, for removal. */
+  indexes: number[];
+  /** What this body still lacks for these items, its earlier items counted first. */
+  short: Cost | null;
+}
+
+/** A technology over every body where it is planned ("Miniera di metallo × 13 pianeti"). */
+export interface TechGroup {
+  id: number;
+  name: string;
+  cost: Cost;
+  rows: TechRow[];
+  added: number;
+}
+
+/**
+ * The plan grouped by technology, in the order it was planned. `haveOf` gives what a body holds
+ * (resources on the way included), or null when unknown.
+ */
+export function groupByTech(plan: Plan, haveOf: (bodyId: number) => Res | null): TechGroup[] {
+  const groups = new Map<number, TechGroup>();
+  for (const [key, items] of Object.entries(plan)) {
+    const bodyId = Number(key);
+    const have = haveOf(bodyId);
+    let spent: Cost = { ...ZERO_COST };
+    let before = have ? missing(spent, have) : null;
+    items.forEach((item, index) => {
+      // What this item adds to the body's shortfall, the earlier ones taken first.
+      spent = addCost(spent, item.cost);
+      const after = have ? missing(spent, have) : null;
+      const short = after && before ? { metal: after.metal - before.metal, crystal: after.crystal - before.crystal, deuterium: after.deuterium - before.deuterium, energy: 0 } : null;
+      before = after;
+      let g = groups.get(item.id);
+      if (!g) groups.set(item.id, (g = { id: item.id, name: item.name, cost: { ...ZERO_COST }, rows: [], added: item.added }));
+      g.cost = addCost(g.cost, item.cost);
+      g.added = Math.min(g.added, item.added);
+      const last = g.rows[g.rows.length - 1];
+      if (last && last.bodyId === bodyId && item.level !== undefined && last.to !== undefined && item.level === last.to + 1) {
+        last.to = item.level;
+        last.cost = addCost(last.cost, item.cost);
+        last.indexes.push(index);
+        last.short = last.short && short ? addCost(last.short, short) : null;
+      } else g.rows.push({ bodyId, from: item.level, to: item.level, amount: item.amount, cost: { ...item.cost }, indexes: [index], short });
+    });
+  }
+  return [...groups.values()].sort((a, b) => a.added - b.added || a.id - b.id);
+}
+
+/** Total cost, what the account holds and what is missing over the whole account. */
+export function accountGap(plan: Plan, account: Res | null): { total: Cost; missing: Cost | null } {
+  const total = Object.values(plan).reduce((sum, items) => addCost(sum, planTotal(items)), { ...ZERO_COST });
+  return { total, missing: account ? missing(total, account) : null };
+}

@@ -244,6 +244,24 @@ describe('tech panel', () => {
   });
 });
 
+describe('plan by technology', () => {
+  it('one group per technology over the bodies, missing per body and over the account', async () => {
+    const { groupByTech, accountGap } = await import('../src/engines/planner');
+    const c = (metal: number) => ({ metal, crystal: 0, deuterium: 0, energy: 0 });
+    let plan = addToPlan({}, 10, [{ id: 1, level: 46, name: 'Miniera', cost: c(100), added: 1 }, { id: 2, level: 30, name: 'Cristallo', cost: c(50), added: 2 }]);
+    plan = addToPlan(plan, 20, [{ id: 1, level: 45, name: 'Miniera', cost: c(80), added: 3 }, { id: 1, level: 46, name: 'Miniera', cost: c(100), added: 3 }]);
+    const have: Record<number, { metal: number; crystal: number; deuterium: number }> = { 10: { metal: 120, crystal: 0, deuterium: 0 }, 20: { metal: 0, crystal: 0, deuterium: 0 } };
+    const groups = groupByTech(plan, (id) => have[id] ?? null);
+    expect(groups.map((g) => [g.name, g.rows.length, g.cost.metal])).toEqual([['Miniera', 2, 280], ['Cristallo', 1, 50]]);
+    expect(groups[0]!.rows[1]).toMatchObject({ bodyId: 20, from: 45, to: 46, short: { metal: 180 } });
+    // Body 10: the mine (100) fits in 120, the crystal mine after it lacks 30.
+    expect(groups[0]!.rows[0]!.short!.metal).toBe(0);
+    expect(groups[1]!.rows[0]!.short!.metal).toBe(30);
+    expect(accountGap(plan, { metal: 300, crystal: 0, deuterium: 0 }).missing!.metal).toBe(30);
+    expect(accountGap(plan, null).missing).toBeNull();
+  });
+});
+
 describe('planner window', () => {
   it('groups levels, shows totals and missing, removes and brings resources', () => {
     document.body.innerHTML = '';
@@ -272,12 +290,15 @@ describe('planner window', () => {
       navigate: (u) => (went = u),
     });
     const root = document.getElementById('fut-planner')!.shadowRoot!;
-    expect(root.querySelector('h3')!.textContent).toBe('Casa [1:2:3]');
-    expect(root.querySelectorAll('.row')).toHaveLength(1);
-    expect(root.querySelector('.row .lv')!.textContent).toBe('liv. 31–32');
-    // 250 metal needed, 60 here: 190 missing; crystal 100 vs 80: 20.
-    expect(root.querySelector('.sum.warn .num.m')!.textContent).toBe('190');
-    root.querySelector<HTMLButtonElement>('.act:not(.ghost)')!.click();
+    expect(root.querySelectorAll('.group')).toHaveLength(1);
+    expect(root.querySelector('.gtitle')!.textContent).toBe('Miniera');
+    expect(root.querySelector('.gmeta')!.textContent).toBe('Casa [1:2:3] · liv. 31–32');
+    // 250 metal needed, 60 here: shown once, in red, with what is missing in the tooltip.
+    const metal = root.querySelector<HTMLElement>('.ghead .num.m')!;
+    expect(metal.textContent).toBe('250');
+    expect(metal.classList.contains('short')).toBe(true);
+    expect(metal.title).toContain('190');
+    root.querySelector<HTMLButtonElement>('.ib.bring')!.click();
     expect(went).toContain('cp=20');
     expect(went).toContain('futmode=plan');
     expect(went).toContain('futdest=10');
@@ -341,13 +362,13 @@ describe('resources sent to a planned body', () => {
       navigate: (u) => (went = u),
     });
     const root = document.getElementById('fut-planner')!.shadowRoot!;
-    expect(root.querySelector('.sum.sent .num.m')!.textContent).toBe('600');
-    const bring = root.querySelector<HTMLButtonElement>('.act:not(.ghost)')!;
-    expect(bring.textContent).toBe("Completa l'invio");
+    expect(root.querySelector<HTMLElement>('.sent')!.title).toContain('600');
+    const bring = root.querySelector<HTMLButtonElement>('.ib.bring')!;
+    expect(bring.title).toContain("Completa l'invio");
+    // 1000 needed, 600 on the way: only 400 lacking here.
+    expect(root.querySelector<HTMLElement>('.ghead .num.m')!.title).toContain('400');
     bring.click();
     expect(went).toContain('cp=20');
-    // 1000 needed, 600 on the way: only 400 still to bring.
-    expect(root.querySelector('.sum.warn .num.m')!.textContent).toBe('400');
     expect(store.get<{ need: { metal: number } } | null>('plan.delivery', null)!.need.metal).toBe(400);
     closePlanner(document);
   });

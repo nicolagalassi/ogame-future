@@ -10,12 +10,6 @@ export const GALAXY_CSS = `
 .fut-g-inact { color: #9BE36D; }
 .fut-g-vac { color: #7FB8FF; }
 .fut-g-deb { color: #F5B547; }
-.fut-g-tgtbtn {
-  margin-left: auto; height: 24px; padding: 0 10px; display: inline-flex; align-items: center; gap: 6px;
-  border: 1px solid #2A3B55; border-radius: 6px; background: #0A111C; color: #C9D4E2; font: 12px Arial, sans-serif; cursor: pointer;
-}
-.fut-g-tgtbtn:hover, .fut-g-tgtbtn[aria-expanded="true"] { border-color: #4FD1E8; color: #E6EDF5; }
-
 /* Rows: a light tint on the cells, the game's own colours stay. */
 #galaxyContent .galaxyRow.fut-g-inactive .galaxyCell { background-color: rgba(155,227,109,0.07); }
 #galaxyContent .galaxyRow.fut-g-own .galaxyCell { background-color: rgba(79,209,232,0.08); }
@@ -29,14 +23,24 @@ export const GALAXY_CSS = `
 /* Planet colour: at the right of the name, faint until the row is pointed at or the planet has one. */
 #galaxyContent .cellPlanetName .fut-mk-tag { position: absolute; right: 3px; top: 50%; transform: translateY(-50%); margin: 0; opacity: 0; transition: opacity 120ms ease-out; }
 #galaxyContent .galaxyRow:hover .fut-mk-tag, #galaxyContent .fut-mk-tag:focus-visible, #galaxyContent .fut-mk-tag.on { opacity: 1; }
-#galaxyContent .cellPlayerName .fut-mk-flag { width: 16px; height: 16px; }
-.fut-g-rank:focus-visible, .fut-g-tgtbtn:focus-visible { outline: 2px solid #4FD1E8; outline-offset: 1px; }
+.fut-g-rank:focus-visible { outline: 2px solid #4FD1E8; outline-offset: 1px; }
 
+/* Player column, as OGLight lays it out: status first, the name with all the room left, rank and
+   flag on the right. The planet name gives up some width to the player name. */
+#galaxyContent .galaxyRow .cellPlanetName { flex: 0.72 1 0% !important; }
+#galaxyContent .galaxyRow .cellPlayerName { flex: 1.28 1 0% !important; }
+#galaxyContent .galaxyRow.ctContentRow .cellPlayerName { justify-content: flex-start !important; gap: 3px; padding: 0 3px 0 5px; box-sizing: border-box; }
+#galaxyContent .cellPlayerName > pre { order: -1; flex: none; margin: 0; }
+#galaxyContent .cellPlayerName > .playerName { flex: 0 1 auto; min-width: 0; }
 .fut-g-rank {
-  margin-left: 4px; padding: 0 4px; border: 1px solid #2A3B55; border-radius: 4px; background: rgba(10,17,28,0.8);
-  color: #C9D4E2; font: 10px/14px Consolas, "JetBrains Mono", monospace; cursor: help; vertical-align: 1px;
+  margin-left: auto; flex: none; padding: 0 2px; border: 0; border-radius: 3px; background: none;
+  color: #8A9BB0; font: 10px/14px Consolas, "JetBrains Mono", monospace; cursor: help;
 }
-.fut-g-rank:hover { border-color: #4FD1E8; color: #E6EDF5; }
+.fut-g-rank:hover { background: #16243A; color: #E6EDF5; }
+/* The flag stays out of the way until the row is pointed at, or the player has one. */
+#galaxyContent .cellPlayerName .fut-mk-flag { flex: none; width: 16px; height: 16px; margin: 0; border-color: transparent; background: none; opacity: 0; transition: opacity 120ms ease-out; }
+#galaxyContent .galaxyRow:hover .fut-mk-flag, #galaxyContent .fut-mk-flag:focus-visible { opacity: 1; }
+#galaxyContent .cellPlayerName .fut-mk-flag.on { opacity: 1; border-color: transparent; }
 #galaxyContent .cellDebris { position: relative; }
 .fut-g-dval { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); padding: 0 3px; border-radius: 3px; background: rgba(5,10,18,0.85);
   color: #C9D4E2; font: 10px/12px Consolas, "JetBrains Mono", monospace; white-space: nowrap; pointer-events: none; }

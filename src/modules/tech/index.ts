@@ -10,6 +10,7 @@
  * COMPLIANCE: reads the panel the game itself loaded; no request, no game action. The panel
  * is watched with a MutationObserver instead of replacing the game's technologyDetails.
  */
+import { rememberTechIcons } from '../../data/tech-icons';
 import { icon } from '../../core/icons';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
@@ -373,6 +374,8 @@ export function watchTechPages(o: TechOptions): void {
     o.onPlanChange?.();
   }
   injectStyle(doc);
+  // The game's pictures of these technologies, for the plan window.
+  rememberTechIcons(doc, o.store);
   // "Sviluppa" (in the panel or on the list), also with dark matter: the started level, or
   // the units ordered, leave the plan at once. The page reload after it prunes again.
   doc.addEventListener(
