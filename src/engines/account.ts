@@ -2,6 +2,7 @@
  * Account-wide figures for the dashboard, computed from the stored snapshot and the
  * game's planet list. Pure functions: no DOM writes, no network.
  */
+import { rawCost } from './tech';
 import type { AccountSnapshot, Resources } from '../data/account-info';
 import type { PlanetListEntry } from '../data/planet-list';
 import { activeItems, type QueueSnapshot } from '../data/queues';
@@ -12,6 +13,20 @@ type Key = (typeof KEYS)[number];
 
 /** Metal-standard units at 3:2:1. */
 export const msu = (r: Resources): number => r.metal + r.crystal * 1.5 + r.deuterium * 3;
+
+/** Ships that fly: everything in the shipyard but solar satellites and crawlers. */
+const FLYING = [202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 213, 214, 215, 218, 219];
+/** What the ships on a body cost, the three resources summed 1:1:1 (as of the last reading of that body). */
+export function fleetValue(body: { levels: Record<string, number> }): number {
+  let total = 0;
+  for (const id of FLYING) {
+    const n = body.levels[String(id)] ?? 0;
+    if (!n) continue;
+    const c = rawCost(id, 1);
+    total += n * (c.metal + c.crystal + c.deuterium);
+  }
+  return total;
+}
 
 export interface BodyRow {
   id: number;

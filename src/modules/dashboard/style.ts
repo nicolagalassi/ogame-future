@@ -61,6 +61,13 @@ td.queue { white-space: nowrap; }
 
 /* Level tables: first column stays put while the rest scrolls. */
 .matrix th.col { vertical-align: bottom; white-space: normal; min-width: 44px; max-width: 74px; padding: 6px 4px; line-height: 1.2; }
+.matrix th.col .pic { margin-left: auto; }
+/* The game's pictures: column heads, rows, tiles. */
+.pic { display: block; flex: none; border-radius: 4px; object-fit: cover; background: #16202E; }
+span.pic { display: inline-block !important; }
+.tech-label { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.tech-label span:not(.pic) { overflow: hidden; text-overflow: ellipsis; }
+.tech-label small { color: var(--muted); font-size: 11px; }
 .matrix .col-name { display: block; font-size: 10px; font-weight: 600; color: #8A9BB0; text-decoration: none; overflow-wrap: normal; hyphens: auto; }
 .matrix a.col-name:hover { color: #E6EDF5; }
 .matrix th.col.on .col-name { color: #4FD1E8; }
@@ -76,10 +83,36 @@ td.guess { font-style: italic; opacity: 0.7; }
 .unit-ico { width: 28px; height: 28px; border-radius: 4px; object-fit: cover; display: block; margin: 0 auto; background: #16202E; }
 .unit-ico-none { display: flex; align-items: center; justify-content: center; color: #8A9BB0; font-size: 10px; }
 
-/* Research: name and level in a compact grid. */
-.levels { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0 20px; }
-.lv { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; border-bottom: 1px solid #16202F; font-size: 12px; }
-.lv span { color: #C9D4E2; } .lv.zero b { color: #3A4A60; }
+/* Research: one tile per technology, its picture over its level. */
+.levels { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px; }
+.lv { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px 2px 4px; border: 1px solid var(--line-soft); border-radius: 6px; background: var(--surface); min-width: 0; }
+.lv b { font-size: 13px; color: var(--text); }
+.lv .lv-name { height: 40px; display: flex; align-items: center; text-align: center; color: var(--text-2); font-size: 10px; line-height: 1.15; overflow: hidden; }
+.lv.zero { opacity: 0.45; } .lv.zero b { color: var(--muted); }
+.move .pic { border-radius: 5px; }
+
+/* Planets | moons switch on the ships and defence pages. */
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.seg button { display: inline-flex; align-items: baseline; gap: 8px; height: 28px; padding: 0 12px; border: 0; background: var(--bg); color: var(--muted); font: 12px Arial, sans-serif; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button i { font-style: normal; font-size: 11px; color: var(--muted); }
+.seg button:hover { color: var(--text); }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
+.seg button[aria-pressed="true"] i { color: var(--accent); font-weight: 400; }
+
+/* Body picker: the same two columns as the fleet bar's destination list. */
+.bpick { position: relative; }
+.bpick-btn { display: inline-flex; align-items: center; gap: 8px; height: 28px; min-width: 200px; padding: 0 8px 0 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text); font: 12px Arial, sans-serif; cursor: pointer; }
+.bpick-btn small { margin-left: auto; color: var(--muted); font-size: 11px; }
+.bpick-btn:hover, .bpick-btn[aria-expanded="true"] { border-color: var(--accent); }
+.bmenu { position: absolute; z-index: 5; top: 32px; left: 0; min-width: 250px; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; display: grid; grid-template-columns: minmax(0, 1fr) 40px; gap: 2px; padding: 4px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+.bmenu[hidden] { display: none; }
+.bmenu button { display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 8px; border: 1px solid transparent; border-radius: 4px; background: var(--surface); color: var(--text-2); font: 12px Arial, sans-serif; text-align: left; white-space: nowrap; cursor: pointer; }
+.bmenu button small { margin-left: auto; color: var(--muted); font-size: 11px; }
+.bmenu button.moon { justify-content: center; padding: 0; color: var(--muted); }
+.bmenu button:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+.bmenu button.on { border-color: var(--warn); color: var(--warn); }
+.bmenu button:disabled { background: none; border-color: transparent; color: var(--faint); cursor: default; }
 
 /* Scrap calculator */
 .scrap-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
@@ -88,8 +121,10 @@ td.guess { font-style: italic; opacity: 0.7; }
 .field-label { display: inline-flex; align-items: center; gap: 6px; color: #8A9BB0; font-size: 12px; }
 .field.rate { width: 64px; text-align: right; }
 .field.qty { width: 110px; text-align: right; font-family: "JetBrains Mono", Consolas, monospace; }
-table.scrap .unit-label { display: flex; align-items: center; gap: 8px; }
-table.scrap td.unit .unit-ico { margin: 0; width: 24px; height: 24px; }
+table.scrap td.unit { padding: 2px 8px 2px 2px; }
+table.scrap .unit-label { display: flex; align-items: center; gap: 8px; width: 100%; padding: 2px 8px 2px 2px; border: 1px solid transparent; border-radius: 6px; background: none; color: var(--text-2); font: 12px Arial, sans-serif; text-align: left; cursor: pointer; }
+table.scrap .unit-label:hover { border-color: var(--line); color: var(--text); }
+table.scrap .unit-label[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
 .msu { color: #4FD1E8; margin-left: 4px; }
 @media (max-width: 1100px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 900px) {

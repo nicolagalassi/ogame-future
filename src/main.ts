@@ -14,13 +14,14 @@ import { SCORE_KEY, watchScore, type Score } from './data/score';
 import { HISTORY_KEY, recordDay, type History } from './engines/history';
 import { loadServerDataOnPageLoad } from './data/server-data';
 import { highlightPosition, isGalaxyPage, TARGETS_KEY, watchGalaxy } from './modules/galaxy';
-import { nextInSide, onSideNavigate, refreshSide, restoreSide, toggleSide } from './modules/marks/side';
+import { nextInSide, onSideNavigate, openSide, refreshSide, restoreSide, toggleSide } from './modules/marks/side';
+import { renderDock } from './modules/dock';
 import { loadMarks, MARKS_KEY, migrateOld, type Marks } from './engines/marks';
 import { convertOglight, convertOglightStats, isOglightDb } from './engines/oglight-import';
 import { POSITIONS_KEY, type Positions } from './engines/positions';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
 import { ITEMS_KEY, LF_BONUS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems, type LfBonuses } from './data/bonuses';
-import { openSettings } from './modules/settings';
+import { openSettings, type Section } from './modules/settings';
 import { dayFigures, openDashboard } from './modules/dashboard';
 import { TECH_NAMES_KEY, learnTechNames, type TechNames } from './data/tech-names';
 import { readTechList } from './data/tech-details';
@@ -28,7 +29,7 @@ import { LF_SLOTS_KEY, readLfSlots, rememberLfSlots, type LfSlots } from './data
 import { isFleetDispatch } from './data/fleet-page';
 import { renderFleetTools } from './modules/fleet';
 import { watchJumpgate } from './modules/fleet/jumpgate';
-import { registerShortcuts, switchBodyUrl } from './modules/shortcuts';
+import { mountTouchBar, registerActions, switchBodyUrl } from './modules/shortcuts';
 import { nextBody } from './engines/fleet';
 import { watchTechPages } from './modules/tech';
 import { accountResources, openPlanner } from './modules/tech/planner-view';
@@ -41,6 +42,7 @@ import { openJournal } from './modules/messages/journal-view';
 import { isHighscorePage, watchHighscore } from './modules/highscore';
 import { bellButton, clockOffset, startReminders, watchEventList } from './modules/reminders';
 import { renderPlanetMenu, watchPlanetBar, type MenuMode, type MenuSettings } from './modules/planet-menu';
+import { TECH_ICONS_KEY, type TechIcon } from './data/tech-icons';
 
 async function bootstrap(): Promise<void> {
   const namespace = serverNamespace(document);
@@ -132,7 +134,8 @@ async function bootstrap(): Promise<void> {
     // 'stacked' was the previous layout: it maps to the side-by-side one.
     mode: (storedMode === 'compact' ? 'compact' : 'side') as MenuMode,
     showTotals: store.get<boolean>('planetMenu.totals', true),
-    markIdle: store.get<boolean>('planetMenu.markIdle', false),
+    showFleet: store.get<boolean>('planetMenu.fleet', false),
+    totalView: store.get<string>('planetMenu.totalView', 'msu') === 'sum' ? 'sum' : 'msu',
   };
   /** What the whole account still misses for the plan, in MSU (resources on the way count as there). */
   const planGap = (): number | null => {
@@ -158,7 +161,57 @@ async function bootstrap(): Promise<void> {
   };
   /** Redraws the inbox panels after a choice in the settings (set once the inbox is watched). */
   let refreshInbox: (() => void) | null = null;
-  const draw = () =>
+  let refreshFleet: (() => void) | null = null;
+  // Planet menu facts the settings show (whether the side view fits, colonies); updated by the menu.
+  let menuCtx = { roomy: true, colonies: '' };
+  const openFutureSettings = (section?: Section) =>
+    openSettings({
+      doc: document,
+      store,
+      t,
+      menu: {
+        settings,
+        canSide: menuCtx.roomy,
+        onChange: (next) => {
+          settings = next;
+          store.set('planetMenu.mode', next.mode);
+          store.set('planetMenu.totals', next.showTotals);
+          store.set('planetMenu.fleet', next.showFleet === true);
+          store.set('planetMenu.totalView', next.totalView ?? 'msu');
+          draw();
+        },
+      },
+      backup: {
+        onExport: () => downloadBackup(document, gm, Date.now()),
+        onImport: (text) => {
+          // OGLight's "Export data" file: converted into this universe's marks and positions.
+          let json: unknown = null;
+          try { json = JSON.parse(text); } catch { /* not JSON: importBackup says so */ }
+          if (!isOglightDb(json)) return importBackup(gm, text);
+          const out = convertOglight(json, loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null)), store.get<Positions>(POSITIONS_KEY, {}), Date.now());
+          store.set(MARKS_KEY, out.marks);
+          store.set(POSITIONS_KEY, out.positions);
+          const days = convertOglightStats(json.stats ?? {}, store.get<Journal>(JOURNAL_KEY, {}));
+          store.set(JOURNAL_KEY, days.journal);
+          return t('settings.oglightDone', { players: out.players, planets: out.planets, seen: out.seen, exp: days.expeditions.toLocaleString(locale), raids: days.raids.toLocaleString(locale), days: days.days });
+        },
+      },
+      notes: [menuCtx.colonies, snapshot ? t('toolbar.lastSync', { time: new Date(snapshot.fetchedAt).toLocaleString(locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) }) : ''].filter(Boolean),
+      onMailChange: () => refreshInbox?.(),
+      bodies: readPlanetList(document).flatMap((b) => [
+        ...(b.planetId ? [{ id: b.planetId, label: `${b.name} [${b.coords}]` }] : []),
+        ...(b.moonId ? [{ id: b.moonId, label: `${b.name} [${b.coords}] · ${t('fleet.typeMoon')}` }] : []),
+      ]),
+      onFleetChange: () => {
+        refreshFleet?.();
+        mountTouchBar(document, store, t);
+      },
+      section,
+    });
+  /** Draws the dock under the game's menu (set once the targets side bar is ready, below). */
+  let drawDock: (() => void) | null = null;
+  const draw = () => {
+    drawDock?.();
     renderPlanetMenu({
       doc: document,
       entries: readPlanetList(document),
@@ -168,40 +221,10 @@ async function bootstrap(): Promise<void> {
       now: Date.now(),
       locale,
       t,
-      onOpenSettings: ({ roomy, colonies }) =>
-        openSettings({
-          doc: document,
-          store,
-          t,
-          menu: {
-            settings,
-            canSide: roomy,
-            onChange: (next) => {
-              settings = next;
-              store.set('planetMenu.mode', next.mode);
-              store.set('planetMenu.totals', next.showTotals);
-              store.set('planetMenu.markIdle', next.markIdle);
-              draw();
-            },
-          },
-          backup: {
-            onExport: () => downloadBackup(document, gm, Date.now()),
-            onImport: (text) => {
-              // OGLight's "Export data" file: converted into this universe's marks and positions.
-              let json: unknown = null;
-              try { json = JSON.parse(text); } catch { /* not JSON: importBackup says so */ }
-              if (!isOglightDb(json)) return importBackup(gm, text);
-              const out = convertOglight(json, loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null)), store.get<Positions>(POSITIONS_KEY, {}), Date.now());
-              store.set(MARKS_KEY, out.marks);
-              store.set(POSITIONS_KEY, out.positions);
-              const days = convertOglightStats(json.stats ?? {}, store.get<Journal>(JOURNAL_KEY, {}));
-              store.set(JOURNAL_KEY, days.journal);
-              return t('settings.oglightDone', { players: out.players, planets: out.planets, seen: out.seen, exp: days.expeditions.toLocaleString(locale), raids: days.raids.toLocaleString(locale), days: days.days });
-            },
-          },
-          notes: [colonies, snapshot ? t('toolbar.lastSync', { time: new Date(snapshot.fetchedAt).toLocaleString(locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) }) : ''].filter(Boolean),
-          onMailChange: () => refreshInbox?.(),
-        }),
+      onOpenSettings: (ctx) => {
+        menuCtx = ctx;
+        openFutureSettings();
+      },
       onOpenDashboard: () =>
         openDashboard({
           doc: document,
@@ -213,21 +236,13 @@ async function bootstrap(): Promise<void> {
           queues,
           names: techNames,
           lfSlots,
+          icons: store.get<Record<string, TechIcon>>(TECH_ICONS_KEY, {}),
           now: Date.now(),
           locale,
           t,
         }),
       planCount: planCount(store.get<Plan>(PLAN_KEY, {})),
-      targetsCount: (() => {
-        const m = loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null));
-        return Object.keys(m.players).length + Object.keys(m.planets).length;
-      })(),
-      onOpenTargets: () => openTargetsHere(),
       planGap: planGap(),
-      journalToday: (() => {
-        const s = periodStats(entriesIn(store.get<Journal>(JOURNAL_KEY, {}), periodRange('today', Date.now())));
-        return { count: s.count, net: s.netMsu };
-      })(),
       onOpenPlanner: () => {
         const id = currentBodyId(document);
         const resources = readCurrentResources(document);
@@ -245,7 +260,6 @@ async function bootstrap(): Promise<void> {
           navigate: (url) => location.assign(url),
         });
       },
-      onOpenJournal: () => openJournal({ doc: document, store, now: Date.now(), locale, t }),
       // COMPLIANCE: runs only from the Sync button's click (reason 'user-sync', no cp).
       onSync: async () => {
         try {
@@ -268,6 +282,7 @@ async function bootstrap(): Promise<void> {
         }
       },
     });
+  };
   draw();
   // The game reloads the planet bar by itself now and then: draw the menu again when it does.
   watchPlanetBar(document, draw);
@@ -282,10 +297,7 @@ async function bootstrap(): Promise<void> {
       const id = nextBody(list, currentId, { backwards });
       if (id) location.assign(switchBodyUrl(location.href, id));
     };
-    registerShortcuts(document, [
-      { key: 'i', label: 'shortcut.prev', run: () => go(true) },
-      { key: 'o', label: 'shortcut.next', run: () => go(false) },
-    ]);
+    registerActions(document, store, t, { 'planet.prev': () => go(true), 'planet.next': () => go(false) });
     // Jump gate dialog: keeps reserve 1 of this moon at home.
     watchJumpgate(document, store, currentId, t);
   }
@@ -297,10 +309,27 @@ async function bootstrap(): Promise<void> {
 
   // Targets side bar: stays open across pages as the player left it; M = next position of its list.
   const side = { doc: document, store, guard, t, locale };
-  const openTargetsHere = () => toggleSide(side);
+  // Dock under the game's menu: journal and targets at a glance; redrawn with the planet menu.
+  drawDock = () => {
+    const journal = store.get<Journal>(JOURNAL_KEY, {});
+    const stats = (period: 'today' | 'week') => {
+      const st = periodStats(entriesIn(journal, periodRange(period, Date.now())));
+      return { count: st.count, net: st.netMsu };
+    };
+    renderDock({
+      doc: document,
+      t,
+      locale,
+      journal: { today: stats('today'), week: stats('week') },
+      marks: loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null)),
+      onOpenJournal: () => openJournal({ doc: document, store, now: Date.now(), locale, t }),
+      onOpenTargets: (view) => (view ? openSide(side, view) : toggleSide(side)),
+    });
+  };
+  drawDock();
   onSideNavigate(highlightPosition);
   restoreSide(side);
-  registerShortcuts(document, [{ key: 'm', label: 'shortcut.nextTarget', run: () => void nextInSide(document) }]);
+  registerActions(document, store, t, { 'targets.next': () => void nextInSide(document) });
   const pageMeta = (name: string) => document.querySelector(`meta[name="${name}"]`)?.getAttribute('content') ?? '';
 
   // Manual reminders: due ones are shown on the page; bells on the game's event list.
@@ -332,13 +361,18 @@ async function bootstrap(): Promise<void> {
   // Fleet page helpers: reserves and fleetsave, on the game's own form.
   if (isFleetDispatch(document) && currentId) {
     const bodies = readPlanetList(document).map(({ planetId, moonId, name, coords }) => ({ planetId, moonId, name, coords }));
-    renderFleetTools({ doc: document, store, bodyId: currentId, bodies, t, locale });
+    const fleet = { doc: document, store, bodyId: currentId, bodies, t, locale, onOpenSettings: () => openFutureSettings('fleet') };
+    renderFleetTools(fleet);
+    refreshFleet = () => renderFleetTools(fleet);
   }
 
   // Galaxy view: system summary, marks, debris in MSU, targets and the scores card.
   if (isGalaxyPage(document)) {
     const ownPlanetIds = new Set(readPlanetList(document).flatMap((e) => (e.planetId ? [e.planetId] : [])));
-    watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onSystem: refreshSide });
+    watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onSystem: refreshSide, onPlayer: (id) => openSide(side, { tab: 'players', player: id }) });
+    // Touch bar: the game's own galaxy arrows (the keyboard already moves them).
+    const arrow = (key: string) => () => document.querySelector<HTMLElement>(`#galaxycomponent .galaxy_icons[onclick*="'${key}'"]`)?.click();
+    registerActions(document, store, t, { 'galaxy.left': arrow('ArrowLeft'), 'galaxy.right': arrow('ArrowRight'), 'galaxy.down': arrow('ArrowDown'), 'galaxy.up': arrow('ArrowUp') });
   }
 }
 

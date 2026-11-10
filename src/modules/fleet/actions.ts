@@ -25,7 +25,7 @@ import {
 import type { Resources } from '../../data/account-info';
 import { pageWindow, shipCapacity, shipsOnPlanet, type FleetDispatcher } from '../../data/fleet-dispatcher';
 
-export type FleetMode = 'moon' | 'transport' | 'deploy' | 'expedition' | 'fleetsave' | 'all' | 'last' | 'plan';
+export type FleetMode = 'moon' | 'transport' | 'deploy' | 'expedition' | 'fleetsave' | 'last' | 'plan';
 
 export interface Target {
   galaxy: number;
@@ -145,15 +145,6 @@ export function prepareDeploy(fd: FleetDispatcher, doc: Document, profile: Fleet
   fd.mission = DEPLOY;
   const cargo = count > 0 ? loadCargo(fd, profile) : 0;
   return finish(fd, DEPLOY, count, cargo);
-}
-
-/** All ships after the reserve, no target change, no cargo (the old "Navi − riserva"). */
-export function prepareAllShips(fd: FleetDispatcher, profile: FleetProfile): PrepareResult {
-  const ships = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
-  const count = selectShips(fd, ships);
-  fd.refresh();
-  fd.focusSubmitFleet1();
-  return { ok: count > 0, reason: count > 0 ? undefined : 'fleet.err.noShips', ships: count, cargo: 0 };
 }
 
 export function prepareFleetsave(fd: FleetDispatcher, doc: Document, base: FleetProfile, save: FleetsaveProfile): PrepareResult {

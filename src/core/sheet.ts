@@ -62,6 +62,12 @@ h4 { margin: 10px 0 4px; font-size: 11px; font-weight: 700; color: var(--text-2)
 
 /* Sections: tiles, like the planet rows. */
 .card { padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); min-width: 0; }
+/* On/off switch: a track with a knob, lit and to the right when on (a checked input before it, or aria-checked on its button). */
+.sw-track { position: relative; flex: none; width: 30px; height: 16px; border-radius: 8px; background: var(--faint); transition: background-color 120ms ease-out; }
+.sw-track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--text-2); transition: transform 120ms ease-out; }
+input:checked + .sw-track, [aria-checked="true"] > .sw-track { background: var(--accent); }
+input:checked + .sw-track::after, [aria-checked="true"] > .sw-track::after { transform: translateX(14px); background: var(--bg); }
+@media (prefers-reduced-motion: reduce) { .sw-track, .sw-track::after { transition: none; } }
 .hint { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
 .empty { margin: 0; padding: 14px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 7px; }
 

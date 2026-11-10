@@ -368,11 +368,11 @@ describe('fleetsave reserve', () => {
 
 describe('shortcuts, last fleet and jump gate', () => {
   it('runs a key once, not while typing nor with modifiers', async () => {
-    const { registerShortcuts, resetShortcuts, switchBodyUrl } = await import('../src/modules/shortcuts');
+    const { registerActions, resetShortcuts, switchBodyUrl } = await import('../src/modules/shortcuts');
     resetShortcuts();
     let n = 0;
-    registerShortcuts(document, [{ key: 'o', label: 'x', run: () => n++ }]);
     document.body.innerHTML = '<input id="f">';
+    registerActions(document, new Store(new MemoryStore(), 'k'), (k) => k, { 'planet.next': () => n++ });
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'o' }));
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'O', ctrlKey: true }));
     (document.getElementById('f') as HTMLInputElement).focus();
@@ -382,6 +382,53 @@ describe('shortcuts, last fleet and jump gate', () => {
       'https://s1.test/game/index.php?page=ingame&component=fleetdispatch&cp=2',
     );
     expect(nextBody([{ planetId: 1, moonId: null }, { planetId: 2, moonId: null }, { planetId: 3, moonId: null }], 1, { backwards: true })).toBe(3);
+  });
+
+  it('lets the player change keys: a taken key moves, fixed keys stay, the default comes back', async () => {
+    const { assignKey, keymap, resetKeys, registerActions, resetShortcuts } = await import('../src/modules/shortcuts');
+    resetShortcuts();
+    const store = new Store(new MemoryStore(), 'keys');
+    expect(keymap(store).get('fleet.transport')).toBe('t');
+    // T goes to Expedition: Transport loses it.
+    expect(assignKey(store, 'fleet.expedition', 'T')).toBe('fleet.transport');
+    expect(keymap(store).get('fleet.expedition')).toBe('t');
+    expect(keymap(store).get('fleet.transport')).toBeNull();
+    expect(keymap(store).get('galaxy.up')).toBe('ArrowUp');
+    let ran = '';
+    document.body.innerHTML = '';
+    registerActions(document, store, (k) => k, { 'fleet.expedition': () => (ran = 'x'), 'fleet.transport': () => (ran = 't') });
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 't' }));
+    expect(ran).toBe('x');
+    resetKeys(store);
+    expect(keymap(store).get('fleet.transport')).toBe('t');
+  });
+
+  it('touch bar: this page\'s actions and the game\'s own Avanti / Invia', async () => {
+    const { registerActions, resetShortcuts, TOUCH_KEY, TOUCH_ID } = await import('../src/modules/shortcuts');
+    resetShortcuts();
+    const store = new Store(new MemoryStore(), 'touch');
+    document.body.innerHTML = '<div id="fleetdispatchcomponent"><div id="fleet1"><a id="continueToFleet2" class="on"></a></div><div id="fleet2" style="display:none"><a id="sendFleet"></a></div></div>';
+    let pressed = '';
+    document.getElementById('continueToFleet2')!.addEventListener('click', () => (pressed = 'avanti'));
+    document.getElementById('sendFleet')!.addEventListener('click', () => (pressed = 'invia'));
+    store.set(TOUCH_KEY, 'off');
+    registerActions(document, store, (k) => k, { 'planet.next': () => {} });
+    await Promise.resolve();
+    expect(document.getElementById(TOUCH_ID)).toBeNull();
+    store.set(TOUCH_KEY, 'on');
+    registerActions(document, store, (k) => k, { 'fleet.last': () => (pressed = 'all') });
+    await Promise.resolve();
+    const bar = document.getElementById(TOUCH_ID)!;
+    expect([...bar.querySelectorAll('.keys button')].map((b) => b.getAttribute('aria-label'))).toEqual(['shortcut.next', 'fleet.btn.last']);
+    (bar.querySelector('.keys button:last-child') as HTMLButtonElement).click();
+    expect(pressed).toBe('all');
+    const send = bar.querySelector<HTMLButtonElement>('.send')!;
+    expect(send.textContent).toBe('touch.next');
+    send.click();
+    expect(pressed).toBe('avanti');
+    document.getElementById('fleet1')!.style.display = 'none';
+    send.click();
+    expect(pressed).toBe('invia');
   });
 
   it('repeats the last fleet within the reserve', async () => {
@@ -417,6 +464,17 @@ describe('shortcuts, last fleet and jump gate', () => {
     (document.querySelector('.fut-jgbar button') as HTMLButtonElement).click();
     expect(input.getAttribute('rel')).toBe('100');
     expect((store.get('fleet.settings') as { gateOn: boolean }).gateOn).toBe(false);
+    // The pen opens the rule on the ship rows: a new number is saved and applied at once.
+    (document.querySelector('.fut-jgbar button') as HTMLButtonElement).click();
+    document.querySelectorAll<HTMLButtonElement>('.fut-jgbar button')[1]!.click();
+    const field = document.querySelector<HTMLInputElement>('.fut-jgkeep input')!;
+    expect(field.value).toBe('30');
+    field.value = '45';
+    field.dispatchEvent(new Event('change'));
+    expect((store.get('fleet.profiles') as Record<string, { gate: Record<string, number> }>)['7']!.gate).toEqual({ '203': 45 });
+    expect(input.getAttribute('rel')).toBe('55');
+    document.querySelectorAll<HTMLButtonElement>('.fut-jgbar button')[1]!.click();
+    expect(document.querySelector('.fut-jgkeep input')).toBeNull();
   });
 });
 
@@ -446,7 +504,7 @@ describe('rules window', () => {
       { planetId: 3, moonId: null, name: 'Terza', coords: '5:187:8' },
     ];
     renderFleetTools({ doc, store, bodyId: 1, bodies, t: (k, v) => (v ? `${k}:${Object.values(v).join('|')}` : k), locale: 'it', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch' });
-    (doc.querySelector('.fut-fside button:last-child') as HTMLButtonElement).click();
+    (doc.querySelector('.fut-frules-open') as HTMLButtonElement).click();
     const root = doc.getElementById('fut-fleet-modal')!.shadowRoot!;
     const badges = [...root.querySelectorAll('.fut-fbadge')].map((b) => b.textContent);
     expect(badges[0]).toBe('fleet.rule.on · fleet.rule.alsoOn:Colonia');

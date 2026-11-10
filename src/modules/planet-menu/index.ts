@@ -13,6 +13,7 @@ import type { PlanetListEntry } from '../../data/planet-list';
 import { activeItems, queueLabel, type QueueItem, type QueueSnapshot } from '../../data/queues';
 import { formatUnits } from '../../core/format';
 import { estimateResources, storageFill, totals } from '../../engines/resources';
+import { fleetValue } from '../../engines/account';
 import { MENU_WIDTH, NATIVE_WIDTH, PLANET_MENU_CSS } from './style';
 
 export type MenuMode = 'side' | 'compact';
@@ -20,8 +21,10 @@ export type MenuMode = 'side' | 'compact';
 export interface MenuSettings {
   mode: MenuMode;
   showTotals: boolean;
-  /** Amber dot on planets with nothing under construction. */
-  markIdle: boolean;
+  /** A pill under the resources with what the ships on that body are worth, in MSU. */
+  showFleet?: boolean;
+  /** The sum row of the totals: MSU (metal 1, crystal 1.5, deuterium 3) or the plain sum 1:1:1. */
+  totalView?: 'msu' | 'sum';
 }
 
 export interface PlanetMenuOptions {
@@ -40,18 +43,11 @@ export interface PlanetMenuOptions {
   onSync: () => Promise<boolean>;
   /** Opens the account dashboard (Future's own panel, no game action). */
   onOpenDashboard?: () => void;
-  /** Opens or closes the targets side bar; `targetsCount` players and planets are marked. */
-  onOpenTargets?: () => void;
-  targetsCount?: number;
   /** Opens the construction plan; `planCount` items are planned in total. */
   onOpenPlanner?: () => void;
   planCount?: number;
-  /** Opens the expedition journal. */
-  onOpenJournal?: () => void;
   /** What the plan still misses in MSU (null when no stock is known for its bodies). */
   planGap?: number | null;
-  /** Expeditions read today: how many and the net value in MSU. */
-  journalToday?: { count: number; net: number } | null;
 }
 
 const STYLE_ID = 'fut-planet-menu-style';
@@ -87,8 +83,11 @@ function iconButton(doc: Document, icon: keyof typeof ICONS, title: string, onCl
   return button;
 }
 
-/** Resources in one column. Planets get their storage fill painted behind each number. */
-function resourceColumn(doc: Document, body: OwnBody | undefined, now: number, locale: string, withStorage: boolean): HTMLElement {
+/**
+ * A body's numbers in one column: the three resources (planets get their storage fill painted
+ * behind each number), then the fleet pill when asked for.
+ */
+function resourceColumn(doc: Document, body: OwnBody | undefined, now: number, locale: string, withStorage: boolean, view: { fleet: boolean; t: PlanetMenuOptions['t'] }): HTMLElement {
   const box = el(doc, 'span', 'fut-res');
   if (!body) {
     for (const cls of ['fut-m', 'fut-c', 'fut-d']) box.append(el(doc, 'span', `fut-cell ${cls} fut-missing`, '—'));
@@ -110,6 +109,12 @@ function resourceColumn(doc: Document, body: OwnBody | undefined, now: number, l
   cell('metal', 'fut-m');
   cell('crystal', 'fut-c');
   cell('deuterium', 'fut-d');
+  if (view.fleet) {
+    const value = fleetValue(body);
+    const pill = el(doc, 'span', `fut-cell fut-fleet${value ? '' : ' fut-none'}`, value ? formatUnits(value, locale) : '');
+    if (value) pill.title = view.t('planetMenu.fleetHint');
+    box.append(pill);
+  }
   return box;
 }
 
@@ -175,24 +180,31 @@ export function remaining(end: number, now: number): string {
   return hours < 48 ? `${hours}h ${String(min % 60).padStart(2, '0')}m` : `${Math.floor(hours / 24)}d ${hours % 24}h`;
 }
 
-/** Coloured stripes, one per running queue kind (as OGLight), with the details in the tooltip. */
-function queueStripes(doc: Document, items: QueueItem[], now: number, t: PlanetMenuOptions['t'], locale: string): HTMLElement | null {
-  if (!items.length) return null;
+/**
+ * What is being built on a body: one dot per running queue kind, in OGLight's colours, where the
+ * game's wrench was. `building` = the game marks a construction here: when the queues were never
+ * read (or are older than it) a single plain dot still says so. Details in the tooltip.
+ */
+function queueDots(doc: Document, items: QueueItem[], building: HTMLAnchorElement | null, now: number, t: PlanetMenuOptions['t'], locale: string): HTMLElement | null {
+  if (!items.length && !building) return null;
   const box = el(doc, 'span', 'fut-queue');
-  box.title = items
-    .map((i) => `${t(`queue.${i.kind}`)}: ${queueLabel(i, locale)} · ${remaining(i.end, now)}`)
-    .join('\n');
-  for (const i of items) box.append(el(doc, 'span', `fut-q fut-q-${i.kind}`));
+  if (items.length) {
+    box.title = items.map((i) => `${t(`queue.${i.kind}`)}: ${queueLabel(i, locale)} · ${remaining(i.end, now)}`).join('\n');
+    for (const kind of new Set(items.map((i) => i.kind))) box.append(el(doc, 'span', `fut-q fut-q-${kind}`));
+  } else {
+    box.title = building?.getAttribute('title') || t('planetMenu.building');
+    box.append(el(doc, 'span', 'fut-q fut-q-unknown'));
+  }
   return box;
 }
 
 /** Removes everything Future added, so the menu can be redrawn without duplicates. */
 export function clearPlanetMenu(doc: Document): void {
   doc
-    .querySelectorAll('.fut-res, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-idle, .fut-nomoon, .fut-age, .fut-queue')
+    .querySelectorAll('.fut-res, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue')
     .forEach((n) => n.remove());
   doc.querySelectorAll('.fut-name').forEach((wrap) => wrap.replaceWith(...Array.from(wrap.childNodes)));
-  doc.querySelectorAll('.fut-row').forEach((n) => n.classList.remove('fut-row', 'fut-current', 'fut-building'));
+  doc.querySelectorAll('.fut-row').forEach((n) => n.classList.remove('fut-row', 'fut-current'));
 }
 
 /**
@@ -214,9 +226,9 @@ function formatTime(at: number, locale: string): string {
 }
 
 /**
- * Toolbar: four buttons in two rows that already say something (production, what the plan misses,
- * today's expeditions, marked targets) and open their window; sync and settings stacked on the right.
- * The view switch lives in the settings panel: it is a preference, not an action.
+ * Toolbar: two lines that already say something and open their window (what the account produces
+ * a day, what the construction plan still misses); sync and settings stacked on the right.
+ * The journal and the targets live in the dock under the game's menu (../dock).
  */
 function toolbar(o: PlanetMenuOptions, colonies: string, roomy: boolean): HTMLElement {
   const { doc, t } = o;
@@ -225,36 +237,40 @@ function toolbar(o: PlanetMenuOptions, colonies: string, roomy: boolean): HTMLEl
   const fmt = (n: number) => formatUnits(n, o.locale);
   const msu = (r: { metal: number; crystal: number; deuterium: number }) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
 
-  const cell = (label: string, value: string, cls: string, title: string, onClick?: () => void) => {
+  /** One line: icon and name on the left; on the right the number, with the word that says what it is. */
+  const cell = (glyph: keyof typeof ICONS, label: string, value: string, note: string, unit: string, cls: string, title: string, onClick?: () => void) => {
     const b = el(doc, 'button', 'fut-cell');
     b.type = 'button';
     b.title = title;
-    b.append(el(doc, 'span', 'fut-cell-k', label), el(doc, 'span', `fut-cell-v ${cls}`.trim(), value));
+    const ico = el(doc, 'span', 'fut-cell-i');
+    ico.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="currentColor" stroke="currentColor">${ICONS[glyph]}</svg>`;
+    const v = el(doc, 'span', `fut-cell-v ${cls}`.trim());
+    if (note) v.append(el(doc, 'small', '', note), ' ');
+    v.append(value);
+    if (unit) v.append(' ', el(doc, 'small', '', unit));
+    b.append(ico, el(doc, 'span', 'fut-cell-k', label), v);
     if (onClick) b.addEventListener('click', onClick);
     else b.disabled = true;
     bar.append(b);
   };
 
   const perDay = o.snapshot ? msu(totals(o.snapshot, o.now).perHour) * 24 : null;
-  cell(t('bar.dash'), perDay === null ? '—' : `+${fmt(perDay)}${t('bar.perDay')}`, '', `${t('dash.title')}${perDay === null ? '' : ` · ${t('bar.dashHint')}`}`, o.onOpenDashboard);
+  cell('dashboard', t('bar.prod'), perDay === null ? '—' : `+${fmt(perDay)}`, '', perDay === null ? '' : t('bar.msuDay'), '', `${t('dash.title')}${perDay === null ? '' : ` · ${t('bar.dashHint')}`}`, o.onOpenDashboard);
 
   const count = o.planCount ?? 0;
   const gap = o.planGap;
-  const planValue = !count ? '—' : gap === null || gap === undefined ? '?' : gap > 0 ? `−${fmt(gap)}` : t('bar.ready');
-  const planCls = !count || gap === null || gap === undefined ? '' : gap > 0 ? 'fut-warn' : 'fut-ok';
-  cell(count ? t('bar.plan', { n: count > 99 ? '99+' : count }) : t('bar.planEmpty'), planValue, planCls, `${t('plan.title')} · ${count && gap ? t('bar.planHint') : t('plan.title')}`, o.onOpenPlanner);
-
-  const today = o.journalToday;
+  const known = count > 0 && gap !== null && gap !== undefined;
+  const planValue = !count ? '—' : !known ? '?' : gap > 0 ? fmt(gap) : t('bar.ready');
   cell(
-    t('bar.journal'),
-    today && today.count ? `${today.net >= 0 ? '+' : '−'}${fmt(Math.abs(today.net))}` : '—',
-    today && today.count ? (today.net >= 0 ? 'fut-ok' : 'fut-warn') : '',
-    today && today.count ? `${t('exp.title')} · ${t('bar.journalHint', { n: today.count })}` : t('exp.title'),
-    o.onOpenJournal,
+    'planner',
+    count ? t('bar.plan', { n: count > 99 ? '99+' : count }) : t('bar.planEmpty'),
+    planValue,
+    known && gap > 0 ? t('bar.missing') : '',
+    '',
+    !known ? '' : gap > 0 ? 'fut-warn' : 'fut-ok',
+    `${t('plan.title')}${count && gap ? ` · ${t('bar.planHint')}` : ''}`,
+    o.onOpenPlanner,
   );
-
-  const marked = o.targetsCount ?? 0;
-  cell(t('bar.targets'), marked ? String(marked) : '—', '', t('bar.targetsHint'), o.onOpenTargets);
 
   const side = el(doc, 'div', 'fut-side');
   const lastSync = o.snapshot ? t('toolbar.lastSync', { time: formatTime(o.snapshot.fetchedAt, o.locale) }) : '';
@@ -327,6 +343,9 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
   list.classList.toggle('fut-mode-side', mode === 'side');
 
   const byId = new Map((o.snapshot?.bodies ?? []).map((b) => [b.id, b]));
+  const view = { fleet: o.settings.showFleet === true, t: o.t };
+  // The fleet pill is a fourth line under the three resources: the rows grow by it.
+  list.style.setProperty('--fut-row-h', view.fleet ? '52px' : '40px');
 
   for (const entry of o.entries) {
     entry.element.classList.add('fut-row');
@@ -337,28 +356,21 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       const wrap = el(doc, 'span', 'fut-name');
       link.querySelectorAll('.planet-name, .planet-koords').forEach((n) => wrap.append(n));
       const planetBody = entry.planetId ? byId.get(entry.planetId) : undefined;
-      link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true));
+      link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true, view));
       const age = ageBadge(doc, planetBody, o.now, o.t);
       if (age) link.append(age);
-      const pq = entry.planetId ? queueStripes(doc, activeItems(o.queues?.bodies[String(entry.planetId)], o.now), o.now, o.t, o.locale) : null;
-      if (pq) wrap.append(pq);
-      // Queue: the game's construction icon stays as it is (its own link); a planet with
-      // nothing in construction gets an amber dot.
-      if (entry.construction.planet) entry.element.classList.add('fut-building');
-      else if (o.settings.markIdle) {
-        const idle = el(doc, 'span', 'fut-idle');
-        idle.title = o.t('planetMenu.idle');
-        link.append(idle);
-      }
+      // The game's wrench is hidden: the dots say what is being built, not only that something is.
+      const pq = queueDots(doc, entry.planetId ? activeItems(o.queues?.bodies[String(entry.planetId)], o.now) : [], entry.construction.planet, o.now, o.t, o.locale);
+      if (pq) link.append(pq);
     }
 
     const moon = entry.moonLink;
     if (moon) {
       const moonBody = entry.moonId ? byId.get(entry.moonId) : undefined;
-      moon.append(resourceColumn(doc, moonBody, o.now, o.locale, false));
+      moon.append(resourceColumn(doc, moonBody, o.now, o.locale, false, view));
       const age = ageBadge(doc, moonBody, o.now, o.t);
       if (age) moon.append(age);
-      const mq = entry.moonId ? queueStripes(doc, activeItems(o.queues?.bodies[String(entry.moonId)], o.now), o.now, o.t, o.locale) : null;
+      const mq = queueDots(doc, entry.moonId ? activeItems(o.queues?.bodies[String(entry.moonId)], o.now) : [], entry.construction.moon, o.now, o.t, o.locale);
       if (mq) moon.append(mq);
     } else {
       // Keeps the planet columns aligned on planets without a moon.
@@ -372,17 +384,30 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
   list.before(toolbar(o, colonies, roomy));
 
   if (o.snapshot && o.settings.showTotals) {
+    // A small table: what the whole account holds now and makes in a day; MSU sums the three.
     const { stock, perHour } = totals(o.snapshot, o.now);
     const msu = (r: { metal: number; crystal: number; deuterium: number }) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
     const box = el(doc, 'div', 'fut-totals');
-    const line = (label: string, value: number, rate: number, cls: string) => {
-      box.append(el(doc, 'span', cls, `${label} ${formatUnits(value, o.locale)}`));
-      box.append(el(doc, 'span', 'fut-rate', `+${formatUnits(rate * 24, o.locale)}/24h`));
+    box.setAttribute('role', 'table');
+    const row = (cls: string, cells: [string, string, string]) => {
+      const r = el(doc, 'div', `fut-trow ${cls}`.trim());
+      r.setAttribute('role', 'row');
+      cells.forEach((text, i) => {
+        const c = el(doc, 'span', i ? 'fut-tnum' : 'fut-tname', text);
+        c.setAttribute('role', cls === 'fut-thead' ? 'columnheader' : 'cell');
+        r.append(c);
+      });
+      box.append(r);
     };
+    row('fut-thead', ['', o.t('totals.stock'), o.t('totals.day')]);
+    const line = (label: string, value: number, rate: number, cls: string) => row(cls, [label, formatUnits(value, o.locale), `+${formatUnits(rate * 24, o.locale)}`]);
     line(o.t('res.metal'), stock.metal, perHour.metal, 'fut-m');
     line(o.t('res.crystal'), stock.crystal, perHour.crystal, 'fut-c');
     line(o.t('res.deuterium'), stock.deuterium, perHour.deuterium, 'fut-d');
-    line('MSU', msu(stock), msu(perHour), 'fut-msu');
+    const plain = (r: { metal: number; crystal: number; deuterium: number }) => r.metal + r.crystal + r.deuterium;
+    if (o.settings.totalView === 'sum') line(o.t('totals.sum'), plain(stock), plain(perHour), 'fut-msu');
+    else line('MSU', msu(stock), msu(perHour), 'fut-msu');
+    if (view.fleet) row('fut-fleetrow', [o.t('planetMenu.fleet'), formatUnits(o.snapshot.bodies.reduce((sum, b) => sum + fleetValue(b), 0), o.locale), '']);
     list.after(box);
   }
 }

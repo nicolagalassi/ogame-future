@@ -7,7 +7,6 @@
  * - Trasporto / Schiera: towards a chosen own planet or moon, with a favourite per button.
  * - Spedizione: best ship and expedition cargo, position 16 of this system.
  * - Fleetsave: the per-body profile (empty galaxy/system = this body's, as in PrOGect).
- * - Tutte − riserva: every ship minus the reserve.
  * Rules per body, each with its own global switch: ships to keep, resources to keep, ships
  * the jump gate keeps (moons). The fleetsave has its own ships + resources and ignores the
  * switches. Any rule can be copied onto any chosen bodies; each shows where else it is set.
@@ -48,7 +47,6 @@ import {
 import { originCoords, readShipSlots } from '../../data/fleet-page';
 import { getDispatcher, readShipsInfo, SHIPS_INFO_KEY, whenDispatcherReady, type FleetDispatcher } from '../../data/fleet-dispatcher';
 import {
-  prepareAllShips,
   prepareLast,
   snapshotFleet,
   prepareDeploy,
@@ -62,7 +60,7 @@ import {
 } from './actions';
 import { hookSend, nextInRound, readRepeatParams, repeatUrl, type RepeatState } from './repeat';
 import { FLEET_CSS, MODAL_CSS } from './style';
-import { listShortcuts, registerShortcuts } from '../shortcuts';
+import { keyLabel, keymap, registerActions } from '../shortcuts';
 import { iconSvg, type IconName } from './icons';
 
 export interface FleetBody {
@@ -83,6 +81,8 @@ export interface FleetOptions {
   /** Current URL, and how to open another one (overridable in tests). */
   href?: string;
   navigate?: (url: string) => void;
+  /** Opens Future's settings on the fleet section (general fleet settings, keys). */
+  onOpenSettings?: () => void;
 }
 
 const STYLE_ID = 'fut-fleet-style';
@@ -303,16 +303,29 @@ function ruleBadge(o: FleetOptions, section: ReserveSection): HTMLElement {
   return badge;
 }
 
-/** A box for one rule: title, where it stands, its switch (global), a hint and its fields. */
+/**
+ * A box for one rule: title, where it stands and its switch (global) always in sight; the hint and
+ * the fields fold away, open when the rule holds something.
+ */
 function ruleBox(o: FleetOptions, section: ReserveSection, title: string, hint: string, fields: HTMLElement[], onSwitch: () => void): HTMLElement {
   const { doc, t } = o;
-  const box = el(doc, 'div', 'fut-freserve');
-  const head = el(doc, 'div', 'fut-frulehead');
-  head.append(el(doc, 'h5', '', title), ruleBadge(o, section));
+  const box = el(doc, 'details', 'fut-freserve');
+  box.open = !sectionEmpty(profileFor(loadProfiles(o.store), o.bodyId), section);
+  const head = el(doc, 'summary', 'fut-frulehead');
+  const mark = el(doc, 'span', 'fut-fruleico');
+  mark.innerHTML = iconSvg(section, 18);
+  head.append(iconEl(doc), mark, el(doc, 'h5', '', title), ruleBadge(o, section));
   const key = SWITCH[section];
   if (key) {
-    const [wrap, input] = checkField(doc, t('fleet.rule.switch'), loadSettings(o.store)[key]);
+    // Same switch as on the fleet bar: one for every planet and moon.
+    const wrap = el(doc, 'label', 'fut-fswitch');
     wrap.title = t('fleet.rule.switchHint');
+    const input = el(doc, 'input');
+    input.type = 'checkbox';
+    input.setAttribute('role', 'switch');
+    input.setAttribute('aria-label', `${title}: ${t('fleet.rule.switch')}`);
+    input.checked = loadSettings(o.store)[key];
+    wrap.append(input, el(doc, 'i', 'sw-track'));
     input.addEventListener('change', () => {
       o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: input.checked });
       // Only the badge changes: the fields may hold edits not saved yet.
@@ -321,8 +334,17 @@ function ruleBox(o: FleetOptions, section: ReserveSection, title: string, hint: 
     });
     head.append(wrap);
   }
-  box.append(head, el(doc, 'p', 'fut-fnote', hint), ...fields);
+  const inner = el(doc, 'div', 'fut-frulebody');
+  inner.append(el(doc, 'p', 'fut-fnote', hint), ...fields);
+  box.append(head, inner);
   return box;
+}
+
+/** The fold arrow of a rule box. */
+function iconEl(doc: Document): HTMLElement {
+  const span = el(doc, 'span', 'fold');
+  span.innerHTML = iconSvg('caret', 14);
+  return span;
 }
 
 function reserveEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLElement {
@@ -330,7 +352,6 @@ function reserveEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEle
   const profile = profileFor(loadProfiles(o.store), o.bodyId);
   const moon = isMoon(o.bodies, o.bodyId);
   const panel = el(doc, 'div', 'fut-feditor');
-  panel.append(el(doc, 'h4', '', t(moon ? 'fleet.editTitleMoon' : 'fleet.editTitlePlanet', { body: bodyLabel(o, o.bodyId) })));
   const refresh = () => onSaved('');
 
   // Ships and resources are separate rules: either can be switched off alone.
@@ -343,7 +364,7 @@ function reserveEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEle
   if (gate) panel.append(ruleBox(o, 'gate', t('fleet.rule.gate'), t('fleet.rule.gateHint'), [gate.el], refresh));
 
   // Fleetsave: target plus its own ships and resources to keep; no switch, it ignores the others.
-  const saveGrid = el(doc, 'div', 'fut-fgrid');
+  const saveGrid = el(doc, 'div', 'fut-fgrid wide');
   const origin = originCoords(doc);
   const [gWrap, gIn] = numberField(doc, t('fleet.galaxy'), profile.save?.galaxy ?? null, origin ? String(origin.galaxy) : '');
   const [sWrap, sIn] = numberField(doc, t('fleet.system'), profile.save?.system ?? null, origin ? String(origin.system) : '');
@@ -416,7 +437,7 @@ function reserveEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEle
       copyBox.hidden = !copyBox.hidden;
     }),
   );
-  panel.append(actions, copyBox);
+  panel.append(copyBox, actions);
   return panel;
 }
 
@@ -475,92 +496,6 @@ function copyPanel(o: FleetOptions, moon: boolean, onCopy: (sections: ReserveSec
   return box;
 }
 
-function settingsEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLElement {
-  const { doc, t } = o;
-  const s = loadSettings(o.store);
-  const names = new Map(readShipSlots(doc).map((x) => [Number(x.id), x.name || `#${x.id}`]));
-  const shipName = (id: number) => names.get(id) ?? `#${id}`;
-  const panel = el(doc, 'div', 'fut-feditor');
-
-  panel.append(el(doc, 'h5', '', t('fleet.transportTitle')));
-  const g1 = el(doc, 'div', 'fut-fgrid');
-  const cargoOptions = CARGO_SHIPS.map((id) => [String(id), shipName(id)] as [string, string]);
-  const [mainW, mainSel] = selectField(doc, t('fleet.mainShip'), cargoOptions, String(s.mainShip));
-  const [secW, secSel] = selectField(doc, t('fleet.secondShip'), [['0', t('fleet.none')], ...cargoOptions], String(s.secondShip));
-  const [spdW, spdSel] = selectField(
-    doc,
-    t('fleet.speed'),
-    Array.from({ length: 10 }, (_, i) => [String((i + 1) * 10), `${(i + 1) * 10}%`]),
-    String(s.transportSpeed),
-  );
-  g1.append(mainW, secW, spdW);
-  panel.append(g1);
-
-  panel.append(el(doc, 'h5', '', t('fleet.favTitle')));
-  const gf = el(doc, 'div', 'fut-fgrid');
-  const destOptions: [string, string][] = [
-    ['0', t('fleet.none')],
-    ...o.bodies
-      .flatMap((b) => [b.planetId, b.moonId])
-      .filter((x): x is number => x !== null)
-      .map((id) => [String(id), bodyLabel(o, id)] as [string, string]),
-  ];
-  const [favTW, favTSel] = selectField(doc, t('fleet.favTransport'), destOptions, String(s.favTransport ?? 0));
-  const [favDW, favDSel] = selectField(doc, t('fleet.favDeploy'), destOptions, String(s.favDeploy ?? 0));
-  gf.append(favTW, favDW);
-  panel.append(gf);
-
-  panel.append(el(doc, 'h5', '', t('fleet.expeditionTitle')));
-  const g2 = el(doc, 'div', 'fut-fgrid');
-  const [expW, expSel] = selectField(
-    doc,
-    t('fleet.expeditionShip'),
-    [['0', t('fleet.bestShip')], ...[219, 203, 202].map((id) => [String(id), shipName(id)] as [string, string])],
-    String(s.expeditionShip),
-  );
-  const [valW, valIn] = numberField(doc, t('fleet.expeditionValue'), s.expeditionValue, t('fleet.auto'));
-  valIn.inputMode = 'text';
-  const [extW, extIn] = checkField(doc, t('fleet.expeditionExtras'), s.expeditionExtras);
-  g2.append(expW, valW, extW);
-  panel.append(g2);
-  panel.append(el(doc, 'p', 'fut-fnote', t('fleet.expeditionHint')));
-
-  panel.append(el(doc, 'h5', '', t('fleet.shortcutsTitle')));
-  const keys = el(doc, 'div', 'fut-fkeys');
-  for (const sc of listShortcuts()) {
-    const row = el(doc, 'span', 'fut-fkeyrow');
-    row.append(el(doc, 'kbd', '', sc.key.toUpperCase()), el(doc, 'span', '', t(sc.label)));
-    keys.append(row);
-  }
-  panel.append(keys);
-
-  panel.append(el(doc, 'h5', '', t('fleet.repeatTitle')));
-  const [repW, repIn] = checkField(doc, t('fleet.repeat'), s.repeat);
-  panel.append(repW, el(doc, 'p', 'fut-fnote', t('fleet.repeatHint')));
-
-  const actions = el(doc, 'div', 'fut-factions');
-  actions.append(
-    button(doc, t('fleet.save'), () => {
-      const next: FleetSettings = {
-        ...loadSettings(o.store),
-        mainShip: Number(mainSel.value),
-        secondShip: Number(secSel.value),
-        transportSpeed: Number(spdSel.value),
-        favTransport: Number(favTSel.value) || null,
-        favDeploy: Number(favDSel.value) || null,
-        expeditionShip: Number(expSel.value),
-        expeditionValue: valIn.value.trim(),
-        expeditionExtras: extIn.checked,
-        repeat: repIn.checked,
-      };
-      o.store.set(SETTINGS_KEY, next);
-      onSaved(t('fleet.saved'));
-    }, 'primary'),
-  );
-  panel.append(actions);
-  return panel;
-}
-
 /* ------------------------------------------------------------------ */
 /* Bar                                                                 */
 /* ------------------------------------------------------------------ */
@@ -600,10 +535,11 @@ function closeModal(doc: Document): void {
 }
 
 /**
- * Opens the fleet settings over the page, in a Shadow DOM so the game's CSS cannot
- * restyle our fields. Tab "this body": reserves and fleetsave; tab "general": the rest.
+ * Opens this planet's or moon's rules over the page (reserves, jump gate, fleetsave), in a Shadow
+ * DOM so the game's CSS cannot restyle our fields. The general fleet settings and the keys are in
+ * Future's settings window.
  */
-function openSettings(o: FleetOptions, tab: 'body' | 'general', onChange: () => void): void {
+function openSettings(o: FleetOptions, _tab: 'body', onChange: () => void): void {
   const { doc, t } = o;
   closeModal(doc);
   const host = el(doc, 'div');
@@ -614,45 +550,34 @@ function openSettings(o: FleetOptions, tab: 'body' | 'general', onChange: () => 
   const backdrop = el(doc, 'div', 'backdrop');
   const panel = el(doc, 'div', 'panel');
   panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-modal', 'true');
   panel.setAttribute('aria-label', t('fleet.settingsTitle'));
   const head = el(doc, 'div', 'head');
-  const tabs = el(doc, 'div', 'tabs');
-  const moon = isMoon(o.bodies, o.bodyId);
   const status = el(doc, 'span', 'sub status');
+  status.setAttribute('role', 'status');
   const body = el(doc, 'div', 'body');
-  const show = (which: 'body' | 'general') => {
-    tabs.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tab === which)));
+  const show = () => {
     // A message means something was saved or copied: redraw so every rule shows where it stands now.
     const saved = (msg: string) => {
       onChange();
-      if (msg && which === 'body') {
+      if (msg) {
         const top = backdrop.scrollTop;
-        show(which);
+        show();
         backdrop.scrollTop = top;
       }
       status.textContent = msg;
     };
-    body.replaceChildren(which === 'body' ? reserveEditor(o, saved) : settingsEditor(o, saved));
+    body.replaceChildren(reserveEditor(o, saved));
   };
-  for (const [id, label] of [
-    ['body', t(moon ? 'fleet.tabMoon' : 'fleet.tabPlanet')],
-    ['general', t('fleet.tabGeneral')],
-  ] as const) {
-    const b = el(doc, 'button', 'tab', label);
-    b.type = 'button';
-    b.dataset.tab = id;
-    b.addEventListener('click', () => show(id));
-    tabs.append(b);
-  }
   const close = el(doc, 'button', 'close');
   close.type = 'button';
   close.setAttribute('aria-label', t('fleet.close'));
   close.addEventListener('click', () => closeModal(doc));
   close.append(icon(doc, 'close', 16));
   const titles = el(doc, 'div', 'titles');
-  titles.append(el(doc, 'h2', '', t('fleet.settingsTitle')), status);
+  titles.append(el(doc, 'h2', '', t(isMoon(o.bodies, o.bodyId) ? 'fleet.editTitleMoon' : 'fleet.editTitlePlanet', { body: bodyLabel(o, o.bodyId) })), status);
   head.append(titles, close);
-  panel.append(head, tabs, body);
+  panel.append(head, body);
   backdrop.append(panel);
   backdrop.addEventListener('click', (e) => {
     if (e.target === backdrop) closeModal(doc);
@@ -663,7 +588,8 @@ function openSettings(o: FleetOptions, tab: 'body' | 'general', onChange: () => 
     if (e.key === 'Escape') closeModal(doc);
   };
   doc.addEventListener('keydown', modalKeyHandler, true);
-  show(tab);
+  show();
+  close.focus();
 }
 
 /* ------------------------------------------------------------------ */
@@ -677,17 +603,49 @@ function shortLabel(o: FleetOptions, id: number | null): string {
   return `${b.name}${b.moonId === id ? ' ☾' : ''}`;
 }
 
-/** Keyboard key of each fleet action (OGLight-style shortcuts, shown on the tile). */
-export const FLEET_KEYS: Partial<Record<FleetMode, string>> = { moon: 'l', transport: 't', deploy: 'd', expedition: 'x', fleetsave: 'e', all: 'a', last: 'p' };
+/**
+ * The line that speaks for the icon-only bar: what happened last (role=status) and, while the
+ * pointer or the focus is on a control, what that control does.
+ */
+function readout(doc: Document, text: string) {
+  const box = el(doc, 'span', 'fut-fread');
+  const tip = el(doc, 'span', 'tip');
+  tip.setAttribute('aria-hidden', 'true');
+  const info = el(doc, 'span', 'fut-finfo', text);
+  info.setAttribute('role', 'status');
+  box.append(tip, info);
+  const clear = () => tip.replaceChildren();
+  return {
+    box,
+    say(msg: string, err = false) {
+      clear();
+      info.textContent = msg;
+      info.classList.toggle('err', err);
+    },
+    peek(node: HTMLElement, name: string, detail: string) {
+      const show = () => tip.replaceChildren(el(doc, 'b', '', name), doc.createTextNode(detail ? ` ${detail}` : ''));
+      node.addEventListener('mouseenter', show);
+      node.addEventListener('focus', show);
+      node.addEventListener('mouseleave', clear);
+      node.addEventListener('blur', clear);
+    },
+  };
+}
 
-function tile(doc: Document, icon: IconName, label: string, caption: string, title: string, onClick: () => void, cls = '', key = ''): HTMLButtonElement {
-  const b = el(doc, 'button', `fut-ftile ${cls}`.trim());
+/** An action of the bar: its icon alone, the key in the corner; the name is its accessible label. */
+function tile(doc: Document, icon: IconName, label: string, onClick: () => void, cls = '', key = ''): HTMLButtonElement {
+  const b = el(doc, 'button', `fut-fact ${cls}`.trim());
   b.type = 'button';
-  b.title = key ? `${title} [${key.toUpperCase()}]` : title;
-  b.innerHTML = iconSvg(icon);
-  if (key) b.append(el(doc, 'kbd', 'fut-fkey', key.toUpperCase()));
-  b.append(el(doc, 'span', 'fut-flabel', label));
-  if (caption) b.append(el(doc, 'span', 'fut-fcaption', caption));
+  b.title = key ? `${label} [${keyLabel(key)}]` : label;
+  b.setAttribute('aria-label', label);
+  const ico = el(doc, 'span', 'ico');
+  ico.innerHTML = iconSvg(icon, 22);
+  b.append(ico);
+  if (key) {
+    const cap = el(doc, 'kbd', '', keyLabel(key));
+    cap.setAttribute('aria-hidden', 'true');
+    b.append(cap);
+  }
   b.addEventListener('click', (e) => {
     e.preventDefault();
     onClick();
@@ -695,11 +653,17 @@ function tile(doc: Document, icon: IconName, label: string, caption: string, tit
   return b;
 }
 
-function iconToggle(doc: Document, icon: IconName, title: string, onClick: () => void, cls = ''): HTMLButtonElement {
-  const b = el(doc, 'button', `fut-ficon ${cls}`.trim());
+/** A rule switch: the rule's icon and a small track, knob to the right and lit when on. */
+function ruleSwitch(doc: Document, icon: IconName, label: string, on: boolean, onClick: () => void): HTMLButtonElement {
+  const b = el(doc, 'button', 'fut-fsw');
   b.type = 'button';
-  b.title = title;
-  b.innerHTML = iconSvg(icon, 18);
+  b.title = label;
+  b.setAttribute('role', 'switch');
+  b.setAttribute('aria-checked', String(on));
+  b.setAttribute('aria-label', label);
+  const ico = el(doc, 'span', 'ico');
+  ico.innerHTML = iconSvg(icon, 16);
+  b.append(ico, el(doc, 'i', 'track'));
   b.addEventListener('click', (e) => {
     e.preventDefault();
     onClick();
@@ -707,22 +671,55 @@ function iconToggle(doc: Document, icon: IconName, title: string, onClick: () =>
   return b;
 }
 
-/** Small list to pick the destination of Trasporto / Schiera; the pick becomes the favourite. */
+/**
+ * A small button on each ship of the game's page 1, as OGLight has: it inverts that ship's
+ * selection (100 of 5,000 picked becomes 4,900). Typed into the game's own field, so the game
+ * recounts cargo and fuel itself. No request, no send.
+ */
+function addInvertButtons(o: FleetOptions): void {
+  const { doc, t } = o;
+  for (const slot of readShipSlots(doc)) {
+    const tile = slot.input.closest('li');
+    if (!tile || !slot.available || tile.querySelector('.fut-finv')) continue;
+    const b = el(doc, 'button', 'fut-finv');
+    b.type = 'button';
+    b.title = t('fleet.invert');
+    b.setAttribute('aria-label', `${t('fleet.invert')}: ${slot.name}`);
+    b.innerHTML = iconSvg('invert', 12);
+    b.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // Read now, not when the button was drawn: the amount changes as fleets leave and land.
+      const available = Number(tile.querySelector<HTMLElement>('.amount')?.dataset.value ?? 0) || 0;
+      const picked = Math.min(available, parseAmount(slot.input.value));
+      typeInto(slot.input, available - picked || '');
+    });
+    tile.append(b);
+  }
+}
+
+/** Small list to pick the destination of Trasporto / Schiera for this one fleet. */
 function destinationMenu(o: FleetOptions, anchor: HTMLElement, current: number | null, onPick: (id: number) => void): void {
   const { doc } = o;
   doc.querySelectorAll('.fut-fmenu').forEach((n) => n.remove());
   const menu = el(doc, 'div', 'fut-fmenu');
-  for (const b of o.bodies) {
-    for (const id of [b.planetId, b.moonId]) {
-      if (id === null || id === o.bodyId) continue;
-      const item = button(doc, `${b.name}  [${b.coords}]`, () => {
-        menu.remove();
-        onPick(id);
-      }, id === current ? 'on' : '');
-      if (id === b.moonId) item.prepend(icon(doc, 'moon', 11, 'fut-moon-ico'));
-      menu.append(item);
-    }
-  }
+  // One row per position: the planet on the left, its moon on the right.
+  const cell = (id: number | null, moon: boolean, b: FleetBody) => {
+    if (id === null) return el(doc, 'span');
+    const item = button(doc, moon ? '' : b.name, () => {
+      menu.remove();
+      onPick(id);
+    }, `${moon ? 'moon' : 'planet'}${id === current ? ' on' : ''}`);
+    if (moon) item.append(icon(doc, 'moon', 14));
+    else item.append(el(doc, 'small', '', b.coords));
+    item.setAttribute('aria-label', `${b.name}${moon ? ` (${o.t('fleet.typeMoon')})` : ''} [${b.coords}]`);
+    if (moon) item.title = `${b.name} (${o.t('fleet.typeMoon')})`;
+    if (id === current) item.setAttribute('aria-current', 'true');
+    // Where the fleet leaves from cannot be where it goes.
+    item.disabled = id === o.bodyId;
+    return item;
+  };
+  for (const b of o.bodies) menu.append(cell(b.planetId, false, b), cell(b.moonId, true, b));
   // On <body> with fixed position: inside the bar the game's ship panels covered and clipped it.
   const r = anchor.getBoundingClientRect();
   menu.style.top = `${Math.round(r.bottom + 4)}px`;
@@ -736,7 +733,13 @@ function destinationMenu(o: FleetOptions, anchor: HTMLElement, current: number |
   };
   doc.addEventListener('mousedown', away, true);
   // Fixed on screen: close it when the page scrolls instead of leaving it floating.
-  doc.defaultView?.addEventListener('scroll', () => menu.remove(), { once: true, capture: true });
+  // Its own list scrolls with the wheel; only a scroll of the page behind closes it.
+  const onScroll = (e: Event) => {
+    if (e.target instanceof Node && menu.contains(e.target)) return;
+    menu.remove();
+    doc.defaultView?.removeEventListener('scroll', onScroll, true);
+  };
+  doc.defaultView?.addEventListener('scroll', onScroll, true);
 }
 
 export function renderFleetTools(o: FleetOptions): void {
@@ -769,11 +772,8 @@ export function renderFleetTools(o: FleetOptions): void {
   state.o = o;
   pageState.set(doc, state);
 
-  const info = el(doc, 'span', 'fut-finfo', summary(o, stored, settings));
-  const say = (text: string, err = false) => {
-    info.textContent = text;
-    info.classList.toggle('err', err);
-  };
+  const out = readout(doc, summary(o, stored, settings));
+  const say = out.say;
   const report = (r: PrepareResult, okKey: string, vars: Record<string, string | number> = {}) =>
     r.ok
       ? say(t(okKey, { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), ...vars }))
@@ -830,11 +830,6 @@ export function renderFleetTools(o: FleetOptions): void {
         begin('fleetsave');
         report(prepareFleetsave(fd, doc, profile, profile.save), 'fleet.ok.cargo');
       }),
-    all: () =>
-      withDispatcher((fd) => {
-        begin('all');
-        report(prepareAllShips(fd, profile), 'fleet.ok.ships');
-      }),
     plan: (dest) =>
       withDispatcher((fd) => {
         const delivery = o.store.get<Delivery | null>(DELIVERY_KEY, null);
@@ -854,102 +849,136 @@ export function renderFleetTools(o: FleetOptions): void {
       }),
   };
   const favRun = {
-    transport: () => (settings.favTransport ? run.transport(settings.favTransport) : say(t('fleet.err.noDest'), true)),
-    deploy: () => (settings.favDeploy ? run.deploy(settings.favDeploy) : say(t('fleet.err.noDest'), true)),
+    transport: () => (settings.favTransport ? run.transport(settings.favTransport) : say(t('fleet.err.noDefault'), true)),
+    deploy: () => (settings.favDeploy ? run.deploy(settings.favDeploy) : say(t('fleet.err.noDefault'), true)),
   };
 
-  const setFav = (key: 'favTransport' | 'favDeploy', id: number) => {
-    o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: id });
-    redraw();
-  };
-  const withCaret = (tileEl: HTMLButtonElement, key: 'favTransport' | 'favDeploy') => {
-    const wrap = el(doc, 'span', 'fut-ftilewrap');
-    const caret = iconToggle(doc, 'caret', t('fleet.pickDest'), () => destinationMenu(o, wrap, settings[key], (id) => setFav(key, id)), 'fut-fcaret');
+  // Split button: the tile goes to the default destination (chosen in the settings); the arrow
+  // prepares this one fleet towards another body, without changing the default.
+  const withCaret = (tileEl: HTMLButtonElement, mode: 'transport' | 'deploy', fav: number | null) => {
+    const wrap = el(doc, 'span', 'fut-fsplit');
+    const caret = el(doc, 'button', 'fut-fcaret');
+    caret.type = 'button';
+    caret.title = t('fleet.pickOnce');
+    caret.setAttribute('aria-label', t('fleet.pickOnce'));
+    caret.setAttribute('aria-haspopup', 'menu');
+    caret.innerHTML = iconSvg('caret', 14);
+    caret.addEventListener('click', (e) => {
+      e.preventDefault();
+      destinationMenu(o, wrap, fav, (id) => run[mode](id));
+    });
+    out.peek(caret, t('fleet.pickOnce'), t('fleet.pickOnceHint'));
     wrap.append(tileEl, caret);
     return wrap;
   };
 
   if (fleet1 && anchor1) {
     const bar = el(doc, 'div', 'fut-fbar');
-    const tiles = el(doc, 'div', 'fut-ftiles');
+    const keys = keymap(o.store);
+    const k = (id: string) => keys.get(id) ?? '';
+    const tiles = el(doc, 'div', 'fut-facts');
+    tiles.setAttribute('role', 'group');
+    tiles.setAttribute('aria-label', t('fleet.actionsLabel'));
     const here = o.bodies.find((b) => b.planetId === o.bodyId);
-    if (here?.moonId) tiles.append(tile(doc, 'moon', t('fleet.btn.moon'), '', t('fleet.tip.moon'), () => run.moon(), '', FLEET_KEYS.moon));
+    /** One action: icon-only tile, described in the readout while pointed at. */
+    const act = (ico: IconName, id: string, name: string, where: string, tip: string, onClick: () => void, dim = false) => {
+      const b = tile(doc, ico, where ? `${name} ${where}` : name, onClick, dim ? 'dim' : '', k(id));
+      out.peek(b, where ? `${name} ${where}` : name, tip);
+      return b;
+    };
+    const to = (id: number | null) => `→ ${shortLabel(o, id)}`;
+    if (here?.moonId) tiles.append(act('moon', 'fleet.moon', t('fleet.btn.moon'), to(here.moonId), t('fleet.tip.moon'), () => run.moon()));
+    const last = o.store.get<LastFleet | null>(LAST_FLEET_KEY, null);
     tiles.append(
-      withCaret(
-        tile(doc, 'transport', t('fleet.btn.transport'), `→ ${shortLabel(o, settings.favTransport)}`, t('fleet.tip.transport'), favRun.transport, '', FLEET_KEYS.transport),
-        'favTransport',
-      ),
-      withCaret(
-        tile(doc, 'deploy', t('fleet.btn.deploy'), `→ ${shortLabel(o, settings.favDeploy)}`, t('fleet.tip.deploy'), favRun.deploy, '', FLEET_KEYS.deploy),
-        'favDeploy',
-      ),
-      tile(doc, 'expedition', t('fleet.btn.expedition'), '', t('fleet.tip.expedition'), () => run.expedition(), '', FLEET_KEYS.expedition),
-      tile(
-        doc,
+      withCaret(act('transport', 'fleet.transport', t('fleet.btn.transport'), to(settings.favTransport), t('fleet.tip.transport'), favRun.transport, !settings.favTransport), 'transport', settings.favTransport),
+      withCaret(act('deploy', 'fleet.deploy', t('fleet.btn.deploy'), to(settings.favDeploy), t('fleet.tip.deploy'), favRun.deploy, !settings.favDeploy), 'deploy', settings.favDeploy),
+      act('expedition', 'fleet.expedition', t('fleet.btn.expedition'), '', t('fleet.tip.expedition'), () => run.expedition()),
+      act(
         'fleetsave',
+        'fleet.fleetsave',
         t('fleet.btn.fleetsave'),
-        profile.save ? `→ ${profile.save.position}` : '',
+        profile.save ? `→ ${profile.save.galaxy ?? '·'}:${profile.save.system ?? '·'}:${profile.save.position}` : '',
         profile.save ? t('fleet.tip.fleetsave') : t('fleet.err.noFleetsave'),
         () => (profile.save ? run.fleetsave() : openSettings(o, 'body', redraw)),
-        profile.save ? '' : 'dim',
-        FLEET_KEYS.fleetsave,
+        !profile.save,
       ),
-      tile(doc, 'all', t('fleet.btn.all'), '', t('fleet.tip.all'), () => run.all(), '', FLEET_KEYS.all),
-      tile(doc, 'last', t('fleet.btn.last'), '', t('fleet.tip.last'), () => run.last(), o.store.get(LAST_FLEET_KEY, null) ? '' : 'dim', FLEET_KEYS.last),
+      act('last', 'fleet.last', t('fleet.btn.last'), '', last ? t('fleet.tip.last') : t('fleet.err.noLast'), () => run.last(), !last),
     );
-    // Same actions from the keyboard, like OGLight (one key = one prepared fleet, never a send).
-    registerShortcuts(doc, [
-      ...(here?.moonId ? [{ key: FLEET_KEYS.moon!, label: 'fleet.btn.moon', run: () => run.moon() }] : []),
-      { key: FLEET_KEYS.transport!, label: 'fleet.btn.transport', run: favRun.transport },
-      { key: FLEET_KEYS.deploy!, label: 'fleet.btn.deploy', run: favRun.deploy },
-      { key: FLEET_KEYS.expedition!, label: 'fleet.btn.expedition', run: () => run.expedition() },
-      { key: FLEET_KEYS.fleetsave!, label: 'fleet.btn.fleetsave', run: () => run.fleetsave() },
-      { key: FLEET_KEYS.all!, label: 'fleet.btn.all', run: () => run.all() },
-      { key: FLEET_KEYS.last!, label: 'fleet.btn.last', run: () => run.last() },
-    ]);
-    const side = el(doc, 'div', 'fut-fside');
-    side.append(
-      ...(['shipsOn', 'resourcesOn', 'gateOn'] as const).map((key) => {
-        const name = key === 'shipsOn' ? 'ships' : key === 'resourcesOn' ? 'resources' : 'gate';
-        return iconToggle(doc, name, `${t(`fleet.rule.${name}`)}: ${settings[key] ? t('fleet.on') : t('fleet.off')}. ${t(`fleet.rule.${name}Hint`)}`, () => {
-          o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: !loadSettings(o.store)[key] });
-          redraw();
-        }, settings[key] ? 'on' : '');
-      }),
-      iconToggle(doc, 'food', `${t('fleet.foodShort')}: ${settings.ignoreFood ? t('fleet.on') : t('fleet.off')}. ${t('fleet.foodHint')}`, () => {
-        o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), ignoreFood: !loadSettings(o.store).ignoreFood });
-        applyFood(o.store);
+    // Same actions on their keys and in the touch bar, like OGLight (one key = one prepared fleet, never a send).
+    registerActions(doc, o.store, t, {
+      ...(here?.moonId ? { 'fleet.moon': () => run.moon() } : {}),
+      'fleet.transport': favRun.transport,
+      'fleet.deploy': favRun.deploy,
+      'fleet.expedition': () => run.expedition(),
+      'fleet.fleetsave': () => run.fleetsave(),
+      'fleet.last': () => run.last(),
+    });
+
+    // Rules: what the actions keep back, one switch each.
+    const rules = el(doc, 'div', 'fut-frules');
+    rules.setAttribute('role', 'group');
+    rules.setAttribute('aria-label', t('fleet.rulesLabel'));
+    type Flag = 'shipsOn' | 'resourcesOn' | 'gateOn' | 'ignoreFood' | 'repeat';
+    const sw = (ico: IconName, label: string, hint: string, key: Flag, after?: () => void) => {
+      const b = ruleSwitch(doc, ico, label, settings[key], () => {
+        o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: !loadSettings(o.store)[key] });
+        after?.();
         redraw();
-      }, settings.ignoreFood ? 'on' : ''),
-      iconToggle(doc, 'repeat', `${t('fleet.repeatShort')}: ${settings.repeat ? t('fleet.on') : t('fleet.off')}. ${t('fleet.repeatHint')}`, () => {
-        o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), repeat: !loadSettings(o.store).repeat });
-        redraw();
-      }, settings.repeat ? 'on' : ''),
-      iconToggle(doc, 'settings', t('fleet.settingsTitle'), () => openSettings(o, 'body', redraw)),
+      });
+      out.peek(b, `${label}: ${settings[key] ? t('fleet.on') : t('fleet.off')}.`, hint);
+      return b;
+    };
+    rules.append(
+      sw('ships', t('fleet.rule.ships'), t('fleet.rule.shipsHint'), 'shipsOn'),
+      sw('resources', t('fleet.rule.resources'), t('fleet.rule.resourcesHint'), 'resourcesOn'),
+      ...(isMoon(o.bodies, o.bodyId) ? [sw('gate', t('fleet.rule.gate'), t('fleet.rule.gateHint'), 'gateOn')] : []),
+      sw('food', t('fleet.foodShort'), t('fleet.foodHint'), 'ignoreFood', () => applyFood(o.store)),
+      sw('repeat', t('fleet.repeatShort'), t('fleet.repeatHint'), 'repeat'),
     );
+
+    // The editors: this body's rules, and Future's general fleet settings.
+    const edit = el(doc, 'span', 'fut-fedit');
+    const tool = (ico: IconName, label: string, hint: string, onClick: () => void, cls = '') => {
+      const b = el(doc, 'button', `fut-ftool ${cls}`.trim());
+      b.type = 'button';
+      b.title = label;
+      b.setAttribute('aria-label', label);
+      b.innerHTML = iconSvg(ico, 18);
+      b.addEventListener('click', (e) => {
+        e.preventDefault();
+        onClick();
+      });
+      out.peek(b, label, hint);
+      return b;
+    };
+    edit.append(tool('rules', t('fleet.editRules', { body: shortLabel(o, o.bodyId) }), t('fleet.editRulesHint'), () => openSettings(o, 'body', redraw), 'fut-frules-open'));
+    if (o.onOpenSettings) edit.append(tool('settings', t('fleet.general'), t('fleet.generalHint'), () => o.onOpenSettings?.()));
+
     const top = el(doc, 'div', 'fut-frow');
-    top.append(tiles, side);
-    bar.append(top, info);
+    top.append(tiles, edit);
+    const bottom = el(doc, 'div', 'fut-frow');
+    bottom.append(rules, out.box);
+    bar.append(top, bottom);
     anchor1.before(bar);
+    addInvertButtons(o);
   }
 
   if (fleet2 && anchor2) {
     const bar = el(doc, 'div', 'fut-fbar');
+    const out2 = readout(doc, summary(o, stored, settings));
+    const load = tile(doc, 'cargo', t('fleet.resMinusReserve'), () => {
+      const fd = getDispatcher();
+      if (!fd) return;
+      out2.say(t('fleet.resLoaded', { cargo: loadCargoNow(fd, profile).toLocaleString(o.locale) }));
+    });
+    out2.peek(load, t('fleet.resMinusReserve'), t('fleet.tip.cargo'));
     const row = el(doc, 'div', 'fut-frow');
-    const info2 = el(doc, 'span', 'fut-finfo', summary(o, stored, settings));
-    const tiles = el(doc, 'div', 'fut-ftiles');
-    tiles.append(
-      tile(doc, 'cargo', t('fleet.resMinusReserve'), '', t('fleet.tip.cargo'), () => {
-        const fd = getDispatcher();
-        if (!fd) return;
-        const load = loadCargoNow(fd, profile);
-        info2.textContent = t('fleet.resLoaded', { cargo: load.toLocaleString(o.locale) });
-      }),
-    );
-    row.append(tiles);
-    bar.append(row, info2);
+    row.append(load, out2.box);
+    bar.append(row);
     anchor2.before(bar);
   }
+  // Touch bar on both pages (Avanti / Invia), even when no action is on a key here.
+  registerActions(doc, o.store, t, {});
 
   void whenDispatcherReady().then((fd) => {
     if (!fd) return;

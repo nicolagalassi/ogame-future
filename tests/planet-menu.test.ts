@@ -3,11 +3,13 @@ import { readCurrentResources, readPlanetList } from '../src/data/planet-list';
 import { dataAge, renderPlanetMenu } from '../src/modules/planet-menu';
 import { translator } from '../src/core/i18n';
 import { PLANET_LIST_HTML, SNAPSHOT } from './fixtures';
+import { DOCK_ID, renderDock } from '../src/modules/dock';
+import { loadMarks } from '../src/engines/marks';
 
 const t = translator('it');
 const draw = (mode: 'side' | 'compact', onOpenSettings = vi.fn(), onSync = vi.fn(async () => true)) =>
   renderPlanetMenu({
-    doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { mode, showTotals: true, markIdle: true },
+    doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { mode, showTotals: true },
     now: 0, locale: 'it', t, onOpenSettings, onSync,
   });
 
@@ -50,12 +52,11 @@ describe('renderPlanetMenu', () => {
     expect(document.body.textContent).not.toMatch(/NaN|undefined/);
   });
 
-  it('shows the build queue: game icon kept, amber dot on idle planets', () => {
+  it('marks a construction with a dot where the game shows its wrench, nothing on idle planets', () => {
     draw('side');
-    expect(document.querySelector('#planet-1 .fut-idle')).not.toBeNull();
-    expect(document.querySelector('#planet-3 .fut-idle')).toBeNull();
-    expect(document.querySelector('#planet-3 a.constructionIcon')).not.toBeNull();
-    expect(document.getElementById('planet-3')?.classList.contains('fut-building')).toBe(true);
+    expect(document.querySelector('#planet-1 .fut-queue')).toBeNull();
+    // Queues never read: the game's own icon is enough for one plain dot.
+    expect(Array.from(document.querySelectorAll('#planet-3 .fut-q')).map((d) => d.className)).toEqual(['fut-q fut-q-unknown']);
   });
 
   it('paints storage fill behind planet numbers only, never on moons', () => {
@@ -88,30 +89,54 @@ describe('renderPlanetMenu', () => {
     expect(document.querySelectorAll('.fut-nomoon')).toHaveLength(1);
     expect(document.querySelectorAll('#planet-1 .fut-res')).toHaveLength(2); // planet + moon
     expect(document.querySelectorAll('.fut-name')).toHaveLength(2);
-    expect(document.querySelectorAll('.fut-idle')).toHaveLength(1);
     expect(document.getElementById('planetList')?.classList.contains('fut-mode-compact')).toBe(true);
   });
 
-  it('toolbar buttons show data and open their window', () => {
+  it('toolbar lines show data and open their window', () => {
     const onOpenPlanner = vi.fn();
-    const onOpenJournal = vi.fn();
-    const onOpenTargets = vi.fn();
+    const onOpenDashboard = vi.fn();
     renderPlanetMenu({
-      doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { mode: 'side', showTotals: true, markIdle: true },
+      doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { mode: 'side', showTotals: true },
       now: 0, locale: 'it', t, onSync: vi.fn(async () => true),
-      onOpenDashboard: vi.fn(), onOpenPlanner, onOpenJournal, onOpenTargets, targetsCount: 8, planCount: 50, planGap: 1.2e9, journalToday: { count: 25, net: 4e7 },
+      onOpenDashboard, onOpenPlanner, planCount: 50, planGap: 1.2e9,
     });
     const cells = Array.from(document.querySelectorAll<HTMLButtonElement>('.fut-toolbar .fut-cell'));
-    expect(cells.map((c) => c.querySelector('.fut-cell-k')!.textContent)).toEqual(['Dashboard', 'Piano · 50', 'Diario oggi', 'Bersagli']);
-    expect(cells[3]!.querySelector('.fut-cell-v')!.textContent).toBe('8');
-    cells[3]!.click();
-    expect(onOpenTargets).toHaveBeenCalledOnce();
-    expect(cells[1]!.querySelector('.fut-cell-v')!.textContent).toBe('−1,2G');
-    expect(cells[2]!.querySelector('.fut-cell-v')!.textContent).toBe('+40,0M');
+    expect(cells.map((c) => c.querySelector('.fut-cell-k')!.textContent)).toEqual(['Produzione', 'Piano · 50']);
+    expect(cells[0]!.querySelector('.fut-cell-v')!.textContent).toMatch(/^\+.* MSU\/g$/);
+    expect(cells[1]!.querySelector('.fut-cell-v')!.textContent).toBe('mancano 1,2G');
+    cells[0]!.click();
     cells[1]!.click();
-    cells[2]!.click();
+    expect(onOpenDashboard).toHaveBeenCalledTimes(1);
     expect(onOpenPlanner).toHaveBeenCalledTimes(1);
-    expect(onOpenJournal).toHaveBeenCalledTimes(1);
+    // Totals: a table with a heading row and one row per resource plus MSU.
+    expect(document.querySelectorAll('.fut-totals .fut-trow')).toHaveLength(5);
+  });
+
+  it('the dock under the game menu shows journal and targets and opens them', () => {
+    const links = document.createElement('div');
+    links.id = 'links';
+    document.body.append(links);
+    const onOpenJournal = vi.fn();
+    const onOpenTargets = vi.fn();
+    const marks = loadMarks({
+      players: { 1: { flag: 'farm', name: 'A', at: 0 }, 2: { flag: 'farm', name: 'B', at: 0 }, 3: { flag: 'danger', name: 'C', at: 0 } },
+      planets: { '1:2:3': { tag: 'red', planet: 'P', player: 'A', playerId: 1, statuses: [], moon: false, at: 0 } },
+    });
+    const o = { doc: document, t, locale: 'it', journal: { today: { count: 25, net: 4e7 }, week: { count: 0, net: 0 } }, marks, onOpenJournal, onOpenTargets };
+    renderDock(o);
+    renderDock(o);
+    expect(document.querySelectorAll(`#${DOCK_ID}`)).toHaveLength(1);
+    const dock = links.querySelector(`#${DOCK_ID}`)!;
+    expect([...dock.querySelectorAll('.line .v')].map((v) => v.textContent)).toEqual(['+40,0M', '—', '1']);
+    expect(dock.querySelector('.head .n')!.textContent).toBe('4');
+    expect([...dock.querySelectorAll('.flag')].map((f) => f.getAttribute('aria-label'))).toEqual(['Frigo: 2', 'Pericolo: 1']);
+    dock.querySelector<HTMLButtonElement>('.line')!.click();
+    expect(onOpenJournal).toHaveBeenCalledOnce();
+    dock.querySelector<HTMLButtonElement>('.flag')!.click();
+    expect(onOpenTargets).toHaveBeenLastCalledWith({ tab: 'players', flagTab: 'farm' });
+    dock.querySelectorAll<HTMLButtonElement>('.head')[1]!.click();
+    expect(onOpenTargets).toHaveBeenLastCalledWith();
+    links.remove();
   });
 
   it('sync runs only from the button click', () => {

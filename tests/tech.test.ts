@@ -263,6 +263,39 @@ describe('plan by technology', () => {
 });
 
 describe('planner window', () => {
+  it('by planet: one button brings everything, picked rows bring only themselves', () => {
+    document.body.innerHTML = '';
+    const store = new Store(new MemoryStore(), 'test');
+    const c = (metal: number) => ({ metal, crystal: 0, deuterium: 0, energy: 0 });
+    store.set('planner', addToPlan({}, 10, [
+      { id: 1, level: 31, name: 'Miniera', cost: c(100), added: 1 },
+      { id: 14, level: 5, name: 'Robot', cost: c(400), added: 2 },
+    ]));
+    let went = '';
+    openPlanner({
+      doc: document, store, snapshot: null, now: 0, locale: 'it', t,
+      entries: [{ planetId: 10, moonId: null, name: 'Casa', coords: '1:2:3' } as never, { planetId: 20, moonId: null, name: 'Due', coords: '1:2:4' } as never],
+      current: { id: 10, resources: { metal: 50, crystal: 0, deuterium: 0 } },
+      href: 'https://s1-it.ogame.gameforge.com/game/index.php?page=ingame&component=supplies',
+      navigate: (u) => (went = u),
+    });
+    const root = () => document.getElementById('fut-planner')!.shadowRoot!;
+    // Opens by planet: one tile for the body, one row per planned thing.
+    expect(root().querySelector('.seg [aria-pressed="true"]')!.textContent).toBe('Per pianeta');
+    expect(root().querySelectorAll('.group.body')).toHaveLength(1);
+    expect(root().querySelectorAll('.grow.pick')).toHaveLength(2);
+    expect(root().querySelector('.bring-all')!.textContent).toBe('Porta tutto');
+    root().querySelector<HTMLButtonElement>('.bring-all')!.click();
+    expect(went).toContain('futdest=10');
+    expect(store.get('plan.delivery', null)).toEqual({ target: 10, need: { metal: 450, crystal: 0, deuterium: 0 } });
+    // Picking the second row: only its cost, less what the planet holds.
+    root().querySelectorAll<HTMLButtonElement>('button.gbody')[1]!.click();
+    expect(root().querySelector('.bring-all')!.textContent).toBe('Porta 1 scelti');
+    root().querySelector<HTMLButtonElement>('.bring-all')!.click();
+    expect(store.get('plan.delivery', null)).toEqual({ target: 10, need: { metal: 350, crystal: 0, deuterium: 0 } });
+    closePlanner(document);
+  });
+
   it('groups levels, shows totals and missing, removes and brings resources', () => {
     document.body.innerHTML = '';
     const store = new Store(new MemoryStore(), 'test');
@@ -290,6 +323,7 @@ describe('planner window', () => {
       navigate: (u) => (went = u),
     });
     const root = document.getElementById('fut-planner')!.shadowRoot!;
+    root.querySelector<HTMLButtonElement>('.seg [data-view="tech"]')!.click();
     expect(root.querySelectorAll('.group')).toHaveLength(1);
     expect(root.querySelector('.gtitle')!.textContent).toBe('Miniera');
     expect(root.querySelector('.gmeta')!.textContent).toBe('Casa [1:2:3] · liv. 31–32');
@@ -365,6 +399,7 @@ describe('resources sent to a planned body', () => {
       navigate: (u) => (went = u),
     });
     const root = document.getElementById('fut-planner')!.shadowRoot!;
+    root.querySelector<HTMLButtonElement>('.seg [data-view="tech"]')!.click();
     expect(root.querySelector<HTMLElement>('.sent')!.title).toContain('600');
     const bring = root.querySelector<HTMLButtonElement>('.ib.bring')!;
     expect(bring.title).toContain("Completa l'invio");
