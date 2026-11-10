@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
-import { daysToCatch, readHighscore } from '../src/data/highscore';
-import { decorateHighscore } from '../src/modules/highscore';
+import { readHighscore } from '../src/data/highscore';
+import { decorateHighscore, watchHighscore } from '../src/modules/highscore';
 import { parsePtreRanks, ptreRanks, ptreServer, PTRE_KEY } from '../src/data/ptre';
 import { NetworkGuard } from '../src/core/guard';
 import { MemoryStore, Store } from '../src/core/storage';
@@ -26,14 +26,7 @@ describe('highscore page', () => {
     expect(hs.rows.map((r) => [r.playerId, r.rank, r.name, r.score, r.mine])).toEqual([[1, 10, 'Ahead', 1_100_000_000, false], [2, 11, 'Me', 1_000_000_000, true], [3, 12, 'Behind', 990_000_000, false]]);
   });
 
-  it('works out the days to catch up', () => {
-    expect(daysToCatch(100, 10)).toBe(10);
-    expect(daysToCatch(100, 10, 5)).toBe(20);
-    expect(daysToCatch(100, 5, 10)).toBeNull();
-    expect(daysToCatch(-5, 1)).toBe(0);
-  });
-
-  it('shows the points since the PTRE snapshot, its age, days to catch up and the player flag', async () => {
+  it('shows the points since the PTRE snapshot, its age, the player flag and marks the top three', async () => {
     page();
     document.querySelector('#ranks')!.insertAdjacentHTML('afterbegin', '<thead><tr><td class="position">#</td><td class="name">Nome</td><td class="score">Punti</td></tr></thead>');
     document.body.insertAdjacentHTML('afterbegin', '<p class="fut-hs-note">old note</p>');
@@ -53,17 +46,30 @@ describe('highscore page', () => {
     const ahead = document.getElementById('position1')!;
     expect(ahead.querySelector('.fut-hs-gap')?.textContent).toBe('+10,0M');
     expect(ahead.querySelector('.fut-hs-gap')?.className).toContain('up');
-    expect(document.querySelector('#position2 .fut-hs-gap')?.textContent).toBe('0');
+    expect(document.querySelector('#position2 .fut-hs-gap')).toBeNull();
     expect(document.querySelector('#position3 .fut-hs-gap')?.textContent).toBe('−5,0M');
     expect(document.querySelector('#position3 .fut-hs-gap')?.className).toContain('down');
     expect(document.querySelector('#ranks thead .fut-hs-age')?.textContent).toBe('(Δ 15h)');
     expect(document.querySelector('.fut-hs-note')).toBeNull();
-    expect(ahead.querySelector('.fut-hs-eta')?.textContent).toBe('ti avvicini: 10 g');
+    expect(ahead.querySelector('.fut-hs-eta')).toBeNull();
+    expect(document.querySelector('.fut-hs-top')).toBeNull();
     expect(document.getElementById('position2')!.querySelector('.fut-mk-flag')).toBeNull();
     (ahead.querySelector<HTMLButtonElement>('.fut-mk-flag')!).dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true }));
     expect(store.get<{ players: Record<string, { flag: string }> }>(MARKS_KEY, { players: {} }).players['1']?.flag).toBe('watch');
     expect(document.querySelectorAll('#position1 .fut-hs-gap')).toHaveLength(1);
     expect(document.querySelectorAll('#ranks thead .fut-hs-age')).toHaveLength(1);
+  });
+});
+
+describe('compact rows and back to top', () => {
+  it('keeps the top three roomy and adds one back-to-top button', () => {
+    page();
+    document.getElementById('position2')!.querySelector('.position')!.textContent = '2';
+    const o = { doc: document, store: new Store(new MemoryStore(), 'y'), locale: 'it', t: translator('it') };
+    watchHighscore(o);
+    watchHighscore(o);
+    expect([...document.querySelectorAll('.fut-hs-top')].map((r) => r.id)).toEqual(['position2']);
+    expect(document.querySelectorAll('#fut-hs-top')).toHaveLength(1);
   });
 });
 

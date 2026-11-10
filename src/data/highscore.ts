@@ -41,12 +41,3 @@ export function readHighscore(doc: Document): Highscore | null {
   return { category, rows };
 }
 
-/**
- * Days until the player catches someone `gap` points ahead, when the player gains `mine` points a
- * day and the other `theirs` (0 when unknown). Null when never at these paces.
- */
-export function daysToCatch(gap: number, mine: number, theirs = 0): number | null {
-  const closing = mine - theirs;
-  if (gap <= 0) return 0;
-  return closing > 0 ? gap / closing : null;
-}

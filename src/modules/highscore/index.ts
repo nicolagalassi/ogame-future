@@ -1,18 +1,17 @@
 /**
  * Highscore page (players): on the total points, under each score the difference from PTRE's last
- * snapshot (green up, red down) with its age in the column header, as OGLight shows it; the days
- * needed to catch those ahead at the player's pace; the player flag of Future's targets.
+ * snapshot (green up, red down) with its age in the column header, as OGLight shows it; compact rows
+ * (the top three stay roomy); the player flag of Future's targets; a button back to the top.
  *
  * COMPLIANCE: reads the page the player opened, Future's stored data and PTRE's ranking
  * (data/ptre: 'user-view', at most every 6 hours, no cookies). The flag only edits Future's own list.
  */
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
-import { daysToCatch, readHighscore } from '../../data/highscore';
+import { readHighscore } from '../../data/highscore';
 import { ptreRanks, type PtreRanks } from '../../data/ptre';
 import type { NetworkGuard } from '../../core/guard';
-import { SCORE_KEY, type Score } from '../../data/score';
-import { changeOver, HISTORY_KEY, type History } from '../../engines/history';
+import { icon } from '../../core/icons';
 import { ensureMarksStyle, flagButton } from '../marks/picker';
 
 type T = (key: string, vars?: Record<string, string | number>) => string;
@@ -32,11 +31,22 @@ const ptreSeen = new WeakMap<Store, PtreRanks | null>();
 export const isHighscorePage = (doc: Document) => new URL(doc.location?.href ?? 'http://x/').searchParams.get('component') === 'highscore';
 
 const CSS = `
-#ranks .fut-hs-gap { display: block; font-size: 11px; line-height: 1.35; font-variant-numeric: tabular-nums; }
-#ranks .fut-hs-gap.up { color: #7BC47F; } #ranks .fut-hs-gap.down { color: #E57B70; } #ranks .fut-hs-gap.flat { color: #8592A1; }
-#ranks .fut-hs-age { margin-left: 4px; color: #8592A1; font-weight: 400; }
-#ranks .fut-hs-eta { display: block; font-size: 11px; color: #6F9FC8; }
-#ranks .highscoreNameHolder .fut-mk-flag { margin-left: 4px; }`;
+#ranks { --fut-up: #7BC47F; --fut-down: #E57B70; --fut-mute: #8592A1; --fut-line: #3A4A5C; --fut-btn: #0F1822; --fut-txt: #C9D6E3; --fut-hi: #FFFFFF; --fut-link: #6F9FC8; }
+#fut-hs-top { --fut-line: #3A4A5C; --fut-btn: #0F1822; --fut-txt: #C9D6E3; --fut-hi: #FFFFFF; --fut-link: #6F9FC8; }
+#ranks .fut-hs-gap { display: block; font-size: 11px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+#ranks .fut-hs-gap.up { color: var(--fut-up); } #ranks .fut-hs-gap.down { color: var(--fut-down); }
+#ranks .fut-hs-age { margin-left: 4px; color: var(--fut-mute); font-weight: 400; }
+#ranks .highscoreNameHolder .fut-mk-flag { margin-left: 4px; }
+/* Compact rows, as OGLight does; the top three keep the game's roomy ones. */
+#ranks tr:not(.fut-hs-top) .highscoreNameFieldWrapper { height: 36px !important; align-items: center; }
+#ranks tr:not(.fut-hs-top) .highscoreNameFieldWrapper profile-picture { zoom: .7; }
+#ranks tr:not(.fut-hs-top) .highscoreNameAndTitleHolder { flex-direction: row !important; align-items: center; gap: 6px; width: calc(100% - 36px) !important; }
+#ranks tr:not(.fut-hs-top) .highscoreNameHolder .fut-mk-flag { margin-left: 6px; }
+#ranks tr:not(.fut-hs-top) td { padding-top: 2px; padding-bottom: 2px; line-height: 1.25; }
+#ranks tr:not(.fut-hs-top) .honorScore { line-height: 1; }
+#fut-hs-top { position: fixed; right: 18px; bottom: 44px; z-index: 1000; display: none; width: 34px; height: 34px; padding: 0; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--fut-line); border-radius: 6px; background: var(--fut-btn); color: var(--fut-txt); }
+#fut-hs-top.on { display: flex; } #fut-hs-top:hover, #fut-hs-top:focus-visible { border-color: var(--fut-link); color: var(--fut-hi); }
+#fut-hs-top svg { transform: rotate(180deg); }`;
 
 export function decorateHighscore(o: HighscoreOptions): void {
   const { doc, store, t, locale } = o;
@@ -44,9 +54,6 @@ export function decorateHighscore(o: HighscoreOptions): void {
   if (!hs) return;
   const fmt = (n: number) => formatUnits(n, locale);
   const total = hs.category === 'points';
-  // My score in this category: my own row when on the page, else (total points only) the stored one.
-  const mine = hs.rows.find((r) => r.mine)?.score ?? (total ? store.get<Score | null>(SCORE_KEY, null)?.points : undefined);
-  const myPace = total ? changeOver(store.get<History>(HISTORY_KEY, []), 7)?.perDay ?? 0 : 0;
   const now = o.now?.() ?? Date.now();
   // The old note above the table (points since midnight) is gone.
   doc.querySelector('.fut-hs-note')?.remove();
@@ -71,25 +78,19 @@ export function decorateHighscore(o: HighscoreOptions): void {
   }
 
   for (const r of hs.rows) {
-    r.row.querySelectorAll('.fut-hs-gap, .fut-hs-eta').forEach((n) => n.remove());
+    r.row.querySelectorAll('.fut-hs-gap').forEach((n) => n.remove());
+    r.row.classList.toggle('fut-hs-top', r.rank <= 3);
     const scoreCell = r.row.querySelector('td.score');
     // Points since PTRE's snapshot: score on the page now − score at the snapshot.
     const base = snap?.scores[String(r.playerId)];
-    if (scoreCell && base !== undefined) {
+    // Nothing under the score when the player has not moved: only who moved stands out.
+    if (scoreCell && base !== undefined && r.score !== base) {
       const made = r.score - base;
       const g = doc.createElement('span');
-      g.className = `fut-hs-gap ${made > 0 ? 'up' : made < 0 ? 'down' : 'flat'}`;
-      g.textContent = made > 0 ? `+${fmt(made)}` : made < 0 ? `−${fmt(-made)}` : '0';
+      g.className = `fut-hs-gap ${made > 0 ? 'up' : 'down'}`;
+      g.textContent = made > 0 ? `+${fmt(made)}` : `−${fmt(-made)}`;
       g.title = t('hs.sincePtre', { n: made.toLocaleString(locale), time: since });
       scoreCell.append(g);
-    }
-    if (scoreCell && mine !== undefined && !r.mine && total && myPace > 0 && r.score > mine) {
-      const days = daysToCatch(r.score - mine, myPace);
-      const e = doc.createElement('span');
-      e.className = 'fut-hs-eta';
-      e.textContent = days === null ? t('hs.never') : days < 1 ? t('hs.passToday') : t('hs.days', { n: Math.ceil(days).toLocaleString(locale) });
-      e.title = t('hs.etaMine', { mine: fmt(myPace) });
-      scoreCell.append(e);
     }
     const nameHolder = r.row.querySelector('.highscoreNameHolder');
     if (nameHolder && !r.mine && !nameHolder.querySelector('.fut-mk-flag')) nameHolder.append(flagButton({ doc, store, t }, r.playerId, r.name));
@@ -106,6 +107,7 @@ export function watchHighscore(o: HighscoreOptions): void {
     o.doc.head.append(style);
   }
   decorateHighscore(o);
+  addTopButton(o);
   const box = o.doc.getElementById('stat_list_content') ?? o.doc.body;
   let queued = false;
   new MutationObserver((list) => {
@@ -117,4 +119,21 @@ export function watchHighscore(o: HighscoreOptions): void {
       decorateHighscore(o);
     }, 50);
   }).observe(box, { childList: true, subtree: true });
+}
+
+/** Button back to the top of the page, shown once the table has been scrolled. */
+function addTopButton(o: HighscoreOptions): void {
+  const { doc, t } = o;
+  if (doc.getElementById('fut-hs-top')) return;
+  const b = doc.createElement('button');
+  b.id = 'fut-hs-top';
+  b.type = 'button';
+  b.title = t('hs.top');
+  b.setAttribute('aria-label', t('hs.top'));
+  b.append(icon(doc, 'chevron', 18));
+  b.addEventListener('click', () => doc.defaultView?.scrollTo({ top: 0, behavior: 'smooth' }));
+  doc.body.append(b);
+  const sync = () => b.classList.toggle('on', (doc.defaultView?.scrollY ?? 0) > 400);
+  doc.defaultView?.addEventListener('scroll', sync, { passive: true });
+  sync();
 }

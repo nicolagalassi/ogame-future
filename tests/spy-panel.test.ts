@@ -4,7 +4,7 @@ import { loadServerDataOnPageLoad, parseServerData, SERVER_DATA_KEY } from '../s
 import { NetworkGuard } from '../src/core/guard';
 import { MemoryStore, Store } from '../src/core/storage';
 import { converterLink, SIM_KEY, simLink, simPrefill } from '../src/engines/sim-links';
-import { mountSpyPanel, SPY_PANEL_ID, SPY_SHARED_KEY, universeOf } from '../src/modules/messages/spy-table';
+import { columnOrder, mountSpyPanel, moveColumn, SPY_PANEL_ID, SPY_SHARED_KEY, universeOf } from '../src/modules/messages/spy-table';
 import { SPY_BOARD_KEY } from '../src/engines/raids';
 import { translator } from '../src/core/i18n';
 
@@ -68,16 +68,29 @@ describe('spy panel in the inbox', () => {
     const panel = document.getElementById(SPY_PANEL_ID)!;
     expect(panel.nextElementSibling?.className).toBe('messagesHolder');
     expect(panel.querySelectorAll('.fut-sp-list .fut-sp-row')).toHaveLength(1);
-    // Columns: no MSU per hour; loot is the resources you can carry away (1M × 50%).
-    expect(Array.from(panel.querySelectorAll('.fut-sp-cols .fut-sp-h')).map((h) => h.textContent)).toEqual(['Bersaglio', 'Età', 'Bottino', 'Flotta', 'Difesa', '']);
-    expect(panel.querySelector('.fut-sp-list .fut-sp-row .fut-sp-num:nth-child(3) b')?.textContent).toBe('500k');
+    // Columns as OGLight: number, age, activity, coords, name, loot, fleet, defence, actions.
+    expect(Array.from(panel.querySelectorAll('.fut-sp-cols .fut-sp-h')).map((h) => h.textContent)).toEqual(['#', 'Età', 'Att.', 'Coord.', 'Nome', 'Bottino', 'Flotta', 'Difesa', '']);
+    // Loot is the resources you can carry away (1M × 50%).
+    expect(panel.querySelector('.fut-sp-list .fut-sp-row .fut-sp-loot')?.textContent).toBe('500k');
+    expect(panel.querySelector('.fut-sp-foot .fut-sp-r')?.textContent).toBe('500k');
     // The name opens the full report in the game's own window.
     const name = panel.querySelector<HTMLAnchorElement>('a.fut-sp-name')!;
     expect(name.classList.contains('overlay')).toBe(true);
     expect(name.href).toContain('component=messagedetails&messageId=9');
-    // Attack, one Simulate (the picked tool), remove.
+    // Icons: next raids, attack, one Simulate (the picked tool), remove.
     const acts = panel.querySelector('.fut-sp-list .fut-sp-acts')!;
-    expect(Array.from(acts.querySelectorAll('button')).map((b) => b.className)).toEqual(['fut-sp-attack', 'fut-sp-sim', 'fut-sp-del']);
+    expect(Array.from(acts.querySelectorAll('button')).map((b) => b.classList[1])).toEqual(['fut-sp-more', 'fut-sp-attack', 'fut-sp-sim', 'fut-sp-del']);
+    // The day's 6 raids: 50% of what is left each time; every ship count opens Fleet with those ships.
+    acts.querySelector<HTMLButtonElement>('.fut-sp-more')!.click();
+    expect(Array.from(document.querySelectorAll('.fut-sp-wgrid b')).map((x) => x.textContent)).toEqual(['500k', '250k', '125k', '62,5k', '31,3k', '15,6k']);
+    const counts = Array.from(document.querySelectorAll<HTMLAnchorElement>('.fut-sp-wgrid a.cnt'));
+    expect(counts.map((a) => a.textContent)).toEqual(['20', '10', '5', '3', '2', '1', '100', '50', '25', '13', '7', '4']);
+    expect(counts[1]!.getAttribute('href')).toBe('/game/index.php?page=ingame&component=fleetdispatch&galaxy=1&system=476&position=11&type=1&mission=1&am203=10');
+    expect(counts[6]!.getAttribute('href')).toContain('&am202=100');
+    // Columns move: the name goes first.
+    store.set('spy.view', { cols: ['target', 'age', 'act', 'coords', 'loot', 'fleet', 'def'] });
+    mountSpyPanel(o);
+    expect(document.querySelector('.fut-sp-cols .fut-sp-c:nth-child(2) .fut-sp-h')?.textContent).toBe('Nome');
     expect(acts.querySelector('.fut-sp-sim')?.getAttribute('title')).toContain('Osims');
     store.set(SIM_KEY, 'ogametools');
     mountSpyPanel(o);
@@ -87,6 +100,14 @@ describe('spy panel in the inbox', () => {
     document.querySelector('[data-subtab-id="20"]')!.classList.remove('active');
     mountSpyPanel(o);
     expect(document.getElementById(SPY_PANEL_ID)).toBeNull();
+  });
+});
+
+describe('spy table columns', () => {
+  it('moves columns and rejects a broken saved order', () => {
+    expect(moveColumn(['age', 'act', 'coords', 'target', 'loot', 'fleet', 'def'], 'def', 'age')).toEqual(['def', 'age', 'act', 'coords', 'target', 'loot', 'fleet']);
+    expect(moveColumn(['age', 'act', 'coords', 'target', 'loot', 'fleet', 'def'], 'age', 'act')).toEqual(['act', 'age', 'coords', 'target', 'loot', 'fleet', 'def']);
+    expect(columnOrder(['age', 'age'])).toHaveLength(7);
   });
 });
 
@@ -103,6 +124,11 @@ describe('reports shared by the alliance', () => {
     mountSpyPanel(o);
     expect(document.querySelectorAll('.fut-sp-list .fut-sp-row')).toHaveLength(2);
     expect(document.querySelectorAll('.st-shared')).toHaveLength(1);
+    // Removing a target keeps the keyboard in the table, on the next remove button.
+    document.querySelector<HTMLButtonElement>('.fut-sp-list .fut-sp-del')!.click();
+    expect(document.querySelectorAll('.fut-sp-list .fut-sp-row')).toHaveLength(1);
+    expect(document.activeElement?.classList.contains('fut-sp-del')).toBe(true);
+    store.set(SPY_BOARD_KEY, { '1:1:1': { ...entry, key: '1:1:1', id: '1', coords: '1:1:1', playerName: 'Mine' }, '2:2:2': { ...entry, key: '2:2:2', id: '2', coords: '2:2:2', playerName: 'Ally', shared: true } });
     store.set(SPY_SHARED_KEY, false);
     mountSpyPanel(o);
     expect(Array.from(document.querySelectorAll('.fut-sp-name')).map((n) => n.textContent)).toEqual(['Mine']);

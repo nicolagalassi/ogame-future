@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.8
+// @version      0.3.9
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -607,19 +607,17 @@
     "spy.inactiveOnly": "Solo inattivi",
     "spy.none": "Nessun report di spionaggio negli ultimi 3 giorni. I report che apri in posta finiscono qui da soli.",
     "spy.noneFiltered": "Nessun bersaglio con questi filtri.",
-    "spy.col.target": "Bersaglio",
+    "spy.col.target": "Nome",
     "spy.col.age": "Et\xE0",
     "spy.col.loot": "Bottino",
     "spy.col.def": "Difesa",
-    "spy.col.actions": "",
-    "spy.attackHint": "Attacca da {name}: apre la pagina Flotta con il bersaglio e {n} {ship} gi\xE0 inseriti; l\u2019invio resta a te",
+    "spy.attackHint": "Attacca da {name}: apre la pagina Flotta con il bersaglio gi\xE0 inserito; le navi le scegli tu (i link delle razzie mettono anche i cargo)",
     "spy.attack": "Attacca",
-    "spy.cargoShip": "Nave da carico per il conteggio e l\u2019attacco",
-    "spy.lootHint": "Bottino {pct}%: metallo {m}, cristallo {c}, deuterio {d}. Servono {n} {ship}",
+    "spy.lootHint": "Bottino {pct}%: metallo {m}, cristallo {c}, deuterio {d}. Servono {large} cargo pesanti o {small} leggeri",
     "msg.spy.counterPill": "Spiato",
     "msg.combat.netHint": "bottino meno perdite",
     "spy.remove": "Togli dalla tabella",
-    "spy.hint": "Un bersaglio per pianeta o luna, l\u2019ultimo report vince; restano 3 giorni anche se cancelli i report. Bottino = risorse che puoi portare via. Clic sul nome: apre il report completo.",
+    "spy.hint": "Un bersaglio per pianeta o luna, resta 3 giorni anche se cancelli i report. Bottino: risorse che puoi portare via. Nome: apre il report. \u22EF: le 6 razzie del giorno, un clic sulle navi apre Flotta.",
     "spy.status.inactive": "i",
     "spy.status.longinactive": "I",
     "spy.status.vacation": "v",
@@ -639,10 +637,6 @@
     "remind.return": "(ritorno)",
     "msg.combat.converter": "Convertitore",
     "msg.combat.converterHint": "Apre il rapporto nel convertitore Ogotcha (nuova scheda)",
-    "hs.days": "ti avvicini: {n} g",
-    "hs.never": "al ritmo attuale no",
-    "hs.etaMine": "Al tuo ritmo degli ultimi 7 giorni (+{mine}/g)",
-    "hs.passToday": "lo superi oggi",
     "mark.flag.watch": "Da controllare",
     "mark.flag.target": "Bersaglio",
     "mark.flag.farm": "Frigo",
@@ -788,7 +782,20 @@
     "msg.abbr.darkMatter": "MO",
     "spy.col.actionsName": "Azioni",
     "hs.ptreAge": "Differenza dalla classifica PTRE del {time}",
-    "hs.sincePtre": "{n} punti dalla classifica PTRE del {time}"
+    "hs.sincePtre": "{n} punti dalla classifica PTRE del {time}",
+    "hs.top": "Torna in cima",
+    "spy.col.n": "Numero",
+    "spy.col.act": "Att.",
+    "spy.col.coords": "Coord.",
+    "spy.colHint": "Clic: ordina. Trascina, o Alt + frecce: sposta la colonna",
+    "spy.moon": "Luna",
+    "spy.planet": "Pianeta",
+    "spy.waves": "Le 6 razzie del giorno",
+    "spy.wave": "{n}\xAA",
+    "spy.onPlanet": "Sul pianeta",
+    "spy.from": "da {name} [{coords}]",
+    "spy.total": "Totale",
+    "spy.waveHint": "{n}\xAA razzia: apre Flotta da {name} con {count} {ship} e il bersaglio gi\xE0 inseriti"
   };
 
   // src/i18n/en.json
@@ -1212,19 +1219,17 @@
     "spy.inactiveOnly": "Inactive only",
     "spy.none": "No espionage reports in the last 3 days. Reports you open in the inbox land here by themselves.",
     "spy.noneFiltered": "No target matches these filters.",
-    "spy.col.target": "Target",
+    "spy.col.target": "Name",
     "spy.col.age": "Age",
     "spy.col.loot": "Loot",
     "spy.col.def": "Defence",
-    "spy.col.actions": "",
-    "spy.attackHint": "Attack from {name}: opens the Fleet page with the target and {n} {ship} filled in; sending stays with you",
+    "spy.attackHint": "Attack from {name}: opens the Fleet page with the target filled in; you pick the ships (the raid links add the cargo ships too)",
     "spy.attack": "Attack",
-    "spy.cargoShip": "Cargo ship for the count and the attack",
-    "spy.lootHint": "Loot {pct}%: metal {m}, crystal {c}, deuterium {d}. Takes {n} {ship}",
+    "spy.lootHint": "Loot {pct}%: metal {m}, crystal {c}, deuterium {d}. Takes {large} large or {small} small cargo",
     "msg.spy.counterPill": "Spied on",
     "msg.combat.netHint": "loot minus losses",
     "spy.remove": "Remove from the table",
-    "spy.hint": "One target per planet or moon, the newest report wins; kept 3 days even if you delete the reports. Loot = resources you can carry away. Click the name: opens the full report.",
+    "spy.hint": "One target per planet or moon, kept 3 days even if you delete the reports. Loot: resources you can carry away. Name: opens the report. \u22EF: the day\u2019s 6 raids, a click on the ships opens Fleet.",
     "spy.status.inactive": "i",
     "spy.status.longinactive": "I",
     "spy.status.vacation": "v",
@@ -1244,10 +1249,6 @@
     "remind.return": "(return)",
     "msg.combat.converter": "Converter",
     "msg.combat.converterHint": "Opens the report in the Ogotcha converter (new tab)",
-    "hs.days": "catch up: {n} d",
-    "hs.never": "not at this pace",
-    "hs.etaMine": "At your pace of the last 7 days (+{mine}/d)",
-    "hs.passToday": "you pass today",
     "mark.flag.watch": "Watch",
     "mark.flag.target": "Target",
     "mark.flag.farm": "Farm",
@@ -1393,7 +1394,20 @@
     "msg.abbr.darkMatter": "DM",
     "spy.col.actionsName": "Actions",
     "hs.ptreAge": "Difference from PTRE's ranking of {time}",
-    "hs.sincePtre": "{n} points since PTRE's ranking of {time}"
+    "hs.sincePtre": "{n} points since PTRE's ranking of {time}",
+    "hs.top": "Back to top",
+    "spy.col.n": "Number",
+    "spy.col.act": "Act.",
+    "spy.col.coords": "Coords",
+    "spy.colHint": "Click: sort. Drag, or Alt + arrows: move the column",
+    "spy.moon": "Moon",
+    "spy.planet": "Planet",
+    "spy.waves": "The 6 raids of the day",
+    "spy.wave": "#{n}",
+    "spy.onPlanet": "On the planet",
+    "spy.from": "from {name} [{coords}]",
+    "spy.total": "Total",
+    "spy.waveHint": "Raid {n}: opens Fleet from {name} with {count} {ship} and the target filled in"
   };
 
   // src/i18n/fr.json
@@ -1817,19 +1831,17 @@
     "spy.inactiveOnly": "Inactifs seulement",
     "spy.none": "Aucun rapport d'espionnage ces 3 derniers jours. Les rapports ouverts dans la messagerie arrivent ici tout seuls.",
     "spy.noneFiltered": "Aucune cible avec ces filtres.",
-    "spy.col.target": "Cible",
+    "spy.col.target": "Nom",
     "spy.col.age": "\xC2ge",
     "spy.col.loot": "Butin",
     "spy.col.def": "D\xE9fense",
-    "spy.col.actions": "",
-    "spy.attackHint": "Attaquer depuis {name} : ouvre la page Flotte avec la cible et {n} {ship} d\xE9j\xE0 remplis ; l\u2019envoi reste \xE0 vous",
+    "spy.attackHint": "Attaquer depuis {name} : ouvre la page Flotte avec la cible remplie ; vous choisissez les vaisseaux (les liens des pillages ajoutent aussi les transporteurs)",
     "spy.attack": "Attaquer",
-    "spy.cargoShip": "Transporteur pour le calcul et l\u2019attaque",
-    "spy.lootHint": "Butin {pct} % : m\xE9tal {m}, cristal {c}, deut\xE9rium {d}. Il faut {n} {ship}",
+    "spy.lootHint": "Butin {pct} % : m\xE9tal {m}, cristal {c}, deut\xE9rium {d}. Il faut {large} grands ou {small} petits transporteurs",
     "msg.spy.counterPill": "Espionn\xE9",
     "msg.combat.netHint": "butin moins pertes",
     "spy.remove": "Retirer du tableau",
-    "spy.hint": "Une cible par plan\xE8te ou lune, le dernier rapport gagne ; gard\xE9es 3 jours m\xEAme si vous supprimez les rapports. Butin = ressources emportables. Clic sur le nom : ouvre le rapport complet.",
+    "spy.hint": "Une cible par plan\xE8te ou lune, gard\xE9e 3 jours m\xEAme si vous supprimez les rapports. Butin : ressources emportables. Nom : ouvre le rapport. \u22EF : les 6 pillages du jour, un clic sur les vaisseaux ouvre Flotte.",
     "spy.status.inactive": "i",
     "spy.status.longinactive": "I",
     "spy.status.vacation": "v",
@@ -1849,10 +1861,6 @@
     "remind.return": "(retour)",
     "msg.combat.converter": "Convertisseur",
     "msg.combat.converterHint": "Ouvre le rapport dans le convertisseur Ogotcha (nouvel onglet)",
-    "hs.days": "rattrap\xE9 en {n} j",
-    "hs.never": "pas \xE0 ce rythme",
-    "hs.etaMine": "\xC0 votre rythme des 7 derniers jours (+{mine}/j)",
-    "hs.passToday": "d\xE9pass\xE9 aujourd'hui",
     "mark.flag.watch": "\xC0 surveiller",
     "mark.flag.target": "Cible",
     "mark.flag.farm": "Ferme",
@@ -1998,7 +2006,20 @@
     "msg.abbr.darkMatter": "AN",
     "spy.col.actionsName": "Actions",
     "hs.ptreAge": "Diff\xE9rence depuis le classement PTRE du {time}",
-    "hs.sincePtre": "{n} points depuis le classement PTRE du {time}"
+    "hs.sincePtre": "{n} points depuis le classement PTRE du {time}",
+    "hs.top": "Haut de page",
+    "spy.col.n": "Num\xE9ro",
+    "spy.col.act": "Act.",
+    "spy.col.coords": "Coord.",
+    "spy.colHint": "Clic : trier. Glisser, ou Alt + fl\xE8ches : d\xE9placer la colonne",
+    "spy.moon": "Lune",
+    "spy.planet": "Plan\xE8te",
+    "spy.waves": "Les 6 pillages du jour",
+    "spy.wave": "n\xB0{n}",
+    "spy.onPlanet": "Sur la plan\xE8te",
+    "spy.from": "depuis {name} [{coords}]",
+    "spy.total": "Total",
+    "spy.waveHint": "Pillage {n} : ouvre Flotte depuis {name} avec {count} {ship} et la cible remplie"
   };
 
   // src/i18n/de.json
@@ -2422,19 +2443,17 @@
     "spy.inactiveOnly": "Nur Inaktive",
     "spy.none": "Keine Spionageberichte in den letzten 3 Tagen. Berichte, die du im Postfach \xF6ffnest, landen von selbst hier.",
     "spy.noneFiltered": "Kein Ziel passt zu diesen Filtern.",
-    "spy.col.target": "Ziel",
+    "spy.col.target": "Name",
     "spy.col.age": "Alter",
     "spy.col.loot": "Beute",
     "spy.col.def": "Verteid.",
-    "spy.col.actions": "",
-    "spy.attackHint": "Von {name} angreifen: \xF6ffnet die Flottenseite mit Ziel und {n} {ship} ausgef\xFCllt; Absenden bleibt bei dir",
+    "spy.attackHint": "Von {name} angreifen: \xF6ffnet die Flottenseite mit dem Ziel; die Schiffe w\xE4hlst du (die Raid-Links tragen auch die Transporter ein)",
     "spy.attack": "Angreifen",
-    "spy.cargoShip": "Transporter f\xFCr Anzahl und Angriff",
-    "spy.lootHint": "Beute {pct} %: Metall {m}, Kristall {c}, Deuterium {d}. Ben\xF6tigt {n} {ship}",
+    "spy.lootHint": "Beute {pct} %: Metall {m}, Kristall {c}, Deuterium {d}. Ben\xF6tigt {large} gro\xDFe oder {small} kleine Transporter",
     "msg.spy.counterPill": "Ausspioniert",
     "msg.combat.netHint": "Beute minus Verluste",
     "spy.remove": "Aus der Tabelle entfernen",
-    "spy.hint": "Ein Ziel pro Planet oder Mond, der neueste Bericht gewinnt; bleibt 3 Tage, auch wenn du die Berichte l\xF6schst. Beute = Rohstoffe, die du mitnehmen kannst. Klick auf den Namen: \xF6ffnet den ganzen Bericht.",
+    "spy.hint": "Ein Ziel pro Planet oder Mond, 3 Tage gespeichert, auch wenn du die Berichte l\xF6schst. Beute: Rohstoffe zum Mitnehmen. Name: \xF6ffnet den Bericht. \u22EF: die 6 Raids des Tages, ein Klick auf die Schiffe \xF6ffnet die Flotte.",
     "spy.status.inactive": "i",
     "spy.status.longinactive": "I",
     "spy.status.vacation": "u",
@@ -2454,10 +2473,6 @@
     "remind.return": "(R\xFCckflug)",
     "msg.combat.converter": "Konverter",
     "msg.combat.converterHint": "\xD6ffnet den Bericht im Ogotcha-Konverter (neuer Tab)",
-    "hs.days": "eingeholt in {n} T",
-    "hs.never": "nicht bei diesem Tempo",
-    "hs.etaMine": "Bei deinem Tempo der letzten 7 Tage (+{mine}/T)",
-    "hs.passToday": "heute \xFCberholt",
     "mark.flag.watch": "Beobachten",
     "mark.flag.target": "Ziel",
     "mark.flag.farm": "Farm",
@@ -2603,7 +2618,20 @@
     "msg.abbr.darkMatter": "DM",
     "spy.col.actionsName": "Aktionen",
     "hs.ptreAge": "Unterschied zur PTRE-Rangliste vom {time}",
-    "hs.sincePtre": "{n} Punkte seit der PTRE-Rangliste vom {time}"
+    "hs.sincePtre": "{n} Punkte seit der PTRE-Rangliste vom {time}",
+    "hs.top": "Nach oben",
+    "spy.col.n": "Nummer",
+    "spy.col.act": "Akt.",
+    "spy.col.coords": "Koord.",
+    "spy.colHint": "Klick: sortieren. Ziehen oder Alt + Pfeile: Spalte verschieben",
+    "spy.moon": "Mond",
+    "spy.planet": "Planet",
+    "spy.waves": "Die 6 Raids des Tages",
+    "spy.wave": "#{n}",
+    "spy.onPlanet": "Auf dem Planeten",
+    "spy.from": "von {name} [{coords}]",
+    "spy.total": "Summe",
+    "spy.waveHint": "Raid {n}: \xF6ffnet Flotte von {name} mit {count} {ship} und dem Ziel eingetragen"
   };
 
   // src/core/i18n.ts
@@ -2994,7 +3022,11 @@
     planet: '<circle cx="12" cy="12" r="6"/><path d="M3 15.5c2.5 1.6 15.5-3.5 18-7"/>',
     fleet: '<path d="M3.5 12h11l5-4.5v9l-5-4.5"/><path d="M6.5 8.5L9 12l-2.5 3.5"/>',
     chevron: '<path d="M6 9.5l6 6 6-6"/>',
-    next: '<path d="M4.5 12h14M13 5.5l6.5 6.5-6.5 6.5"/>'
+    next: '<path d="M4.5 12h14M13 5.5l6.5 6.5-6.5 6.5"/>',
+    sword: '<path d="M19.5 4.5L9 15M19.5 4.5V9M19.5 4.5H15"/><path d="M6.5 12.5l5 5M8 16l-3.5 3.5"/>',
+    play: '<path d="M8 5.5v13l10.5-6.5z"/>',
+    trash: '<path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/>',
+    more: '<path d="M5.5 12h.01M12 12h.01M18.5 12h.01" stroke-width="3.2"/>'
   };
   function icon(doc, name, size = 14, cls = "fut-ico") {
     const svg2 = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -3019,7 +3051,7 @@
   var POP_ID = "fut-mk-pop";
   var MARKS_CSS = `
 .fut-mk { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin: 0 2px; padding: 0;
-  border: 1px solid #2E4356; border-radius: 4px; background: #0D1522; color: #4A5B72; cursor: pointer; vertical-align: middle; }
+  border: 1px solid #2E4356; border-radius: 4px; background: #0D1522; color: #7A8CA3; cursor: pointer; vertical-align: middle; }
 .fut-mk:hover, .fut-mk:focus-visible { border-color: #617C8D; color: #C9D4E2; outline: none; }
 .fut-mk.on { border-color: currentColor; background: #0D1522; }
 .fut-mk-dot { width: 9px; height: 9px; border-radius: 50%; border: 1px solid #4A5B72; }
@@ -5223,6 +5255,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
       };
     });
   }
+  function raidWaves(total, loot, n = 3) {
+    const waves = [];
+    let left = total;
+    for (let i = 0; i < n; i++) {
+      const take = Math.floor(left * loot);
+      waves.push(take);
+      left -= take;
+    }
+    return waves;
+  }
 
   // src/modules/messages/style.ts
   var OUTCOME_COLORS = {
@@ -5249,6 +5291,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .fut-msg, .fut-fresh, #fut-spypanel {
   --hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1; --faint: #4E5B6A; --line: #2E4356;
   --link: #6F9FC8; --accent: #4FD1E8; --neg: #F07A6E; --warn: #E3B341; --ok: #7BC47F; --ship: #4FE0B0; --on-tone: #0D1116;
+  --loot: #F0A35A; --name: #E8D27A; --on-accent: #CFF5FC; --attack: #FF9B8A; --attack-line: #C0533F; --sim: #8FB6D8; --chip: #1A2733;
 }
 .fut-msg { display: grid; grid-template-columns: 124px minmax(0, 1fr) minmax(84px, auto) auto; align-items: center; column-gap: 10px;
   box-sizing: border-box; margin: 4px 0 6px; padding: 5px 16px; min-height: 30px;
@@ -5278,7 +5321,7 @@ ${outcomeCss}
 .fut-r-m { --dot: ${RES_COLORS.metal}; } .fut-r-c { --dot: ${RES_COLORS.crystal}; } .fut-r-d { --dot: ${RES_COLORS.deuterium}; } .fut-r-f { --dot: ${RES_COLORS.food}; } .fut-r-dm { --dot: ${RES_COLORS.darkMatter}; }
 .fut-u { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 .fut-msg-icon { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; flex: none; }
-.fut-msg-icon-none { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #1A2733; font-size: 8px; color: var(--mute); }
+.fut-msg-icon-none { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--chip); font-size: 8px; color: var(--mute); }
 .fut-note { white-space: nowrap; color: var(--txt); }
 .fut-msg .fut-muted { color: var(--mute); } .fut-msg .fut-warn { color: var(--warn); } .fut-msg .fut-neg { color: var(--neg); }
 .fut-msg .fut-item { color: #D08A5B; } .fut-msg .fut-lf { color: #E07BC8; } .fut-msg .fut-art { color: #D4A93A; }
@@ -5300,7 +5343,7 @@ ${outcomeCss}
 .fut-msg-acts { display: flex; gap: 4px; }
 .fut-msg-acts:empty { display: none; }
 .fut-msg a.fut-msg-link { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 12px; border: 1px solid var(--line);
-  color: #8FB6D8; text-decoration: none; font-size: 11px; font-weight: 700; white-space: nowrap; }
+  color: var(--sim); text-decoration: none; font-size: 11px; font-weight: 700; white-space: nowrap; }
 .fut-msg a.fut-msg-link:hover, .fut-msg a.fut-msg-link:focus-visible { border-color: var(--link); color: var(--hi); outline: none; }
 /* Today's recap heads the Expeditions tab with the same columns as the reports below. */
 .fut-msg.fut-recap { margin: 0 0 8px; padding: 8px 16px; background: rgba(79, 209, 232, 0.08); box-shadow: inset 0 1px 0 rgba(79, 209, 232, 0.4), inset 0 -1px 0 rgba(79, 209, 232, 0.4); }
@@ -5342,73 +5385,87 @@ ${outcomeCss}
 }
 .msg.fut-msg-folded .msgContent, .msg.fut-msg-folded .msg_content, .msg.fut-msg-folded > .content-box { display: none !important; }
 
-/* Spy table, above the Espionage reports. Same type, tokens and pills as the summaries. */
-#fut-spypanel { margin: 0 0 8px; padding: 8px; border-radius: 4px; background: #0A0F14; font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt);
+/* Spy table, above the Espionage reports: one compact line per target, as OGLight lays it out. */
+#fut-spypanel { margin: 0 0 8px; padding: 6px 8px 8px; border-radius: 4px; background: #0A0F14; font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt);
   font-variant-numeric: tabular-nums; }
 #fut-spypanel button { font: inherit; cursor: pointer; }
 #fut-spypanel button:focus-visible, #fut-spypanel a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.fut-sp-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-#fut-spypanel .fut-sp-title { display: flex; align-items: baseline; gap: 8px; flex: 1 0 100%; box-sizing: border-box; min-height: 28px; padding: 4px 6px;
-  border: 0; border-radius: 4px; background: none; color: var(--hi); }
+.fut-sp-head { display: flex; align-items: center; gap: 6px; }
+#fut-spypanel .fut-sp-title { display: flex; align-items: baseline; gap: 8px; flex: 1 1 auto; min-width: 0; box-sizing: border-box; min-height: 26px; padding: 3px 6px;
+  border: 0; border-radius: 4px; background: none; color: var(--hi); text-align: left; }
 #fut-spypanel .fut-sp-title:hover { background: rgba(120, 150, 180, 0.08); }
-.fut-sp-title b { font-size: 13px; }
-.fut-sp-title span { color: var(--mute); }
-.fut-sp-chev { align-self: center; color: var(--mute); transition: transform 120ms ease-out; }
+.fut-sp-title b { font-size: 13px; white-space: nowrap; }
+.fut-sp-title span { color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fut-sp-chev { align-self: center; flex: none; color: var(--mute); transition: transform 120ms ease-out; }
 .fut-sp-title[aria-expanded="false"] .fut-sp-chev { transform: rotate(-90deg); }
 @media (prefers-reduced-motion: reduce) { .fut-sp-chev { transition: none; } }
-.fut-sp-group { display: inline-flex; }
-#fut-spypanel .fut-sp-chip { height: 24px; padding: 0 10px; border: 1px solid var(--line); border-radius: 12px; background: none; color: var(--mute); white-space: nowrap; }
-#fut-spypanel .fut-sp-group .fut-sp-chip { border-radius: 0; }
-#fut-spypanel .fut-sp-group .fut-sp-chip:first-child { border-radius: 12px 0 0 12px; }
-#fut-spypanel .fut-sp-group .fut-sp-chip + .fut-sp-chip { border-left: 0; }
-#fut-spypanel .fut-sp-group .fut-sp-chip:last-child { border-radius: 0 12px 12px 0; }
-#fut-spypanel .fut-sp-chip:hover { color: var(--hi); border-color: #4A6A86; }
-#fut-spypanel .fut-sp-chip[aria-pressed="true"] { background: rgba(79, 209, 232, 0.14); border-color: var(--accent); color: #CFF5FC; }
-.fut-sp-row { display: grid; grid-template-columns: minmax(0, 1fr) 62px 80px 56px 56px 156px; gap: 8px; align-items: center;
-  min-height: 38px; padding: 4px 8px; border-radius: 4px; }
-.fut-sp-list { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
+#fut-spypanel .fut-sp-chip { flex: none; height: 22px; padding: 0 9px; border: 1px solid var(--line); border-radius: 11px; background: none; color: var(--mute); white-space: nowrap; }
+#fut-spypanel .fut-sp-chip:hover { color: var(--hi); border-color: var(--link); }
+#fut-spypanel .fut-sp-chip[aria-pressed="true"] { background: rgba(79, 209, 232, 0.14); border-color: var(--accent); color: var(--on-accent); }
+.fut-sp-table { margin-top: 6px; }
+.fut-sp-row { display: grid; column-gap: 6px; align-items: center; min-height: 28px; padding: 0 6px; border-radius: 3px; }
+.fut-sp-c { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fut-sp-c.fut-sp-r { text-align: right; justify-self: stretch; }
+.fut-sp-c.fut-sp-n { color: var(--dim); text-align: right; }
+.fut-sp-list { display: flex; flex-direction: column; gap: 1px; }
 .fut-sp-list .fut-sp-row { background: rgba(120, 150, 180, 0.05); }
-.fut-sp-list .fut-sp-row:hover { background: rgba(120, 150, 180, 0.1); }
-.fut-sp-cols { min-height: 0; margin-top: 8px; padding-top: 0; padding-bottom: 2px; }
-.fut-sp-cols > [role="columnheader"] { display: flex; justify-content: flex-end; min-width: 0; }
-.fut-sp-cols > [role="columnheader"]:first-child { justify-content: flex-start; }
-#fut-spypanel .fut-sp-h { display: inline-flex; align-items: center; gap: 3px; min-height: 24px; padding: 0 2px; border: 0; background: none; color: var(--mute);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fut-sp-list .fut-sp-row:hover { background: rgba(120, 150, 180, 0.11); }
+.fut-sp-cols { min-height: 24px; }
+.fut-sp-cols .fut-sp-c { display: flex; overflow: visible; }
+.fut-sp-cols .fut-sp-c.fut-sp-r { justify-content: flex-end; }
+.fut-sp-cols .fut-sp-c[draggable="true"] { cursor: grab; }
+.fut-sp-cols .fut-sp-c.drag { opacity: .45; }
+.fut-sp-cols .fut-sp-c.over { box-shadow: inset 2px 0 0 var(--accent); }
+#fut-spypanel .fut-sp-h { display: inline-flex; align-items: center; gap: 3px; min-height: 22px; padding: 0 2px; border: 0; background: none; color: var(--mute);
+  font-size: 11px; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
+#fut-spypanel button.fut-sp-h { cursor: inherit; }
 #fut-spypanel button.fut-sp-h:hover { color: var(--hi); }
-#fut-spypanel .fut-sp-h.sortBy { color: #CFF5FC; }
+#fut-spypanel .fut-sp-h.sortBy { color: var(--on-accent); }
 [aria-sort="ascending"] > .fut-sp-h .fut-sp-sort { transform: rotate(180deg); }
-.fut-sp-who { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.fut-sp-line { display: flex; align-items: center; gap: 4px; min-width: 0; }
-#fut-spypanel a.fut-sp-name { color: var(--hi); font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#fut-spypanel a.fut-sp-name:hover, #fut-spypanel a.fut-sp-name:focus-visible { color: var(--accent); text-decoration: underline; }
-#fut-spypanel .fut-mk-flag { min-width: 24px; min-height: 24px; }
-.fut-sp-st { padding: 0 5px; border-radius: 8px; background: #1A2733; font-size: 11px; line-height: 16px; color: var(--txt); white-space: nowrap; }
+.fut-sp-who { display: flex; align-items: center; gap: 4px; }
+#fut-spypanel a.fut-sp-name { min-width: 0; color: var(--name); font-weight: 700; text-decoration: none; overflow: hidden; text-overflow: ellipsis; }
+#fut-spypanel a.fut-sp-name:hover, #fut-spypanel a.fut-sp-name:focus-visible { color: var(--hi); text-decoration: underline; }
+#fut-spypanel .fut-sp-who .fut-mk-flag { flex: none; min-width: 20px; min-height: 20px; margin-left: auto; }
+.fut-sp-st { flex: none; padding: 0 5px; border-radius: 8px; background: var(--chip); font-size: 11px; line-height: 15px; color: var(--txt); }
 .fut-sp-st.st-inactive, .fut-sp-st.st-longinactive { color: var(--ok); }
 .fut-sp-st.st-vacation { color: #7FB8FF; }
 .fut-sp-st.st-shared { color: #D2B8FF; background: rgba(181, 123, 255, 0.16); }
 .fut-sp-st.st-noob, .fut-sp-st.st-strong, .fut-sp-st.st-honorableTarget { color: var(--warn); }
-#fut-spypanel a.fut-sp-coords { color: var(--link); text-decoration: none; white-space: nowrap; }
+#fut-spypanel a.fut-sp-coords { display: inline-flex; align-items: center; gap: 5px; color: var(--link); text-decoration: none; }
 #fut-spypanel a.fut-sp-coords:hover { color: var(--hi); }
-.fut-sp-moon { margin-right: 3px; vertical-align: -1px; }
-.fut-sp-num { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; white-space: nowrap; min-width: 0; }
-.fut-sp-num b { color: var(--hi); font-size: 12px; }
-.fut-sp-num small { font-size: 11px; color: var(--mute); overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-.fut-sp-num small .fut-msg-icon { width: 14px; height: 14px; vertical-align: -3px; margin-right: 3px; }
+.fut-sp-kind { flex: none; color: var(--mute); }
+.fut-sp-c.fut-sp-loot { color: var(--loot); font-weight: 700; }
 #fut-spypanel .fresh { color: var(--ok); } #fut-spypanel .warm { color: var(--warn); } #fut-spypanel .old, #fut-spypanel .bad { color: var(--neg); }
 #fut-spypanel .zero { color: var(--dim); }
-.fut-sp-acts { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
-#fut-spypanel .fut-sp-attack { height: 24px; padding: 0 10px; border: 1px solid #C0533F; border-radius: 12px; background: rgba(192, 83, 63, 0.18); color: #FFD9D2; font-weight: 700; }
-#fut-spypanel .fut-sp-attack:hover { background: rgba(192, 83, 63, 0.34); }
-#fut-spypanel .fut-sp-sim { height: 24px; padding: 0 10px; border: 1px solid var(--line); border-radius: 12px; background: none; color: #8FB6D8; font-weight: 700; }
-#fut-spypanel .fut-sp-sim:hover { color: var(--hi); border-color: var(--link); background: rgba(120, 150, 180, 0.12); }
-#fut-spypanel .fut-sp-del { flex: none; width: 24px; min-width: 24px; height: 24px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
-  border: 0; border-radius: 50%; background: none; color: var(--dim); }
-#fut-spypanel .fut-sp-del:hover { color: var(--neg); background: rgba(240, 122, 110, 0.12); }
-.fut-sp-note { max-width: 80ch; margin: 8px 4px 0; color: var(--mute); font-size: 11px; line-height: 1.5; }
+.fut-sp-acts { display: flex; align-items: center; justify-content: flex-end; gap: 2px; overflow: visible; }
+#fut-spypanel .fut-sp-ib { flex: none; width: 24px; height: 24px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid transparent; border-radius: 4px; background: rgba(120, 150, 180, 0.1); color: var(--mute); }
+#fut-spypanel .fut-sp-ib:hover { color: var(--hi); border-color: var(--line); background: rgba(120, 150, 180, 0.2); }
+#fut-spypanel .fut-sp-more[aria-expanded="true"] { color: var(--accent); border-color: var(--accent); }
+#fut-spypanel .fut-sp-attack { color: var(--attack); }
+#fut-spypanel .fut-sp-attack:hover { color: var(--hi); border-color: var(--attack-line); background: rgba(192, 83, 63, 0.3); }
+#fut-spypanel .fut-sp-sim { color: var(--sim); }
+#fut-spypanel .fut-sp-del:hover { color: var(--neg); border-color: rgba(240, 122, 110, 0.5); background: rgba(240, 122, 110, 0.14); }
+.fut-sp-waves { padding: 6px 8px 8px 34px; background: rgba(79, 209, 232, 0.05); border-radius: 0 0 3px 3px; }
+.fut-sp-wgrid { display: grid; grid-template-columns: 120px repeat(6, minmax(0, 1fr)); align-items: center; column-gap: 6px; row-gap: 0; max-width: 560px; }
+.fut-sp-wgrid > * { min-height: 24px; line-height: 24px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fut-sp-wgrid .k { display: flex; align-items: center; gap: 5px; color: var(--mute); text-align: left; }
+.fut-sp-wgrid .k .fut-msg-icon { flex: none; width: 16px; height: 16px; }
+.fut-sp-wgrid .h { color: var(--dim); font-size: 11px; }
+.fut-sp-wgrid b { color: var(--loot); }
+.fut-sp-wgrid .cnt { color: var(--txt); }
+#fut-spypanel .fut-sp-wgrid a.cnt { justify-self: end; box-sizing: border-box; min-width: 28px; padding: 0 5px; border-radius: 3px; color: var(--link); text-decoration: none; }
+#fut-spypanel .fut-sp-wgrid a.cnt:hover, #fut-spypanel .fut-sp-wgrid a.cnt:focus-visible { color: var(--hi); background: rgba(111, 159, 200, 0.18); }
+.fut-sp-wres { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(120, 150, 180, 0.12); color: var(--txt); }
+.fut-sp-wres .k { width: 120px; color: var(--mute); }
+.fut-sp-wres .from { margin-left: auto; color: var(--mute); }
+.fut-sp-foot { min-height: 24px; color: var(--mute); }
+.fut-sp-foot .fut-sp-c.fut-sp-r { color: var(--loot); font-weight: 700; }
+.fut-sp-note { max-width: 62ch; margin: 8px 4px 0; text-wrap: pretty; color: var(--mute); font-size: 11px; line-height: 1.5; }
 @media (max-width: 640px) {
-  .fut-sp-cols { display: none; }
-  .fut-sp-row { grid-template-columns: minmax(0, 1fr) auto auto; }
-  .fut-sp-row > .fut-sp-acts { grid-column: 1 / -1; justify-content: flex-start; }
+  .fut-sp-head { flex-wrap: wrap; }
+  .fut-sp-table { overflow-x: auto; }
+  .fut-sp-row { min-width: 560px; }
 }
 `;
   var JOURNAL_CSS = `
@@ -5461,8 +5518,11 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
   var SPY_PANEL_ID = "fut-spypanel";
   var VIEW_KEY2 = "spy.view";
   var SPY_SHARED_KEY = "spy.shared";
-  var SORT_KEYS = ["target", "age", "loot", "fleet", "def"];
-  var DEFAULT_VIEW = { sort: "loot", desc: true, ship: 203, hideDefended: false, inactiveOnly: false, open: true };
+  var COLS = ["age", "act", "coords", "target", "loot", "fleet", "def"];
+  var WIDTH = { age: "36px", act: "28px", coords: "74px", target: "minmax(0, 1fr)", loot: "58px", fleet: "50px", def: "50px" };
+  var RIGHT = ["loot", "fleet", "def"];
+  var DEFAULT_VIEW = { sort: "loot", desc: true, cols: COLS, hideDefended: false, inactiveOnly: false, open: true };
+  var expanded = /* @__PURE__ */ new Set();
   function universeOf(doc, data) {
     const meta = (name) => doc.querySelector(`meta[name="${name}"]`)?.getAttribute("content") ?? "";
     return {
@@ -5475,6 +5535,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
   }
   var INACTIVE = ["inactive", "longinactive"];
   var defended = (r) => r.entry.defValue !== 0 || r.entry.fleetValue !== 0;
+  var coordsRank = (c) => c.split(":").reduce((n, x) => n * 1e3 + Number(x), 0);
   function sortRows(rows, view) {
     const val = (r) => {
       switch (view.sort) {
@@ -5482,6 +5543,11 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
           return r.entry.playerName.toLowerCase();
         case "age":
           return r.ageMinutes;
+        // Active now first, then by minutes; no activity (60+) last.
+        case "act":
+          return r.entry.activity;
+        case "coords":
+          return coordsRank(r.entry.coords) * 2 + (r.entry.moon ? 1 : 0);
         case "loot":
           return r.lootRes;
         case "fleet":
@@ -5495,6 +5561,15 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
       const x = val(a), y = val(b);
       return (x < y ? -1 : x > y ? 1 : 0) * dir;
     });
+  }
+  function columnOrder(saved) {
+    return Array.isArray(saved) && saved.length === COLS.length && COLS.every((c) => saved.includes(c)) ? saved : COLS;
+  }
+  function moveColumn(cols, key, to) {
+    if (key === to) return cols;
+    const rest = cols.filter((c) => c !== key);
+    const at = rest.indexOf(to) + (cols.indexOf(key) < cols.indexOf(to) ? 1 : 0);
+    return [...rest.slice(0, at), key, ...rest.slice(at)];
   }
   var isSpyTab = (doc) => !!doc.querySelector('[data-subtab-id="20"].active, [data-subtab-id="20"][aria-selected="true"]');
   function mountSpyPanel(o) {
@@ -5510,14 +5585,17 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     }
     const board = o.store.get(SPY_BOARD_KEY, {});
     const view = { ...DEFAULT_VIEW, ...o.store.get(VIEW_KEY2, {}) };
-    if (!SORT_KEYS.includes(view.sort)) view.sort = "loot";
-    const prefs = [o.store.get(SPY_SHARED_KEY, true), o.store.get(SIM_KEY, "osims")];
+    if (!COLS.includes(view.sort)) view.sort = "loot";
+    view.cols = columnOrder(view.cols);
+    const prefs = [o.store.get(SPY_SHARED_KEY, true), o.store.get(SIM_KEY, "osims"), [...expanded]];
     const sig = JSON.stringify([Object.values(board).map((e) => e.id), view, prefs, Math.floor((o.now?.() ?? Date.now()) / 6e4)]);
     if (old && old.dataset.sig === sig && old.nextElementSibling === anchor) return;
+    const focus = doc.activeElement?.closest(`#${SPY_PANEL_ID}`) ? doc.activeElement.dataset.focus : void 0;
     const panel = renderPanel(o, board, view);
     panel.dataset.sig = sig;
     if (old) old.remove();
     anchor.before(panel);
+    if (focus) panel.querySelector(`[data-focus="${focus}"]`)?.focus();
   }
   function renderPanel(o, board, view) {
     const { doc, store, t, locale, spy } = o;
@@ -5534,10 +5612,12 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
       store.set(VIEW_KEY2, { ...view, ...next });
       mountSpyPanel(o);
     };
-    const button3 = (cls, text, title, onClick) => {
-      const b = el5("button", cls, text);
+    const iconButton3 = (cls, name, label, onClick) => {
+      const b = el5("button", `fut-sp-ib ${cls}`);
       b.type = "button";
-      b.title = title;
+      b.title = label;
+      b.setAttribute("aria-label", label);
+      b.append(icon(doc, name, 14));
       b.addEventListener("click", (ev) => {
         ev.preventDefault();
         onClick();
@@ -5545,38 +5625,38 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
       return b;
     };
     const ships = store.get(SHIPS_INFO_KEY, {});
-    const info = ships[String(view.ship)];
-    const capacity = info?.capacity || (view.ship === 202 ? 5e3 : 25e3);
+    const cap = (id) => ships[String(id)]?.capacity || (id === 202 ? 5e3 : 25e3);
     const universe = universeOf(doc, store.get(SERVER_DATA_KEY, null));
     const showShared = store.get(SPY_SHARED_KEY, true);
     const tool = simTool(store.get(SIM_KEY, "osims"));
-    const all2 = targetRows(board, spy.bases, { capacity, speed: info?.speed ?? 0, universe, now }).filter((r) => showShared || !r.entry.shared);
+    const all2 = targetRows(board, spy.bases, { capacity: cap(203), speed: ships["203"]?.speed ?? 0, universe, now }).filter((r) => showShared || !r.entry.shared);
     const rows = sortRows(all2.filter((r) => (!view.hideDefended || !defended(r)) && (!view.inactiveOnly || r.entry.statuses.some((s) => INACTIVE.includes(s)))), view);
+    const meta = (name) => doc.querySelector(`meta[name="ogame-planet-${name}"]`)?.getAttribute("content") ?? "";
+    const here = Number(meta("id")) > 0 ? { id: Number(meta("id")), name: meta("name"), coords: meta("coordinates"), moon: meta("type") === "moon" } : null;
+    const baseName = (b) => b.name || doc.querySelector(`#planet-${b.id} .planet-name, #planet-${b.id} .moon-name`)?.textContent?.trim() || "";
+    const grid2 = `22px ${view.cols.map((c) => WIDTH[c]).join(" ")} 104px`;
     const panel = el5("div", "fut-sp");
     panel.id = SPY_PANEL_ID;
     const head = el5("div", "fut-sp-head");
     const toggle = el5("button", "fut-sp-title");
     toggle.type = "button";
+    toggle.dataset.focus = "title";
     toggle.setAttribute("aria-expanded", String(view.open));
     toggle.append(icon(doc, "chevron", 12, "fut-sp-chev"), el5("b", "", t("spy.title")), el5("span", "", t("spy.sub", { n: rows.length, loot: fmt(rows.reduce((s, r) => s + r.lootRes, 0)) })));
     toggle.addEventListener("click", () => redraw({ open: !view.open }));
     head.append(toggle);
     if (view.open) {
-      const chip2 = (text, pressed, next) => {
+      const chip2 = (id, text, pressed, next) => {
         const b = el5("button", "fut-sp-chip", text);
         b.type = "button";
+        b.dataset.focus = id;
         b.setAttribute("aria-pressed", String(pressed));
         b.addEventListener("click", () => redraw(next));
         return b;
       };
-      const cargo = el5("span", "fut-sp-group");
-      cargo.setAttribute("role", "group");
-      cargo.setAttribute("aria-label", t("spy.cargoShip"));
-      cargo.append(chip2(shipName(203, ships, t), view.ship === 203, { ship: 203 }), chip2(shipName(202, ships, t), view.ship === 202, { ship: 202 }));
       head.append(
-        cargo,
-        chip2(t("spy.hideDefended"), view.hideDefended, { hideDefended: !view.hideDefended }),
-        chip2(t("spy.inactiveOnly"), view.inactiveOnly, { inactiveOnly: !view.inactiveOnly })
+        chip2("def", t("spy.hideDefended"), view.hideDefended, { hideDefended: !view.hideDefended }),
+        chip2("ina", t("spy.inactiveOnly"), view.inactiveOnly, { inactiveOnly: !view.inactiveOnly })
       );
     }
     panel.append(head);
@@ -5588,103 +5668,205 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     const table = el5("div", "fut-sp-table");
     table.setAttribute("role", "table");
     table.setAttribute("aria-label", t("spy.title"));
-    const cols = el5("div", "fut-sp-row fut-sp-cols");
-    cols.setAttribute("role", "row");
-    const headers = [["target", "spy.col.target"], ["age", "spy.col.age"], ["loot", "spy.col.loot"], ["fleet", "spy.col.fleet"], ["def", "spy.col.def"], [null, "spy.col.actions"]];
-    for (const [key, label] of headers) {
-      const cell = el5("div");
+    const line = (cls) => {
+      const r = el5("div", `fut-sp-row ${cls}`.trim());
+      r.setAttribute("role", "row");
+      r.style.gridTemplateColumns = grid2;
+      return r;
+    };
+    const cols = line("fut-sp-cols");
+    const fixedHead = (text, label) => {
+      const c = el5("div", "fut-sp-c");
+      c.setAttribute("role", "columnheader");
+      const s = el5("span", "fut-sp-h", text);
+      s.setAttribute("aria-label", label);
+      c.append(s);
+      return c;
+    };
+    cols.append(fixedHead("#", t("spy.col.n")));
+    for (const key of view.cols) {
+      const cell = el5("div", `fut-sp-c${RIGHT.includes(key) ? " fut-sp-r" : ""}`);
       cell.setAttribute("role", "columnheader");
-      const c = el5(key ? "button" : "span", `fut-sp-h${view.sort === key ? " sortBy" : ""}`, t(label));
-      if (key && view.sort === key) c.append(icon(doc, "chevron", 10, "fut-sp-sort"));
-      if (key) {
-        c.type = "button";
-        cell.setAttribute("aria-sort", view.sort === key ? view.desc ? "descending" : "ascending" : "none");
-        c.addEventListener("click", () => redraw(view.sort === key ? { desc: !view.desc } : { sort: key, desc: key !== "target" && key !== "age" }));
-      } else c.setAttribute("aria-label", t("spy.col.actionsName"));
-      cell.append(c);
+      cell.setAttribute("aria-sort", view.sort === key ? view.desc ? "descending" : "ascending" : "none");
+      const b = el5("button", `fut-sp-h${view.sort === key ? " sortBy" : ""}`, t(`spy.col.${key}`));
+      b.type = "button";
+      b.dataset.focus = `col-${key}`;
+      b.title = t("spy.colHint");
+      if (view.sort === key) b.append(icon(doc, "chevron", 10, "fut-sp-sort"));
+      b.addEventListener("click", () => redraw(view.sort === key ? { desc: !view.desc } : { sort: key, desc: !["target", "age", "act", "coords"].includes(key) }));
+      b.addEventListener("keydown", (ev) => {
+        if (!ev.altKey || ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
+        ev.preventDefault();
+        const i = view.cols.indexOf(key) + (ev.key === "ArrowLeft" ? -1 : 1);
+        if (i >= 0 && i < view.cols.length) redraw({ cols: moveColumn(view.cols, key, view.cols[i]) });
+      });
+      cell.draggable = true;
+      cell.addEventListener("dragstart", (ev) => {
+        ev.dataTransfer?.setData("text/x-fut-col", key);
+        cell.classList.add("drag");
+      });
+      cell.addEventListener("dragend", () => cell.classList.remove("drag"));
+      cell.addEventListener("dragover", (ev) => {
+        if (!ev.dataTransfer?.types.includes("text/x-fut-col")) return;
+        ev.preventDefault();
+        cell.classList.add("over");
+      });
+      cell.addEventListener("dragleave", () => cell.classList.remove("over"));
+      cell.addEventListener("drop", (ev) => {
+        ev.preventDefault();
+        const from = ev.dataTransfer?.getData("text/x-fut-col");
+        if (from && COLS.includes(from)) redraw({ cols: moveColumn(view.cols, from, key) });
+      });
+      cell.append(b);
       cols.append(cell);
     }
+    cols.append(fixedHead("", t("spy.col.actionsName")));
     table.append(cols);
     const list = el5("div", "fut-sp-list");
     list.setAttribute("role", "rowgroup");
-    for (const r of rows) {
+    rows.forEach((r, index) => {
       const e = r.entry;
       const [g, s, p] = e.coords.split(":");
-      const row = el5("div", `fut-sp-row${defended(r) ? " defended" : ""}`);
-      row.setAttribute("role", "row");
-      const who = el5("div", "fut-sp-who");
-      const top = el5("div", "fut-sp-line");
-      const name = el5("a", "fut-sp-name overlay", e.playerName || "?");
-      name.href = `${doc.location.origin}/game/index.php?page=ajax&component=messagedetails&messageId=${encodeURIComponent(e.id)}`;
-      name.dataset.overlayTitle = t("spy.report");
-      name.title = t("spy.reportHint", { name: e.playerName || "?" });
-      top.append(name, flagButton({ doc, store, t }, e.playerId, e.playerName));
-      if (e.shared) {
-        const ally = el5("span", "fut-sp-st st-shared", t("spy.shared"));
-        ally.title = t("spy.sharedHint");
-        top.append(ally);
-      }
-      for (const st of e.statuses.filter((x) => x !== "active")) top.append(el5("span", `fut-sp-st st-${st}`, t(`spy.status.${st}`)));
-      const gal = el5("a", "fut-sp-coords", `[${e.coords}]`);
-      gal.href = `/game/index.php?page=ingame&component=galaxy&galaxy=${g}&system=${s}`;
-      if (e.moon) gal.prepend(icon(doc, "moon", 10, "fut-sp-moon"));
-      const bottom = el5("div", "fut-sp-line");
-      bottom.append(gal);
-      who.append(top, bottom);
-      const age = el5("div", "fut-sp-num");
-      age.append(
-        el5("b", r.ageMinutes > 360 ? "old" : r.ageMinutes > 60 ? "warm" : "fresh", r.ageMinutes < 60 ? `${r.ageMinutes}m` : `${Math.floor(r.ageMinutes / 60)}h`),
-        el5("small", e.activity === 0 ? "bad" : e.activity < 60 ? "warm" : "", e.activity === 0 ? t("msg.spy.active") : e.activity >= 60 ? ">60m" : `${e.activity}m`)
-      );
-      age.title = new Date(e.at).toLocaleString(locale);
-      const loot = el5("div", "fut-sp-num");
-      const need = el5("small", "", r.ships.toLocaleString(locale));
-      need.prepend(shipIcon(doc, view.ship, shipName(view.ship, ships, t), "fut-msg-icon"));
-      loot.append(el5("b", "", fmt(r.lootRes)), need);
-      loot.title = t("spy.lootHint", {
-        pct: Math.round(e.loot * 100),
-        m: fmt(e.res.metal * e.loot),
-        c: fmt(e.res.crystal * e.loot),
-        d: fmt(e.res.deuterium * e.loot),
-        n: r.ships.toLocaleString(locale),
-        ship: shipName(view.ship, ships, t)
-      });
-      const value = (v, label) => {
-        const cell = el5("div", "fut-sp-num");
-        cell.append(el5("b", v < 0 ? "warm" : v > 0 ? "warm" : "zero", v < 0 ? "?" : v > 0 ? fmt(v) : "0"));
-        cell.title = `${label}: ${v < 0 ? t("spy.hidden") : exact(v)}`;
-        return cell;
+      const row = line(defended(r) ? "defended" : "");
+      const open = expanded.has(e.key);
+      const from = here ?? r.base;
+      const attackUrl = (n2, id) => `/game/index.php?page=ingame&component=fleetdispatch&galaxy=${g}&system=${s}&position=${p}&type=${e.moon ? 3 : 1}&mission=1${n2 > 0 ? `&am${id}=${n2}` : ""}`;
+      const cellOf = {
+        age: () => {
+          const c = el5("div", `fut-sp-c ${r.ageMinutes > 360 ? "old" : r.ageMinutes > 60 ? "warm" : "fresh"}`, r.ageMinutes < 60 ? `${r.ageMinutes}m` : r.ageMinutes < 2880 ? `${Math.floor(r.ageMinutes / 60)}h` : `${Math.floor(r.ageMinutes / 1440)}g`);
+          c.title = new Date(e.at).toLocaleString(locale);
+          return c;
+        },
+        act: () => {
+          const c = el5("div", `fut-sp-c ${e.activity === 0 ? "bad" : e.activity < 60 ? "warm" : "zero"}`, e.activity === 0 ? "*" : e.activity < 60 ? String(e.activity) : "\u2013");
+          c.title = e.activity === 0 ? t("msg.spy.active") : e.activity < 60 ? t("msg.spy.activity", { n: e.activity }) : t("msg.spy.inactive");
+          return c;
+        },
+        coords: () => {
+          const c = el5("div", "fut-sp-c");
+          const gal = el5("a", "fut-sp-coords", e.coords);
+          gal.href = `/game/index.php?page=ingame&component=galaxy&galaxy=${g}&system=${s}`;
+          gal.title = t(e.moon ? "spy.moon" : "spy.planet");
+          gal.prepend(icon(doc, e.moon ? "moon" : "planet", 11, "fut-sp-kind"));
+          c.append(gal);
+          return c;
+        },
+        target: () => {
+          const c = el5("div", "fut-sp-c fut-sp-who");
+          const name = el5("a", "fut-sp-name overlay", e.playerName || "?");
+          name.href = `${doc.location.origin}/game/index.php?page=ajax&component=messagedetails&messageId=${encodeURIComponent(e.id)}`;
+          name.dataset.overlayTitle = t("spy.report");
+          name.title = t("spy.reportHint", { name: e.playerName || "?" });
+          c.append(name);
+          for (const st of e.statuses.filter((x) => x !== "active")) c.append(el5("span", `fut-sp-st st-${st}`, t(`spy.status.${st}`)));
+          if (e.shared) {
+            const ally = el5("span", "fut-sp-st st-shared", t("spy.shared"));
+            ally.title = t("spy.sharedHint");
+            c.append(ally);
+          }
+          c.append(flagButton({ doc, store, t }, e.playerId, e.playerName));
+          return c;
+        },
+        loot: () => {
+          const c = el5("div", "fut-sp-c fut-sp-r fut-sp-loot", fmt(r.lootRes));
+          c.title = t("spy.lootHint", {
+            pct: Math.round(e.loot * 100),
+            m: fmt(e.res.metal * e.loot),
+            c: fmt(e.res.crystal * e.loot),
+            d: fmt(e.res.deuterium * e.loot),
+            large: Math.ceil(r.lootRes / cap(203)).toLocaleString(locale),
+            small: Math.ceil(r.lootRes / cap(202)).toLocaleString(locale)
+          });
+          return c;
+        },
+        fleet: () => value(e.fleetValue, t("msg.spy.fleet")),
+        def: () => value(e.defValue, t("msg.spy.def"))
       };
-      const acts = el5("div", "fut-sp-acts");
-      if (r.base) {
-        const base = r.base;
-        const am = r.ships > 0 ? `&am${view.ship}=${r.ships}` : "";
-        acts.append(button3("fut-sp-attack", t("spy.attack"), t("spy.attackHint", { name: base.name, n: r.ships.toLocaleString(locale), ship: shipName(view.ship, ships, t) }), () => {
-          doc.location.assign(`/game/index.php?page=ingame&component=fleetdispatch&cp=${base.id}&galaxy=${g}&system=${s}&position=${p}&type=${e.moon ? 3 : 1}&mission=1${am}`);
+      const value = (v, label) => {
+        const c = el5("div", `fut-sp-c fut-sp-r ${v !== 0 ? "warm" : "zero"}`, v < 0 ? "?" : v > 0 ? fmt(v) : "0");
+        c.title = `${label}: ${v < 0 ? t("spy.hidden") : exact(v)}`;
+        return c;
+      };
+      const acts = el5("div", "fut-sp-c fut-sp-acts");
+      const more = iconButton3("fut-sp-more", "more", t("spy.waves"), () => {
+        if (open) expanded.delete(e.key);
+        else expanded.add(e.key);
+        mountSpyPanel(o);
+      });
+      more.dataset.focus = `more-${e.key}`;
+      more.setAttribute("aria-expanded", String(open));
+      more.setAttribute("aria-controls", `fut-sp-w-${index}`);
+      acts.append(more);
+      if (from) {
+        const base = from;
+        acts.append(iconButton3("fut-sp-attack", "sword", t("spy.attackHint", { name: baseName(base) }), () => {
+          doc.location.assign(attackUrl(0, 203));
         }));
       }
       if (e.apiKey) {
         const key = e.apiKey;
-        acts.append(button3("fut-sp-sim", t("spy.simulate"), t("spy.simulateHint", { tool: SIM_TOOLS[tool].name }), () => {
-          const prefill = simPrefill(spy.server, r.base ? { coords: r.base.coords, researches: spy.researches, classId: spy.classId, allianceClass: spy.allianceClass, lf: spy.lf ?? void 0 } : null, e.coords);
+        acts.append(iconButton3("fut-sp-sim", "play", t("spy.simulateHint", { tool: SIM_TOOLS[tool].name }), () => {
+          const prefill = simPrefill(spy.server, from ? { coords: from.coords, researches: spy.researches, classId: spy.classId, allianceClass: spy.allianceClass, lf: spy.lf ?? void 0 } : null, e.coords);
           doc.defaultView?.open(simLink(tool, key, spy.lang, prefill), "_blank", "noopener");
         }));
       }
-      const del = button3("fut-sp-del", "", t("spy.remove"), () => {
+      acts.append(iconButton3("fut-sp-del", "trash", t("spy.remove"), () => {
         const b = store.get(SPY_BOARD_KEY, {});
         delete b[e.key];
         store.set(SPY_BOARD_KEY, b);
+        expanded.delete(e.key);
+        const near = rows[index + 1] ?? rows[index - 1];
         mountSpyPanel(o);
-      });
-      del.setAttribute("aria-label", t("spy.remove"));
-      del.append(icon(doc, "close", 11));
-      acts.append(del);
-      const cells = [who, age, loot, value(e.fleetValue, t("msg.spy.fleet")), value(e.defValue, t("msg.spy.def")), acts];
+        const panel2 = doc.getElementById(SPY_PANEL_ID);
+        (panel2?.querySelector(near ? `[data-focus="del-${near.entry.key}"]` : '[data-focus="title"]') ?? panel2?.querySelector('[data-focus="title"]'))?.focus();
+      }));
+      acts.lastElementChild.setAttribute("data-focus", `del-${e.key}`);
+      const n = el5("div", "fut-sp-c fut-sp-n", String(index + 1));
+      const cells = [n, ...view.cols.map((c) => cellOf[c]()), acts];
       for (const c of cells) c.setAttribute("role", "cell");
       row.append(...cells);
       list.append(row);
-    }
+      if (open) {
+        const det = el5("div", "fut-sp-waves");
+        det.id = `fut-sp-w-${index}`;
+        det.setAttribute("role", "row");
+        const cell = el5("div");
+        cell.setAttribute("role", "cell");
+        cell.setAttribute("aria-colspan", String(view.cols.length + 2));
+        const waves = raidWaves(e.res.metal + e.res.crystal + e.res.deuterium, e.loot, 6);
+        const wgrid = el5("div", "fut-sp-wgrid");
+        wgrid.append(el5("span", "k"), ...waves.map((_, i) => el5("span", "h", t("spy.wave", { n: i + 1 }))));
+        wgrid.append(el5("span", "k", t("spy.col.loot")), ...waves.map((w) => el5("b", "", fmt(w))));
+        for (const id of [203, 202]) {
+          const label = el5("span", "k");
+          label.append(shipIcon(doc, id, shipName(id, ships, t), "fut-msg-icon"), shipName(id, ships, t));
+          wgrid.append(label);
+          for (const [i, w] of waves.entries()) {
+            const n2 = Math.ceil(w / cap(id));
+            if (!from || n2 === 0) {
+              wgrid.append(el5("span", "cnt", n2.toLocaleString(locale)));
+              continue;
+            }
+            const a = el5("a", "cnt", n2.toLocaleString(locale));
+            a.href = attackUrl(n2, id);
+            a.title = t("spy.waveHint", { n: i + 1, count: n2.toLocaleString(locale), ship: shipName(id, ships, t), name: baseName(from) });
+            wgrid.append(a);
+          }
+        }
+        const res = el5("div", "fut-sp-wres");
+        res.append(el5("span", "k", t("spy.onPlanet")), el5("span", "", `M ${fmt(e.res.metal)}`), el5("span", "", `C ${fmt(e.res.crystal)}`), el5("span", "", `D ${fmt(e.res.deuterium)}`));
+        if (from) res.append(el5("span", "from", t("spy.from", { name: baseName(from), coords: from.coords })));
+        cell.append(wgrid, res);
+        det.append(cell);
+        list.append(det);
+      }
+    });
     table.append(list);
+    const foot = line("fut-sp-foot");
+    foot.append(el5("div", "fut-sp-c"));
+    for (const key of view.cols) foot.append(el5("div", `fut-sp-c${RIGHT.includes(key) ? " fut-sp-r" : ""}`, key === "loot" ? fmt(rows.reduce((s, r) => s + r.lootRes, 0)) : key === "target" ? t("spy.total") : ""));
+    foot.append(el5("div", "fut-sp-c"));
+    table.append(foot);
     panel.append(table, el5("p", "fut-sp-note", t("spy.hint")));
     return panel;
   }
@@ -10641,11 +10823,6 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     }
     return { category, rows };
   }
-  function daysToCatch(gap, mine, theirs = 0) {
-    const closing = mine - theirs;
-    if (gap <= 0) return 0;
-    return closing > 0 ? gap / closing : null;
-  }
 
   // src/data/ptre.ts
   var PTRE_KEY = "ptre.ranks";
@@ -10684,19 +10861,28 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   var ptreSeen = /* @__PURE__ */ new WeakMap();
   var isHighscorePage = (doc) => new URL(doc.location?.href ?? "http://x/").searchParams.get("component") === "highscore";
   var CSS3 = `
-#ranks .fut-hs-gap { display: block; font-size: 11px; line-height: 1.35; font-variant-numeric: tabular-nums; }
-#ranks .fut-hs-gap.up { color: #7BC47F; } #ranks .fut-hs-gap.down { color: #E57B70; } #ranks .fut-hs-gap.flat { color: #8592A1; }
-#ranks .fut-hs-age { margin-left: 4px; color: #8592A1; font-weight: 400; }
-#ranks .fut-hs-eta { display: block; font-size: 11px; color: #6F9FC8; }
-#ranks .highscoreNameHolder .fut-mk-flag { margin-left: 4px; }`;
+#ranks { --fut-up: #7BC47F; --fut-down: #E57B70; --fut-mute: #8592A1; --fut-line: #3A4A5C; --fut-btn: #0F1822; --fut-txt: #C9D6E3; --fut-hi: #FFFFFF; --fut-link: #6F9FC8; }
+#fut-hs-top { --fut-line: #3A4A5C; --fut-btn: #0F1822; --fut-txt: #C9D6E3; --fut-hi: #FFFFFF; --fut-link: #6F9FC8; }
+#ranks .fut-hs-gap { display: block; font-size: 11px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+#ranks .fut-hs-gap.up { color: var(--fut-up); } #ranks .fut-hs-gap.down { color: var(--fut-down); }
+#ranks .fut-hs-age { margin-left: 4px; color: var(--fut-mute); font-weight: 400; }
+#ranks .highscoreNameHolder .fut-mk-flag { margin-left: 4px; }
+/* Compact rows, as OGLight does; the top three keep the game's roomy ones. */
+#ranks tr:not(.fut-hs-top) .highscoreNameFieldWrapper { height: 36px !important; align-items: center; }
+#ranks tr:not(.fut-hs-top) .highscoreNameFieldWrapper profile-picture { zoom: .7; }
+#ranks tr:not(.fut-hs-top) .highscoreNameAndTitleHolder { flex-direction: row !important; align-items: center; gap: 6px; width: calc(100% - 36px) !important; }
+#ranks tr:not(.fut-hs-top) .highscoreNameHolder .fut-mk-flag { margin-left: 6px; }
+#ranks tr:not(.fut-hs-top) td { padding-top: 2px; padding-bottom: 2px; line-height: 1.25; }
+#ranks tr:not(.fut-hs-top) .honorScore { line-height: 1; }
+#fut-hs-top { position: fixed; right: 18px; bottom: 44px; z-index: 1000; display: none; width: 34px; height: 34px; padding: 0; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--fut-line); border-radius: 6px; background: var(--fut-btn); color: var(--fut-txt); }
+#fut-hs-top.on { display: flex; } #fut-hs-top:hover, #fut-hs-top:focus-visible { border-color: var(--fut-link); color: var(--fut-hi); }
+#fut-hs-top svg { transform: rotate(180deg); }`;
   function decorateHighscore(o) {
     const { doc, store, t, locale } = o;
     const hs = readHighscore(doc);
     if (!hs) return;
     const fmt = (n) => formatUnits(n, locale);
     const total = hs.category === "points";
-    const mine = hs.rows.find((r) => r.mine)?.score ?? (total ? store.get(SCORE_KEY, null)?.points : void 0);
-    const myPace = total ? changeOver(store.get(HISTORY_KEY, []), 7)?.perDay ?? 0 : 0;
     const now = o.now?.() ?? Date.now();
     doc.querySelector(".fut-hs-note")?.remove();
     if (total && !ptreSeen.has(store) && o.guard) {
@@ -10718,24 +10904,17 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       head.append(age);
     }
     for (const r of hs.rows) {
-      r.row.querySelectorAll(".fut-hs-gap, .fut-hs-eta").forEach((n) => n.remove());
+      r.row.querySelectorAll(".fut-hs-gap").forEach((n) => n.remove());
+      r.row.classList.toggle("fut-hs-top", r.rank <= 3);
       const scoreCell = r.row.querySelector("td.score");
       const base = snap?.scores[String(r.playerId)];
-      if (scoreCell && base !== void 0) {
+      if (scoreCell && base !== void 0 && r.score !== base) {
         const made = r.score - base;
         const g = doc.createElement("span");
-        g.className = `fut-hs-gap ${made > 0 ? "up" : made < 0 ? "down" : "flat"}`;
-        g.textContent = made > 0 ? `+${fmt(made)}` : made < 0 ? `\u2212${fmt(-made)}` : "0";
+        g.className = `fut-hs-gap ${made > 0 ? "up" : "down"}`;
+        g.textContent = made > 0 ? `+${fmt(made)}` : `\u2212${fmt(-made)}`;
         g.title = t("hs.sincePtre", { n: made.toLocaleString(locale), time: since });
         scoreCell.append(g);
-      }
-      if (scoreCell && mine !== void 0 && !r.mine && total && myPace > 0 && r.score > mine) {
-        const days = daysToCatch(r.score - mine, myPace);
-        const e = doc.createElement("span");
-        e.className = "fut-hs-eta";
-        e.textContent = days === null ? t("hs.never") : days < 1 ? t("hs.passToday") : t("hs.days", { n: Math.ceil(days).toLocaleString(locale) });
-        e.title = t("hs.etaMine", { mine: fmt(myPace) });
-        scoreCell.append(e);
       }
       const nameHolder = r.row.querySelector(".highscoreNameHolder");
       if (nameHolder && !r.mine && !nameHolder.querySelector(".fut-mk-flag")) nameHolder.append(flagButton({ doc, store, t }, r.playerId, r.name));
@@ -10750,6 +10929,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       o.doc.head.append(style);
     }
     decorateHighscore(o);
+    addTopButton(o);
     const box = o.doc.getElementById("stat_list_content") ?? o.doc.body;
     let queued = false;
     new MutationObserver((list) => {
@@ -10760,6 +10940,21 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         decorateHighscore(o);
       }, 50);
     }).observe(box, { childList: true, subtree: true });
+  }
+  function addTopButton(o) {
+    const { doc, t } = o;
+    if (doc.getElementById("fut-hs-top")) return;
+    const b = doc.createElement("button");
+    b.id = "fut-hs-top";
+    b.type = "button";
+    b.title = t("hs.top");
+    b.setAttribute("aria-label", t("hs.top"));
+    b.append(icon(doc, "chevron", 18));
+    b.addEventListener("click", () => doc.defaultView?.scrollTo({ top: 0, behavior: "smooth" }));
+    doc.body.append(b);
+    const sync = () => b.classList.toggle("on", (doc.defaultView?.scrollY ?? 0) > 400);
+    doc.defaultView?.addEventListener("scroll", sync, { passive: true });
+    sync();
   }
 
   // src/engines/reminders.ts
