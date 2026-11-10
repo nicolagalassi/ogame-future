@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.9
+// @version      0.3.10
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -199,7 +199,6 @@
     "res.metal": "Metallo",
     "res.crystal": "Cristallo",
     "res.deuterium": "Deuterio",
-    "planetMenu.idle": "Nessuna costruzione in corso",
     "planetMenu.side": "Affiancato",
     "planetMenu.toSide": "Vista affiancata (con risorse)",
     "planetMenu.toCompact": "Vista compatta",
@@ -248,7 +247,6 @@
     "alert.soonFull": "{count} pianeti pieni entro 6 ore",
     "alert.idle": "{count} pianeti senza costruzioni",
     "alert.stale": "Dati vecchi pi\xF9 di un'ora su {count} corpi",
-    "settings.markIdle": "Segna pianeti senza costruzioni",
     "queue.building": "Edificio",
     "queue.research": "Ricerca",
     "queue.ship": "Cantiere",
@@ -266,8 +264,8 @@
     "mine.deuterium": "Sintetizzatore di deuterio",
     "fleet.noShips": "Nessuna nave su questo pianeta.",
     "fleet.fleetsave": "Fleetsave",
-    "fleet.galaxy": "Galassia (vuoto = questa)",
-    "fleet.system": "Sistema (vuoto = questo)",
+    "fleet.galaxy": "Galassia",
+    "fleet.system": "Sistema",
     "fleet.position": "Posizione",
     "fleet.type": "Tipo",
     "fleet.typePlanet": "Pianeta",
@@ -292,7 +290,7 @@
     "mission.15": "Spedizione",
     "fleet.editTitlePlanet": "Riserve e fleetsave di {body}",
     "fleet.editTitleMoon": "Riserve e fleetsave della luna {body}",
-    "fleet.settingsTitle": "Impostazioni flotta",
+    "fleet.settingsTitle": "Regole di questo pianeta o luna",
     "fleet.transportTitle": "Trasporti e schieramenti",
     "fleet.mainShip": "Nave principale",
     "fleet.secondShip": "Nave secondaria (se la prima non basta)",
@@ -318,13 +316,11 @@
     "fleet.btn.deploy": "Schiera",
     "fleet.btn.expedition": "Spedizione",
     "fleet.btn.fleetsave": "Fleetsave",
-    "fleet.btn.all": "Tutte \u2212 riserva",
     "fleet.tip.moon": "Trasporta le risorse sulla luna di questo pianeta, con i cargo necessari",
     "fleet.tip.transport": "Trasporta le risorse (meno la riserva) alla destinazione scelta",
     "fleet.tip.deploy": "Schiera tutte le navi (meno la riserva) con le risorse che portano",
     "fleet.tip.expedition": "Spedizione in posizione 16 di questo sistema, con la nave migliore",
     "fleet.tip.fleetsave": "Prepara il fleetsave di questo pianeta o luna",
-    "fleet.tip.all": "Seleziona tutte le navi meno la riserva",
     "fleet.ok.cargo": "Pronto: {ships} navi, {cargo} risorse. Premi Avanti e Invia flotta",
     "fleet.ok.ships": "{ships} navi selezionate",
     "fleet.ok.expedition": "Spedizione pronta: {ships} navi per {target} di carico. Premi Avanti e Invia flotta",
@@ -336,9 +332,6 @@
     "fleet.err.noFleetsave": "Nessun fleetsave impostato: aprilo da Riserve e fleetsave",
     "fleet.err.notReady": "La pagina flotta non \xE8 ancora pronta, riprova",
     "fleet.err.page1": "Torna alla prima pagina della flotta per usare questi pulsanti",
-    "fleet.tabPlanet": "Questo pianeta",
-    "fleet.tabMoon": "Questa luna",
-    "fleet.tabGeneral": "Generali",
     "fleet.close": "Chiudi",
     "fleet.favTitle": "Destinazioni preferite",
     "fleet.favTransport": "Trasporto verso",
@@ -350,7 +343,6 @@
     "fleet.jumpgateKeep": "Riserva portale di questa luna",
     "shortcut.prev": "Pianeta precedente",
     "shortcut.next": "Pianeta successivo",
-    "fleet.shortcutsTitle": "Scorciatoie da tastiera",
     "tech.prev": "Livello precedente",
     "tech.next": "Livello successivo",
     "tech.reset": "Torna al prossimo livello",
@@ -377,7 +369,7 @@
     "tech.added": "Aggiunto \u2713",
     "plan.title": "Piano di costruzione",
     "plan.titleCount": "Piano di costruzione ({n})",
-    "plan.sub": "Una riga per cosa da fare, aperta sui pianeti. In rosso quello che manca su quel pianeta.",
+    "plan.sub": "Per pianeta: un tasto porta l\xEC tutto quello che manca. In rosso quello che manca su quel pianeta.",
     "plan.moonOf": "Luna di {name}",
     "plan.clear": "Svuota",
     "plan.colItem": "Cosa",
@@ -535,8 +527,8 @@
     "dash.tab.scrap": "Rottamatore",
     "dash.prodDayK": "Produzione al giorno (MSU)",
     "dash.prodHourNote": "{value} all'ora",
-    "dash.fleetValue": "Flotta (MSU)",
-    "dash.defValue": "Difese (MSU)",
+    "dash.fleetValue": "Flotta (risorse)",
+    "dash.defValue": "Difese (risorse)",
     "dash.unitsNote": "{n} unit\xE0, a costo pieno",
     "dash.research": "Ricerche",
     "dash.average": "Media",
@@ -554,7 +546,7 @@
     "lf.3": "Mecha",
     "lf.4": "Kaelesh",
     "dash.unitsNone": "Nessuna unit\xE0 nei dati salvati.",
-    "dash.valueMsu": "Valore MSU",
+    "dash.valueMsu": "Valore",
     "dash.scrapHint": "Solo calcolo: il Rottamatore del gioco restituisce il 35% del costo, fino al 75% contrattando. La vendita la fai nella pagina del Mercante.",
     "dash.scrapRate": "Resa",
     "dash.scrapAll": "Tutto",
@@ -727,7 +719,7 @@
     "fleet.rule.ships": "Navi",
     "fleet.rule.resources": "Risorse",
     "fleet.rule.gate": "Portale",
-    "fleet.rule.shipsHint": "Navi che restano sul corpo con Su luna, Trasporto, Schiera, Tutte \u2212 riserva, Ultima e Porta qui le risorse. Le spedizioni non la usano.",
+    "fleet.rule.shipsHint": "Navi che restano sul corpo con Su luna, Trasporto, Schiera, Ultima e Porta qui le risorse. Le spedizioni non la usano.",
     "fleet.rule.resourcesHint": "Risorse che restano sul corpo con Su luna, Trasporto, Schiera, Porta qui le risorse e Risorse \u2212 riserva.",
     "fleet.rule.gateHint": "Navi che restano sulla luna quando usi il portale del gioco.",
     "fleet.rule.saveShips": "Navi da lasciare",
@@ -764,10 +756,9 @@
     "settings.section.menu": "Menu pianeti",
     "settings.section.mail": "Posta e spiate",
     "settings.section.data": "Dati",
-    "settings.viewHint": "Affiancato mostra risorse e lune accanto a ogni pianeta; compatto occupa la larghezza del gioco.",
+    "settings.viewHint": "Affiancato mostra nome, risorse e lune accanto a ogni pianeta; compatto sta nella larghezza del gioco con coordinate e risorse.",
     "settings.viewNarrow": "Lo schermo \xE8 troppo stretto per la vista affiancata: resta compatto.",
     "settings.totalsHint": "Il riquadro sotto i pianeti con le risorse di tutto l\u2019account e la produzione al giorno.",
-    "settings.markIdleHint": "Evidenzia i pianeti che non stanno costruendo niente.",
     "settings.sim": "Simulatore",
     "settings.simHint": "Si apre con il pulsante Simula nella tabella spiate e nei rapporti, gi\xE0 compilato con le tue ricerche.",
     "settings.shared": "Spiate condivise dall\u2019alleanza",
@@ -795,7 +786,91 @@
     "spy.onPlanet": "Sul pianeta",
     "spy.from": "da {name} [{coords}]",
     "spy.total": "Totale",
-    "spy.waveHint": "{n}\xAA razzia: apre Flotta da {name} con {count} {ship} e il bersaglio gi\xE0 inseriti"
+    "spy.waveHint": "{n}\xAA razzia: apre Flotta da {name} con {count} {ship} e il bersaglio gi\xE0 inseriti",
+    "shortcut.galaxyLeft": "Sistema precedente",
+    "shortcut.galaxyRight": "Sistema successivo",
+    "shortcut.galaxyDown": "Galassia precedente",
+    "shortcut.galaxyUp": "Galassia successiva",
+    "touch.bar": "Scorciatoie",
+    "touch.send": "Invia",
+    "touch.next": "Avanti",
+    "fleet.cap.expedition": "posizione 16",
+    "fleet.cap.setUp": "da impostare",
+    "fleet.cap.last": "ripete l\u2019ultima",
+    "fleet.cap.cargo": "meno riserva e volo",
+    "fleet.rulesLabel": "Regole",
+    "fleet.editRules": "Regole di {body}",
+    "fleet.general": "Impostazioni",
+    "fleet.generalHint": "Navi da carico, preferiti, spedizione, Ripeti e tasti: nelle Impostazioni di Future",
+    "settings.section.fleet": "Flotta",
+    "settings.section.keys": "Tasti",
+    "settings.mainShipHint": "La nave da carico usata per prima da Trasporto, Schiera e Su luna.",
+    "settings.secondShipHint": "Copre quello che la prima non riesce a portare.",
+    "settings.speedHint": "Velocit\xE0 di Trasporto, Schiera e Su luna.",
+    "settings.favHint": "La destinazione predefinita del tasto. La freccia accanto al tasto manda una sola flotta altrove, senza cambiarla.",
+    "settings.expValueHint": "Vuoto = calcolato; 50% = met\xE0 del calcolato; un numero = carico fisso.",
+    "settings.extrasHint": "Aggiunge una grande nave da battaglia, una sonda e un pathfinder, come OGLight.",
+    "settings.touch": "Barra da toccare",
+    "settings.touchHint": "In basso sullo schermo: le scorciatoie di questa pagina e, in Flotta, il pulsante Avanti / Invia del gioco.",
+    "settings.touchAuto": "Su touch",
+    "settings.touchOn": "Sempre",
+    "settings.touchOff": "Mai",
+    "settings.keys.planet": "Pianeti",
+    "settings.keys.targets": "Bersagli",
+    "settings.keys.fleet": "Flotta",
+    "settings.keys.galaxy": "Galassia (barra da toccare)",
+    "settings.keyPress": "Premi un tasto\u2026",
+    "settings.keyNone": "nessuno",
+    "settings.keyFixed": "Tasto del gioco, non modificabile.",
+    "settings.keyChange": "Clic per cambiarlo.",
+    "settings.keyReset": "Predefinito",
+    "settings.keyResetHint": "Torna a {key}",
+    "settings.keyTaken": "Fatto. {key} era di \u201C{other}\u201D, che ora \xE8 senza tasto.",
+    "settings.keySaved": "Tasto salvato.",
+    "settings.keyGame": "frecce del gioco",
+    "settings.keysDefault": "Tasti predefiniti",
+    "settings.keysHint": "Rimette tutti i tasti come all\u2019inizio.",
+    "settings.keysDefaultDone": "Tasti predefiniti ripristinati.",
+    "settings.keyListen": "Premi il nuovo tasto per \u201C{name}\u201D: una lettera o un numero. Esc annulla, Canc lo toglie.",
+    "settings.keyCleared": "\u201C{name}\u201D \xE8 ora senza tasto.",
+    "settings.keyBad": "Usa una lettera o un numero, senza Ctrl o Alt.",
+    "settings.expShipHint": "Automatica = la migliore che hai su quel pianeta o luna.",
+    "fleet.actionsLabel": "Prepara una flotta",
+    "fleet.editRulesHint": "Navi e risorse da lasciare qui, portale e fleetsave.",
+    "bar.prod": "Produzione",
+    "bar.msuDay": "MSU/g",
+    "bar.missing": "mancano",
+    "totals.stock": "In cassa",
+    "totals.day": "Al giorno",
+    "dock.journal": "Diario",
+    "dock.count": "sped.",
+    "dock.today": "Oggi",
+    "dock.week": "7 giorni",
+    "dock.journalHint": "{n} spedizioni lette dalla posta; guadagno netto in MSU. Clic: apre il diario.",
+    "dock.targetsEmpty": "Nessun bersaglio: segna giocatori e pianeti dalla galassia.",
+    "dock.planetsHint": "Pianeti colorati: apre la lista nella barra dei bersagli",
+    "dash.scrapPick": "Clic: tutte, di nuovo clic: nessuna",
+    "plan.byBody": "Per pianeta",
+    "plan.byTech": "Per tecnologia",
+    "plan.bringAll": "Porta tutto",
+    "plan.bringSome": "Porta {n} scelti",
+    "plan.pickedOf": "{n} di {of} scelti",
+    "plan.pickHint": "Clic: scegli questa riga, il tasto in alto porta solo le righe scelte",
+    "plan.removeBody": "Togli tutto il piano di questo corpo",
+    "planetMenu.fleet": "Flotta",
+    "planetMenu.fleetHint": "Valore delle navi su questo corpo (costo in risorse, 1:1:1), all\u2019ultimo aggiornamento dei suoi dati",
+    "settings.fleetPill": "Valore della flotta",
+    "settings.fleetPillHint": "Una pillola sotto le risorse con il valore delle navi ferme su quel pianeta o luna (costo in risorse, 1:1:1).",
+    "totals.sum": "Totale",
+    "settings.totalView": "Totale nel riepilogo",
+    "settings.totalViewHint": "La riga di somma sotto i pianeti: in MSU (metallo:cristallo:deuterio 3:2:1) oppure le tre risorse sommate alla pari.",
+    "planetMenu.building": "Costruzione in corso",
+    "fleet.jumpgateStay": "restano",
+    "fleet.jumpgateEdit": "Riserva del portale: scegli quante navi restano su questa luna",
+    "fleet.pickOnce": "Altra destinazione, solo per questa flotta",
+    "fleet.pickOnceHint": "Il tasto va alla destinazione predefinita, che si sceglie nelle Impostazioni.",
+    "fleet.err.noDefault": "Nessuna destinazione predefinita: sceglila nelle Impostazioni (ingranaggio) o usa la freccia per questa flotta.",
+    "fleet.invert": "Inverti la selezione di questa nave"
   };
 
   // src/i18n/en.json
@@ -811,7 +886,6 @@
     "res.metal": "Metal",
     "res.crystal": "Crystal",
     "res.deuterium": "Deuterium",
-    "planetMenu.idle": "Nothing under construction",
     "planetMenu.side": "Side by side",
     "planetMenu.toSide": "Side-by-side view (with resources)",
     "planetMenu.toCompact": "Compact view",
@@ -860,7 +934,6 @@
     "alert.soonFull": "{count} planets full within 6 hours",
     "alert.idle": "{count} planets with nothing under construction",
     "alert.stale": "Data older than an hour on {count} bodies",
-    "settings.markIdle": "Mark planets with nothing under construction",
     "queue.building": "Building",
     "queue.research": "Research",
     "queue.ship": "Shipyard",
@@ -878,8 +951,8 @@
     "mine.deuterium": "Deuterium synthesizer",
     "fleet.noShips": "No ships on this planet.",
     "fleet.fleetsave": "Fleetsave",
-    "fleet.galaxy": "Galaxy (empty = this one)",
-    "fleet.system": "System (empty = this one)",
+    "fleet.galaxy": "Galaxy",
+    "fleet.system": "System",
     "fleet.position": "Position",
     "fleet.type": "Type",
     "fleet.typePlanet": "Planet",
@@ -904,7 +977,7 @@
     "mission.15": "Expedition",
     "fleet.editTitlePlanet": "Reserves and fleetsave of {body}",
     "fleet.editTitleMoon": "Reserves and fleetsave of moon {body}",
-    "fleet.settingsTitle": "Fleet settings",
+    "fleet.settingsTitle": "Rules of this planet or moon",
     "fleet.transportTitle": "Transports and deployments",
     "fleet.mainShip": "Main ship",
     "fleet.secondShip": "Second ship (if the first is not enough)",
@@ -930,13 +1003,11 @@
     "fleet.btn.deploy": "Deploy",
     "fleet.btn.expedition": "Expedition",
     "fleet.btn.fleetsave": "Fleetsave",
-    "fleet.btn.all": "All \u2212 reserve",
     "fleet.tip.moon": "Transport the resources to this planet's moon with the cargo ships needed",
     "fleet.tip.transport": "Transport the resources (minus the reserve) to the chosen destination",
     "fleet.tip.deploy": "Deploy every ship (minus the reserve) with the resources they carry",
     "fleet.tip.expedition": "Expedition to position 16 of this system with the best ship",
     "fleet.tip.fleetsave": "Prepare this planet or moon's fleetsave",
-    "fleet.tip.all": "Select every ship minus the reserve",
     "fleet.ok.cargo": "Ready: {ships} ships, {cargo} resources. Press Next and Send fleet",
     "fleet.ok.ships": "{ships} ships selected",
     "fleet.ok.expedition": "Expedition ready: {ships} ships for {target} cargo. Press Next and Send fleet",
@@ -948,9 +1019,6 @@
     "fleet.err.noFleetsave": "No fleetsave set: open Reserves and fleetsave",
     "fleet.err.notReady": "The fleet page is not ready yet, try again",
     "fleet.err.page1": "Go back to fleet page 1 to use these buttons",
-    "fleet.tabPlanet": "This planet",
-    "fleet.tabMoon": "This moon",
-    "fleet.tabGeneral": "General",
     "fleet.close": "Close",
     "fleet.favTitle": "Favourite destinations",
     "fleet.favTransport": "Transport to",
@@ -962,7 +1030,6 @@
     "fleet.jumpgateKeep": "Jump gate reserve of this moon",
     "shortcut.prev": "Previous planet",
     "shortcut.next": "Next planet",
-    "fleet.shortcutsTitle": "Keyboard shortcuts",
     "tech.prev": "Previous level",
     "tech.next": "Next level",
     "tech.reset": "Back to the next level",
@@ -989,7 +1056,7 @@
     "tech.added": "Added \u2713",
     "plan.title": "Construction plan",
     "plan.titleCount": "Construction plan ({n})",
-    "plan.sub": "One line per thing to build, opening onto its planets. Red: what that planet lacks.",
+    "plan.sub": "By planet: one button brings there everything it lacks. Red is what that planet lacks.",
     "plan.moonOf": "Moon of {name}",
     "plan.clear": "Clear",
     "plan.colItem": "What",
@@ -1147,8 +1214,8 @@
     "dash.tab.scrap": "Scrap merchant",
     "dash.prodDayK": "Daily production (MSU)",
     "dash.prodHourNote": "{value} per hour",
-    "dash.fleetValue": "Fleet (MSU)",
-    "dash.defValue": "Defence (MSU)",
+    "dash.fleetValue": "Fleet (resources)",
+    "dash.defValue": "Defence (resources)",
     "dash.unitsNote": "{n} units, at full cost",
     "dash.research": "Research",
     "dash.average": "Average",
@@ -1166,7 +1233,7 @@
     "lf.3": "Mechas",
     "lf.4": "Kaelesh",
     "dash.unitsNone": "No units in the stored data.",
-    "dash.valueMsu": "Value MSU",
+    "dash.valueMsu": "Value",
     "dash.scrapHint": "Calculation only: the game's scrap merchant gives back 35% of the cost, up to 75% by bargaining. You sell on the Merchant page.",
     "dash.scrapRate": "Rate",
     "dash.scrapAll": "All",
@@ -1339,7 +1406,7 @@
     "fleet.rule.ships": "Ships",
     "fleet.rule.resources": "Resources",
     "fleet.rule.gate": "Jump gate",
-    "fleet.rule.shipsHint": "Ships that stay here with To moon, Transport, Deploy, All \u2212 reserve, Last fleet and Bring resources. Expeditions do not use it.",
+    "fleet.rule.shipsHint": "Ships that stay here with To moon, Transport, Deploy, Last fleet and Bring resources. Expeditions do not use it.",
     "fleet.rule.resourcesHint": "Resources that stay here with To moon, Transport, Deploy, Bring resources and Resources \u2212 reserve.",
     "fleet.rule.gateHint": "Ships that stay on the moon when you use the game's jump gate.",
     "fleet.rule.saveShips": "Ships to keep",
@@ -1376,10 +1443,9 @@
     "settings.section.menu": "Planet menu",
     "settings.section.mail": "Inbox and spying",
     "settings.section.data": "Data",
-    "settings.viewHint": "Side by side shows resources and moons next to each planet; compact keeps the game\u2019s width.",
+    "settings.viewHint": "Side by side shows name, resources and moons next to each planet; compact fits the game width with coordinates and resources.",
     "settings.viewNarrow": "The screen is too narrow for side by side: it stays compact.",
     "settings.totalsHint": "The box under the planets with the whole account\u2019s resources and daily production.",
-    "settings.markIdleHint": "Highlights the planets that are not building anything.",
     "settings.sim": "Simulator",
     "settings.simHint": "Opens from the Simulate button in the spy table and in the reports, already filled with your research.",
     "settings.shared": "Spy reports shared by the alliance",
@@ -1407,7 +1473,91 @@
     "spy.onPlanet": "On the planet",
     "spy.from": "from {name} [{coords}]",
     "spy.total": "Total",
-    "spy.waveHint": "Raid {n}: opens Fleet from {name} with {count} {ship} and the target filled in"
+    "spy.waveHint": "Raid {n}: opens Fleet from {name} with {count} {ship} and the target filled in",
+    "shortcut.galaxyLeft": "Previous system",
+    "shortcut.galaxyRight": "Next system",
+    "shortcut.galaxyDown": "Previous galaxy",
+    "shortcut.galaxyUp": "Next galaxy",
+    "touch.bar": "Shortcuts",
+    "touch.send": "Send",
+    "touch.next": "Next",
+    "fleet.cap.expedition": "position 16",
+    "fleet.cap.setUp": "to set up",
+    "fleet.cap.last": "repeats the last",
+    "fleet.cap.cargo": "minus reserve and fuel",
+    "fleet.rulesLabel": "Rules",
+    "fleet.editRules": "Rules of {body}",
+    "fleet.general": "Settings",
+    "fleet.generalHint": "Cargo ships, favourites, expedition, Repeat and keys: in Future\u2019s settings",
+    "settings.section.fleet": "Fleet",
+    "settings.section.keys": "Keys",
+    "settings.mainShipHint": "The cargo ship Transport, Deploy and To moon use first.",
+    "settings.secondShipHint": "Carries what the first one cannot.",
+    "settings.speedHint": "Speed of Transport, Deploy and To moon.",
+    "settings.favHint": "The default destination of the button. The arrow next to it sends one fleet elsewhere without changing it.",
+    "settings.expValueHint": "Empty = calculated; 50% = half of it; a number = fixed cargo.",
+    "settings.extrasHint": "Adds one big battleship, one probe and one pathfinder, like OGLight.",
+    "settings.touch": "Touch bar",
+    "settings.touchHint": "At the bottom of the screen: this page\u2019s shortcuts and, on the Fleet page, the game\u2019s Next / Send button.",
+    "settings.touchAuto": "On touch",
+    "settings.touchOn": "Always",
+    "settings.touchOff": "Never",
+    "settings.keys.planet": "Planets",
+    "settings.keys.targets": "Targets",
+    "settings.keys.fleet": "Fleet",
+    "settings.keys.galaxy": "Galaxy (touch bar)",
+    "settings.keyPress": "Press a key\u2026",
+    "settings.keyNone": "none",
+    "settings.keyFixed": "The game\u2019s key, cannot change.",
+    "settings.keyChange": "Click to change it.",
+    "settings.keyReset": "Default",
+    "settings.keyResetHint": "Back to {key}",
+    "settings.keyTaken": "Done. {key} was on \u201C{other}\u201D, which now has no key.",
+    "settings.keySaved": "Key saved.",
+    "settings.keyGame": "the game\u2019s arrows",
+    "settings.keysDefault": "Default keys",
+    "settings.keysHint": "Puts every key back as it was.",
+    "settings.keysDefaultDone": "Default keys restored.",
+    "settings.keyListen": "Press the new key for \u201C{name}\u201D: a letter or a digit. Esc cancels, Delete removes it.",
+    "settings.keyCleared": "\u201C{name}\u201D now has no key.",
+    "settings.keyBad": "Use a letter or a digit, without Ctrl or Alt.",
+    "settings.expShipHint": "Automatic = the best one you have on that planet or moon.",
+    "fleet.actionsLabel": "Prepare a fleet",
+    "fleet.editRulesHint": "Ships and resources to keep here, jump gate and fleetsave.",
+    "bar.prod": "Production",
+    "bar.msuDay": "MSU/d",
+    "bar.missing": "missing",
+    "totals.stock": "In stock",
+    "totals.day": "Per day",
+    "dock.journal": "Journal",
+    "dock.count": "exp.",
+    "dock.today": "Today",
+    "dock.week": "7 days",
+    "dock.journalHint": "{n} expeditions read from the inbox; net gain in MSU. Click: opens the journal.",
+    "dock.targetsEmpty": "No targets yet: mark players and planets in the galaxy.",
+    "dock.planetsHint": "Coloured planets: opens their list in the targets bar",
+    "dash.scrapPick": "Click: all of them, click again: none",
+    "plan.byBody": "By planet",
+    "plan.byTech": "By technology",
+    "plan.bringAll": "Bring all",
+    "plan.bringSome": "Bring {n} picked",
+    "plan.pickedOf": "{n} of {of} picked",
+    "plan.pickHint": "Click: pick this row, the button above brings only the picked rows",
+    "plan.removeBody": "Remove this body's whole plan",
+    "planetMenu.fleet": "Fleet",
+    "planetMenu.fleetHint": "Value of the ships on this body (cost in resources, 1:1:1), as of its last data update",
+    "settings.fleetPill": "Fleet value",
+    "settings.fleetPillHint": "A pill under the resources with the value of the ships sitting on that planet or moon (cost in resources, 1:1:1).",
+    "totals.sum": "Total",
+    "settings.totalView": "Sum in the totals",
+    "settings.totalViewHint": "The sum row under the planets: in MSU (metal:crystal:deuterium 3:2:1) or the three resources added as equals.",
+    "planetMenu.building": "Construction in progress",
+    "fleet.jumpgateStay": "stay",
+    "fleet.jumpgateEdit": "Jump gate reserve: set how many ships stay on this moon",
+    "fleet.pickOnce": "Another destination, for this fleet only",
+    "fleet.pickOnceHint": "The button goes to the default destination, which is chosen in the Settings.",
+    "fleet.err.noDefault": "No default destination: choose it in the Settings (gear) or use the arrow for this fleet.",
+    "fleet.invert": "Invert this ship's selection"
   };
 
   // src/i18n/fr.json
@@ -1423,7 +1573,6 @@
     "res.metal": "M\xE9tal",
     "res.crystal": "Cristal",
     "res.deuterium": "Deut\xE9rium",
-    "planetMenu.idle": "Aucune construction en cours",
     "planetMenu.side": "C\xF4te \xE0 c\xF4te",
     "planetMenu.toSide": "Vue c\xF4te \xE0 c\xF4te (avec ressources)",
     "planetMenu.toCompact": "Vue compacte",
@@ -1472,7 +1621,6 @@
     "alert.soonFull": "{count} plan\xE8tes pleines d'ici 6 heures",
     "alert.idle": "{count} plan\xE8tes sans construction",
     "alert.stale": "Donn\xE9es de plus d'une heure sur {count} corps",
-    "settings.markIdle": "Signaler les plan\xE8tes sans construction",
     "queue.building": "B\xE2timent",
     "queue.research": "Recherche",
     "queue.ship": "Chantier",
@@ -1490,8 +1638,8 @@
     "mine.deuterium": "Synth\xE9tiseur de deut\xE9rium",
     "fleet.noShips": "Aucun vaisseau ici.",
     "fleet.fleetsave": "Fleetsave",
-    "fleet.galaxy": "Galaxie (vide = celle-ci)",
-    "fleet.system": "Syst\xE8me (vide = celui-ci)",
+    "fleet.galaxy": "Galaxie",
+    "fleet.system": "Syst\xE8me",
     "fleet.position": "Position",
     "fleet.type": "Type",
     "fleet.typePlanet": "Plan\xE8te",
@@ -1516,7 +1664,7 @@
     "mission.15": "Exp\xE9dition",
     "fleet.editTitlePlanet": "R\xE9serves et fleetsave de {body}",
     "fleet.editTitleMoon": "R\xE9serves et fleetsave de la lune {body}",
-    "fleet.settingsTitle": "R\xE9glages flotte",
+    "fleet.settingsTitle": "R\xE8gles de cette plan\xE8te ou lune",
     "fleet.transportTitle": "Transports et stationnements",
     "fleet.mainShip": "Vaisseau principal",
     "fleet.secondShip": "Vaisseau secondaire (si le premier ne suffit pas)",
@@ -1542,13 +1690,11 @@
     "fleet.btn.deploy": "Stationner",
     "fleet.btn.expedition": "Exp\xE9dition",
     "fleet.btn.fleetsave": "Fleetsave",
-    "fleet.btn.all": "Tout \u2212 r\xE9serve",
     "fleet.tip.moon": "Transporter les ressources vers la lune de cette plan\xE8te avec les cargos n\xE9cessaires",
     "fleet.tip.transport": "Transporter les ressources (moins la r\xE9serve) vers la destination choisie",
     "fleet.tip.deploy": "Stationner tous les vaisseaux (moins la r\xE9serve) avec les ressources qu'ils portent",
     "fleet.tip.expedition": "Exp\xE9dition en position 16 de ce syst\xE8me avec le meilleur vaisseau",
     "fleet.tip.fleetsave": "Pr\xE9parer le fleetsave de cette plan\xE8te ou lune",
-    "fleet.tip.all": "S\xE9lectionner tous les vaisseaux moins la r\xE9serve",
     "fleet.ok.cargo": "Pr\xEAt : {ships} vaisseaux, {cargo} ressources. Appuyez sur Suivant puis Envoyer",
     "fleet.ok.ships": "{ships} vaisseaux s\xE9lectionn\xE9s",
     "fleet.ok.expedition": "Exp\xE9dition pr\xEAte : {ships} vaisseaux pour {target} de fret. Suivant puis Envoyer",
@@ -1560,9 +1706,6 @@
     "fleet.err.noFleetsave": "Aucun fleetsave d\xE9fini : ouvrez R\xE9serves et fleetsave",
     "fleet.err.notReady": "La page flotte n'est pas encore pr\xEAte, r\xE9essayez",
     "fleet.err.page1": "Revenez \xE0 la page 1 de la flotte pour ces boutons",
-    "fleet.tabPlanet": "Cette plan\xE8te",
-    "fleet.tabMoon": "Cette lune",
-    "fleet.tabGeneral": "G\xE9n\xE9ral",
     "fleet.close": "Fermer",
     "fleet.favTitle": "Destinations favorites",
     "fleet.favTransport": "Transport vers",
@@ -1574,7 +1717,6 @@
     "fleet.jumpgateKeep": "R\xE9serve porte de saut de cette lune",
     "shortcut.prev": "Plan\xE8te pr\xE9c\xE9dente",
     "shortcut.next": "Plan\xE8te suivante",
-    "fleet.shortcutsTitle": "Raccourcis clavier",
     "tech.prev": "Niveau pr\xE9c\xE9dent",
     "tech.next": "Niveau suivant",
     "tech.reset": "Revenir au prochain niveau",
@@ -1601,7 +1743,7 @@
     "tech.added": "Ajout\xE9 \u2713",
     "plan.title": "Plan de construction",
     "plan.titleCount": "Plan de construction ({n})",
-    "plan.sub": "Une ligne par chose \xE0 construire, ouverte sur ses plan\xE8tes. En rouge : ce qui manque sur cette plan\xE8te.",
+    "plan.sub": "Par plan\xE8te : un bouton y apporte tout ce qui manque. En rouge ce qui manque sur cette plan\xE8te.",
     "plan.moonOf": "Lune de {name}",
     "plan.clear": "Vider",
     "plan.colItem": "Quoi",
@@ -1759,8 +1901,8 @@
     "dash.tab.scrap": "Ferrailleur",
     "dash.prodDayK": "Production par jour (MSU)",
     "dash.prodHourNote": "{value} par heure",
-    "dash.fleetValue": "Flotte (MSU)",
-    "dash.defValue": "D\xE9fense (MSU)",
+    "dash.fleetValue": "Flotte (ressources)",
+    "dash.defValue": "D\xE9fense (ressources)",
     "dash.unitsNote": "{n} unit\xE9s, au co\xFBt plein",
     "dash.research": "Recherches",
     "dash.average": "Moyenne",
@@ -1778,7 +1920,7 @@
     "lf.3": "M\xE9cas",
     "lf.4": "Kaelesh",
     "dash.unitsNone": "Aucune unit\xE9 dans les donn\xE9es.",
-    "dash.valueMsu": "Valeur MSU",
+    "dash.valueMsu": "Valeur",
     "dash.scrapHint": "Calcul uniquement : le ferrailleur rend 35 % du co\xFBt, jusqu'\xE0 75 % en n\xE9gociant. La vente se fait sur la page du Marchand.",
     "dash.scrapRate": "Taux",
     "dash.scrapAll": "Tout",
@@ -1951,7 +2093,7 @@
     "fleet.rule.ships": "Vaisseaux",
     "fleet.rule.resources": "Ressources",
     "fleet.rule.gate": "Porte de saut",
-    "fleet.rule.shipsHint": "Vaisseaux qui restent ici avec Vers lune, Transport, Stationner, Tout \u2212 r\xE9serve, Derni\xE8re flotte et Apporter les ressources. Les exp\xE9ditions ne l'utilisent pas.",
+    "fleet.rule.shipsHint": "Vaisseaux qui restent ici avec Vers lune, Transport, Stationner, Derni\xE8re flotte et Apporter les ressources. Les exp\xE9ditions ne l'utilisent pas.",
     "fleet.rule.resourcesHint": "Ressources qui restent ici avec Vers lune, Transport, Stationner, Apporter les ressources et Ressources \u2212 r\xE9serve.",
     "fleet.rule.gateHint": "Vaisseaux qui restent sur la lune quand tu utilises la porte de saut du jeu.",
     "fleet.rule.saveShips": "Vaisseaux \xE0 garder",
@@ -1988,10 +2130,9 @@
     "settings.section.menu": "Menu des plan\xE8tes",
     "settings.section.mail": "Messagerie et espionnage",
     "settings.section.data": "Donn\xE9es",
-    "settings.viewHint": "C\xF4te \xE0 c\xF4te affiche ressources et lunes \xE0 c\xF4t\xE9 de chaque plan\xE8te ; compact garde la largeur du jeu.",
+    "settings.viewHint": "C\xF4te \xE0 c\xF4te montre nom, ressources et lunes pr\xE8s de chaque plan\xE8te ; compact tient dans la largeur du jeu avec coordonn\xE9es et ressources.",
     "settings.viewNarrow": "L\u2019\xE9cran est trop \xE9troit pour c\xF4te \xE0 c\xF4te : il reste compact.",
     "settings.totalsHint": "Le cadre sous les plan\xE8tes avec les ressources de tout le compte et la production par jour.",
-    "settings.markIdleHint": "Met en \xE9vidence les plan\xE8tes qui ne construisent rien.",
     "settings.sim": "Simulateur",
     "settings.simHint": "S\u2019ouvre avec le bouton Simuler du tableau d\u2019espionnage et des rapports, d\xE9j\xE0 rempli avec vos recherches.",
     "settings.shared": "Rapports partag\xE9s par l\u2019alliance",
@@ -2019,7 +2160,91 @@
     "spy.onPlanet": "Sur la plan\xE8te",
     "spy.from": "depuis {name} [{coords}]",
     "spy.total": "Total",
-    "spy.waveHint": "Pillage {n} : ouvre Flotte depuis {name} avec {count} {ship} et la cible remplie"
+    "spy.waveHint": "Pillage {n} : ouvre Flotte depuis {name} avec {count} {ship} et la cible remplie",
+    "shortcut.galaxyLeft": "Syst\xE8me pr\xE9c\xE9dent",
+    "shortcut.galaxyRight": "Syst\xE8me suivant",
+    "shortcut.galaxyDown": "Galaxie pr\xE9c\xE9dente",
+    "shortcut.galaxyUp": "Galaxie suivante",
+    "touch.bar": "Raccourcis",
+    "touch.send": "Envoyer",
+    "touch.next": "Suivant",
+    "fleet.cap.expedition": "position 16",
+    "fleet.cap.setUp": "\xE0 configurer",
+    "fleet.cap.last": "r\xE9p\xE8te la derni\xE8re",
+    "fleet.cap.cargo": "moins r\xE9serve et carburant",
+    "fleet.rulesLabel": "R\xE8gles",
+    "fleet.editRules": "R\xE8gles de {body}",
+    "fleet.general": "Param\xE8tres",
+    "fleet.generalHint": "Transporteurs, favoris, exp\xE9dition, R\xE9p\xE9ter et touches : dans les param\xE8tres de Future",
+    "settings.section.fleet": "Flotte",
+    "settings.section.keys": "Touches",
+    "settings.mainShipHint": "Le transporteur utilis\xE9 d\u2019abord par Transport, Stationner et Vers la lune.",
+    "settings.secondShipHint": "Porte ce que le premier ne peut pas.",
+    "settings.speedHint": "Vitesse de Transport, Stationner et Vers la lune.",
+    "settings.favHint": "La destination par d\xE9faut du bouton. La fl\xE8che \xE0 c\xF4t\xE9 envoie une seule flotte ailleurs sans la changer.",
+    "settings.expValueHint": "Vide = calcul\xE9 ; 50% = la moiti\xE9 ; un nombre = chargement fixe.",
+    "settings.extrasHint": "Ajoute un grand vaisseau de combat, une sonde et un \xE9claireur, comme OGLight.",
+    "settings.touch": "Barre tactile",
+    "settings.touchHint": "En bas de l\u2019\xE9cran : les raccourcis de cette page et, sur Flotte, le bouton Suivant / Envoyer du jeu.",
+    "settings.touchAuto": "Sur tactile",
+    "settings.touchOn": "Toujours",
+    "settings.touchOff": "Jamais",
+    "settings.keys.planet": "Plan\xE8tes",
+    "settings.keys.targets": "Cibles",
+    "settings.keys.fleet": "Flotte",
+    "settings.keys.galaxy": "Galaxie (barre tactile)",
+    "settings.keyPress": "Appuyez sur une touche\u2026",
+    "settings.keyNone": "aucune",
+    "settings.keyFixed": "Touche du jeu, non modifiable.",
+    "settings.keyChange": "Cliquez pour la changer.",
+    "settings.keyReset": "D\xE9faut",
+    "settings.keyResetHint": "Revenir \xE0 {key}",
+    "settings.keyTaken": "Fait. {key} \xE9tait sur \xAB {other} \xBB, qui n\u2019a plus de touche.",
+    "settings.keySaved": "Touche enregistr\xE9e.",
+    "settings.keyGame": "fl\xE8ches du jeu",
+    "settings.keysDefault": "Touches par d\xE9faut",
+    "settings.keysHint": "Remet toutes les touches comme au d\xE9but.",
+    "settings.keysDefaultDone": "Touches par d\xE9faut r\xE9tablies.",
+    "settings.keyListen": "Appuyez sur la nouvelle touche pour \xAB {name} \xBB : une lettre ou un chiffre. \xC9chap annule, Suppr l\u2019enl\xE8ve.",
+    "settings.keyCleared": "\xAB {name} \xBB n\u2019a plus de touche.",
+    "settings.keyBad": "Utilisez une lettre ou un chiffre, sans Ctrl ni Alt.",
+    "settings.expShipHint": "Automatique = le meilleur que vous avez sur cette plan\xE8te ou lune.",
+    "fleet.actionsLabel": "Pr\xE9parer une flotte",
+    "fleet.editRulesHint": "Vaisseaux et ressources \xE0 garder ici, porte de saut et fleetsave.",
+    "bar.prod": "Production",
+    "bar.msuDay": "MSU/j",
+    "bar.missing": "manque",
+    "totals.stock": "En stock",
+    "totals.day": "Par jour",
+    "dock.journal": "Journal",
+    "dock.count": "exp.",
+    "dock.today": "Aujourd'hui",
+    "dock.week": "7 jours",
+    "dock.journalHint": "{n} exp\xE9ditions lues dans la messagerie ; gain net en MSU. Clic : ouvre le journal.",
+    "dock.targetsEmpty": "Aucune cible : marquez joueurs et plan\xE8tes dans la galaxie.",
+    "dock.planetsHint": "Plan\xE8tes color\xE9es : ouvre leur liste dans la barre des cibles",
+    "dash.scrapPick": "Clic : tous, nouveau clic : aucun",
+    "plan.byBody": "Par plan\xE8te",
+    "plan.byTech": "Par technologie",
+    "plan.bringAll": "Tout apporter",
+    "plan.bringSome": "Apporter {n} choisis",
+    "plan.pickedOf": "{n} sur {of} choisis",
+    "plan.pickHint": "Clic : choisit cette ligne, le bouton en haut n'apporte que les lignes choisies",
+    "plan.removeBody": "Retirer tout le plan de ce corps",
+    "planetMenu.fleet": "Flotte",
+    "planetMenu.fleetHint": "Valeur des vaisseaux sur ce corps (co\xFBt en ressources, 1:1:1), \xE0 la derni\xE8re mise \xE0 jour de ses donn\xE9es",
+    "settings.fleetPill": "Valeur de la flotte",
+    "settings.fleetPillHint": "Une pastille sous les ressources avec la valeur des vaisseaux stationn\xE9s sur cette plan\xE8te ou lune (co\xFBt en ressources, 1:1:1).",
+    "totals.sum": "Total",
+    "settings.totalView": "Somme dans les totaux",
+    "settings.totalViewHint": "La ligne de somme sous les plan\xE8tes : en MSU (m\xE9tal:cristal:deut\xE9rium 3:2:1) ou les trois ressources additionn\xE9es \xE0 parts \xE9gales.",
+    "planetMenu.building": "Construction en cours",
+    "fleet.jumpgateStay": "restent",
+    "fleet.jumpgateEdit": "R\xE9serve de la porte de saut : choisissez combien de vaisseaux restent sur cette lune",
+    "fleet.pickOnce": "Autre destination, pour cette flotte seulement",
+    "fleet.pickOnceHint": "Le bouton va \xE0 la destination par d\xE9faut, choisie dans les Param\xE8tres.",
+    "fleet.err.noDefault": "Pas de destination par d\xE9faut : choisissez-la dans les Param\xE8tres (engrenage) ou utilisez la fl\xE8che pour cette flotte.",
+    "fleet.invert": "Inverser la s\xE9lection de ce vaisseau"
   };
 
   // src/i18n/de.json
@@ -2035,7 +2260,6 @@
     "res.metal": "Metall",
     "res.crystal": "Kristall",
     "res.deuterium": "Deuterium",
-    "planetMenu.idle": "Kein Bau im Gange",
     "planetMenu.side": "Nebeneinander",
     "planetMenu.toSide": "Ansicht nebeneinander (mit Rohstoffen)",
     "planetMenu.toCompact": "Kompakte Ansicht",
@@ -2084,7 +2308,6 @@
     "alert.soonFull": "{count} Planeten in 6 Stunden voll",
     "alert.idle": "{count} Planeten ohne Bau",
     "alert.stale": "Daten \xE4lter als eine Stunde auf {count} K\xF6rpern",
-    "settings.markIdle": "Planeten ohne Bau markieren",
     "queue.building": "Geb\xE4ude",
     "queue.research": "Forschung",
     "queue.ship": "Werft",
@@ -2102,8 +2325,8 @@
     "mine.deuterium": "Deuteriumsynthetisierer",
     "fleet.noShips": "Keine Schiffe hier.",
     "fleet.fleetsave": "Fleetsave",
-    "fleet.galaxy": "Galaxie (leer = diese)",
-    "fleet.system": "System (leer = dieses)",
+    "fleet.galaxy": "Galaxie",
+    "fleet.system": "System",
     "fleet.position": "Position",
     "fleet.type": "Typ",
     "fleet.typePlanet": "Planet",
@@ -2128,7 +2351,7 @@
     "mission.15": "Expedition",
     "fleet.editTitlePlanet": "Reserven und Fleetsave von {body}",
     "fleet.editTitleMoon": "Reserven und Fleetsave des Mondes {body}",
-    "fleet.settingsTitle": "Flotteneinstellungen",
+    "fleet.settingsTitle": "Regeln dieses Planeten oder Mondes",
     "fleet.transportTitle": "Transporte und Stationierungen",
     "fleet.mainShip": "Hauptschiff",
     "fleet.secondShip": "Zweitschiff (wenn das erste nicht reicht)",
@@ -2154,13 +2377,11 @@
     "fleet.btn.deploy": "Stationieren",
     "fleet.btn.expedition": "Expedition",
     "fleet.btn.fleetsave": "Fleetsave",
-    "fleet.btn.all": "Alle \u2212 Reserve",
     "fleet.tip.moon": "Rohstoffe mit den n\xF6tigen Frachtern auf den Mond dieses Planeten bringen",
     "fleet.tip.transport": "Rohstoffe (minus Reserve) zum gew\xE4hlten Ziel transportieren",
     "fleet.tip.deploy": "Alle Schiffe (minus Reserve) mit ihrer Ladung stationieren",
     "fleet.tip.expedition": "Expedition auf Position 16 dieses Systems mit dem besten Schiff",
     "fleet.tip.fleetsave": "Fleetsave dieses Planeten oder Mondes vorbereiten",
-    "fleet.tip.all": "Alle Schiffe minus Reserve ausw\xE4hlen",
     "fleet.ok.cargo": "Bereit: {ships} Schiffe, {cargo} Rohstoffe. Weiter und Flotte senden dr\xFCcken",
     "fleet.ok.ships": "{ships} Schiffe ausgew\xE4hlt",
     "fleet.ok.expedition": "Expedition bereit: {ships} Schiffe f\xFCr {target} Ladung. Weiter und Senden",
@@ -2172,9 +2393,6 @@
     "fleet.err.noFleetsave": "Kein Fleetsave gesetzt: Reserven und Fleetsave \xF6ffnen",
     "fleet.err.notReady": "Flottenseite noch nicht bereit, nochmal versuchen",
     "fleet.err.page1": "F\xFCr diese Kn\xF6pfe zur\xFCck zu Flottenseite 1",
-    "fleet.tabPlanet": "Dieser Planet",
-    "fleet.tabMoon": "Dieser Mond",
-    "fleet.tabGeneral": "Allgemein",
     "fleet.close": "Schlie\xDFen",
     "fleet.favTitle": "Lieblingsziele",
     "fleet.favTransport": "Transport nach",
@@ -2186,7 +2404,6 @@
     "fleet.jumpgateKeep": "Sprungtor-Reserve dieses Mondes",
     "shortcut.prev": "Vorheriger Planet",
     "shortcut.next": "N\xE4chster Planet",
-    "fleet.shortcutsTitle": "Tastenk\xFCrzel",
     "tech.prev": "Vorherige Stufe",
     "tech.next": "N\xE4chste Stufe",
     "tech.reset": "Zur\xFCck zur n\xE4chsten Stufe",
@@ -2213,7 +2430,7 @@
     "tech.added": "Hinzugef\xFCgt \u2713",
     "plan.title": "Bauplan",
     "plan.titleCount": "Bauplan ({n})",
-    "plan.sub": "Eine Zeile pro Bauvorhaben, aufklappbar auf die Planeten. Rot: was auf diesem Planeten fehlt.",
+    "plan.sub": "Nach Planet: ein Knopf bringt alles Fehlende dorthin. Rot ist, was auf dem Planeten fehlt.",
     "plan.moonOf": "Mond von {name}",
     "plan.clear": "Leeren",
     "plan.colItem": "Was",
@@ -2371,8 +2588,8 @@
     "dash.tab.scrap": "Schrotth\xE4ndler",
     "dash.prodDayK": "Produktion pro Tag (MSU)",
     "dash.prodHourNote": "{value} pro Stunde",
-    "dash.fleetValue": "Flotte (MSU)",
-    "dash.defValue": "Verteidigung (MSU)",
+    "dash.fleetValue": "Flotte (Rohstoffe)",
+    "dash.defValue": "Verteidigung (Rohstoffe)",
     "dash.unitsNote": "{n} Einheiten, voller Preis",
     "dash.research": "Forschung",
     "dash.average": "Durchschnitt",
@@ -2390,7 +2607,7 @@
     "lf.3": "Mechas",
     "lf.4": "Kaelesh",
     "dash.unitsNone": "Keine Einheiten in den gespeicherten Daten.",
-    "dash.valueMsu": "Wert MSU",
+    "dash.valueMsu": "Wert",
     "dash.scrapHint": "Nur Berechnung: der Schrotth\xE4ndler gibt 35 % der Kosten zur\xFCck, mit Verhandeln bis 75 %. Verkauft wird auf der H\xE4ndlerseite.",
     "dash.scrapRate": "Quote",
     "dash.scrapAll": "Alle",
@@ -2563,7 +2780,7 @@
     "fleet.rule.ships": "Schiffe",
     "fleet.rule.resources": "Rohstoffe",
     "fleet.rule.gate": "Sprungtor",
-    "fleet.rule.shipsHint": "Schiffe, die hier bleiben bei Zum Mond, Transport, Stationieren, Alle \u2212 Reserve, Letzte Flotte und Rohstoffe bringen. Expeditionen nutzen sie nicht.",
+    "fleet.rule.shipsHint": "Schiffe, die hier bleiben bei Zum Mond, Transport, Stationieren, Letzte Flotte und Rohstoffe bringen. Expeditionen nutzen sie nicht.",
     "fleet.rule.resourcesHint": "Rohstoffe, die hier bleiben bei Zum Mond, Transport, Stationieren, Rohstoffe bringen und Rohstoffe \u2212 Reserve.",
     "fleet.rule.gateHint": "Schiffe, die auf dem Mond bleiben, wenn du das Sprungtor des Spiels nutzt.",
     "fleet.rule.saveShips": "Schiffe behalten",
@@ -2600,10 +2817,9 @@
     "settings.section.menu": "Planetenmen\xFC",
     "settings.section.mail": "Posteingang und Spionage",
     "settings.section.data": "Daten",
-    "settings.viewHint": "Nebeneinander zeigt Rohstoffe und Monde neben jedem Planeten; kompakt beh\xE4lt die Breite des Spiels.",
+    "settings.viewHint": "Nebeneinander zeigt Name, Rohstoffe und Monde neben jedem Planeten; kompakt passt in die Spielbreite mit Koordinaten und Rohstoffen.",
     "settings.viewNarrow": "Der Bildschirm ist zu schmal f\xFCr nebeneinander: bleibt kompakt.",
     "settings.totalsHint": "Der Kasten unter den Planeten mit den Rohstoffen des ganzen Kontos und der Tagesproduktion.",
-    "settings.markIdleHint": "Hebt die Planeten hervor, die nichts bauen.",
     "settings.sim": "Simulator",
     "settings.simHint": "\xD6ffnet sich mit Simulieren in der Spionagetabelle und in den Berichten, schon mit deinen Forschungen ausgef\xFCllt.",
     "settings.shared": "Von der Allianz geteilte Berichte",
@@ -2631,7 +2847,91 @@
     "spy.onPlanet": "Auf dem Planeten",
     "spy.from": "von {name} [{coords}]",
     "spy.total": "Summe",
-    "spy.waveHint": "Raid {n}: \xF6ffnet Flotte von {name} mit {count} {ship} und dem Ziel eingetragen"
+    "spy.waveHint": "Raid {n}: \xF6ffnet Flotte von {name} mit {count} {ship} und dem Ziel eingetragen",
+    "shortcut.galaxyLeft": "Vorheriges System",
+    "shortcut.galaxyRight": "N\xE4chstes System",
+    "shortcut.galaxyDown": "Vorherige Galaxie",
+    "shortcut.galaxyUp": "N\xE4chste Galaxie",
+    "touch.bar": "Kurzbefehle",
+    "touch.send": "Senden",
+    "touch.next": "Weiter",
+    "fleet.cap.expedition": "Position 16",
+    "fleet.cap.setUp": "einrichten",
+    "fleet.cap.last": "wiederholt die letzte",
+    "fleet.cap.cargo": "minus Reserve und Treibstoff",
+    "fleet.rulesLabel": "Regeln",
+    "fleet.editRules": "Regeln von {body}",
+    "fleet.general": "Einstellungen",
+    "fleet.generalHint": "Transporter, Favoriten, Expedition, Wiederholen und Tasten: in den Einstellungen von Future",
+    "settings.section.fleet": "Flotte",
+    "settings.section.keys": "Tasten",
+    "settings.mainShipHint": "Der Transporter, den Transport, Stationieren und Zum Mond zuerst nutzen.",
+    "settings.secondShipHint": "Tr\xE4gt, was der erste nicht schafft.",
+    "settings.speedHint": "Geschwindigkeit von Transport, Stationieren und Zum Mond.",
+    "settings.favHint": "Das Standardziel des Knopfes. Der Pfeil daneben schickt eine einzelne Flotte woandershin, ohne es zu \xE4ndern.",
+    "settings.expValueHint": "Leer = berechnet; 50% = die H\xE4lfte; eine Zahl = feste Ladung.",
+    "settings.extrasHint": "F\xFCgt ein gro\xDFes Kampfschiff, eine Sonde und einen Pathfinder hinzu, wie OGLight.",
+    "settings.touch": "Touch-Leiste",
+    "settings.touchHint": "Unten am Bildschirm: die Kurzbefehle dieser Seite und auf der Flottenseite der Weiter-/Senden-Knopf des Spiels.",
+    "settings.touchAuto": "Bei Touch",
+    "settings.touchOn": "Immer",
+    "settings.touchOff": "Nie",
+    "settings.keys.planet": "Planeten",
+    "settings.keys.targets": "Ziele",
+    "settings.keys.fleet": "Flotte",
+    "settings.keys.galaxy": "Galaxie (Touch-Leiste)",
+    "settings.keyPress": "Taste dr\xFCcken\u2026",
+    "settings.keyNone": "keine",
+    "settings.keyFixed": "Taste des Spiels, nicht \xE4nderbar.",
+    "settings.keyChange": "Klicken zum \xC4ndern.",
+    "settings.keyReset": "Standard",
+    "settings.keyResetHint": "Zur\xFCck zu {key}",
+    "settings.keyTaken": "Erledigt. {key} lag auf \u201E{other}\u201C, das jetzt keine Taste hat.",
+    "settings.keySaved": "Taste gespeichert.",
+    "settings.keyGame": "Pfeile des Spiels",
+    "settings.keysDefault": "Standardtasten",
+    "settings.keysHint": "Setzt alle Tasten zur\xFCck.",
+    "settings.keysDefaultDone": "Standardtasten wiederhergestellt.",
+    "settings.keyListen": "Neue Taste f\xFCr \u201E{name}\u201C dr\xFCcken: ein Buchstabe oder eine Ziffer. Esc bricht ab, Entf entfernt sie.",
+    "settings.keyCleared": "\u201E{name}\u201C hat jetzt keine Taste.",
+    "settings.keyBad": "Einen Buchstaben oder eine Ziffer, ohne Strg oder Alt.",
+    "settings.expShipHint": "Automatisch = das beste, das du auf dem Planeten oder Mond hast.",
+    "fleet.actionsLabel": "Flotte vorbereiten",
+    "fleet.editRulesHint": "Schiffe und Rohstoffe, die hier bleiben, Sprungtor und Fleetsave.",
+    "bar.prod": "Produktion",
+    "bar.msuDay": "MSU/T",
+    "bar.missing": "fehlen",
+    "totals.stock": "Auf Lager",
+    "totals.day": "Pro Tag",
+    "dock.journal": "Tagebuch",
+    "dock.count": "Exp.",
+    "dock.today": "Heute",
+    "dock.week": "7 Tage",
+    "dock.journalHint": "{n} Expeditionen aus dem Postfach; Nettogewinn in MSU. Klick: \xF6ffnet das Tagebuch.",
+    "dock.targetsEmpty": "Noch keine Ziele: markiere Spieler und Planeten in der Galaxie.",
+    "dock.planetsHint": "Farbige Planeten: \xF6ffnet ihre Liste in der Zielleiste",
+    "dash.scrapPick": "Klick: alle, erneut klicken: keine",
+    "plan.byBody": "Nach Planet",
+    "plan.byTech": "Nach Technologie",
+    "plan.bringAll": "Alles bringen",
+    "plan.bringSome": "{n} gew\xE4hlte bringen",
+    "plan.pickedOf": "{n} von {of} gew\xE4hlt",
+    "plan.pickHint": "Klick: w\xE4hlt diese Zeile, der Knopf oben bringt nur die gew\xE4hlten Zeilen",
+    "plan.removeBody": "Ganzen Plan dieses K\xF6rpers entfernen",
+    "planetMenu.fleet": "Flotte",
+    "planetMenu.fleetHint": "Wert der Schiffe auf diesem K\xF6rper (Kosten in Rohstoffen, 1:1:1), Stand der letzten Datenaktualisierung",
+    "settings.fleetPill": "Flottenwert",
+    "settings.fleetPillHint": "Eine Pille unter den Rohstoffen mit dem Wert der Schiffe auf diesem Planeten oder Mond (Kosten in Rohstoffen, 1:1:1).",
+    "totals.sum": "Summe",
+    "settings.totalView": "Summe in der \xDCbersicht",
+    "settings.totalViewHint": "Die Summenzeile unter den Planeten: in MSU (Metall:Kristall:Deuterium 3:2:1) oder die drei Rohstoffe gleich gewichtet addiert.",
+    "planetMenu.building": "Bau l\xE4uft",
+    "fleet.jumpgateStay": "bleiben",
+    "fleet.jumpgateEdit": "Sprungtor-Reserve: wie viele Schiffe auf diesem Mond bleiben",
+    "fleet.pickOnce": "Anderes Ziel, nur f\xFCr diese Flotte",
+    "fleet.pickOnceHint": "Der Knopf fliegt zum Standardziel, das in den Einstellungen gew\xE4hlt wird.",
+    "fleet.err.noDefault": "Kein Standardziel: in den Einstellungen (Zahnrad) w\xE4hlen oder den Pfeil f\xFCr diese Flotte nutzen.",
+    "fleet.invert": "Auswahl dieses Schiffs umkehren"
   };
 
   // src/core/i18n.ts
@@ -2731,7 +3031,7 @@
       const planetLink = element.querySelector("a.planetlink");
       const moonLink = element.querySelector("a.moonlink");
       const coords = (element.querySelector(".planet-koords")?.textContent ?? "").replace(/[[\]\s]/g, "");
-      const current2 = element.classList.contains("hightlightMoon") ? "moon" : element.classList.contains("hightlightPlanet") ? "planet" : null;
+      const current3 = element.classList.contains("hightlightMoon") ? "moon" : element.classList.contains("hightlightPlanet") ? "planet" : null;
       return {
         element,
         planetLink,
@@ -2740,7 +3040,7 @@
         moonId: idFromLink(moonLink),
         name: element.querySelector(".planet-name")?.textContent?.trim() ?? "",
         coords,
-        current: current2,
+        current: current3,
         construction: {
           planet: element.querySelector("a.constructionIcon:not(.moon)"),
           moon: element.querySelector("a.constructionIcon.moon")
@@ -2750,8 +3050,8 @@
   }
   function readCurrentResources(doc) {
     const raw = (id) => {
-      const el5 = doc.getElementById(id);
-      const value = el5?.getAttribute("data-raw") ?? el5?.textContent?.replace(/\D/g, "");
+      const el6 = doc.getElementById(id);
+      const value = el6?.getAttribute("data-raw") ?? el6?.textContent?.replace(/\D/g, "");
       const n = Number(value);
       return value != null && value !== "" && Number.isFinite(n) ? n : null;
     };
@@ -2842,9 +3142,9 @@
     const typed = () => /\)\s*$/.test(field.textContent ?? "");
     const seen = typed() ? readScore(doc, now()) : null;
     if (seen) return onScore(seen);
-    const view = doc.defaultView;
-    if (!view) return;
-    const observer = new view.MutationObserver(() => {
+    const view2 = doc.defaultView;
+    if (!view2) return;
+    const observer = new view2.MutationObserver(() => {
       const score = typed() ? readScore(doc, now()) : null;
       if (!score) return;
       observer.disconnect();
@@ -3082,9 +3382,9 @@
     pop.append(...items);
     doc.body.append(pop);
     const box = anchor.getBoundingClientRect();
-    const view = doc.defaultView;
-    pop.style.left = `${Math.max(6, Math.min(box.left - 4, (view?.innerWidth ?? 1200) - pop.offsetWidth - 6))}px`;
-    pop.style.top = `${box.bottom + 4 + pop.offsetHeight > (view?.innerHeight ?? 800) ? box.top - 4 - pop.offsetHeight : box.bottom + 4}px`;
+    const view2 = doc.defaultView;
+    pop.style.left = `${Math.max(6, Math.min(box.left - 4, (view2?.innerWidth ?? 1200) - pop.offsetWidth - 6))}px`;
+    pop.style.top = `${box.bottom + 4 + pop.offsetHeight > (view2?.innerHeight ?? 800) ? box.top - 4 - pop.offsetHeight : box.bottom + 4}px`;
     items.find((b) => b.getAttribute("aria-pressed") === "true")?.focus() ?? items[0]?.focus();
     const away = (e) => {
       if (e instanceof KeyboardEvent ? e.key === "Escape" : !pop.contains(e.target)) {
@@ -3135,13 +3435,13 @@
       e.preventDefault();
       e.stopPropagation();
       const m = readMarks(store);
-      const current2 = m.players[String(id)]?.flag;
-      if (e.shiftKey) return set(current2 === m.lastFlag ? null : m.lastFlag);
+      const current3 = m.players[String(id)]?.flag;
+      if (e.shiftKey) return set(current3 === m.lastFlag ? null : m.lastFlag);
       const items = [...FLAGS, null].map((flag) => {
         const it = doc.createElement("button");
         it.type = "button";
         it.setAttribute("role", "menuitemradio");
-        it.setAttribute("aria-pressed", String((current2 ?? null) === flag));
+        it.setAttribute("aria-pressed", String((current3 ?? null) === flag));
         it.title = flag ? t(`mark.flag.${flag}`) : t("mark.none");
         it.setAttribute("aria-label", it.title);
         it.append(icon(doc, flag ? FLAG_ICONS[flag] : "close", 13));
@@ -3174,13 +3474,13 @@
       e.preventDefault();
       e.stopPropagation();
       const m = readMarks(store);
-      const current2 = m.planets[coords]?.tag;
-      if (e.shiftKey) return set(current2 === m.lastTag ? null : m.lastTag);
+      const current3 = m.planets[coords]?.tag;
+      if (e.shiftKey) return set(current3 === m.lastTag ? null : m.lastTag);
       const items = [...TAGS, null].map((tag) => {
         const it = doc.createElement("button");
         it.type = "button";
         it.setAttribute("role", "menuitemradio");
-        it.setAttribute("aria-pressed", String((current2 ?? null) === tag));
+        it.setAttribute("aria-pressed", String((current3 ?? null) === tag));
         it.title = tag ? t(`mark.tag.${tag}`) : t("mark.none");
         it.setAttribute("aria-label", it.title);
         if (tag) {
@@ -3332,6 +3632,8 @@
 
   // src/modules/galaxy/style.ts
   var GALAXY_CSS = `
+.fut-g-name { cursor: pointer; }
+.fut-g-name:hover { text-decoration: underline; text-decoration-color: #4FD1E8; text-underline-offset: 2px; }
 .fut-g-bar {
   display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin: 4px 0 6px; padding: 6px 10px;
   border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A;
@@ -3453,9 +3755,9 @@
       const q = new URL(doc.location.href).searchParams;
       return q.get("galaxy") && q.get("system") && q.get("position") ? `${q.get("galaxy")}:${q.get("system")}:${q.get("position")}` : "";
     })();
-    let queued = false;
+    let queued2 = false;
     const run = () => {
-      queued = false;
+      queued2 = false;
       const content = doc.getElementById("galaxyContent");
       if (!content) return;
       remember(o);
@@ -3464,8 +3766,8 @@
     };
     new doc.defaultView.MutationObserver((records) => {
       const theirs = records.some((r) => ![...r.addedNodes, ...r.removedNodes].every(isOurs));
-      if (!theirs || queued) return;
-      queued = true;
+      if (!theirs || queued2) return;
+      queued2 = true;
       setTimeout(run, 30);
     }).observe(component, { childList: true, subtree: true });
     run();
@@ -3504,6 +3806,13 @@
         nameCell.append(tagButton(picker, coords, { planet: r.planetName, player: r.playerName, playerId: r.playerId, statuses: r.statuses, moon: !!r.moonId }));
       else if (nameCell && (own || !r.planetId)) nameCell.querySelector(".fut-mk-tag")?.remove();
       const playerCell = r.row.querySelector(".cellPlayerName");
+      const nameEl = playerCell?.querySelector(".playerName");
+      if (nameEl && r.playerId && !own && o.onPlayer && !nameEl.dataset.futPlayer) {
+        nameEl.dataset.futPlayer = String(r.playerId);
+        nameEl.classList.add("fut-g-name");
+        const id = r.playerId;
+        nameEl.addEventListener("click", () => o.onPlayer?.(id, r.playerName));
+      }
       if (playerCell && r.playerId && r.rank && !playerCell.querySelector(".fut-g-rank")) {
         const id = r.playerId;
         const badge = el(doc, "button", "fut-g-rank", `#${r.rank.toLocaleString(locale)}`);
@@ -3560,10 +3869,10 @@
     doc.body.append(card);
     const place2 = () => {
       const box = anchor.getBoundingClientRect();
-      const view = doc.defaultView;
+      const view2 = doc.defaultView;
       const h6 = card.offsetHeight;
-      const below = box.bottom + 6 + h6 <= (view?.innerHeight ?? 800);
-      card.style.left = `${Math.max(8, Math.min(box.left, (view?.innerWidth ?? 1200) - card.offsetWidth - 8))}px`;
+      const below = box.bottom + 6 + h6 <= (view2?.innerHeight ?? 800);
+      card.style.left = `${Math.max(8, Math.min(box.left, (view2?.innerWidth ?? 1200) - card.offsetWidth - 8))}px`;
       card.style.top = `${below ? box.bottom + 6 : Math.max(8, box.top - 6 - h6)}px`;
     };
     place2();
@@ -3835,8 +4144,8 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
   function openSide(o, change) {
     last = o;
     const { doc, store, t, locale } = o;
-    const view = { ...readView(o), ...change, open: true };
-    store.set(VIEW_KEY, view);
+    const view2 = { ...readView(o), ...change, open: true };
+    store.set(VIEW_KEY, view2);
     const keepScroll = doc.getElementById(SIDE_ID)?.shadowRoot?.querySelector(".scroll")?.scrollTop ?? 0;
     const marks = readMarks2(store);
     const positions = store.get(POSITIONS_KEY, {});
@@ -3858,7 +4167,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     side.setAttribute("aria-label", t("marks.title"));
     const head = h(doc, "header", "head");
     const title = h(doc, "div", "title");
-    if (view.player !== null) {
+    if (view2.player !== null) {
       const back = iconButton(doc, "back", t("marks.back"));
       back.addEventListener("click", () => go({ player: null }));
       head.append(back);
@@ -3869,20 +4178,20 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     head.append(x);
     side.append(head);
     const scroll = h(doc, "div", "scroll");
-    if (view.player !== null) playerSheet(o, side, scroll, title, view.player, marks, positions, picker, here);
+    if (view2.player !== null) playerSheet(o, side, scroll, title, view2.player, marks, positions, picker, here);
     else {
       title.append(h(doc, "span", "name", t("marks.title")));
       const seg = h(doc, "div", "seg");
       for (const id of ["players", "planets"]) {
         const b = h(doc, "button", "", t(`marks.tab.${id}`));
         b.type = "button";
-        b.setAttribute("aria-pressed", String(view.tab === id));
+        b.setAttribute("aria-pressed", String(view2.tab === id));
         b.addEventListener("click", () => go({ tab: id }));
         seg.append(b);
       }
       side.append(seg);
-      if (view.tab === "players") playersList(o, side, scroll, view, marks, picker, go);
-      else taggedList(o, side, scroll, view, marks, positions, picker, go, here);
+      if (view2.tab === "players") playersList(o, side, scroll, view2, marks, picker, go);
+      else taggedList(o, side, scroll, view2, marks, positions, picker, go, here);
     }
     side.append(scroll);
     const foot = h(doc, "div", "foot");
@@ -3901,7 +4210,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     b.append(icon(doc, name, 16));
     return b;
   }
-  function playersList(o, side, scroll, view, marks, picker, go) {
+  function playersList(o, side, scroll, view2, marks, picker, go) {
     const { doc, t, locale } = o;
     const chips = h(doc, "div", "chips");
     const counts = Object.values(marks.players).reduce((c, p) => (c[p.flag] = (c[p.flag] ?? 0) + 1, c), {});
@@ -3910,16 +4219,16 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       b.type = "button";
       b.title = t(f === "recent" ? "marks.recent" : `mark.flag.${f}`);
       b.setAttribute("aria-label", b.title);
-      b.setAttribute("aria-pressed", String(view.flagTab === f));
+      b.setAttribute("aria-pressed", String(view2.flagTab === f));
       if (f !== "recent") b.style.color = FLAG_COLORS[f];
       b.append(icon(doc, f === "recent" ? "eye" : FLAG_ICONS[f], 12), h(doc, "span", "n", String(f === "recent" ? marks.recent.length : counts[f] ?? 0)));
       b.addEventListener("click", () => go({ flagTab: f }));
       chips.append(b);
     }
     side.append(chips);
-    const list = view.flagTab === "recent" ? marks.recent : Object.entries(marks.players).filter(([, p]) => p.flag === view.flagTab).map(([id, p]) => ({ id: Number(id), name: p.name })).sort((a, b) => a.name.localeCompare(b.name));
+    const list = view2.flagTab === "recent" ? marks.recent : Object.entries(marks.players).filter(([, p]) => p.flag === view2.flagTab).map(([id, p]) => ({ id: Number(id), name: p.name })).sort((a, b) => a.name.localeCompare(b.name));
     if (!list.length) {
-      scroll.append(h(doc, "p", "empty", t(view.flagTab === "recent" ? "marks.noRecent" : "marks.noPlayers")));
+      scroll.append(h(doc, "p", "empty", t(view2.flagTab === "recent" ? "marks.noRecent" : "marks.noPlayers")));
       return;
     }
     const cache = o.store.get(PLAYER_SCORES_KEY, {});
@@ -3954,9 +4263,9 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     if (!seen) return h(doc, "span", "age none", "\u2014");
     const ms = now - seen.at;
     const { n, unit } = ageParts(ms);
-    const el5 = h(doc, "span", `age ${ms < HOUR ? "fresh" : ms < 3 * 864e5 ? "warm" : "old"}`, t("marks.ago", { n, u: t(`marks.unit.${unit}`) }));
-    el5.title = new Date(seen.at).toLocaleString(locale);
-    return el5;
+    const el6 = h(doc, "span", `age ${ms < HOUR ? "fresh" : ms < 3 * 864e5 ? "warm" : "old"}`, t("marks.ago", { n, u: t(`marks.unit.${unit}`) }));
+    el6.title = new Date(seen.at).toLocaleString(locale);
+    return el6;
   }
   function coordsButton(doc, t, coords, fresh = false) {
     const b = h(doc, "button", `coords${fresh ? " new" : ""}`, coords);
@@ -4055,7 +4364,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     scroll.append(wrap);
     scroll.append(h(doc, "p", "foot", t("marks.planets", { n: lines.length, moons: lines.filter((l) => l.moon).length }) + " \xB7 " + t("galaxy.apiAge", { time: new Date(data.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) })));
   }
-  function taggedList(o, side, scroll, view, marks, positions, picker, go, here) {
+  function taggedList(o, side, scroll, view2, marks, positions, picker, go, here) {
     const { doc, t, locale } = o;
     const range = h(doc, "div", "range");
     const input = (value, label, placeholder) => {
@@ -4066,8 +4375,8 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       i.setAttribute("aria-label", label);
       return i;
     };
-    const from = input(view.from, t("marks.from"), "1:1");
-    const to = input(view.to, t("marks.to"), "9:499");
+    const from = input(view2.from, t("marks.from"), "1:1");
+    const to = input(view2.to, t("marks.to"), "9:499");
     const apply = () => {
       const ok = (v) => !v.trim() || /^\d{1,2}:\d{1,3}$/.test(v.trim());
       if (ok(from.value) && ok(to.value)) go({ from: from.value.trim(), to: to.value.trim() });
@@ -4079,7 +4388,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     for (const tag of TAGS) {
       const b = h(doc, "button", "chip");
       b.type = "button";
-      const on = view.tags.includes(tag);
+      const on = view2.tags.includes(tag);
       b.title = t(`mark.tag.${tag}`);
       b.setAttribute("aria-label", b.title);
       b.setAttribute("aria-pressed", String(on));
@@ -4088,7 +4397,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       dot.style.background = TAG_COLORS[tag];
       dot.style.borderColor = "transparent";
       b.append(dot);
-      b.addEventListener("click", () => go({ tags: on ? view.tags.filter((x) => x !== tag) : [...view.tags, tag] }));
+      b.addEventListener("click", () => go({ tags: on ? view2.tags.filter((x) => x !== tag) : [...view2.tags, tag] }));
       chips.append(b);
     }
     side.append(chips);
@@ -4096,9 +4405,9 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     for (const st of ["vacation", "banned", "inactive"]) {
       const b = h(doc, "button", "chip", t(`marks.hide.${st}`));
       b.type = "button";
-      const on = view.hide.includes(st);
+      const on = view2.hide.includes(st);
       b.setAttribute("aria-pressed", String(on));
-      b.addEventListener("click", () => go({ hide: on ? view.hide.filter((x) => x !== st) : [...view.hide, st] }));
+      b.addEventListener("click", () => go({ hide: on ? view2.hide.filter((x) => x !== st) : [...view2.hide, st] }));
       hides.append(b);
     }
     side.append(hides);
@@ -4107,8 +4416,8 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       return row ? statusNames(row[1]) : saved;
     };
     const withStatus = { ...marks, planets: Object.fromEntries(Object.entries(marks.planets).map(([c, p]) => [c, { ...p, statuses: statusOf(p.playerId, p.statuses) }])) };
-    const hide = view.hide.flatMap((s) => s === "inactive" ? ["inactive", "longinactive"] : [s]);
-    const list = planetsInRange(withStatus, view.from || "1:0", view.to || "99:999", { tags: view.tags, hide });
+    const hide = view2.hide.flatMap((s) => s === "inactive" ? ["inactive", "longinactive"] : [s]);
+    const list = planetsInRange(withStatus, view2.from || "1:0", view2.to || "99:999", { tags: view2.tags, hide });
     if (!uni) void universePlayers({ guard: o.guard, store: o.store, origin: doc.location.origin }).catch(() => null).then((u) => {
       if (u) {
         uni = u;
@@ -4137,6 +4446,123 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     });
     scroll.append(wrap);
     scroll.append(h(doc, "p", "foot", t("marks.planetsHint", { n: list.length })));
+  }
+
+  // src/modules/dock/index.ts
+  var DOCK_ID = "fut-dock";
+  var STYLE_ID = "fut-dock-style";
+  var CSS2 = `
+#${DOCK_ID} {
+  box-sizing: border-box; clear: both; display: flex; flex-direction: column; gap: 6px; width: 150px; margin: 10px 0 0 13px;
+  font: 12px/1.3 Arial, Helvetica, sans-serif; color: #C9D4E2; font-variant-numeric: tabular-nums; text-align: left;
+}
+#${DOCK_ID} * { box-sizing: border-box; }
+#${DOCK_ID} button { margin: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; }
+#${DOCK_ID} button:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -2px; }
+#${DOCK_ID} .card { border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden; }
+/* Head: what the card is and, on the right, its one number or the arrow that opens it. */
+#${DOCK_ID} .head { display: flex; align-items: center; gap: 6px; width: 100%; height: 28px; padding: 0 8px; border: 0; border-bottom: 1px solid #1F2C40; background: #0B121D; }
+#${DOCK_ID} .head b { flex: 1; min-width: 0; color: #E6EDF5; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#${DOCK_ID} .head svg { flex: none; color: #4FD1E8; }
+#${DOCK_ID} .head .n { color: #9AA9BC; font: 12px Consolas, "JetBrains Mono", monospace; }
+#${DOCK_ID} .head:hover, #${DOCK_ID} .line:hover { background: #16243A; }
+/* Journal: one line per period. */
+#${DOCK_ID} .line { display: grid; grid-template-columns: minmax(0, 1fr) auto 52px; align-items: baseline; gap: 6px; width: 100%; min-height: 24px; padding: 3px 8px; border: 0; background: none; }
+#${DOCK_ID} .line + .line { border-top: 1px solid #16202F; }
+#${DOCK_ID} .line .k { color: #9AA9BC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#${DOCK_ID} .line .c { color: #9AA9BC; font: 11px Consolas, "JetBrains Mono", monospace; }
+#${DOCK_ID} .line .v { color: #E6EDF5; font: 700 12px Consolas, "JetBrains Mono", monospace; text-align: right; }
+#${DOCK_ID} .line .v.pos { color: #4FE0B0; } #${DOCK_ID} .line .v.neg { color: #F5B547; } #${DOCK_ID} .line .v.none { color: #617C8D; font-weight: 400; }
+#${DOCK_ID} .cols { display: grid; grid-template-columns: minmax(0, 1fr) auto 52px; gap: 6px; padding: 3px 8px 0; color: #617C8D; font-size: 11px; }
+#${DOCK_ID} .cols span:last-child { text-align: right; }
+/* Targets: one chip per flag in use, then the coloured planets. */
+#${DOCK_ID} .flags { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 6px; }
+#${DOCK_ID} .flag { display: flex; align-items: center; justify-content: center; gap: 4px; height: 26px; padding: 0; border: 1px solid #1F2C40; border-radius: 5px; background: #0A111C; }
+#${DOCK_ID} .flag:hover { border-color: currentColor; }
+#${DOCK_ID} .flag i { font: normal 12px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; }
+#${DOCK_ID} .tags { display: inline-flex; gap: 2px; }
+#${DOCK_ID} .tags i { width: 6px; height: 6px; border-radius: 50%; }
+#${DOCK_ID} .hint { margin: 0; padding: 8px; color: #9AA9BC; font-size: 11px; line-height: 1.4; }
+`;
+  function el2(doc, tag, cls = "", text) {
+    const n = doc.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== void 0) n.textContent = text;
+    return n;
+  }
+  function renderDock(o) {
+    const { doc, t } = o;
+    doc.getElementById(DOCK_ID)?.remove();
+    const menu = doc.getElementById("links");
+    const home = menu ?? doc.getElementById("myPlanets");
+    if (!home) return;
+    if (!doc.getElementById(STYLE_ID)) {
+      const style = el2(doc, "style");
+      style.id = STYLE_ID;
+      style.textContent = CSS2;
+      doc.head.append(style);
+    }
+    const dock = el2(doc, "div");
+    dock.id = DOCK_ID;
+    const fmt = (n) => formatUnits(n, o.locale);
+    const button3 = (cls, title, onClick) => {
+      const b = el2(doc, "button", cls);
+      b.type = "button";
+      b.title = title;
+      b.addEventListener("click", (e) => {
+        e.preventDefault();
+        onClick();
+      });
+      return b;
+    };
+    const head = (glyph2, name, title, onClick, count2 = "") => {
+      const b = button3("head", title, onClick);
+      b.append(icon(doc, glyph2, 14), el2(doc, "b", "", name));
+      if (count2) b.append(el2(doc, "span", "n", count2));
+      return b;
+    };
+    const journal = el2(doc, "section", "card");
+    journal.append(head("chart", t("dock.journal"), t("exp.title"), o.onOpenJournal));
+    const cols = el2(doc, "div", "cols");
+    cols.append(el2(doc, "span"), el2(doc, "span", "", t("dock.count")), el2(doc, "span", "", "MSU"));
+    journal.append(cols);
+    for (const [key, s] of [["dock.today", o.journal.today], ["dock.week", o.journal.week]]) {
+      const line = button3("line", t("dock.journalHint", { n: s.count }), o.onOpenJournal);
+      const net = s.count ? `${s.net >= 0 ? "+" : "\u2212"}${fmt(Math.abs(s.net))}` : "\u2014";
+      line.append(el2(doc, "span", "k", t(key)), el2(doc, "span", "c", s.count ? String(s.count) : ""), el2(doc, "span", `v ${s.count ? s.net >= 0 ? "pos" : "neg" : "none"}`, net));
+      journal.append(line);
+    }
+    const players = Object.values(o.marks.players);
+    const planets = Object.values(o.marks.planets);
+    const targets = el2(doc, "section", "card");
+    targets.append(head("target", t("bar.targets"), t("bar.targetsHint"), () => o.onOpenTargets(), String(players.length + planets.length || "")));
+    if (!players.length && !planets.length) targets.append(el2(doc, "p", "hint", t("dock.targetsEmpty")));
+    const flags = el2(doc, "div", "flags");
+    for (const f of FLAGS) {
+      const n = players.filter((p) => p.flag === f).length;
+      if (!n) continue;
+      const b = button3("flag", `${t(`mark.flag.${f}`)}: ${n}`, () => o.onOpenTargets({ tab: "players", flagTab: f }));
+      b.style.color = FLAG_COLORS[f];
+      b.setAttribute("aria-label", `${t(`mark.flag.${f}`)}: ${n}`);
+      b.append(icon(doc, FLAG_ICONS[f], 13), el2(doc, "i", "", String(n)));
+      flags.append(b);
+    }
+    if (flags.childElementCount) targets.append(flags);
+    if (planets.length) {
+      const line = button3("line", t("dock.planetsHint"), () => o.onOpenTargets({ tab: "planets" }));
+      const dots = el2(doc, "span", "tags");
+      for (const tag of TAGS) {
+        if (!planets.some((p) => p.tag === tag)) continue;
+        const dot = el2(doc, "i");
+        dot.style.background = TAG_COLORS[tag];
+        dots.append(dot);
+      }
+      line.append(el2(doc, "span", "k", t("marks.tab.planets")), dots, el2(doc, "span", "v", String(planets.length)));
+      targets.append(line);
+    }
+    dock.append(journal, targets);
+    if (menu) menu.append(dock);
+    else home.append(dock);
   }
 
   // src/data/tech-table.ts
@@ -4875,6 +5301,12 @@ h4 { margin: 10px 0 4px; font-size: 11px; font-weight: 700; color: var(--text-2)
 
 /* Sections: tiles, like the planet rows. */
 .card { padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); min-width: 0; }
+/* On/off switch: a track with a knob, lit and to the right when on (a checked input before it, or aria-checked on its button). */
+.sw-track { position: relative; flex: none; width: 30px; height: 16px; border-radius: 8px; background: var(--faint); transition: background-color 120ms ease-out; }
+.sw-track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--text-2); transition: transform 120ms ease-out; }
+input:checked + .sw-track, [aria-checked="true"] > .sw-track { background: var(--accent); }
+input:checked + .sw-track::after, [aria-checked="true"] > .sw-track::after { transform: translateX(14px); background: var(--bg); }
+@media (prefers-reduced-motion: reduce) { .sw-track, .sw-track::after { transition: none; } }
 .hint { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
 .empty { margin: 0; padding: 14px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 7px; }
 
@@ -5536,9 +5968,9 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
   var INACTIVE = ["inactive", "longinactive"];
   var defended = (r) => r.entry.defValue !== 0 || r.entry.fleetValue !== 0;
   var coordsRank = (c) => c.split(":").reduce((n, x) => n * 1e3 + Number(x), 0);
-  function sortRows(rows, view) {
+  function sortRows(rows, view2) {
     const val = (r) => {
-      switch (view.sort) {
+      switch (view2.sort) {
         case "target":
           return r.entry.playerName.toLowerCase();
         case "age":
@@ -5556,7 +5988,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
           return r.entry.defValue;
       }
     };
-    const dir = view.desc ? -1 : 1;
+    const dir = view2.desc ? -1 : 1;
     return [...rows].sort((a, b) => {
       const x = val(a), y = val(b);
       return (x < y ? -1 : x > y ? 1 : 0) * dir;
@@ -5584,36 +6016,36 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
       return;
     }
     const board = o.store.get(SPY_BOARD_KEY, {});
-    const view = { ...DEFAULT_VIEW, ...o.store.get(VIEW_KEY2, {}) };
-    if (!COLS.includes(view.sort)) view.sort = "loot";
-    view.cols = columnOrder(view.cols);
+    const view2 = { ...DEFAULT_VIEW, ...o.store.get(VIEW_KEY2, {}) };
+    if (!COLS.includes(view2.sort)) view2.sort = "loot";
+    view2.cols = columnOrder(view2.cols);
     const prefs = [o.store.get(SPY_SHARED_KEY, true), o.store.get(SIM_KEY, "osims"), [...expanded]];
-    const sig = JSON.stringify([Object.values(board).map((e) => e.id), view, prefs, Math.floor((o.now?.() ?? Date.now()) / 6e4)]);
+    const sig = JSON.stringify([Object.values(board).map((e) => e.id), view2, prefs, Math.floor((o.now?.() ?? Date.now()) / 6e4)]);
     if (old && old.dataset.sig === sig && old.nextElementSibling === anchor) return;
     const focus = doc.activeElement?.closest(`#${SPY_PANEL_ID}`) ? doc.activeElement.dataset.focus : void 0;
-    const panel = renderPanel(o, board, view);
+    const panel = renderPanel(o, board, view2);
     panel.dataset.sig = sig;
     if (old) old.remove();
     anchor.before(panel);
     if (focus) panel.querySelector(`[data-focus="${focus}"]`)?.focus();
   }
-  function renderPanel(o, board, view) {
+  function renderPanel(o, board, view2) {
     const { doc, store, t, locale, spy } = o;
     const now = o.now?.() ?? Date.now();
     const fmt = (n) => formatUnits(n, locale);
     const exact = (n) => Math.round(n).toLocaleString(locale);
-    const el5 = (tag, cls = "", text) => {
+    const el6 = (tag, cls = "", text) => {
       const n = doc.createElement(tag);
       if (cls) n.className = cls;
       if (text !== void 0) n.textContent = text;
       return n;
     };
     const redraw = (next = {}) => {
-      store.set(VIEW_KEY2, { ...view, ...next });
+      store.set(VIEW_KEY2, { ...view2, ...next });
       mountSpyPanel(o);
     };
     const iconButton3 = (cls, name, label, onClick) => {
-      const b = el5("button", `fut-sp-ib ${cls}`);
+      const b = el6("button", `fut-sp-ib ${cls}`);
       b.type = "button";
       b.title = label;
       b.setAttribute("aria-label", label);
@@ -5630,24 +6062,24 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     const showShared = store.get(SPY_SHARED_KEY, true);
     const tool = simTool(store.get(SIM_KEY, "osims"));
     const all2 = targetRows(board, spy.bases, { capacity: cap(203), speed: ships["203"]?.speed ?? 0, universe, now }).filter((r) => showShared || !r.entry.shared);
-    const rows = sortRows(all2.filter((r) => (!view.hideDefended || !defended(r)) && (!view.inactiveOnly || r.entry.statuses.some((s) => INACTIVE.includes(s)))), view);
+    const rows = sortRows(all2.filter((r) => (!view2.hideDefended || !defended(r)) && (!view2.inactiveOnly || r.entry.statuses.some((s) => INACTIVE.includes(s)))), view2);
     const meta = (name) => doc.querySelector(`meta[name="ogame-planet-${name}"]`)?.getAttribute("content") ?? "";
     const here = Number(meta("id")) > 0 ? { id: Number(meta("id")), name: meta("name"), coords: meta("coordinates"), moon: meta("type") === "moon" } : null;
     const baseName = (b) => b.name || doc.querySelector(`#planet-${b.id} .planet-name, #planet-${b.id} .moon-name`)?.textContent?.trim() || "";
-    const grid2 = `22px ${view.cols.map((c) => WIDTH[c]).join(" ")} 104px`;
-    const panel = el5("div", "fut-sp");
+    const grid2 = `22px ${view2.cols.map((c) => WIDTH[c]).join(" ")} 104px`;
+    const panel = el6("div", "fut-sp");
     panel.id = SPY_PANEL_ID;
-    const head = el5("div", "fut-sp-head");
-    const toggle = el5("button", "fut-sp-title");
+    const head = el6("div", "fut-sp-head");
+    const toggle = el6("button", "fut-sp-title");
     toggle.type = "button";
     toggle.dataset.focus = "title";
-    toggle.setAttribute("aria-expanded", String(view.open));
-    toggle.append(icon(doc, "chevron", 12, "fut-sp-chev"), el5("b", "", t("spy.title")), el5("span", "", t("spy.sub", { n: rows.length, loot: fmt(rows.reduce((s, r) => s + r.lootRes, 0)) })));
-    toggle.addEventListener("click", () => redraw({ open: !view.open }));
+    toggle.setAttribute("aria-expanded", String(view2.open));
+    toggle.append(icon(doc, "chevron", 12, "fut-sp-chev"), el6("b", "", t("spy.title")), el6("span", "", t("spy.sub", { n: rows.length, loot: fmt(rows.reduce((s, r) => s + r.lootRes, 0)) })));
+    toggle.addEventListener("click", () => redraw({ open: !view2.open }));
     head.append(toggle);
-    if (view.open) {
+    if (view2.open) {
       const chip2 = (id, text, pressed, next) => {
-        const b = el5("button", "fut-sp-chip", text);
+        const b = el6("button", "fut-sp-chip", text);
         b.type = "button";
         b.dataset.focus = id;
         b.setAttribute("aria-pressed", String(pressed));
@@ -5655,50 +6087,50 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         return b;
       };
       head.append(
-        chip2("def", t("spy.hideDefended"), view.hideDefended, { hideDefended: !view.hideDefended }),
-        chip2("ina", t("spy.inactiveOnly"), view.inactiveOnly, { inactiveOnly: !view.inactiveOnly })
+        chip2("def", t("spy.hideDefended"), view2.hideDefended, { hideDefended: !view2.hideDefended }),
+        chip2("ina", t("spy.inactiveOnly"), view2.inactiveOnly, { inactiveOnly: !view2.inactiveOnly })
       );
     }
     panel.append(head);
-    if (!view.open) return panel;
+    if (!view2.open) return panel;
     if (!rows.length) {
-      panel.append(el5("p", "fut-sp-note", t(all2.length ? "spy.noneFiltered" : "spy.none")));
+      panel.append(el6("p", "fut-sp-note", t(all2.length ? "spy.noneFiltered" : "spy.none")));
       return panel;
     }
-    const table = el5("div", "fut-sp-table");
+    const table = el6("div", "fut-sp-table");
     table.setAttribute("role", "table");
     table.setAttribute("aria-label", t("spy.title"));
     const line = (cls) => {
-      const r = el5("div", `fut-sp-row ${cls}`.trim());
+      const r = el6("div", `fut-sp-row ${cls}`.trim());
       r.setAttribute("role", "row");
       r.style.gridTemplateColumns = grid2;
       return r;
     };
     const cols = line("fut-sp-cols");
     const fixedHead = (text, label) => {
-      const c = el5("div", "fut-sp-c");
+      const c = el6("div", "fut-sp-c");
       c.setAttribute("role", "columnheader");
-      const s = el5("span", "fut-sp-h", text);
+      const s = el6("span", "fut-sp-h", text);
       s.setAttribute("aria-label", label);
       c.append(s);
       return c;
     };
     cols.append(fixedHead("#", t("spy.col.n")));
-    for (const key of view.cols) {
-      const cell = el5("div", `fut-sp-c${RIGHT.includes(key) ? " fut-sp-r" : ""}`);
+    for (const key of view2.cols) {
+      const cell = el6("div", `fut-sp-c${RIGHT.includes(key) ? " fut-sp-r" : ""}`);
       cell.setAttribute("role", "columnheader");
-      cell.setAttribute("aria-sort", view.sort === key ? view.desc ? "descending" : "ascending" : "none");
-      const b = el5("button", `fut-sp-h${view.sort === key ? " sortBy" : ""}`, t(`spy.col.${key}`));
+      cell.setAttribute("aria-sort", view2.sort === key ? view2.desc ? "descending" : "ascending" : "none");
+      const b = el6("button", `fut-sp-h${view2.sort === key ? " sortBy" : ""}`, t(`spy.col.${key}`));
       b.type = "button";
       b.dataset.focus = `col-${key}`;
       b.title = t("spy.colHint");
-      if (view.sort === key) b.append(icon(doc, "chevron", 10, "fut-sp-sort"));
-      b.addEventListener("click", () => redraw(view.sort === key ? { desc: !view.desc } : { sort: key, desc: !["target", "age", "act", "coords"].includes(key) }));
+      if (view2.sort === key) b.append(icon(doc, "chevron", 10, "fut-sp-sort"));
+      b.addEventListener("click", () => redraw(view2.sort === key ? { desc: !view2.desc } : { sort: key, desc: !["target", "age", "act", "coords"].includes(key) }));
       b.addEventListener("keydown", (ev) => {
         if (!ev.altKey || ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
         ev.preventDefault();
-        const i = view.cols.indexOf(key) + (ev.key === "ArrowLeft" ? -1 : 1);
-        if (i >= 0 && i < view.cols.length) redraw({ cols: moveColumn(view.cols, key, view.cols[i]) });
+        const i = view2.cols.indexOf(key) + (ev.key === "ArrowLeft" ? -1 : 1);
+        if (i >= 0 && i < view2.cols.length) redraw({ cols: moveColumn(view2.cols, key, view2.cols[i]) });
       });
       cell.draggable = true;
       cell.addEventListener("dragstart", (ev) => {
@@ -5715,14 +6147,14 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
       cell.addEventListener("drop", (ev) => {
         ev.preventDefault();
         const from = ev.dataTransfer?.getData("text/x-fut-col");
-        if (from && COLS.includes(from)) redraw({ cols: moveColumn(view.cols, from, key) });
+        if (from && COLS.includes(from)) redraw({ cols: moveColumn(view2.cols, from, key) });
       });
       cell.append(b);
       cols.append(cell);
     }
     cols.append(fixedHead("", t("spy.col.actionsName")));
     table.append(cols);
-    const list = el5("div", "fut-sp-list");
+    const list = el6("div", "fut-sp-list");
     list.setAttribute("role", "rowgroup");
     rows.forEach((r, index) => {
       const e = r.entry;
@@ -5733,18 +6165,18 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
       const attackUrl = (n2, id) => `/game/index.php?page=ingame&component=fleetdispatch&galaxy=${g}&system=${s}&position=${p}&type=${e.moon ? 3 : 1}&mission=1${n2 > 0 ? `&am${id}=${n2}` : ""}`;
       const cellOf = {
         age: () => {
-          const c = el5("div", `fut-sp-c ${r.ageMinutes > 360 ? "old" : r.ageMinutes > 60 ? "warm" : "fresh"}`, r.ageMinutes < 60 ? `${r.ageMinutes}m` : r.ageMinutes < 2880 ? `${Math.floor(r.ageMinutes / 60)}h` : `${Math.floor(r.ageMinutes / 1440)}g`);
+          const c = el6("div", `fut-sp-c ${r.ageMinutes > 360 ? "old" : r.ageMinutes > 60 ? "warm" : "fresh"}`, r.ageMinutes < 60 ? `${r.ageMinutes}m` : r.ageMinutes < 2880 ? `${Math.floor(r.ageMinutes / 60)}h` : `${Math.floor(r.ageMinutes / 1440)}g`);
           c.title = new Date(e.at).toLocaleString(locale);
           return c;
         },
         act: () => {
-          const c = el5("div", `fut-sp-c ${e.activity === 0 ? "bad" : e.activity < 60 ? "warm" : "zero"}`, e.activity === 0 ? "*" : e.activity < 60 ? String(e.activity) : "\u2013");
+          const c = el6("div", `fut-sp-c ${e.activity === 0 ? "bad" : e.activity < 60 ? "warm" : "zero"}`, e.activity === 0 ? "*" : e.activity < 60 ? String(e.activity) : "\u2013");
           c.title = e.activity === 0 ? t("msg.spy.active") : e.activity < 60 ? t("msg.spy.activity", { n: e.activity }) : t("msg.spy.inactive");
           return c;
         },
         coords: () => {
-          const c = el5("div", "fut-sp-c");
-          const gal = el5("a", "fut-sp-coords", e.coords);
+          const c = el6("div", "fut-sp-c");
+          const gal = el6("a", "fut-sp-coords", e.coords);
           gal.href = `/game/index.php?page=ingame&component=galaxy&galaxy=${g}&system=${s}`;
           gal.title = t(e.moon ? "spy.moon" : "spy.planet");
           gal.prepend(icon(doc, e.moon ? "moon" : "planet", 11, "fut-sp-kind"));
@@ -5752,15 +6184,15 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
           return c;
         },
         target: () => {
-          const c = el5("div", "fut-sp-c fut-sp-who");
-          const name = el5("a", "fut-sp-name overlay", e.playerName || "?");
+          const c = el6("div", "fut-sp-c fut-sp-who");
+          const name = el6("a", "fut-sp-name overlay", e.playerName || "?");
           name.href = `${doc.location.origin}/game/index.php?page=ajax&component=messagedetails&messageId=${encodeURIComponent(e.id)}`;
           name.dataset.overlayTitle = t("spy.report");
           name.title = t("spy.reportHint", { name: e.playerName || "?" });
           c.append(name);
-          for (const st of e.statuses.filter((x) => x !== "active")) c.append(el5("span", `fut-sp-st st-${st}`, t(`spy.status.${st}`)));
+          for (const st of e.statuses.filter((x) => x !== "active")) c.append(el6("span", `fut-sp-st st-${st}`, t(`spy.status.${st}`)));
           if (e.shared) {
-            const ally = el5("span", "fut-sp-st st-shared", t("spy.shared"));
+            const ally = el6("span", "fut-sp-st st-shared", t("spy.shared"));
             ally.title = t("spy.sharedHint");
             c.append(ally);
           }
@@ -5768,7 +6200,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
           return c;
         },
         loot: () => {
-          const c = el5("div", "fut-sp-c fut-sp-r fut-sp-loot", fmt(r.lootRes));
+          const c = el6("div", "fut-sp-c fut-sp-r fut-sp-loot", fmt(r.lootRes));
           c.title = t("spy.lootHint", {
             pct: Math.round(e.loot * 100),
             m: fmt(e.res.metal * e.loot),
@@ -5783,11 +6215,11 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         def: () => value(e.defValue, t("msg.spy.def"))
       };
       const value = (v, label) => {
-        const c = el5("div", `fut-sp-c fut-sp-r ${v !== 0 ? "warm" : "zero"}`, v < 0 ? "?" : v > 0 ? fmt(v) : "0");
+        const c = el6("div", `fut-sp-c fut-sp-r ${v !== 0 ? "warm" : "zero"}`, v < 0 ? "?" : v > 0 ? fmt(v) : "0");
         c.title = `${label}: ${v < 0 ? t("spy.hidden") : exact(v)}`;
         return c;
       };
-      const acts = el5("div", "fut-sp-c fut-sp-acts");
+      const acts = el6("div", "fut-sp-c fut-sp-acts");
       const more = iconButton3("fut-sp-more", "more", t("spy.waves"), () => {
         if (open) expanded.delete(e.key);
         else expanded.add(e.key);
@@ -5821,41 +6253,41 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         (panel2?.querySelector(near ? `[data-focus="del-${near.entry.key}"]` : '[data-focus="title"]') ?? panel2?.querySelector('[data-focus="title"]'))?.focus();
       }));
       acts.lastElementChild.setAttribute("data-focus", `del-${e.key}`);
-      const n = el5("div", "fut-sp-c fut-sp-n", String(index + 1));
-      const cells = [n, ...view.cols.map((c) => cellOf[c]()), acts];
+      const n = el6("div", "fut-sp-c fut-sp-n", String(index + 1));
+      const cells = [n, ...view2.cols.map((c) => cellOf[c]()), acts];
       for (const c of cells) c.setAttribute("role", "cell");
       row.append(...cells);
       list.append(row);
       if (open) {
-        const det = el5("div", "fut-sp-waves");
+        const det = el6("div", "fut-sp-waves");
         det.id = `fut-sp-w-${index}`;
         det.setAttribute("role", "row");
-        const cell = el5("div");
+        const cell = el6("div");
         cell.setAttribute("role", "cell");
-        cell.setAttribute("aria-colspan", String(view.cols.length + 2));
+        cell.setAttribute("aria-colspan", String(view2.cols.length + 2));
         const waves = raidWaves(e.res.metal + e.res.crystal + e.res.deuterium, e.loot, 6);
-        const wgrid = el5("div", "fut-sp-wgrid");
-        wgrid.append(el5("span", "k"), ...waves.map((_, i) => el5("span", "h", t("spy.wave", { n: i + 1 }))));
-        wgrid.append(el5("span", "k", t("spy.col.loot")), ...waves.map((w) => el5("b", "", fmt(w))));
+        const wgrid = el6("div", "fut-sp-wgrid");
+        wgrid.append(el6("span", "k"), ...waves.map((_, i) => el6("span", "h", t("spy.wave", { n: i + 1 }))));
+        wgrid.append(el6("span", "k", t("spy.col.loot")), ...waves.map((w) => el6("b", "", fmt(w))));
         for (const id of [203, 202]) {
-          const label = el5("span", "k");
+          const label = el6("span", "k");
           label.append(shipIcon(doc, id, shipName(id, ships, t), "fut-msg-icon"), shipName(id, ships, t));
           wgrid.append(label);
           for (const [i, w] of waves.entries()) {
             const n2 = Math.ceil(w / cap(id));
             if (!from || n2 === 0) {
-              wgrid.append(el5("span", "cnt", n2.toLocaleString(locale)));
+              wgrid.append(el6("span", "cnt", n2.toLocaleString(locale)));
               continue;
             }
-            const a = el5("a", "cnt", n2.toLocaleString(locale));
+            const a = el6("a", "cnt", n2.toLocaleString(locale));
             a.href = attackUrl(n2, id);
             a.title = t("spy.waveHint", { n: i + 1, count: n2.toLocaleString(locale), ship: shipName(id, ships, t), name: baseName(from) });
             wgrid.append(a);
           }
         }
-        const res = el5("div", "fut-sp-wres");
-        res.append(el5("span", "k", t("spy.onPlanet")), el5("span", "", `M ${fmt(e.res.metal)}`), el5("span", "", `C ${fmt(e.res.crystal)}`), el5("span", "", `D ${fmt(e.res.deuterium)}`));
-        if (from) res.append(el5("span", "from", t("spy.from", { name: baseName(from), coords: from.coords })));
+        const res = el6("div", "fut-sp-wres");
+        res.append(el6("span", "k", t("spy.onPlanet")), el6("span", "", `M ${fmt(e.res.metal)}`), el6("span", "", `C ${fmt(e.res.crystal)}`), el6("span", "", `D ${fmt(e.res.deuterium)}`));
+        if (from) res.append(el6("span", "from", t("spy.from", { name: baseName(from), coords: from.coords })));
         cell.append(wgrid, res);
         det.append(cell);
         list.append(det);
@@ -5863,11 +6295,11 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     });
     table.append(list);
     const foot = line("fut-sp-foot");
-    foot.append(el5("div", "fut-sp-c"));
-    for (const key of view.cols) foot.append(el5("div", `fut-sp-c${RIGHT.includes(key) ? " fut-sp-r" : ""}`, key === "loot" ? fmt(rows.reduce((s, r) => s + r.lootRes, 0)) : key === "target" ? t("spy.total") : ""));
-    foot.append(el5("div", "fut-sp-c"));
+    foot.append(el6("div", "fut-sp-c"));
+    for (const key of view2.cols) foot.append(el6("div", `fut-sp-c${RIGHT.includes(key) ? " fut-sp-r" : ""}`, key === "loot" ? fmt(rows.reduce((s, r) => s + r.lootRes, 0)) : key === "target" ? t("spy.total") : ""));
+    foot.append(el6("div", "fut-sp-c"));
     table.append(foot);
-    panel.append(table, el5("p", "fut-sp-note", t("spy.hint")));
+    panel.append(table, el6("p", "fut-sp-note", t("spy.hint")));
     return panel;
   }
 
@@ -5933,29 +6365,29 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     const fmt = (n) => formatUnits(n, locale);
     const exact = (n) => Math.round(n).toLocaleString(locale);
     const ships = o.store.get(SHIPS_INFO_KEY, {});
-    const el5 = (tag, cls = "", text) => {
+    const el6 = (tag, cls = "", text) => {
       const n = doc.createElement(tag);
       if (cls) n.className = cls;
       if (text !== void 0) n.textContent = text;
       return n;
     };
-    const panel = el5("section", "fut-fresh");
+    const panel = el6("section", "fut-fresh");
     panel.id = FRESH_ID;
     panel.setAttribute("aria-live", "polite");
     panel.setAttribute("aria-label", t("fresh.title"));
     shown.set(panel, all2);
-    const timer2 = el5("div", "fut-fresh-timer");
-    const bar = el5("i");
+    const timer2 = el6("div", "fut-fresh-timer");
+    const bar = el6("i");
     bar.style.animationDuration = `${FRESH_MS}ms`;
     bar.addEventListener("animationend", () => panel.remove());
     timer2.append(bar);
-    const head = el5("div", "fut-fresh-head");
-    head.append(el5("b", "", t("fresh.title")), el5("span", "fut-fresh-count", t("recap.count", { n: (s.count + s.discoveries).toLocaleString(locale) })));
-    for (const i of [0, 1, 2]) if (s.sizes[i]) head.append(el5("span", `fut-rar-chip fut-rar-${i}`, `${s.sizes[i]} ${t(`msg.size.${i}`).toLowerCase()}`));
-    const total = el5("span", `fut-fresh-total${s.netMsu < 0 ? " fut-neg" : ""}`);
-    total.append(el5("b", "", fmt(s.netMsu)), el5("small", "", "MSU"));
+    const head = el6("div", "fut-fresh-head");
+    head.append(el6("b", "", t("fresh.title")), el6("span", "fut-fresh-count", t("recap.count", { n: (s.count + s.discoveries).toLocaleString(locale) })));
+    for (const i of [0, 1, 2]) if (s.sizes[i]) head.append(el6("span", `fut-rar-chip fut-rar-${i}`, `${s.sizes[i]} ${t(`msg.size.${i}`).toLowerCase()}`));
+    const total = el6("span", `fut-fresh-total${s.netMsu < 0 ? " fut-neg" : ""}`);
+    total.append(el6("b", "", fmt(s.netMsu)), el6("small", "", "MSU"));
     total.title = `${exact(s.netMsu)} MSU`;
-    const close = el5("button", "fut-fresh-close");
+    const close = el6("button", "fut-fresh-close");
     close.type = "button";
     close.title = t("fresh.close");
     close.setAttribute("aria-label", t("fresh.close"));
@@ -5963,23 +6395,23 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     close.addEventListener("click", () => panel.remove());
     head.append(total, close);
     panel.append(timer2, head);
-    const res = el5("div", "fut-fresh-res");
+    const res = el6("div", "fut-fresh-res");
     for (const [key, c] of [["metal", "m"], ["crystal", "c"], ["deuterium", "d"], ["darkMatter", "dm"]]) {
       const v = s.res[key];
-      const tile2 = el5("div", `fut-fresh-tile fut-r-${c}${v ? "" : " zero"}`);
+      const tile2 = el6("div", `fut-fresh-tile fut-r-${c}${v ? "" : " zero"}`);
       tile2.title = `${t(`msg.res.${key}`)}: ${exact(v)}`;
-      tile2.append(el5("span", "fut-fresh-name", t(`msg.res.${key}`)), el5("b", "", v ? fmt(v) : "0"));
+      tile2.append(el6("span", "fut-fresh-name", t(`msg.res.${key}`)), el6("b", "", v ? fmt(v) : "0"));
       res.append(tile2);
     }
     panel.append(res);
     const found = Object.entries(s.shipsFound);
     const lost = Object.entries(s.lost);
     if (found.length || lost.length) {
-      const list = el5("div", "fut-fresh-ships");
+      const list = el6("div", "fut-fresh-ships");
       for (const [units, isLost] of [[found, false], [lost, true]]) {
         for (const [id, n] of [...units].sort((a, b) => Number(a[0]) - Number(b[0]))) {
           const name = shipName(Number(id), ships, t);
-          const tile2 = el5("span", `fut-fresh-ship${isLost ? " fut-neg" : ""}`, `${isLost ? "\u2212" : "+"}${n.toLocaleString(locale)}`);
+          const tile2 = el6("span", `fut-fresh-ship${isLost ? " fut-neg" : ""}`, `${isLost ? "\u2212" : "+"}${n.toLocaleString(locale)}`);
           tile2.prepend(shipIcon(doc, Number(id), name, "fut-msg-icon"));
           tile2.title = name;
           list.append(tile2);
@@ -6306,12 +6738,12 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
       doc.head.append(style);
     }
     processMessages(o);
-    let queued = false;
+    let queued2 = false;
     const observer = new MutationObserver(() => {
-      if (queued) return;
-      queued = true;
+      if (queued2) return;
+      queued2 = true;
       setTimeout(() => {
-        queued = false;
+        queued2 = false;
         processMessages(o);
       }, 50);
     });
@@ -6326,15 +6758,505 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     };
   }
 
+  // src/engines/fleet.ts
+  var EMPTY_RESERVE = { ships: {}, resources: { metal: 0, crystal: 0, deuterium: 0 } };
+  var PROFILES_KEY = "fleet.profiles";
+  function profileFor(profiles, bodyId) {
+    const p = profiles[String(bodyId)] ?? { reserve: structuredClone(EMPTY_RESERVE), save: null };
+    return { ...p, gate: p.gate ?? { ...p.reserve.ships }, saveReserve: p.saveReserve ?? structuredClone(EMPTY_RESERVE) };
+  }
+  function activeProfile(p, s) {
+    return {
+      ...p,
+      reserve: { ships: s.shipsOn ? p.reserve.ships : {}, resources: s.resourcesOn ? p.reserve.resources : { ...EMPTY_RESERVE.resources } },
+      gate: s.gateOn ? p.gate : {}
+    };
+  }
+  var RESERVE_SECTIONS = ["ships", "resources", "gate", "fleetsave"];
+  var positive = (ships) => Object.fromEntries(Object.entries(ships).filter(([, n]) => n > 0));
+  function sectionValue(p, section2) {
+    switch (section2) {
+      case "ships":
+        return positive(p.reserve.ships);
+      case "resources":
+        return p.reserve.resources;
+      case "gate":
+        return positive(p.gate);
+      case "fleetsave":
+        return { save: p.save, ships: positive(p.saveReserve.ships), resources: p.saveReserve.resources };
+    }
+  }
+  function canonical(v) {
+    if (v === null || typeof v !== "object") return JSON.stringify(v ?? null);
+    return `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${canonical(v[k])}`).join(",")}}`;
+  }
+  function sectionEmpty(p, section2) {
+    const v = sectionValue(p, section2);
+    if (section2 === "resources") return !Object.values(v).some(Boolean);
+    if (section2 === "fleetsave") return v.save === null && canonical({ ships: v.ships, resources: v.resources }) === canonical({ ships: {}, resources: EMPTY_RESERVE.resources });
+    return Object.keys(v).length === 0;
+  }
+  function sameSection(profiles, fromId, ids, section2) {
+    const mine = canonical(sectionValue(profileFor(profiles, fromId), section2));
+    return ids.filter((id) => id !== fromId && canonical(sectionValue(profileFor(profiles, id), section2)) === mine);
+  }
+  function copySections(profiles, fromId, ids, sections) {
+    const src = structuredClone(profileFor(profiles, fromId));
+    const out = { ...profiles };
+    for (const id of ids) {
+      if (id === fromId) continue;
+      const p = structuredClone(profileFor(profiles, id));
+      if (sections.includes("ships")) p.reserve.ships = { ...src.reserve.ships };
+      if (sections.includes("resources")) p.reserve.resources = { ...src.reserve.resources };
+      if (sections.includes("gate")) p.gate = { ...src.gate };
+      if (sections.includes("fleetsave")) {
+        p.save = structuredClone(src.save);
+        p.saveReserve = structuredClone(src.saveReserve);
+      }
+      out[String(id)] = p;
+    }
+    return out;
+  }
+  function shipsAfterReserve(available, reserve) {
+    const out = {};
+    for (const [id, count2] of Object.entries(available)) {
+      const n = Math.max(0, count2 - (reserve.ships[id] ?? 0));
+      if (n > 0) out[id] = n;
+    }
+    return out;
+  }
+  function resourcesAfterReserve(available, reserve, fuel) {
+    return {
+      metal: Math.max(0, Math.floor(available.metal - reserve.resources.metal)),
+      crystal: Math.max(0, Math.floor(available.crystal - reserve.resources.crystal)),
+      deuterium: Math.max(0, Math.floor(available.deuterium - fuel - reserve.resources.deuterium))
+    };
+  }
+  function resolveTarget(save, origin) {
+    return {
+      galaxy: save.galaxy ?? origin.galaxy,
+      system: save.system ?? origin.system,
+      position: save.position,
+      type: save.type
+    };
+  }
+  function parseAmount(text) {
+    const raw = text.trim().toLowerCase().replace(/\s/g, "");
+    const m = raw.match(/^([\d.,]+)([kmg])?$/);
+    if (!m) return 0;
+    const unit = m[2] === "k" ? 1e3 : m[2] === "m" ? 1e6 : m[2] === "g" ? 1e9 : 1;
+    let num4 = m[1];
+    num4 = unit === 1 ? num4.replace(/[.,]/g, "") : num4.replace(",", ".");
+    const value = Number(num4) * unit;
+    return Number.isFinite(value) ? Math.floor(value) : 0;
+  }
+  var SETTINGS_KEY = "fleet.settings";
+  var DEFAULT_SETTINGS = {
+    mainShip: 203,
+    secondShip: 202,
+    transportSpeed: 100,
+    favTransport: null,
+    favDeploy: null,
+    expeditionShip: 0,
+    expeditionValue: "",
+    expeditionExtras: true,
+    repeat: false,
+    shipsOn: true,
+    resourcesOn: true,
+    gateOn: true,
+    ignoreFood: false
+  };
+  function settingsFrom(stored) {
+    const { reserveOn, ...rest } = stored;
+    const legacy = reserveOn === void 0 ? {} : { shipsOn: reserveOn, resourcesOn: reserveOn };
+    return { ...DEFAULT_SETTINGS, ...legacy, ...rest };
+  }
+  var DELIVERY_KEY = "plan.delivery";
+  function deliveryLoad(onPlanet2, reserve, fuel, capacity, need) {
+    const free = resourcesAfterReserve(onPlanet2, reserve, fuel);
+    let room = Math.max(0, Math.floor(capacity));
+    const take = (a, b) => Math.max(0, Math.floor(Math.min(a, b, room)));
+    const deuterium = take(free.deuterium, Math.ceil(need.deuterium));
+    room -= deuterium;
+    const crystal = take(free.crystal, Math.ceil(need.crystal));
+    room -= crystal;
+    const metal = take(free.metal, Math.ceil(need.metal));
+    return { metal, crystal, deuterium };
+  }
+  var CARGO_SHIPS = [203, 202, 219, 209, 210];
+  function cargoShipsFor(amount, stock2, main2, second) {
+    const out = {};
+    let left = Math.max(0, amount);
+    for (const id of [main2, second]) {
+      if (!id || left <= 0) continue;
+      const s = stock2.find((x) => x.id === id);
+      if (!s || s.available <= 0 || s.capacity <= 0) continue;
+      const n = Math.min(s.available, Math.ceil(left / s.capacity));
+      if (n > 0) {
+        out[id] = (out[id] ?? 0) + n;
+        left -= n * s.capacity;
+      }
+    }
+    return out;
+  }
+  function cargoLoad(onPlanet2, reserve, fuel, capacity) {
+    const free = resourcesAfterReserve(onPlanet2, reserve, fuel);
+    let room = Math.max(0, Math.floor(capacity));
+    const deuterium = Math.max(0, Math.floor(Math.min(free.deuterium, room)));
+    room -= deuterium;
+    const crystal = Math.max(0, Math.floor(Math.min(free.crystal, room)));
+    room -= crystal;
+    const metal = Math.max(0, Math.floor(Math.min(free.metal, room)));
+    return { metal, crystal, deuterium };
+  }
+  var EXPEDITION_TABLE = [
+    { topScore: 1e4, base: 10, max: 4e4 },
+    { topScore: 1e5, base: 125, max: 5e5 },
+    { topScore: 1e6, base: 300, max: 12e5 },
+    { topScore: 5e6, base: 450, max: 18e5 },
+    { topScore: 25e6, base: 600, max: 24e5 },
+    { topScore: 5e7, base: 750, max: 3e6 },
+    { topScore: 75e6, base: 900, max: 36e5 },
+    { topScore: 1e8, base: 1050, max: 42e5 },
+    { topScore: Infinity, base: 1250, max: 5e6 }
+  ];
+  function expeditionMax(o) {
+    const row = EXPEDITION_TABLE.find((r) => r.topScore >= (o.topScore ?? Infinity));
+    const factor = o.characterClass === 3 ? 3 * o.economySpeed : 2;
+    const bonus = (1 + o.classBooster) * (1 + (o.lfBooster ?? 0)) * (1 + (o.itemBoost ?? 0));
+    return { base: row.base, max: Math.round(row.max * factor * bonus) };
+  }
+  function expeditionTarget(calculated, value) {
+    const v = value.trim();
+    if (!v) return calculated;
+    if (v.endsWith("%")) return Math.round(calculated * (parseAmount(v.slice(0, -1)) || 0) / 100);
+    return parseAmount(v) || calculated;
+  }
+  var EXPEDITION_FACTOR = { 202: 1, 203: 3, 219: 5.75 };
+  var EXPEDITION_FILLERS = [218, 213, 211, 215, 207, 206, 205, 204];
+  function expeditionFleet(stock2, o) {
+    const has = (id) => (stock2.find((s) => s.id === id)?.available ?? 0) > 0;
+    const need = (id) => {
+      const s = stock2.find((x) => x.id === id);
+      if (!s || s.capacity <= 0) return Infinity;
+      return Math.max(Math.ceil(o.base / (EXPEDITION_FACTOR[id] ?? 1)), Math.ceil(o.target / s.capacity));
+    };
+    let ship = o.ship;
+    if (!ship) {
+      const options = [219, 203, 202].filter(has);
+      ship = options.find((id) => (stock2.find((s) => s.id === id)?.available ?? 0) >= need(id)) ?? options.sort((a, b) => {
+        const cap = (id) => {
+          const s = stock2.find((x) => x.id === id);
+          return s.available * s.capacity;
+        };
+        return cap(b) - cap(a);
+      })[0] ?? 0;
+    }
+    const out = {};
+    if (ship && has(ship)) out[ship] = Math.min(stock2.find((s) => s.id === ship).available, need(ship));
+    if (o.extras) {
+      const filler = EXPEDITION_FILLERS.find((id) => id !== ship && has(id));
+      if (filler) out[filler] = 1;
+      if (ship !== 210 && has(210)) out[210] = 1;
+      if (ship !== 219 && has(219)) out[219] = 1;
+    }
+    return out;
+  }
+  function nextBody(list, current3, opts = {}) {
+    const isMoon2 = list.some((b) => b.moonId === current3);
+    const ids = list.filter((b) => isMoon2 || opts.onlyWithMoon ? b.moonId !== null : b.planetId !== null).map((b) => isMoon2 ? b.moonId : b.planetId);
+    const i = ids.indexOf(current3);
+    if (i < 0) return null;
+    for (let k = 1; k < ids.length; k++) {
+      const step = opts.backwards ? -k : k;
+      const id = ids[((i + step) % ids.length + ids.length) % ids.length];
+      if (id !== opts.skip) return id;
+    }
+    return null;
+  }
+  var LAST_FLEET_KEY = "fleet.last";
+
+  // src/modules/fleet/icons.ts
+  var ICONS = {
+    moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+    transport: '<path d="M2.5 8l6-3 6 3v8l-6 3-6-3z"/><path d="M2.5 8l6 3 6-3M8.5 11v8"/><path d="M17 12h5M19.5 9.5L22 12l-2.5 2.5"/>',
+    deploy: '<circle cx="12" cy="5" r="2"/><path d="M12 7v14M8.5 11h7"/><path d="M4.5 14c0 4 3.3 7 7.5 7s7.5-3 7.5-7"/>',
+    expedition: '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+    fleetsave: '<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+    invert: '<path d="M7 4v15M3.5 15.5L7 19l3.5-3.5"/><path d="M17 20V5M13.5 8.5L17 5l3.5 3.5"/>',
+    cargo: '<path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M4 15v5h16v-5"/>',
+    repeat: '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/>',
+    settings: '<circle cx="12" cy="12" r="2.5"/><circle cx="12" cy="12" r="6.5"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
+    last: '<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/>',
+    rules: '<path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.5"/><circle cx="8" cy="17" r="2.5"/>',
+    caret: '<path d="M7 10l5 5 5-5"/>',
+    reserve: '<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M8 12h8"/>',
+    ships: '<path d="M12 2c2.5 2 4 5 4 9v6l-4 3-4-3v-6c0-4 1.5-7 4-9z"/><path d="M8 13l-3 3v4l3-2M16 13l3 3v4l-3-2"/><circle cx="12" cy="9" r="1.5"/>',
+    resources: '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',
+    gate: '<ellipse cx="12" cy="12" rx="5" ry="9"/><path d="M2 12h6M16 12h6M19 9l3 3-3 3"/>',
+    food: '<path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10"/><path d="M16 3c-1.7 1-2.5 3-2.5 6s1 4 2.5 4v8"/><path d="M4 20L20 4" stroke-width="1.4"/>'
+  };
+  function iconSvg(name, size = 20) {
+    return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
+  }
+
+  // src/modules/shortcuts/index.ts
+  var ACTIONS = [
+    { id: "planet.prev", key: "i", label: "shortcut.prev", group: "planet", glyph: { core: "back" } },
+    { id: "planet.next", key: "o", label: "shortcut.next", group: "planet", glyph: { core: "next" } },
+    { id: "targets.next", key: "m", label: "shortcut.nextTarget", group: "targets", glyph: { core: "target" } },
+    { id: "fleet.moon", key: "l", label: "fleet.btn.moon", group: "fleet", glyph: { fleet: "moon" } },
+    { id: "fleet.transport", key: "t", label: "fleet.btn.transport", group: "fleet", glyph: { fleet: "transport" } },
+    { id: "fleet.deploy", key: "d", label: "fleet.btn.deploy", group: "fleet", glyph: { fleet: "deploy" } },
+    { id: "fleet.expedition", key: "x", label: "fleet.btn.expedition", group: "fleet", glyph: { fleet: "expedition" } },
+    { id: "fleet.fleetsave", key: "e", label: "fleet.btn.fleetsave", group: "fleet", glyph: { fleet: "fleetsave" } },
+    { id: "fleet.last", key: "p", label: "fleet.btn.last", group: "fleet", glyph: { fleet: "last" } },
+    { id: "galaxy.left", key: "ArrowLeft", label: "shortcut.galaxyLeft", group: "galaxy", glyph: { core: "back" }, fixed: true, touchOnly: true },
+    { id: "galaxy.right", key: "ArrowRight", label: "shortcut.galaxyRight", group: "galaxy", glyph: { core: "next" }, fixed: true, touchOnly: true },
+    { id: "galaxy.down", key: "ArrowDown", label: "shortcut.galaxyDown", group: "galaxy", glyph: { core: "chevron" }, fixed: true, touchOnly: true },
+    { id: "galaxy.up", key: "ArrowUp", label: "shortcut.galaxyUp", group: "galaxy", glyph: { core: "chevron", turn: 180 }, fixed: true, touchOnly: true }
+  ];
+  var KEYMAP_KEY = "keys.map";
+  var TOUCH_KEY = "keys.touch";
+  function keymap(store) {
+    const saved = store.get(KEYMAP_KEY, {});
+    return new Map(ACTIONS.map((a) => [a.id, a.fixed ? a.key : a.id in saved ? saved[a.id] ?? null : a.key]));
+  }
+  function usableKey(key) {
+    return /^[a-z0-9]$/i.test(key);
+  }
+  function assignKey(store, id, key) {
+    const k = key?.toLowerCase() ?? null;
+    const map = keymap(store);
+    const saved = { ...store.get(KEYMAP_KEY, {}) };
+    let taken = null;
+    if (k) {
+      for (const [other, ok] of map) if (other !== id && ok === k && !ACTIONS.find((a) => a.id === other)?.fixed) {
+        saved[other] = null;
+        taken = other;
+      }
+    }
+    saved[id] = k;
+    store.set(KEYMAP_KEY, saved);
+    return taken;
+  }
+  function resetKeys(store) {
+    store.set(KEYMAP_KEY, {});
+  }
+  var runs = /* @__PURE__ */ new Map();
+  var installed = null;
+  var current = null;
+  function typing(doc) {
+    const a = doc.activeElement;
+    if (!a) return false;
+    const tag = a.tagName;
+    return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || a.isContentEditable;
+  }
+  var WINDOWS = ["fut-fleet-modal", "fut-dashboard", "fut-planner", "fut-journal", "fut-settings-window"];
+  function registerActions(doc, store, t, list) {
+    for (const [id, run] of Object.entries(list)) runs.set(id, run);
+    current = { doc, store, t };
+    if (installed !== doc) {
+      installed = doc;
+      doc.addEventListener(
+        "keydown",
+        (e) => {
+          if (e.repeat || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey || !current) return;
+          if (typing(doc) || WINDOWS.some((w) => doc.getElementById(w))) return;
+          const k = e.key.toLowerCase();
+          for (const [id, key] of keymap(current.store)) {
+            const def = ACTIONS.find((a) => a.id === id);
+            if (def.touchOnly || key !== k) continue;
+            const run = runs.get(id);
+            if (!run) continue;
+            e.preventDefault();
+            e.stopPropagation();
+            run();
+            return;
+          }
+        },
+        true
+      );
+    }
+    scheduleTouchBar();
+  }
+  function switchBodyUrl(href, cp) {
+    const u = new URL(href);
+    for (const k of [...u.searchParams.keys()]) if (k.startsWith("fut")) u.searchParams.delete(k);
+    u.searchParams.set("cp", String(cp));
+    return u.toString();
+  }
+  function keyLabel(key) {
+    if (!key) return "";
+    return { arrowleft: "\u2190", arrowright: "\u2192", arrowup: "\u2191", arrowdown: "\u2193", enter: "\u21B5" }[key.toLowerCase()] ?? key.toUpperCase();
+  }
+  function glyph(doc, def, size = 18) {
+    if ("fleet" in def.glyph) {
+      const span = doc.createElement("span");
+      span.className = "fut-tb-glyph";
+      span.innerHTML = iconSvg(def.glyph.fleet, size);
+      return span;
+    }
+    const svg2 = icon(doc, def.glyph.core, size, "fut-tb-glyph");
+    if (def.glyph.turn) svg2.style.transform = `rotate(${def.glyph.turn}deg)`;
+    return svg2;
+  }
+  var TOUCH_ID = "fut-touchbar";
+  var SEND = { fleet1: "#continueToFleet2", fleet2: "#sendFleet" };
+  function touchWanted(doc, store) {
+    const mode = store.get(TOUCH_KEY, "auto");
+    if (mode === "on") return true;
+    if (mode === "off") return false;
+    return !!doc.defaultView?.matchMedia?.("(pointer: coarse)").matches;
+  }
+  var TOUCH_CSS = `
+#${TOUCH_ID} { position: fixed; left: 0; top: 0; z-index: 1000000; box-sizing: border-box; transform-origin: 0 0;
+  display: flex; align-items: center; gap: 6px; padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+  background: rgba(8, 13, 20, 0.94); border-top: 1px solid #1F2C40; box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.45);
+  font: 11px/1.2 Verdana, Arial, sans-serif; color: #C9D4E2; }
+#${TOUCH_ID} .keys { flex: 1; display: flex; gap: 6px; min-width: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+#${TOUCH_ID} .keys::-webkit-scrollbar { display: none; }
+#${TOUCH_ID} .sep { flex: none; width: 1px; align-self: stretch; margin: 4px 2px; background: #1F2C40; }
+#${TOUCH_ID} button { flex: none; position: relative; display: inline-flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px; padding: 0; border: 1px solid #24344B; border-radius: 6px; background: #0D1522; color: #4FD1E8;
+  font: inherit; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+#${TOUCH_ID} button:active { background: #12283A; border-color: #4FD1E8; transform: translateY(1px); }
+#${TOUCH_ID} button:focus-visible { outline: 2px solid #4FD1E8; outline-offset: 1px; }
+/* The key in the corner, as on the fleet bar; fingers do not need it. */
+#${TOUCH_ID} button .k { position: absolute; top: 3px; right: 4px; color: #8592A1; font-size: 11px; line-height: 11px; }
+#${TOUCH_ID} button:has(.k) .fut-tb-glyph { margin: 6px 6px 0 0; }
+@media (pointer: coarse) { #${TOUCH_ID} button .k { display: none; } #${TOUCH_ID} button:has(.k) .fut-tb-glyph { margin: 0; } }
+#${TOUCH_ID} button.planet { color: #C9D2DC; }
+#${TOUCH_ID} button.galaxy { color: #7BC47F; }
+#${TOUCH_ID}[data-page="fleet2"] button.fleet, #${TOUCH_ID}[data-page="fleet2"] .sep.fleet { display: none; }
+#${TOUCH_ID} .send { width: auto; min-width: 104px; padding: 0 16px; gap: 8px; border-color: #2B8A5E; background: #12352A; color: #E6F7EE; font-weight: 700; font-size: 13px; }
+#${TOUCH_ID} .send:active { background: #1A4A3A; border-color: #4FE0B0; }
+@media (prefers-reduced-motion: reduce) { #${TOUCH_ID} button:active { transform: none; } }
+#${TOUCH_ID} .send[aria-disabled="true"] { opacity: 0.45; }
+.fut-touch-pad { height: 72px; }
+`;
+  var queued = false;
+  function scheduleTouchBar() {
+    if (queued) return;
+    queued = true;
+    queueMicrotask(() => {
+      queued = false;
+      if (current) mountTouchBar(current.doc, current.store, current.t);
+    });
+  }
+  function mountTouchBar(doc, store, t) {
+    doc.getElementById(TOUCH_ID)?.remove();
+    doc.querySelector(".fut-touch-pad")?.remove();
+    if (!touchWanted(doc, store) || !doc.body) return;
+    if (!doc.getElementById(`${TOUCH_ID}-style`)) {
+      const style = doc.createElement("style");
+      style.id = `${TOUCH_ID}-style`;
+      style.textContent = TOUCH_CSS;
+      doc.head.append(style);
+    }
+    const bar = doc.createElement("div");
+    bar.id = TOUCH_ID;
+    bar.setAttribute("role", "toolbar");
+    bar.setAttribute("aria-label", t("touch.bar"));
+    const keys = doc.createElement("div");
+    keys.className = "keys";
+    const map = keymap(store);
+    let group = "";
+    for (const def of ACTIONS) {
+      const run = runs.get(def.id);
+      if (!run) continue;
+      if (group && group !== def.group) {
+        const sep = doc.createElement("span");
+        sep.className = `sep ${def.group}`;
+        keys.append(sep);
+      }
+      group = def.group;
+      const b = doc.createElement("button");
+      b.type = "button";
+      b.className = def.group;
+      const key = keyLabel(map.get(def.id) ?? null);
+      b.title = key && !def.touchOnly ? `${t(def.label)} [${key}]` : t(def.label);
+      b.setAttribute("aria-label", t(def.label));
+      b.append(glyph(doc, def, 24));
+      if (key && !def.touchOnly) {
+        const k = doc.createElement("span");
+        k.className = "k";
+        k.setAttribute("aria-hidden", "true");
+        k.textContent = key;
+        b.append(k);
+      }
+      b.addEventListener("click", (e) => {
+        e.preventDefault();
+        run();
+      });
+      keys.append(b);
+    }
+    bar.append(keys);
+    const fleet = doc.getElementById("fleetdispatchcomponent");
+    if (fleet) {
+      const send = doc.createElement("button");
+      send.type = "button";
+      send.className = "send";
+      const label = doc.createElement("span");
+      send.append(label, icon(doc, "next", 16));
+      const page = () => doc.getElementById("fleet1")?.style.display === "none" ? "fleet2" : "fleet1";
+      const sync = () => {
+        const p = page();
+        bar.dataset.page = p;
+        label.textContent = t(p === "fleet2" ? "touch.send" : "touch.next");
+        const target = doc.querySelector(SEND[p]);
+        send.setAttribute("aria-disabled", String(!target || target.classList.contains("off") || target.disabled === true));
+      };
+      sync();
+      send.addEventListener("click", (e) => {
+        e.preventDefault();
+        doc.querySelector(SEND[page()])?.click();
+      });
+      new MutationObserver(sync).observe(fleet, { attributes: true, subtree: true, attributeFilter: ["style", "class", "disabled"] });
+      bar.append(send);
+    }
+    if (!keys.childElementCount && !fleet) return;
+    doc.body.append(bar);
+    const pad = doc.createElement("div");
+    pad.className = "fut-touch-pad";
+    doc.body.append(pad);
+    followViewport(doc, bar);
+  }
+  function followViewport(doc, bar) {
+    const vv = doc.defaultView?.visualViewport;
+    if (!vv) {
+      Object.assign(bar.style, { top: "auto", bottom: "0", width: "100%" });
+      return;
+    }
+    const place2 = () => {
+      const b = doc.getElementById(TOUCH_ID);
+      if (!b) return;
+      const s = vv.scale || 1;
+      Object.assign(b.style, { left: `${vv.offsetLeft}px`, top: `${vv.offsetTop + vv.height}px`, width: `${vv.width * s}px`, transform: `scale(${1 / s}) translateY(-100%)` });
+    };
+    place2();
+    if (!followers.has(doc)) {
+      followers.add(doc);
+      vv.addEventListener("resize", place2);
+      vv.addEventListener("scroll", place2);
+    }
+  }
+  var followers = /* @__PURE__ */ new WeakSet();
+
   // src/modules/settings/index.ts
   var SETTINGS_ID = "fut-settings-window";
   var TAB_KEY = "settings.tab";
-  var SECTIONS = ["menu", "mail", "data"];
-  var CSS2 = `
+  var SECTIONS = ["menu", "mail", "fleet", "keys", "data"];
+  var CSS3 = `
 :host { --panel-w: 620px; }
-.body { display: flex; flex-direction: column; gap: 6px; }
-.row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 16px; padding: 10px 12px;
-  border: 1px solid var(--line); border-radius: 7px; background: var(--raised); }
+.body { display: flex; flex-direction: column; }
+/* Rows that follow each other read as one card, split by hairlines. */
+.row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px 16px; padding: 9px 12px;
+  border: 1px solid var(--line); border-top-color: var(--line-soft); margin-top: -1px; background: var(--raised); }
+.row:first-child, :not(.row) + .row { margin-top: 0; border-top-color: var(--line); border-radius: 7px 7px 0 0; }
+.row:last-child, .row:has(+ :not(.row)) { border-radius: 0 0 7px 7px; }
+.row:first-child:last-child, .row:first-child:has(+ :not(.row)), :not(.row) + .row:last-child, :not(.row) + .row:has(+ :not(.row)) { border-radius: 7px; }
+.row + :not(.row) { margin-top: 6px; }
 .row .name { color: var(--text); font-size: 12px; font-weight: 700; }
 .row .desc { grid-column: 1; color: var(--muted); font-size: 11px; line-height: 1.4; }
 .row .control { grid-column: 2; grid-row: 1 / span 2; display: inline-flex; }
@@ -6349,6 +7271,30 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
 .seg:disabled { opacity: 0.45; cursor: not-allowed; }
 .status { min-height: 16px; padding: 0 4px; color: var(--accent); font-size: 11px; }
 .notes { padding: 2px 4px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.field { height: 26px; width: 190px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: #0A111C; color: var(--text); font: 12px Arial, sans-serif; }
+input.field { width: 190px; }
+.field:hover { border-color: #2B6F7D; }
+.group { display: flex; align-items: center; gap: 7px; margin: 12px 0 6px; padding: 0 2px; color: var(--text); font-size: 12px; font-weight: 700; }
+.group:first-child { margin-top: 8px; }
+.group .gi { display: inline-flex; color: var(--accent); }
+.switch { display: inline-flex; align-items: center; height: 28px; padding: 0 2px; border: 0; background: none; cursor: pointer; }
+.switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 9px; }
+.keygrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px; }
+.keygrid + .row { margin-top: 12px; }
+.keyrow { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 6px 8px 6px 10px;
+  border: 1px solid var(--line); border-radius: 7px; background: var(--raised); }
+.keyrow .g, .keyrow .g span { display: inline-flex; color: var(--accent); }
+.keyrow .name { color: var(--text); font-size: 12px; }
+.keyrow .fixed { display: block; color: var(--muted); font-size: 11px; }
+.keycap { min-width: 44px; height: 28px; padding: 0 10px; border: 1px solid #2B6F7D; border-radius: 6px; background: #0A111C; color: var(--accent);
+  font: 700 12px var(--mono); cursor: pointer; }
+.keycap:hover { border-color: var(--accent); }
+.keycap.none { border-style: dashed; border-color: var(--line); color: var(--muted); font: 11px Arial, sans-serif; }
+.keycap.listening { border-color: var(--warn); color: var(--warn); font: 11px Arial, sans-serif; }
+.keycap:disabled { cursor: default; border-color: var(--line); color: var(--muted); }
+.mini { height: 28px; padding: 0 8px; border: 0; border-radius: 6px; background: none; color: var(--muted); font: 11px Arial, sans-serif; cursor: pointer; }
+.mini:hover { background: #16243A; color: var(--text); }
+.mini[hidden] { display: inline-block; visibility: hidden; }
 @media (max-width: 520px) { .row { grid-template-columns: 1fr; } .row .control { grid-column: 1; grid-row: auto; } }
 `;
   var keyHandler = null;
@@ -6363,16 +7309,16 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     const host = doc.createElement("div");
     host.id = SETTINGS_ID;
     const root = host.attachShadow({ mode: "open" });
-    const el5 = (tag, cls = "", text) => {
+    const el6 = (tag, cls = "", text) => {
       const n = doc.createElement(tag);
       if (cls) n.className = cls;
       if (text !== void 0) n.textContent = text;
       return n;
     };
-    const style = el5("style");
-    style.textContent = WINDOW_SHEET + CSS2;
-    const backdrop = el5("div", "backdrop");
-    const panel = el5("div", "panel");
+    const style = el6("style");
+    style.textContent = WINDOW_SHEET + CSS3;
+    const backdrop = el6("div", "backdrop");
+    const panel = el6("div", "panel");
     panel.setAttribute("role", "dialog");
     panel.setAttribute("aria-modal", "true");
     panel.setAttribute("aria-label", t("toolbar.settings"));
@@ -6382,20 +7328,20 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     });
     root.append(style, backdrop);
     doc.body.append(host);
-    let section2 = store.get(TAB_KEY, "menu");
+    let section2 = o.section ?? store.get(TAB_KEY, "menu");
     if (!SECTIONS.includes(section2)) section2 = "menu";
     let menu = { ...o.menu.settings };
     let status = "";
-    const choice = (options, current2, onPick, disabled = false) => {
-      const box = el5("span", "control");
+    const choice = (options, current3, onPick, disabled = false) => {
+      const box = el6("span", "control");
       box.setAttribute("role", "group");
       for (const [v, label] of options) {
-        const b = el5("button", "seg", label);
+        const b = el6("button", "seg", label);
         b.type = "button";
         b.disabled = disabled;
-        b.setAttribute("aria-pressed", String(v === current2));
+        b.setAttribute("aria-pressed", String(v === current3));
         b.addEventListener("click", () => {
-          if (v === current2) return;
+          if (v === current3) return;
           onPick(v);
           draw();
         });
@@ -6404,26 +7350,195 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
       return box;
     };
     const row = (name, desc, control) => {
-      const r = el5("div", "row");
-      r.append(el5("span", "name", name), el5("span", "desc", desc), control);
+      const r = el6("div", "row");
+      r.append(el6("span", "name", name), el6("span", "desc", desc), control);
+      control.querySelector(".switch")?.setAttribute("aria-label", name);
       return r;
     };
-    const yesNo = (v, onPick) => choice([[true, t("settings.on")], [false, t("settings.off")]], v, onPick);
+    const yesNo = (v, onPick) => {
+      const box = el6("span", "control");
+      const b = el6("button", "switch");
+      b.type = "button";
+      b.setAttribute("role", "switch");
+      b.setAttribute("aria-checked", String(v));
+      b.title = t(v ? "settings.on" : "settings.off");
+      b.append(el6("i", "sw-track"));
+      b.addEventListener("click", () => {
+        onPick(!v);
+        draw();
+      });
+      box.append(b);
+      return box;
+    };
+    const group = (label, glyph2) => {
+      const g = el6("div", "group");
+      const gi = el6("span", "gi");
+      gi.append(glyph2);
+      g.append(gi, doc.createTextNode(label));
+      return g;
+    };
+    const fleetGlyph = (name) => {
+      const span = el6("span");
+      span.style.display = "inline-flex";
+      span.innerHTML = iconSvg(name, 16);
+      return span;
+    };
+    const select = (options, current3, onPick) => {
+      const box = el6("span", "control");
+      const sel = el6("select", "field");
+      for (const [v, label] of options) {
+        const opt = el6("option", "", label);
+        opt.value = v;
+        opt.selected = v === current3;
+        sel.append(opt);
+      }
+      sel.addEventListener("change", () => onPick(sel.value));
+      box.append(sel);
+      return box;
+    };
+    const fleetRows = () => {
+      const f = settingsFrom(store.get(SETTINGS_KEY, {}));
+      const set = (next) => {
+        store.set(SETTINGS_KEY, { ...settingsFrom(store.get(SETTINGS_KEY, {})), ...next });
+        o.onFleetChange?.();
+      };
+      const ships = store.get(SHIPS_INFO_KEY, {});
+      const shipName2 = (id) => ships[String(id)]?.name || (t(`ship.${id}`) !== `ship.${id}` ? t(`ship.${id}`) : `#${id}`);
+      const cargo = CARGO_SHIPS.map((id) => [String(id), shipName2(id)]);
+      const speeds = Array.from({ length: 10 }, (_, i) => [String((i + 1) * 10), `${(i + 1) * 10}%`]);
+      const dest = [["0", t("fleet.none")], ...(o.bodies ?? []).map((b) => [String(b.id), b.label])];
+      const value = el6("span", "control");
+      const input = el6("input", "field");
+      input.type = "text";
+      input.value = f.expeditionValue;
+      input.placeholder = t("fleet.auto");
+      input.setAttribute("aria-label", t("fleet.expeditionValue"));
+      input.addEventListener("change", () => set({ expeditionValue: input.value.trim() }));
+      value.append(input);
+      return [
+        group(t("fleet.transportTitle"), fleetGlyph("transport")),
+        row(t("fleet.mainShip"), t("settings.mainShipHint"), select(cargo, String(f.mainShip), (v) => set({ mainShip: Number(v) }))),
+        row(t("fleet.secondShip"), t("settings.secondShipHint"), select([["0", t("fleet.none")], ...cargo], String(f.secondShip), (v) => set({ secondShip: Number(v) }))),
+        row(t("fleet.speed"), t("settings.speedHint"), select(speeds, String(f.transportSpeed), (v) => set({ transportSpeed: Number(v) }))),
+        group(t("fleet.favTitle"), icon(doc, "star", 16)),
+        row(t("fleet.favTransport"), t("settings.favHint"), select(dest, String(f.favTransport ?? 0), (v) => set({ favTransport: Number(v) || null }))),
+        row(t("fleet.favDeploy"), t("settings.favHint"), select(dest, String(f.favDeploy ?? 0), (v) => set({ favDeploy: Number(v) || null }))),
+        group(t("fleet.expeditionTitle"), fleetGlyph("expedition")),
+        row(t("fleet.expeditionShip"), t("settings.expShipHint"), select([["0", t("fleet.bestShip")], ...[219, 203, 202].map((id) => [String(id), shipName2(id)])], String(f.expeditionShip), (v) => set({ expeditionShip: Number(v) }))),
+        row(t("fleet.expeditionValue"), t("settings.expValueHint"), value),
+        row(t("fleet.expeditionExtras"), t("settings.extrasHint"), yesNo(f.expeditionExtras, (v) => set({ expeditionExtras: v }))),
+        group(t("fleet.repeatTitle"), fleetGlyph("repeat")),
+        row(t("fleet.repeat"), t("fleet.repeatHint"), yesNo(f.repeat, (v) => set({ repeat: v })))
+      ];
+    };
+    let listening = null;
+    const keyRows = () => {
+      const map = keymap(store);
+      const out = [
+        row(t("settings.touch"), t("settings.touchHint"), choice([["auto", t("settings.touchAuto")], ["on", t("settings.touchOn")], ["off", t("settings.touchOff")]], store.get(TOUCH_KEY, "auto"), (v) => {
+          store.set(TOUCH_KEY, v);
+          o.onFleetChange?.();
+        }))
+      ];
+      let section3 = "";
+      let grid2 = el6("div", "keygrid");
+      for (const a of ACTIONS) {
+        if (a.group !== section3) {
+          section3 = a.group;
+          grid2 = el6("div", "keygrid");
+          out.push(el6("div", "group", t(`settings.keys.${section3}`)), grid2);
+        }
+        const r = el6("div", "keyrow");
+        const g = el6("span", "g");
+        g.append(glyph(doc, a, 16));
+        const key = map.get(a.id) ?? null;
+        const cap = el6("button", `keycap${key ? "" : " none"}${listening === a.id ? " listening" : ""}`, listening === a.id ? t("settings.keyPress") : key ? keyLabel(key) : t("settings.keyNone"));
+        cap.type = "button";
+        cap.dataset.id = a.id;
+        cap.setAttribute("aria-label", `${t(a.label)}: ${key ? keyLabel(key) : t("settings.keyNone")}. ${a.fixed ? t("settings.keyFixed") : t("settings.keyChange")}`);
+        const reset = el6("button", "mini", t("settings.keyReset"));
+        reset.type = "button";
+        if (a.fixed) {
+          cap.disabled = true;
+          reset.hidden = true;
+        } else {
+          cap.addEventListener("click", () => {
+            listening = listening === a.id ? null : a.id;
+            status = listening ? t("settings.keyListen", { name: t(a.label) }) : "";
+            draw();
+            root.querySelector(`.keycap[data-id="${a.id}"]`)?.focus();
+          });
+          reset.hidden = key === a.key;
+          reset.title = t("settings.keyResetHint", { key: keyLabel(a.key) });
+          reset.addEventListener("click", () => {
+            const taken = assignKey(store, a.id, a.key);
+            status = taken ? t("settings.keyTaken", { key: keyLabel(a.key), other: t(ACTIONS.find((x) => x.id === taken).label) }) : t("settings.keySaved");
+            o.onFleetChange?.();
+            draw();
+          });
+        }
+        const name = el6("span", "name", t(a.label));
+        if (a.touchOnly) name.append(el6("span", "fixed", t("settings.keyGame")));
+        r.append(g, name, reset, cap);
+        grid2.append(r);
+      }
+      const all2 = el6("span", "control");
+      const b = el6("button", "seg", t("settings.keysDefault"));
+      b.type = "button";
+      b.addEventListener("click", () => {
+        resetKeys(store);
+        listening = null;
+        status = t("settings.keysDefaultDone");
+        o.onFleetChange?.();
+        draw();
+      });
+      all2.append(b);
+      out.push(row(t("settings.keysDefault"), t("settings.keysHint"), all2));
+      const st = el6("div", "status", status);
+      st.setAttribute("role", "status");
+      out.push(st);
+      return out;
+    };
+    const capture = (e) => {
+      if (!listening) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const id = listening;
+      const def = ACTIONS.find((a) => a.id === id);
+      if (e.key === "Escape") {
+        listening = null;
+        status = "";
+      } else if (e.key === "Delete" || e.key === "Backspace") {
+        assignKey(store, id, null);
+        listening = null;
+        status = t("settings.keyCleared", { name: t(def.label) });
+        o.onFleetChange?.();
+      } else if (!e.ctrlKey && !e.altKey && !e.metaKey && usableKey(e.key)) {
+        const taken = assignKey(store, id, e.key);
+        listening = null;
+        status = taken ? t("settings.keyTaken", { key: keyLabel(e.key), other: t(ACTIONS.find((x) => x.id === taken).label) }) : t("settings.keySaved");
+        o.onFleetChange?.();
+      } else {
+        status = t("settings.keyBad");
+      }
+      draw();
+      root.querySelector(`.keycap[data-id="${id}"]`)?.focus();
+    };
     const draw = () => {
-      const head = el5("div", "head");
-      const titles = el5("div", "titles");
-      titles.append(el5("h2", "", t("toolbar.settings")), el5("span", "sub", t("settings.sub")));
-      const close = el5("button", "close");
+      const head = el6("div", "head");
+      const titles = el6("div", "titles");
+      titles.append(el6("h2", "", t("toolbar.settings")), el6("span", "sub", t("settings.sub")));
+      const close = el6("button", "close");
       close.type = "button";
       close.title = t("fleet.close");
       close.setAttribute("aria-label", t("fleet.close"));
       close.append(icon(doc, "close", 16));
       close.addEventListener("click", () => closeSettings(doc));
       head.append(titles, close);
-      const tabs = el5("div", "tabs");
+      const tabs = el6("div", "tabs");
       tabs.setAttribute("role", "tablist");
       for (const s of SECTIONS) {
-        const b = el5("button", "tab", t(`settings.section.${s}`));
+        const b = el6("button", "tab", t(`settings.section.${s}`));
         b.type = "button";
         b.setAttribute("role", "tab");
         b.setAttribute("aria-selected", String(s === section2));
@@ -6431,12 +7546,13 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         b.addEventListener("click", () => {
           section2 = s;
           status = "";
+          listening = null;
           store.set(TAB_KEY, s);
           draw();
         });
         tabs.append(b);
       }
-      const body = el5("div", "body");
+      const body = el6("div", "body");
       body.setAttribute("role", "tabpanel");
       if (section2 === "menu") {
         const setMenu = (next) => {
@@ -6446,7 +7562,8 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         body.append(
           row(t("settings.view"), t(o.menu.canSide ? "settings.viewHint" : "settings.viewNarrow"), choice([["side", t("planetMenu.side")], ["compact", t("planetMenu.compact")]], o.menu.canSide ? menu.mode : "compact", (v) => setMenu({ mode: v }), !o.menu.canSide)),
           row(t("settings.totals"), t("settings.totalsHint"), yesNo(menu.showTotals, (v) => setMenu({ showTotals: v }))),
-          row(t("settings.markIdle"), t("settings.markIdleHint"), yesNo(menu.markIdle, (v) => setMenu({ markIdle: v })))
+          row(t("settings.totalView"), t("settings.totalViewHint"), choice([["msu", "MSU 3:2:1"], ["sum", "1:1:1"]], menu.totalView ?? "msu", (v) => setMenu({ totalView: v }), !menu.showTotals)),
+          row(t("settings.fleetPill"), t("settings.fleetPillHint"), yesNo(menu.showFleet === true, (v) => setMenu({ showFleet: v })))
         );
       } else if (section2 === "mail") {
         const set = (key, v) => {
@@ -6459,10 +7576,14 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
           row(t("settings.shared"), t("settings.sharedHint"), yesNo(store.get(SPY_SHARED_KEY, true), (v) => set(SPY_SHARED_KEY, v))),
           row(t("settings.fold"), t("settings.foldHint"), yesNo(store.get(FOLD_KEY, true), (v) => set(FOLD_KEY, v)))
         );
+      } else if (section2 === "fleet") {
+        body.append(...fleetRows());
+      } else if (section2 === "keys") {
+        body.append(...keyRows());
       } else {
         if (o.backup) {
           const { onExport, onImport } = o.backup;
-          const picker = el5("input");
+          const picker = el6("input");
           picker.type = "file";
           picker.hidden = true;
           picker.title = t("settings.backupImportHint");
@@ -6478,19 +7599,19 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
             }).finally(draw);
           });
           const action = (label, onClick) => {
-            const box = el5("span", "control");
-            const b = el5("button", "seg", label);
+            const box = el6("span", "control");
+            const b = el6("button", "seg", label);
             b.type = "button";
             b.addEventListener("click", onClick);
             box.append(b);
             return box;
           };
-          const two = el5("span", "control");
+          const two = el6("span", "control");
           for (const [label, fn] of [[t("settings.backupExport"), () => {
             status = t("settings.backupSaved", { n: onExport() });
             draw();
           }], [t("settings.backupImport"), () => picker.click()]]) {
-            const b = el5("button", "seg", label);
+            const b = el6("button", "seg", label);
             b.type = "button";
             b.addEventListener("click", fn);
             two.append(b);
@@ -6500,16 +7621,17 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
             row(t("settings.oglight"), t("settings.backupImportHint"), action(t("settings.oglightImport"), () => picker.click())),
             picker
           );
-          const s = el5("div", "status", status);
+          const s = el6("div", "status", status);
           s.setAttribute("role", "status");
           body.append(s);
         }
-        if (o.notes?.length) body.append(el5("div", "notes", o.notes.join(" \xB7 ")));
+        if (o.notes?.length) body.append(el6("div", "notes", o.notes.join(" \xB7 ")));
       }
       panel.replaceChildren(head, tabs, body);
     };
     draw();
     keyHandler = (e) => {
+      if (listening) return capture(e);
       if (e.key === "Escape") closeSettings(doc);
     };
     doc.addEventListener("keydown", keyHandler, true);
@@ -6518,6 +7640,17 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
   // src/engines/account.ts
   var KEYS3 = ["metal", "crystal", "deuterium"];
   var msu2 = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
+  var FLYING = [202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 213, 214, 215, 218, 219];
+  function fleetValue(body) {
+    let total = 0;
+    for (const id of FLYING) {
+      const n = body.levels[String(id)] ?? 0;
+      if (!n) continue;
+      const c = rawCost(id, 1);
+      total += n * (c.metal + c.crystal + c.deuterium);
+    }
+    return total;
+  }
   function bodyRows(snapshot, entries, now, queues = null) {
     if (!snapshot) return [];
     const byId = new Map(snapshot.bodies.map((b) => [b.id, b]));
@@ -6620,7 +7753,7 @@ body.fut-on #planetbarcomponent #countColonies { display: none !important; }
 ${L} { width: 100% !important; display: flex !important; flex-direction: column; gap: 2px; padding: 0 !important; background: none !important; }
 ${L} .smallplanet.fut-row {
   position: relative !important; display: flex !important; flex-direction: row; align-items: stretch;
-  width: 100% !important; height: 40px !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important;
+  width: 100% !important; height: var(--fut-row-h, 40px) !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important;
   border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A !important; overflow: hidden; box-sizing: border-box;
 }
 ${L} .smallplanet.fut-current { border-color: #2C5A73; }
@@ -6634,7 +7767,7 @@ ${L} a.planetlink {
 }
 ${L} a.planetlink:hover { background: rgba(79,209,232,0.08) !important; }
 ${L} a.planetlink .planetBarSpaceObjectContainer {
-  position: absolute !important; left: -6px !important; top: 0 !important;
+  position: absolute !important; left: -6px !important; top: calc(50% - 20px) !important;
   width: 40px !important; height: 40px !important; margin: 0 !important; opacity: 0.85;
 }
 ${L} .planetBarSpaceObjectHighlightContainer { display: none !important; }
@@ -6663,11 +7796,15 @@ ${L} .fut-cell.fut-has-fill {
   background: linear-gradient(90deg, color-mix(in srgb, currentColor 15%, transparent) var(--fut-fill),
     rgba(255,255,255,0.04) var(--fut-fill)) !important;
 }
-${L} .fut-m, .fut-totals .fut-m { color: ${RES_COLORS.metal}; }
-${L} .fut-c, .fut-totals .fut-c { color: ${RES_COLORS.crystal}; }
-${L} .fut-d, .fut-totals .fut-d { color: ${RES_COLORS.deuterium}; }
+${L} .fut-m, .fut-totals .fut-m .fut-tname { color: ${RES_COLORS.metal}; }
+${L} .fut-c, .fut-totals .fut-c .fut-tname { color: ${RES_COLORS.crystal}; }
+${L} .fut-d, .fut-totals .fut-d .fut-tname { color: ${RES_COLORS.deuterium}; }
 ${L} .fut-full { color: #F5B547 !important; font-weight: 700; }
 ${L} .fut-missing { color: #8A9BB0; }
+/* Fleet pill: what the ships here are worth, under the resources. */
+${L} .fut-fleet { margin: 1px 0 0 auto; padding: 0 4px; border-radius: 6px; background: rgba(255, 122, 122, 0.16); color: #FFA0A0; line-height: 11px; max-width: 100%; }
+${L} .fut-fleet.fut-none { visibility: hidden; }
+.fut-totals .fut-fleetrow .fut-tname { color: #FFA0A0; }
 
 /* Moon: its own tile on the right of the same row. */
 ${L} a.moonlink {
@@ -6707,91 +7844,101 @@ ${L} .fut-age-fresh { color: #38C56E; }
 ${L} .fut-age-warm { color: #E3BB28; }
 ${L} .fut-age-old { color: #EF7676; }
 
-/* Running queues: one coloured stripe per kind (OGLight colours), details in the tooltip. */
-${L} .fut-queue { display: flex; gap: 2px; margin-top: 2px; height: 3px; }
-${L} .fut-q { display: block; width: 12px; height: 3px; border-radius: 2px; background: currentColor; }
-${L} a.moonlink .fut-queue { position: absolute; left: 3px; bottom: 3px; margin: 0; }
-${L} a.moonlink .fut-q { width: 8px; }
+/* What is being built: one dot per queue kind (OGLight colours) where the game's wrench was; details in the tooltip. */
+${L} .smallplanet .constructionIcon { display: none !important; }
+${L} .fut-queue { position: absolute; left: 2px; bottom: 2px; z-index: 2; display: flex; gap: 2px; padding: 2px; border-radius: 6px; background: rgba(5,10,18,0.85); }
+${L} .fut-q { display: block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+${L} a.moonlink .fut-queue { left: 2px; bottom: auto; top: 1px; padding: 1px 2px; }
+${L} a.moonlink .fut-q { width: 5px; height: 5px; }
 ${L} .fut-q-building { color: #FF8200; }
 ${L} .fut-q-research { color: #32FB2F; }
 ${L} .fut-q-ship { color: #FFEB00; }
 ${L} .fut-q-lfbuilding { color: #FF79BD; }
 ${L} .fut-q-lfresearch { color: #42AFFF; }
-
-/* Queue: the game's own construction icon (kept clickable) on the skin, or an amber dot when idle. */
-${L} .smallplanet .constructionIcon,
+${L} .fut-q-unknown { color: #4FD1E8; }
+/* The game's attack alert keeps its place on the skin. */
 ${L} .smallplanet a.alert {
-  position: absolute !important; left: 1px !important; top: auto !important; bottom: 1px !important; right: auto !important; z-index: 2;
-  width: 12px !important; height: 12px !important; border-radius: 50%;
-  background-color: rgba(79,209,232,0.35) !important; box-shadow: 0 0 0 1px #0A111C;
-}
-${L} .smallplanet a.constructionIcon.moon { left: auto !important; right: 2px !important; top: 1px !important; bottom: auto !important; }
-${L} .fut-idle {
-  position: absolute; left: 3px; bottom: 3px; width: 6px; height: 6px; border-radius: 50%;
-  background: #F5B547; box-shadow: 0 0 0 1px #0A111C;
+  position: absolute !important; left: 1px !important; top: auto !important; bottom: 1px !important; right: auto !important; z-index: 3;
+  width: 12px !important; height: 12px !important; border-radius: 50%; box-shadow: 0 0 0 1px #0A111C;
 }
 
-/* Compact: the game's width, 30px rows, no numbers, moon as a square button. */
-${L}.fut-mode-compact .smallplanet.fut-row { height: 34px !important; }
-${L}.fut-mode-compact a.planetlink { padding-left: 30px !important; }
-${L}.fut-mode-compact a.planetlink .planetBarSpaceObjectContainer,
-${L}.fut-mode-compact a.planetlink img.planetPic { width: 36px !important; height: 36px !important; }
-${L}.fut-mode-compact .fut-name .planet-name { font-size: 11px !important; }
-${L}.fut-mode-compact .fut-name .planet-koords { font-size: 10px !important; }
-${L}.fut-mode-compact .fut-res,
-${L}.fut-mode-compact .fut-nomoon { display: none; }
-${L}.fut-mode-compact a.moonlink { width: 32px !important; padding: 0 !important; }
-${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { left: 6px !important; top: 7px !important; width: 18px !important; height: 18px !important; }
-${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height: 18px !important; }
+/* Compact: the game's width. Coordinates over the planet's skin (no name), the numbers, the moon as a square button. */
+${L}.fut-mode-compact a.planetlink { padding: 0 2px 0 3px !important; gap: 2px; }
+${L}.fut-mode-compact a.planetlink .planetBarSpaceObjectContainer { left: -10px !important; opacity: 0.4; }
+${L}.fut-mode-compact .fut-name .planet-name { display: none !important; }
+${L}.fut-mode-compact .fut-name .planet-koords { font-size: 11px !important; letter-spacing: -0.4px; color: #E6EDF5 !important; text-overflow: clip; }
+${L}.fut-mode-compact .fut-res { width: 38px; }
+${L}.fut-mode-compact .fut-cell { padding: 0 1px; }
+${L}.fut-mode-compact .fut-nomoon { width: 22px; }
+${L}.fut-mode-compact a.moonlink { width: 22px !important; padding: 0 !important; justify-content: center; }
+${L}.fut-mode-compact a.moonlink .fut-res, ${L}.fut-mode-compact a.moonlink .fut-age { display: none; }
+${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: static !important; width: 16px !important; height: 16px !important; }
 
-/* Toolbar: replaces the colony counter. Three data buttons, then sync and settings stacked. */
+/* Toolbar: replaces the colony counter. Two lines that open their window, then sync and settings stacked. */
 #planetbarcomponent .fut-toolbar {
-  box-sizing: border-box; display: grid !important; height: auto !important; padding: 0 !important; grid-template-columns: repeat(2, minmax(0, 1fr)) 24px; margin: 0 0 3px;
-  border: 1px solid #1F2C40; border-radius: 6px; background: #0B121D; overflow: hidden;
+  box-sizing: border-box; display: grid !important; height: auto !important; padding: 0 !important; grid-template-columns: minmax(0, 1fr) 26px; margin: 0 0 3px;
+  border: 1px solid #1F2C40; border-radius: 7px; background: #0B121D; overflow: hidden;
 }
-#planetbarcomponent .fut-cell {
-  box-sizing: border-box !important; height: auto !important; width: auto !important; box-shadow: none !important; border-radius: 0 !important; font: inherit;
-  display: flex; flex-direction: column; align-items: flex-start; gap: 1px; min-width: 0; padding: 4px 6px 5px; margin: 0;
-  border: 0 !important; border-right: 1px solid #1F2C40 !important; border-bottom: 1px solid #1F2C40 !important; background: none !important; color: inherit; text-align: left; cursor: pointer;
+#planetbarcomponent .fut-toolbar .fut-cell {
+  box-sizing: border-box !important; grid-column: 1; height: 26px !important; width: auto !important; box-shadow: none !important; border-radius: 0 !important; font: inherit;
+  display: flex; align-items: center; gap: 6px; min-width: 0; padding: 0 8px; margin: 0;
+  border: 0 !important; border-right: 1px solid #1F2C40 !important; background: none !important; color: inherit; text-align: left; cursor: pointer;
 }
-#planetbarcomponent .fut-toolbar > .fut-cell:nth-child(n+3) { border-bottom: 0 !important; }
-#planetbarcomponent .fut-cell:hover:not(:disabled) { background: #111D2D !important; }
-#planetbarcomponent .fut-cell:hover:not(:disabled) .fut-cell-k { color: #C9D4E2; }
-#planetbarcomponent .fut-cell:focus-visible, #planetbarcomponent .fut-tool:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -2px; }
-#planetbarcomponent .fut-cell:disabled { cursor: default; }
-#planetbarcomponent .fut-cell-k { max-width: 100%; font: 11px/13px Arial, sans-serif; color: #9AA9BC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#planetbarcomponent .fut-cell-v { max-width: 100%; font: 700 12px/14px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#planetbarcomponent .fut-cell-v.fut-warn { color: #F5B547; } .fut-cell-v.fut-ok { color: #4FE0B0; }
-#planetbarcomponent .fut-side { display: flex; flex-direction: column; grid-column: 3; grid-row: 1 / span 2; }
+#planetbarcomponent .fut-toolbar .fut-cell + .fut-cell { border-top: 1px solid #1F2C40 !important; }
+#planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) { background: #111D2D !important; }
+#planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) .fut-cell-k { color: #E6EDF5; }
+#planetbarcomponent .fut-toolbar .fut-cell:focus-visible, #planetbarcomponent .fut-tool:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -2px; }
+#planetbarcomponent .fut-toolbar .fut-cell:disabled { cursor: default; }
+#planetbarcomponent .fut-cell-i { flex: none; display: inline-flex; color: #4FD1E8; }
+#planetbarcomponent .fut-cell-k { flex: none; font: 12px/14px Arial, sans-serif; color: #C9D4E2; white-space: nowrap; }
+#planetbarcomponent .fut-cell-v { flex: 1; min-width: 0; font: 700 12px/14px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#planetbarcomponent .fut-cell-v small { font: 11px/14px Arial, sans-serif; color: #9AA9BC; }
+#planetbarcomponent .fut-cell-v.fut-warn { color: #F5B547; } #planetbarcomponent .fut-cell-v.fut-ok { color: #4FE0B0; }
+#planetbarcomponent .fut-side { display: flex; flex-direction: column; grid-column: 2; grid-row: 1 / span 2; }
 #planetbarcomponent .fut-tool {
   position: relative; flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; padding: 0;
   border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; color: #8A9BB0; cursor: pointer; height: auto !important; min-height: 0 !important;
 }
 #planetbarcomponent .fut-tool + .fut-tool { border-top: 1px solid #1F2C40 !important; }
-#planetbarcomponent .fut-tool svg { width: 11px; height: 11px; }
+#planetbarcomponent .fut-tool svg { width: 13px; height: 13px; }
 #planetbarcomponent .fut-tool:hover { background: #111D2D !important; color: #E6EDF5; }
 #planetbarcomponent .fut-tool:disabled { opacity: 0.35; cursor: default; background: none; }
 #planetbarcomponent .fut-tool[aria-expanded="true"] { background: #12283A !important; color: #4FD1E8; }
 #planetbarcomponent .fut-tool.fut-stale { color: #F5B547; }
 #planetbarcomponent .fut-tool.fut-failed { color: #E5534B; }
 #planetbarcomponent .fut-tool.fut-busy svg { animation: fut-spin 1s linear infinite; }
-#planetbarcomponent:not(.fut-wide) .fut-cell { padding: 3px 3px 4px; }
-#planetbarcomponent:not(.fut-wide) .fut-cell-v { font-size: 10px; }
+/* Game width: no room for the names, the icon and the tooltip say what the number is. */
+#planetbarcomponent:not(.fut-wide) .fut-toolbar .fut-cell { padding: 0 5px; gap: 4px; }
+#planetbarcomponent:not(.fut-wide) .fut-cell-k, #planetbarcomponent:not(.fut-wide) .fut-cell-v small { display: none; }
 @keyframes fut-spin { to { transform: rotate(360deg); } }
 
 
+/* Totals: a table, resource by resource: in stock now, made in a day. Numbers in one bright colour, right-aligned. */
 .fut-totals {
-  box-sizing: border-box; margin-top: 4px; padding: 6px 8px; border-radius: 7px;
-  border: 1px solid #1F2C40; background: #111B2A; display: grid; grid-template-columns: 1fr auto;
-  gap: 2px 6px; font: 11px monospace;
+  box-sizing: border-box; margin-top: 4px; padding: 2px 8px 4px; border-radius: 7px; border: 1px solid #1F2C40; background: #111B2A;
+  font: 12px/1.3 Arial, Helvetica, sans-serif; font-variant-numeric: tabular-nums;
 }
-.fut-totals .fut-rate { color: #8A9BB0; text-align: right; }
-.fut-totals .fut-msu { color: #4FD1E8; }
+.fut-totals .fut-trow { display: grid; grid-template-columns: minmax(0, 1fr) 58px 62px; align-items: baseline; gap: 6px; min-height: 20px; padding: 2px 0; }
+.fut-totals .fut-trow + .fut-trow { border-top: 1px solid #16202F; }
+.fut-totals .fut-thead { min-height: 0; color: #9AA9BC; font-size: 11px; }
+.fut-totals .fut-thead + .fut-trow { border-top-color: #1F2C40; }
+.fut-totals .fut-tname { display: flex; align-items: center; gap: 6px; min-width: 0; white-space: nowrap; overflow: hidden; }
+.fut-totals .fut-trow:not(.fut-thead) .fut-tname::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.fut-totals .fut-tnum { text-align: right; white-space: nowrap; color: #E6EDF5; font: 700 12px Consolas, "JetBrains Mono", monospace; }
+.fut-totals .fut-tnum:last-child { color: #B4C2D3; font-weight: 400; }
+.fut-totals .fut-thead .fut-tnum { color: inherit; font: inherit; }
+.fut-totals .fut-msu { border-top-color: #2C3E57 !important; }
+.fut-totals .fut-msu .fut-tname { color: #4FD1E8; font-weight: 700; }
+.fut-totals .fut-msu .fut-tnum:last-child { color: #E6EDF5; }
+#planetbarcomponent:not(.fut-wide) .fut-totals { padding: 2px 4px 4px; }
+#planetbarcomponent:not(.fut-wide) .fut-totals .fut-trow { grid-template-columns: 8px minmax(0, 1fr) minmax(0, 1fr); gap: 3px; }
+#planetbarcomponent:not(.fut-wide) .fut-totals .fut-tname { font-size: 0; gap: 0; }
+#planetbarcomponent:not(.fut-wide) .fut-totals .fut-tnum { font-size: 11px; }
 `;
 
   // src/modules/planet-menu/index.ts
-  var STYLE_ID = "fut-planet-menu-style";
-  var ICONS = {
+  var STYLE_ID2 = "fut-planet-menu-style";
+  var ICONS2 = {
     journal: '<path d="M5 3.5h11a3 3 0 0 1 3 3V20.5H8a3 3 0 0 1-3-3z" fill="none" stroke-width="2"/><path d="M5 17.5a3 3 0 0 1 3-3h11" fill="none" stroke-width="2"/><path stroke="none" d="M9.5 6.5l1 2.2 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3L6.2 9l2.3-.3z"/>',
     planner: '<path d="M9 6h11M9 12h11M9 18h11" fill="none" stroke-width="2.2"/><path stroke="none" d="M3 4.5h3v3H3zM3 10.5h3v3H3zM3 16.5h3v3H3z"/>',
     dashboard: '<path stroke="none" d="M3 3h8v10H3zM13 3h8v6h-8zM13 11h8v10h-8zM3 15h8v6H3z"/>',
@@ -6800,35 +7947,35 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     sync: '<path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9" fill="none" stroke-width="2.2"/><path d="M19 3v5h-5M5 21v-5h5" fill="none" stroke-width="2.2"/>',
     settings: '<path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z" fill="none" stroke-width="2.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" fill="none" stroke-width="2.2"/>'
   };
-  function el2(doc, tag, className, text) {
+  function el3(doc, tag, className, text) {
     const node = doc.createElement(tag);
     node.className = className;
     if (text !== void 0) node.textContent = text;
     return node;
   }
   function iconButton2(doc, icon2, title, onClick) {
-    const button3 = el2(doc, "button", `fut-tool fut-tool-${icon2}`);
+    const button3 = el3(doc, "button", `fut-tool fut-tool-${icon2}`);
     button3.type = "button";
     button3.title = title;
     button3.setAttribute("aria-label", title);
-    button3.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor" stroke="currentColor">${ICONS[icon2]}</svg>`;
+    button3.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor" stroke="currentColor">${ICONS2[icon2]}</svg>`;
     button3.addEventListener("click", (event) => {
       event.preventDefault();
       onClick();
     });
     return button3;
   }
-  function resourceColumn(doc, body, now, locale, withStorage) {
-    const box = el2(doc, "span", "fut-res");
+  function resourceColumn(doc, body, now, locale, withStorage, view2) {
+    const box = el3(doc, "span", "fut-res");
     if (!body) {
-      for (const cls of ["fut-m", "fut-c", "fut-d"]) box.append(el2(doc, "span", `fut-cell ${cls} fut-missing`, "\u2014"));
+      for (const cls of ["fut-m", "fut-c", "fut-d"]) box.append(el3(doc, "span", `fut-cell ${cls} fut-missing`, "\u2014"));
       return box;
     }
     const amount = estimateResources(body, now);
     const fill = withStorage ? storageFill(body, amount) : null;
     const cell = (key, cls) => {
       const full = fill !== null && fill[key] >= 0.9;
-      const node = el2(doc, "span", full ? `fut-cell ${cls} fut-full` : `fut-cell ${cls}`, formatUnits(amount[key], locale));
+      const node = el3(doc, "span", full ? `fut-cell ${cls} fut-full` : `fut-cell ${cls}`, formatUnits(amount[key], locale));
       if (fill !== null) {
         const pct = Math.round(fill[key] * 100);
         node.style.setProperty("--fut-fill", `${pct}%`);
@@ -6840,6 +7987,12 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     cell("metal", "fut-m");
     cell("crystal", "fut-c");
     cell("deuterium", "fut-d");
+    if (view2.fleet) {
+      const value = fleetValue(body);
+      const pill = el3(doc, "span", `fut-cell fut-fleet${value ? "" : " fut-none"}`, value ? formatUnits(value, locale) : "");
+      if (value) pill.title = view2.t("planetMenu.fleetHint");
+      box.append(pill);
+    }
     return box;
   }
   function guardSkin(img) {
@@ -6867,7 +8020,7 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
   function ageBadge(doc, body, now, t) {
     if (!body || !body.resourcesAt) return null;
     const { text, cls } = dataAge(body.resourcesAt, now);
-    const badge = el2(doc, "span", `fut-age ${cls}`, text);
+    const badge = el3(doc, "span", `fut-age ${cls}`, text);
     badge.dataset.at = String(body.resourcesAt);
     badge.title = t("planetMenu.age");
     return badge;
@@ -6889,62 +8042,72 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     const hours = Math.floor(min / 60);
     return hours < 48 ? `${hours}h ${String(min % 60).padStart(2, "0")}m` : `${Math.floor(hours / 24)}d ${hours % 24}h`;
   }
-  function queueStripes(doc, items, now, t, locale) {
-    if (!items.length) return null;
-    const box = el2(doc, "span", "fut-queue");
-    box.title = items.map((i) => `${t(`queue.${i.kind}`)}: ${queueLabel(i, locale)} \xB7 ${remaining(i.end, now)}`).join("\n");
-    for (const i of items) box.append(el2(doc, "span", `fut-q fut-q-${i.kind}`));
+  function queueDots(doc, items, building, now, t, locale) {
+    if (!items.length && !building) return null;
+    const box = el3(doc, "span", "fut-queue");
+    if (items.length) {
+      box.title = items.map((i) => `${t(`queue.${i.kind}`)}: ${queueLabel(i, locale)} \xB7 ${remaining(i.end, now)}`).join("\n");
+      for (const kind of new Set(items.map((i) => i.kind))) box.append(el3(doc, "span", `fut-q fut-q-${kind}`));
+    } else {
+      box.title = building?.getAttribute("title") || t("planetMenu.building");
+      box.append(el3(doc, "span", "fut-q fut-q-unknown"));
+    }
     return box;
   }
   function clearPlanetMenu(doc) {
-    doc.querySelectorAll(".fut-res, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-idle, .fut-nomoon, .fut-age, .fut-queue").forEach((n) => n.remove());
+    doc.querySelectorAll(".fut-res, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue").forEach((n) => n.remove());
     doc.querySelectorAll(".fut-name").forEach((wrap) => wrap.replaceWith(...Array.from(wrap.childNodes)));
-    doc.querySelectorAll(".fut-row").forEach((n) => n.classList.remove("fut-row", "fut-current", "fut-building"));
+    doc.querySelectorAll(".fut-row").forEach((n) => n.classList.remove("fut-row", "fut-current"));
   }
   function canWiden(doc) {
     const banner = doc.getElementById("bannerskyscrapercomponent");
-    const view = doc.documentElement.clientWidth;
+    const view2 = doc.documentElement.clientWidth;
     if (!banner) return true;
     const rect = banner.getBoundingClientRect();
     const shifted = rect.right + (MENU_WIDTH - NATIVE_WIDTH + 8);
-    return rect.width === 0 || shifted <= view;
+    return rect.width === 0 || shifted <= view2;
   }
   function formatTime(at, locale) {
     return new Date(at).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
   }
   function toolbar(o, colonies, roomy) {
     const { doc, t } = o;
-    const bar = el2(doc, "div", "fut-toolbar");
+    const bar = el3(doc, "div", "fut-toolbar");
     if (colonies) bar.title = colonies;
     const fmt = (n) => formatUnits(n, o.locale);
     const msu4 = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
-    const cell = (label, value, cls, title, onClick) => {
-      const b = el2(doc, "button", "fut-cell");
+    const cell = (glyph2, label, value, note, unit, cls, title, onClick) => {
+      const b = el3(doc, "button", "fut-cell");
       b.type = "button";
       b.title = title;
-      b.append(el2(doc, "span", "fut-cell-k", label), el2(doc, "span", `fut-cell-v ${cls}`.trim(), value));
+      const ico = el3(doc, "span", "fut-cell-i");
+      ico.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="currentColor" stroke="currentColor">${ICONS2[glyph2]}</svg>`;
+      const v = el3(doc, "span", `fut-cell-v ${cls}`.trim());
+      if (note) v.append(el3(doc, "small", "", note), " ");
+      v.append(value);
+      if (unit) v.append(" ", el3(doc, "small", "", unit));
+      b.append(ico, el3(doc, "span", "fut-cell-k", label), v);
       if (onClick) b.addEventListener("click", onClick);
       else b.disabled = true;
       bar.append(b);
     };
     const perDay = o.snapshot ? msu4(totals(o.snapshot, o.now).perHour) * 24 : null;
-    cell(t("bar.dash"), perDay === null ? "\u2014" : `+${fmt(perDay)}${t("bar.perDay")}`, "", `${t("dash.title")}${perDay === null ? "" : ` \xB7 ${t("bar.dashHint")}`}`, o.onOpenDashboard);
+    cell("dashboard", t("bar.prod"), perDay === null ? "\u2014" : `+${fmt(perDay)}`, "", perDay === null ? "" : t("bar.msuDay"), "", `${t("dash.title")}${perDay === null ? "" : ` \xB7 ${t("bar.dashHint")}`}`, o.onOpenDashboard);
     const count2 = o.planCount ?? 0;
     const gap = o.planGap;
-    const planValue = !count2 ? "\u2014" : gap === null || gap === void 0 ? "?" : gap > 0 ? `\u2212${fmt(gap)}` : t("bar.ready");
-    const planCls = !count2 || gap === null || gap === void 0 ? "" : gap > 0 ? "fut-warn" : "fut-ok";
-    cell(count2 ? t("bar.plan", { n: count2 > 99 ? "99+" : count2 }) : t("bar.planEmpty"), planValue, planCls, `${t("plan.title")} \xB7 ${count2 && gap ? t("bar.planHint") : t("plan.title")}`, o.onOpenPlanner);
-    const today = o.journalToday;
+    const known = count2 > 0 && gap !== null && gap !== void 0;
+    const planValue = !count2 ? "\u2014" : !known ? "?" : gap > 0 ? fmt(gap) : t("bar.ready");
     cell(
-      t("bar.journal"),
-      today && today.count ? `${today.net >= 0 ? "+" : "\u2212"}${fmt(Math.abs(today.net))}` : "\u2014",
-      today && today.count ? today.net >= 0 ? "fut-ok" : "fut-warn" : "",
-      today && today.count ? `${t("exp.title")} \xB7 ${t("bar.journalHint", { n: today.count })}` : t("exp.title"),
-      o.onOpenJournal
+      "planner",
+      count2 ? t("bar.plan", { n: count2 > 99 ? "99+" : count2 }) : t("bar.planEmpty"),
+      planValue,
+      known && gap > 0 ? t("bar.missing") : "",
+      "",
+      !known ? "" : gap > 0 ? "fut-warn" : "fut-ok",
+      `${t("plan.title")}${count2 && gap ? ` \xB7 ${t("bar.planHint")}` : ""}`,
+      o.onOpenPlanner
     );
-    const marked = o.targetsCount ?? 0;
-    cell(t("bar.targets"), marked ? String(marked) : "\u2014", "", t("bar.targetsHint"), o.onOpenTargets);
-    const side = el2(doc, "div", "fut-side");
+    const side = el3(doc, "div", "fut-side");
     const lastSync = o.snapshot ? t("toolbar.lastSync", { time: formatTime(o.snapshot.fetchedAt, o.locale) }) : "";
     const sync = iconButton2(doc, "sync", [t("sync.button"), lastSync].filter(Boolean).join(" \xB7 "), () => {
       if (sync.classList.contains("fut-busy")) return;
@@ -6965,14 +8128,14 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
   }
   function watchPlanetBar(doc, redraw) {
     const bar = doc.getElementById("planetbarcomponent");
-    const view = doc.defaultView;
-    if (!bar || !view) return;
-    let queued = false;
-    new view.MutationObserver(() => {
-      if (queued || bar.querySelector(".fut-toolbar") || !doc.getElementById("planetList")) return;
-      queued = true;
-      view.setTimeout(() => {
-        queued = false;
+    const view2 = doc.defaultView;
+    if (!bar || !view2) return;
+    let queued2 = false;
+    new view2.MutationObserver(() => {
+      if (queued2 || bar.querySelector(".fut-toolbar") || !doc.getElementById("planetList")) return;
+      queued2 = true;
+      view2.setTimeout(() => {
+        queued2 = false;
         if (!bar.querySelector(".fut-toolbar") && doc.getElementById("planetList")) redraw();
       }, 0);
     }).observe(bar, { childList: true, subtree: true });
@@ -6981,9 +8144,9 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     const { doc } = o;
     const list = doc.getElementById("planetList");
     if (!list) return;
-    if (!doc.getElementById(STYLE_ID)) {
-      const style = el2(doc, "style", "");
-      style.id = STYLE_ID;
+    if (!doc.getElementById(STYLE_ID2)) {
+      const style = el3(doc, "style", "");
+      style.id = STYLE_ID2;
       style.textContent = PLANET_MENU_CSS;
       doc.head.append(style);
     }
@@ -6998,36 +8161,32 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     list.classList.toggle("fut-mode-compact", mode === "compact");
     list.classList.toggle("fut-mode-side", mode === "side");
     const byId = new Map((o.snapshot?.bodies ?? []).map((b) => [b.id, b]));
+    const view2 = { fleet: o.settings.showFleet === true, t: o.t };
+    list.style.setProperty("--fut-row-h", view2.fleet ? "52px" : "40px");
     for (const entry of o.entries) {
       entry.element.classList.add("fut-row");
       if (entry.current) entry.element.classList.add("fut-current");
       const link = entry.planetLink;
       if (link) {
-        const wrap = el2(doc, "span", "fut-name");
+        const wrap = el3(doc, "span", "fut-name");
         link.querySelectorAll(".planet-name, .planet-koords").forEach((n) => wrap.append(n));
         const planetBody = entry.planetId ? byId.get(entry.planetId) : void 0;
-        link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true));
+        link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true, view2));
         const age = ageBadge(doc, planetBody, o.now, o.t);
         if (age) link.append(age);
-        const pq = entry.planetId ? queueStripes(doc, activeItems(o.queues?.bodies[String(entry.planetId)], o.now), o.now, o.t, o.locale) : null;
-        if (pq) wrap.append(pq);
-        if (entry.construction.planet) entry.element.classList.add("fut-building");
-        else if (o.settings.markIdle) {
-          const idle = el2(doc, "span", "fut-idle");
-          idle.title = o.t("planetMenu.idle");
-          link.append(idle);
-        }
+        const pq = queueDots(doc, entry.planetId ? activeItems(o.queues?.bodies[String(entry.planetId)], o.now) : [], entry.construction.planet, o.now, o.t, o.locale);
+        if (pq) link.append(pq);
       }
       const moon = entry.moonLink;
       if (moon) {
         const moonBody = entry.moonId ? byId.get(entry.moonId) : void 0;
-        moon.append(resourceColumn(doc, moonBody, o.now, o.locale, false));
+        moon.append(resourceColumn(doc, moonBody, o.now, o.locale, false, view2));
         const age = ageBadge(doc, moonBody, o.now, o.t);
         if (age) moon.append(age);
-        const mq = entry.moonId ? queueStripes(doc, activeItems(o.queues?.bodies[String(entry.moonId)], o.now), o.now, o.t, o.locale) : null;
+        const mq = queueDots(doc, entry.moonId ? activeItems(o.queues?.bodies[String(entry.moonId)], o.now) : [], entry.construction.moon, o.now, o.t, o.locale);
         if (mq) moon.append(mq);
       } else {
-        link?.after(el2(doc, "span", "fut-nomoon"));
+        link?.after(el3(doc, "span", "fut-nomoon"));
       }
       entry.element.querySelectorAll("img.planetPic, img.icon-moon").forEach(guardSkin);
     }
@@ -7037,15 +8196,27 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     if (o.snapshot && o.settings.showTotals) {
       const { stock: stock2, perHour } = totals(o.snapshot, o.now);
       const msu4 = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
-      const box = el2(doc, "div", "fut-totals");
-      const line = (label, value, rate, cls) => {
-        box.append(el2(doc, "span", cls, `${label} ${formatUnits(value, o.locale)}`));
-        box.append(el2(doc, "span", "fut-rate", `+${formatUnits(rate * 24, o.locale)}/24h`));
+      const box = el3(doc, "div", "fut-totals");
+      box.setAttribute("role", "table");
+      const row = (cls, cells) => {
+        const r = el3(doc, "div", `fut-trow ${cls}`.trim());
+        r.setAttribute("role", "row");
+        cells.forEach((text, i) => {
+          const c = el3(doc, "span", i ? "fut-tnum" : "fut-tname", text);
+          c.setAttribute("role", cls === "fut-thead" ? "columnheader" : "cell");
+          r.append(c);
+        });
+        box.append(r);
       };
+      row("fut-thead", ["", o.t("totals.stock"), o.t("totals.day")]);
+      const line = (label, value, rate, cls) => row(cls, [label, formatUnits(value, o.locale), `+${formatUnits(rate * 24, o.locale)}`]);
       line(o.t("res.metal"), stock2.metal, perHour.metal, "fut-m");
       line(o.t("res.crystal"), stock2.crystal, perHour.crystal, "fut-c");
       line(o.t("res.deuterium"), stock2.deuterium, perHour.deuterium, "fut-d");
-      line("MSU", msu4(stock2), msu4(perHour), "fut-msu");
+      const plain = (r) => r.metal + r.crystal + r.deuterium;
+      if (o.settings.totalView === "sum") line(o.t("totals.sum"), plain(stock2), plain(perHour), "fut-msu");
+      else line("MSU", msu4(stock2), msu4(perHour), "fut-msu");
+      if (view2.fleet) row("fut-fleetrow", [o.t("planetMenu.fleet"), formatUnits(o.snapshot.bodies.reduce((sum, b) => sum + fleetValue(b), 0), o.locale), ""]);
       list.after(box);
     }
   }
@@ -7312,6 +8483,40 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     return out;
   }
 
+  // src/data/tech-icons.ts
+  var TECH_ICONS_KEY = "tech.icons";
+  function readTechIcons(doc) {
+    const view2 = doc.defaultView;
+    const out = {};
+    if (!view2) return out;
+    for (const tech of doc.querySelectorAll("#technologies .technology[data-technology]")) {
+      const tile2 = tech.querySelector(".icon");
+      if (!tile2) continue;
+      const cs = view2.getComputedStyle(tile2);
+      const url = /url\("?([^")]+)"?\)/.exec(cs.backgroundImage)?.[1];
+      const w = parseFloat(cs.width);
+      if (url && w > 0) out[tech.dataset.technology] = { url, pos: cs.backgroundPosition, size: cs.backgroundSize, w };
+    }
+    return out;
+  }
+  function rememberTechIcons(doc, store) {
+    const seen = readTechIcons(doc);
+    if (!Object.keys(seen).length) return;
+    const known = store.get(TECH_ICONS_KEY, {});
+    if (Object.entries(seen).every(([id, i]) => JSON.stringify(known[id]) === JSON.stringify(i))) return;
+    store.set(TECH_ICONS_KEY, { ...known, ...seen });
+  }
+  function techIconEl(doc, icon2, px, cls = "tico") {
+    const box = doc.createElement("span");
+    box.className = cls;
+    box.style.cssText = `display:inline-block;flex:none;width:${px}px;height:${px}px;overflow:hidden;border-radius:4px;background:#16243A;vertical-align:middle;`;
+    if (!icon2) return box;
+    const tile2 = doc.createElement("span");
+    tile2.style.cssText = `display:block;width:${icon2.w}px;height:${icon2.w}px;background-image:url("${icon2.url}");background-position:${icon2.pos};background-size:${icon2.size};background-repeat:no-repeat;transform:scale(${px / icon2.w});transform-origin:0 0;`;
+    box.append(tile2);
+    return box;
+  }
+
   // src/modules/dashboard/style.ts
   var DASHBOARD_CSS = `
 :host { --panel-w: 1120px; }
@@ -7375,6 +8580,13 @@ td.queue { white-space: nowrap; }
 
 /* Level tables: first column stays put while the rest scrolls. */
 .matrix th.col { vertical-align: bottom; white-space: normal; min-width: 44px; max-width: 74px; padding: 6px 4px; line-height: 1.2; }
+.matrix th.col .pic { margin-left: auto; }
+/* The game's pictures: column heads, rows, tiles. */
+.pic { display: block; flex: none; border-radius: 4px; object-fit: cover; background: #16202E; }
+span.pic { display: inline-block !important; }
+.tech-label { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.tech-label span:not(.pic) { overflow: hidden; text-overflow: ellipsis; }
+.tech-label small { color: var(--muted); font-size: 11px; }
 .matrix .col-name { display: block; font-size: 10px; font-weight: 600; color: #8A9BB0; text-decoration: none; overflow-wrap: normal; hyphens: auto; }
 .matrix a.col-name:hover { color: #E6EDF5; }
 .matrix th.col.on .col-name { color: #4FD1E8; }
@@ -7390,10 +8602,36 @@ td.guess { font-style: italic; opacity: 0.7; }
 .unit-ico { width: 28px; height: 28px; border-radius: 4px; object-fit: cover; display: block; margin: 0 auto; background: #16202E; }
 .unit-ico-none { display: flex; align-items: center; justify-content: center; color: #8A9BB0; font-size: 10px; }
 
-/* Research: name and level in a compact grid. */
-.levels { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0 20px; }
-.lv { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; border-bottom: 1px solid #16202F; font-size: 12px; }
-.lv span { color: #C9D4E2; } .lv.zero b { color: #3A4A60; }
+/* Research: one tile per technology, its picture over its level. */
+.levels { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px; }
+.lv { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px 2px 4px; border: 1px solid var(--line-soft); border-radius: 6px; background: var(--surface); min-width: 0; }
+.lv b { font-size: 13px; color: var(--text); }
+.lv .lv-name { height: 40px; display: flex; align-items: center; text-align: center; color: var(--text-2); font-size: 10px; line-height: 1.15; overflow: hidden; }
+.lv.zero { opacity: 0.45; } .lv.zero b { color: var(--muted); }
+.move .pic { border-radius: 5px; }
+
+/* Planets | moons switch on the ships and defence pages. */
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.seg button { display: inline-flex; align-items: baseline; gap: 8px; height: 28px; padding: 0 12px; border: 0; background: var(--bg); color: var(--muted); font: 12px Arial, sans-serif; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button i { font-style: normal; font-size: 11px; color: var(--muted); }
+.seg button:hover { color: var(--text); }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
+.seg button[aria-pressed="true"] i { color: var(--accent); font-weight: 400; }
+
+/* Body picker: the same two columns as the fleet bar's destination list. */
+.bpick { position: relative; }
+.bpick-btn { display: inline-flex; align-items: center; gap: 8px; height: 28px; min-width: 200px; padding: 0 8px 0 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text); font: 12px Arial, sans-serif; cursor: pointer; }
+.bpick-btn small { margin-left: auto; color: var(--muted); font-size: 11px; }
+.bpick-btn:hover, .bpick-btn[aria-expanded="true"] { border-color: var(--accent); }
+.bmenu { position: absolute; z-index: 5; top: 32px; left: 0; min-width: 250px; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; display: grid; grid-template-columns: minmax(0, 1fr) 40px; gap: 2px; padding: 4px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+.bmenu[hidden] { display: none; }
+.bmenu button { display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 8px; border: 1px solid transparent; border-radius: 4px; background: var(--surface); color: var(--text-2); font: 12px Arial, sans-serif; text-align: left; white-space: nowrap; cursor: pointer; }
+.bmenu button small { margin-left: auto; color: var(--muted); font-size: 11px; }
+.bmenu button.moon { justify-content: center; padding: 0; color: var(--muted); }
+.bmenu button:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+.bmenu button.on { border-color: var(--warn); color: var(--warn); }
+.bmenu button:disabled { background: none; border-color: transparent; color: var(--faint); cursor: default; }
 
 /* Scrap calculator */
 .scrap-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
@@ -7402,8 +8640,10 @@ td.guess { font-style: italic; opacity: 0.7; }
 .field-label { display: inline-flex; align-items: center; gap: 6px; color: #8A9BB0; font-size: 12px; }
 .field.rate { width: 64px; text-align: right; }
 .field.qty { width: 110px; text-align: right; font-family: "JetBrains Mono", Consolas, monospace; }
-table.scrap .unit-label { display: flex; align-items: center; gap: 8px; }
-table.scrap td.unit .unit-ico { margin: 0; width: 24px; height: 24px; }
+table.scrap td.unit { padding: 2px 8px 2px 2px; }
+table.scrap .unit-label { display: flex; align-items: center; gap: 8px; width: 100%; padding: 2px 8px 2px 2px; border: 1px solid transparent; border-radius: 6px; background: none; color: var(--text-2); font: 12px Arial, sans-serif; text-align: left; cursor: pointer; }
+table.scrap .unit-label:hover { border-color: var(--line); color: var(--text); }
+table.scrap .unit-label[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
 .msu { color: #4FD1E8; margin-left: 4px; }
 @media (max-width: 1100px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 900px) {
@@ -7436,6 +8676,7 @@ table.queues td.acts { width: 1%; text-align: right; }
   var tab = "summary";
   var scrapBody = null;
   var scrapRate = 35;
+  var unitScope = "planet";
   var keyHandler2 = null;
   function h3(tag, className = "", text) {
     const node = document.createElement(tag);
@@ -7463,33 +8704,34 @@ table.queues td.acts { width: 1%; text-align: right; }
     return list;
   }
   var level = (b, id) => b.levels[String(id)] ?? 0;
+  var MINE_ID = { metal: 1, crystal: 2, deuterium: 3 };
   var numLocale = "it";
   var count = (n) => n < 1e6 ? n.toLocaleString(numLocale) : formatUnits(n, numLocale);
-  function unitsMsu(b, ids) {
+  function unitsValue2(b, ids) {
     let total = 0;
     let count2 = 0;
     for (const id of ids) {
       const n = level(b, id);
       if (!n) continue;
       const c = rawCost(id, 1);
-      total += n * msu2(c);
+      total += n * (c.metal + c.crystal + c.deuterium);
       count2 += n;
     }
-    return { msu: total, count: count2 };
+    return { value: total, count: count2 };
   }
   var COMBAT = SHIPS.filter((id) => id !== 212 && id !== 217);
-  function fleetMsu(bodies) {
-    let out = { msu: 0, count: 0 };
+  function fleetValueOf(bodies) {
+    let out = { value: 0, count: 0 };
     for (const b of bodies) {
-      const f = unitsMsu(b, COMBAT);
-      out = { msu: out.msu + f.msu, count: out.count + f.count };
+      const f = unitsValue2(b, COMBAT);
+      out = { value: out.value + f.value, count: out.count + f.count };
     }
     return out;
   }
   function dayFigures(snapshot) {
     if (!snapshot) return { prodDay: 0, fleet: 0 };
     const prod = snapshot.bodies.reduce((s, b) => s + msu2(b.production), 0) * 24;
-    return { prodDay: Math.round(prod), fleet: Math.round(fleetMsu(snapshot.bodies).msu) };
+    return { prodDay: Math.round(prod), fleet: Math.round(fleetValueOf(snapshot.bodies).value) };
   }
   function scrapReturn(amounts, rate) {
     const out = { metal: 0, crystal: 0, deuterium: 0 };
@@ -7563,7 +8805,22 @@ table.queues td.acts { width: 1%; text-align: right; }
       bodies: orderedBodies(o.snapshot, o.entries),
       fmt: (v) => formatUnits(v, locale),
       name: (id) => techName(id, locale, o.names ?? {}, t),
-      redraw
+      redraw,
+      pic: (id, px) => {
+        const name = techName(id, locale, o.names ?? {}, t);
+        if (SHIP_ICONS[id]) {
+          const img = shipIcon(doc, id, name, "pic");
+          img.style.width = img.style.height = `${px}px`;
+          return img;
+        }
+        const known = o.icons?.[String(id)];
+        if (!known) return null;
+        const tile2 = techIconEl(doc, known, px, "pic");
+        tile2.title = name;
+        tile2.setAttribute("role", "img");
+        tile2.setAttribute("aria-label", name);
+        return tile2;
+      }
     };
     const body = h3("div", "tab-body");
     if (!o.snapshot) body.append(h3("p", "empty", t("dash.noData")));
@@ -7581,9 +8838,10 @@ table.queues td.acts { width: 1%; text-align: right; }
   }
   function section(parent, title, hint) {
     const s = h3("div", "card");
-    s.append(h3("h3", "", title));
+    const head = h3("h3", "", title);
+    if (hint) head.title = hint;
+    s.append(head);
     parent.append(s);
-    if (hint) s.dataset.hint = hint;
     return s;
   }
   function bodyLink(doc, b) {
@@ -7606,9 +8864,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     hr.append(h3("th", "name", t("dash.colBody")));
     for (const id of ids) {
       const th = h3("th", "num col");
-      const head = opts.head ? opts.head(id) : ctx.name(id);
-      if (typeof head === "string") th.append(h3("span", "col-name", head));
-      else th.append(head);
+      th.append(ctx.pic(id, 30) ?? h3("span", "col-name", ctx.name(id)));
       th.title = ctx.name(id);
       hr.append(th);
     }
@@ -7664,14 +8920,14 @@ table.queues td.acts { width: 1%; text-align: right; }
     } else kpi(t("dash.points"), "\u2014", t("dash.pointsHint"));
     kpi(t("dash.stock"), fmt(msu2(sum.stock)), `${fmt(sum.stock.metal)} \xB7 ${fmt(sum.stock.crystal)} \xB7 ${fmt(sum.stock.deuterium)}`, "accent");
     kpi(t("dash.prodDayK"), `+${fmt(msu2(sum.perHour) * 24)}`, t("dash.prodHourNote", { value: fmt(msu2(sum.perHour)) }), "accent");
-    const fleet = fleetMsu(ctx.bodies);
-    let def = { msu: 0, count: 0 };
+    const fleet = fleetValueOf(ctx.bodies);
+    let def = { value: 0, count: 0 };
     for (const b of ctx.bodies) {
-      const d = unitsMsu(b, DEFENCES.filter((id) => id < 500));
-      def = { msu: def.msu + d.msu, count: def.count + d.count };
+      const d = unitsValue2(b, DEFENCES.filter((id) => id < 500));
+      def = { value: def.value + d.value, count: def.count + d.count };
     }
-    kpi(t("dash.fleetValue"), fmt(fleet.msu), t("dash.unitsNote", { n: fmt(fleet.count) }));
-    kpi(t("dash.defValue"), fmt(def.msu), t("dash.unitsNote", { n: fmt(def.count) }));
+    kpi(t("dash.fleetValue"), fmt(fleet.value), t("dash.unitsNote", { n: fmt(fleet.count) }));
+    kpi(t("dash.defValue"), fmt(def.value), t("dash.unitsNote", { n: fmt(def.count) }));
     const running = /* @__PURE__ */ new Map();
     let busy = 0;
     for (const r of rows) {
@@ -7708,19 +8964,20 @@ table.queues td.acts { width: 1%; text-align: right; }
       prod.append(h3("h4", "", t("dash.tab.lifeforms")), lf);
     }
     const movesCard = h3("div", "card");
-    movesCard.append(h3("h3", "", t("dash.moves")));
+    const movesHead = h3("h3", "", t("dash.moves"));
+    movesHead.title = t("dash.movesHint");
+    movesCard.append(movesHead);
     const moves = bestUpgrades(o.snapshot, o.entries, 5);
     if (!moves.length) movesCard.append(h3("p", "hint", t("dash.movesNone")));
     moves.forEach((m, i) => {
       const line = h3("div", "move");
-      line.append(h3("span", "n", String(i + 1)));
+      line.append(ctx.pic(MINE_ID[m.mine], 28) ?? h3("span", "n", String(i + 1)));
       const text = h3("div", "move-text");
       text.append(h3("strong", "", `${t(`mine.${m.mine}`)} ${m.from} \u2192 ${m.from + 1}`));
       text.append(h3("span", "", `${m.name} [${m.coords}] \xB7 ${fmt(m.cost.metal)} M \xB7 ${fmt(m.cost.crystal)} C`));
       line.append(text, h3("span", "roi mono", m.days < 1 ? `<1 ${t("dash.daysShort")}` : `${m.days.toLocaleString(ctx.o.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${t("dash.daysShort")}`));
       movesCard.append(line);
     });
-    movesCard.append(h3("p", "hint", t("dash.movesHint")));
     const checks = h3("div", "card");
     checks.append(h3("h3", "", t("dash.checks")));
     if (!alerts.length) checks.append(h3("p", "ok", t("dash.allGood")));
@@ -7764,7 +9021,8 @@ table.queues td.acts { width: 1%; text-align: right; }
     for (const id of RESEARCH) {
       const v = o.snapshot?.researches[String(id)] ?? 0;
       const item = h3("div", `lv${v ? "" : " zero"}`);
-      item.append(h3("span", "", ctx.name(id)), h3("b", "mono", String(v)));
+      item.title = ctx.name(id);
+      item.append(ctx.pic(id, 40) ?? h3("span", "lv-name", ctx.name(id)), h3("b", "mono", String(v)));
       grid2.append(item);
     }
     research.append(grid2);
@@ -7892,7 +9150,7 @@ table.queues td.acts { width: 1%; text-align: right; }
   function minesTab(parent, ctx) {
     const { t } = ctx.o;
     const planets = ctx.bodies.filter((b) => b.type === "planet");
-    const s = section(parent, t("dash.tab.mines"));
+    const s = section(parent, t("dash.tab.mines"), t("dash.minesHint"));
     s.append(
       bodyMatrix(ctx, planets, MINES2, {
         foot: "avg",
@@ -7903,7 +9161,6 @@ table.queues td.acts { width: 1%; text-align: right; }
         ]
       })
     );
-    s.append(h3("p", "hint", t("dash.minesHint")));
   }
   function facilitiesTab(parent, ctx) {
     const { t } = ctx.o;
@@ -7917,9 +9174,8 @@ table.queues td.acts { width: 1%; text-align: right; }
     const { t, doc } = o;
     const planets = ctx.bodies.filter((b) => b.type === "planet");
     const active = new Map(planets.map((p) => [p.id, { b: activeLfBuildings(p), r: activeLfResearch(p, o.lfSlots?.[String(p.id)]) }]));
-    parent.append(h3("p", "hint", t("dash.lfHint")));
     const table = (title, pick) => {
-      const s = section(parent, title);
+      const s = section(parent, title, t("dash.lfHint"));
       const ids = [...new Set(planets.flatMap((p) => pick(p).filter((a) => a.level > 0).map((a) => a.id)))].sort(
         (a, b) => a % 100 - b % 100 || a - b
       );
@@ -7946,17 +9202,23 @@ table.queues td.acts { width: 1%; text-align: right; }
       for (const id of ids) {
         const tr = h3("tr");
         const sp = speciesOf(id);
-        tr.append(h3("td", "name tech", `${name(id)}${sp ? ` \xB7 ${t(`lf.${sp}`)}` : ""}`));
+        const cell = h3("td", "name tech");
+        const label = h3("span", "tech-label");
+        label.append(ctx.pic(id, 26) ?? techIconEl(doc, void 0, 26, "pic"));
+        label.append(h3("span", "", name(id)));
+        if (sp) label.append(h3("small", "", t(`lf.${sp}`)));
+        cell.append(label);
+        tr.append(cell);
         const on = planets.map((p) => pick(p).find((a) => a.id === id));
         const values = on.flatMap((a) => a ? [a.level] : []);
         const max = values.length > 1 && values.some((v) => v !== Math.max(...values)) ? Math.max(...values) : -1;
         on.forEach((a) => {
-          const cell = levelCell(a?.level ?? 0, max);
+          const cell2 = levelCell(a?.level ?? 0, max);
           if (a?.guessed) {
-            cell.classList.add("guess");
-            cell.title = t("dash.lfGuess");
+            cell2.classList.add("guess");
+            cell2.title = t("dash.lfGuess");
           }
-          tr.append(cell);
+          tr.append(cell2);
         });
         tbody.append(tr);
       }
@@ -7968,29 +9230,94 @@ table.queues td.acts { width: 1%; text-align: right; }
     table(t("dash.lfResearch"), (p) => active.get(p.id).r);
   }
   function unitsTab(parent, ctx, ids, ships) {
-    const { t, doc } = ctx.o;
-    const shown2 = ids.filter((id) => ctx.bodies.some((b) => level(b, id) > 0));
-    const s = section(parent, t(ships ? "dash.tab.ships" : "dash.tab.defence"));
+    const { t } = ctx.o;
+    const title = t(ships ? "dash.tab.ships" : "dash.tab.defence");
+    const s = h3("div", "card");
+    parent.append(s);
+    const head = h3("div", "table-head");
+    head.append(h3("h3", "", title));
+    const of = (type) => ctx.bodies.filter((b) => b.type === type && ids.some((id) => level(b, id) > 0));
+    const value = (list) => list.reduce((sum, b) => sum + unitsValue2(b, ids).value, 0);
+    const seg = h3("div", "seg");
+    seg.setAttribute("role", "group");
+    seg.setAttribute("aria-label", title);
+    for (const type of ["planet", "moon"]) {
+      const list = of(type);
+      const b = h3("button", "");
+      b.type = "button";
+      b.dataset.scope = type;
+      b.setAttribute("aria-pressed", String(unitScope === type));
+      b.append(h3("span", "", t(type === "planet" ? "dash.planets" : "dash.moons")), h3("i", "mono", list.length ? ctx.fmt(value(list)) : "\u2014"));
+      b.addEventListener("click", () => {
+        unitScope = type;
+        ctx.redraw();
+      });
+      seg.append(b);
+    }
+    head.append(seg);
+    s.append(head);
+    const bodies = of(unitScope);
+    const shown2 = ids.filter((id) => bodies.some((b) => level(b, id) > 0));
     if (!shown2.length) {
       s.append(h3("p", "hint", t("dash.unitsNone")));
       return;
     }
-    const bodies = ctx.bodies.filter((b) => shown2.some((id) => level(b, id) > 0));
-    s.append(
-      bodyMatrix(ctx, bodies, shown2, {
-        units: true,
-        foot: "sum",
-        head: ships ? (id) => shipIcon(doc, id, ctx.name(id), "unit-ico") : void 0,
-        extra: [{ label: t("dash.valueMsu"), value: (b) => ctx.fmt(unitsMsu(b, shown2).msu) }]
-      })
-    );
+    s.append(bodyMatrix(ctx, bodies, shown2, { units: true, foot: "sum", extra: [{ label: t("dash.valueMsu"), value: (b) => ctx.fmt(unitsValue2(b, shown2).value) }] }));
+  }
+  function bodyPicker(ctx, ids, current3, onPick) {
+    const { doc, t } = ctx.o;
+    const wrap = h3("div", "bpick");
+    const label = (b) => `${b.name}${b.type === "moon" ? ` (${t("dash.moon")})` : ""} [${b.coords}]`;
+    const button3 = h3("button", "bpick-btn");
+    button3.type = "button";
+    button3.setAttribute("aria-haspopup", "listbox");
+    button3.setAttribute("aria-expanded", "false");
+    button3.setAttribute("aria-label", label(current3));
+    if (current3.type === "moon") button3.append(icon(doc, "moon", 13));
+    button3.append(h3("b", "", current3.name), h3("small", "mono", current3.coords), icon(doc, "chevron", 14));
+    const menu = h3("div", "bmenu");
+    menu.setAttribute("role", "listbox");
+    menu.hidden = true;
+    const cell = (b, moon) => {
+      if (!b) return h3("span");
+      const item = h3("button", `${moon ? "moon" : "planet"}${b.id === current3.id ? " on" : ""}`);
+      item.type = "button";
+      item.setAttribute("role", "option");
+      item.setAttribute("aria-selected", String(b.id === current3.id));
+      item.setAttribute("aria-label", label(b));
+      if (moon) {
+        item.append(icon(doc, "moon", 14));
+        item.title = label(b);
+      } else item.append(h3("span", "", b.name), h3("small", "mono", b.coords));
+      item.disabled = !ids.has(b.id);
+      item.addEventListener("click", () => onPick(b.id));
+      return item;
+    };
+    const planets = ctx.bodies.filter((b) => b.type === "planet");
+    const moons = new Map(ctx.bodies.filter((b) => b.type === "moon").map((m) => [m.coords, m]));
+    for (const p of planets) menu.append(cell(p, false), cell(moons.get(p.coords), true));
+    const set = (open) => {
+      menu.hidden = !open;
+      button3.setAttribute("aria-expanded", String(open));
+    };
+    button3.addEventListener("click", () => set(menu.hidden));
+    wrap.addEventListener("focusout", (e) => {
+      if (!wrap.contains(e.relatedTarget)) set(false);
+    });
+    wrap.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape" || menu.hidden) return;
+      e.stopPropagation();
+      set(false);
+      button3.focus();
+    });
+    wrap.append(button3, menu);
+    return wrap;
   }
   function scrapTab(parent, ctx) {
     const { t } = ctx.o;
     const units = [...SHIPS, ...DEFENCES.filter((id) => id < 500)];
     const owners = ctx.bodies.filter((b) => units.some((id) => level(b, id) > 0));
-    const s = section(parent, t("dash.tab.scrap"));
-    s.append(h3("p", "hint", t("dash.scrapHint")));
+    const s = section(parent, t("dash.tab.scrap"), t("dash.scrapHint"));
     if (!owners.length) {
       s.append(h3("p", "hint", t("dash.unitsNone")));
       return;
@@ -7998,15 +9325,8 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (!owners.some((b) => b.id === scrapBody)) scrapBody = owners[0].id;
     const body = owners.find((b) => b.id === scrapBody);
     const bar = h3("div", "scrap-bar");
-    const pick = h3("select", "field");
-    for (const b of owners) {
-      const opt = h3("option", "", `${b.type === "moon" ? `${t("dash.moon")} ` : ""}${b.name} [${b.coords}]`);
-      opt.value = String(b.id);
-      opt.selected = b.id === body.id;
-      pick.append(opt);
-    }
-    pick.addEventListener("change", () => {
-      scrapBody = Number(pick.value);
+    const pick = bodyPicker(ctx, new Set(owners.map((b) => b.id)), body, (id) => {
+      scrapBody = id;
       ctx.redraw();
     });
     const rateLabel = h3("label", "field-label", t("dash.scrapRate"));
@@ -8033,14 +9353,19 @@ table.queues td.acts { width: 1%; text-align: right; }
     const tbody = h3("tbody");
     const inputs = /* @__PURE__ */ new Map();
     const outs = /* @__PURE__ */ new Map();
+    const picks = /* @__PURE__ */ new Map();
     for (const id of units) {
       const owned = level(body, id);
       if (!owned) continue;
       const tr = h3("tr");
       const nameCell = h3("td", "unit");
-      const label = h3("span", "unit-label");
-      if (id < 400) label.append(shipIcon(ctx.o.doc, id, ctx.name(id), "unit-ico"));
+      const label = h3("button", "unit-label");
+      label.type = "button";
+      label.title = t("dash.scrapPick");
+      const p = ctx.pic(id, 28);
+      if (p) label.append(p);
       label.append(h3("span", "", ctx.name(id)));
+      picks.set(id, label);
       nameCell.append(label);
       tr.append(nameCell, h3("td", "num mono", count(owned)));
       const qty = h3("input", "field qty");
@@ -8076,6 +9401,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       for (const [id, input] of inputs) {
         const n = Math.min(level(body, id), Math.max(0, Math.floor(Number(input.value) || 0)));
         amounts[id] = n;
+        picks.get(id).setAttribute("aria-pressed", String(n === level(body, id)));
         const r = scrapReturn({ [id]: n }, scrapRate);
         const [m, c, d] = outs.get(id);
         m.textContent = n ? ctx.fmt(r.metal) : "\xB7";
@@ -8086,9 +9412,16 @@ table.queues td.acts { width: 1%; text-align: right; }
       totalCells[0].textContent = ctx.fmt(total.metal);
       totalCells[1].textContent = ctx.fmt(total.crystal);
       totalCells[2].textContent = ctx.fmt(total.deuterium);
-      msuCell.textContent = `\xB7 ${ctx.fmt(msu2(total))} MSU`;
+      msuCell.textContent = `${ctx.fmt(msu2(total))} MSU`;
     };
     for (const input of inputs.values()) input.addEventListener("input", update);
+    for (const [id, label] of picks) {
+      label.addEventListener("click", () => {
+        const input = inputs.get(id);
+        input.value = Number(input.value) === level(body, id) ? "0" : String(level(body, id));
+        update();
+      });
+    }
     rate.addEventListener("input", update);
     all2.addEventListener("click", () => {
       for (const [id, input] of inputs) input.value = String(level(body, id));
@@ -8108,21 +9441,21 @@ table.queues td.acts { width: 1%; text-align: right; }
     return Number.isFinite(n) && String(value).trim() !== "" ? n : null;
   };
   function readTechList(doc) {
-    return Array.from(doc.querySelectorAll("#technologies .technology[data-technology]")).flatMap((el5) => {
-      const id = Number(el5.getAttribute("data-technology"));
-      const built = num3(el5.querySelector(".level")?.getAttribute("data-value"));
+    return Array.from(doc.querySelectorAll("#technologies .technology[data-technology]")).flatMap((el6) => {
+      const id = Number(el6.getAttribute("data-technology"));
+      const built = num3(el6.querySelector(".level")?.getAttribute("data-value"));
       if (!id || built === null) return [];
-      const target = num3(el5.querySelector(".targetlevel")?.getAttribute("data-value"));
-      return [{ id, name: el5.getAttribute("aria-label") ?? el5.getAttribute("title") ?? String(id), built, level: Math.max(built, target ?? 0) }];
+      const target = num3(el6.querySelector(".targetlevel")?.getAttribute("data-value"));
+      return [{ id, name: el6.getAttribute("aria-label") ?? el6.getAttribute("title") ?? String(id), built, level: Math.max(built, target ?? 0) }];
     });
   }
   function levelsOf(list) {
     return Object.fromEntries(list.map((e) => [e.id, e.level]));
   }
   function costValue(root, cls) {
-    const el5 = root.querySelector(`.costs .${cls}`);
-    if (!el5) return void 0;
-    const v = num3(el5.getAttribute("data-value")) ?? num3(el5.getAttribute("data-tooltip-title") ?? el5.getAttribute("title")) ?? num3(el5.textContent);
+    const el6 = root.querySelector(`.costs .${cls}`);
+    if (!el6) return void 0;
+    const v = num3(el6.getAttribute("data-value")) ?? num3(el6.getAttribute("data-tooltip-title") ?? el6.getAttribute("title")) ?? num3(el6.textContent);
     return v ?? void 0;
   }
   function readTechDetails(doc) {
@@ -8192,6 +9525,11 @@ table.queues td.acts { width: 1%; text-align: right; }
     const next = { ...plan };
     if (list.length) next[key] = list;
     else delete next[key];
+    return next;
+  }
+  function clearBody(plan, bodyId) {
+    const next = { ...plan };
+    delete next[String(bodyId)];
     return next;
   }
   function prune(plan, bodyId, levels) {
@@ -8322,224 +9660,6 @@ table.queues td.acts { width: 1%; text-align: right; }
     return { total, missing: account ? missing(total, account) : null };
   }
 
-  // src/engines/fleet.ts
-  var EMPTY_RESERVE = { ships: {}, resources: { metal: 0, crystal: 0, deuterium: 0 } };
-  var PROFILES_KEY = "fleet.profiles";
-  function profileFor(profiles, bodyId) {
-    const p = profiles[String(bodyId)] ?? { reserve: structuredClone(EMPTY_RESERVE), save: null };
-    return { ...p, gate: p.gate ?? { ...p.reserve.ships }, saveReserve: p.saveReserve ?? structuredClone(EMPTY_RESERVE) };
-  }
-  function activeProfile(p, s) {
-    return {
-      ...p,
-      reserve: { ships: s.shipsOn ? p.reserve.ships : {}, resources: s.resourcesOn ? p.reserve.resources : { ...EMPTY_RESERVE.resources } },
-      gate: s.gateOn ? p.gate : {}
-    };
-  }
-  var RESERVE_SECTIONS = ["ships", "resources", "gate", "fleetsave"];
-  var positive = (ships) => Object.fromEntries(Object.entries(ships).filter(([, n]) => n > 0));
-  function sectionValue(p, section2) {
-    switch (section2) {
-      case "ships":
-        return positive(p.reserve.ships);
-      case "resources":
-        return p.reserve.resources;
-      case "gate":
-        return positive(p.gate);
-      case "fleetsave":
-        return { save: p.save, ships: positive(p.saveReserve.ships), resources: p.saveReserve.resources };
-    }
-  }
-  function canonical(v) {
-    if (v === null || typeof v !== "object") return JSON.stringify(v ?? null);
-    return `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${canonical(v[k])}`).join(",")}}`;
-  }
-  function sectionEmpty(p, section2) {
-    const v = sectionValue(p, section2);
-    if (section2 === "resources") return !Object.values(v).some(Boolean);
-    if (section2 === "fleetsave") return v.save === null && canonical({ ships: v.ships, resources: v.resources }) === canonical({ ships: {}, resources: EMPTY_RESERVE.resources });
-    return Object.keys(v).length === 0;
-  }
-  function sameSection(profiles, fromId, ids, section2) {
-    const mine = canonical(sectionValue(profileFor(profiles, fromId), section2));
-    return ids.filter((id) => id !== fromId && canonical(sectionValue(profileFor(profiles, id), section2)) === mine);
-  }
-  function copySections(profiles, fromId, ids, sections) {
-    const src = structuredClone(profileFor(profiles, fromId));
-    const out = { ...profiles };
-    for (const id of ids) {
-      if (id === fromId) continue;
-      const p = structuredClone(profileFor(profiles, id));
-      if (sections.includes("ships")) p.reserve.ships = { ...src.reserve.ships };
-      if (sections.includes("resources")) p.reserve.resources = { ...src.reserve.resources };
-      if (sections.includes("gate")) p.gate = { ...src.gate };
-      if (sections.includes("fleetsave")) {
-        p.save = structuredClone(src.save);
-        p.saveReserve = structuredClone(src.saveReserve);
-      }
-      out[String(id)] = p;
-    }
-    return out;
-  }
-  function shipsAfterReserve(available, reserve) {
-    const out = {};
-    for (const [id, count2] of Object.entries(available)) {
-      const n = Math.max(0, count2 - (reserve.ships[id] ?? 0));
-      if (n > 0) out[id] = n;
-    }
-    return out;
-  }
-  function resourcesAfterReserve(available, reserve, fuel) {
-    return {
-      metal: Math.max(0, Math.floor(available.metal - reserve.resources.metal)),
-      crystal: Math.max(0, Math.floor(available.crystal - reserve.resources.crystal)),
-      deuterium: Math.max(0, Math.floor(available.deuterium - fuel - reserve.resources.deuterium))
-    };
-  }
-  function resolveTarget(save, origin) {
-    return {
-      galaxy: save.galaxy ?? origin.galaxy,
-      system: save.system ?? origin.system,
-      position: save.position,
-      type: save.type
-    };
-  }
-  function parseAmount(text) {
-    const raw = text.trim().toLowerCase().replace(/\s/g, "");
-    const m = raw.match(/^([\d.,]+)([kmg])?$/);
-    if (!m) return 0;
-    const unit = m[2] === "k" ? 1e3 : m[2] === "m" ? 1e6 : m[2] === "g" ? 1e9 : 1;
-    let num4 = m[1];
-    num4 = unit === 1 ? num4.replace(/[.,]/g, "") : num4.replace(",", ".");
-    const value = Number(num4) * unit;
-    return Number.isFinite(value) ? Math.floor(value) : 0;
-  }
-  var SETTINGS_KEY = "fleet.settings";
-  var DEFAULT_SETTINGS = {
-    mainShip: 203,
-    secondShip: 202,
-    transportSpeed: 100,
-    favTransport: null,
-    favDeploy: null,
-    expeditionShip: 0,
-    expeditionValue: "",
-    expeditionExtras: true,
-    repeat: false,
-    shipsOn: true,
-    resourcesOn: true,
-    gateOn: true,
-    ignoreFood: false
-  };
-  function settingsFrom(stored) {
-    const { reserveOn, ...rest } = stored;
-    const legacy = reserveOn === void 0 ? {} : { shipsOn: reserveOn, resourcesOn: reserveOn };
-    return { ...DEFAULT_SETTINGS, ...legacy, ...rest };
-  }
-  var DELIVERY_KEY = "plan.delivery";
-  function deliveryLoad(onPlanet2, reserve, fuel, capacity, need) {
-    const free = resourcesAfterReserve(onPlanet2, reserve, fuel);
-    let room = Math.max(0, Math.floor(capacity));
-    const take = (a, b) => Math.max(0, Math.floor(Math.min(a, b, room)));
-    const deuterium = take(free.deuterium, Math.ceil(need.deuterium));
-    room -= deuterium;
-    const crystal = take(free.crystal, Math.ceil(need.crystal));
-    room -= crystal;
-    const metal = take(free.metal, Math.ceil(need.metal));
-    return { metal, crystal, deuterium };
-  }
-  var CARGO_SHIPS = [203, 202, 219, 209, 210];
-  function cargoShipsFor(amount, stock2, main2, second) {
-    const out = {};
-    let left = Math.max(0, amount);
-    for (const id of [main2, second]) {
-      if (!id || left <= 0) continue;
-      const s = stock2.find((x) => x.id === id);
-      if (!s || s.available <= 0 || s.capacity <= 0) continue;
-      const n = Math.min(s.available, Math.ceil(left / s.capacity));
-      if (n > 0) {
-        out[id] = (out[id] ?? 0) + n;
-        left -= n * s.capacity;
-      }
-    }
-    return out;
-  }
-  function cargoLoad(onPlanet2, reserve, fuel, capacity) {
-    const free = resourcesAfterReserve(onPlanet2, reserve, fuel);
-    let room = Math.max(0, Math.floor(capacity));
-    const deuterium = Math.max(0, Math.floor(Math.min(free.deuterium, room)));
-    room -= deuterium;
-    const crystal = Math.max(0, Math.floor(Math.min(free.crystal, room)));
-    room -= crystal;
-    const metal = Math.max(0, Math.floor(Math.min(free.metal, room)));
-    return { metal, crystal, deuterium };
-  }
-  var EXPEDITION_TABLE = [
-    { topScore: 1e4, base: 10, max: 4e4 },
-    { topScore: 1e5, base: 125, max: 5e5 },
-    { topScore: 1e6, base: 300, max: 12e5 },
-    { topScore: 5e6, base: 450, max: 18e5 },
-    { topScore: 25e6, base: 600, max: 24e5 },
-    { topScore: 5e7, base: 750, max: 3e6 },
-    { topScore: 75e6, base: 900, max: 36e5 },
-    { topScore: 1e8, base: 1050, max: 42e5 },
-    { topScore: Infinity, base: 1250, max: 5e6 }
-  ];
-  function expeditionMax(o) {
-    const row = EXPEDITION_TABLE.find((r) => r.topScore >= (o.topScore ?? Infinity));
-    const factor = o.characterClass === 3 ? 3 * o.economySpeed : 2;
-    const bonus = (1 + o.classBooster) * (1 + (o.lfBooster ?? 0)) * (1 + (o.itemBoost ?? 0));
-    return { base: row.base, max: Math.round(row.max * factor * bonus) };
-  }
-  function expeditionTarget(calculated, value) {
-    const v = value.trim();
-    if (!v) return calculated;
-    if (v.endsWith("%")) return Math.round(calculated * (parseAmount(v.slice(0, -1)) || 0) / 100);
-    return parseAmount(v) || calculated;
-  }
-  var EXPEDITION_FACTOR = { 202: 1, 203: 3, 219: 5.75 };
-  var EXPEDITION_FILLERS = [218, 213, 211, 215, 207, 206, 205, 204];
-  function expeditionFleet(stock2, o) {
-    const has = (id) => (stock2.find((s) => s.id === id)?.available ?? 0) > 0;
-    const need = (id) => {
-      const s = stock2.find((x) => x.id === id);
-      if (!s || s.capacity <= 0) return Infinity;
-      return Math.max(Math.ceil(o.base / (EXPEDITION_FACTOR[id] ?? 1)), Math.ceil(o.target / s.capacity));
-    };
-    let ship = o.ship;
-    if (!ship) {
-      const options = [219, 203, 202].filter(has);
-      ship = options.find((id) => (stock2.find((s) => s.id === id)?.available ?? 0) >= need(id)) ?? options.sort((a, b) => {
-        const cap = (id) => {
-          const s = stock2.find((x) => x.id === id);
-          return s.available * s.capacity;
-        };
-        return cap(b) - cap(a);
-      })[0] ?? 0;
-    }
-    const out = {};
-    if (ship && has(ship)) out[ship] = Math.min(stock2.find((s) => s.id === ship).available, need(ship));
-    if (o.extras) {
-      const filler = EXPEDITION_FILLERS.find((id) => id !== ship && has(id));
-      if (filler) out[filler] = 1;
-      if (ship !== 210 && has(210)) out[210] = 1;
-      if (ship !== 219 && has(219)) out[219] = 1;
-    }
-    return out;
-  }
-  function nextBody(list, current2, opts = {}) {
-    const isMoon2 = list.some((b) => b.moonId === current2);
-    const ids = list.filter((b) => isMoon2 || opts.onlyWithMoon ? b.moonId !== null : b.planetId !== null).map((b) => isMoon2 ? b.moonId : b.planetId);
-    const i = ids.indexOf(current2);
-    if (i < 0) return null;
-    for (let k = 1; k < ids.length; k++) {
-      const step = opts.backwards ? -k : k;
-      const id = ids[((i + step) % ids.length + ids.length) % ids.length];
-      if (id !== opts.skip) return id;
-    }
-    return null;
-  }
-  var LAST_FLEET_KEY = "fleet.last";
-
   // src/modules/fleet/actions.ts
   var TRANSPORT = 3;
   var DEPLOY = 4;
@@ -8623,13 +9743,6 @@ table.queues td.acts { width: 1%; text-align: right; }
     fd.mission = DEPLOY;
     const cargo = count2 > 0 ? loadCargo(fd, profile) : 0;
     return finish(fd, DEPLOY, count2, cargo);
-  }
-  function prepareAllShips(fd, profile) {
-    const ships = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
-    const count2 = selectShips(fd, ships);
-    fd.refresh();
-    fd.focusSubmitFleet1();
-    return { ok: count2 > 0, reason: count2 > 0 ? void 0 : "fleet.err.noShips", ships: count2, cargo: 0 };
   }
   function prepareFleetsave(fd, doc, base, save) {
     const profile = { ...base, reserve: base.saveReserve ?? EMPTY_RESERVE };
@@ -8764,56 +9877,108 @@ table.queues td.acts { width: 1%; text-align: right; }
 
   // src/modules/fleet/style.ts
   var FLEET_CSS = `
-.fut-fmenu .fut-moon-ico { margin-right: 4px; vertical-align: -1px; color: #8A9BB0; }
+/* The fleet bar speaks the inbox's language: Verdana 11px, tabular numbers, one set of tokens. */
+.fut-fbar, .fut-fmenu {
+  --hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1; --line: #24344B; --line-soft: #1A2738;
+  --tile: #0D1522; --tile-hi: #12283A; --accent: #4FD1E8; --on-accent: #CFF5FC; --ok: #4FE0B0; --neg: #F07A6E; --warn: #E3B341;
+  --track: #3A4A60; --knob-on: #06222A; --on-line: #1F5A68;
+}
 .fut-fbar {
-  display: flex; flex-direction: column; gap: 6px; margin: 6px 10px; padding: 8px;
-  border: 1px solid #1F2C40; border-radius: 10px; background: #0D1522;
-  font: 12px Arial, sans-serif; color: #C9D4E2;
+  display: flex; flex-direction: column; gap: 8px; margin: 6px 10px; padding: 8px;
+  border: 1px solid var(--line-soft); border-radius: 6px; background: #0A0F14;
+  font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums;
 }
-.fut-frow { display: flex; align-items: flex-start; gap: 8px; }
-.fut-ftiles { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; }
-.fut-ftilewrap { position: relative; display: inline-flex; }
-.fut-ftile {
-  position: relative; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-  min-width: 56px; height: 58px; padding: 6px 4px; border-radius: 8px; border: 1px solid #24344B; background: #0A111C;
-  color: #4FD1E8; font: 11px Arial, sans-serif; cursor: pointer;
+.fut-fbar button { font: inherit; cursor: pointer; }
+.fut-fbar button:focus-visible, .fut-fmenu button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Two rows: what to send (and the editors), then what to keep back (and the readout). */
+.fut-frow { display: flex; align-items: center; gap: 8px; min-width: 0; }
+
+/* Actions: a hotbar of icons, the key in the corner. Dashed = still to set up. */
+.fut-facts { display: flex; flex-wrap: wrap; gap: 4px; }
+.fut-fact {
+  position: relative; flex: none; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 40px; padding: 0;
+  border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--accent);
 }
-.fut-ftile:hover { border-color: #4FD1E8; background: #0F1C2C; }
-.fut-ftile.dim { color: #5B6B80; }
-.fut-ftile.dim .fut-flabel { color: #8A9BB0; }
-.fut-fkey {
-  position: absolute; left: 4px; top: 3px; padding: 0 3px; border-radius: 3px; background: #16243A;
-  color: #8A9BB0; font: 10px/13px Consolas, monospace;
-}
-.fut-flabel { color: #E6EDF5; font-weight: 700; white-space: nowrap; }
-.fut-fcaption { color: #9AA9BC; font-size: 11px; max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fut-ftilewrap .fut-ftile { padding-right: 16px; }
+.fut-fact:hover { border-color: var(--accent); background: var(--tile-hi); color: var(--on-accent); }
+.fut-fact:active { transform: translateY(1px); }
+.fut-fact .ico { display: inline-flex; }
+/* The key sits in the corner: the icon steps aside for it. */
+.fut-fact:has(kbd) .ico { margin: 5px 6px 0 0; }
+.fut-fact kbd { position: absolute; top: 2px; right: 3px; color: var(--dim); font: 11px/11px Verdana, Arial, sans-serif; }
+.fut-fact:hover kbd { color: var(--mute); }
+.fut-fact.dim { border-style: dashed; color: var(--dim); }
+.fut-fsplit { display: inline-flex; }
+.fut-fsplit .fut-fact { border-radius: 5px 0 0 5px; }
 .fut-fcaret {
-  position: absolute; right: 2px; top: 2px; width: 16px; height: 20px; padding: 0; border: 0; background: none;
-  color: #8A9BB0; cursor: pointer;
+  width: 24px; height: 40px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line); border-left: 0; border-radius: 0 5px 5px 0; background: var(--tile); color: var(--mute);
 }
-.fut-fcaret:hover { color: #E6EDF5; }
-.fut-fcaret svg { width: 14px; height: 14px; }
-.fut-fside { display: grid; grid-template-columns: repeat(3, auto); gap: 4px; align-content: start; }
-.fut-ficon {
-  width: 30px; height: 26px; display: inline-flex; align-items: center; justify-content: center; padding: 0;
-  border-radius: 7px; border: 1px solid #24344B; background: #0A111C; color: #8A9BB0; cursor: pointer;
+.fut-fcaret:hover { border-color: var(--accent); box-shadow: -1px 0 0 var(--accent); background: var(--tile-hi); color: var(--hi); }
+
+/* On the game's ship tiles: inverts that ship's selection. */
+#fleet1 #technologies li[data-technology] { position: relative; }
+.fut-finv { position: absolute; top: 2px; left: 2px; z-index: 3; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; padding: 0;
+  border: 1px solid #24344B; border-radius: 4px; background: rgba(8, 13, 20, 0.85); color: #C9D2DC; cursor: pointer; opacity: 0.75; }
+.fut-finv:hover, .fut-finv:focus-visible { opacity: 1; border-color: #4FD1E8; color: #4FD1E8; }
+@media (pointer: coarse) { .fut-finv { width: 26px; height: 26px; opacity: 1; } }
+
+/* Editors, pushed to the far end of the first row. */
+.fut-fedit { display: inline-flex; gap: 2px; margin-left: auto; }
+.fut-ftool { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 5px; background: none; color: var(--mute); }
+.fut-ftool:hover { background: var(--tile-hi); color: var(--hi); }
+
+/* Rules: the rule's icon beside a switch track, so on and off read without a word. */
+.fut-frules { flex: none; display: inline-flex; gap: 4px; }
+.fut-fsw { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 7px 0 8px; border: 1px solid var(--line-soft); border-radius: 14px; background: none; color: var(--dim); }
+.fut-fsw .ico { display: inline-flex; }
+.fut-fsw .track { position: relative; flex: none; width: 20px; height: 12px; border-radius: 6px; background: var(--track); transition: background-color 120ms ease-out; }
+.fut-fsw .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 8px; height: 8px; border-radius: 50%; background: var(--txt); transition: transform 120ms ease-out; }
+.fut-fsw:hover { border-color: var(--line); color: var(--txt); }
+.fut-fsw[aria-checked="true"] { border-color: var(--on-line); background: rgba(79, 209, 232, 0.08); color: var(--on-accent); }
+.fut-fsw[aria-checked="true"] .track { background: var(--accent); }
+.fut-fsw[aria-checked="true"] .track::after { transform: translateX(8px); background: var(--knob-on); }
+
+/* Readout: the last outcome, or what the control under the pointer does. Two lines at most, fixed height. */
+.fut-fread { flex: 1; min-width: 0; height: 30px; display: flex; align-items: center; }
+.fut-fread span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.fut-fread .tip { color: var(--mute); }
+.fut-fread .tip b { color: var(--hi); }
+.fut-fread .tip:empty { display: none; }
+.fut-fread .tip:not(:empty) + .fut-finfo { display: none; }
+.fut-finfo { color: var(--mute); }
+.fut-finfo.err { color: var(--neg); }
+
+/* Fingers: bigger targets, no key letters. */
+@media (pointer: coarse) {
+  .fut-fact { width: 48px; height: 46px; }
+  .fut-fcaret { width: 30px; height: 46px; }
+  .fut-fact kbd { display: none; }
+  .fut-fact:has(kbd) .ico { margin: 0; }
+  .fut-ftool { width: 44px; height: 44px; }
+  .fut-frow { flex-wrap: wrap; }
+  .fut-frules { flex-wrap: wrap; gap: 6px; }
+  .fut-fsw { height: 40px; padding: 0 10px 0 12px; border-radius: 20px; }
+  .fut-fread { flex-basis: 100%; }
 }
-.fut-ficon:hover { border-color: #4FD1E8; color: #E6EDF5; }
-.fut-ficon.on { border-color: #38C56E; color: #38C56E; }
-.fut-finfo { color: #8A9BB0; font-size: 11px; min-height: 14px; }
-.fut-finfo.err { color: #FF7A7A; }
+
+/* Destination list of Trasporto / Schiera. */
 .fut-fmenu {
-  position: fixed; z-index: 1000002; min-width: 220px; max-height: 320px; overflow-y: auto;
-  display: flex; flex-direction: column; padding: 4px; border: 1px solid #2C3E57; border-radius: 8px; background: #0A111C;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  position: fixed; z-index: 1000002; min-width: 240px; max-height: 320px; overflow-y: auto; overscroll-behavior: contain;
+  display: grid; grid-template-columns: minmax(0, 1fr) 40px; gap: 2px; padding: 4px; border: 1px solid var(--line); border-radius: 6px; background: #0A0F14;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); font: 11px/1.35 Verdana, Arial, sans-serif;
 }
 .fut-fmenu .fut-fbtn {
-  height: 24px; padding: 0 8px; border: 0; border-radius: 5px; background: none; text-align: left;
-  color: #C9D4E2; font: 12px Arial, sans-serif; cursor: pointer; white-space: nowrap;
+  display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 8px; border: 1px solid transparent; border-radius: 4px; background: var(--tile);
+  color: var(--txt); font: inherit; cursor: pointer; white-space: nowrap; text-align: left;
 }
-.fut-fmenu .fut-fbtn:hover { background: #12283A; }
-.fut-fmenu .fut-fbtn.on { color: #FFC94D; }
+.fut-fmenu .fut-fbtn small { margin-left: auto; color: var(--dim); font-size: 11px; }
+.fut-fmenu .fut-fbtn.moon { justify-content: center; padding: 0; color: var(--mute); }
+.fut-fmenu .fut-fbtn:hover { border-color: var(--accent); background: var(--tile-hi); color: var(--hi); }
+.fut-fmenu .fut-fbtn.on { border-color: var(--warn); color: var(--warn); }
+.fut-fmenu .fut-fbtn:disabled { background: none; color: var(--dim); opacity: 0.5; cursor: default; border-color: transparent; }
+@media (pointer: coarse) { .fut-fmenu { grid-template-columns: minmax(0, 1fr) 48px; max-height: 60vh; } .fut-fmenu .fut-fbtn { min-height: 44px; } }
+@media (prefers-reduced-motion: reduce) { .fut-fact:active { transform: none; } .fut-fsw .track, .fut-fsw .track::after { transition: none; } }
 `;
   var MODAL_CSS = `
 :host { --panel-w: 720px; }
@@ -8829,17 +9994,33 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-feditor h4 { margin: 0 0 4px; font-size: 14px; color: #E6EDF5; }
 .fut-feditor h5 { margin: 16px 0 6px; font-size: 12px; font-weight: 700; color: #C9D4E2; }
 .fut-feditor > h5:first-child { margin-top: 0; }
-.fut-fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px 12px; }
-.fut-ffield { display: flex; flex-direction: column; gap: 3px; color: #8A9BB0; font-size: 11px; }
+.fut-fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 4px 14px; }
+.fut-ffield { display: grid; grid-template-columns: minmax(0, 1fr) 96px; align-items: center; gap: 8px; min-height: 28px; color: var(--text-2); font-size: 11px; }
+.fut-ffield span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fut-ffield select { width: 96px; }
+.fut-fgrid.wide .fut-ffield { grid-template-columns: minmax(0, 1fr) 130px; }
+.fut-fgrid.wide .fut-ffield select { width: 130px; }
+.fut-ffield input { text-align: right; font-variant-numeric: tabular-nums; }
 .fut-ffield input, .fut-ffield select {
   height: 26px; padding: 0 6px; border-radius: 6px; border: 1px solid #2C3E57; background: #0D1522; color: #E6EDF5; font: 12px Arial, sans-serif;
 }
 .fut-ffield input:focus, .fut-ffield select:focus { outline: none; border-color: #4FD1E8; }
 .fut-fcheck { display: flex; align-items: center; gap: 6px; color: #C9D4E2; font-size: 12px; align-self: end; min-height: 26px; }
-.fut-freserve { margin-top: 12px; padding: 10px; border: 1px solid #1F2C40; border-radius: 8px; background: #0D1522; }
+.fut-freserve { margin-top: 6px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); }
+.fut-freserve[open] { padding-bottom: 10px; }
+.fut-frulebody { padding: 0 12px; }
+.fold { display: inline-flex; color: var(--muted); transform: rotate(-90deg); transition: transform 120ms ease-out; }
+.fut-freserve[open] .fold { transform: none; }
+@media (prefers-reduced-motion: reduce) { .fold { transition: none; } }
 .fut-freserve h5 { margin: 0; }
-.fut-frulehead { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
-.fut-frulehead .fut-fcheck { margin-left: auto; min-height: 0; }
+.fut-frulehead { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-height: 40px; padding: 0 12px; cursor: pointer; list-style: none; }
+.fut-frulehead::-webkit-details-marker { display: none; }
+.fut-frulehead:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; border-radius: 7px; }
+.fut-fruleico { display: inline-flex; color: var(--accent); }
+.fut-fswitch { margin-left: auto; display: inline-flex; align-items: center; padding: 8px 0 8px 8px; cursor: pointer; }
+.fut-fswitch input { position: absolute; opacity: 0; pointer-events: none; }
+.fut-fswitch input:focus-visible + .sw-track { outline: 2px solid var(--accent); outline-offset: 2px; }
+input[type="checkbox"] { accent-color: var(--accent); }
 .fut-fbadge { padding: 1px 7px; border-radius: 9px; border: 1px solid #2C3E57; color: #8A9BB0; font-size: 11px; cursor: default; }
 .fut-fbadge.on { border-color: #38C56E; color: #38C56E; }
 .fut-fbadge.off { border-color: #C9853A; color: #FFB15C; }
@@ -8847,84 +10028,27 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fchecks .fut-fcheck { align-self: auto; min-height: 22px; }
 .fut-fcopy .fut-factions { margin-top: 6px; }
 .fut-feditor h6 { margin: 10px 0 4px; font-size: 11px; font-weight: 400; color: #8A9BB0; }
-.fut-fkeys { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 12px; }
-.fut-fkeyrow { display: flex; align-items: center; gap: 8px; color: #C9D4E2; }
-.fut-fkeyrow kbd { min-width: 20px; padding: 1px 5px; border: 1px solid #2C3E57; border-radius: 4px; background: #0D1522; color: #4FD1E8; font: 11px Consolas, monospace; text-align: center; }
 .fut-fnote { margin: 6px 0 0; color: #8A9BB0; font-size: 11px; }
 .fut-factions { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+.fut-feditor > .fut-factions { position: sticky; bottom: 0; z-index: 1; margin: 10px -8px -8px; padding: 10px 8px; border-top: 1px solid var(--line); background: var(--bg); }
 `;
 
-  // src/modules/shortcuts/index.ts
-  var registry = /* @__PURE__ */ new Map();
-  var installed = null;
-  function typing(doc) {
-    const a = doc.activeElement;
-    if (!a) return false;
-    const tag = a.tagName;
-    return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || a.isContentEditable;
-  }
-  function registerShortcuts(doc, list) {
-    for (const s of list) registry.set(s.key.toLowerCase(), s);
-    if (installed === doc) return;
-    installed = doc;
-    doc.addEventListener(
-      "keydown",
-      (e) => {
-        if (e.repeat || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
-        if (typing(doc) || doc.getElementById("fut-fleet-modal") || doc.getElementById("fut-dashboard") || doc.getElementById("fut-planner") || doc.getElementById("fut-journal")) return;
-        const s = registry.get(e.key.toLowerCase());
-        if (!s) return;
-        e.preventDefault();
-        e.stopPropagation();
-        s.run();
-      },
-      true
-    );
-  }
-  function listShortcuts() {
-    return [...registry.values()];
-  }
-  function switchBodyUrl(href, cp) {
-    const u = new URL(href);
-    for (const k of [...u.searchParams.keys()]) if (k.startsWith("fut")) u.searchParams.delete(k);
-    u.searchParams.set("cp", String(cp));
-    return u.toString();
-  }
-
-  // src/modules/fleet/icons.ts
-  var ICONS2 = {
-    moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
-    transport: '<path d="M2 7h12v9H2z"/><path d="M14 10h4l4 4v2h-8z"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/>',
-    deploy: '<path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/>',
-    expedition: '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
-    fleetsave: '<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
-    all: '<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
-    cargo: '<path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M4 15v5h16v-5"/>',
-    repeat: '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/>',
-    settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/>',
-    last: '<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/>',
-    caret: '<path d="M7 10l5 5 5-5"/>',
-    reserve: '<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M8 12h8"/>',
-    ships: '<path d="M12 2c2.5 2 4 5 4 9v6l-4 3-4-3v-6c0-4 1.5-7 4-9z"/><path d="M8 13l-3 3v4l3-2M16 13l3 3v4l-3-2"/><circle cx="12" cy="9" r="1.5"/>',
-    resources: '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',
-    gate: '<ellipse cx="12" cy="12" rx="5" ry="9"/><path d="M2 12h6M16 12h6M19 9l3 3-3 3"/>',
-    food: '<path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10"/><path d="M16 3c-1.7 1-2.5 3-2.5 6s1 4 2.5 4v8"/><path d="M4 20L20 4" stroke-width="1.4"/>'
-  };
-  function iconSvg(name, size = 20) {
-    return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS2[name]}</svg>`;
-  }
-
   // src/modules/fleet/index.ts
-  var STYLE_ID2 = "fut-fleet-style";
+  var STYLE_ID3 = "fut-fleet-style";
   var MODAL_ID = "fut-fleet-modal";
   var FLEETSAVE_MISSIONS = [3, 4, 6, 8, 15, 5, 1];
   var pageState = /* @__PURE__ */ new WeakMap();
   var REPEATABLE = ["moon", "transport", "deploy", "expedition", "fleetsave", "plan"];
-  function el3(doc, tag, className = "", text) {
+  function el4(doc, tag, className = "", text) {
     const node = doc.createElement(tag);
     if (className) node.className = className;
     if (text !== void 0) node.textContent = text;
     return node;
+  }
+  function typeInto(input, value) {
+    input.value = String(value);
+    input.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
   }
   function enableOriginAutofill(doc) {
     const p = doc.querySelector("#fleet2 #position");
@@ -8947,7 +10071,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     return settingsFrom(store.get(SETTINGS_KEY, {}));
   }
   function button(doc, text, onClick, cls = "", title = "") {
-    const b = el3(doc, "button", `fut-fbtn ${cls}`.trim(), text);
+    const b = el4(doc, "button", `fut-fbtn ${cls}`.trim(), text);
     b.type = "button";
     if (title) b.title = title;
     b.addEventListener("click", (e) => {
@@ -8963,9 +10087,9 @@ table.queues td.acts { width: 1%; text-align: right; }
     input.addEventListener("keypress", (e) => e.stopPropagation());
   }
   function numberField(doc, label, value, placeholder = "") {
-    const wrap = el3(doc, "label", "fut-ffield");
-    wrap.append(el3(doc, "span", "", label));
-    const input = el3(doc, "input");
+    const wrap = el4(doc, "label", "fut-ffield");
+    wrap.append(el4(doc, "span", "", label));
+    const input = el4(doc, "input");
     input.type = "text";
     input.inputMode = "numeric";
     input.placeholder = placeholder;
@@ -8975,11 +10099,11 @@ table.queues td.acts { width: 1%; text-align: right; }
     return [wrap, input];
   }
   function selectField(doc, label, options, value) {
-    const wrap = el3(doc, "label", "fut-ffield");
-    wrap.append(el3(doc, "span", "", label));
-    const sel = el3(doc, "select");
+    const wrap = el4(doc, "label", "fut-ffield");
+    wrap.append(el4(doc, "span", "", label));
+    const sel = el4(doc, "select");
     for (const [v, text] of options) {
-      const opt = el3(doc, "option", "", text);
+      const opt = el4(doc, "option", "", text);
       opt.value = v;
       opt.selected = v === value;
       sel.append(opt);
@@ -8989,11 +10113,11 @@ table.queues td.acts { width: 1%; text-align: right; }
     return [wrap, sel];
   }
   function checkField(doc, label, checked) {
-    const wrap = el3(doc, "label", "fut-fcheck");
-    const input = el3(doc, "input");
+    const wrap = el4(doc, "label", "fut-fcheck");
+    const input = el4(doc, "input");
     input.type = "checkbox";
     input.checked = checked;
-    wrap.append(input, el3(doc, "span", "", label));
+    wrap.append(input, el4(doc, "span", "", label));
     return [wrap, input];
   }
   function parseCoords(coords) {
@@ -9018,14 +10142,14 @@ table.queues td.acts { width: 1%; text-align: right; }
     return `${b.name} [${b.coords}]${b.moonId === id ? ` \xB7 ${o.t("fleet.typeMoon")}` : ""}`;
   }
   function shipFields(o, ships) {
-    const grid2 = el3(o.doc, "div", "fut-fgrid");
+    const grid2 = el4(o.doc, "div", "fut-fgrid");
     const inputs = [];
     for (const slot of readShipSlots(o.doc)) {
       const [wrap, input] = numberField(o.doc, slot.name, ships[slot.id] ?? null, "0");
       grid2.append(wrap);
       inputs.push([slot.id, input]);
     }
-    if (!inputs.length) grid2.append(el3(o.doc, "span", "fut-fnote", o.t("fleet.noShips")));
+    if (!inputs.length) grid2.append(el4(o.doc, "span", "fut-fnote", o.t("fleet.noShips")));
     return {
       el: grid2,
       read: () => {
@@ -9039,7 +10163,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     };
   }
   function resourceFields(o, res) {
-    const grid2 = el3(o.doc, "div", "fut-fgrid");
+    const grid2 = el4(o.doc, "div", "fut-fgrid");
     const inputs = ["metal", "crystal", "deuterium"].map((k) => {
       const [wrap, input] = numberField(o.doc, o.t(`res.${k}`), res[k] || null, "0");
       grid2.append(wrap);
@@ -9064,7 +10188,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const profiles = loadProfiles(o.store);
     const settings = loadSettings(o.store);
     const key = SWITCH[section2];
-    const badge = el3(doc, "span", "fut-fbadge");
+    const badge = el4(doc, "span", "fut-fbadge");
     if (sectionEmpty(profileFor(profiles, o.bodyId), section2)) {
       badge.classList.add("empty");
       badge.textContent = t("fleet.rule.empty");
@@ -9083,13 +10207,22 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   }
   function ruleBox(o, section2, title, hint, fields, onSwitch) {
     const { doc, t } = o;
-    const box = el3(doc, "div", "fut-freserve");
-    const head = el3(doc, "div", "fut-frulehead");
-    head.append(el3(doc, "h5", "", title), ruleBadge(o, section2));
+    const box = el4(doc, "details", "fut-freserve");
+    box.open = !sectionEmpty(profileFor(loadProfiles(o.store), o.bodyId), section2);
+    const head = el4(doc, "summary", "fut-frulehead");
+    const mark = el4(doc, "span", "fut-fruleico");
+    mark.innerHTML = iconSvg(section2, 18);
+    head.append(iconEl(doc), mark, el4(doc, "h5", "", title), ruleBadge(o, section2));
     const key = SWITCH[section2];
     if (key) {
-      const [wrap, input] = checkField(doc, t("fleet.rule.switch"), loadSettings(o.store)[key]);
+      const wrap = el4(doc, "label", "fut-fswitch");
       wrap.title = t("fleet.rule.switchHint");
+      const input = el4(doc, "input");
+      input.type = "checkbox";
+      input.setAttribute("role", "switch");
+      input.setAttribute("aria-label", `${title}: ${t("fleet.rule.switch")}`);
+      input.checked = loadSettings(o.store)[key];
+      wrap.append(input, el4(doc, "i", "sw-track"));
       input.addEventListener("change", () => {
         o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: input.checked });
         head.querySelector(".fut-fbadge")?.replaceWith(ruleBadge(o, section2));
@@ -9097,15 +10230,21 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       });
       head.append(wrap);
     }
-    box.append(head, el3(doc, "p", "fut-fnote", hint), ...fields);
+    const inner = el4(doc, "div", "fut-frulebody");
+    inner.append(el4(doc, "p", "fut-fnote", hint), ...fields);
+    box.append(head, inner);
     return box;
+  }
+  function iconEl(doc) {
+    const span = el4(doc, "span", "fold");
+    span.innerHTML = iconSvg("caret", 14);
+    return span;
   }
   function reserveEditor(o, onSaved) {
     const { doc, t } = o;
     const profile = profileFor(loadProfiles(o.store), o.bodyId);
     const moon = isMoon(o.bodies, o.bodyId);
-    const panel = el3(doc, "div", "fut-feditor");
-    panel.append(el3(doc, "h4", "", t(moon ? "fleet.editTitleMoon" : "fleet.editTitlePlanet", { body: bodyLabel(o, o.bodyId) })));
+    const panel = el4(doc, "div", "fut-feditor");
     const refresh = () => onSaved("");
     const ships = shipFields(o, profile.reserve.ships);
     panel.append(ruleBox(o, "ships", t("fleet.rule.ships"), t("fleet.rule.shipsHint"), [ships.el], refresh));
@@ -9113,7 +10252,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     panel.append(ruleBox(o, "resources", t("fleet.rule.resources"), t("fleet.rule.resourcesHint"), [res.el], refresh));
     const gate = moon ? shipFields(o, profile.gate) : null;
     if (gate) panel.append(ruleBox(o, "gate", t("fleet.rule.gate"), t("fleet.rule.gateHint"), [gate.el], refresh));
-    const saveGrid = el3(doc, "div", "fut-fgrid");
+    const saveGrid = el4(doc, "div", "fut-fgrid wide");
     const origin = originCoords(doc);
     const [gWrap, gIn] = numberField(doc, t("fleet.galaxy"), profile.save?.galaxy ?? null, origin ? String(origin.galaxy) : "");
     const [sWrap, sIn] = numberField(doc, t("fleet.system"), profile.save?.system ?? null, origin ? String(origin.system) : "");
@@ -9137,9 +10276,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     panel.append(
       ruleBox(o, "fleetsave", t("fleet.fleetsave"), t("fleet.fleetsaveHint"), [
         saveGrid,
-        el3(doc, "h6", "", t("fleet.rule.saveShips")),
+        el4(doc, "h6", "", t("fleet.rule.saveShips")),
         saveShips.el,
-        el3(doc, "h6", "", t("fleet.rule.saveResources")),
+        el4(doc, "h6", "", t("fleet.rule.saveResources")),
         saveRes.el
       ], refresh)
     );
@@ -9171,7 +10310,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       onSaved(t("fleet.copied", { count: ids.length }));
     });
     copyBox.hidden = true;
-    const actions = el3(doc, "div", "fut-factions");
+    const actions = el4(doc, "div", "fut-factions");
     actions.append(
       button(doc, t("fleet.save"), () => {
         store();
@@ -9181,21 +10320,21 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         copyBox.hidden = !copyBox.hidden;
       })
     );
-    panel.append(actions, copyBox);
+    panel.append(copyBox, actions);
     return panel;
   }
   function copyPanel(o, moon, onCopy) {
     const { doc, t } = o;
-    const box = el3(doc, "div", "fut-freserve fut-fcopy");
-    box.append(el3(doc, "h5", "", t("fleet.copyTitle")), el3(doc, "p", "fut-fnote", t("fleet.copyHint")));
-    const secRow = el3(doc, "div", "fut-fchecks");
+    const box = el4(doc, "div", "fut-freserve fut-fcopy");
+    box.append(el4(doc, "h5", "", t("fleet.copyTitle")), el4(doc, "p", "fut-fnote", t("fleet.copyHint")));
+    const secRow = el4(doc, "div", "fut-fchecks");
     const sections = RESERVE_SECTIONS.filter((s) => s !== "gate" || moon).map((s) => {
       const [wrap, input] = checkField(doc, t(s === "fleetsave" ? "fleet.fleetsave" : `fleet.rule.${s}`), true);
       secRow.append(wrap);
       return [s, input];
     });
-    box.append(el3(doc, "h6", "", t("fleet.copyWhat")), secRow);
-    const bodyRow = el3(doc, "div", "fut-fchecks");
+    box.append(el4(doc, "h6", "", t("fleet.copyWhat")), secRow);
+    const bodyRow = el4(doc, "div", "fut-fchecks");
     const targets = [];
     for (const b of o.bodies) {
       for (const [id, isMoonId] of [[b.planetId, false], [b.moonId, true]]) {
@@ -9208,15 +10347,15 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const pick = (which) => {
       for (const [, isMoonId, input] of targets) input.checked = which === "moons" ? isMoonId : which === "planets" ? !isMoonId : false;
     };
-    const quick = el3(doc, "div", "fut-factions");
+    const quick = el4(doc, "div", "fut-factions");
     quick.append(
       button(doc, t("fleet.pickPlanets"), () => pick("planets")),
       button(doc, t("fleet.pickMoons"), () => pick("moons")),
       button(doc, t("fleet.pickNone"), () => pick("none"))
     );
-    box.append(el3(doc, "h6", "", t("fleet.copyWhere")), quick, bodyRow);
-    const status = el3(doc, "span", "fut-fnote");
-    const go = el3(doc, "div", "fut-factions");
+    box.append(el4(doc, "h6", "", t("fleet.copyWhere")), quick, bodyRow);
+    const status = el4(doc, "span", "fut-fnote");
+    const go = el4(doc, "div", "fut-factions");
     go.append(
       button(doc, t("fleet.copyGo"), () => {
         const chosen = sections.filter(([, i]) => i.checked).map(([s]) => s);
@@ -9231,82 +10370,6 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     );
     box.append(go);
     return box;
-  }
-  function settingsEditor(o, onSaved) {
-    const { doc, t } = o;
-    const s = loadSettings(o.store);
-    const names = new Map(readShipSlots(doc).map((x) => [Number(x.id), x.name || `#${x.id}`]));
-    const shipName2 = (id) => names.get(id) ?? `#${id}`;
-    const panel = el3(doc, "div", "fut-feditor");
-    panel.append(el3(doc, "h5", "", t("fleet.transportTitle")));
-    const g1 = el3(doc, "div", "fut-fgrid");
-    const cargoOptions = CARGO_SHIPS.map((id) => [String(id), shipName2(id)]);
-    const [mainW, mainSel] = selectField(doc, t("fleet.mainShip"), cargoOptions, String(s.mainShip));
-    const [secW, secSel] = selectField(doc, t("fleet.secondShip"), [["0", t("fleet.none")], ...cargoOptions], String(s.secondShip));
-    const [spdW, spdSel] = selectField(
-      doc,
-      t("fleet.speed"),
-      Array.from({ length: 10 }, (_, i) => [String((i + 1) * 10), `${(i + 1) * 10}%`]),
-      String(s.transportSpeed)
-    );
-    g1.append(mainW, secW, spdW);
-    panel.append(g1);
-    panel.append(el3(doc, "h5", "", t("fleet.favTitle")));
-    const gf = el3(doc, "div", "fut-fgrid");
-    const destOptions = [
-      ["0", t("fleet.none")],
-      ...o.bodies.flatMap((b) => [b.planetId, b.moonId]).filter((x) => x !== null).map((id) => [String(id), bodyLabel(o, id)])
-    ];
-    const [favTW, favTSel] = selectField(doc, t("fleet.favTransport"), destOptions, String(s.favTransport ?? 0));
-    const [favDW, favDSel] = selectField(doc, t("fleet.favDeploy"), destOptions, String(s.favDeploy ?? 0));
-    gf.append(favTW, favDW);
-    panel.append(gf);
-    panel.append(el3(doc, "h5", "", t("fleet.expeditionTitle")));
-    const g2 = el3(doc, "div", "fut-fgrid");
-    const [expW, expSel] = selectField(
-      doc,
-      t("fleet.expeditionShip"),
-      [["0", t("fleet.bestShip")], ...[219, 203, 202].map((id) => [String(id), shipName2(id)])],
-      String(s.expeditionShip)
-    );
-    const [valW, valIn] = numberField(doc, t("fleet.expeditionValue"), s.expeditionValue, t("fleet.auto"));
-    valIn.inputMode = "text";
-    const [extW, extIn] = checkField(doc, t("fleet.expeditionExtras"), s.expeditionExtras);
-    g2.append(expW, valW, extW);
-    panel.append(g2);
-    panel.append(el3(doc, "p", "fut-fnote", t("fleet.expeditionHint")));
-    panel.append(el3(doc, "h5", "", t("fleet.shortcutsTitle")));
-    const keys = el3(doc, "div", "fut-fkeys");
-    for (const sc of listShortcuts()) {
-      const row = el3(doc, "span", "fut-fkeyrow");
-      row.append(el3(doc, "kbd", "", sc.key.toUpperCase()), el3(doc, "span", "", t(sc.label)));
-      keys.append(row);
-    }
-    panel.append(keys);
-    panel.append(el3(doc, "h5", "", t("fleet.repeatTitle")));
-    const [repW, repIn] = checkField(doc, t("fleet.repeat"), s.repeat);
-    panel.append(repW, el3(doc, "p", "fut-fnote", t("fleet.repeatHint")));
-    const actions = el3(doc, "div", "fut-factions");
-    actions.append(
-      button(doc, t("fleet.save"), () => {
-        const next = {
-          ...loadSettings(o.store),
-          mainShip: Number(mainSel.value),
-          secondShip: Number(secSel.value),
-          transportSpeed: Number(spdSel.value),
-          favTransport: Number(favTSel.value) || null,
-          favDeploy: Number(favDSel.value) || null,
-          expeditionShip: Number(expSel.value),
-          expeditionValue: valIn.value.trim(),
-          expeditionExtras: extIn.checked,
-          repeat: repIn.checked
-        };
-        o.store.set(SETTINGS_KEY, next);
-        onSaved(t("fleet.saved"));
-      }, "primary")
-    );
-    panel.append(actions);
-    return panel;
   }
   function summary(o, stored, settings) {
     const { t } = o;
@@ -9332,55 +10395,44 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     if (modalKeyHandler) doc.removeEventListener("keydown", modalKeyHandler, true);
     modalKeyHandler = null;
   }
-  function openSettings2(o, tab2, onChange) {
+  function openSettings2(o, _tab, onChange) {
     const { doc, t } = o;
     closeModal(doc);
-    const host = el3(doc, "div");
+    const host = el4(doc, "div");
     host.id = MODAL_ID;
     const root = host.attachShadow({ mode: "open" });
-    const style = el3(doc, "style");
+    const style = el4(doc, "style");
     style.textContent = WINDOW_SHEET + MODAL_CSS;
-    const backdrop = el3(doc, "div", "backdrop");
-    const panel = el3(doc, "div", "panel");
+    const backdrop = el4(doc, "div", "backdrop");
+    const panel = el4(doc, "div", "panel");
     panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-modal", "true");
     panel.setAttribute("aria-label", t("fleet.settingsTitle"));
-    const head = el3(doc, "div", "head");
-    const tabs = el3(doc, "div", "tabs");
-    const moon = isMoon(o.bodies, o.bodyId);
-    const status = el3(doc, "span", "sub status");
-    const body = el3(doc, "div", "body");
-    const show2 = (which) => {
-      tabs.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tab === which)));
+    const head = el4(doc, "div", "head");
+    const status = el4(doc, "span", "sub status");
+    status.setAttribute("role", "status");
+    const body = el4(doc, "div", "body");
+    const show2 = () => {
       const saved = (msg) => {
         onChange();
-        if (msg && which === "body") {
+        if (msg) {
           const top = backdrop.scrollTop;
-          show2(which);
+          show2();
           backdrop.scrollTop = top;
         }
         status.textContent = msg;
       };
-      body.replaceChildren(which === "body" ? reserveEditor(o, saved) : settingsEditor(o, saved));
+      body.replaceChildren(reserveEditor(o, saved));
     };
-    for (const [id, label] of [
-      ["body", t(moon ? "fleet.tabMoon" : "fleet.tabPlanet")],
-      ["general", t("fleet.tabGeneral")]
-    ]) {
-      const b = el3(doc, "button", "tab", label);
-      b.type = "button";
-      b.dataset.tab = id;
-      b.addEventListener("click", () => show2(id));
-      tabs.append(b);
-    }
-    const close = el3(doc, "button", "close");
+    const close = el4(doc, "button", "close");
     close.type = "button";
     close.setAttribute("aria-label", t("fleet.close"));
     close.addEventListener("click", () => closeModal(doc));
     close.append(icon(doc, "close", 16));
-    const titles = el3(doc, "div", "titles");
-    titles.append(el3(doc, "h2", "", t("fleet.settingsTitle")), status);
+    const titles = el4(doc, "div", "titles");
+    titles.append(el4(doc, "h2", "", t(isMoon(o.bodies, o.bodyId) ? "fleet.editTitleMoon" : "fleet.editTitlePlanet", { body: bodyLabel(o, o.bodyId) })), status);
     head.append(titles, close);
-    panel.append(head, tabs, body);
+    panel.append(head, body);
     backdrop.append(panel);
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop) closeModal(doc);
@@ -9391,7 +10443,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       if (e.key === "Escape") closeModal(doc);
     };
     doc.addEventListener("keydown", modalKeyHandler, true);
-    show2(tab2);
+    show2();
+    close.focus();
   }
   function shortLabel(o, id) {
     if (!id) return o.t("fleet.pickDest");
@@ -9399,47 +10452,104 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     if (!b) return o.t("fleet.pickDest");
     return `${b.name}${b.moonId === id ? " \u263E" : ""}`;
   }
-  var FLEET_KEYS = { moon: "l", transport: "t", deploy: "d", expedition: "x", fleetsave: "e", all: "a", last: "p" };
-  function tile(doc, icon2, label, caption, title, onClick, cls = "", key = "") {
-    const b = el3(doc, "button", `fut-ftile ${cls}`.trim());
+  function readout(doc, text) {
+    const box = el4(doc, "span", "fut-fread");
+    const tip = el4(doc, "span", "tip");
+    tip.setAttribute("aria-hidden", "true");
+    const info = el4(doc, "span", "fut-finfo", text);
+    info.setAttribute("role", "status");
+    box.append(tip, info);
+    const clear = () => tip.replaceChildren();
+    return {
+      box,
+      say(msg, err = false) {
+        clear();
+        info.textContent = msg;
+        info.classList.toggle("err", err);
+      },
+      peek(node, name, detail) {
+        const show2 = () => tip.replaceChildren(el4(doc, "b", "", name), doc.createTextNode(detail ? ` ${detail}` : ""));
+        node.addEventListener("mouseenter", show2);
+        node.addEventListener("focus", show2);
+        node.addEventListener("mouseleave", clear);
+        node.addEventListener("blur", clear);
+      }
+    };
+  }
+  function tile(doc, icon2, label, onClick, cls = "", key = "") {
+    const b = el4(doc, "button", `fut-fact ${cls}`.trim());
     b.type = "button";
-    b.title = key ? `${title} [${key.toUpperCase()}]` : title;
-    b.innerHTML = iconSvg(icon2);
-    if (key) b.append(el3(doc, "kbd", "fut-fkey", key.toUpperCase()));
-    b.append(el3(doc, "span", "fut-flabel", label));
-    if (caption) b.append(el3(doc, "span", "fut-fcaption", caption));
+    b.title = key ? `${label} [${keyLabel(key)}]` : label;
+    b.setAttribute("aria-label", label);
+    const ico = el4(doc, "span", "ico");
+    ico.innerHTML = iconSvg(icon2, 22);
+    b.append(ico);
+    if (key) {
+      const cap = el4(doc, "kbd", "", keyLabel(key));
+      cap.setAttribute("aria-hidden", "true");
+      b.append(cap);
+    }
     b.addEventListener("click", (e) => {
       e.preventDefault();
       onClick();
     });
     return b;
   }
-  function iconToggle(doc, icon2, title, onClick, cls = "") {
-    const b = el3(doc, "button", `fut-ficon ${cls}`.trim());
+  function ruleSwitch(doc, icon2, label, on, onClick) {
+    const b = el4(doc, "button", "fut-fsw");
     b.type = "button";
-    b.title = title;
-    b.innerHTML = iconSvg(icon2, 18);
+    b.title = label;
+    b.setAttribute("role", "switch");
+    b.setAttribute("aria-checked", String(on));
+    b.setAttribute("aria-label", label);
+    const ico = el4(doc, "span", "ico");
+    ico.innerHTML = iconSvg(icon2, 16);
+    b.append(ico, el4(doc, "i", "track"));
     b.addEventListener("click", (e) => {
       e.preventDefault();
       onClick();
     });
     return b;
   }
-  function destinationMenu(o, anchor, current2, onPick) {
+  function addInvertButtons(o) {
+    const { doc, t } = o;
+    for (const slot of readShipSlots(doc)) {
+      const tile2 = slot.input.closest("li");
+      if (!tile2 || !slot.available || tile2.querySelector(".fut-finv")) continue;
+      const b = el4(doc, "button", "fut-finv");
+      b.type = "button";
+      b.title = t("fleet.invert");
+      b.setAttribute("aria-label", `${t("fleet.invert")}: ${slot.name}`);
+      b.innerHTML = iconSvg("invert", 12);
+      b.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const available = Number(tile2.querySelector(".amount")?.dataset.value ?? 0) || 0;
+        const picked2 = Math.min(available, parseAmount(slot.input.value));
+        typeInto(slot.input, available - picked2 || "");
+      });
+      tile2.append(b);
+    }
+  }
+  function destinationMenu(o, anchor, current3, onPick) {
     const { doc } = o;
     doc.querySelectorAll(".fut-fmenu").forEach((n) => n.remove());
-    const menu = el3(doc, "div", "fut-fmenu");
-    for (const b of o.bodies) {
-      for (const id of [b.planetId, b.moonId]) {
-        if (id === null || id === o.bodyId) continue;
-        const item = button(doc, `${b.name}  [${b.coords}]`, () => {
-          menu.remove();
-          onPick(id);
-        }, id === current2 ? "on" : "");
-        if (id === b.moonId) item.prepend(icon(doc, "moon", 11, "fut-moon-ico"));
-        menu.append(item);
-      }
-    }
+    const menu = el4(doc, "div", "fut-fmenu");
+    const cell = (id, moon, b) => {
+      if (id === null) return el4(doc, "span");
+      const item = button(doc, moon ? "" : b.name, () => {
+        menu.remove();
+        onPick(id);
+      }, `${moon ? "moon" : "planet"}${id === current3 ? " on" : ""}`);
+      if (moon) item.append(icon(doc, "moon", 14));
+      else item.append(el4(doc, "small", "", b.coords));
+      item.setAttribute("aria-label", `${b.name}${moon ? ` (${o.t("fleet.typeMoon")})` : ""} [${b.coords}]`);
+      if (moon) item.title = `${b.name} (${o.t("fleet.typeMoon")})`;
+      if (id === current3) item.setAttribute("aria-current", "true");
+      item.disabled = id === o.bodyId;
+      return item;
+    };
+    for (const b of o.bodies) menu.append(cell(b.planetId, false, b), cell(b.moonId, true, b));
     const r = anchor.getBoundingClientRect();
     menu.style.top = `${Math.round(r.bottom + 4)}px`;
     menu.style.left = `${Math.round(r.left)}px`;
@@ -9451,13 +10561,18 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       }
     };
     doc.addEventListener("mousedown", away, true);
-    doc.defaultView?.addEventListener("scroll", () => menu.remove(), { once: true, capture: true });
+    const onScroll = (e) => {
+      if (e.target instanceof Node && menu.contains(e.target)) return;
+      menu.remove();
+      doc.defaultView?.removeEventListener("scroll", onScroll, true);
+    };
+    doc.defaultView?.addEventListener("scroll", onScroll, true);
   }
   function renderFleetTools(o) {
     const { doc, t } = o;
-    if (!doc.getElementById(STYLE_ID2)) {
-      const style = el3(doc, "style");
-      style.id = STYLE_ID2;
+    if (!doc.getElementById(STYLE_ID3)) {
+      const style = el4(doc, "style");
+      style.id = STYLE_ID3;
       style.textContent = FLEET_CSS;
       doc.head.append(style);
     }
@@ -9477,11 +10592,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const state = pageState.get(doc) ?? { active: incoming, o };
     state.o = o;
     pageState.set(doc, state);
-    const info = el3(doc, "span", "fut-finfo", summary(o, stored, settings));
-    const say = (text, err = false) => {
-      info.textContent = text;
-      info.classList.toggle("err", err);
-    };
+    const out = readout(doc, summary(o, stored, settings));
+    const say = out.say;
     const report = (r, okKey, vars = {}) => r.ok ? say(t(okKey, { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), ...vars })) : say(t(r.reason ?? "fleet.err.noShips"), true);
     const withDispatcher = (fn) => {
       const fd = getDispatcher();
@@ -9527,10 +10639,6 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         begin("fleetsave");
         report(prepareFleetsave(fd, doc, profile, profile.save), "fleet.ok.cargo");
       }),
-      all: () => withDispatcher((fd) => {
-        begin("all");
-        report(prepareAllShips(fd, profile), "fleet.ok.ships");
-      }),
       plan: (dest) => withDispatcher((fd) => {
         const delivery = o.store.get(DELIVERY_KEY, null);
         const target = dest ? bodyTarget(o.bodies, dest) : null;
@@ -9548,98 +10656,122 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       })
     };
     const favRun = {
-      transport: () => settings.favTransport ? run.transport(settings.favTransport) : say(t("fleet.err.noDest"), true),
-      deploy: () => settings.favDeploy ? run.deploy(settings.favDeploy) : say(t("fleet.err.noDest"), true)
+      transport: () => settings.favTransport ? run.transport(settings.favTransport) : say(t("fleet.err.noDefault"), true),
+      deploy: () => settings.favDeploy ? run.deploy(settings.favDeploy) : say(t("fleet.err.noDefault"), true)
     };
-    const setFav = (key, id) => {
-      o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: id });
-      redraw();
-    };
-    const withCaret = (tileEl, key) => {
-      const wrap = el3(doc, "span", "fut-ftilewrap");
-      const caret = iconToggle(doc, "caret", t("fleet.pickDest"), () => destinationMenu(o, wrap, settings[key], (id) => setFav(key, id)), "fut-fcaret");
+    const withCaret = (tileEl, mode, fav) => {
+      const wrap = el4(doc, "span", "fut-fsplit");
+      const caret = el4(doc, "button", "fut-fcaret");
+      caret.type = "button";
+      caret.title = t("fleet.pickOnce");
+      caret.setAttribute("aria-label", t("fleet.pickOnce"));
+      caret.setAttribute("aria-haspopup", "menu");
+      caret.innerHTML = iconSvg("caret", 14);
+      caret.addEventListener("click", (e) => {
+        e.preventDefault();
+        destinationMenu(o, wrap, fav, (id) => run[mode](id));
+      });
+      out.peek(caret, t("fleet.pickOnce"), t("fleet.pickOnceHint"));
       wrap.append(tileEl, caret);
       return wrap;
     };
     if (fleet1 && anchor1) {
-      const bar = el3(doc, "div", "fut-fbar");
-      const tiles = el3(doc, "div", "fut-ftiles");
+      const bar = el4(doc, "div", "fut-fbar");
+      const keys = keymap(o.store);
+      const k = (id) => keys.get(id) ?? "";
+      const tiles = el4(doc, "div", "fut-facts");
+      tiles.setAttribute("role", "group");
+      tiles.setAttribute("aria-label", t("fleet.actionsLabel"));
       const here = o.bodies.find((b) => b.planetId === o.bodyId);
-      if (here?.moonId) tiles.append(tile(doc, "moon", t("fleet.btn.moon"), "", t("fleet.tip.moon"), () => run.moon(), "", FLEET_KEYS.moon));
+      const act2 = (ico, id, name, where, tip, onClick, dim = false) => {
+        const b = tile(doc, ico, where ? `${name} ${where}` : name, onClick, dim ? "dim" : "", k(id));
+        out.peek(b, where ? `${name} ${where}` : name, tip);
+        return b;
+      };
+      const to = (id) => `\u2192 ${shortLabel(o, id)}`;
+      if (here?.moonId) tiles.append(act2("moon", "fleet.moon", t("fleet.btn.moon"), to(here.moonId), t("fleet.tip.moon"), () => run.moon()));
+      const last2 = o.store.get(LAST_FLEET_KEY, null);
       tiles.append(
-        withCaret(
-          tile(doc, "transport", t("fleet.btn.transport"), `\u2192 ${shortLabel(o, settings.favTransport)}`, t("fleet.tip.transport"), favRun.transport, "", FLEET_KEYS.transport),
-          "favTransport"
-        ),
-        withCaret(
-          tile(doc, "deploy", t("fleet.btn.deploy"), `\u2192 ${shortLabel(o, settings.favDeploy)}`, t("fleet.tip.deploy"), favRun.deploy, "", FLEET_KEYS.deploy),
-          "favDeploy"
-        ),
-        tile(doc, "expedition", t("fleet.btn.expedition"), "", t("fleet.tip.expedition"), () => run.expedition(), "", FLEET_KEYS.expedition),
-        tile(
-          doc,
+        withCaret(act2("transport", "fleet.transport", t("fleet.btn.transport"), to(settings.favTransport), t("fleet.tip.transport"), favRun.transport, !settings.favTransport), "transport", settings.favTransport),
+        withCaret(act2("deploy", "fleet.deploy", t("fleet.btn.deploy"), to(settings.favDeploy), t("fleet.tip.deploy"), favRun.deploy, !settings.favDeploy), "deploy", settings.favDeploy),
+        act2("expedition", "fleet.expedition", t("fleet.btn.expedition"), "", t("fleet.tip.expedition"), () => run.expedition()),
+        act2(
           "fleetsave",
+          "fleet.fleetsave",
           t("fleet.btn.fleetsave"),
-          profile.save ? `\u2192 ${profile.save.position}` : "",
+          profile.save ? `\u2192 ${profile.save.galaxy ?? "\xB7"}:${profile.save.system ?? "\xB7"}:${profile.save.position}` : "",
           profile.save ? t("fleet.tip.fleetsave") : t("fleet.err.noFleetsave"),
           () => profile.save ? run.fleetsave() : openSettings2(o, "body", redraw),
-          profile.save ? "" : "dim",
-          FLEET_KEYS.fleetsave
+          !profile.save
         ),
-        tile(doc, "all", t("fleet.btn.all"), "", t("fleet.tip.all"), () => run.all(), "", FLEET_KEYS.all),
-        tile(doc, "last", t("fleet.btn.last"), "", t("fleet.tip.last"), () => run.last(), o.store.get(LAST_FLEET_KEY, null) ? "" : "dim", FLEET_KEYS.last)
+        act2("last", "fleet.last", t("fleet.btn.last"), "", last2 ? t("fleet.tip.last") : t("fleet.err.noLast"), () => run.last(), !last2)
       );
-      registerShortcuts(doc, [
-        ...here?.moonId ? [{ key: FLEET_KEYS.moon, label: "fleet.btn.moon", run: () => run.moon() }] : [],
-        { key: FLEET_KEYS.transport, label: "fleet.btn.transport", run: favRun.transport },
-        { key: FLEET_KEYS.deploy, label: "fleet.btn.deploy", run: favRun.deploy },
-        { key: FLEET_KEYS.expedition, label: "fleet.btn.expedition", run: () => run.expedition() },
-        { key: FLEET_KEYS.fleetsave, label: "fleet.btn.fleetsave", run: () => run.fleetsave() },
-        { key: FLEET_KEYS.all, label: "fleet.btn.all", run: () => run.all() },
-        { key: FLEET_KEYS.last, label: "fleet.btn.last", run: () => run.last() }
-      ]);
-      const side = el3(doc, "div", "fut-fside");
-      side.append(
-        ...["shipsOn", "resourcesOn", "gateOn"].map((key) => {
-          const name = key === "shipsOn" ? "ships" : key === "resourcesOn" ? "resources" : "gate";
-          return iconToggle(doc, name, `${t(`fleet.rule.${name}`)}: ${settings[key] ? t("fleet.on") : t("fleet.off")}. ${t(`fleet.rule.${name}Hint`)}`, () => {
-            o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: !loadSettings(o.store)[key] });
-            redraw();
-          }, settings[key] ? "on" : "");
-        }),
-        iconToggle(doc, "food", `${t("fleet.foodShort")}: ${settings.ignoreFood ? t("fleet.on") : t("fleet.off")}. ${t("fleet.foodHint")}`, () => {
-          o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), ignoreFood: !loadSettings(o.store).ignoreFood });
-          applyFood(o.store);
+      registerActions(doc, o.store, t, {
+        ...here?.moonId ? { "fleet.moon": () => run.moon() } : {},
+        "fleet.transport": favRun.transport,
+        "fleet.deploy": favRun.deploy,
+        "fleet.expedition": () => run.expedition(),
+        "fleet.fleetsave": () => run.fleetsave(),
+        "fleet.last": () => run.last()
+      });
+      const rules = el4(doc, "div", "fut-frules");
+      rules.setAttribute("role", "group");
+      rules.setAttribute("aria-label", t("fleet.rulesLabel"));
+      const sw = (ico, label, hint, key, after) => {
+        const b = ruleSwitch(doc, ico, label, settings[key], () => {
+          o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: !loadSettings(o.store)[key] });
+          after?.();
           redraw();
-        }, settings.ignoreFood ? "on" : ""),
-        iconToggle(doc, "repeat", `${t("fleet.repeatShort")}: ${settings.repeat ? t("fleet.on") : t("fleet.off")}. ${t("fleet.repeatHint")}`, () => {
-          o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), repeat: !loadSettings(o.store).repeat });
-          redraw();
-        }, settings.repeat ? "on" : ""),
-        iconToggle(doc, "settings", t("fleet.settingsTitle"), () => openSettings2(o, "body", redraw))
+        });
+        out.peek(b, `${label}: ${settings[key] ? t("fleet.on") : t("fleet.off")}.`, hint);
+        return b;
+      };
+      rules.append(
+        sw("ships", t("fleet.rule.ships"), t("fleet.rule.shipsHint"), "shipsOn"),
+        sw("resources", t("fleet.rule.resources"), t("fleet.rule.resourcesHint"), "resourcesOn"),
+        ...isMoon(o.bodies, o.bodyId) ? [sw("gate", t("fleet.rule.gate"), t("fleet.rule.gateHint"), "gateOn")] : [],
+        sw("food", t("fleet.foodShort"), t("fleet.foodHint"), "ignoreFood", () => applyFood(o.store)),
+        sw("repeat", t("fleet.repeatShort"), t("fleet.repeatHint"), "repeat")
       );
-      const top = el3(doc, "div", "fut-frow");
-      top.append(tiles, side);
-      bar.append(top, info);
+      const edit = el4(doc, "span", "fut-fedit");
+      const tool = (ico, label, hint, onClick, cls = "") => {
+        const b = el4(doc, "button", `fut-ftool ${cls}`.trim());
+        b.type = "button";
+        b.title = label;
+        b.setAttribute("aria-label", label);
+        b.innerHTML = iconSvg(ico, 18);
+        b.addEventListener("click", (e) => {
+          e.preventDefault();
+          onClick();
+        });
+        out.peek(b, label, hint);
+        return b;
+      };
+      edit.append(tool("rules", t("fleet.editRules", { body: shortLabel(o, o.bodyId) }), t("fleet.editRulesHint"), () => openSettings2(o, "body", redraw), "fut-frules-open"));
+      if (o.onOpenSettings) edit.append(tool("settings", t("fleet.general"), t("fleet.generalHint"), () => o.onOpenSettings?.()));
+      const top = el4(doc, "div", "fut-frow");
+      top.append(tiles, edit);
+      const bottom = el4(doc, "div", "fut-frow");
+      bottom.append(rules, out.box);
+      bar.append(top, bottom);
       anchor1.before(bar);
+      addInvertButtons(o);
     }
     if (fleet2 && anchor2) {
-      const bar = el3(doc, "div", "fut-fbar");
-      const row = el3(doc, "div", "fut-frow");
-      const info2 = el3(doc, "span", "fut-finfo", summary(o, stored, settings));
-      const tiles = el3(doc, "div", "fut-ftiles");
-      tiles.append(
-        tile(doc, "cargo", t("fleet.resMinusReserve"), "", t("fleet.tip.cargo"), () => {
-          const fd = getDispatcher();
-          if (!fd) return;
-          const load = loadCargoNow(fd, profile);
-          info2.textContent = t("fleet.resLoaded", { cargo: load.toLocaleString(o.locale) });
-        })
-      );
-      row.append(tiles);
-      bar.append(row, info2);
+      const bar = el4(doc, "div", "fut-fbar");
+      const out2 = readout(doc, summary(o, stored, settings));
+      const load = tile(doc, "cargo", t("fleet.resMinusReserve"), () => {
+        const fd = getDispatcher();
+        if (!fd) return;
+        out2.say(t("fleet.resLoaded", { cargo: loadCargoNow(fd, profile).toLocaleString(o.locale) }));
+      });
+      out2.peek(load, t("fleet.resMinusReserve"), t("fleet.tip.cargo"));
+      const row = el4(doc, "div", "fut-frow");
+      row.append(load, out2.box);
+      bar.append(row);
       anchor2.before(bar);
     }
+    registerActions(doc, o.store, t, {});
     void whenDispatcherReady().then((fd) => {
       if (!fd) return;
       applyFood(o.store, fd);
@@ -9651,9 +10783,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           recordShipment(o, fd);
         } catch {
         }
-        const current2 = pageState.get(doc);
-        if (current2?.active?.mode === "plan") {
-          const d = current2.o.store.get(DELIVERY_KEY, null);
+        const current3 = pageState.get(doc);
+        if (current3?.active?.mode === "plan") {
+          const d = current3.o.store.get(DELIVERY_KEY, null);
           if (!d) return false;
           const need = {
             metal: Math.max(0, d.need.metal - fd.cargoMetal),
@@ -9661,17 +10793,17 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
             deuterium: Math.max(0, d.need.deuterium - fd.cargoDeuterium)
           };
           const done = need.metal + need.crystal + need.deuterium <= 0;
-          current2.o.store.set(DELIVERY_KEY, done ? null : { ...d, need });
+          current3.o.store.set(DELIVERY_KEY, done ? null : { ...d, need });
           if (done) return false;
-          const nextBody2 = nextInRound(current2.active, current2.o.bodyId, current2.o.bodies);
+          const nextBody2 = nextInRound(current3.active, current3.o.bodyId, current3.o.bodies);
           if (nextBody2 === null) return false;
-          navigate(repeatUrl(href, nextBody2, current2.active));
+          navigate(repeatUrl(href, nextBody2, current3.active));
           return true;
         }
-        if (!current2?.active || !loadSettings(current2.o.store).repeat) return false;
-        const next = nextInRound(current2.active, current2.o.bodyId, current2.o.bodies);
+        if (!current3?.active || !loadSettings(current3.o.store).repeat) return false;
+        const next = nextInRound(current3.active, current3.o.bodyId, current3.o.bodies);
         if (next === null) return false;
-        navigate(repeatUrl(href, next, current2.active));
+        navigate(repeatUrl(href, next, current3.active));
         return true;
       });
       if (incoming && fd.currentPage === "fleet1" && !doc.documentElement.dataset.futAutoRun) {
@@ -9737,10 +10869,21 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   // src/modules/fleet/jumpgate.ts
   var STYLE = `
 .fut-jgkeep { color: #FF9A6B; font: 11px Arial, sans-serif; text-align: right; }
-.fut-jgbar { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin: 4px 0; font: 11px Arial, sans-serif; color: #8A9BB0; }
-.fut-jgbar button { padding: 1px 8px; border: 1px solid #2C3E57; border-radius: 5px; background: #0A111C; color: #8A9BB0; font: 11px Arial, sans-serif; cursor: pointer; }
-.fut-jgbar button.on { border-color: #38C56E; color: #38C56E; }
+.fut-jgkeep input { box-sizing: border-box; display: block; width: 100%; max-width: 84px; margin: 2px 0 0 auto; height: 20px; padding: 0 4px; border: 1px solid #2C3E57; border-radius: 4px; background: #0A111C; color: #E6EDF5; font: 11px Arial, sans-serif; text-align: right; }
+.fut-jgkeep input:focus { outline: none; border-color: #4FD1E8; }
+.fut-jgbar { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin: 4px 0; font: 11px Arial, sans-serif; color: #A3AFBD; }
+.fut-jgbar > span { margin-right: auto; }
+.fut-jgbar button { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 8px; border: 1px solid #24344B; border-radius: 13px; background: #0A111C; color: #8592A1; font: 11px Arial, sans-serif; cursor: pointer; }
+.fut-jgbar button:hover { color: #E6EDF5; border-color: #4FD1E8; }
+.fut-jgbar button:focus-visible { outline: 2px solid #4FD1E8; outline-offset: 1px; }
+.fut-jgbar .track { position: relative; width: 20px; height: 12px; border-radius: 6px; background: #3A4A60; }
+.fut-jgbar .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 8px; height: 8px; border-radius: 50%; background: #C9D2DC; }
+.fut-jgbar button[aria-checked="true"] { border-color: #1F5A68; color: #CFF5FC; }
+.fut-jgbar button[aria-checked="true"] .track { background: #4FD1E8; }
+.fut-jgbar button[aria-checked="true"] .track::after { transform: translateX(8px); background: #06222A; }
+.fut-jgbar button[aria-pressed="true"] { border-color: #4FD1E8; color: #CFF5FC; background: #12283A; }
 `;
+  var editing = false;
   function applyJumpgateReserve(doc, store, bodyId, t) {
     const gate = doc.getElementById("jumpgate");
     if (!gate || doc.getElementById("jumpgateNotReady")) return 0;
@@ -9751,7 +10894,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       doc.head.append(style);
     }
     const on = loadSettings(store).gateOn;
-    const reserve = on ? profileFor(loadProfiles(store), bodyId).gate : {};
+    const stored = profileFor(loadProfiles(store), bodyId).gate;
+    const reserve = on ? stored : {};
     const all2 = {};
     let kept = 0;
     gate.querySelectorAll(".ship_input_row").forEach((row) => {
@@ -9775,8 +10919,30 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         note.className = "fut-jgkeep";
         row.append(note);
       }
-      note.textContent = keep ? `\u2212${keep.toLocaleString()}` : "";
       note.title = t("fleet.jumpgateKeep");
+      if (editing) {
+        const field = doc.createElement("input");
+        field.type = "text";
+        field.inputMode = "numeric";
+        field.placeholder = t("fleet.jumpgateStay");
+        field.title = t("fleet.jumpgateKeep");
+        field.value = stored[id] ? String(stored[id]) : "";
+        field.setAttribute("aria-label", t("fleet.jumpgateKeep"));
+        field.setAttribute("autocomplete", "off");
+        for (const ev of ["keydown", "keyup", "keypress"]) field.addEventListener(ev, (e) => e.stopPropagation());
+        field.addEventListener("change", () => {
+          const profiles = loadProfiles(store);
+          const profile = profileFor(profiles, bodyId);
+          const gateRule = { ...profile.gate };
+          const n = parseAmount(field.value);
+          if (n > 0) gateRule[id] = n;
+          else delete gateRule[id];
+          profiles[String(bodyId)] = { ...profile, gate: gateRule };
+          store.set(PROFILES_KEY, profiles);
+          applyJumpgateReserve(doc, store, bodyId, t);
+        });
+        note.replaceChildren(field);
+      } else note.textContent = keep ? `\u2212${keep.toLocaleString()}` : "";
       all2[id] = amount;
     });
     gate.querySelector("#sendall")?.setAttribute("onclick", `setMaxIntInput("#jumpgateForm", ${JSON.stringify(all2)})`);
@@ -9794,14 +10960,28 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     label.textContent = on ? t("fleet.jumpgateKept", { count: kept.toLocaleString() }) : t("fleet.jumpgateOff");
     const toggle = doc.createElement("button");
     toggle.type = "button";
-    toggle.className = on ? "on" : "";
-    toggle.textContent = `${t("fleet.rule.gate")}: ${on ? t("fleet.on") : t("fleet.off")}`;
+    toggle.setAttribute("role", "switch");
+    toggle.setAttribute("aria-checked", String(on));
+    toggle.setAttribute("aria-label", t("fleet.rule.gate"));
+    toggle.title = `${t("fleet.rule.gate")}: ${on ? t("fleet.on") : t("fleet.off")}`;
+    toggle.innerHTML = `${iconSvg("gate", 15)}<i class="track"></i>`;
     toggle.addEventListener("click", (e) => {
       e.preventDefault();
       store.set(SETTINGS_KEY, { ...loadSettings(store), gateOn: !loadSettings(store).gateOn });
       applyJumpgateReserve(doc, store, bodyId, t);
     });
-    bar.replaceChildren(label, toggle);
+    const edit = doc.createElement("button");
+    edit.type = "button";
+    edit.setAttribute("aria-pressed", String(editing));
+    edit.title = t("fleet.jumpgateEdit");
+    edit.setAttribute("aria-label", edit.title);
+    edit.innerHTML = iconSvg("rules", 15);
+    edit.addEventListener("click", (e) => {
+      e.preventDefault();
+      editing = !editing;
+      applyJumpgateReserve(doc, store, bodyId, t);
+    });
+    bar.replaceChildren(label, toggle, edit);
   }
   function watchJumpgate(doc, store, bodyId, t) {
     const win = pageWindow();
@@ -9817,40 +10997,6 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     };
     wrapped.futHooked = true;
     win.initJumpgate = wrapped;
-  }
-
-  // src/data/tech-icons.ts
-  var TECH_ICONS_KEY = "tech.icons";
-  function readTechIcons(doc) {
-    const view = doc.defaultView;
-    const out = {};
-    if (!view) return out;
-    for (const tech of doc.querySelectorAll("#technologies .technology[data-technology]")) {
-      const tile2 = tech.querySelector(".icon");
-      if (!tile2) continue;
-      const cs = view.getComputedStyle(tile2);
-      const url = /url\("?([^")]+)"?\)/.exec(cs.backgroundImage)?.[1];
-      const w = parseFloat(cs.width);
-      if (url && w > 0) out[tech.dataset.technology] = { url, pos: cs.backgroundPosition, size: cs.backgroundSize, w };
-    }
-    return out;
-  }
-  function rememberTechIcons(doc, store) {
-    const seen = readTechIcons(doc);
-    if (!Object.keys(seen).length) return;
-    const known = store.get(TECH_ICONS_KEY, {});
-    if (Object.entries(seen).every(([id, i]) => JSON.stringify(known[id]) === JSON.stringify(i))) return;
-    store.set(TECH_ICONS_KEY, { ...known, ...seen });
-  }
-  function techIconEl(doc, icon2, px, cls = "tico") {
-    const box = doc.createElement("span");
-    box.className = cls;
-    box.style.cssText = `display:inline-block;flex:none;width:${px}px;height:${px}px;overflow:hidden;border-radius:4px;background:#16243A;vertical-align:middle;`;
-    if (!icon2) return box;
-    const tile2 = doc.createElement("span");
-    tile2.style.cssText = `display:block;width:${icon2.w}px;height:${icon2.w}px;background-image:url("${icon2.url}");background-position:${icon2.pos};background-size:${icon2.size};background-repeat:no-repeat;transform:scale(${px / icon2.w});transform-origin:0 0;`;
-    box.append(tile2);
-    return box;
   }
 
   // src/modules/tech/style.ts
@@ -9936,6 +11082,23 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 .x:hover { border-color: var(--bad); color: var(--bad); }
 .sent { display: inline-flex; color: var(--accent); }
 .okmark { display: inline-flex; width: 22px; justify-content: center; color: var(--ok); }
+/* By planet | by technology. */
+.seg { align-self: flex-start; display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.seg button { height: 26px; padding: 0 12px; border: 0; background: var(--bg); color: var(--muted); font: 12px Arial, sans-serif; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button:hover { color: var(--text); }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
+/* Planet view: the head carries the one button that brings everything; rows are picked with a click. */
+.group.body .ghead { grid-template-columns: 28px minmax(0, 1fr) 70px 70px 70px 170px; }
+.group.body .grow { grid-template-columns: minmax(0, 1fr) 70px 70px 70px 170px; padding-left: 6px; }
+.gmeta:empty { display: none; }
+.bmark { display: inline-flex; justify-content: center; color: var(--accent); }
+.bring-all { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border: 1px solid var(--warn); border-radius: 6px; background: rgba(245, 181, 71, 0.1); color: var(--warn); font: 700 12px Arial, sans-serif; white-space: nowrap; cursor: pointer; }
+.bring-all:hover { background: rgba(245, 181, 71, 0.2); color: var(--text); }
+button.gbody { align-items: center; padding: 2px 6px 2px 2px; border: 1px solid transparent; border-radius: 5px; background: none; font: 12px Arial, sans-serif; text-align: left; cursor: pointer; }
+button.gbody:hover { border-color: var(--line); color: var(--text); }
+.grow.pick.on { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+.grow.pick.on button.gbody { color: var(--text); font-weight: 700; }
 @media (max-width: 640px) { .kpis { grid-template-columns: 1fr; } }
 `;
 
@@ -9946,14 +11109,14 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     ["deuterium", "d"],
     ["energy", "e"]
   ];
-  function el4(doc, tag, cls = "", text) {
+  function el5(doc, tag, cls = "", text) {
     const node = doc.createElement(tag);
     if (cls) node.className = cls;
     if (text !== void 0) node.textContent = text;
     return node;
   }
   function okCell(doc, have, cls) {
-    const c = el4(doc, "span", cls, have ? "" : "\u2014");
+    const c = el5(doc, "span", cls, have ? "" : "\u2014");
     if (have) c.append(icon(doc, "check", 12));
     return c;
   }
@@ -9984,7 +11147,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   }
   var msu3 = (c) => c.metal + c.crystal * 1.5 + c.deuterium * 3;
   function button2(doc, cls, html, title, onClick) {
-    const b = el4(doc, "button", cls);
+    const b = el5(doc, "button", cls);
     b.type = "button";
     b.innerHTML = html;
     b.title = title;
@@ -10004,29 +11167,29 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     energy: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>',
     start: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v5h5"/></svg>'
   };
-  function grid(o, view, have) {
+  function grid(o, view2, have) {
     const { doc, t, locale } = o;
-    const g = el4(doc, "div", "fut-tp-grid");
-    g.style.gridTemplateColumns = `auto repeat(${view.cols.length}, minmax(0, 1fr))`;
-    g.append(el4(doc, "span", "fut-tp-h"));
-    for (const h6 of view.heads) g.append(el4(doc, "span", "fut-tp-h", h6));
-    const rows = RES.filter(([key]) => view.cols.some((c) => !c.short && c.cost[key] > 0));
+    const g = el5(doc, "div", "fut-tp-grid");
+    g.style.gridTemplateColumns = `auto repeat(${view2.cols.length}, minmax(0, 1fr))`;
+    g.append(el5(doc, "span", "fut-tp-h"));
+    for (const h6 of view2.heads) g.append(el5(doc, "span", "fut-tp-h", h6));
+    const rows = RES.filter(([key]) => view2.cols.some((c) => !c.short && c.cost[key] > 0));
     const cell = (value, cls) => {
-      const c = el4(doc, "span", `fut-tp-v ${cls}`, value ? formatUnits(value, locale) : "\u2014");
+      const c = el5(doc, "span", `fut-tp-v ${cls}`, value ? formatUnits(value, locale) : "\u2014");
       c.title = Math.round(value).toLocaleString(locale);
       return c;
     };
     for (const [key, cls] of rows) {
-      g.append(el4(doc, "span", `fut-tp-k fut-${cls}`, t(`tech.res.${key}`)));
-      for (const col of view.cols) {
+      g.append(el5(doc, "span", `fut-tp-k fut-${cls}`, t(`tech.res.${key}`)));
+      for (const col of view2.cols) {
         if (!col.short) g.append(cell(col.cost[key], col.cls ?? ""));
-        else if (key === "energy") g.append(el4(doc, "span", "fut-tp-v"));
+        else if (key === "energy") g.append(el5(doc, "span", "fut-tp-v"));
         else if (col.cost[key] > 0) g.append(cell(-col.cost[key], "fut-tp-short"));
         else g.append(okCell(doc, have, "fut-tp-v fut-tp-ok"));
       }
     }
-    g.append(el4(doc, "span", "fut-tp-k fut-tp-msu", "MSU"));
-    for (const col of view.cols) {
+    g.append(el5(doc, "span", "fut-tp-k fut-tp-msu", "MSU"));
+    for (const col of view2.cols) {
       const v = msu3(col.cost);
       if (col.short) g.append(v > 0 ? cell(-v, "fut-tp-short fut-tp-msu") : okCell(doc, have, "fut-tp-v fut-tp-ok fut-tp-msu"));
       else g.append(cell(v, `${col.cls ?? ""} fut-tp-msu`));
@@ -10034,9 +11197,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     return g;
   }
   function chip(doc, icon2, text, title, cls = "") {
-    const c = el4(doc, "span", `fut-tp-chip ${cls}`.trim());
+    const c = el5(doc, "span", `fut-tp-chip ${cls}`.trim());
     c.innerHTML = icon2;
-    c.append(el4(doc, "span", "", text));
+    c.append(el5(doc, "span", "", text));
     c.title = title;
     return c;
   }
@@ -10067,8 +11230,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     details.root.querySelectorAll(".fut-tp, .fut-tp-tools").forEach((n) => n.remove());
     const list = readTechList(doc);
     const entry = list.find((e) => e.id === details.id);
-    const box = el4(doc, "div", "fut-tp");
-    const tools = el4(doc, "div", "fut-tp-tools");
+    const box = el5(doc, "div", "fut-tp");
+    const tools = el5(doc, "div", "fut-tp-tools");
     const levelLabel = details.root.querySelector(".information .level");
     const levelText = levelLabel?.textContent ?? "";
     const chips = gameChips(doc, details);
@@ -10101,11 +11264,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           draw();
         });
         const add = button2(doc, planned ? "fut-tp-btn fut-tp-plan on" : "fut-tp-btn fut-tp-plan", ICON.plan, "", () => {
-          let current2 = loadPlan(o.store);
+          let current3 = loadPlan(o.store);
           if (planned) {
             for (let l = to; l >= start.level; l--) {
-              const idx = (current2[String(o.bodyId)] ?? []).findIndex((x) => x.id === details.id && x.level === l);
-              if (idx >= 0) current2 = removeFromPlan(current2, o.bodyId, idx);
+              const idx = (current3[String(o.bodyId)] ?? []).findIndex((x) => x.id === details.id && x.level === l);
+              if (idx >= 0) current3 = removeFromPlan(current3, o.bodyId, idx);
             }
           } else {
             const now = Date.now();
@@ -10113,20 +11276,20 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
             for (let l = start.level; l <= to; l++) {
               items.push({ id: details.id, level: l, name: details.name, cost: levelCost(details.id, l, start.discount), added: now });
             }
-            current2 = addToPlan(current2, o.bodyId, items);
+            current3 = addToPlan(current3, o.bodyId, items);
           }
-          o.store.set(PLAN_KEY, current2);
+          o.store.set(PLAN_KEY, current3);
           o.onPlanChange?.();
           draw();
         });
         add.title = planned ? `${t("tech.inPlan")} \xB7 ${t("tech.removeHint")}` : to > start.level ? t("tech.addRange", { from: start.level, to }) : t("tech.addOne", { level: to });
         tools.replaceChildren(prev, reset, next, add);
         if (levelLabel) levelLabel.textContent = `${start.level - 1} \u2192 ${to}`;
-        const view = {
+        const view2 = {
           heads: [t("tech.colLevel", { level: to }), t("tech.rangeShort", { from: start.level - 1, to }), t("tech.colMissing")],
           cols: [{ cost: one }, { cost: total, cls: "fut-tp-sum" }, { cost: gap, short: true }]
         };
-        const row = el4(doc, "div", "fut-tp-chips");
+        const row = el5(doc, "div", "fut-tp-chips");
         if (details.durationMs) {
           row.append(
             chip(
@@ -10139,13 +11302,13 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         }
         row.append(...chips);
         if (start.discount > 5e-4) row.append(chip(doc, "", t("tech.discountShort", { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), t("tech.discount", { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), "fut-tp-disc"));
-        box.replaceChildren(grid(o, view, have !== null), row);
+        box.replaceChildren(grid(o, view2, have !== null), row);
       };
       draw();
     } else {
       const unit = matchShownLevel(details.id, [1], details.shown);
       const discount = unit?.discount ?? 0;
-      const amount = el4(doc, "input", "fut-tp-amount");
+      const amount = el5(doc, "input", "fut-tp-amount");
       amount.type = "text";
       amount.inputMode = "numeric";
       amount.value = String(Math.max(1, Math.floor(Number(details.amountInput?.value) || 1)));
@@ -10168,14 +11331,14 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         });
         if (added) add.title = t("tech.added");
         tools.replaceChildren(amount, add);
-        const view = {
+        const view2 = {
           heads: [t("tech.colOne"), `\xD7${n.toLocaleString(locale)}`, t("tech.colMissing")],
           cols: [{ cost: one }, { cost: total, cls: "fut-tp-sum" }, { cost: gap, short: true }]
         };
-        const row = el4(doc, "div", "fut-tp-chips");
+        const row = el5(doc, "div", "fut-tp-chips");
         if (details.durationMs) row.append(chip(doc, ICON.time, `${formatDuration(details.durationMs)} \xB7 \u03A3 ${formatDuration(details.durationMs * n)}`, t("tech.time")));
         row.append(...chips);
-        box.replaceChildren(grid(o, view, have !== null), row);
+        box.replaceChildren(grid(o, view2, have !== null), row);
       };
       amount.addEventListener("input", () => {
         added = false;
@@ -10206,7 +11369,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   }
   function injectStyle(doc) {
     if (doc.getElementById("fut-tp-style")) return;
-    const style = el4(doc, "style");
+    const style = el5(doc, "style");
     style.id = "fut-tp-style";
     style.textContent = TECH_CSS;
     doc.head.append(style);
@@ -10255,6 +11418,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   // src/modules/tech/planner-view.ts
   var RES2 = [["metal", "m"], ["crystal", "c"], ["deuterium", "d"]];
   var toggled = /* @__PURE__ */ new Set();
+  var view = "body";
+  var picked = /* @__PURE__ */ new Map();
   var PLANNER_ID = "fut-planner";
   var keyHandler3 = null;
   function h4(tag, cls = "", text) {
@@ -10330,6 +11495,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const sent = prunePending(allSent, plan, seenAt);
       if (sent.length !== allSent.length) o.store.set(SENT_KEY, sent);
       const save = (next) => {
+        picked.clear();
         o.store.set(PLAN_KEY, next);
         o.onChange?.();
         draw();
@@ -10397,9 +11563,127 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         covered ? kpi(t("plan.accountCovered"), null, "ok") : kpi(t("plan.accountMissing"), missing2, "warn")
       );
       if (covered) kpis.lastElementChild.querySelector(".kpi-line").replaceChildren(h4("span", "num okv", "\u2713"));
+      const seg = h4("div", "seg");
+      seg.setAttribute("role", "group");
+      for (const v of ["body", "tech"]) {
+        const b = h4("button", "", t(v === "body" ? "plan.byBody" : "plan.byTech"));
+        b.type = "button";
+        b.dataset.view = v;
+        b.setAttribute("aria-pressed", String(view === v));
+        b.addEventListener("click", () => {
+          view = v;
+          draw();
+        });
+        seg.append(b);
+      }
       const list = h4("div", "groups");
-      for (const g of groups) list.append(groupTile(g, plan, haveOf, pendingOf, save));
-      panel.replaceChildren(head, kpis, list);
+      if (view === "tech") for (const g of groups) list.append(groupTile(g, plan, haveOf, pendingOf, save));
+      else {
+        const ids = Object.keys(plan).map(Number).sort((a, b) => (order.get(a) ?? 1e9) - (order.get(b) ?? 1e9));
+        for (const id of ids) list.append(bodyTile(id, plan, haveOf, pendingOf, save));
+      }
+      panel.replaceChildren(head, kpis, seg, list);
+    };
+    const bringTo = (target, need) => {
+      const here = o.current?.id ?? null;
+      const source = here !== null && here !== target ? here : nextBody(refs, here ?? target, { skip: target });
+      if (!source || !o.navigate || !o.href) return;
+      const delivery = { target, need: { metal: Math.ceil(need.metal), crystal: Math.ceil(need.crystal), deuterium: Math.ceil(need.deuterium) } };
+      o.store.set(DELIVERY_KEY, delivery);
+      o.navigate(repeatUrl(o.href, source, { mode: "plan", first: source, dest: target }));
+    };
+    const sentMark = (p) => {
+      const mark = h4("span", "sent");
+      mark.append(icon(doc, "fleet", 12));
+      mark.title = `${p.arriveAt > o.now ? t("plan.sentArriving", { time: timeOf(p.arriveAt) }) : t("plan.sentArrived")}: ${fmt(p.metal)} \xB7 ${fmt(p.crystal)} \xB7 ${fmt(p.deuterium)}`;
+      return mark;
+    };
+    const bodyTile = (bodyId, plan, haveOf, pendingOf, save) => {
+      const items = plan[String(bodyId)] ?? [];
+      const have = haveOf(bodyId);
+      const chosen = picked.get(bodyId) ?? /* @__PURE__ */ new Set();
+      const rows = [];
+      items.forEach((item, index) => {
+        const last2 = rows[rows.length - 1];
+        if (last2 && last2.id === item.id && item.level !== void 0 && last2.to !== void 0 && item.level === last2.to + 1) {
+          last2.to = item.level;
+          last2.cost = { metal: last2.cost.metal + item.cost.metal, crystal: last2.cost.crystal + item.cost.crystal, deuterium: last2.cost.deuterium + item.cost.deuterium, energy: last2.cost.energy };
+          last2.indexes.push(index);
+        } else rows.push({ id: item.id, name: item.name, from: item.level, to: item.level, amount: item.amount, cost: { ...item.cost }, indexes: [index] });
+      });
+      const scope = chosen.size ? items.filter((_, i) => chosen.has(i)) : items;
+      const total = items.reduce((sum, i) => ({ metal: sum.metal + i.cost.metal, crystal: sum.crystal + i.cost.crystal, deuterium: sum.deuterium + i.cost.deuterium, energy: 0 }), { metal: 0, crystal: 0, deuterium: 0, energy: 0 });
+      const gapAll = have ? planMissing(items, have) : null;
+      const gap = have ? planMissing(scope, have) : null;
+      const short = gap ? gap.metal + gap.crystal + gap.deuterium : 0;
+      const tile2 = h4("div", "group body");
+      tile2.dataset.body = String(bodyId);
+      const top = h4("div", "ghead");
+      const name = h4("div", "gname");
+      name.append(h4("span", "gtitle", labelOf(bodyId)), h4("span", "gmeta", chosen.size ? t("plan.pickedOf", { n: chosen.size, of: items.length }) : items.length > 1 ? t("plan.items", { n: items.length }) : ""));
+      const mark = h4("span", "bmark");
+      mark.append(icon(doc, byId.get(bodyId)?.type === "moon" ? "moon" : "planet", 16));
+      top.append(mark, name, ...triple(total, gapAll));
+      const acts = h4("div", "acts");
+      const p = pendingOf(bodyId);
+      const onWay = p.metal + p.crystal + p.deuterium > 0;
+      if (onWay) acts.append(sentMark(p));
+      if (gap && short > 0 && o.navigate && o.href) {
+        const bring = h4("button", "bring-all");
+        bring.type = "button";
+        bring.append(icon(doc, "swap", 13), h4("span", "", chosen.size ? t("plan.bringSome", { n: chosen.size }) : onWay ? t("plan.complete") : t("plan.bringAll")));
+        bring.title = `${fmt(gap.metal)} \xB7 ${fmt(gap.crystal)} \xB7 ${fmt(gap.deuterium)} \u2014 ${t("plan.bringHint")}`;
+        bring.addEventListener("click", () => bringTo(bodyId, gap));
+        acts.append(bring);
+      } else if (gap) {
+        const ok = h4("span", "okmark");
+        ok.append(icon(doc, "check", 12));
+        ok.title = t("plan.readyHere");
+        acts.append(ok);
+      }
+      const remove = h4("button", "x");
+      remove.type = "button";
+      remove.append(icon(doc, "close", 13));
+      remove.title = t("plan.removeBody");
+      remove.setAttribute("aria-label", remove.title);
+      remove.addEventListener("click", () => save(clearBody(plan, bodyId)));
+      acts.append(remove);
+      top.append(acts);
+      tile2.append(top);
+      const list = h4("div", "grows");
+      for (const r of rows) {
+        const on = r.indexes.every((i) => chosen.has(i));
+        const row = h4("div", `grow pick${on ? " on" : ""}`);
+        const pick = h4("button", "gbody");
+        pick.type = "button";
+        pick.title = t("plan.pickHint");
+        pick.setAttribute("aria-pressed", String(on));
+        pick.append(techIconEl(doc, icons[String(r.id)], 22), h4("span", "", r.name), h4("span", "lv", what(r)));
+        pick.addEventListener("click", () => {
+          const next = new Set(chosen);
+          for (const i of r.indexes) on ? next.delete(i) : next.add(i);
+          if (next.size) picked.set(bodyId, next);
+          else picked.delete(bodyId);
+          draw();
+        });
+        row.append(pick, ...triple(r.cost));
+        const a = h4("div", "acts");
+        const x = h4("button", "x");
+        x.type = "button";
+        x.append(icon(doc, "close", 13));
+        x.title = t("plan.remove");
+        x.setAttribute("aria-label", `${t("plan.remove")}: ${r.name}`);
+        x.addEventListener("click", () => {
+          let next = plan;
+          for (const i of [...r.indexes].reverse()) next = removeFromPlan(next, bodyId, i);
+          save(next);
+        });
+        a.append(x);
+        row.append(a);
+        list.append(row);
+      }
+      tile2.append(list);
+      return tile2;
     };
     const groupTile = (g, plan, haveOf, pendingOf, save) => {
       const tile2 = h4("div", "group");
@@ -10470,26 +11754,14 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const gap = have ? planMissing(items, have) : null;
       const short = gap ? gap.metal + gap.crystal + gap.deuterium : 0;
       const p = pendingOf(r.bodyId);
-      if (p.metal + p.crystal + p.deuterium > 0) {
-        const s = h4("span", "sent");
-        s.append(icon(doc, "fleet", 12));
-        s.title = `${p.arriveAt > o.now ? t("plan.sentArriving", { time: timeOf(p.arriveAt) }) : t("plan.sentArrived")}: ${fmt(p.metal)} \xB7 ${fmt(p.crystal)} \xB7 ${fmt(p.deuterium)}`;
-        out.push(s);
-      }
+      if (p.metal + p.crystal + p.deuterium > 0) out.push(sentMark(p));
       if (gap && short > 0 && o.navigate && o.href) {
         const bring = h4("button", "ib bring");
         bring.type = "button";
         bring.append(icon(doc, "swap", 13));
         bring.title = `${p.metal + p.crystal + p.deuterium > 0 ? t("plan.complete") : t("plan.bring")} \xB7 ${labelOf(r.bodyId)} \xB7 ${t("plan.bringHint")}`;
         bring.setAttribute("aria-label", bring.title);
-        bring.addEventListener("click", () => {
-          const here = o.current?.id ?? null;
-          const source = here !== null && here !== r.bodyId ? here : nextBody(refs, here ?? r.bodyId, { skip: r.bodyId });
-          if (!source) return;
-          const delivery = { target: r.bodyId, need: { metal: Math.ceil(gap.metal), crystal: Math.ceil(gap.crystal), deuterium: Math.ceil(gap.deuterium) } };
-          o.store.set(DELIVERY_KEY, delivery);
-          o.navigate(repeatUrl(o.href, source, { mode: "plan", first: source, dest: r.bodyId }));
-        });
+        bring.addEventListener("click", () => bringTo(r.bodyId, gap));
         out.push(bring);
       } else if (gap && short === 0) {
         const ok = h4("span", "okmark");
@@ -10860,7 +12132,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   // src/modules/highscore/index.ts
   var ptreSeen = /* @__PURE__ */ new WeakMap();
   var isHighscorePage = (doc) => new URL(doc.location?.href ?? "http://x/").searchParams.get("component") === "highscore";
-  var CSS3 = `
+  var CSS4 = `
 #ranks { --fut-up: #7BC47F; --fut-down: #E57B70; --fut-mute: #8592A1; --fut-line: #3A4A5C; --fut-btn: #0F1822; --fut-txt: #C9D6E3; --fut-hi: #FFFFFF; --fut-link: #6F9FC8; }
 #fut-hs-top { --fut-line: #3A4A5C; --fut-btn: #0F1822; --fut-txt: #C9D6E3; --fut-hi: #FFFFFF; --fut-link: #6F9FC8; }
 #ranks .fut-hs-gap { display: block; font-size: 11px; line-height: 1.2; font-variant-numeric: tabular-nums; }
@@ -10925,18 +12197,18 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     if (!o.doc.getElementById("fut-hs-style")) {
       const style = o.doc.createElement("style");
       style.id = "fut-hs-style";
-      style.textContent = CSS3;
+      style.textContent = CSS4;
       o.doc.head.append(style);
     }
     decorateHighscore(o);
     addTopButton(o);
     const box = o.doc.getElementById("stat_list_content") ?? o.doc.body;
-    let queued = false;
+    let queued2 = false;
     new MutationObserver((list) => {
-      if (queued || list.every((m) => [...m.addedNodes].every((n) => n instanceof Element && (/^fut-(hs|mk)/.test(n.getAttribute("class") ?? "") || !!n.closest(".fut-mk"))))) return;
-      queued = true;
+      if (queued2 || list.every((m) => [...m.addedNodes].every((n) => n instanceof Element && (/^fut-(hs|mk)/.test(n.getAttribute("class") ?? "") || !!n.closest(".fut-mk"))))) return;
+      queued2 = true;
       setTimeout(() => {
-        queued = false;
+        queued2 = false;
         decorateHighscore(o);
       }, 50);
     }).observe(box, { childList: true, subtree: true });
@@ -10977,7 +12249,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   // src/modules/reminders/index.ts
   var HOST_ID2 = "fut-reminders";
   var timer = null;
-  var current = null;
+  var current2 = null;
   function clockOffset(doc, localNow) {
     const ts = Number(doc.querySelector('meta[name="ogame-timestamp"]')?.getAttribute("content"));
     return ts ? ts * 1e3 - localNow : 0;
@@ -11026,7 +12298,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     stack.append(box);
   }
   function startReminders(o, late = true) {
-    current = o;
+    current2 = o;
     if (timer) clearTimeout(timer);
     timer = null;
     const list = o.store.get(REMINDERS_KEY, []);
@@ -11040,7 +12312,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   function toggleFromClick(store, r) {
     const list = toggleReminder(store.get(REMINDERS_KEY, []), r);
     store.set(REMINDERS_KEY, list);
-    if (current) startReminders(current, false);
+    if (current2) startReminders(current2, false);
     return hasReminder(list, r.id);
   }
   function bellButton(doc, store, t, r, cls = "fut-bell") {
@@ -11088,12 +12360,12 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       o.doc.head.append(style);
     }
     decorateEventList(o);
-    let queued = false;
+    let queued2 = false;
     new MutationObserver(() => {
-      if (queued) return;
-      queued = true;
+      if (queued2) return;
+      queued2 = true;
       setTimeout(() => {
-        queued = false;
+        queued2 = false;
         decorateEventList(o);
       }, 50);
     }).observe(o.doc.body, { childList: true, subtree: true });
@@ -11170,7 +12442,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       // 'stacked' was the previous layout: it maps to the side-by-side one.
       mode: storedMode === "compact" ? "compact" : "side",
       showTotals: store.get("planetMenu.totals", true),
-      markIdle: store.get("planetMenu.markIdle", false)
+      showFleet: store.get("planetMenu.fleet", false),
+      totalView: store.get("planetMenu.totalView", "msu") === "sum" ? "sum" : "msu"
     };
     const planGap = () => {
       const plan = store.get(PLAN_KEY, {});
@@ -11194,115 +12467,126 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       return gap ? gap.metal + gap.crystal * 1.5 + gap.deuterium * 3 : null;
     };
     let refreshInbox = null;
-    const draw = () => renderPlanetMenu({
+    let refreshFleet = null;
+    let menuCtx = { roomy: true, colonies: "" };
+    const openFutureSettings = (section2) => openSettings({
       doc: document,
-      entries: readPlanetList(document),
-      snapshot,
-      queues,
-      settings,
-      now: Date.now(),
-      locale,
+      store,
       t,
-      onOpenSettings: ({ roomy, colonies }) => openSettings({
-        doc: document,
-        store,
-        t,
-        menu: {
-          settings,
-          canSide: roomy,
-          onChange: (next) => {
-            settings = next;
-            store.set("planetMenu.mode", next.mode);
-            store.set("planetMenu.totals", next.showTotals);
-            store.set("planetMenu.markIdle", next.markIdle);
-            draw();
+      menu: {
+        settings,
+        canSide: menuCtx.roomy,
+        onChange: (next) => {
+          settings = next;
+          store.set("planetMenu.mode", next.mode);
+          store.set("planetMenu.totals", next.showTotals);
+          store.set("planetMenu.fleet", next.showFleet === true);
+          store.set("planetMenu.totalView", next.totalView ?? "msu");
+          draw();
+        }
+      },
+      backup: {
+        onExport: () => downloadBackup(document, gm, Date.now()),
+        onImport: (text) => {
+          let json2 = null;
+          try {
+            json2 = JSON.parse(text);
+          } catch {
           }
-        },
-        backup: {
-          onExport: () => downloadBackup(document, gm, Date.now()),
-          onImport: (text) => {
-            let json2 = null;
-            try {
-              json2 = JSON.parse(text);
-            } catch {
-            }
-            if (!isOglightDb(json2)) return importBackup(gm, text);
-            const out = convertOglight(json2, loadMarks(store.get(MARKS_KEY, null)), store.get(POSITIONS_KEY, {}), Date.now());
-            store.set(MARKS_KEY, out.marks);
-            store.set(POSITIONS_KEY, out.positions);
-            const days = convertOglightStats(json2.stats ?? {}, store.get(JOURNAL_KEY, {}));
-            store.set(JOURNAL_KEY, days.journal);
-            return t("settings.oglightDone", { players: out.players, planets: out.planets, seen: out.seen, exp: days.expeditions.toLocaleString(locale), raids: days.raids.toLocaleString(locale), days: days.days });
-          }
-        },
-        notes: [colonies, snapshot ? t("toolbar.lastSync", { time: new Date(snapshot.fetchedAt).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) }) : ""].filter(Boolean),
-        onMailChange: () => refreshInbox?.()
-      }),
-      onOpenDashboard: () => openDashboard({
+          if (!isOglightDb(json2)) return importBackup(gm, text);
+          const out = convertOglight(json2, loadMarks(store.get(MARKS_KEY, null)), store.get(POSITIONS_KEY, {}), Date.now());
+          store.set(MARKS_KEY, out.marks);
+          store.set(POSITIONS_KEY, out.positions);
+          const days = convertOglightStats(json2.stats ?? {}, store.get(JOURNAL_KEY, {}));
+          store.set(JOURNAL_KEY, days.journal);
+          return t("settings.oglightDone", { players: out.players, planets: out.planets, seen: out.seen, exp: days.expeditions.toLocaleString(locale), raids: days.raids.toLocaleString(locale), days: days.days });
+        }
+      },
+      notes: [menuCtx.colonies, snapshot ? t("toolbar.lastSync", { time: new Date(snapshot.fetchedAt).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) }) : ""].filter(Boolean),
+      onMailChange: () => refreshInbox?.(),
+      bodies: readPlanetList(document).flatMap((b) => [
+        ...b.planetId ? [{ id: b.planetId, label: `${b.name} [${b.coords}]` }] : [],
+        ...b.moonId ? [{ id: b.moonId, label: `${b.name} [${b.coords}] \xB7 ${t("fleet.typeMoon")}` }] : []
+      ]),
+      onFleetChange: () => {
+        refreshFleet?.();
+        mountTouchBar(document, store, t);
+      },
+      section: section2
+    });
+    let drawDock = null;
+    const draw = () => {
+      drawDock?.();
+      renderPlanetMenu({
         doc: document,
-        snapshot,
         entries: readPlanetList(document),
-        score: store.get(SCORE_KEY, null),
-        history: store.get(HISTORY_KEY, []),
-        bell: (r) => bellButton(document, store, t, r),
+        snapshot,
         queues,
-        names: techNames,
-        lfSlots,
+        settings,
         now: Date.now(),
         locale,
-        t
-      }),
-      planCount: planCount(store.get(PLAN_KEY, {})),
-      targetsCount: (() => {
-        const m = loadMarks(store.get(MARKS_KEY, null));
-        return Object.keys(m.players).length + Object.keys(m.planets).length;
-      })(),
-      onOpenTargets: () => openTargetsHere(),
-      planGap: planGap(),
-      journalToday: (() => {
-        const s = periodStats(entriesIn(store.get(JOURNAL_KEY, {}), periodRange("today", Date.now())));
-        return { count: s.count, net: s.netMsu };
-      })(),
-      onOpenPlanner: () => {
-        const id = currentBodyId(document);
-        const resources = readCurrentResources(document);
-        openPlanner({
+        t,
+        onOpenSettings: (ctx) => {
+          menuCtx = ctx;
+          openFutureSettings();
+        },
+        onOpenDashboard: () => openDashboard({
           doc: document,
-          store,
-          entries: readPlanetList(document),
           snapshot,
-          current: id && resources ? { id, resources } : null,
+          entries: readPlanetList(document),
+          score: store.get(SCORE_KEY, null),
+          history: store.get(HISTORY_KEY, []),
+          bell: (r) => bellButton(document, store, t, r),
+          queues,
+          names: techNames,
+          lfSlots,
+          icons: store.get(TECH_ICONS_KEY, {}),
           now: Date.now(),
           locale,
-          t,
-          onChange: () => draw(),
-          href: location.href,
-          navigate: (url) => location.assign(url)
-        });
-      },
-      onOpenJournal: () => openJournal({ doc: document, store, now: Date.now(), locale, t }),
-      // COMPLIANCE: runs only from the Sync button's click (reason 'user-sync', no cp).
-      onSync: async () => {
-        try {
-          const [account, queue] = await Promise.allSettled([
-            syncAccountOnUserClick(deps),
-            syncQueuesOnUserClick({ guard, store, ids: bodyIds }),
-            fetchLfBonuses({ guard, store }, "user-sync")
-          ]);
-          if (queue.status === "fulfilled") queues = queue.value;
-          if (account.status === "rejected") {
-            console.warn(`[${t("app.name")}]`, account.reason);
+          t
+        }),
+        planCount: planCount(store.get(PLAN_KEY, {})),
+        planGap: planGap(),
+        onOpenPlanner: () => {
+          const id = currentBodyId(document);
+          const resources = readCurrentResources(document);
+          openPlanner({
+            doc: document,
+            store,
+            entries: readPlanetList(document),
+            snapshot,
+            current: id && resources ? { id, resources } : null,
+            now: Date.now(),
+            locale,
+            t,
+            onChange: () => draw(),
+            href: location.href,
+            navigate: (url) => location.assign(url)
+          });
+        },
+        // COMPLIANCE: runs only from the Sync button's click (reason 'user-sync', no cp).
+        onSync: async () => {
+          try {
+            const [account, queue] = await Promise.allSettled([
+              syncAccountOnUserClick(deps),
+              syncQueuesOnUserClick({ guard, store, ids: bodyIds }),
+              fetchLfBonuses({ guard, store }, "user-sync")
+            ]);
+            if (queue.status === "fulfilled") queues = queue.value;
+            if (account.status === "rejected") {
+              console.warn(`[${t("app.name")}]`, account.reason);
+              return false;
+            }
+            snapshot = account.value;
+            draw();
+            return true;
+          } catch (error) {
+            console.warn(`[${t("app.name")}]`, error);
             return false;
           }
-          snapshot = account.value;
-          draw();
-          return true;
-        } catch (error) {
-          console.warn(`[${t("app.name")}]`, error);
-          return false;
         }
-      }
-    });
+      });
+    };
     draw();
     watchPlanetBar(document, draw);
     const currentId = currentBodyId(document);
@@ -11312,20 +12596,33 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         const id = nextBody(list, currentId, { backwards });
         if (id) location.assign(switchBodyUrl(location.href, id));
       };
-      registerShortcuts(document, [
-        { key: "i", label: "shortcut.prev", run: () => go(true) },
-        { key: "o", label: "shortcut.next", run: () => go(false) }
-      ]);
+      registerActions(document, store, t, { "planet.prev": () => go(true), "planet.next": () => go(false) });
       watchJumpgate(document, store, currentId, t);
     }
     if (currentId) {
       watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), onPlanChange: () => draw() });
     }
     const side = { doc: document, store, guard, t, locale };
-    const openTargetsHere = () => toggleSide(side);
+    drawDock = () => {
+      const journal = store.get(JOURNAL_KEY, {});
+      const stats = (period) => {
+        const st = periodStats(entriesIn(journal, periodRange(period, Date.now())));
+        return { count: st.count, net: st.netMsu };
+      };
+      renderDock({
+        doc: document,
+        t,
+        locale,
+        journal: { today: stats("today"), week: stats("week") },
+        marks: loadMarks(store.get(MARKS_KEY, null)),
+        onOpenJournal: () => openJournal({ doc: document, store, now: Date.now(), locale, t }),
+        onOpenTargets: (view2) => view2 ? openSide(side, view2) : toggleSide(side)
+      });
+    };
+    drawDock();
     onSideNavigate(highlightPosition);
     restoreSide(side);
-    registerShortcuts(document, [{ key: "m", label: "shortcut.nextTarget", run: () => void nextInSide(document) }]);
+    registerActions(document, store, t, { "targets.next": () => void nextInSide(document) });
     const pageMeta = (name) => document.querySelector(`meta[name="${name}"]`)?.getAttribute("content") ?? "";
     const reminders = { doc: document, store, t, locale, offset: clockOffset(document, Date.now()) };
     startReminders(reminders);
@@ -11353,11 +12650,15 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       });
     if (isFleetDispatch(document) && currentId) {
       const bodies = readPlanetList(document).map(({ planetId, moonId, name, coords }) => ({ planetId, moonId, name, coords }));
-      renderFleetTools({ doc: document, store, bodyId: currentId, bodies, t, locale });
+      const fleet = { doc: document, store, bodyId: currentId, bodies, t, locale, onOpenSettings: () => openFutureSettings("fleet") };
+      renderFleetTools(fleet);
+      refreshFleet = () => renderFleetTools(fleet);
     }
     if (isGalaxyPage(document)) {
       const ownPlanetIds = new Set(readPlanetList(document).flatMap((e) => e.planetId ? [e.planetId] : []));
-      watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onSystem: refreshSide });
+      watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onSystem: refreshSide, onPlayer: (id) => openSide(side, { tab: "players", player: id }) });
+      const arrow = (key) => () => document.querySelector(`#galaxycomponent .galaxy_icons[onclick*="'${key}'"]`)?.click();
+      registerActions(document, store, t, { "galaxy.left": arrow("ArrowLeft"), "galaxy.right": arrow("ArrowRight"), "galaxy.down": arrow("ArrowDown"), "galaxy.up": arrow("ArrowUp") });
     }
   }
   if (document.readyState === "loading") {

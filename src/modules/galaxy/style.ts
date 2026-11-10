@@ -1,5 +1,7 @@
 /** Galaxy view: summary strip, row marks, debris values, target list and the scores card (prefixed classes). */
 export const GALAXY_CSS = `
+.fut-g-name { cursor: pointer; }
+.fut-g-name:hover { text-decoration: underline; text-decoration-color: #4FD1E8; text-underline-offset: 2px; }
 .fut-g-bar {
   display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin: 4px 0 6px; padding: 6px 10px;
   border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A;

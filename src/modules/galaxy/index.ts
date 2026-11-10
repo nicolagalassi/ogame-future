@@ -31,6 +31,8 @@ export interface GalaxyOptions {
   t: (key: string, vars?: Record<string, string | number>) => string;
   /** After the game drew a system and Future read it (the side bar redraws). */
   onSystem?: () => void;
+  /** A click on a player's name: the side bar opens on that player's planets. */
+  onPlayer?: (id: number, name: string) => void;
 }
 
 /** Position to mark in the next system drawn ("g:s:p"): the one the side bar or the URL asked for. */
@@ -157,6 +159,15 @@ function decorate(o: GalaxyOptions, content: Element): void {
 
     // Rank badge (hover: scores card) and the player's flag.
     const playerCell = r.row.querySelector('.cellPlayerName');
+    // The name itself: one click opens the side bar on this player's planets. The game's own
+    // tooltip on the name keeps working (nothing is prevented).
+    const nameEl = playerCell?.querySelector<HTMLElement>('.playerName');
+    if (nameEl && r.playerId && !own && o.onPlayer && !nameEl.dataset.futPlayer) {
+      nameEl.dataset.futPlayer = String(r.playerId);
+      nameEl.classList.add('fut-g-name');
+      const id = r.playerId;
+      nameEl.addEventListener('click', () => o.onPlayer?.(id, r.playerName));
+    }
     if (playerCell && r.playerId && r.rank && !playerCell.querySelector('.fut-g-rank')) {
       const id = r.playerId;
       const badge = el(doc, 'button', 'fut-g-rank', `#${r.rank.toLocaleString(locale)}`);

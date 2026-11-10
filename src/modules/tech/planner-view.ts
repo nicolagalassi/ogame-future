@@ -12,7 +12,7 @@ import type { AccountSnapshot } from '../../data/account-info';
 import type { PlanetListEntry } from '../../data/planet-list';
 import { formatUnits } from '../../core/format';
 import { estimateResources } from '../../engines/resources';
-import { accountGap, groupByTech, PLAN_KEY, planMissing, removeFromPlan, type Plan, type TechGroup, type TechRow } from '../../engines/planner';
+import { accountGap, clearBody, groupByTech, PLAN_KEY, planMissing, removeFromPlan, type Plan, type TechGroup, type TechRow } from '../../engines/planner';
 import { TECH_ICONS_KEY, techIconEl, type TechIcon } from '../../data/tech-icons';
 import type { Cost } from '../../engines/tech';
 import { PLANNER_CSS } from './style';
@@ -24,6 +24,10 @@ type Res = { metal: number; crystal: number; deuterium: number };
 const RES = [['metal', 'm'], ['crystal', 'c'], ['deuterium', 'd']] as const;
 /** Technologies opened onto their planets (others: open when on 3 planets or fewer). */
 const toggled = new Set<number>();
+/** The plan by planet (what to carry where) or by technology (what it costs over the account). */
+let view: 'body' | 'tech' = 'body';
+/** Rows picked in the planet view: body id → indexes in its list. Emptied when the plan changes. */
+const picked = new Map<number, Set<number>>();
 import type { T } from './index';
 
 export const PLANNER_ID = 'fut-planner';
@@ -134,6 +138,8 @@ export function openPlanner(o: PlannerOptions): void {
     const sent = prunePending(allSent, plan, seenAt);
     if (sent.length !== allSent.length) o.store.set(SENT_KEY, sent);
     const save = (next: Plan) => {
+      // Indexes shift when rows leave: a pick made before would point at another row.
+      picked.clear();
       o.store.set(PLAN_KEY, next);
       o.onChange?.();
       draw();
@@ -206,9 +212,137 @@ export function openPlanner(o: PlannerOptions): void {
     );
     if (covered) kpis.lastElementChild!.querySelector('.kpi-line')!.replaceChildren(h('span', 'num okv', '✓'));
 
+    const seg = h('div', 'seg');
+    seg.setAttribute('role', 'group');
+    for (const v of ['body', 'tech'] as const) {
+      const b = h('button', '', t(v === 'body' ? 'plan.byBody' : 'plan.byTech'));
+      b.type = 'button';
+      b.dataset.view = v;
+      b.setAttribute('aria-pressed', String(view === v));
+      b.addEventListener('click', () => {
+        view = v;
+        draw();
+      });
+      seg.append(b);
+    }
     const list = h('div', 'groups');
-    for (const g of groups) list.append(groupTile(g, plan, haveOf, pendingOf, save));
-    panel.replaceChildren(head, kpis, list);
+    if (view === 'tech') for (const g of groups) list.append(groupTile(g, plan, haveOf, pendingOf, save));
+    else {
+      const ids = Object.keys(plan).map(Number).sort((a, b) => (order.get(a) ?? 1e9) - (order.get(b) ?? 1e9));
+      for (const id of ids) list.append(bodyTile(id, plan, haveOf, pendingOf, save));
+    }
+    panel.replaceChildren(head, kpis, seg, list);
+  };
+
+  /** Opens the fleet page on a source body with a transport of `need` towards `target` prepared (the player sends it). */
+  const bringTo = (target: number, need: Res) => {
+    const here = o.current?.id ?? null;
+    const source = here !== null && here !== target ? here : nextBody(refs, here ?? target, { skip: target });
+    if (!source || !o.navigate || !o.href) return;
+    const delivery: Delivery = { target, need: { metal: Math.ceil(need.metal), crystal: Math.ceil(need.crystal), deuterium: Math.ceil(need.deuterium) } };
+    o.store.set(DELIVERY_KEY, delivery);
+    o.navigate(repeatUrl(o.href, source, { mode: 'plan', first: source, dest: target }));
+  };
+  const sentMark = (p: Res & { arriveAt: number }) => {
+    const mark = h('span', 'sent');
+    mark.append(icon(doc, 'fleet', 12));
+    mark.title = `${p.arriveAt > o.now ? t('plan.sentArriving', { time: timeOf(p.arriveAt) }) : t('plan.sentArrived')}: ${fmt(p.metal)} · ${fmt(p.crystal)} · ${fmt(p.deuterium)}`;
+    return mark;
+  };
+
+  /**
+   * One planet or moon: what its plan costs and one button that carries there everything it lacks.
+   * A click on its rows picks them: the button then carries only what those rows need.
+   */
+  const bodyTile = (bodyId: number, plan: Plan, haveOf: (id: number) => Res | null, pendingOf: (id: number) => Res & { arriveAt: number }, save: (p: Plan) => void) => {
+    const items = plan[String(bodyId)] ?? [];
+    const have = haveOf(bodyId);
+    const chosen = picked.get(bodyId) ?? new Set<number>();
+    // Consecutive levels of one technology read as one row ("liv. 46–48").
+    const rows: { id: number; name: string; from?: number; to?: number; amount?: number; cost: Cost; indexes: number[] }[] = [];
+    items.forEach((item, index) => {
+      const last = rows[rows.length - 1];
+      if (last && last.id === item.id && item.level !== undefined && last.to !== undefined && item.level === last.to + 1) {
+        last.to = item.level;
+        last.cost = { metal: last.cost.metal + item.cost.metal, crystal: last.cost.crystal + item.cost.crystal, deuterium: last.cost.deuterium + item.cost.deuterium, energy: last.cost.energy };
+        last.indexes.push(index);
+      } else rows.push({ id: item.id, name: item.name, from: item.level, to: item.level, amount: item.amount, cost: { ...item.cost }, indexes: [index] });
+    });
+    const scope = chosen.size ? items.filter((_, i) => chosen.has(i)) : items;
+    const total = items.reduce<Cost>((sum, i) => ({ metal: sum.metal + i.cost.metal, crystal: sum.crystal + i.cost.crystal, deuterium: sum.deuterium + i.cost.deuterium, energy: 0 }), { metal: 0, crystal: 0, deuterium: 0, energy: 0 });
+    const gapAll = have ? planMissing(items, have) : null;
+    const gap = have ? planMissing(scope, have) : null;
+    const short = gap ? gap.metal + gap.crystal + gap.deuterium : 0;
+
+    const tile = h('div', 'group body');
+    tile.dataset.body = String(bodyId);
+    const top = h('div', 'ghead');
+    const name = h('div', 'gname');
+    name.append(h('span', 'gtitle', labelOf(bodyId)), h('span', 'gmeta', chosen.size ? t('plan.pickedOf', { n: chosen.size, of: items.length }) : items.length > 1 ? t('plan.items', { n: items.length }) : ''));
+    const mark = h('span', 'bmark');
+    mark.append(icon(doc, byId.get(bodyId)?.type === 'moon' ? 'moon' : 'planet', 16));
+    top.append(mark, name, ...triple(total, gapAll));
+    const acts = h('div', 'acts');
+    const p = pendingOf(bodyId);
+    const onWay = p.metal + p.crystal + p.deuterium > 0;
+    if (onWay) acts.append(sentMark(p));
+    if (gap && short > 0 && o.navigate && o.href) {
+      const bring = h('button', 'bring-all');
+      bring.type = 'button';
+      bring.append(icon(doc, 'swap', 13), h('span', '', chosen.size ? t('plan.bringSome', { n: chosen.size }) : onWay ? t('plan.complete') : t('plan.bringAll')));
+      bring.title = `${fmt(gap.metal)} · ${fmt(gap.crystal)} · ${fmt(gap.deuterium)} — ${t('plan.bringHint')}`;
+      bring.addEventListener('click', () => bringTo(bodyId, gap));
+      acts.append(bring);
+    } else if (gap) {
+      const ok = h('span', 'okmark');
+      ok.append(icon(doc, 'check', 12));
+      ok.title = t('plan.readyHere');
+      acts.append(ok);
+    }
+    const remove = h('button', 'x');
+    remove.type = 'button';
+    remove.append(icon(doc, 'close', 13));
+    remove.title = t('plan.removeBody');
+    remove.setAttribute('aria-label', remove.title);
+    remove.addEventListener('click', () => save(clearBody(plan, bodyId)));
+    acts.append(remove);
+    top.append(acts);
+    tile.append(top);
+
+    const list = h('div', 'grows');
+    for (const r of rows) {
+      const on = r.indexes.every((i) => chosen.has(i));
+      const row = h('div', `grow pick${on ? ' on' : ''}`);
+      const pick = h('button', 'gbody');
+      pick.type = 'button';
+      pick.title = t('plan.pickHint');
+      pick.setAttribute('aria-pressed', String(on));
+      pick.append(techIconEl(doc, icons[String(r.id)], 22), h('span', '', r.name), h('span', 'lv', what(r)));
+      pick.addEventListener('click', () => {
+        const next = new Set(chosen);
+        for (const i of r.indexes) on ? next.delete(i) : next.add(i);
+        if (next.size) picked.set(bodyId, next);
+        else picked.delete(bodyId);
+        draw();
+      });
+      row.append(pick, ...triple(r.cost));
+      const a = h('div', 'acts');
+      const x = h('button', 'x');
+      x.type = 'button';
+      x.append(icon(doc, 'close', 13));
+      x.title = t('plan.remove');
+      x.setAttribute('aria-label', `${t('plan.remove')}: ${r.name}`);
+      x.addEventListener('click', () => {
+        let next = plan;
+        for (const i of [...r.indexes].reverse()) next = removeFromPlan(next, bodyId, i);
+        save(next);
+      });
+      a.append(x);
+      row.append(a);
+      list.append(row);
+    }
+    tile.append(list);
+    return tile;
   };
 
   const groupTile = (g: TechGroup, plan: Plan, haveOf: (id: number) => Res | null, pendingOf: (id: number) => Res & { arriveAt: number }, save: (p: Plan) => void) => {
@@ -283,26 +417,14 @@ export function openPlanner(o: PlannerOptions): void {
     const gap = have ? planMissing(items, have) : null;
     const short = gap ? gap.metal + gap.crystal + gap.deuterium : 0;
     const p = pendingOf(r.bodyId);
-    if (p.metal + p.crystal + p.deuterium > 0) {
-      const s = h('span', 'sent');
-      s.append(icon(doc, 'fleet', 12));
-      s.title = `${p.arriveAt > o.now ? t('plan.sentArriving', { time: timeOf(p.arriveAt) }) : t('plan.sentArrived')}: ${fmt(p.metal)} · ${fmt(p.crystal)} · ${fmt(p.deuterium)}`;
-      out.push(s);
-    }
+    if (p.metal + p.crystal + p.deuterium > 0) out.push(sentMark(p));
     if (gap && short > 0 && o.navigate && o.href) {
       const bring = h('button', 'ib bring');
       bring.type = 'button';
       bring.append(icon(doc, 'swap', 13));
       bring.title = `${p.metal + p.crystal + p.deuterium > 0 ? t('plan.complete') : t('plan.bring')} · ${labelOf(r.bodyId)} · ${t('plan.bringHint')}`;
       bring.setAttribute('aria-label', bring.title);
-      bring.addEventListener('click', () => {
-        const here = o.current?.id ?? null;
-        const source = here !== null && here !== r.bodyId ? here : nextBody(refs, here ?? r.bodyId, { skip: r.bodyId });
-        if (!source) return;
-        const delivery: Delivery = { target: r.bodyId, need: { metal: Math.ceil(gap.metal), crystal: Math.ceil(gap.crystal), deuterium: Math.ceil(gap.deuterium) } };
-        o.store.set(DELIVERY_KEY, delivery);
-        o.navigate!(repeatUrl(o.href!, source, { mode: 'plan', first: source, dest: r.bodyId }));
-      });
+      bring.addEventListener('click', () => bringTo(r.bodyId, gap));
       out.push(bring);
     } else if (gap && short === 0) {
       const ok = h('span', 'okmark');

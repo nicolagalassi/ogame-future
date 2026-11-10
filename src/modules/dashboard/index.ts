@@ -24,6 +24,8 @@ import {
 } from '../../data/tech-names';
 import { activeLfBuildings, activeLfResearch, type ActiveTech, type LfSlots } from '../../data/lf-slots';
 import { shipIcon } from '../messages';
+import { SHIP_ICONS } from '../../data/ship-icons';
+import { techIconEl, type TechIcon } from '../../data/tech-icons';
 import { DASHBOARD_CSS } from './style';
 
 export interface DashboardOptions {
@@ -40,6 +42,8 @@ export interface DashboardOptions {
   names?: TechNames;
   /** Lifeform research slots seen on the game's page, per planet (see data/lf-slots). */
   lfSlots?: LfSlots;
+  /** The game's technology pictures seen so far (data/tech-icons); a missing one falls back to the name. */
+  icons?: Record<string, TechIcon>;
   now: number;
   locale: string;
   t: (key: string, vars?: Record<string, string | number>) => string;
@@ -52,6 +56,8 @@ const HOST_ID = 'fut-dashboard';
 let tab: Tab = 'summary';
 let scrapBody: number | null = null;
 let scrapRate = 35;
+/** Ships and defences: planets and moons on separate pages. */
+let unitScope: 'planet' | 'moon' = 'planet';
 let keyHandler: ((e: KeyboardEvent) => void) | null = null;
 
 function h<K extends keyof HTMLElementTagNameMap>(tag: K, className = '', text?: string): HTMLElementTagNameMap[K] {
@@ -90,31 +96,33 @@ function orderedBodies(snapshot: AccountSnapshot | null, entries: PlanetListEntr
 }
 
 const level = (b: OwnBody, id: number): number => b.levels[String(id)] ?? 0;
+/** The mine each ROI key stands for. */
+const MINE_ID = { metal: 1, crystal: 2, deuterium: 3 } as const;
 /** Unit counts: exact up to a million, then short. */
 let numLocale = 'it';
 const count = (n: number): string => (n < 1e6 ? n.toLocaleString(numLocale) : formatUnits(n, numLocale));
 
-/** Value of a set of units (ships or defences) at full cost, in MSU. */
-export function unitsMsu(b: OwnBody, ids: readonly number[]): { msu: number; count: number } {
+/** Value of a set of units (ships or defences): their cost, the three resources summed 1:1:1. */
+export function unitsValue(b: OwnBody, ids: readonly number[]): { value: number; count: number } {
   let total = 0;
   let count = 0;
   for (const id of ids) {
     const n = level(b, id);
     if (!n) continue;
     const c = rawCost(id, 1);
-    total += n * msu(c);
+    total += n * (c.metal + c.crystal + c.deuterium);
     count += n;
   }
-  return { msu: total, count };
+  return { value: total, count };
 }
 
-/** Fleet of all bodies without solar satellites and crawlers, in MSU. */
+/** Fleet of all bodies without solar satellites and crawlers, as resources 1:1:1. */
 const COMBAT = SHIPS.filter((id) => id !== 212 && id !== 217);
-export function fleetMsu(bodies: readonly OwnBody[]): { msu: number; count: number } {
-  let out = { msu: 0, count: 0 };
+export function fleetValueOf(bodies: readonly OwnBody[]): { value: number; count: number } {
+  let out = { value: 0, count: 0 };
   for (const b of bodies) {
-    const f = unitsMsu(b, COMBAT);
-    out = { msu: out.msu + f.msu, count: out.count + f.count };
+    const f = unitsValue(b, COMBAT);
+    out = { value: out.value + f.value, count: out.count + f.count };
   }
   return out;
 }
@@ -123,7 +131,7 @@ export function fleetMsu(bodies: readonly OwnBody[]): { msu: number; count: numb
 export function dayFigures(snapshot: AccountSnapshot | null): { prodDay: number; fleet: number } {
   if (!snapshot) return { prodDay: 0, fleet: 0 };
   const prod = snapshot.bodies.reduce((s, b) => s + msu(b.production), 0) * 24;
-  return { prodDay: Math.round(prod), fleet: Math.round(fleetMsu(snapshot.bodies).msu) };
+  return { prodDay: Math.round(prod), fleet: Math.round(fleetValueOf(snapshot.bodies).value) };
 }
 
 /** Resources the scrap merchant gives back for `amounts`, at `rate` percent. */
@@ -210,6 +218,21 @@ export function openDashboard(o: DashboardOptions): void {
     fmt: (v: number) => formatUnits(v, locale),
     name: (id: number) => techName(id, locale, o.names ?? {}, t),
     redraw,
+    pic: (id: number, px: number) => {
+      const name = techName(id, locale, o.names ?? {}, t);
+      if (SHIP_ICONS[id]) {
+        const img = shipIcon(doc, id, name, 'pic');
+        img.style.width = img.style.height = `${px}px`;
+        return img;
+      }
+      const known = o.icons?.[String(id)];
+      if (!known) return null;
+      const tile = techIconEl(doc, known, px, 'pic');
+      tile.title = name;
+      tile.setAttribute('role', 'img');
+      tile.setAttribute('aria-label', name);
+      return tile;
+    },
   };
   const body = h('div', 'tab-body');
   if (!o.snapshot) body.append(h('p', 'empty', t('dash.noData')));
@@ -233,13 +256,17 @@ interface Ctx {
   fmt: (v: number) => string;
   name: (id: number) => string;
   redraw: () => void;
+  /** The game's picture of a technology, or null when it was never seen. */
+  pic: (id: number, px: number) => HTMLElement | null;
 }
 
 function section(parent: HTMLElement, title: string, hint?: string): HTMLElement {
   const s = h('div', 'card');
-  s.append(h('h3', '', title));
+  const head = h('h3', '', title);
+  // Explanations stay one hover away instead of filling the page.
+  if (hint) head.title = hint;
+  s.append(head);
   parent.append(s);
-  if (hint) s.dataset.hint = hint;
   return s;
 }
 
@@ -262,7 +289,7 @@ function bodyMatrix(
   ctx: Ctx,
   bodies: OwnBody[],
   ids: readonly number[],
-  opts: { head?: (id: number) => HTMLElement | string; units?: boolean; extra?: { label: string; cls?: string; value: (b: OwnBody) => string }[]; foot?: 'avg' | 'sum' } = {},
+  opts: { units?: boolean; extra?: { label: string; cls?: string; value: (b: OwnBody) => string }[]; foot?: 'avg' | 'sum' } = {},
 ): HTMLElement {
   const { doc, t } = ctx.o;
   const wrap = h('div', 'table-wrap');
@@ -271,9 +298,7 @@ function bodyMatrix(
   hr.append(h('th', 'name', t('dash.colBody')));
   for (const id of ids) {
     const th = h('th', 'num col');
-    const head = opts.head ? opts.head(id) : ctx.name(id);
-    if (typeof head === 'string') th.append(h('span', 'col-name', head));
-    else th.append(head);
+    th.append(ctx.pic(id, 30) ?? h('span', 'col-name', ctx.name(id)));
     th.title = ctx.name(id);
     hr.append(th);
   }
@@ -332,14 +357,14 @@ function summaryTab(parent: HTMLElement, ctx: Ctx): void {
   } else kpi(t('dash.points'), '—', t('dash.pointsHint'));
   kpi(t('dash.stock'), fmt(msu(sum.stock)), `${fmt(sum.stock.metal)} · ${fmt(sum.stock.crystal)} · ${fmt(sum.stock.deuterium)}`, 'accent');
   kpi(t('dash.prodDayK'), `+${fmt(msu(sum.perHour) * 24)}`, t('dash.prodHourNote', { value: fmt(msu(sum.perHour)) }), 'accent');
-  const fleet = fleetMsu(ctx.bodies);
-  let def = { msu: 0, count: 0 };
+  const fleet = fleetValueOf(ctx.bodies);
+  let def = { value: 0, count: 0 };
   for (const b of ctx.bodies) {
-    const d = unitsMsu(b, DEFENCES.filter((id) => id < 500));
-    def = { msu: def.msu + d.msu, count: def.count + d.count };
+    const d = unitsValue(b, DEFENCES.filter((id) => id < 500));
+    def = { value: def.value + d.value, count: def.count + d.count };
   }
-  kpi(t('dash.fleetValue'), fmt(fleet.msu), t('dash.unitsNote', { n: fmt(fleet.count) }));
-  kpi(t('dash.defValue'), fmt(def.msu), t('dash.unitsNote', { n: fmt(def.count) }));
+  kpi(t('dash.fleetValue'), fmt(fleet.value), t('dash.unitsNote', { n: fmt(fleet.count) }));
+  kpi(t('dash.defValue'), fmt(def.value), t('dash.unitsNote', { n: fmt(def.count) }));
   const running = new Map<string, number>();
   let busy = 0;
   for (const r of rows) {
@@ -379,19 +404,20 @@ function summaryTab(parent: HTMLElement, ctx: Ctx): void {
   }
 
   const movesCard = h('div', 'card');
-  movesCard.append(h('h3', '', t('dash.moves')));
+  const movesHead = h('h3', '', t('dash.moves'));
+  movesHead.title = t('dash.movesHint');
+  movesCard.append(movesHead);
   const moves = bestUpgrades(o.snapshot, o.entries, 5);
   if (!moves.length) movesCard.append(h('p', 'hint', t('dash.movesNone')));
   moves.forEach((m, i) => {
     const line = h('div', 'move');
-    line.append(h('span', 'n', String(i + 1)));
+    line.append(ctx.pic(MINE_ID[m.mine], 28) ?? h('span', 'n', String(i + 1)));
     const text = h('div', 'move-text');
     text.append(h('strong', '', `${t(`mine.${m.mine}`)} ${m.from} → ${m.from + 1}`));
     text.append(h('span', '', `${m.name} [${m.coords}] · ${fmt(m.cost.metal)} M · ${fmt(m.cost.crystal)} C`));
     line.append(text, h('span', 'roi mono', m.days < 1 ? `<1 ${t('dash.daysShort')}` : `${m.days.toLocaleString(ctx.o.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${t('dash.daysShort')}`));
     movesCard.append(line);
   });
-  movesCard.append(h('p', 'hint', t('dash.movesHint')));
 
   const checks = h('div', 'card');
   checks.append(h('h3', '', t('dash.checks')));
@@ -440,7 +466,8 @@ function summaryTab(parent: HTMLElement, ctx: Ctx): void {
   for (const id of RESEARCH) {
     const v = o.snapshot?.researches[String(id)] ?? 0;
     const item = h('div', `lv${v ? '' : ' zero'}`);
-    item.append(h('span', '', ctx.name(id)), h('b', 'mono', String(v)));
+    item.title = ctx.name(id);
+    item.append(ctx.pic(id, 40) ?? h('span', 'lv-name', ctx.name(id)), h('b', 'mono', String(v)));
     grid.append(item);
   }
   research.append(grid);
@@ -573,7 +600,7 @@ function historyTab(parent: HTMLElement, ctx: Ctx): void {
 function minesTab(parent: HTMLElement, ctx: Ctx): void {
   const { t } = ctx.o;
   const planets = ctx.bodies.filter((b) => b.type === 'planet');
-  const s = section(parent, t('dash.tab.mines'));
+  const s = section(parent, t('dash.tab.mines'), t('dash.minesHint'));
   s.append(
     bodyMatrix(ctx, planets, MINES, {
       foot: 'avg',
@@ -584,7 +611,6 @@ function minesTab(parent: HTMLElement, ctx: Ctx): void {
       ],
     }),
   );
-  s.append(h('p', 'hint', t('dash.minesHint')));
 }
 
 function facilitiesTab(parent: HTMLElement, ctx: Ctx): void {
@@ -601,11 +627,10 @@ function lifeformsTab(parent: HTMLElement, ctx: Ctx): void {
   const planets = ctx.bodies.filter((b) => b.type === 'planet');
   // Lifeforms mix: each planet has its own species (buildings) and its own research per slot.
   const active = new Map(planets.map((p) => [p.id, { b: activeLfBuildings(p), r: activeLfResearch(p, o.lfSlots?.[String(p.id)]) }]));
-  parent.append(h('p', 'hint', t('dash.lfHint')));
 
   // Rows = technologies active on at least one planet, columns = planets.
   const table = (title: string, pick: (p: OwnBody) => ActiveTech[]) => {
-    const s = section(parent, title);
+    const s = section(parent, title, t('dash.lfHint'));
     const ids = [...new Set(planets.flatMap((p) => pick(p).filter((a) => a.level > 0).map((a) => a.id)))].sort(
       (a, b) => a % 100 - b % 100 || a - b,
     );
@@ -632,7 +657,14 @@ function lifeformsTab(parent: HTMLElement, ctx: Ctx): void {
     for (const id of ids) {
       const tr = h('tr');
       const sp = speciesOf(id);
-      tr.append(h('td', 'name tech', `${name(id)}${sp ? ` · ${t(`lf.${sp}`)}` : ''}`));
+      const cell = h('td', 'name tech');
+      const label = h('span', 'tech-label');
+      // A picture never seen keeps its square, so the names stay in one column.
+      label.append(ctx.pic(id, 26) ?? techIconEl(doc, undefined, 26, 'pic'));
+      label.append(h('span', '', name(id)));
+      if (sp) label.append(h('small', '', t(`lf.${sp}`)));
+      cell.append(label);
+      tr.append(cell);
       const on = planets.map((p) => pick(p).find((a) => a.id === id));
       const values = on.flatMap((a) => (a ? [a.level] : []));
       const max = values.length > 1 && values.some((v) => v !== Math.max(...values)) ? Math.max(...values) : -1;
@@ -654,32 +686,103 @@ function lifeformsTab(parent: HTMLElement, ctx: Ctx): void {
   table(t('dash.lfResearch'), (p) => active.get(p.id)!.r);
 }
 
+/** Ships or defences of the planets, or of the moons: one page each, switched on top. */
 function unitsTab(parent: HTMLElement, ctx: Ctx, ids: readonly number[], ships: boolean): void {
-  const { t, doc } = ctx.o;
-  // Only the units someone owns: an empty column is noise.
-  const shown = ids.filter((id) => ctx.bodies.some((b) => level(b, id) > 0));
-  const s = section(parent, t(ships ? 'dash.tab.ships' : 'dash.tab.defence'));
+  const { t } = ctx.o;
+  const title = t(ships ? 'dash.tab.ships' : 'dash.tab.defence');
+  const s = h('div', 'card');
+  parent.append(s);
+  const head = h('div', 'table-head');
+  head.append(h('h3', '', title));
+  const of = (type: 'planet' | 'moon') => ctx.bodies.filter((b) => b.type === type && ids.some((id) => level(b, id) > 0));
+  const value = (list: OwnBody[]) => list.reduce((sum, b) => sum + unitsValue(b, ids).value, 0);
+  const seg = h('div', 'seg');
+  seg.setAttribute('role', 'group');
+  seg.setAttribute('aria-label', title);
+  for (const type of ['planet', 'moon'] as const) {
+    const list = of(type);
+    const b = h('button', '');
+    b.type = 'button';
+    b.dataset.scope = type;
+    b.setAttribute('aria-pressed', String(unitScope === type));
+    b.append(h('span', '', t(type === 'planet' ? 'dash.planets' : 'dash.moons')), h('i', 'mono', list.length ? ctx.fmt(value(list)) : '—'));
+    b.addEventListener('click', () => {
+      unitScope = type;
+      ctx.redraw();
+    });
+    seg.append(b);
+  }
+  head.append(seg);
+  s.append(head);
+  const bodies = of(unitScope);
+  // Only the units someone here owns: an empty column is noise.
+  const shown = ids.filter((id) => bodies.some((b) => level(b, id) > 0));
   if (!shown.length) {
     s.append(h('p', 'hint', t('dash.unitsNone')));
     return;
   }
-  const bodies = ctx.bodies.filter((b) => shown.some((id) => level(b, id) > 0));
-  s.append(
-    bodyMatrix(ctx, bodies, shown, {
-      units: true,
-      foot: 'sum',
-      head: ships ? (id) => shipIcon(doc, id, ctx.name(id), 'unit-ico') : undefined,
-      extra: [{ label: t('dash.valueMsu'), value: (b) => ctx.fmt(unitsMsu(b, shown).msu) }],
-    }),
-  );
+  s.append(bodyMatrix(ctx, bodies, shown, { units: true, foot: 'sum', extra: [{ label: t('dash.valueMsu'), value: (b) => ctx.fmt(unitsValue(b, shown).value) }] }));
+}
+
+/**
+ * Picks one planet or moon, as the destination list of the fleet bar does: one row per position,
+ * the planet on the left and its moon on the right; bodies outside `ids` are shown but off.
+ */
+function bodyPicker(ctx: Ctx, ids: Set<number>, current: OwnBody, onPick: (id: number) => void): HTMLElement {
+  const { doc, t } = ctx.o;
+  const wrap = h('div', 'bpick');
+  const label = (b: OwnBody) => `${b.name}${b.type === 'moon' ? ` (${t('dash.moon')})` : ''} [${b.coords}]`;
+  const button = h('button', 'bpick-btn');
+  button.type = 'button';
+  button.setAttribute('aria-haspopup', 'listbox');
+  button.setAttribute('aria-expanded', 'false');
+  button.setAttribute('aria-label', label(current));
+  if (current.type === 'moon') button.append(icon(doc, 'moon', 13));
+  button.append(h('b', '', current.name), h('small', 'mono', current.coords), icon(doc, 'chevron', 14));
+  const menu = h('div', 'bmenu');
+  menu.setAttribute('role', 'listbox');
+  menu.hidden = true;
+  const cell = (b: OwnBody | undefined, moon: boolean) => {
+    if (!b) return h('span');
+    const item = h('button', `${moon ? 'moon' : 'planet'}${b.id === current.id ? ' on' : ''}`);
+    item.type = 'button';
+    item.setAttribute('role', 'option');
+    item.setAttribute('aria-selected', String(b.id === current.id));
+    item.setAttribute('aria-label', label(b));
+    if (moon) {
+      item.append(icon(doc, 'moon', 14));
+      item.title = label(b);
+    } else item.append(h('span', '', b.name), h('small', 'mono', b.coords));
+    item.disabled = !ids.has(b.id);
+    item.addEventListener('click', () => onPick(b.id));
+    return item;
+  };
+  const planets = ctx.bodies.filter((b) => b.type === 'planet');
+  const moons = new Map(ctx.bodies.filter((b) => b.type === 'moon').map((m) => [m.coords, m]));
+  for (const p of planets) menu.append(cell(p, false), cell(moons.get(p.coords), true));
+  const set = (open: boolean) => {
+    menu.hidden = !open;
+    button.setAttribute('aria-expanded', String(open));
+  };
+  button.addEventListener('click', () => set(menu.hidden));
+  wrap.addEventListener('focusout', (e) => {
+    if (!wrap.contains(e.relatedTarget as Node | null)) set(false);
+  });
+  wrap.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || menu.hidden) return;
+    e.stopPropagation();
+    set(false);
+    button.focus();
+  });
+  wrap.append(button, menu);
+  return wrap;
 }
 
 function scrapTab(parent: HTMLElement, ctx: Ctx): void {
   const { t } = ctx.o;
   const units = [...SHIPS, ...DEFENCES.filter((id) => id < 500)];
   const owners = ctx.bodies.filter((b) => units.some((id) => level(b, id) > 0));
-  const s = section(parent, t('dash.tab.scrap'));
-  s.append(h('p', 'hint', t('dash.scrapHint')));
+  const s = section(parent, t('dash.tab.scrap'), t('dash.scrapHint'));
   if (!owners.length) {
     s.append(h('p', 'hint', t('dash.unitsNone')));
     return;
@@ -688,15 +791,8 @@ function scrapTab(parent: HTMLElement, ctx: Ctx): void {
   const body = owners.find((b) => b.id === scrapBody)!;
 
   const bar = h('div', 'scrap-bar');
-  const pick = h('select', 'field');
-  for (const b of owners) {
-    const opt = h('option', '', `${b.type === 'moon' ? `${t('dash.moon')} ` : ''}${b.name} [${b.coords}]`);
-    opt.value = String(b.id);
-    opt.selected = b.id === body.id;
-    pick.append(opt);
-  }
-  pick.addEventListener('change', () => {
-    scrapBody = Number(pick.value);
+  const pick = bodyPicker(ctx, new Set(owners.map((b) => b.id)), body, (id) => {
+    scrapBody = id;
     ctx.redraw();
   });
   const rateLabel = h('label', 'field-label', t('dash.scrapRate'));
@@ -724,14 +820,20 @@ function scrapTab(parent: HTMLElement, ctx: Ctx): void {
   const tbody = h('tbody');
   const inputs = new Map<number, HTMLInputElement>();
   const outs = new Map<number, HTMLElement[]>();
+  const picks = new Map<number, HTMLButtonElement>();
   for (const id of units) {
     const owned = level(body, id);
     if (!owned) continue;
     const tr = h('tr');
     const nameCell = h('td', 'unit');
-    const label = h('span', 'unit-label');
-    if (id < 400) label.append(shipIcon(ctx.o.doc, id, ctx.name(id), 'unit-ico'));
+    // The picture and the name are one button: all of this unit, or none again.
+    const label = h('button', 'unit-label');
+    label.type = 'button';
+    label.title = t('dash.scrapPick');
+    const p = ctx.pic(id, 28);
+    if (p) label.append(p);
     label.append(h('span', '', ctx.name(id)));
+    picks.set(id, label);
     nameCell.append(label);
     tr.append(nameCell, h('td', 'num mono', count(owned)));
     const qty = h('input', 'field qty');
@@ -768,6 +870,7 @@ function scrapTab(parent: HTMLElement, ctx: Ctx): void {
     for (const [id, input] of inputs) {
       const n = Math.min(level(body, id), Math.max(0, Math.floor(Number(input.value) || 0)));
       amounts[id] = n;
+      picks.get(id)!.setAttribute('aria-pressed', String(n === level(body, id)));
       const r = scrapReturn({ [id]: n }, scrapRate);
       const [m, c, d] = outs.get(id)!;
       m!.textContent = n ? ctx.fmt(r.metal) : '·';
@@ -778,9 +881,16 @@ function scrapTab(parent: HTMLElement, ctx: Ctx): void {
     totalCells[0]!.textContent = ctx.fmt(total.metal);
     totalCells[1]!.textContent = ctx.fmt(total.crystal);
     totalCells[2]!.textContent = ctx.fmt(total.deuterium);
-    msuCell.textContent = `· ${ctx.fmt(msu(total))} MSU`;
+    msuCell.textContent = `${ctx.fmt(msu(total))} MSU`;
   };
   for (const input of inputs.values()) input.addEventListener('input', update);
+  for (const [id, label] of picks) {
+    label.addEventListener('click', () => {
+      const input = inputs.get(id)!;
+      input.value = Number(input.value) === level(body, id) ? '0' : String(level(body, id));
+      update();
+    });
+  }
   rate.addEventListener('input', update);
   all.addEventListener('click', () => {
     for (const [id, input] of inputs) input.value = String(level(body, id));

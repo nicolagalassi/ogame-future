@@ -82,5 +82,22 @@ export const PLANNER_CSS = `
 .x:hover { border-color: var(--bad); color: var(--bad); }
 .sent { display: inline-flex; color: var(--accent); }
 .okmark { display: inline-flex; width: 22px; justify-content: center; color: var(--ok); }
+/* By planet | by technology. */
+.seg { align-self: flex-start; display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.seg button { height: 26px; padding: 0 12px; border: 0; background: var(--bg); color: var(--muted); font: 12px Arial, sans-serif; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button:hover { color: var(--text); }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
+/* Planet view: the head carries the one button that brings everything; rows are picked with a click. */
+.group.body .ghead { grid-template-columns: 28px minmax(0, 1fr) 70px 70px 70px 170px; }
+.group.body .grow { grid-template-columns: minmax(0, 1fr) 70px 70px 70px 170px; padding-left: 6px; }
+.gmeta:empty { display: none; }
+.bmark { display: inline-flex; justify-content: center; color: var(--accent); }
+.bring-all { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border: 1px solid var(--warn); border-radius: 6px; background: rgba(245, 181, 71, 0.1); color: var(--warn); font: 700 12px Arial, sans-serif; white-space: nowrap; cursor: pointer; }
+.bring-all:hover { background: rgba(245, 181, 71, 0.2); color: var(--text); }
+button.gbody { align-items: center; padding: 2px 6px 2px 2px; border: 1px solid transparent; border-radius: 5px; background: none; font: 12px Arial, sans-serif; text-align: left; cursor: pointer; }
+button.gbody:hover { border-color: var(--line); color: var(--text); }
+.grow.pick.on { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+.grow.pick.on button.gbody { color: var(--text); font-weight: 700; }
 @media (max-width: 640px) { .kpis { grid-template-columns: 1fr; } }
 `;
