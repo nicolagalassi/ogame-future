@@ -141,3 +141,18 @@ export function targetRows(board: SpyBoard, bases: Base[], o: { capacity: number
     };
   });
 }
+
+/**
+ * Resources taken by each of the next `n` raids on the same target, when nothing changes in
+ * between: every raid takes the loot share (`loot`, 0..1) of what is still there.
+ */
+export function raidWaves(total: number, loot: number, n = 3): number[] {
+  const waves: number[] = [];
+  let left = total;
+  for (let i = 0; i < n; i++) {
+    const take = Math.floor(left * loot);
+    waves.push(take);
+    left -= take;
+  }
+  return waves;
+}

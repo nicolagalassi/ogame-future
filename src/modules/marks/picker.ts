@@ -19,7 +19,7 @@ const POP_ID = 'fut-mk-pop';
 
 export const MARKS_CSS = `
 .fut-mk { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin: 0 2px; padding: 0;
-  border: 1px solid #2E4356; border-radius: 4px; background: #0D1522; color: #4A5B72; cursor: pointer; vertical-align: middle; }
+  border: 1px solid #2E4356; border-radius: 4px; background: #0D1522; color: #7A8CA3; cursor: pointer; vertical-align: middle; }
 .fut-mk:hover, .fut-mk:focus-visible { border-color: #617C8D; color: #C9D4E2; outline: none; }
 .fut-mk.on { border-color: currentColor; background: #0D1522; }
 .fut-mk-dot { width: 9px; height: 9px; border-radius: 50%; border: 1px solid #4A5B72; }

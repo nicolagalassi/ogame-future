@@ -22,6 +22,10 @@ const PATHS = {
   fleet: '<path d="M3.5 12h11l5-4.5v9l-5-4.5"/><path d="M6.5 8.5L9 12l-2.5 3.5"/>',
   chevron: '<path d="M6 9.5l6 6 6-6"/>',
   next: '<path d="M4.5 12h14M13 5.5l6.5 6.5-6.5 6.5"/>',
+  sword: '<path d="M19.5 4.5L9 15M19.5 4.5V9M19.5 4.5H15"/><path d="M6.5 12.5l5 5M8 16l-3.5 3.5"/>',
+  play: '<path d="M8 5.5v13l10.5-6.5z"/>',
+  trash: '<path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/>',
+  more: '<path d="M5.5 12h.01M12 12h.01M18.5 12h.01" stroke-width="3.2"/>',
 } as const;
 
 export type IconName = keyof typeof PATHS;
