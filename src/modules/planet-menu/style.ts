@@ -4,6 +4,7 @@
  * The game positions everything absolutely with its own rules, so ours use two ids
  * plus !important on layout properties to win reliably.
  */
+import { RES_COLORS } from '../../core/sheet';
 /** Width of the side-by-side menu (tolerated OGLight uses 208px; ours is a bit wider for larger text). */
 export const MENU_WIDTH = 228;
 /** Native width of the planet column (#rechts) in OGame 13. */
@@ -73,12 +74,12 @@ ${L} .fut-res {
 ${L} .fut-cell { display: block; padding: 0 2px; border-radius: 2px; white-space: nowrap; overflow: hidden; }
 /* Storage fill painted behind the number (planets only): no extra space needed. */
 ${L} .fut-cell.fut-has-fill {
-  background: linear-gradient(90deg, color-mix(in srgb, currentColor 26%, transparent) var(--fut-fill),
+  background: linear-gradient(90deg, color-mix(in srgb, currentColor 15%, transparent) var(--fut-fill),
     rgba(255,255,255,0.04) var(--fut-fill)) !important;
 }
-${L} .fut-m, .fut-totals .fut-m { color: #B8C2CC; }
-${L} .fut-c, .fut-totals .fut-c { color: #7FB8FF; }
-${L} .fut-d, .fut-totals .fut-d { color: #4FE0B0; }
+${L} .fut-m, .fut-totals .fut-m { color: ${RES_COLORS.metal}; }
+${L} .fut-c, .fut-totals .fut-c { color: ${RES_COLORS.crystal}; }
+${L} .fut-d, .fut-totals .fut-d { color: ${RES_COLORS.deuterium}; }
 ${L} .fut-full { color: #F5B547 !important; font-weight: 700; }
 ${L} .fut-missing { color: #8A9BB0; }
 
@@ -113,7 +114,7 @@ ${L} a.planetlink.active .planet-name { color: #8BE4F2 !important; }
 /* Data age: minutes since this body's numbers were last read (green < 15, amber < 30, red after). */
 ${L} .fut-age {
   position: absolute; left: 1px; top: 1px; z-index: 2; min-width: 14px; padding: 0 2px; border-radius: 4px;
-  font: 700 10px/12px Arial, sans-serif; text-align: center; background: rgba(5,10,18,0.8); pointer-events: none;
+  font: 700 11px/13px Arial, sans-serif; text-align: center; background: rgba(5,10,18,0.85); pointer-events: none;
 }
 ${L} a.moonlink .fut-age { left: 1px; top: auto; bottom: 1px; }
 ${L} .fut-age-fresh { color: #38C56E; }
@@ -172,7 +173,7 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
 #planetbarcomponent .fut-cell:hover:not(:disabled) .fut-cell-k { color: #C9D4E2; }
 #planetbarcomponent .fut-cell:focus-visible, #planetbarcomponent .fut-tool:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -2px; }
 #planetbarcomponent .fut-cell:disabled { cursor: default; }
-#planetbarcomponent .fut-cell-k { max-width: 100%; font: 10px/12px Arial, sans-serif; color: #8A9BB0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#planetbarcomponent .fut-cell-k { max-width: 100%; font: 11px/13px Arial, sans-serif; color: #9AA9BC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #planetbarcomponent .fut-cell-v { max-width: 100%; font: 700 12px/14px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #planetbarcomponent .fut-cell-v.fut-warn { color: #F5B547; } .fut-cell-v.fut-ok { color: #4FE0B0; }
 #planetbarcomponent .fut-side { display: flex; flex-direction: column; grid-column: 3; grid-row: 1 / span 2; }
@@ -190,7 +191,6 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
 #planetbarcomponent .fut-tool.fut-busy svg { animation: fut-spin 1s linear infinite; }
 #planetbarcomponent:not(.fut-wide) .fut-cell { padding: 3px 3px 4px; }
 #planetbarcomponent:not(.fut-wide) .fut-cell-v { font-size: 10px; }
-#planetbarcomponent:not(.fut-wide) .fut-cell-k { font-size: 10px; }
 @keyframes fut-spin { to { transform: rotate(360deg); } }
 
 

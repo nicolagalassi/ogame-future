@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.6
+// @version      0.3.7
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -4780,13 +4780,14 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
   }
 
   // src/core/sheet.ts
+  var RES_COLORS = { metal: "#B8C2CC", crystal: "#7FB8FF", deuterium: "#4FE0B0", darkMatter: "#B58CDB", food: "#D6A8C8" };
   var WINDOW_SHEET = `
 :host {
   all: initial;
   --bg: #0B121D; --surface: #0D1522; --raised: #111B2A; --line: #1F2C40; --line-soft: #16202F;
   --text: #E6EDF5; --text-2: #C9D4E2; --muted: #8A9BB0; --faint: #4A5B72;
   --accent: #4FD1E8; --accent-soft: #12283A; --warn: #F5B547; --ok: #4FE0B0; --bad: #FF7A7A;
-  --m: #B8C2CC; --c: #7FB8FF; --d: #4FE0B0; --dm: #B58CDB;
+  --m: ${RES_COLORS.metal}; --c: ${RES_COLORS.crystal}; --d: ${RES_COLORS.deuterium}; --dm: ${RES_COLORS.darkMatter};
   --mono: Consolas, "JetBrains Mono", monospace;
   --panel-w: 860px;
 }
@@ -4827,15 +4828,15 @@ h4 { margin: 10px 0 4px; font-size: 11px; font-weight: 700; color: var(--text-2)
 /* Key numbers: the planet menu toolbar, one cell each. */
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); overflow: hidden; }
 .kpi { display: flex; flex-direction: column; gap: 1px; padding: 6px 10px 7px; min-width: 0; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
-.kpi .label { color: var(--muted); font-size: 10px; }
+.kpi .label { color: var(--muted); font-size: 11px; }
 .kpi .value { font: 700 15px/18px var(--mono); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kpi .note, .kpi .detail { color: var(--muted); font-size: 10px; }
+.kpi .note, .kpi .detail { color: var(--muted); font-size: 11px; }
 .kpi.accent .value { color: var(--accent); }
 .kpi.warn .value { color: var(--warn); }
 
 /* Sections: tiles, like the planet rows. */
 .card { padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); min-width: 0; }
-.hint { margin: 6px 0 0; color: var(--muted); font-size: 10px; }
+.hint { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
 .empty { margin: 0; padding: 14px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 7px; }
 
 /* Buttons: the settings chips. One filled action, ghost for the rest. */
@@ -5243,8 +5244,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   --link: #6F9FC8; --accent: #4FD1E8; --neg: #F07A6E; --warn: #E3B341; --ok: #7BC47F; --ship: #4FE0B0; --on-tone: #0D1116;
 }
 .fut-msg { display: grid; grid-template-columns: 124px minmax(0, 1fr) minmax(84px, auto) auto; align-items: center; column-gap: 10px;
-  box-sizing: border-box; margin: 4px 8px 6px; padding: 5px 8px; min-height: 30px;
-  border-radius: 4px; background: rgba(120, 150, 180, 0.06); cursor: pointer; text-align: left;
+  box-sizing: border-box; margin: 4px 0 6px; padding: 5px 16px; min-height: 30px;
+  border-radius: 0; background: rgba(120, 150, 180, 0.06); cursor: pointer; text-align: left;
   font: 11px/16px Verdana, Arial, Helvetica, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums; }
 .fut-msg:hover { background: rgba(120, 150, 180, 0.11); }
 .fut-msg:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
@@ -5254,11 +5255,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   color: color-mix(in srgb, var(--tone) 78%, #fff); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Expedition size as game rarity, on the whole row: an edge, a tint, the value in the colour, the word for big and huge. */
 ${RARITY.map((c, i) => `.fut-rar-${i} { --rar: ${c}; }`).join(" ")}
-.fut-msg[class*="fut-rar-"] { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rar) 30%, transparent); background: color-mix(in srgb, var(--rar) 7%, transparent); }
+.fut-msg[class*="fut-rar-"] { box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rar) 30%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--rar) 30%, transparent); background: color-mix(in srgb, var(--rar) 7%, transparent); }
 .fut-msg[class*="fut-rar-"]:hover { background: color-mix(in srgb, var(--rar) 12%, transparent); }
 .fut-msg[class*="fut-rar-"] .fut-msg-val b { color: var(--rar); }
-.fut-msg.fut-rar-1 { background: color-mix(in srgb, var(--rar) 11%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rar) 60%, transparent); }
-.fut-msg.fut-rar-0 { background: color-mix(in srgb, var(--rar) 17%, transparent); box-shadow: inset 0 0 0 1px var(--rar); }
+.fut-msg.fut-rar-1 { background: color-mix(in srgb, var(--rar) 12%, transparent); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rar) 60%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--rar) 60%, transparent); }
+.fut-msg.fut-rar-0 { background: color-mix(in srgb, var(--rar) 19%, transparent); box-shadow: inset 0 1px 0 var(--rar), inset 0 -1px 0 var(--rar); }
 .fut-msg.fut-rar-0 .fut-msg-val b { font-size: 14px; }
 .fut-rar-tag { margin-right: 4px; color: var(--rar); font-weight: 700; }
 ${outcomeCss}
@@ -5267,7 +5268,7 @@ ${outcomeCss}
 .fut-r { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
 .fut-r::before { content: attr(data-k); box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; flex: none;
   min-width: 16px; height: 16px; padding: 0 3px; border-radius: 8px; background: var(--dot); color: var(--on-tone); font-size: 10px; font-weight: 700; line-height: 1; }
-.fut-r-m { --dot: #A9B1C9; } .fut-r-c { --dot: #8DCEEC; } .fut-r-d { --dot: #4FC3A8; } .fut-r-f { --dot: #D6A8C8; } .fut-r-dm { --dot: #B58CDB; }
+.fut-r-m { --dot: ${RES_COLORS.metal}; } .fut-r-c { --dot: ${RES_COLORS.crystal}; } .fut-r-d { --dot: ${RES_COLORS.deuterium}; } .fut-r-f { --dot: ${RES_COLORS.food}; } .fut-r-dm { --dot: ${RES_COLORS.darkMatter}; }
 .fut-u { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 .fut-msg-icon { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; flex: none; }
 .fut-msg-icon-none { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #1A2733; font-size: 8px; color: var(--mute); }
@@ -5286,7 +5287,7 @@ ${outcomeCss}
 .fut-msg-val { justify-self: end; display: flex; align-items: baseline; gap: 4px; white-space: nowrap; }
 .fut-msg-val b { font-size: 13px; color: var(--hi); }
 .fut-msg-val b.fut-neg { color: var(--neg); }
-.fut-msg-val b.fut-dm { color: #B58CDB; }
+.fut-msg-val b.fut-dm { color: ${RES_COLORS.darkMatter}; }
 .fut-msg-val small { font-size: 11px; color: var(--mute); }
 .fut-dash { color: var(--dim); }
 .fut-msg-acts { display: flex; gap: 4px; }
@@ -5295,13 +5296,13 @@ ${outcomeCss}
   color: #8FB6D8; text-decoration: none; font-size: 11px; font-weight: 700; white-space: nowrap; }
 .fut-msg a.fut-msg-link:hover, .fut-msg a.fut-msg-link:focus-visible { border-color: var(--link); color: var(--hi); outline: none; }
 /* Today's recap heads the Expeditions tab with the same columns as the reports below. */
-.fut-msg.fut-recap { margin: 0 8px 8px; padding: 7px 8px; background: rgba(79, 209, 232, 0.08); box-shadow: inset 0 0 0 1px rgba(79, 209, 232, 0.4); }
+.fut-msg.fut-recap { margin: 0 0 8px; padding: 8px 16px; background: rgba(79, 209, 232, 0.08); box-shadow: inset 0 1px 0 rgba(79, 209, 232, 0.4), inset 0 -1px 0 rgba(79, 209, 232, 0.4); }
 .fut-msg.fut-recap:hover { background: rgba(79, 209, 232, 0.13); }
 .fut-recap .fut-msg-val b { font-size: 14px; }
 /* "Just read": under today's recap, gone after a countdown (paused on hover / focus). */
-.fut-fresh { box-sizing: border-box; margin: -6px 8px 10px; padding: 0 10px 10px; border-radius: 0 0 4px 4px; overflow: hidden;
+.fut-fresh { box-sizing: border-box; margin: -8px 0 10px; padding: 0 16px 10px; border-radius: 0; overflow: hidden;
   background: #0E151C; font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums; }
-.fut-fresh-timer { height: 3px; margin: 0 -10px 8px; background: #1A2530; }
+.fut-fresh-timer { height: 3px; margin: 0 -16px 8px; background: #1A2530; }
 .fut-fresh-timer i { display: block; height: 100%; background: #F5A623; transform-origin: left center; animation: fut-fresh-countdown linear forwards; }
 .fut-fresh:hover .fut-fresh-timer i, .fut-fresh:focus-within .fut-fresh-timer i { animation-play-state: paused; }
 @keyframes fut-fresh-countdown { from { transform: scaleX(1); } to { transform: scaleX(0); } }
@@ -5407,18 +5408,18 @@ ${outcomeCss}
 :host { --panel-w: 860px; }
 .kpi .value { font-size: 18px; font-family: var(--mono); }
 .kpi .detail { display: flex; flex-wrap: wrap; gap: 8px; }
-.bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: #0D1522; gap: 2px; }
+.bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--surface); gap: 2px; }
 .bar span { display: block; height: 100%; min-width: 2px; }
 .legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 4px 12px; margin-top: 8px; font-size: 12px; }
 .legend div { display: flex; align-items: center; gap: 6px; }
 .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
-.legend .n { margin-left: auto; font-family: "JetBrains Mono", Consolas, monospace; color: #C9D4E2; }
-.legend .pct { color: #8A9BB0; font-size: 11px; min-width: 38px; text-align: right; }
+.legend .n { margin-left: auto; font-family: "JetBrains Mono", Consolas, monospace; color: var(--text-2); }
+.legend .pct { color: var(--muted); font-size: 11px; min-width: 38px; text-align: right; }
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
-th { text-align: right; color: #8A9BB0; font-weight: 400; padding: 3px 6px; border-bottom: 1px solid #1F2C40; white-space: nowrap; }
+th { text-align: right; color: var(--muted); font-weight: 400; padding: 3px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 th:first-child, td:first-child { text-align: left; }
-td { text-align: right; padding: 3px 6px; border-bottom: 1px solid #172334; font-family: "JetBrains Mono", Consolas, monospace; white-space: nowrap; }
-td:first-child { font-family: Arial, sans-serif; color: #C9D4E2; }
+td { text-align: right; padding: 3px 6px; border-bottom: 1px solid var(--line-soft); font-family: "JetBrains Mono", Consolas, monospace; white-space: nowrap; }
+td:first-child { font-family: Arial, sans-serif; color: var(--text-2); }
 .scroll { overflow-x: auto; }
 .sizes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .rar { padding: 1px 8px; border-radius: 9px; font-size: 12px; font-weight: 700; color: var(--rar);
@@ -5426,24 +5427,25 @@ td:first-child { font-family: Arial, sans-serif; color: #C9D4E2; }
 ${RARITY.map((c, i) => `.rar-${i} { --rar: ${c}; }`).join(" ")}
 /* Resources found: the big numbers of the journal. */
 .res { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-.res-tile { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 10px 12px; border-radius: 6px; background: #111B27; }
-.res-tile.m { --dot: #A9B1C9; } .res-tile.c { --dot: #8DCEEC; } .res-tile.d { --dot: #4FC3A8; } .res-tile.dm { --dot: #B58CDB; }
-.res-name { display: flex; align-items: center; gap: 6px; color: #8A9BB0; font-size: 12px; }
+.res-tile { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 10px 12px; border-radius: 6px; background: var(--surface); }
+.res-tile.m { --dot: var(--m); } .res-tile.c { --dot: var(--c); } .res-tile.d { --dot: var(--d); } .res-tile.dm { --dot: var(--dm); }
+.res-name { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
 .res-name::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--dot); flex: none; }
 .res-tile b { font-size: 22px; line-height: 1.15; color: var(--dot); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.res-tile.zero b { color: #4E5B6A; }
+.res-tile.zero b { color: var(--faint); }
 /* Ships found: compact, many per row; the count matters more than the picture. */
 .ships { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 4px 10px; }
 .ship { display: flex; align-items: center; gap: 6px; padding: 1px 0; min-width: 0; }
-.ship-img { width: 24px; height: 24px; flex: none; border-radius: 50%; object-fit: cover; background: #16202E; }
-.ship-img-none { display: flex; align-items: center; justify-content: center; color: #8A9BB0; font-size: 9px; }
+.ship-img { width: 24px; height: 24px; flex: none; border-radius: 50%; object-fit: cover; background: var(--line-soft); }
+.ship-img-none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 9px; }
 .ship-info { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
 .ship-info b { font-size: 12px; font-variant-numeric: tabular-nums; }
-.ship-name { color: #8A9BB0; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ship-name { color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 560px) { .res { grid-template-columns: repeat(2, minmax(0, 1fr)); } .res-tile b { font-size: 18px; } }
 h4.lost { margin: 10px 0 6px; color: var(--bad); }
 .foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
-.opt { display: flex; gap: 6px; align-items: center; color: #B4C2D3; font-size: 12px; cursor: pointer; }
+.opt input { width: 16px; height: 16px; margin: 0; }
+.opt { min-height: 24px; display: flex; gap: 6px; align-items: center; color: var(--text-2); font-size: 12px; cursor: pointer; }
 .acts { display: flex; gap: 6px; }
 @media (max-width: 560px) { .kpi .value { font-size: 15px; } }
 `;
@@ -6469,12 +6471,12 @@ ${L} .fut-res {
 ${L} .fut-cell { display: block; padding: 0 2px; border-radius: 2px; white-space: nowrap; overflow: hidden; }
 /* Storage fill painted behind the number (planets only): no extra space needed. */
 ${L} .fut-cell.fut-has-fill {
-  background: linear-gradient(90deg, color-mix(in srgb, currentColor 26%, transparent) var(--fut-fill),
+  background: linear-gradient(90deg, color-mix(in srgb, currentColor 15%, transparent) var(--fut-fill),
     rgba(255,255,255,0.04) var(--fut-fill)) !important;
 }
-${L} .fut-m, .fut-totals .fut-m { color: #B8C2CC; }
-${L} .fut-c, .fut-totals .fut-c { color: #7FB8FF; }
-${L} .fut-d, .fut-totals .fut-d { color: #4FE0B0; }
+${L} .fut-m, .fut-totals .fut-m { color: ${RES_COLORS.metal}; }
+${L} .fut-c, .fut-totals .fut-c { color: ${RES_COLORS.crystal}; }
+${L} .fut-d, .fut-totals .fut-d { color: ${RES_COLORS.deuterium}; }
 ${L} .fut-full { color: #F5B547 !important; font-weight: 700; }
 ${L} .fut-missing { color: #8A9BB0; }
 
@@ -6509,7 +6511,7 @@ ${L} a.planetlink.active .planet-name { color: #8BE4F2 !important; }
 /* Data age: minutes since this body's numbers were last read (green < 15, amber < 30, red after). */
 ${L} .fut-age {
   position: absolute; left: 1px; top: 1px; z-index: 2; min-width: 14px; padding: 0 2px; border-radius: 4px;
-  font: 700 10px/12px Arial, sans-serif; text-align: center; background: rgba(5,10,18,0.8); pointer-events: none;
+  font: 700 11px/13px Arial, sans-serif; text-align: center; background: rgba(5,10,18,0.85); pointer-events: none;
 }
 ${L} a.moonlink .fut-age { left: 1px; top: auto; bottom: 1px; }
 ${L} .fut-age-fresh { color: #38C56E; }
@@ -6568,7 +6570,7 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
 #planetbarcomponent .fut-cell:hover:not(:disabled) .fut-cell-k { color: #C9D4E2; }
 #planetbarcomponent .fut-cell:focus-visible, #planetbarcomponent .fut-tool:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -2px; }
 #planetbarcomponent .fut-cell:disabled { cursor: default; }
-#planetbarcomponent .fut-cell-k { max-width: 100%; font: 10px/12px Arial, sans-serif; color: #8A9BB0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#planetbarcomponent .fut-cell-k { max-width: 100%; font: 11px/13px Arial, sans-serif; color: #9AA9BC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #planetbarcomponent .fut-cell-v { max-width: 100%; font: 700 12px/14px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #planetbarcomponent .fut-cell-v.fut-warn { color: #F5B547; } .fut-cell-v.fut-ok { color: #4FE0B0; }
 #planetbarcomponent .fut-side { display: flex; flex-direction: column; grid-column: 3; grid-row: 1 / span 2; }
@@ -6586,7 +6588,6 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
 #planetbarcomponent .fut-tool.fut-busy svg { animation: fut-spin 1s linear infinite; }
 #planetbarcomponent:not(.fut-wide) .fut-cell { padding: 3px 3px 4px; }
 #planetbarcomponent:not(.fut-wide) .fut-cell-v { font-size: 10px; }
-#planetbarcomponent:not(.fut-wide) .fut-cell-k { font-size: 10px; }
 @keyframes fut-spin { to { transform: rotate(360deg); } }
 
 
@@ -8596,7 +8597,7 @@ table.queues td.acts { width: 1%; text-align: right; }
   color: #8A9BB0; font: 10px/13px Consolas, monospace;
 }
 .fut-flabel { color: #E6EDF5; font-weight: 700; white-space: nowrap; }
-.fut-fcaption { color: #8A9BB0; font-size: 10px; max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fut-fcaption { color: #9AA9BC; font-size: 11px; max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fut-ftilewrap .fut-ftile { padding-right: 16px; }
 .fut-fcaret {
   position: absolute; right: 2px; top: 2px; width: 16px; height: 20px; padding: 0; border: 0; background: none;

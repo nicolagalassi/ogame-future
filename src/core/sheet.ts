@@ -4,13 +4,16 @@
  * empty states and the browser surfaces (focus, scrollbars, selection, numerals).
  * Each window adds only its own rules and sets its width with `--panel-w`.
  */
+/** Resource colours, the same in the planet menu, the windows and the inbox. */
+export const RES_COLORS = { metal: '#B8C2CC', crystal: '#7FB8FF', deuterium: '#4FE0B0', darkMatter: '#B58CDB', food: '#D6A8C8' };
+
 export const WINDOW_SHEET = `
 :host {
   all: initial;
   --bg: #0B121D; --surface: #0D1522; --raised: #111B2A; --line: #1F2C40; --line-soft: #16202F;
   --text: #E6EDF5; --text-2: #C9D4E2; --muted: #8A9BB0; --faint: #4A5B72;
   --accent: #4FD1E8; --accent-soft: #12283A; --warn: #F5B547; --ok: #4FE0B0; --bad: #FF7A7A;
-  --m: #B8C2CC; --c: #7FB8FF; --d: #4FE0B0; --dm: #B58CDB;
+  --m: ${RES_COLORS.metal}; --c: ${RES_COLORS.crystal}; --d: ${RES_COLORS.deuterium}; --dm: ${RES_COLORS.darkMatter};
   --mono: Consolas, "JetBrains Mono", monospace;
   --panel-w: 860px;
 }
@@ -51,15 +54,15 @@ h4 { margin: 10px 0 4px; font-size: 11px; font-weight: 700; color: var(--text-2)
 /* Key numbers: the planet menu toolbar, one cell each. */
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); overflow: hidden; }
 .kpi { display: flex; flex-direction: column; gap: 1px; padding: 6px 10px 7px; min-width: 0; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
-.kpi .label { color: var(--muted); font-size: 10px; }
+.kpi .label { color: var(--muted); font-size: 11px; }
 .kpi .value { font: 700 15px/18px var(--mono); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kpi .note, .kpi .detail { color: var(--muted); font-size: 10px; }
+.kpi .note, .kpi .detail { color: var(--muted); font-size: 11px; }
 .kpi.accent .value { color: var(--accent); }
 .kpi.warn .value { color: var(--warn); }
 
 /* Sections: tiles, like the planet rows. */
 .card { padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); min-width: 0; }
-.hint { margin: 6px 0 0; color: var(--muted); font-size: 10px; }
+.hint { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
 .empty { margin: 0; padding: 14px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 7px; }
 
 /* Buttons: the settings chips. One filled action, ghost for the rest. */
