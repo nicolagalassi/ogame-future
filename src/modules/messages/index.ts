@@ -10,12 +10,13 @@ import { formatUnits } from '../../core/format';
 import { readMessage, type ExpeditionMessage, type ParsedMessage, type Res, type SpyMessage } from '../../data/messages';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { SHIP_ICONS } from '../../data/ship-icons';
-import { JOURNAL_KEY, record, recordCombat, trim, unitsValue, msu, type Journal } from '../../engines/expeditions';
+import { JOURNAL_KEY, record, recordCombat, trim, unitsValue, msu, type Journal, type JournalEntry } from '../../engines/expeditions';
 import { nearestBase, rememberSpies, SPY_BOARD_KEY, type SpyBoard, type Universe } from '../../engines/raids';
 import { MESSAGES_CSS } from './style';
 import { mountSpyPanel, universeOf, type SpyContext } from './spy-table';
+import { mountExpeditionRecap, showFreshExpeditions } from './exp-recap';
 import { SERVER_DATA_KEY, type ServerData } from '../../data/server-data';
-import { converterLink, ogameToolsSimLink, osimsLink, simPrefill } from '../../engines/sim-links';
+import { converterLink, SIM_KEY, SIM_TOOLS, simLink, simPrefill, simTool, type SimTool } from '../../engines/sim-links';
 
 export type T = (key: string, vars?: Record<string, string | number>) => string;
 
@@ -30,6 +31,8 @@ export interface MessagesOptions {
   now?: () => number;
   /** Called when new expeditions entered the journal. */
   onJournal?: (added: number) => void;
+  /** Opens the expedition journal, from today's recap on the Expeditions tab. */
+  onOpenJournal?: () => void;
   /** The spy table's data (bases, research, server); none = no table. */
   spy?: SpyContext;
 }
@@ -61,158 +64,235 @@ export function shipName(id: number, ships: ShipsInfo, t: T): string {
   return fallback === key ? `#${id}` : fallback;
 }
 
-/** Summary line for one report, or null when there is nothing worth showing. */
-export function summaryFor(doc: Document, m: ParsedMessage, o: { locale: string; t: T; ships: ShipsInfo; spy?: SpyContext; universe?: Universe }): HTMLElement | null {
+/** What a summary line needs besides the report. */
+export interface SummaryContext {
+  locale: string;
+  t: T;
+  ships: ShipsInfo;
+  spy?: SpyContext;
+  universe?: Universe;
+  /** The simulator picked in the settings. */
+  sim?: SimTool;
+}
+
+/**
+ * The summary line's grammar, shared by every report kind and by today's recap:
+ * [pill: outcome] [body: what it holds] [value: MSU, right-aligned] [actions].
+ * The value sits in the same place on every report, so the eye reads it down the list.
+ */
+export function summaryLine(doc: Document, cls: string, o: Pick<SummaryContext, 'locale' | 't' | 'ships'>) {
   const { t, locale } = o;
   const fmt = (n: number) => formatUnits(n, locale);
-  const box = h(doc, 'div', `fut-msg fut-msg-${m.kind}`);
-  /** Where the next chips go: the box itself, or one of its rows. */
-  let into: HTMLElement = box;
-  const chip = (text: string, cls = '', title?: string) => {
-    const c = h(doc, 'span', `fut-msg-chip ${cls}`.trim(), text);
-    if (title) c.title = title;
-    into.append(c);
-    return c;
+  const exact = (n: number) => Math.round(n).toLocaleString(locale);
+  const box = h(doc, 'div', `fut-msg ${cls}`);
+  const pillCell = h(doc, 'div', 'fut-msg-pillcell');
+  const body = h(doc, 'div', 'fut-msg-body');
+  const value = h(doc, 'div', 'fut-msg-val');
+  const acts = h(doc, 'div', 'fut-msg-acts');
+  box.append(pillCell, body, value, acts);
+
+  return {
+    box,
+    body,
+    /** The outcome pill; `size` 0 huge, 1 big, 2 normal (brighter = bigger find). */
+    pill(text: string, tone: string, title?: string, size = -1) {
+      const p = h(doc, 'span', `fut-pill fut-out-${tone}${size >= 0 ? ` fut-size-${size}` : ''}`, text);
+      if (title) p.title = title;
+      pillCell.append(p);
+      return p;
+    },
+    /** Resources with a colour dot each; `sign` −1 for what was taken from you. */
+    res(r: Partial<Res & { food: number; darkMatter: number }>, sign = 1, prefix = '') {
+      const keys = [['metal', 'm'], ['crystal', 'c'], ['deuterium', 'd'], ['food', 'f'], ['darkMatter', 'dm']] as const;
+      let any = false;
+      for (const [key, c] of keys) {
+        const v = (r[key] ?? 0) * sign;
+        if (!v) continue;
+        any = true;
+        const s = h(doc, 'span', `fut-r fut-r-${c}${v < 0 ? ' fut-neg' : ''}`, `${v < 0 ? '−' : prefix}${fmt(Math.abs(v))}`);
+        // The initial in the coloured badge: the resource is readable without telling colours apart.
+        s.dataset.k = t(`msg.abbr.${key}`);
+        s.title = `${t(`msg.res.${key}`)}: ${exact(v)}`;
+        s.setAttribute('aria-label', s.title);
+        body.append(s);
+      }
+      return any;
+    },
+    /** Ships with the game's picture: found (+), lost (−) or just counted. */
+    ships(units: Record<number, number>, mode: 'found' | 'lost' | 'count') {
+      for (const [id, n] of Object.entries(units).sort((a, b) => Number(a[0]) - Number(b[0]))) {
+        if (!n) continue;
+        const name = shipName(Number(id), o.ships, t);
+        const s = h(doc, 'span', `fut-u${mode === 'lost' ? ' fut-neg' : ''}`, `${mode === 'found' ? '+' : mode === 'lost' ? '−' : ''}${n.toLocaleString(locale)}`);
+        s.prepend(shipIcon(doc, Number(id), name, 'fut-msg-icon'));
+        s.title = name;
+        body.append(s);
+      }
+    },
+    /** A short labelled fact ("Difesa 876M"); `tone` warn / neg / muted. */
+    note(text: string, tone = '', title?: string) {
+      const s = h(doc, 'span', `fut-note${tone ? ` fut-${tone}` : ''}`, text);
+      if (title) s.title = title;
+      body.append(s);
+      return s;
+    },
+    /** An amount that is not MSU (dark matter), in the value column with its own unit. */
+    amount(n: number, unit: string, cls: string, title: string) {
+      value.replaceChildren(h(doc, 'b', cls, `+${fmt(n)}`), h(doc, 'small', '', unit));
+      value.title = `${exact(n)} ${title}`;
+    },
+    /** The value in MSU, or a dash when the report carries nothing. */
+    value(msuValue: number | null, title = t('msg.msuHint')) {
+      value.replaceChildren();
+      if (!msuValue) {
+        value.append(h(doc, 'span', 'fut-dash', '—'));
+        return;
+      }
+      value.append(h(doc, 'b', msuValue < 0 ? 'fut-neg' : '', `${msuValue < 0 ? '−' : ''}${fmt(Math.abs(msuValue))}`), h(doc, 'small', '', 'MSU'));
+      value.title = `${exact(msuValue)} MSU · ${title}`;
+    },
+    /** The find's size in words before the value (big and huge only; normal is the default). */
+    rarity(label: string) {
+      value.prepend(h(doc, 'span', 'fut-rar-tag', label));
+    },
+    /** A small text button that opens an outside tool in a new tab (the player's click). */
+    link(text: string, href: string, title: string) {
+      const a = h(doc, 'a', 'fut-msg-link', text);
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.title = title;
+      acts.append(a);
+    },
+    /** Depletion of the expedition spot, as three ticks. */
+    depletion(n: number) {
+      const meter = h(doc, 'span', 'fut-depl');
+      meter.title = t('msg.depletion', { n });
+      meter.setAttribute('role', 'img');
+      meter.setAttribute('aria-label', meter.title);
+      for (let i = 1; i <= 3; i++) meter.append(h(doc, 'i', i <= n ? 'on' : ''));
+      body.append(meter);
+    },
   };
-  /** A chip that opens an outside tool in a new tab (the player's click; see engines/sim-links). */
-  const linkChip = (text: string, href: string, title: string) => {
-    const a = h(doc, 'a', 'fut-msg-chip fut-msg-link', text);
-    a.href = href;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.title = title;
-    into.append(a);
-  };
-  const resChips = (r: Partial<Res & { food: number; darkMatter: number }>, sign = 1) => {
-    const keys = [
-      ['metal', 'm'],
-      ['crystal', 'c'],
-      ['deuterium', 'd'],
-      ['food', 'f'],
-      ['darkMatter', 'dm'],
-    ] as const;
-    let any = false;
-    for (const [key, cls] of keys) {
-      const v = (r[key] ?? 0) * sign;
-      if (!v) continue;
-      any = true;
-      chip(`${v > 0 && sign > 0 ? '+' : ''}${fmt(v)}`, `fut-msg-res fut-msg-${cls}${v < 0 ? ' fut-msg-neg' : ''}`, `${t(`msg.res.${key}`)}: ${Math.round(v).toLocaleString(locale)}`);
-    }
-    return any;
-  };
-  const unitChips = (units: Record<number, number>, lost: boolean) => {
-    for (const [id, n] of Object.entries(units).sort((a, b) => Number(a[0]) - Number(b[0]))) {
-      const name = shipName(Number(id), o.ships, t);
-      const c = chip(`${lost ? '−' : '+'}${n.toLocaleString(locale)}`, lost ? 'fut-msg-ship fut-msg-neg' : 'fut-msg-ship', name);
-      c.prepend(shipIcon(doc, Number(id), name, 'fut-msg-icon'));
-    }
-  };
+}
+
+/** Summary line for one report, or null when there is nothing worth showing. */
+export function summaryFor(doc: Document, m: ParsedMessage, o: SummaryContext): HTMLElement | null {
+  const { t, locale } = o;
+  const fmt = (n: number) => formatUnits(n, locale);
+  const line = summaryLine(doc, `fut-msg-${m.kind}`, o);
 
   switch (m.kind) {
     case 'expedition':
     case 'discovery': {
-      // Three rows: outcome and value, then what was found (centred), then depletion.
-      // The size is the colour of the frame: normal, big, huge.
-      box.classList.add('fut-msg-rows');
-      if (m.size >= 0) {
-        box.classList.add(`fut-size-${m.size}`);
-        box.dataset.size = t(`msg.size.${m.size}`);
+      const sizeName = m.size >= 0 ? t(`msg.size.${m.size}`) : '';
+      // Short pill label where the full one would not fit; the full one is in the tooltip.
+      const full = t(`msg.out.${m.result}`);
+      const short = t(`msg.pill.${m.result}`);
+      const name = short === `msg.pill.${m.result}` ? full : short;
+      const label = m.kind === 'discovery' ? `${t('msg.discovery')} · ${name}` : name;
+      line.pill(label, m.result, [m.kind === 'discovery' ? t('msg.discovery') : '', full, sizeName].filter(Boolean).join(' · '));
+      // Size as game rarity: normal = common (green), big = rare (blue), huge = epic (purple).
+      if (sizeName) {
+        line.box.dataset.size = sizeName;
+        line.box.classList.add(`fut-rar-${m.size}`);
       }
-      const row = (cls: string) => {
-        const r = h(doc, 'div', `fut-msg-row ${cls}`);
-        box.append(r);
-        into = r;
-        return r;
-      };
-      row('fut-msg-top');
-      chip(m.kind === 'discovery' ? `${t('msg.discovery')} · ${t(`msg.out.${m.result}`)}` : t(`msg.out.${m.result}`), `fut-msg-out fut-out-${m.result}`);
-      const value = msu(m.res) + msu(unitsValue(m.ships)) - msu(unitsValue(m.lost));
-      if (value) chip(`${fmt(value)} MSU`, `fut-msg-msu fut-msg-big${value < 0 ? ' fut-msg-neg' : ''}`, t('msg.msuHint'));
-      const found = row('fut-msg-found');
-      resChips(m.res);
-      unitChips(m.ships, false);
-      unitChips(m.lost, true);
-      if (m.item) chip(m.item, 'fut-msg-item');
-      if (m.lfXp) chip(t('msg.lfXp', { n: m.lfXp.toLocaleString(locale) }), 'fut-msg-lf');
-      if (m.artefacts) chip(t('msg.artefacts', { n: m.artefacts.toLocaleString(locale) }), 'fut-msg-art');
-      if (!found.childElementCount) found.remove();
-      if (m.depletion > 0) {
-        row('fut-msg-foot');
-        chip(t('msg.depletion', { n: m.depletion }), 'fut-msg-muted');
-      }
-      return box;
+      line.res(m.res, 1, '+');
+      line.ships(m.ships, 'found');
+      line.ships(m.lost, 'lost');
+      if (m.item) line.note(m.item, 'item');
+      if (m.lfXp) line.note(t('msg.lfXp', { n: m.lfXp.toLocaleString(locale) }), 'lf');
+      if (m.artefacts) line.note(t('msg.artefacts', { n: m.artefacts.toLocaleString(locale) }), 'art');
+      if (m.depletion > 0) line.depletion(m.depletion);
+      const worth = msu(m.res) + msu(unitsValue(m.ships)) - msu(unitsValue(m.lost));
+      // Dark matter has no MSU value: its amount takes the value column instead of a dash.
+      if (!worth && m.res.darkMatter) line.amount(m.res.darkMatter, t('msg.dmUnit'), 'fut-dm', t('msg.res.darkMatter'));
+      else line.value(worth);
+      if (m.size === 0 || m.size === 1) line.rarity(sizeName.toLowerCase());
+      return line.box;
     }
     case 'spy': {
       if (m.counter) {
-        chip(t('msg.spy.counter', { name: m.sourceName || '?', coords: m.sourceCoords || '?' }), 'fut-msg-out fut-out-alien');
-        return box;
+        line.pill(t('msg.spy.counterPill'), 'alien');
+        const who = h(doc, 'span', 'fut-note', `${m.sourceName || '?'} `);
+        if (m.sourceCoords) {
+          const [g, s] = m.sourceCoords.split(':');
+          const a = h(doc, 'a', 'fut-coords', `[${m.sourceCoords}]`);
+          a.href = `/game/index.php?page=ingame&component=galaxy&galaxy=${g}&system=${s}`;
+          who.append(a);
+        }
+        line.body.append(who);
+        return line.box;
       }
       const act = m.activity === 0 ? t('msg.spy.active') : m.activity >= 60 ? t('msg.spy.inactive') : t('msg.spy.activity', { n: m.activity });
-      chip(act, m.activity === 0 ? 'fut-msg-out fut-out-pirate' : m.activity < 60 ? 'fut-msg-out fut-out-late' : 'fut-msg-out fut-out-nothing');
-      const total = m.res.metal + m.res.crystal + m.res.deuterium;
-      const loot = Math.floor(total * m.loot);
-      chip(`${t('msg.spy.loot')} ${fmt(loot)}`, 'fut-msg-loot', `${Math.round(m.loot * 100)}% · ${Math.round(loot).toLocaleString(locale)}`);
-      const lootMsu = msu(m.res) * m.loot;
-      chip(`${fmt(lootMsu)} MSU`, 'fut-msg-msu', t('msg.msuHint'));
+      line.pill(act, m.activity === 0 ? 'pirate' : m.activity < 60 ? 'late' : 'nothing');
+      line.res({ metal: m.res.metal * m.loot, crystal: m.res.crystal * m.loot, deuterium: m.res.deuterium * m.loot });
+      const loot = Math.floor((m.res.metal + m.res.crystal + m.res.deuterium) * m.loot);
       const capacity = o.ships['203']?.capacity || 25000;
-      if (loot > 0) chip(t('msg.spy.cargo', { n: Math.ceil(loot / capacity).toLocaleString(locale), ship: shipName(203, o.ships, t) }), 'fut-msg-ship');
-      chip(`${t('msg.spy.fleet')} ${m.fleetValue < 0 ? '?' : fmt(m.fleetValue)}`, m.fleetValue > 0 ? 'fut-msg-warn' : 'fut-msg-muted');
-      chip(`${t('msg.spy.def')} ${m.defValue < 0 ? '?' : fmt(m.defValue)}`, m.defValue > 0 ? 'fut-msg-warn' : 'fut-msg-muted');
-      if (m.attacked) chip(t('msg.spy.attacked'), 'fut-msg-muted');
+      if (loot > 0) line.ships({ 203: Math.ceil(loot / capacity) }, 'count');
+      const fleet = m.fleetValue < 0 ? '?' : m.fleetValue ? fmt(m.fleetValue) : '0';
+      const def = m.defValue < 0 ? '?' : m.defValue ? fmt(m.defValue) : '0';
+      line.note(`${t('msg.spy.fleet')} ${fleet}`, m.fleetValue !== 0 ? 'warn' : 'muted');
+      line.note(`${t('msg.spy.def')} ${def}`, m.defValue !== 0 ? 'warn' : 'muted');
+      if (m.attacked) line.note(t('msg.spy.attacked'), 'muted');
+      line.value(msu(m.res) * m.loot, `${t('msg.spy.loot')} ${Math.round(m.loot * 100)}%`);
       if (m.apiKey && o.spy && o.universe) {
         const base = nearestBase(o.spy.bases, m.coords, o.universe).base;
-        const prefill = simPrefill(o.spy.server, base ? { coords: base.coords, researches: o.spy.researches, classId: o.spy.classId } : null, m.coords);
-        linkChip('Osims', osimsLink(m.apiKey, prefill), t('spy.simOsims'));
-        linkChip('OGame Simulator', ogameToolsSimLink(m.apiKey, o.spy.lang, prefill), t('spy.simOgameTools'));
+        const prefill = simPrefill(o.spy.server, base ? { coords: base.coords, researches: o.spy.researches, classId: o.spy.classId, allianceClass: o.spy.allianceClass, lf: o.spy.lf ?? undefined } : null, m.coords);
+        const tool = o.sim ?? 'osims';
+        line.link(t('spy.simulate'), simLink(tool, m.apiKey, o.spy.lang, prefill), t('spy.simulateHint', { tool: SIM_TOOLS[tool].name }));
       }
-      return box;
+      return line.box;
     }
     case 'transport':
     case 'deploy':
     case 'return':
     case 'recycle': {
-      chip(t(`msg.${m.kind}`), `fut-msg-out ${m.kind === 'recycle' ? 'fut-out-resource' : m.kind === 'transport' ? 'fut-out-trader' : 'fut-out-early'}`);
+      line.pill(t(`msg.${m.kind}`), m.kind === 'recycle' ? 'resource' : m.kind === 'transport' ? 'trader' : 'early');
       if (m.from && m.to) {
-        // Route: origin → destination, a drawn moon in front of moons.
-        const route = chip('', 'fut-msg-route');
         const place = (p: { name: string; coords: string; moon: boolean }) => {
-          const s = h(doc, 'span', 'fut-msg-place', `${p.name ? `${p.name} ` : ''}[${p.coords}]`);
+          const s = h(doc, 'span', 'fut-place', p.name ? `${p.name} ` : '');
           if (p.moon) s.prepend(icon(doc, 'moon', 10, 'fut-msg-moon'));
+          s.append(h(doc, 'span', 'fut-coords', `[${p.coords}]`));
           return s;
         };
-        route.append(place(m.from), h(doc, 'span', 'fut-msg-arrow', '→'), place(m.to));
+        const route = h(doc, 'span', 'fut-route');
+        const arrow = icon(doc, 'next', 12, 'fut-arrow');
+        arrow.setAttribute('aria-label', '→');
+        route.append(place(m.from), arrow, place(m.to));
+        line.body.append(route);
       }
-      const any = resChips(m.res);
-      if (any) chip(`${fmt(msu(m.res))} MSU`, 'fut-msg-msu', t('msg.msuHint'));
-      else chip(t('msg.empty'), 'fut-msg-muted');
+      const any = line.res(m.res);
+      if (!any) line.note(t('msg.empty'), 'muted');
       const left = m.left ? m.left.metal + m.left.crystal + m.left.deuterium : 0;
-      if (left > 0) chip(t('msg.debrisLeft', { n: fmt(left) }), 'fut-msg-warn', `${Math.round(m.left!.metal).toLocaleString(locale)} / ${Math.round(m.left!.crystal).toLocaleString(locale)} / ${Math.round(m.left!.deuterium).toLocaleString(locale)}`);
-      return box;
+      if (left > 0) line.note(t('msg.debrisLeft', { n: fmt(left) }), 'warn', `${Math.round(m.left!.metal).toLocaleString(locale)} / ${Math.round(m.left!.crystal).toLocaleString(locale)} / ${Math.round(m.left!.deuterium).toLocaleString(locale)}`);
+      line.value(any ? msu(m.res) : null);
+      return line.box;
     }
     case 'combat': {
-      if (m.coords) chip(`[${m.coords}]`, 'fut-msg-route');
-      chip(t(`msg.combat.${m.winner}`), `fut-msg-out ${m.winner === 'won' ? 'fut-out-resource' : m.winner === 'lost' ? 'fut-out-blackhole' : 'fut-out-nothing'}`);
+      line.pill(t(`msg.combat.${m.winner}`), m.winner === 'won' ? 'resource' : m.winner === 'lost' ? 'late' : 'nothing');
       const sum = m.loot.metal + m.loot.crystal + m.loot.deuterium;
-      if (sum) {
-        chip(t(sum > 0 ? 'msg.combat.loot' : 'msg.combat.raided'), 'fut-msg-muted');
-        resChips(m.loot);
-      }
+      if (sum) line.res(m.loot, 1, sum > 0 ? '+' : '');
       const lost = msu(unitsValue(m.lost));
-      if (lost) chip(`${t('msg.combat.losses')} ${fmt(lost)} MSU`, 'fut-msg-neg', Object.entries(m.lost).map(([id, n]) => `${n.toLocaleString(locale)} ${shipName(Number(id), o.ships, t)}`).join(', '));
+      if (lost) line.note(`${t('msg.combat.losses')} ${fmt(lost)}`, 'neg', Object.entries(m.lost).map(([id, n]) => `${n.toLocaleString(locale)} ${shipName(Number(id), o.ships, t)}`).join(', '));
       const debris = m.debris.metal + m.debris.crystal + m.debris.deuterium;
-      if (debris) chip(`${t('msg.combat.debris')} ${fmt(debris)}`, 'fut-msg-loot');
-      if (m.apiKey) linkChip(t('msg.combat.converter'), converterLink(m.apiKey, o.spy?.lang || locale), t('msg.combat.converterHint'));
-      return box;
+      if (debris) line.note(`${t('msg.combat.debris')} ${fmt(debris)}`, 'muted');
+      line.value(msu(m.loot) - lost, t('msg.combat.netHint'));
+      if (m.apiKey) line.link(t('msg.combat.converter'), converterLink(m.apiKey, o.spy?.lang || locale), t('msg.combat.converterHint'));
+      return line.box;
     }
   }
 }
 
-/** Where the summary goes: above the game's action bar, like OGLight. */
+/** Where the summary goes: right under the report's header, in both of the game's views. */
 function place(msg: Element, box: HTMLElement): void {
   // List view (13.x, "collapsible" reports): the body stays hidden until opened, so the
   // summary goes under the game's header row to be seen with the report closed.
   const header = msg.querySelector(':scope > .msgFilteredHeaderRow');
   if (header) return void header.after(box);
+  // Card view: under the title and sender, above the game's text.
+  const head = msg.querySelector(':scope .msgHead');
+  if (head && !head.closest('.messageContentWrapper')) return void head.after(box);
   const actions = msg.querySelector('.msg_actions, message-footer');
   if (actions?.parentElement) actions.before(box);
   else (msg.querySelector('.msgContent') ?? msg).after(box);
@@ -224,28 +304,50 @@ export function processMessages(o: MessagesOptions): number {
   const ships = store.get<ShipsInfo>(SHIPS_INFO_KEY, {});
   const universe = universeOf(doc, store.get<ServerData | null>(SERVER_DATA_KEY, null));
   const fold = store.get<boolean>(FOLD_KEY, true);
+  const sim = simTool(store.get<string>(SIM_KEY, 'osims'));
+  // Communication › shared espionage reports: an alliance member's probes.
+  const sharedTab = !!doc.querySelector('[data-subtab-id="11"].active, [data-subtab-id="11"][aria-selected="true"]');
   const expeditions: ExpeditionMessage[] = [];
   const spies: SpyMessage[] = [];
   let journal: Journal | null = null;
   let added = 0;
+  /** What entered the journal in this pass, for the "just read" panel. */
+  const fresh: JournalEntry[] = [];
   for (const msg of Array.from(doc.querySelectorAll('.msg[data-msg-id]'))) {
     if (msg.hasAttribute('data-fut-done') || msg.closest('#fut-journal')) continue;
     msg.setAttribute('data-fut-done', '');
     const parsed = readMessage(msg, o.playerId);
     if (!parsed) continue;
-    const box = summaryFor(doc, parsed, { locale, t, ships, spy: o.spy, universe });
+    const box = summaryFor(doc, parsed, { locale, t, ships, spy: o.spy, universe, sim });
     if (box) {
       box.title = [box.dataset.size, t('msg.toggle')].filter(Boolean).join(' · ');
+      // A real control: reachable with Tab, Enter / Space open and close the game's text.
+      box.tabIndex = 0;
+      box.setAttribute('role', 'button');
+      const cell = () => msg.querySelector<HTMLElement>(':scope > .msgFilteredHeaderRow .msgFilteredHeaderCell');
+      const sync = () => {
+        if (!cell()) box.setAttribute('aria-expanded', String(!msg.classList.contains('fut-msg-folded')));
+      };
+      const toggle = () => {
+        // List view: open/close the report the way the game's own header row does.
+        const c = cell();
+        if (c) return void c.click();
+        msg.classList.toggle('fut-msg-folded');
+        sync();
+      };
       box.addEventListener('click', (e) => {
         if ((e.target as Element).closest('a, button')) return;
-        // List view: open/close the report the way the game's own header row does.
-        const cell = msg.querySelector<HTMLElement>(':scope > .msgFilteredHeaderRow .msgFilteredHeaderCell');
-        if (cell) return void cell.click();
-        msg.classList.toggle('fut-msg-folded');
+        toggle();
+      });
+      box.addEventListener('keydown', (e) => {
+        if (e.target !== box || (e.key !== 'Enter' && e.key !== ' ')) return;
+        e.preventDefault();
+        toggle();
       });
       place(msg, box);
       // The game's text is long and the same every time: folded for expeditions and recycling.
       if (fold && (parsed.kind === 'expedition' || parsed.kind === 'discovery' || parsed.kind === 'recycle' || parsed.kind === 'transport' || parsed.kind === 'deploy' || parsed.kind === 'return')) msg.classList.add('fut-msg-folded');
+      sync();
     }
     if (parsed.kind === 'expedition' || parsed.kind === 'discovery') expeditions.push(parsed);
     if (parsed.kind === 'spy') spies.push(parsed);
@@ -255,29 +357,39 @@ export function processMessages(o: MessagesOptions): number {
       const r = recordCombat(journal, parsed.id, parsed.at, parsed.lost, parsed.coords);
       journal = r.journal;
       added += r.added;
+      if (r.added) fresh.push(journal[parsed.id]!);
     }
   }
   if (expeditions.length) {
     journal ??= store.get<Journal>(JOURNAL_KEY, {});
+    const before = journal;
     const r = record(journal, expeditions);
     journal = r.journal;
     added += r.added;
+    for (const e of expeditions) if (!before[e.id]) fresh.push(journal[e.id]!);
   }
   // Spy board: newest report per target, kept locally for the spy table (no network).
   if (spies.length) {
     const board = store.get<SpyBoard>(SPY_BOARD_KEY, {});
-    if (rememberSpies(board, spies, o.now?.() ?? Date.now())) store.set(SPY_BOARD_KEY, board);
+    if (rememberSpies(board, spies, o.now?.() ?? Date.now(), sharedTab)) store.set(SPY_BOARD_KEY, board);
   }
   if (o.spy) mountSpyPanel({ doc, store, t, locale, spy: o.spy, now: o.now });
   if (journal && added) {
     store.set(JOURNAL_KEY, trim(journal, o.now?.() ?? Date.now()));
     o.onJournal?.(added);
   }
+  const recap = { doc, store, t, locale, now: o.now, onOpen: o.onOpenJournal };
+  mountExpeditionRecap(recap);
+  if (fresh.length) showFreshExpeditions(recap, fresh);
   return added;
 }
 
-/** On the messages page: summaries for the reports shown now and for those loaded later. */
-export function watchMessages(o: MessagesOptions): void {
+/**
+ * On the messages page: summaries for the reports shown now and for those loaded later.
+ * Returns a redraw for after a change in the settings (simulator, folding, shared reports):
+ * the journal does not count a report twice, so redrawing is safe.
+ */
+export function watchMessages(o: MessagesOptions): () => void {
   const { doc } = o;
   if (!doc.getElementById('fut-msg-style')) {
     const style = h(doc, 'style');
@@ -297,4 +409,12 @@ export function watchMessages(o: MessagesOptions): void {
     }, 50);
   });
   observer.observe(doc.body, { childList: true, subtree: true });
+  return () => {
+    doc.querySelectorAll('.msg .fut-msg').forEach((n) => n.remove());
+    doc.querySelectorAll('.msg[data-fut-done]').forEach((m) => {
+      m.removeAttribute('data-fut-done');
+      m.classList.remove('fut-msg-folded');
+    });
+    processMessages(o);
+  };
 }

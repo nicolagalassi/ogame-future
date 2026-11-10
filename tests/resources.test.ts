@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { formatUnits } from '../src/core/format';
-import { applyPageResources, estimateResources, storageCapacity, storageFill, totals } from '../src/engines/resources';
+import { applyPageResources, estimateResources, mergeNewerResources, storageCapacity, storageFill, totals } from '../src/engines/resources';
 import { SNAPSHOT, body } from './fixtures';
 
 describe('formatUnits', () => {
@@ -59,5 +59,19 @@ describe('applyPageResources and totals', () => {
     const { stock, perHour } = totals(snap, 0);
     expect(stock.metal).toBe(5 + 292_600_000);
     expect(perHour.metal).toBe(10);
+  });
+});
+
+describe('mergeNewerResources', () => {
+  it('keeps what another tab saved later and adds what this page read', () => {
+    const stored = structuredClone(SNAPSHOT);
+    const mine = structuredClone(SNAPSHOT);
+    const [a, b] = [stored.bodies[0]!.id, stored.bodies[1]!.id];
+    applyPageResources(stored, b, { metal: 9, crystal: 9, deuterium: 9 }, 2_000); // other tab, later
+    applyPageResources(mine, a, { metal: 5, crystal: 6, deuterium: 7 }, 1_000); // this page
+    mine.bodies[1]!.resourcesAt = 500; // this tab's copy of b is older
+    const out = mergeNewerResources(stored, mine);
+    expect(out.bodies.find((x) => x.id === a)!.resources.metal).toBe(5);
+    expect(out.bodies.find((x) => x.id === b)!.resources.metal).toBe(9);
   });
 });

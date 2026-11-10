@@ -34,14 +34,10 @@ export interface PlanetMenuOptions {
   now: number;
   locale: string;
   t: (key: string, vars?: Record<string, string | number>) => string;
-  onSettingsChange: (next: MenuSettings) => void;
-  /** Saves every Future value as a local file; returns how many were saved. */
-  onBackupExport?: () => number;
-  /** Writes a backup file's text back (Future's, or OGLight's export converted); returns how many
-   * values were restored, or the message to show; throws on a bad file. */
-  onBackupImport?: (text: string) => number | string;
+  /** Opens the settings window; `roomy` says whether the side-by-side view fits the screen. */
+  onOpenSettings?: (ctx: { roomy: boolean; colonies: string }) => void;
   /** Runs the user-initiated sync. Only ever called from the Sync button's click. */
-  onSync: () => Promise<void>;
+  onSync: () => Promise<boolean>;
   /** Opens the account dashboard (Future's own panel, no game action). */
   onOpenDashboard?: () => void;
   /** Opens or closes the targets side bar; `targetsCount` players and planets are marked. */
@@ -59,8 +55,6 @@ export interface PlanetMenuOptions {
 }
 
 const STYLE_ID = 'fut-planet-menu-style';
-/** Settings panel open state survives redraws within the page. */
-let panelOpen = false;
 
 const ICONS = {
   journal: '<path d="M5 3.5h11a3 3 0 0 1 3 3V20.5H8a3 3 0 0 1-3-3z" fill="none" stroke-width="2"/><path d="M5 17.5a3 3 0 0 1 3-3h11" fill="none" stroke-width="2"/><path stroke="none" d="M9.5 6.5l1 2.2 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3L6.2 9l2.3-.3z"/>',
@@ -224,7 +218,7 @@ function formatTime(at: number, locale: string): string {
  * today's expeditions, marked targets) and open their window; sync and settings stacked on the right.
  * The view switch lives in the settings panel: it is a preference, not an action.
  */
-function toolbar(o: PlanetMenuOptions, colonies: string): HTMLElement {
+function toolbar(o: PlanetMenuOptions, colonies: string, roomy: boolean): HTMLElement {
   const { doc, t } = o;
   const bar = el(doc, 'div', 'fut-toolbar');
   if (colonies) bar.title = colonies;
@@ -267,96 +261,25 @@ function toolbar(o: PlanetMenuOptions, colonies: string): HTMLElement {
   const sync = iconButton(doc, 'sync', [t('sync.button'), lastSync].filter(Boolean).join(' · '), () => {
     if (sync.classList.contains('fut-busy')) return;
     sync.classList.add('fut-busy');
-    o.onSync().finally(() => sync.classList.remove('fut-busy'));
+    sync.classList.remove('fut-failed');
+    o.onSync()
+      .then((ok) => {
+        // On success the menu is redrawn; on failure this button stays and says so.
+        if (ok) return;
+        sync.classList.add('fut-failed');
+        sync.title = t('sync.failed');
+      })
+      .finally(() => sync.classList.remove('fut-busy'));
   });
   // Data older than an hour: the sync button says so.
   if (!o.snapshot || o.now - o.snapshot.fetchedAt > 3_600_000) sync.classList.add('fut-stale');
-  const gear = iconButton(doc, 'settings', t('toolbar.settings'), () => {
-    panelOpen = !panelOpen;
-    gear.setAttribute('aria-expanded', String(panelOpen));
-    doc.querySelector('.fut-settings')?.toggleAttribute('hidden', !panelOpen);
-  });
-  gear.setAttribute('aria-expanded', String(panelOpen));
+  const gear = iconButton(doc, 'settings', t('toolbar.settings'), () => o.onOpenSettings?.({ roomy, colonies }));
+  gear.setAttribute('aria-haspopup', 'dialog');
   side.append(sync, gear);
   bar.append(side);
   return bar;
 }
 
-function settingsPanel(o: PlanetMenuOptions, mode: MenuMode, roomy: boolean, colonies: string): HTMLElement {
-  const { doc, t } = o;
-  const panel = el(doc, 'div', 'fut-settings');
-  panel.toggleAttribute('hidden', !panelOpen);
-
-  const row = (label: string, ...controls: HTMLElement[]) => {
-    const line = el(doc, 'div', 'fut-set-row');
-    line.append(el(doc, 'span', 'fut-set-label', label), ...controls);
-    panel.append(line);
-  };
-  const choice = (text: string, pressed: boolean, onClick: () => void, disabled = false) => {
-    const b = el(doc, 'button', 'fut-chip', text);
-    b.type = 'button';
-    b.setAttribute('aria-pressed', String(pressed));
-    b.disabled = disabled;
-    b.addEventListener('click', onClick);
-    return b;
-  };
-
-  row(
-    t('settings.view'),
-    choice(t('planetMenu.side'), mode === 'side', () => o.onSettingsChange({ ...o.settings, mode: 'side' }), !roomy),
-    choice(t('planetMenu.compact'), mode === 'compact', () => o.onSettingsChange({ ...o.settings, mode: 'compact' })),
-  );
-  row(
-    t('settings.totals'),
-    choice(t('settings.on'), o.settings.showTotals, () => o.onSettingsChange({ ...o.settings, showTotals: true })),
-    choice(t('settings.off'), !o.settings.showTotals, () => o.onSettingsChange({ ...o.settings, showTotals: false })),
-  );
-  row(
-    t('settings.markIdle'),
-    choice(t('settings.on'), o.settings.markIdle, () => o.onSettingsChange({ ...o.settings, markIdle: true })),
-    choice(t('settings.off'), !o.settings.markIdle, () => o.onSettingsChange({ ...o.settings, markIdle: false })),
-  );
-  if (o.onBackupExport && o.onBackupImport) {
-    const action = (text: string, onClick: () => void) => {
-      const b = el(doc, 'button', 'fut-chip', text);
-      b.type = 'button';
-      b.addEventListener('click', onClick);
-      return b;
-    };
-    const exportBackup = o.onBackupExport;
-    const importBackup = o.onBackupImport;
-    // Feedback on the player's own click only (AGENTS.md §1.4 allows it).
-    const note = el(doc, 'div', 'fut-set-note');
-    note.setAttribute('role', 'status');
-    const picker = el(doc, 'input', '');
-    picker.type = 'file';
-    // OGLight's export has no extension: any file is accepted, the content decides.
-    picker.title = t('settings.backupImportHint');
-    picker.hidden = true;
-    picker.addEventListener('change', () => {
-      const file = picker.files?.[0];
-      picker.value = '';
-      if (!file) return;
-      file.text().then((text) => {
-        const done = importBackup(text);
-        note.textContent = typeof done === 'string' ? done : t('settings.backupRestored', { n: done });
-      }).catch(() => { note.textContent = t('settings.backupBad'); });
-    });
-    row(
-      t('settings.backup'),
-      action(t('settings.backupExport'), () => { note.textContent = t('settings.backupSaved', { n: exportBackup() }); }),
-      action(t('settings.backupImport'), () => picker.click()),
-    );
-    row(
-      t('settings.oglight'),
-      action(t('settings.oglightImport'), () => picker.click()),
-    );
-    panel.append(picker, note);
-  }
-  if (colonies) panel.append(el(doc, 'div', 'fut-set-note', colonies));
-  if (o.snapshot) panel.append(el(doc, 'div', 'fut-set-note', t('toolbar.lastSync', { time: formatTime(o.snapshot.fetchedAt, o.locale) })));
-  return panel;
-}
 
 export function renderPlanetMenu(o: PlanetMenuOptions): void {
   const { doc } = o;
@@ -425,7 +348,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
 
   startAgeClock(doc);
   const colonies = (doc.getElementById('countColonies')?.textContent ?? '').replace(/\s+/g, ' ').trim();
-  list.before(toolbar(o, colonies), settingsPanel(o, mode, roomy, colonies));
+  list.before(toolbar(o, colonies, roomy));
 
   if (o.snapshot && o.settings.showTotals) {
     const { stock, perHour } = totals(o.snapshot, o.now);

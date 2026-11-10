@@ -132,8 +132,7 @@ export function openJournal(o: JournalOptions): void {
       }
       if (!isDisc && kind !== 'raid') {
       kpi(t('exp.count'), s.count.toLocaleString(locale));
-      kpi(t('exp.resources'), `${fmt(msu(s.res))} MSU`, '', triple(s.res));
-      kpi(t('exp.dm'), fmt(s.res.darkMatter), 'dm');
+      kpi(t('exp.resources'), `${fmt(msu(s.res))} MSU`);
       kpi(t('exp.shipsFound'), `${fmt(msu(s.shipsValue))} MSU`, 'pos', triple(s.shipsValue));
       kpi(t('exp.lost'), msu(s.lostValue) ? `−${fmt(msu(s.lostValue))} MSU` : '—', msu(s.lostValue) ? 'neg' : '', msu(s.lostValue) ? triple(s.lostValue) : undefined);
       kpi(t('exp.net'), `${fmt(s.netMsu)} MSU`, s.netMsu < 0 ? 'neg' : 'pos');
@@ -145,6 +144,22 @@ export function openJournal(o: JournalOptions): void {
       }
       }
       if (kind !== 'raid') parts.push(kpis);
+
+      // Resources found: the big numbers, one tile each, before the ships.
+      if (!isDisc && kind !== 'raid' && (msu(s.res) || s.res.darkMatter)) {
+        const card = h('div', 'card');
+        card.append(h('h3', '', t('exp.resourcesFound')));
+        const grid = h('div', 'res');
+        for (const [key, c] of [['metal', 'm'], ['crystal', 'c'], ['deuterium', 'd'], ['darkMatter', 'dm']] as const) {
+          const v = s.res[key];
+          const tile = h('div', `res-tile ${c}${v ? '' : ' zero'}`);
+          tile.title = `${t(`msg.res.${key}`)}: ${Math.round(v).toLocaleString(locale)}`;
+          tile.append(h('span', 'res-name', t(`msg.res.${key}`)), h('b', '', fmt(v)));
+          grid.append(tile);
+        }
+        card.append(grid);
+        parts.push(card);
+      }
 
       // Outcomes: one bar, then each outcome with count and share.
       const outs = h('div', 'card');
@@ -170,8 +185,9 @@ export function openJournal(o: JournalOptions): void {
       const sized = s.sizes[0] + s.sizes[1] + s.sizes[2];
       if (sized) {
         const sizes = h('div', 'detail');
-        sizes.style.cssText = 'display:flex;gap:12px;margin-top:8px;color:#8A9BB0;font-size:12px';
-        for (const i of [2, 1, 0] as const) sizes.append(h('span', '', `${t(`msg.size.${i}`)} ${s.sizes[i].toLocaleString(locale)} (${(s.sizes[i] / sized).toLocaleString(locale, { style: 'percent', maximumFractionDigits: 0 })})`));
+        sizes.className = 'sizes';
+        // Sizes in the rarity colours used in the inbox: normal common, big rare, huge epic.
+        for (const i of [2, 1, 0] as const) sizes.append(h('span', `rar rar-${i}`, `${t(`msg.size.${i}`)} ${s.sizes[i].toLocaleString(locale)} (${(s.sizes[i] / sized).toLocaleString(locale, { style: 'percent', maximumFractionDigits: 0 })})`));
         outs.append(sizes);
       }
       if (kind !== 'raid') parts.push(outs);
