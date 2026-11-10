@@ -451,12 +451,9 @@
   "msg.combat.converter": "Converter",
   "msg.combat.converterHint": "Opens the report in the Ogotcha converter (new tab)",
   "hs.days": "catch up: {n} d",
-  "hs.today": "{n} points since midnight (base at {time})",
   "hs.never": "not at this pace",
   "hs.etaMine": "At your pace of the last 7 days (+{mine}/d)",
   "hs.passToday": "you pass today",
-  "hs.note": "Under the points: what each player made today, from the public highscore of {time}.",
-  "hs.noteWaiting": "Reading the public highscore for today's points…",
   "mark.flag.watch": "Watch",
   "mark.flag.target": "Target",
   "mark.flag.farm": "Farm",
@@ -600,5 +597,7 @@
   "msg.abbr.deuterium": "D",
   "msg.abbr.food": "F",
   "msg.abbr.darkMatter": "DM",
-  "spy.col.actionsName": "Actions"
+  "spy.col.actionsName": "Actions",
+  "hs.ptreAge": "Difference from PTRE's ranking of {time}",
+  "hs.sincePtre": "{n} points since PTRE's ranking of {time}"
 }

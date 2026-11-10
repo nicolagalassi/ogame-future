@@ -41,9 +41,18 @@ describe('NetworkGuard', () => {
     const fetchImpl = ok();
     const guard = new NetworkGuard(fetchImpl, ORIGIN);
     await guard.request('/game/index.php?page=x', 'page-load');
-    await guard.request('https://ogapi.faw-kes.de/players', 'page-load');
+    await guard.request('https://ptre.chez.gg/scripts/api_get_ranks.php?country=it&univers=1', 'user-view');
     expect(fetchImpl.mock.calls[0]?.[1]?.credentials).toBe('include');
     expect(fetchImpl.mock.calls[1]?.[1]?.credentials).toBe('omit');
+  });
+
+  it('refuses every outside service but PTRE ranking, and PTRE only from what the player opens', async () => {
+    const fetchImpl = ok();
+    const guard = new NetworkGuard(fetchImpl, ORIGIN);
+    await expect(guard.request('https://ogapi.faw-kes.de/players', 'page-load')).rejects.toBeInstanceOf(GuardError);
+    await expect(guard.request('https://ptre.chez.gg/scripts/api_get_ranks.php', 'page-load')).rejects.toBeInstanceOf(GuardError);
+    await expect(guard.request('https://ptre.chez.gg/scripts/api_post_activity.php', 'user-view')).rejects.toBeInstanceOf(GuardError);
+    expect(fetchImpl).not.toHaveBeenCalled();
   });
 
   it('lets what the player points at read the public API only, without cookies', async () => {

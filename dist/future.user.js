@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.7
+// @version      0.3.8
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -20,6 +20,7 @@
 "use strict";
 (() => {
   // src/core/guard.ts
+  var PTRE_RANKS = "https://ptre.chez.gg/scripts/api_get_ranks.php";
   var GuardError = class extends Error {
     constructor(message) {
       super(message);
@@ -64,8 +65,11 @@
       if (reason === "page-load" && !this.pageLoadOpen) {
         return "Background call refused: the page has finished loading (AGENTS.md \xA74).";
       }
-      if (reason === "user-view" && !this.isPublicApi(url)) {
-        return "Call refused: 'user-view' reaches only the universe's public API (AGENTS.md \xA76).";
+      if (reason === "user-view" && !this.isPublicApi(url) && !this.isPtre(url)) {
+        return "Call refused: 'user-view' reaches only the universe's public API and PTRE's ranking (AGENTS.md \xA76).";
+      }
+      if (this.isOutside(url) && !(reason === "user-view" && this.isPtre(url))) {
+        return "Call refused: no outside service but PTRE's ranking, and only from what the player opens.";
       }
       if (this.isGameUrl(url) && new URL(url, this.gameOrigin).searchParams.has("cp")) {
         return "Call refused: the cp parameter changes the active planet (AGENTS.md \xA74.2).";
@@ -75,6 +79,13 @@
     isPublicApi(url) {
       return this.isGameUrl(url) && /^\/api\/\w+\.xml$/.test(new URL(url, this.gameOrigin).pathname);
     }
+    isPtre(url) {
+      const u = new URL(url, this.gameOrigin);
+      return `${u.origin}${u.pathname}` === PTRE_RANKS;
+    }
+    isOutside(url) {
+      return !this.isGameUrl(url);
+    }
     isGameUrl(url) {
       return new URL(url, this.gameOrigin).origin === new URL(this.gameOrigin).origin;
     }
@@ -82,11 +93,11 @@
 
   // src/core/storage.ts
   var GMStore = class {
-    get(key2, fallback) {
-      return GM_getValue(key2, fallback);
+    get(key, fallback) {
+      return GM_getValue(key, fallback);
     }
-    set(key2, value) {
-      GM_setValue(key2, value);
+    set(key, value) {
+      GM_setValue(key, value);
     }
     keys() {
       return GM_listValues();
@@ -97,11 +108,11 @@
       this.kv = kv;
       this.namespace = namespace;
     }
-    get(key2, fallback) {
-      return this.kv.get(`${this.namespace}:${key2}`, fallback);
+    get(key, fallback) {
+      return this.kv.get(`${this.namespace}:${key}`, fallback);
     }
-    set(key2, value) {
-      this.kv.set(`${this.namespace}:${key2}`, value);
+    set(key, value) {
+      this.kv.set(`${this.namespace}:${key}`, value);
     }
   };
   function serverNamespace(doc) {
@@ -116,7 +127,7 @@
   var VERSION = 1;
   function exportBackup(kv, now) {
     const data = {};
-    for (const key2 of kv.keys().filter((k) => k.startsWith(PREFIX)).sort()) data[key2] = kv.get(key2, null);
+    for (const key of kv.keys().filter((k) => k.startsWith(PREFIX)).sort()) data[key] = kv.get(key, null);
     return { app: "future", version: VERSION, at: now, data };
   }
   function importBackup(kv, text) {
@@ -128,7 +139,7 @@
     }
     if (!file || file.app !== "future" || file.version !== VERSION || !file.data || typeof file.data !== "object" || Array.isArray(file.data)) throw new Error("backup: not a Future backup");
     const entries = Object.entries(file.data).filter(([k]) => k.startsWith(PREFIX));
-    for (const [key2, value] of entries) kv.set(key2, value);
+    for (const [key, value] of entries) kv.set(key, value);
     return entries.length;
   }
   var backupFileName = (now) => `future-backup-${new Date(now).toISOString().slice(0, 10)}.json`;
@@ -629,12 +640,9 @@
     "msg.combat.converter": "Convertitore",
     "msg.combat.converterHint": "Apre il rapporto nel convertitore Ogotcha (nuova scheda)",
     "hs.days": "ti avvicini: {n} g",
-    "hs.today": "{n} punti da mezzanotte (base alle {time})",
     "hs.never": "al ritmo attuale no",
     "hs.etaMine": "Al tuo ritmo degli ultimi 7 giorni (+{mine}/g)",
     "hs.passToday": "lo superi oggi",
-    "hs.note": "Sotto i punti: quanto ha fatto oggi ogni giocatore, dalla classifica pubblica delle {time}.",
-    "hs.noteWaiting": "Lettura della classifica pubblica per i punti di oggi\u2026",
     "mark.flag.watch": "Da controllare",
     "mark.flag.target": "Bersaglio",
     "mark.flag.farm": "Frigo",
@@ -778,7 +786,9 @@
     "msg.abbr.deuterium": "D",
     "msg.abbr.food": "Ci",
     "msg.abbr.darkMatter": "MO",
-    "spy.col.actionsName": "Azioni"
+    "spy.col.actionsName": "Azioni",
+    "hs.ptreAge": "Differenza dalla classifica PTRE del {time}",
+    "hs.sincePtre": "{n} punti dalla classifica PTRE del {time}"
   };
 
   // src/i18n/en.json
@@ -1235,12 +1245,9 @@
     "msg.combat.converter": "Converter",
     "msg.combat.converterHint": "Opens the report in the Ogotcha converter (new tab)",
     "hs.days": "catch up: {n} d",
-    "hs.today": "{n} points since midnight (base at {time})",
     "hs.never": "not at this pace",
     "hs.etaMine": "At your pace of the last 7 days (+{mine}/d)",
     "hs.passToday": "you pass today",
-    "hs.note": "Under the points: what each player made today, from the public highscore of {time}.",
-    "hs.noteWaiting": "Reading the public highscore for today's points\u2026",
     "mark.flag.watch": "Watch",
     "mark.flag.target": "Target",
     "mark.flag.farm": "Farm",
@@ -1384,7 +1391,9 @@
     "msg.abbr.deuterium": "D",
     "msg.abbr.food": "F",
     "msg.abbr.darkMatter": "DM",
-    "spy.col.actionsName": "Actions"
+    "spy.col.actionsName": "Actions",
+    "hs.ptreAge": "Difference from PTRE's ranking of {time}",
+    "hs.sincePtre": "{n} points since PTRE's ranking of {time}"
   };
 
   // src/i18n/fr.json
@@ -1841,12 +1850,9 @@
     "msg.combat.converter": "Convertisseur",
     "msg.combat.converterHint": "Ouvre le rapport dans le convertisseur Ogotcha (nouvel onglet)",
     "hs.days": "rattrap\xE9 en {n} j",
-    "hs.today": "{n} points depuis minuit (base \xE0 {time})",
     "hs.never": "pas \xE0 ce rythme",
     "hs.etaMine": "\xC0 votre rythme des 7 derniers jours (+{mine}/j)",
     "hs.passToday": "d\xE9pass\xE9 aujourd'hui",
-    "hs.note": "Sous les points : ce que chaque joueur a fait aujourd'hui, d'apr\xE8s le classement public de {time}.",
-    "hs.noteWaiting": "Lecture du classement public pour les points du jour\u2026",
     "mark.flag.watch": "\xC0 surveiller",
     "mark.flag.target": "Cible",
     "mark.flag.farm": "Ferme",
@@ -1990,7 +1996,9 @@
     "msg.abbr.deuterium": "D",
     "msg.abbr.food": "N",
     "msg.abbr.darkMatter": "AN",
-    "spy.col.actionsName": "Actions"
+    "spy.col.actionsName": "Actions",
+    "hs.ptreAge": "Diff\xE9rence depuis le classement PTRE du {time}",
+    "hs.sincePtre": "{n} points depuis le classement PTRE du {time}"
   };
 
   // src/i18n/de.json
@@ -2447,12 +2455,9 @@
     "msg.combat.converter": "Konverter",
     "msg.combat.converterHint": "\xD6ffnet den Bericht im Ogotcha-Konverter (neuer Tab)",
     "hs.days": "eingeholt in {n} T",
-    "hs.today": "{n} Punkte seit Mitternacht (Basis {time})",
     "hs.never": "nicht bei diesem Tempo",
     "hs.etaMine": "Bei deinem Tempo der letzten 7 Tage (+{mine}/T)",
     "hs.passToday": "heute \xFCberholt",
-    "hs.note": "Unter den Punkten: was jeder Spieler heute gemacht hat, laut \xF6ffentlicher Rangliste von {time}.",
-    "hs.noteWaiting": "\xD6ffentliche Rangliste f\xFCr die heutigen Punkte wird gelesen\u2026",
     "mark.flag.watch": "Beobachten",
     "mark.flag.target": "Ziel",
     "mark.flag.farm": "Farm",
@@ -2596,7 +2601,9 @@
     "msg.abbr.deuterium": "D",
     "msg.abbr.food": "N",
     "msg.abbr.darkMatter": "DM",
-    "spy.col.actionsName": "Aktionen"
+    "spy.col.actionsName": "Aktionen",
+    "hs.ptreAge": "Unterschied zur PTRE-Rangliste vom {time}",
+    "hs.sincePtre": "{n} Punkte seit der PTRE-Rangliste vom {time}"
   };
 
   // src/core/i18n.ts
@@ -2608,8 +2615,8 @@
   }
   function translator(locale) {
     const dict = dictionaries[locale];
-    return (key2, vars = {}) => {
-      const text = dict[key2] ?? dictionaries.en[key2] ?? key2;
+    return (key, vars = {}) => {
+      const text = dict[key] ?? dictionaries.en[key] ?? key;
       return text.replace(/\{(\w+)\}/g, (_, name) => String(vars[name] ?? `{${name}}`));
     };
   }
@@ -2735,11 +2742,11 @@
   function estimateResources(body, now) {
     const seconds = Math.max(0, (now - body.resourcesAt) / 1e3);
     const out = { metal: 0, crystal: 0, deuterium: 0 };
-    for (const key2 of KEYS) {
-      const start = body.resources[key2];
-      const grown = body.type === "planet" ? start + body.production[key2] * seconds / 3600 : start;
-      const cap = effectiveStorage(body)[key2];
-      out[key2] = cap > 0 ? Math.max(start, Math.min(grown, cap)) : grown;
+    for (const key of KEYS) {
+      const start = body.resources[key];
+      const grown = body.type === "planet" ? start + body.production[key] * seconds / 3600 : start;
+      const cap = effectiveStorage(body)[key];
+      out[key] = cap > 0 ? Math.max(start, Math.min(grown, cap)) : grown;
     }
     return out;
   }
@@ -3257,11 +3264,11 @@
     const id = Number(root?.getAttribute("id"));
     if (!root || !id) return null;
     const scores = {};
-    for (const [key2, type] of Object.entries(SCORE_TYPES)) {
+    for (const [key, type] of Object.entries(SCORE_TYPES)) {
       const pos = root.querySelector(`positions position[type="${type}"]`);
       const points = Number(pos?.getAttribute("score"));
       const rank = Number(pos?.textContent?.trim());
-      if (pos && Number.isFinite(points) && Number.isFinite(rank)) scores[key2] = { points: Math.floor(points), rank };
+      if (pos && Number.isFinite(points) && Number.isFinite(rank)) scores[key] = { points: Math.floor(points), rank };
     }
     const ships = Number(root.querySelector('positions position[type="3"]')?.getAttribute("ships"));
     const planets = [...root.querySelectorAll("planets planet")].map((p) => {
@@ -3541,11 +3548,11 @@
       return;
     }
     const table = el(doc, "table");
-    for (const key2 of Object.keys(SCORE_TYPES)) {
-      const v = data.scores[key2];
+    for (const key of Object.keys(SCORE_TYPES)) {
+      const v = data.scores[key];
       if (!v) continue;
       const tr = el(doc, "tr");
-      tr.append(el(doc, "td", "", t(`galaxy.score.${key2}`)), el(doc, "td", "", formatUnits(v.points, locale)), el(doc, "td", "r", `#${v.rank.toLocaleString(locale)}`));
+      tr.append(el(doc, "td", "", t(`galaxy.score.${key}`)), el(doc, "td", "", formatUnits(v.points, locale)), el(doc, "td", "r", `#${v.rank.toLocaleString(locale)}`));
       table.append(tr);
     }
     note.before(table);
@@ -3847,9 +3854,9 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     }
     side.append(scroll);
     const foot = h(doc, "div", "foot");
-    const key2 = h(doc, "span", "");
-    key2.append(h(doc, "kbd", "", "M"), doc.createTextNode(` ${t("marks.keyNext")}`));
-    foot.append(key2, h(doc, "span", "", t("marks.footData")));
+    const key = h(doc, "span", "");
+    key.append(h(doc, "kbd", "", "M"), doc.createTextNode(` ${t("marks.keyNext")}`));
+    foot.append(key, h(doc, "span", "", t("marks.footData")));
     side.append(foot);
     root.replaceChildren(style, side);
     scroll.scrollTop = keepScroll;
@@ -3956,10 +3963,10 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       return;
     }
     const scores = h(doc, "div", "scores");
-    for (const [key2, ico, color] of SCORE_LOOK) {
-      const v = data?.scores[key2];
+    for (const [key, ico, color] of SCORE_LOOK) {
+      const v = data?.scores[key];
       const cell = h(doc, "div", "score");
-      cell.title = t(`galaxy.score.${key2}`);
+      cell.title = t(`galaxy.score.${key}`);
       const ic = icon(doc, ico, 14);
       ic.style.color = color;
       const b = h(doc, "b", "", v ? formatUnits(v.points, locale) : "\u2014");
@@ -4320,16 +4327,16 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
   var KEYS2 = ["metal", "crystal", "deuterium", "energy"];
   function main(cost) {
     let best = null;
-    for (const key2 of KEYS2) if (cost[key2] > 0 && (best === null || cost[key2] > cost[best])) best = key2;
+    for (const key of KEYS2) if (cost[key] > 0 && (best === null || cost[key] > cost[best])) best = key;
     return best;
   }
   function discountFrom(id, level2, shown2) {
     const raw = rawCost(id, level2);
-    const key2 = main(raw);
-    if (!key2) return null;
-    const value = shown2[key2];
+    const key = main(raw);
+    if (!key) return null;
+    const value = shown2[key];
     if (value === void 0 || !(value > 0)) return null;
-    const ratio = value / raw[key2];
+    const ratio = value / raw[key];
     if (ratio > 1.001 || ratio < 0.2) return null;
     return Math.max(0, 1 - ratio);
   }
@@ -4513,10 +4520,10 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     const days = /* @__PURE__ */ new Map();
     for (const e of entries) {
       if (e.kind === "raid") continue;
-      const key2 = dayStart(e.at);
-      const list = days.get(key2) ?? [];
+      const key = dayStart(e.at);
+      const list = days.get(key) ?? [];
       list.push(e);
-      days.set(key2, list);
+      days.set(key, list);
     }
     return [...days.entries()].sort((a, b) => b[0] - a[0]).slice(0, limit).map(([day, list]) => ({ day, stats: periodStats(list) }));
   }
@@ -4610,8 +4617,8 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     let days = 0;
     let expeditions = 0;
     let raids = 0;
-    for (const [key2, day] of Object.entries(stats)) {
-      const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(key2);
+    for (const [key, day] of Object.entries(stats)) {
+      const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(key);
       if (!m) continue;
       const at = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12).getTime();
       const tag = `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
@@ -4924,8 +4931,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   }
   function readUnits(raw) {
     const out = {};
-    for (const [key2, value] of Object.entries(raw)) {
-      const id = Math.abs(Number(key2));
+    for (const [key, value] of Object.entries(raw)) {
+      const id = Math.abs(Number(key));
       const amount = typeof value === "object" && value ? num2(value.amount) : num2(value);
       if (id > 0 && amount) out[id] = (out[id] ?? 0) + amount;
     }
@@ -5086,8 +5093,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     const sides = new Set(mine.map((f) => f.side));
     const attacker = sides.has("attacker");
     const winner = result.winner === "none" ? "draw" : result.winner && sides.has(result.winner) ? "won" : result.winner ? "lost" : "unknown";
-    const pick = (list, key2) => {
-      const of = (r) => num2(list?.find((x) => x.resource === r)?.[key2]);
+    const pick = (list, key) => {
+      const of = (r) => num2(list?.find((x) => x.resource === r)?.[key]);
       return { metal: of("metal"), crystal: of("crystal"), deuterium: of("deuterium") };
     };
     let loot = { metal: 0, crystal: 0, deuterium: 0 };
@@ -5141,15 +5148,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     let changed = 0;
     for (const r of reports) {
       if (r.counter || !r.playerId) continue;
-      const key2 = spyKey(r.coords, r.moon);
-      const known = board[key2];
+      const key = spyKey(r.coords, r.moon);
+      const known = board[key];
       if (known && known.id === r.id && shared && !known.shared) {
         known.shared = true;
         changed++;
       }
       if (known && (known.at > r.at || known.at === r.at && (known.apiKey || !r.apiKey))) continue;
-      board[key2] = {
-        key: key2,
+      board[key] = {
+        key,
         id: r.id,
         at: r.at,
         coords: r.coords,
@@ -5167,8 +5174,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
       };
       changed++;
     }
-    for (const [key2, e] of Object.entries(board)) if (now - e.at > SPY_MAX_AGE) {
-      delete board[key2];
+    for (const [key, e] of Object.entries(board)) if (now - e.at > SPY_MAX_AGE) {
+      delete board[key];
       changed++;
     }
     return changed;
@@ -5584,15 +5591,15 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     const cols = el5("div", "fut-sp-row fut-sp-cols");
     cols.setAttribute("role", "row");
     const headers = [["target", "spy.col.target"], ["age", "spy.col.age"], ["loot", "spy.col.loot"], ["fleet", "spy.col.fleet"], ["def", "spy.col.def"], [null, "spy.col.actions"]];
-    for (const [key2, label] of headers) {
+    for (const [key, label] of headers) {
       const cell = el5("div");
       cell.setAttribute("role", "columnheader");
-      const c = el5(key2 ? "button" : "span", `fut-sp-h${view.sort === key2 ? " sortBy" : ""}`, t(label));
-      if (key2 && view.sort === key2) c.append(icon(doc, "chevron", 10, "fut-sp-sort"));
-      if (key2) {
+      const c = el5(key ? "button" : "span", `fut-sp-h${view.sort === key ? " sortBy" : ""}`, t(label));
+      if (key && view.sort === key) c.append(icon(doc, "chevron", 10, "fut-sp-sort"));
+      if (key) {
         c.type = "button";
-        cell.setAttribute("aria-sort", view.sort === key2 ? view.desc ? "descending" : "ascending" : "none");
-        c.addEventListener("click", () => redraw(view.sort === key2 ? { desc: !view.desc } : { sort: key2, desc: key2 !== "target" && key2 !== "age" }));
+        cell.setAttribute("aria-sort", view.sort === key ? view.desc ? "descending" : "ascending" : "none");
+        c.addEventListener("click", () => redraw(view.sort === key ? { desc: !view.desc } : { sort: key, desc: key !== "target" && key !== "age" }));
       } else c.setAttribute("aria-label", t("spy.col.actionsName"));
       cell.append(c);
       cols.append(cell);
@@ -5657,10 +5664,10 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         }));
       }
       if (e.apiKey) {
-        const key2 = e.apiKey;
+        const key = e.apiKey;
         acts.append(button3("fut-sp-sim", t("spy.simulate"), t("spy.simulateHint", { tool: SIM_TOOLS[tool].name }), () => {
           const prefill = simPrefill(spy.server, r.base ? { coords: r.base.coords, researches: spy.researches, classId: spy.classId, allianceClass: spy.allianceClass, lf: spy.lf ?? void 0 } : null, e.coords);
-          doc.defaultView?.open(simLink(tool, key2, spy.lang, prefill), "_blank", "noopener");
+          doc.defaultView?.open(simLink(tool, key, spy.lang, prefill), "_blank", "noopener");
         }));
       }
       const del = button3("fut-sp-del", "", t("spy.remove"), () => {
@@ -5775,11 +5782,11 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     head.append(total, close);
     panel.append(timer2, head);
     const res = el5("div", "fut-fresh-res");
-    for (const [key2, c] of [["metal", "m"], ["crystal", "c"], ["deuterium", "d"], ["darkMatter", "dm"]]) {
-      const v = s.res[key2];
+    for (const [key, c] of [["metal", "m"], ["crystal", "c"], ["deuterium", "d"], ["darkMatter", "dm"]]) {
+      const v = s.res[key];
       const tile2 = el5("div", `fut-fresh-tile fut-r-${c}${v ? "" : " zero"}`);
-      tile2.title = `${t(`msg.res.${key2}`)}: ${exact(v)}`;
-      tile2.append(el5("span", "fut-fresh-name", t(`msg.res.${key2}`)), el5("b", "", v ? fmt(v) : "0"));
+      tile2.title = `${t(`msg.res.${key}`)}: ${exact(v)}`;
+      tile2.append(el5("span", "fut-fresh-name", t(`msg.res.${key}`)), el5("b", "", v ? fmt(v) : "0"));
       res.append(tile2);
     }
     panel.append(res);
@@ -5823,9 +5830,9 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
   function shipName(id, ships, t) {
     const name = ships[String(id)]?.name;
     if (name) return name;
-    const key2 = `ship.${id}`;
-    const fallback = t(key2);
-    return fallback === key2 ? `#${id}` : fallback;
+    const key = `ship.${id}`;
+    const fallback = t(key);
+    return fallback === key ? `#${id}` : fallback;
   }
   function summaryLine(doc, cls, o) {
     const { t, locale } = o;
@@ -5851,13 +5858,13 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
       res(r, sign = 1, prefix = "") {
         const keys = [["metal", "m"], ["crystal", "c"], ["deuterium", "d"], ["food", "f"], ["darkMatter", "dm"]];
         let any = false;
-        for (const [key2, c] of keys) {
-          const v = (r[key2] ?? 0) * sign;
+        for (const [key, c] of keys) {
+          const v = (r[key] ?? 0) * sign;
           if (!v) continue;
           any = true;
           const s = h2(doc, "span", `fut-r fut-r-${c}${v < 0 ? " fut-neg" : ""}`, `${v < 0 ? "\u2212" : prefix}${fmt(Math.abs(v))}`);
-          s.dataset.k = t(`msg.abbr.${key2}`);
-          s.title = `${t(`msg.res.${key2}`)}: ${exact(v)}`;
+          s.dataset.k = t(`msg.abbr.${key}`);
+          s.title = `${t(`msg.res.${key}`)}: ${exact(v)}`;
           s.setAttribute("aria-label", s.title);
           body.append(s);
         }
@@ -6260,8 +6267,8 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
           row(t("settings.markIdle"), t("settings.markIdleHint"), yesNo(menu.markIdle, (v) => setMenu({ markIdle: v })))
         );
       } else if (section2 === "mail") {
-        const set = (key2, v) => {
-          store.set(key2, v);
+        const set = (key, v) => {
+          store.set(key, v);
           o.onMailChange?.();
         };
         const tools = Object.entries(SIM_TOOLS).map(([k, v]) => [k, v.name]);
@@ -6394,8 +6401,8 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     const idle = planets.filter((r) => r.idle === true);
     const stale = rows.filter((r) => r.ageMinutes > STALE_MINUTES);
     const out = [];
-    const push = (level2, key2, list) => {
-      if (list.length) out.push({ level: level2, key: key2, count: list.length, names: list.map(label) });
+    const push = (level2, key, list) => {
+      if (list.length) out.push({ level: level2, key, count: list.length, names: list.map(label) });
     };
     push("warn", "alert.missing", missing2);
     push("warn", "alert.full", full);
@@ -6637,11 +6644,11 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     }
     const amount = estimateResources(body, now);
     const fill = withStorage ? storageFill(body, amount) : null;
-    const cell = (key2, cls) => {
-      const full = fill !== null && fill[key2] >= 0.9;
-      const node = el2(doc, "span", full ? `fut-cell ${cls} fut-full` : `fut-cell ${cls}`, formatUnits(amount[key2], locale));
+    const cell = (key, cls) => {
+      const full = fill !== null && fill[key] >= 0.9;
+      const node = el2(doc, "span", full ? `fut-cell ${cls} fut-full` : `fut-cell ${cls}`, formatUnits(amount[key], locale));
       if (fill !== null) {
-        const pct = Math.round(fill[key2] * 100);
+        const pct = Math.round(fill[key] * 100);
         node.style.setProperty("--fut-fill", `${pct}%`);
         node.classList.add("fut-has-fill");
         node.title = `${pct}%`;
@@ -7092,9 +7099,9 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     return ids.length ? ids.sort((a, b) => slotOf(a) - slotOf(b)) : null;
   }
   function rememberLfSlots(slots, bodyId, ids) {
-    const key2 = String(bodyId);
-    if (slots[key2]?.join() === ids.join()) return false;
-    slots[key2] = ids;
+    const key = String(bodyId);
+    if (slots[key]?.join() === ids.join()) return false;
+    slots[key] = ids;
     return true;
   }
   var lvl = (b, id) => b.levels[String(id)] ?? 0;
@@ -7987,31 +7994,31 @@ table.queues td.acts { width: 1%; text-align: right; }
   var PLAN_KEY = "planner";
   var isResearch = (id) => id > 100 && id < 200 || Math.floor(id % 1e3 / 100) === 2;
   function addToPlan(plan, bodyId, items) {
-    const key2 = String(bodyId);
-    const list = [...plan[key2] ?? []];
+    const key = String(bodyId);
+    const list = [...plan[key] ?? []];
     for (const item of items) {
       const same = item.level !== void 0 ? list.findIndex((x) => x.id === item.id && x.level === item.level) : -1;
       if (same >= 0) list[same] = item;
       else list.push(item);
     }
     list.sort((a, b) => a.added - b.added || a.id - b.id || (a.level ?? 0) - (b.level ?? 0));
-    return { ...plan, [key2]: list };
+    return { ...plan, [key]: list };
   }
   function removeFromPlan(plan, bodyId, index) {
-    const key2 = String(bodyId);
-    const list = (plan[key2] ?? []).filter((_, i) => i !== index);
+    const key = String(bodyId);
+    const list = (plan[key] ?? []).filter((_, i) => i !== index);
     const next = { ...plan };
-    if (list.length) next[key2] = list;
-    else delete next[key2];
+    if (list.length) next[key] = list;
+    else delete next[key];
     return next;
   }
   function prune(plan, bodyId, levels) {
     let changed = false;
     const next = {};
-    for (const [key2, list] of Object.entries(plan)) {
+    for (const [key, list] of Object.entries(plan)) {
       const kept = list.filter((item) => {
         if (item.level === void 0) return true;
-        const here = key2 === String(bodyId) || isResearch(item.id);
+        const here = key === String(bodyId) || isResearch(item.id);
         const reached = levels[item.id];
         if (here && reached !== void 0 && reached >= item.level) {
           changed = true;
@@ -8019,7 +8026,7 @@ table.queues td.acts { width: 1%; text-align: right; }
         }
         return true;
       });
-      if (kept.length) next[key2] = kept;
+      if (kept.length) next[key] = kept;
     }
     return { plan: changed ? next : plan, changed };
   }
@@ -8056,26 +8063,26 @@ table.queues td.acts { width: 1%; text-align: right; }
     const started = [];
     for (const [body, items] of Object.entries(queues)) for (const q of items) if (q.level > 0 && q.name) started.push({ body, name: norm(q.name), level: q.level });
     const next = {};
-    for (const [key2, list] of Object.entries(plan)) {
+    for (const [key, list] of Object.entries(plan)) {
       const kept = list.filter((item) => {
         if (item.level === void 0) return true;
-        const hit = started.some((s) => (s.body === key2 || isResearch(item.id)) && s.name === norm(item.name) && s.level >= item.level);
+        const hit = started.some((s) => (s.body === key || isResearch(item.id)) && s.name === norm(item.name) && s.level >= item.level);
         if (hit) changed = true;
         return !hit;
       });
-      if (kept.length) next[key2] = kept;
+      if (kept.length) next[key] = kept;
     }
     return { plan: changed ? next : plan, changed };
   }
   function startBuild(plan, bodyId, id, o) {
-    const key2 = String(bodyId);
+    const key = String(bodyId);
     let changed = false;
     const next = {};
     for (const [k, list] of Object.entries(plan)) {
       let left = o.amount ?? 0;
       const kept = [];
       for (const item of list) {
-        if (item.id !== id || k !== key2 && !isResearch(id)) {
+        if (item.id !== id || k !== key && !isResearch(id)) {
           kept.push(item);
           continue;
         }
@@ -8083,7 +8090,7 @@ table.queues td.acts { width: 1%; text-align: right; }
           changed = true;
           continue;
         }
-        if (item.amount !== void 0 && left > 0 && k === key2) {
+        if (item.amount !== void 0 && left > 0 && k === key) {
           changed = true;
           if (item.amount <= left) {
             left -= item.amount;
@@ -8103,8 +8110,8 @@ table.queues td.acts { width: 1%; text-align: right; }
   }
   function groupByTech(plan, haveOf) {
     const groups = /* @__PURE__ */ new Map();
-    for (const [key2, items] of Object.entries(plan)) {
-      const bodyId = Number(key2);
+    for (const [key, items] of Object.entries(plan)) {
+      const bodyId = Number(key);
       const have = haveOf(bodyId);
       let spent = { ...ZERO_COST };
       let before = have ? missing(spent, have) : null;
@@ -8874,14 +8881,14 @@ table.queues td.acts { width: 1%; text-align: right; }
     const { doc, t } = o;
     const profiles = loadProfiles(o.store);
     const settings = loadSettings(o.store);
-    const key2 = SWITCH[section2];
+    const key = SWITCH[section2];
     const badge = el3(doc, "span", "fut-fbadge");
     if (sectionEmpty(profileFor(profiles, o.bodyId), section2)) {
       badge.classList.add("empty");
       badge.textContent = t("fleet.rule.empty");
       return badge;
     }
-    const on = key2 ? settings[key2] : true;
+    const on = key ? settings[key] : true;
     badge.classList.add(on ? "on" : "off");
     const ids = o.bodies.flatMap((b) => [b.planetId, b.moonId]).filter((x) => x !== null);
     const same = sameSection(profiles, o.bodyId, ids, section2);
@@ -8897,12 +8904,12 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const box = el3(doc, "div", "fut-freserve");
     const head = el3(doc, "div", "fut-frulehead");
     head.append(el3(doc, "h5", "", title), ruleBadge(o, section2));
-    const key2 = SWITCH[section2];
-    if (key2) {
-      const [wrap, input] = checkField(doc, t("fleet.rule.switch"), loadSettings(o.store)[key2]);
+    const key = SWITCH[section2];
+    if (key) {
+      const [wrap, input] = checkField(doc, t("fleet.rule.switch"), loadSettings(o.store)[key]);
       wrap.title = t("fleet.rule.switchHint");
       input.addEventListener("change", () => {
-        o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key2]: input.checked });
+        o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: input.checked });
         head.querySelector(".fut-fbadge")?.replaceWith(ruleBadge(o, section2));
         onSwitch();
       });
@@ -9211,12 +9218,12 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     return `${b.name}${b.moonId === id ? " \u263E" : ""}`;
   }
   var FLEET_KEYS = { moon: "l", transport: "t", deploy: "d", expedition: "x", fleetsave: "e", all: "a", last: "p" };
-  function tile(doc, icon2, label, caption, title, onClick, cls = "", key2 = "") {
+  function tile(doc, icon2, label, caption, title, onClick, cls = "", key = "") {
     const b = el3(doc, "button", `fut-ftile ${cls}`.trim());
     b.type = "button";
-    b.title = key2 ? `${title} [${key2.toUpperCase()}]` : title;
+    b.title = key ? `${title} [${key.toUpperCase()}]` : title;
     b.innerHTML = iconSvg(icon2);
-    if (key2) b.append(el3(doc, "kbd", "fut-fkey", key2.toUpperCase()));
+    if (key) b.append(el3(doc, "kbd", "fut-fkey", key.toUpperCase()));
     b.append(el3(doc, "span", "fut-flabel", label));
     if (caption) b.append(el3(doc, "span", "fut-fcaption", caption));
     b.addEventListener("click", (e) => {
@@ -9362,13 +9369,13 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       transport: () => settings.favTransport ? run.transport(settings.favTransport) : say(t("fleet.err.noDest"), true),
       deploy: () => settings.favDeploy ? run.deploy(settings.favDeploy) : say(t("fleet.err.noDest"), true)
     };
-    const setFav = (key2, id) => {
-      o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key2]: id });
+    const setFav = (key, id) => {
+      o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: id });
       redraw();
     };
-    const withCaret = (tileEl, key2) => {
+    const withCaret = (tileEl, key) => {
       const wrap = el3(doc, "span", "fut-ftilewrap");
-      const caret = iconToggle(doc, "caret", t("fleet.pickDest"), () => destinationMenu(o, wrap, settings[key2], (id) => setFav(key2, id)), "fut-fcaret");
+      const caret = iconToggle(doc, "caret", t("fleet.pickDest"), () => destinationMenu(o, wrap, settings[key], (id) => setFav(key, id)), "fut-fcaret");
       wrap.append(tileEl, caret);
       return wrap;
     };
@@ -9411,12 +9418,12 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       ]);
       const side = el3(doc, "div", "fut-fside");
       side.append(
-        ...["shipsOn", "resourcesOn", "gateOn"].map((key2) => {
-          const name = key2 === "shipsOn" ? "ships" : key2 === "resourcesOn" ? "resources" : "gate";
-          return iconToggle(doc, name, `${t(`fleet.rule.${name}`)}: ${settings[key2] ? t("fleet.on") : t("fleet.off")}. ${t(`fleet.rule.${name}Hint`)}`, () => {
-            o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key2]: !loadSettings(o.store)[key2] });
+        ...["shipsOn", "resourcesOn", "gateOn"].map((key) => {
+          const name = key === "shipsOn" ? "ships" : key === "resourcesOn" ? "resources" : "gate";
+          return iconToggle(doc, name, `${t(`fleet.rule.${name}`)}: ${settings[key] ? t("fleet.on") : t("fleet.off")}. ${t(`fleet.rule.${name}Hint`)}`, () => {
+            o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: !loadSettings(o.store)[key] });
             redraw();
-          }, settings[key2] ? "on" : "");
+          }, settings[key] ? "on" : "");
         }),
         iconToggle(doc, "food", `${t("fleet.foodShort")}: ${settings.ignoreFood ? t("fleet.on") : t("fleet.off")}. ${t("fleet.foodHint")}`, () => {
           o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), ignoreFood: !loadSettings(o.store).ignoreFood });
@@ -9821,18 +9828,18 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     g.style.gridTemplateColumns = `auto repeat(${view.cols.length}, minmax(0, 1fr))`;
     g.append(el4(doc, "span", "fut-tp-h"));
     for (const h6 of view.heads) g.append(el4(doc, "span", "fut-tp-h", h6));
-    const rows = RES.filter(([key2]) => view.cols.some((c) => !c.short && c.cost[key2] > 0));
+    const rows = RES.filter(([key]) => view.cols.some((c) => !c.short && c.cost[key] > 0));
     const cell = (value, cls) => {
       const c = el4(doc, "span", `fut-tp-v ${cls}`, value ? formatUnits(value, locale) : "\u2014");
       c.title = Math.round(value).toLocaleString(locale);
       return c;
     };
-    for (const [key2, cls] of rows) {
-      g.append(el4(doc, "span", `fut-tp-k fut-${cls}`, t(`tech.res.${key2}`)));
+    for (const [key, cls] of rows) {
+      g.append(el4(doc, "span", `fut-tp-k fut-${cls}`, t(`tech.res.${key}`)));
       for (const col of view.cols) {
-        if (!col.short) g.append(cell(col.cost[key2], col.cls ?? ""));
-        else if (key2 === "energy") g.append(el4(doc, "span", "fut-tp-v"));
-        else if (col.cost[key2] > 0) g.append(cell(-col.cost[key2], "fut-tp-short"));
+        if (!col.short) g.append(cell(col.cost[key], col.cls ?? ""));
+        else if (key === "energy") g.append(el4(doc, "span", "fut-tp-v"));
+        else if (col.cost[key] > 0) g.append(cell(-col.cost[key], "fut-tp-short"));
         else g.append(okCell(doc, have, "fut-tp-v fut-tp-ok"));
       }
     }
@@ -10126,10 +10133,10 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const refs = o.entries.map((e) => ({ planetId: e.planetId, moonId: e.moonId }));
     const triple = (cost, short) => {
       const out = [];
-      for (const [key2, c] of RES2) {
-        const lack = short ? short[key2] : 0;
-        const v = h4("span", `num ${c}${lack > 0 ? " short" : ""}`, cost[key2] ? fmt(cost[key2]) : "\u2014");
-        v.title = `${t(`tech.res.${key2}`)}: ${Math.round(cost[key2]).toLocaleString(locale)}${lack > 0 ? ` \xB7 ${t("plan.lacksHere", { n: fmt(lack) })}` : ""}`;
+      for (const [key, c] of RES2) {
+        const lack = short ? short[key] : 0;
+        const v = h4("span", `num ${c}${lack > 0 ? " short" : ""}`, cost[key] ? fmt(cost[key]) : "\u2014");
+        v.title = `${t(`tech.res.${key}`)}: ${Math.round(cost[key]).toLocaleString(locale)}${lack > 0 ? ` \xB7 ${t("plan.lacksHere", { n: fmt(lack) })}` : ""}`;
         out.push(v);
       }
       return out;
@@ -10191,9 +10198,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         const box = h4("div", `kpi ${cls}`);
         box.append(h4("span", "label", label));
         const line = h4("div", "kpi-line");
-        if (cost) for (const [key2, c] of RES2) {
-          const v = h4("span", `num ${c}`, fmt(cost[key2]));
-          v.title = Math.round(cost[key2]).toLocaleString(locale);
+        if (cost) for (const [key, c] of RES2) {
+          const v = h4("span", `num ${c}`, fmt(cost[key]));
+          v.title = Math.round(cost[key]).toLocaleString(locale);
           line.append(v);
         }
         else line.append(h4("span", "num", "?"));
@@ -10447,11 +10454,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           const card = h5("div", "card");
           card.append(h5("h3", "", t("exp.resourcesFound")));
           const grid2 = h5("div", "res");
-          for (const [key2, c] of [["metal", "m"], ["crystal", "c"], ["deuterium", "d"], ["darkMatter", "dm"]]) {
-            const v = s.res[key2];
+          for (const [key, c] of [["metal", "m"], ["crystal", "c"], ["deuterium", "d"], ["darkMatter", "dm"]]) {
+            const v = s.res[key];
             const tile2 = h5("div", `res-tile ${c}${v ? "" : " zero"}`);
-            tile2.title = `${t(`msg.res.${key2}`)}: ${Math.round(v).toLocaleString(locale)}`;
-            tile2.append(h5("span", "res-name", t(`msg.res.${key2}`)), h5("b", "", fmt(v)));
+            tile2.title = `${t(`msg.res.${key}`)}: ${Math.round(v).toLocaleString(locale)}`;
+            tile2.append(h5("span", "res-name", t(`msg.res.${key}`)), h5("b", "", fmt(v)));
             grid2.append(tile2);
           }
           card.append(grid2);
@@ -10462,18 +10469,18 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         const total = Object.values(s.outcomes).reduce((a, b) => a + (b ?? 0), 0) || 1;
         const bar = h5("div", "bar");
         const legend = h5("div", "legend");
-        for (const key2 of ORDER) {
-          const n = s.outcomes[key2];
+        for (const key of ORDER) {
+          const n = s.outcomes[key];
           if (!n) continue;
           const seg = h5("span");
           seg.style.width = `${n / total * 100}%`;
-          seg.style.background = OUTCOME_COLORS[key2] ?? "#5B6B80";
-          seg.title = `${t(`msg.out.${key2}`)}: ${n}`;
+          seg.style.background = OUTCOME_COLORS[key] ?? "#5B6B80";
+          seg.title = `${t(`msg.out.${key}`)}: ${n}`;
           bar.append(seg);
           const row = h5("div");
           const dot = h5("span", "dot");
-          dot.style.background = OUTCOME_COLORS[key2] ?? "#5B6B80";
-          row.append(dot, h5("span", "", t(`msg.out.${key2}`)), h5("span", "n", n.toLocaleString(locale)), h5("span", "pct", (n / total).toLocaleString(locale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 })));
+          dot.style.background = OUTCOME_COLORS[key] ?? "#5B6B80";
+          row.append(dot, h5("span", "", t(`msg.out.${key}`)), h5("span", "n", n.toLocaleString(locale)), h5("span", "pct", (n / total).toLocaleString(locale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 })));
           legend.append(row);
         }
         if (kind !== "raid") outs.append(bar, legend);
@@ -10640,50 +10647,47 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     return closing > 0 ? gap / closing : null;
   }
 
-  // src/data/highscore-api.ts
-  var API_TYPES = { points: 0, economy: 1, research: 2, fleet: 3, lifeform: 8 };
-  var key = (type) => `hs.daily.${type}`;
-  var TTL4 = 36e5;
-  function parseHighscoreXml(xml, readAt) {
-    const doc = new DOMParser().parseFromString(xml, "text/html");
-    const root = doc.querySelector("highscore");
-    const ts = Number(root?.getAttribute("timestamp"));
-    if (!root || !ts) return null;
+  // src/data/ptre.ts
+  var PTRE_KEY = "ptre.ranks";
+  var TTL4 = 6 * 36e5;
+  function parsePtreRanks(json2, readAt) {
+    const d = json2 ?? {};
+    if (Number(d.code) !== 1 || !Array.isArray(d.ranks_array) || !d.ranks_array.length) return null;
     const scores = {};
-    for (const p of root.querySelectorAll("player")) {
-      const id = p.getAttribute("id");
-      const score = Number(p.getAttribute("score"));
-      if (id && Number.isFinite(score)) scores[id] = Math.floor(score);
+    for (const r of d.ranks_array) {
+      const id = String(r.player_id ?? "");
+      const score = Number(r.total_score);
+      if (/^\d+$/.test(id) && Number.isFinite(score)) scores[id] = score;
     }
-    return { at: ts * 1e3, readAt, scores };
+    const at = Number(d.ranks_array[0]?.timestamp) * 1e3;
+    return Object.keys(scores).length && Number.isFinite(at) ? { readAt, at, scores } : null;
   }
-  function updateBase(prev, reading) {
-    const day = dayKey(reading.at);
-    if (prev && prev.day === day) return { ...prev, last: reading };
-    const lastHour = prev ? new Date(prev.last.at).getHours() : -1;
-    const base = prev && lastHour >= 23 && reading.at - prev.last.at < 2 * TTL4 ? prev.last : reading;
-    return { day, base, last: reading };
+  function ptreServer(host) {
+    const m = /^s(\d+)-([a-z]+)\./.exec(host);
+    return m ? { univers: m[1], country: m[2] } : null;
   }
-  async function dailyBase(deps) {
+  async function ptreRanks(deps) {
     const now = deps.now ?? Date.now();
-    const stored = deps.store.get(key(deps.type), null);
-    if (stored && now - stored.last.readAt < TTL4 && stored.day === dayKey(now)) return stored;
-    const res = await deps.guard.request(`${deps.origin}/api/highscore.xml?category=1&type=${deps.type}`, "user-view");
-    const reading = res.ok ? parseHighscoreXml(await res.text(), now) : null;
-    if (!reading) return stored;
-    const next = updateBase(stored, reading);
-    deps.store.set(key(deps.type), next);
-    return next;
+    const stored = deps.store.get(PTRE_KEY, null);
+    if (stored && now - stored.readAt < TTL4) return stored;
+    const server = ptreServer(deps.host);
+    if (!server) return stored;
+    const query = new URLSearchParams({ country: server.country, univers: server.univers, timestamp: "-1", tool: "future" });
+    const res = await deps.guard.request(`${PTRE_RANKS}?${query}`, "user-view");
+    const fresh = res.ok ? parsePtreRanks(await res.json().catch(() => null), now) : null;
+    if (!fresh) return stored;
+    deps.store.set(PTRE_KEY, fresh);
+    return fresh;
   }
 
   // src/modules/highscore/index.ts
-  var daily = null;
+  var ptreSeen = /* @__PURE__ */ new WeakMap();
   var isHighscorePage = (doc) => new URL(doc.location?.href ?? "http://x/").searchParams.get("component") === "highscore";
   var CSS3 = `
-#ranks .fut-hs-gap { display: block; font-size: 10px; line-height: 1.3; }
-#ranks .fut-hs-gap.up { color: #7BC47F; } #ranks .fut-hs-gap.down { color: #D86A6A; } #ranks .fut-hs-gap.flat { color: #6A7682; }
-.fut-hs-note { margin: 4px 0 6px; color: #848484; font: 11px Verdana, Arial, sans-serif; }
-#ranks .fut-hs-eta { display: block; font-size: 10px; color: #6F9FC8; }
+#ranks .fut-hs-gap { display: block; font-size: 11px; line-height: 1.35; font-variant-numeric: tabular-nums; }
+#ranks .fut-hs-gap.up { color: #7BC47F; } #ranks .fut-hs-gap.down { color: #E57B70; } #ranks .fut-hs-gap.flat { color: #8592A1; }
+#ranks .fut-hs-age { margin-left: 4px; color: #8592A1; font-weight: 400; }
+#ranks .fut-hs-eta { display: block; font-size: 11px; color: #6F9FC8; }
 #ranks .highscoreNameHolder .fut-mk-flag { margin-left: 4px; }`;
   function decorateHighscore(o) {
     const { doc, store, t, locale } = o;
@@ -10694,37 +10698,35 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const mine = hs.rows.find((r) => r.mine)?.score ?? (total ? store.get(SCORE_KEY, null)?.points : void 0);
     const myPace = total ? changeOver(store.get(HISTORY_KEY, []), 7)?.perDay ?? 0 : 0;
     const now = o.now?.() ?? Date.now();
-    const type = API_TYPES[hs.category];
-    const loaded = daily && daily.type === type ? daily.base : null;
-    const today = loaded && loaded.day === dayKey(now) ? loaded : null;
-    const since = today ? new Date(today.base.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) : "";
-    const table = doc.getElementById("ranks");
-    let note = doc.querySelector(".fut-hs-note");
-    if (type !== void 0 && table) {
-      if (!note) {
-        note = doc.createElement("p");
-        note.className = "fut-hs-note";
-      }
-      note.textContent = today ? t("hs.note", { time: since }) : t("hs.noteWaiting");
-      if (note.nextElementSibling !== table) table.before(note);
-    } else note?.remove();
-    if (type !== void 0 && o.guard && (!daily || daily.type !== type)) {
-      daily = { type, base: null };
-      void dailyBase({ guard: o.guard, store, origin: doc.location.origin, type, now }).then((b) => {
-        if (daily?.type === type) daily = { type, base: b };
+    doc.querySelector(".fut-hs-note")?.remove();
+    if (total && !ptreSeen.has(store) && o.guard) {
+      ptreSeen.set(store, null);
+      void ptreRanks({ guard: o.guard, store, host: doc.location.host, now }).then((r) => {
+        ptreSeen.set(store, r);
       }).catch(() => {
       }).finally(() => decorateHighscore(o));
+    }
+    const snap = total ? ptreSeen.get(store) ?? null : null;
+    const since = snap ? new Date(snap.at).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "";
+    const head = doc.querySelector("#ranks thead .score, #ranks tr:first-child > .score");
+    head?.querySelector(".fut-hs-age")?.remove();
+    if (head && snap) {
+      const age = doc.createElement("span");
+      age.className = "fut-hs-age";
+      age.textContent = `(\u0394 ${Math.max(0, Math.floor((now - snap.at) / 36e5))}h)`;
+      age.title = t("hs.ptreAge", { time: since });
+      head.append(age);
     }
     for (const r of hs.rows) {
       r.row.querySelectorAll(".fut-hs-gap, .fut-hs-eta").forEach((n) => n.remove());
       const scoreCell = r.row.querySelector("td.score");
-      const base = today?.base.scores[String(r.playerId)];
+      const base = snap?.scores[String(r.playerId)];
       if (scoreCell && base !== void 0) {
         const made = r.score - base;
         const g = doc.createElement("span");
         g.className = `fut-hs-gap ${made > 0 ? "up" : made < 0 ? "down" : "flat"}`;
         g.textContent = made > 0 ? `+${fmt(made)}` : made < 0 ? `\u2212${fmt(-made)}` : "0";
-        g.title = t("hs.today", { n: made.toLocaleString(locale), time: since });
+        g.title = t("hs.sincePtre", { n: made.toLocaleString(locale), time: since });
         scoreCell.append(g);
       }
       if (scoreCell && mine !== void 0 && !r.mine && total && myPace > 0 && r.score > mine) {
@@ -10919,6 +10921,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       store.set("rivals.list", []);
     }
     if (store.get("rivals.points", null) !== null) store.set("rivals.points", null);
+    for (const type of [0, 1, 2, 3, 8]) if (store.get(`hs.daily.${type}`, null) !== null) store.set(`hs.daily.${type}`, null);
     const locale = detectLocale(document);
     const t = translator(locale);
     let snapshot = store.get(SNAPSHOT_KEY, null);
@@ -10985,8 +10988,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         return here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
       };
       const inFlight = { metal: 0, crystal: 0, deuterium: 0 };
-      for (const key2 of Object.keys(plan)) {
-        const id = Number(key2);
+      for (const key of Object.keys(plan)) {
+        const id = Number(key);
         const p = pendingFor(sent, id, here === id ? now : snapshot?.bodies.find((b) => b.id === id)?.resourcesAt ?? 0);
         inFlight.metal += p.metal;
         inFlight.crystal += p.crystal;
