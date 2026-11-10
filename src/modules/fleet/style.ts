@@ -22,7 +22,7 @@ export const FLEET_CSS = `
   color: #8A9BB0; font: 10px/13px Consolas, monospace;
 }
 .fut-flabel { color: #E6EDF5; font-weight: 700; white-space: nowrap; }
-.fut-fcaption { color: #8A9BB0; font-size: 10px; max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fut-fcaption { color: #9AA9BC; font-size: 11px; max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fut-ftilewrap .fut-ftile { padding-right: 16px; }
 .fut-fcaret {
   position: absolute; right: 2px; top: 2px; width: 16px; height: 20px; padding: 0; border: 0; background: none;
