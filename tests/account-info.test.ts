@@ -69,3 +69,18 @@ describe('hydrateAccountOncePerSession', () => {
     expect(fetchImpl).toHaveBeenCalledOnce();
   });
 });
+
+import { LF_BONUS_KEY, hydrateLfOncePerSession } from '../src/data/bonuses';
+
+describe('lifeform bonuses on page load', () => {
+  it.each([['An error has occured!\n'], [JSON.stringify({ data: {} })]])('keeps the stored bonus and does not retry when the game answers %j', async (body) => {
+    const fetchImpl = vi.fn(async (_url: string, _init?: RequestInit) => new Response(body));
+    const store = new Store(new MemoryStore(), 'future:test:1');
+    store.set(LF_BONUS_KEY, { expedition: 1.21, at: 1 });
+    const deps = { guard: new NetworkGuard(fetchImpl, 'https://s1-it.ogame.gameforge.com'), store, session: new FakeSession() };
+    await expect(hydrateLfOncePerSession(deps)).rejects.toThrow(/speciesBonuses/);
+    expect(store.get(LF_BONUS_KEY, null)).toEqual({ expedition: 1.21, at: 1 });
+    expect(await hydrateLfOncePerSession(deps)).toEqual({ expedition: 1.21, at: 1 });
+    expect(fetchImpl).toHaveBeenCalledOnce();
+  });
+});

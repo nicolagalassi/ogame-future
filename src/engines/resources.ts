@@ -58,6 +58,22 @@ export function applyPageResources(snapshot: AccountSnapshot, bodyId: number, re
   return true;
 }
 
+/**
+ * Copies into `target` every body amount of `source` that is newer, and returns `target`.
+ * Saving merges into the stored snapshot instead of replacing it: another tab may have read
+ * other bodies since this page loaded, and those newer amounts must survive.
+ */
+export function mergeNewerResources(target: AccountSnapshot, source: AccountSnapshot): AccountSnapshot {
+  for (const body of source.bodies) {
+    const into = target.bodies.find((b) => b.id === body.id);
+    if (into && body.resourcesAt > into.resourcesAt) {
+      into.resources = { ...body.resources };
+      into.resourcesAt = body.resourcesAt;
+    }
+  }
+  return target;
+}
+
 export function totals(snapshot: AccountSnapshot, now: number): { stock: Resources; perHour: Resources } {
   const stock = { metal: 0, crystal: 0, deuterium: 0 };
   const perHour = { metal: 0, crystal: 0, deuterium: 0 };

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.4
+// @version      0.3.5
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -33,6 +33,7 @@
       this.now = now;
       this.pageLoadOpen = true;
       this.log = [];
+      this.sessionQueue = Promise.resolve();
     }
     /** Called once bootstrap is done: from here on only user-initiated calls pass. */
     closePageLoadWindow() {
@@ -46,11 +47,18 @@
       this.log.push({ at: this.now(), url, reason, allowed: refusal === null, why: refusal ?? void 0 });
       if (refusal !== null) throw new GuardError(refusal);
       const isGame = this.isGameUrl(url) && !this.isPublicApi(url);
-      return this.fetchImpl(url, {
+      const send = () => this.fetchImpl(url, {
         ...init,
         credentials: isGame ? "include" : "omit",
         headers: isGame ? { "X-Requested-With": "XMLHttpRequest", ...init.headers ?? {} } : init.headers
       });
+      if (!isGame) return send();
+      const run = this.sessionQueue.then(async () => {
+        const res = await send();
+        return new Response(await res.text(), { status: res.status, statusText: res.statusText, headers: res.headers });
+      });
+      this.sessionQueue = run.catch(() => void 0);
+      return run;
     }
     check(url, reason) {
       if (reason === "page-load" && !this.pageLoadOpen) {
@@ -172,6 +180,7 @@
     "app.name": "Future",
     "sync.button": "Sincronizza dati account",
     "sync.done": "Dati aggiornati",
+    "sync.failed": "Aggiornamento non riuscito: il gioco non ha risposto con i dati. Riprova",
     "data.missing": "Dati mancanti su {count} pianeti: apri la loro panoramica",
     "guard.refused": "Chiamata bloccata per rispettare le regole di OGame",
     "planetMenu.moon": "Luna",
@@ -408,6 +417,16 @@
     "msg.depletion": "Esaurimento {n}",
     "msg.discovery": "Scoperta",
     "msg.lfXp": "+{n} XP",
+    "msg.dmUnit": "MO",
+    "msg.pill.lifeform": "Forme di vita",
+    "msg.pill.early": "In anticipo",
+    "recap.title": "Oggi",
+    "recap.count": "{n} spedizioni",
+    "recap.ships": "Navi",
+    "recap.shipsHint": "Navi trovate meno perse: {n} MSU",
+    "recap.open": "Spedizioni di oggi, aggiornate mentre leggi i rapporti \xB7 clic: apri il diario",
+    "fresh.title": "Appena lette",
+    "fresh.close": "Chiudi",
     "msg.artefacts": "{n} artefatti",
     "msg.msuHint": "Valore in unit\xE0 metallo (1 cristallo = 1,5, 1 deuterio = 3)",
     "msg.toggle": "Clic: mostra o nasconde il testo del gioco",
@@ -421,12 +440,12 @@
     "msg.spy.fleet": "Flotta",
     "msg.spy.def": "Difesa",
     "msg.spy.active": "Attivo ora",
-    "msg.spy.activity": "Attivo {n} min fa",
+    "msg.spy.activity": "Attivo {n}m fa",
     "msg.spy.inactive": "Nessuna attivit\xE0",
     "msg.spy.counter": "Spiato da {name} [{coords}]",
     "msg.spy.attacked": "Gi\xE0 attaccato",
     "msg.transport": "Consegna",
-    "msg.deploy": "Flotta arrivata",
+    "msg.deploy": "Schieramento",
     "msg.recycle": "Riciclaggio",
     "msg.empty": "Senza risorse",
     "msg.debrisLeft": "Restano {n}",
@@ -450,6 +469,7 @@
     "exp.count": "Spedizioni",
     "exp.discoveries": "+ {n} scoperte",
     "exp.resources": "Risorse",
+    "exp.resourcesFound": "Risorse trovate",
     "exp.dm": "Materia oscura",
     "exp.shipsFound": "Navi trovate",
     "exp.lost": "Navi perse",
@@ -485,7 +505,7 @@
     "ship.217": "Crawler",
     "ship.218": "Reaper",
     "ship.219": "Pathfinder",
-    "msg.return": "Rientro spedizione",
+    "msg.return": "Rientro",
     "bar.dash": "Dashboard",
     "bar.perDay": "/g",
     "bar.dashHint": "produzione al giorno in MSU",
@@ -571,22 +591,24 @@
     "dash.historyDelta": "Variazione",
     "dash.historyRank": "Posizione",
     "spy.title": "Tabella spiate",
-    "spy.sub": "{n} bersagli \xB7 bottino {msu} MSU",
+    "spy.sub": "{n} bersagli \xB7 bottino {loot}",
     "spy.hideDefended": "Nascondi difesi",
     "spy.inactiveOnly": "Solo inattivi",
-    "spy.noSpeed": "Apri una volta la pagina Flotta: Future legge la velocit\xE0 delle navi e calcola tempi di volo e MSU all'ora.",
     "spy.none": "Nessun report di spionaggio negli ultimi 3 giorni. I report che apri in posta finiscono qui da soli.",
     "spy.noneFiltered": "Nessun bersaglio con questi filtri.",
     "spy.col.target": "Bersaglio",
     "spy.col.age": "Et\xE0",
-    "spy.col.loot": "Bottino MSU",
-    "spy.col.ships": "Cargo",
+    "spy.col.loot": "Bottino",
     "spy.col.def": "Difesa",
-    "spy.col.rate": "MSU/ora",
     "spy.col.actions": "",
-    "spy.attackHint": "Attacca da {name}: apre la pagina Flotta con il bersaglio inserito, navi e invio restano a te",
+    "spy.attackHint": "Attacca da {name}: apre la pagina Flotta con il bersaglio e {n} {ship} gi\xE0 inseriti; l\u2019invio resta a te",
+    "spy.attack": "Attacca",
+    "spy.cargoShip": "Nave da carico per il conteggio e l\u2019attacco",
+    "spy.lootHint": "Bottino {pct}%: metallo {m}, cristallo {c}, deuterio {d}. Servono {n} {ship}",
+    "msg.spy.counterPill": "Spiato",
+    "msg.combat.netHint": "bottino meno perdite",
     "spy.remove": "Togli dalla tabella",
-    "spy.hint": "Un bersaglio per pianeta o luna, l'ultimo report vince; restano 3 giorni anche se cancelli i report. MSU/ora = bottino diviso il volo di andata e ritorno dal tuo pianeta pi\xF9 vicino al 100%; sotto, il volo di andata. OS = Osims, OT = OGame Simulator.",
+    "spy.hint": "Un bersaglio per pianeta o luna, l\u2019ultimo report vince; restano 3 giorni anche se cancelli i report. Bottino = risorse che puoi portare via. Clic sul nome: apre il report completo.",
     "spy.status.inactive": "i",
     "spy.status.longinactive": "I",
     "spy.status.vacation": "v",
@@ -604,10 +626,6 @@
     "remind.late": "Finito alle {time}",
     "remind.ok": "OK",
     "remind.return": "(ritorno)",
-    "spy.simGame": "Simulatore del gioco",
-    "spy.simOsims": "Simula con Osims (nuova scheda, con le tue ricerche di combattimento)",
-    "spy.simOgameTools": "Simula con OGame Simulator (nuova scheda, con le tue ricerche di combattimento)",
-    "spy.from": "Da {name} [{coords}], andata al 100%",
     "msg.combat.converter": "Convertitore",
     "msg.combat.converterHint": "Apre il rapporto nel convertitore Ogotcha (nuova scheda)",
     "hs.days": "ti avvicini: {n} g",
@@ -731,7 +749,36 @@
     "fleet.pickMoons": "Tutte le lune",
     "fleet.pickNone": "Nessuno",
     "fleet.copyGo": "Copia",
-    "fleet.copyNothing": "Scegli almeno una regola e un corpo."
+    "fleet.copyNothing": "Scegli almeno una regola e un corpo.",
+    "spy.col.fleet": "Flotta",
+    "spy.report": "Rapporto di spionaggio",
+    "spy.reportHint": "Apre il report completo su {name}",
+    "spy.shared": "ally",
+    "spy.sharedHint": "Report condiviso dall\u2019alleanza (Comunicazione \u203A Rapporti di spionaggio condivisi)",
+    "spy.hidden": "nascosta",
+    "spy.simulate": "Simula",
+    "spy.simulateHint": "Simula con {tool} in una nuova scheda, con le tue ricerche e i tuoi bonus",
+    "settings.sub": "Le scelte valgono subito e restano in questo browser",
+    "settings.section.menu": "Menu pianeti",
+    "settings.section.mail": "Posta e spiate",
+    "settings.section.data": "Dati",
+    "settings.viewHint": "Affiancato mostra risorse e lune accanto a ogni pianeta; compatto occupa la larghezza del gioco.",
+    "settings.viewNarrow": "Lo schermo \xE8 troppo stretto per la vista affiancata: resta compatto.",
+    "settings.totalsHint": "Il riquadro sotto i pianeti con le risorse di tutto l\u2019account e la produzione al giorno.",
+    "settings.markIdleHint": "Evidenzia i pianeti che non stanno costruendo niente.",
+    "settings.sim": "Simulatore",
+    "settings.simHint": "Si apre con il pulsante Simula nella tabella spiate e nei rapporti, gi\xE0 compilato con le tue ricerche.",
+    "settings.shared": "Spiate condivise dall\u2019alleanza",
+    "settings.sharedHint": "Mostra nella tabella spiate anche i rapporti condivisi in Comunicazione, segnati con \xABally\xBB.",
+    "settings.fold": "Testo del gioco ripiegato",
+    "settings.foldHint": "Nasconde il testo lungo di spedizioni e trasporti sotto il riepilogo; un clic sul riepilogo lo riapre.",
+    "settings.backupHint": "Esporta tutti i dati di Future in un file, o li ripristina da un file.",
+    "msg.abbr.metal": "M",
+    "msg.abbr.crystal": "C",
+    "msg.abbr.deuterium": "D",
+    "msg.abbr.food": "Ci",
+    "msg.abbr.darkMatter": "MO",
+    "spy.col.actionsName": "Azioni"
   };
 
   // src/i18n/en.json
@@ -739,6 +786,7 @@
     "app.name": "Future",
     "sync.button": "Sync account data",
     "sync.done": "Data updated",
+    "sync.failed": "Sync failed: the game did not send the data. Try again",
     "data.missing": "Missing data on {count} planets: open their overview",
     "guard.refused": "Call blocked to respect OGame rules",
     "planetMenu.moon": "Moon",
@@ -975,6 +1023,16 @@
     "msg.depletion": "Depletion {n}",
     "msg.discovery": "Discovery",
     "msg.lfXp": "+{n} XP",
+    "msg.dmUnit": "DM",
+    "msg.pill.lifeform": "Lifeform XP",
+    "msg.pill.early": "Early",
+    "recap.title": "Today",
+    "recap.count": "{n} expeditions",
+    "recap.ships": "Ships",
+    "recap.shipsHint": "Ships found minus lost: {n} MSU",
+    "recap.open": "Today\u2019s expeditions, updated as you read the reports \xB7 click: open the journal",
+    "fresh.title": "Just read",
+    "fresh.close": "Close",
     "msg.artefacts": "{n} artefacts",
     "msg.msuHint": "Value in metal units (1 crystal = 1.5, 1 deuterium = 3)",
     "msg.toggle": "Click: show or hide the game's text",
@@ -988,7 +1046,7 @@
     "msg.spy.fleet": "Fleet",
     "msg.spy.def": "Defence",
     "msg.spy.active": "Active now",
-    "msg.spy.activity": "Active {n} min ago",
+    "msg.spy.activity": "Active {n}m ago",
     "msg.spy.inactive": "No activity",
     "msg.spy.counter": "Spied by {name} [{coords}]",
     "msg.spy.attacked": "Already attacked",
@@ -1017,6 +1075,7 @@
     "exp.count": "Expeditions",
     "exp.discoveries": "+ {n} discoveries",
     "exp.resources": "Resources",
+    "exp.resourcesFound": "Resources found",
     "exp.dm": "Dark Matter",
     "exp.shipsFound": "Ships found",
     "exp.lost": "Ships lost",
@@ -1052,7 +1111,7 @@
     "ship.217": "Crawler",
     "ship.218": "Reaper",
     "ship.219": "Pathfinder",
-    "msg.return": "Expedition return",
+    "msg.return": "Return",
     "bar.dash": "Dashboard",
     "bar.perDay": "/d",
     "bar.dashHint": "production per day in MSU",
@@ -1138,22 +1197,24 @@
     "dash.historyDelta": "Change",
     "dash.historyRank": "Rank",
     "spy.title": "Spy table",
-    "spy.sub": "{n} targets \xB7 loot {msu} MSU",
+    "spy.sub": "{n} targets \xB7 loot {loot}",
     "spy.hideDefended": "Hide defended",
     "spy.inactiveOnly": "Inactive only",
-    "spy.noSpeed": "Open the Fleet page once: Future reads the ship speeds and works out flight times and MSU per hour.",
     "spy.none": "No espionage reports in the last 3 days. Reports you open in the inbox land here by themselves.",
     "spy.noneFiltered": "No target matches these filters.",
     "spy.col.target": "Target",
     "spy.col.age": "Age",
-    "spy.col.loot": "Loot MSU",
-    "spy.col.ships": "Cargo",
+    "spy.col.loot": "Loot",
     "spy.col.def": "Defence",
-    "spy.col.rate": "MSU/hour",
     "spy.col.actions": "",
-    "spy.attackHint": "Attack from {name}: opens the Fleet page with the target filled in; ships and Send stay with you",
+    "spy.attackHint": "Attack from {name}: opens the Fleet page with the target and {n} {ship} filled in; sending stays with you",
+    "spy.attack": "Attack",
+    "spy.cargoShip": "Cargo ship for the count and the attack",
+    "spy.lootHint": "Loot {pct}%: metal {m}, crystal {c}, deuterium {d}. Takes {n} {ship}",
+    "msg.spy.counterPill": "Spied on",
+    "msg.combat.netHint": "loot minus losses",
     "spy.remove": "Remove from the table",
-    "spy.hint": "One target per planet or moon, the newest report wins; kept 3 days even if you delete the reports. MSU/hour = loot divided by the round trip from your nearest planet at 100%; below, the one-way flight. OS = Osims, OT = OGame Simulator.",
+    "spy.hint": "One target per planet or moon, the newest report wins; kept 3 days even if you delete the reports. Loot = resources you can carry away. Click the name: opens the full report.",
     "spy.status.inactive": "i",
     "spy.status.longinactive": "I",
     "spy.status.vacation": "v",
@@ -1171,10 +1232,6 @@
     "remind.late": "Ended at {time}",
     "remind.ok": "OK",
     "remind.return": "(return)",
-    "spy.simGame": "Game's battle simulator",
-    "spy.simOsims": "Simulate with Osims (new tab, with your combat research)",
-    "spy.simOgameTools": "Simulate with OGame Simulator (new tab, with your combat research)",
-    "spy.from": "From {name} [{coords}], one way at 100%",
     "msg.combat.converter": "Converter",
     "msg.combat.converterHint": "Opens the report in the Ogotcha converter (new tab)",
     "hs.days": "catch up: {n} d",
@@ -1298,7 +1355,36 @@
     "fleet.pickMoons": "All moons",
     "fleet.pickNone": "None",
     "fleet.copyGo": "Copy",
-    "fleet.copyNothing": "Pick at least one rule and one body."
+    "fleet.copyNothing": "Pick at least one rule and one body.",
+    "spy.col.fleet": "Fleet",
+    "spy.report": "Espionage report",
+    "spy.reportHint": "Opens the full report on {name}",
+    "spy.shared": "ally",
+    "spy.sharedHint": "Report shared by the alliance (Communication \u203A Shared espionage reports)",
+    "spy.hidden": "hidden",
+    "spy.simulate": "Simulate",
+    "spy.simulateHint": "Simulate with {tool} in a new tab, with your research and bonuses",
+    "settings.sub": "Choices apply at once and stay in this browser",
+    "settings.section.menu": "Planet menu",
+    "settings.section.mail": "Inbox and spying",
+    "settings.section.data": "Data",
+    "settings.viewHint": "Side by side shows resources and moons next to each planet; compact keeps the game\u2019s width.",
+    "settings.viewNarrow": "The screen is too narrow for side by side: it stays compact.",
+    "settings.totalsHint": "The box under the planets with the whole account\u2019s resources and daily production.",
+    "settings.markIdleHint": "Highlights the planets that are not building anything.",
+    "settings.sim": "Simulator",
+    "settings.simHint": "Opens from the Simulate button in the spy table and in the reports, already filled with your research.",
+    "settings.shared": "Spy reports shared by the alliance",
+    "settings.sharedHint": "Also shows in the spy table the reports shared in Communication, marked \xABally\xBB.",
+    "settings.fold": "Game text folded",
+    "settings.foldHint": "Hides the long text of expeditions and transports under the summary; a click on the summary opens it.",
+    "settings.backupHint": "Saves all Future data to a file, or restores it from one.",
+    "msg.abbr.metal": "M",
+    "msg.abbr.crystal": "C",
+    "msg.abbr.deuterium": "D",
+    "msg.abbr.food": "F",
+    "msg.abbr.darkMatter": "DM",
+    "spy.col.actionsName": "Actions"
   };
 
   // src/i18n/fr.json
@@ -1306,6 +1392,7 @@
     "app.name": "Future",
     "sync.button": "Synchroniser le compte",
     "sync.done": "Donn\xE9es mises \xE0 jour",
+    "sync.failed": "\xC9chec de la synchronisation : le jeu n\u2019a pas envoy\xE9 les donn\xE9es. R\xE9essayez",
     "data.missing": "Donn\xE9es manquantes sur {count} plan\xE8tes : ouvrez leur vue d'ensemble",
     "guard.refused": "Appel bloqu\xE9 pour respecter les r\xE8gles d'OGame",
     "planetMenu.moon": "Lune",
@@ -1542,6 +1629,16 @@
     "msg.depletion": "\xC9puisement {n}",
     "msg.discovery": "D\xE9couverte",
     "msg.lfXp": "+{n} XP",
+    "msg.dmUnit": "MN",
+    "msg.pill.lifeform": "Forme de vie",
+    "msg.pill.early": "En avance",
+    "recap.title": "Aujourd\u2019hui",
+    "recap.count": "{n} exp\xE9ditions",
+    "recap.ships": "Vaisseaux",
+    "recap.shipsHint": "Vaisseaux trouv\xE9s moins perdus : {n} MSU",
+    "recap.open": "Exp\xE9ditions du jour, mises \xE0 jour pendant la lecture des rapports \xB7 clic : ouvrir le journal",
+    "fresh.title": "Lues \xE0 l\u2019instant",
+    "fresh.close": "Fermer",
     "msg.artefacts": "{n} artefacts",
     "msg.msuHint": "Valeur en unit\xE9s m\xE9tal (1 cristal = 1,5, 1 deut\xE9rium = 3)",
     "msg.toggle": "Clic : afficher ou masquer le texte du jeu",
@@ -1554,13 +1651,13 @@
     "msg.spy.cargo": "{n}\xD7 {ship}",
     "msg.spy.fleet": "Flotte",
     "msg.spy.def": "D\xE9fense",
-    "msg.spy.active": "Actif maintenant",
-    "msg.spy.activity": "Actif il y a {n} min",
-    "msg.spy.inactive": "Aucune activit\xE9",
+    "msg.spy.active": "Actif",
+    "msg.spy.activity": "Actif il y a {n}m",
+    "msg.spy.inactive": "Inactif",
     "msg.spy.counter": "Espionn\xE9 par {name} [{coords}]",
     "msg.spy.attacked": "D\xE9j\xE0 attaqu\xE9",
     "msg.transport": "Livraison",
-    "msg.deploy": "Flotte arriv\xE9e",
+    "msg.deploy": "Arriv\xE9e",
     "msg.recycle": "Recyclage",
     "msg.empty": "Sans ressources",
     "msg.debrisLeft": "Reste {n}",
@@ -1584,6 +1681,7 @@
     "exp.count": "Exp\xE9ditions",
     "exp.discoveries": "+ {n} d\xE9couvertes",
     "exp.resources": "Ressources",
+    "exp.resourcesFound": "Ressources trouv\xE9es",
     "exp.dm": "Antimati\xE8re",
     "exp.shipsFound": "Vaisseaux trouv\xE9s",
     "exp.lost": "Vaisseaux perdus",
@@ -1619,7 +1717,7 @@
     "ship.217": "Foreuse",
     "ship.218": "Faucheur",
     "ship.219": "\xC9claireur",
-    "msg.return": "Retour d'exp\xE9dition",
+    "msg.return": "Retour",
     "bar.dash": "Tableau",
     "bar.perDay": "/j",
     "bar.dashHint": "production par jour en MSU",
@@ -1705,22 +1803,24 @@
     "dash.historyDelta": "Variation",
     "dash.historyRank": "Classement",
     "spy.title": "Tableau d'espionnage",
-    "spy.sub": "{n} cibles \xB7 butin {msu} MSU",
+    "spy.sub": "{n} cibles \xB7 butin {loot}",
     "spy.hideDefended": "Masquer les d\xE9fendus",
     "spy.inactiveOnly": "Inactifs seulement",
-    "spy.noSpeed": "Ouvrez une fois la page Flotte : Future lit la vitesse des vaisseaux et calcule les temps de vol et les MSU par heure.",
     "spy.none": "Aucun rapport d'espionnage ces 3 derniers jours. Les rapports ouverts dans la messagerie arrivent ici tout seuls.",
     "spy.noneFiltered": "Aucune cible avec ces filtres.",
     "spy.col.target": "Cible",
     "spy.col.age": "\xC2ge",
-    "spy.col.loot": "Butin MSU",
-    "spy.col.ships": "Cargos",
+    "spy.col.loot": "Butin",
     "spy.col.def": "D\xE9fense",
-    "spy.col.rate": "MSU/heure",
     "spy.col.actions": "",
-    "spy.attackHint": "Attaquer depuis {name} : ouvre la page Flotte avec la cible remplie ; vaisseaux et envoi restent \xE0 vous",
+    "spy.attackHint": "Attaquer depuis {name} : ouvre la page Flotte avec la cible et {n} {ship} d\xE9j\xE0 remplis ; l\u2019envoi reste \xE0 vous",
+    "spy.attack": "Attaquer",
+    "spy.cargoShip": "Transporteur pour le calcul et l\u2019attaque",
+    "spy.lootHint": "Butin {pct} % : m\xE9tal {m}, cristal {c}, deut\xE9rium {d}. Il faut {n} {ship}",
+    "msg.spy.counterPill": "Espionn\xE9",
+    "msg.combat.netHint": "butin moins pertes",
     "spy.remove": "Retirer du tableau",
-    "spy.hint": "Une cible par plan\xE8te ou lune, le rapport le plus r\xE9cent l'emporte ; gard\xE9s 3 jours m\xEAme si vous supprimez les rapports. MSU/heure = butin divis\xE9 par l'aller-retour depuis votre plan\xE8te la plus proche \xE0 100 % ; dessous, l'aller. OS = Osims, OT = OGame Simulator.",
+    "spy.hint": "Une cible par plan\xE8te ou lune, le dernier rapport gagne ; gard\xE9es 3 jours m\xEAme si vous supprimez les rapports. Butin = ressources emportables. Clic sur le nom : ouvre le rapport complet.",
     "spy.status.inactive": "i",
     "spy.status.longinactive": "I",
     "spy.status.vacation": "v",
@@ -1738,10 +1838,6 @@
     "remind.late": "Termin\xE9 \xE0 {time}",
     "remind.ok": "OK",
     "remind.return": "(retour)",
-    "spy.simGame": "Simulateur du jeu",
-    "spy.simOsims": "Simuler avec Osims (nouvel onglet, avec vos recherches de combat)",
-    "spy.simOgameTools": "Simuler avec OGame Simulator (nouvel onglet, avec vos recherches de combat)",
-    "spy.from": "Depuis {name} [{coords}], aller \xE0 100 %",
     "msg.combat.converter": "Convertisseur",
     "msg.combat.converterHint": "Ouvre le rapport dans le convertisseur Ogotcha (nouvel onglet)",
     "hs.days": "rattrap\xE9 en {n} j",
@@ -1865,7 +1961,36 @@
     "fleet.pickMoons": "Toutes les lunes",
     "fleet.pickNone": "Aucun",
     "fleet.copyGo": "Copier",
-    "fleet.copyNothing": "Choisis au moins une r\xE8gle et un corps."
+    "fleet.copyNothing": "Choisis au moins une r\xE8gle et un corps.",
+    "spy.col.fleet": "Flotte",
+    "spy.report": "Rapport d\u2019espionnage",
+    "spy.reportHint": "Ouvre le rapport complet sur {name}",
+    "spy.shared": "ally",
+    "spy.sharedHint": "Rapport partag\xE9 par l\u2019alliance (Communication \u203A Rapports d\u2019espionnage partag\xE9s)",
+    "spy.hidden": "cach\xE9e",
+    "spy.simulate": "Simuler",
+    "spy.simulateHint": "Simuler avec {tool} dans un nouvel onglet, avec vos recherches et bonus",
+    "settings.sub": "Les choix s\u2019appliquent tout de suite et restent dans ce navigateur",
+    "settings.section.menu": "Menu des plan\xE8tes",
+    "settings.section.mail": "Messagerie et espionnage",
+    "settings.section.data": "Donn\xE9es",
+    "settings.viewHint": "C\xF4te \xE0 c\xF4te affiche ressources et lunes \xE0 c\xF4t\xE9 de chaque plan\xE8te ; compact garde la largeur du jeu.",
+    "settings.viewNarrow": "L\u2019\xE9cran est trop \xE9troit pour c\xF4te \xE0 c\xF4te : il reste compact.",
+    "settings.totalsHint": "Le cadre sous les plan\xE8tes avec les ressources de tout le compte et la production par jour.",
+    "settings.markIdleHint": "Met en \xE9vidence les plan\xE8tes qui ne construisent rien.",
+    "settings.sim": "Simulateur",
+    "settings.simHint": "S\u2019ouvre avec le bouton Simuler du tableau d\u2019espionnage et des rapports, d\xE9j\xE0 rempli avec vos recherches.",
+    "settings.shared": "Rapports partag\xE9s par l\u2019alliance",
+    "settings.sharedHint": "Affiche aussi dans le tableau les rapports partag\xE9s dans Communication, marqu\xE9s \xAB ally \xBB.",
+    "settings.fold": "Texte du jeu repli\xE9",
+    "settings.foldHint": "Cache le long texte des exp\xE9ditions et transports sous le r\xE9sum\xE9 ; un clic sur le r\xE9sum\xE9 le rouvre.",
+    "settings.backupHint": "Enregistre toutes les donn\xE9es de Future dans un fichier, ou les restaure.",
+    "msg.abbr.metal": "M",
+    "msg.abbr.crystal": "C",
+    "msg.abbr.deuterium": "D",
+    "msg.abbr.food": "N",
+    "msg.abbr.darkMatter": "AN",
+    "spy.col.actionsName": "Actions"
   };
 
   // src/i18n/de.json
@@ -1873,6 +1998,7 @@
     "app.name": "Future",
     "sync.button": "Kontodaten synchronisieren",
     "sync.done": "Daten aktualisiert",
+    "sync.failed": "Synchronisierung fehlgeschlagen: Das Spiel hat keine Daten geschickt. Erneut versuchen",
     "data.missing": "Fehlende Daten auf {count} Planeten: \xF6ffne ihre \xDCbersicht",
     "guard.refused": "Aufruf blockiert, um die OGame-Regeln einzuhalten",
     "planetMenu.moon": "Mond",
@@ -2109,6 +2235,16 @@
     "msg.depletion": "Ersch\xF6pfung {n}",
     "msg.discovery": "Entdeckung",
     "msg.lfXp": "+{n} EP",
+    "msg.dmUnit": "DM",
+    "msg.pill.lifeform": "Lebensform",
+    "msg.pill.early": "Fr\xFCh",
+    "recap.title": "Heute",
+    "recap.count": "{n} Expeditionen",
+    "recap.ships": "Schiffe",
+    "recap.shipsHint": "Gefundene minus verlorene Schiffe: {n} MSU",
+    "recap.open": "Heutige Expeditionen, aktualisiert beim Lesen der Berichte \xB7 Klick: Tagebuch \xF6ffnen",
+    "fresh.title": "Gerade gelesen",
+    "fresh.close": "Schlie\xDFen",
     "msg.artefacts": "{n} Artefakte",
     "msg.msuHint": "Wert in Metalleinheiten (1 Kristall = 1,5, 1 Deuterium = 3)",
     "msg.toggle": "Klick: Text des Spiels ein- oder ausblenden",
@@ -2122,12 +2258,12 @@
     "msg.spy.fleet": "Flotte",
     "msg.spy.def": "Verteidigung",
     "msg.spy.active": "Jetzt aktiv",
-    "msg.spy.activity": "Vor {n} Min. aktiv",
-    "msg.spy.inactive": "Keine Aktivit\xE4t",
+    "msg.spy.activity": "Vor {n}m aktiv",
+    "msg.spy.inactive": "Inaktiv",
     "msg.spy.counter": "Spioniert von {name} [{coords}]",
     "msg.spy.attacked": "Schon angegriffen",
     "msg.transport": "Lieferung",
-    "msg.deploy": "Flotte angekommen",
+    "msg.deploy": "Angekommen",
     "msg.recycle": "Recycling",
     "msg.empty": "Ohne Rohstoffe",
     "msg.debrisLeft": "{n} \xFCbrig",
@@ -2151,6 +2287,7 @@
     "exp.count": "Expeditionen",
     "exp.discoveries": "+ {n} Entdeckungen",
     "exp.resources": "Rohstoffe",
+    "exp.resourcesFound": "Gefundene Rohstoffe",
     "exp.dm": "Dunkle Materie",
     "exp.shipsFound": "Gefundene Schiffe",
     "exp.lost": "Verlorene Schiffe",
@@ -2186,7 +2323,7 @@
     "ship.217": "Crawler",
     "ship.218": "Reaper",
     "ship.219": "Pathfinder",
-    "msg.return": "Expeditionsr\xFCckkehr",
+    "msg.return": "R\xFCckkehr",
     "bar.dash": "Dashboard",
     "bar.perDay": "/T",
     "bar.dashHint": "Produktion pro Tag in MSU",
@@ -2272,22 +2409,24 @@
     "dash.historyDelta": "\xC4nderung",
     "dash.historyRank": "Platz",
     "spy.title": "Spionagetabelle",
-    "spy.sub": "{n} Ziele \xB7 Beute {msu} MSU",
+    "spy.sub": "{n} Ziele \xB7 Beute {loot}",
     "spy.hideDefended": "Verteidigte ausblenden",
     "spy.inactiveOnly": "Nur Inaktive",
-    "spy.noSpeed": "\xD6ffne einmal die Flottenseite: Future liest die Schiffsgeschwindigkeiten und berechnet Flugzeiten und MSU pro Stunde.",
     "spy.none": "Keine Spionageberichte in den letzten 3 Tagen. Berichte, die du im Postfach \xF6ffnest, landen von selbst hier.",
     "spy.noneFiltered": "Kein Ziel passt zu diesen Filtern.",
     "spy.col.target": "Ziel",
     "spy.col.age": "Alter",
-    "spy.col.loot": "Beute MSU",
-    "spy.col.ships": "Transporter",
+    "spy.col.loot": "Beute",
     "spy.col.def": "Verteid.",
-    "spy.col.rate": "MSU/Stunde",
     "spy.col.actions": "",
-    "spy.attackHint": "Angriff von {name}: \xF6ffnet die Flottenseite mit eingetragenem Ziel; Schiffe und Senden bleiben bei dir",
+    "spy.attackHint": "Von {name} angreifen: \xF6ffnet die Flottenseite mit Ziel und {n} {ship} ausgef\xFCllt; Absenden bleibt bei dir",
+    "spy.attack": "Angreifen",
+    "spy.cargoShip": "Transporter f\xFCr Anzahl und Angriff",
+    "spy.lootHint": "Beute {pct} %: Metall {m}, Kristall {c}, Deuterium {d}. Ben\xF6tigt {n} {ship}",
+    "msg.spy.counterPill": "Ausspioniert",
+    "msg.combat.netHint": "Beute minus Verluste",
     "spy.remove": "Aus der Tabelle entfernen",
-    "spy.hint": "Ein Ziel pro Planet oder Mond, der neueste Bericht gilt; 3 Tage gespeichert, auch wenn du die Berichte l\xF6schst. MSU/Stunde = Beute geteilt durch Hin- und R\xFCckflug von deinem n\xE4chsten Planeten bei 100 %; darunter der Hinflug. OS = Osims, OT = OGame Simulator.",
+    "spy.hint": "Ein Ziel pro Planet oder Mond, der neueste Bericht gewinnt; bleibt 3 Tage, auch wenn du die Berichte l\xF6schst. Beute = Rohstoffe, die du mitnehmen kannst. Klick auf den Namen: \xF6ffnet den ganzen Bericht.",
     "spy.status.inactive": "i",
     "spy.status.longinactive": "I",
     "spy.status.vacation": "u",
@@ -2305,10 +2444,6 @@
     "remind.late": "Fertig um {time}",
     "remind.ok": "OK",
     "remind.return": "(R\xFCckflug)",
-    "spy.simGame": "Kampfsimulator des Spiels",
-    "spy.simOsims": "Mit Osims simulieren (neuer Tab, mit deiner Kampfforschung)",
-    "spy.simOgameTools": "Mit OGame Simulator simulieren (neuer Tab, mit deiner Kampfforschung)",
-    "spy.from": "Von {name} [{coords}], Hinflug bei 100 %",
     "msg.combat.converter": "Konverter",
     "msg.combat.converterHint": "\xD6ffnet den Bericht im Ogotcha-Konverter (neuer Tab)",
     "hs.days": "eingeholt in {n} T",
@@ -2432,7 +2567,36 @@
     "fleet.pickMoons": "Alle Monde",
     "fleet.pickNone": "Keiner",
     "fleet.copyGo": "Kopieren",
-    "fleet.copyNothing": "W\xE4hle mindestens eine Regel und einen K\xF6rper."
+    "fleet.copyNothing": "W\xE4hle mindestens eine Regel und einen K\xF6rper.",
+    "spy.col.fleet": "Flotte",
+    "spy.report": "Spionagebericht",
+    "spy.reportHint": "\xD6ffnet den ganzen Bericht \xFCber {name}",
+    "spy.shared": "ally",
+    "spy.sharedHint": "Von der Allianz geteilter Bericht (Kommunikation \u203A Geteilte Spionageberichte)",
+    "spy.hidden": "versteckt",
+    "spy.simulate": "Simulieren",
+    "spy.simulateHint": "Mit {tool} in einem neuen Tab simulieren, mit deinen Forschungen und Boni",
+    "settings.sub": "\xC4nderungen gelten sofort und bleiben in diesem Browser",
+    "settings.section.menu": "Planetenmen\xFC",
+    "settings.section.mail": "Posteingang und Spionage",
+    "settings.section.data": "Daten",
+    "settings.viewHint": "Nebeneinander zeigt Rohstoffe und Monde neben jedem Planeten; kompakt beh\xE4lt die Breite des Spiels.",
+    "settings.viewNarrow": "Der Bildschirm ist zu schmal f\xFCr nebeneinander: bleibt kompakt.",
+    "settings.totalsHint": "Der Kasten unter den Planeten mit den Rohstoffen des ganzen Kontos und der Tagesproduktion.",
+    "settings.markIdleHint": "Hebt die Planeten hervor, die nichts bauen.",
+    "settings.sim": "Simulator",
+    "settings.simHint": "\xD6ffnet sich mit Simulieren in der Spionagetabelle und in den Berichten, schon mit deinen Forschungen ausgef\xFCllt.",
+    "settings.shared": "Von der Allianz geteilte Berichte",
+    "settings.sharedHint": "Zeigt in der Tabelle auch die in Kommunikation geteilten Berichte, markiert mit \xABally\xBB.",
+    "settings.fold": "Spieltext eingeklappt",
+    "settings.foldHint": "Versteckt den langen Text von Expeditionen und Transporten unter der Zusammenfassung; ein Klick \xF6ffnet ihn.",
+    "settings.backupHint": "Speichert alle Future-Daten in einer Datei oder stellt sie wieder her.",
+    "msg.abbr.metal": "M",
+    "msg.abbr.crystal": "K",
+    "msg.abbr.deuterium": "D",
+    "msg.abbr.food": "N",
+    "msg.abbr.darkMatter": "DM",
+    "spy.col.actionsName": "Aktionen"
   };
 
   // src/core/i18n.ts
@@ -2603,6 +2767,16 @@
     body.resources = { ...res };
     body.resourcesAt = now;
     return true;
+  }
+  function mergeNewerResources(target, source) {
+    for (const body of source.bodies) {
+      const into = target.bodies.find((b) => b.id === body.id);
+      if (into && body.resourcesAt > into.resourcesAt) {
+        into.resources = { ...body.resources };
+        into.resourcesAt = body.resourcesAt;
+      }
+    }
+    return target;
   }
   function totals(snapshot, now) {
     const stock2 = { metal: 0, crystal: 0, deuterium: 0 };
@@ -2811,7 +2985,9 @@
     pen: '<path d="M4 20l1-4.5L16 4.5l3.5 3.5L8.5 19z"/><path d="M13.5 7l3.5 3.5"/>',
     chart: '<path d="M4 20.5h16"/><path d="M7 17v-5M12 17V6.5M17 17v-8"/>',
     planet: '<circle cx="12" cy="12" r="6"/><path d="M3 15.5c2.5 1.6 15.5-3.5 18-7"/>',
-    fleet: '<path d="M3.5 12h11l5-4.5v9l-5-4.5"/><path d="M6.5 8.5L9 12l-2.5 3.5"/>'
+    fleet: '<path d="M3.5 12h11l5-4.5v9l-5-4.5"/><path d="M6.5 8.5L9 12l-2.5 3.5"/>',
+    chevron: '<path d="M6 9.5l6 6 6-6"/>',
+    next: '<path d="M4.5 12h14M13 5.5l6.5 6.5-6.5 6.5"/>'
   };
   function icon(doc, name, size = 14, cls = "fut-ico") {
     const svg2 = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -4147,20 +4323,20 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     for (const key2 of KEYS2) if (cost[key2] > 0 && (best === null || cost[key2] > cost[best])) best = key2;
     return best;
   }
-  function discountFrom(id, level2, shown) {
+  function discountFrom(id, level2, shown2) {
     const raw = rawCost(id, level2);
     const key2 = main(raw);
     if (!key2) return null;
-    const value = shown[key2];
+    const value = shown2[key2];
     if (value === void 0 || !(value > 0)) return null;
     const ratio = value / raw[key2];
     if (ratio > 1.001 || ratio < 0.2) return null;
     return Math.max(0, 1 - ratio);
   }
-  function matchShownLevel(id, candidates, shown) {
+  function matchShownLevel(id, candidates, shown2) {
     let best = null;
     for (const level2 of new Set(candidates.filter((l) => l >= 1))) {
-      const discount = discountFrom(id, level2, shown);
+      const discount = discountFrom(id, level2, shown2);
       if (discount === null) continue;
       if (!best || discount < best.discount) best = { level: level2, discount };
     }
@@ -4559,22 +4735,39 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
   };
   function parseSpeciesBonuses(json2, at) {
     const data = (json2 ?? {}).data;
-    const value = Number(data?.expedition?.ResultBooster?.totalBonus?.ResultBooster);
-    return { expedition: Number.isFinite(value) && value > 0 ? value : 0, at };
+    if (!data?.expedition || typeof data.expedition !== "object") return null;
+    const num4 = (v) => Number.isFinite(Number(v)) ? Number(v) : 0;
+    const value = num4(data.expedition.ResultBooster?.totalBonus?.ResultBooster);
+    const ships = {};
+    for (const [id, b] of Object.entries(data.ships ?? {})) {
+      if (Number(id) < 200 || Number(id) > 299) continue;
+      const tb = b?.totalBonus ?? {};
+      ships[id] = { weapon: num4(tb.weapon), shield: num4(tb.shield), armor: num4(tb.armor), cargo: num4(tb.cargo), speed: num4(tb.speed), fuel: num4(tb.fuel) };
+    }
+    const classBooster = {};
+    for (const cls of [1, 2, 3]) classBooster[cls] = num4(data.characterclasses?.[String(600 + cls)]?.totalBonus?.characterClass);
+    return { expedition: value > 0 ? value : 0, ships, classBooster, at };
   }
   var sessionKey2 = (store) => `${store.namespace}:lf.hydrated`;
   async function fetchLfBonuses(deps, reason, now = Date.now()) {
     const response = await deps.guard.request(SPECIES_BONUSES_PATH, reason);
-    const bonuses = parseSpeciesBonuses(await response.json(), now);
+    const text = await response.text();
+    let json2;
+    try {
+      json2 = JSON.parse(text);
+    } catch {
+      throw new Error(`speciesBonuses: not JSON (${text.slice(0, 40).trim()})`);
+    }
+    const bonuses = parseSpeciesBonuses(json2, now);
+    if (!bonuses) throw new Error("speciesBonuses: no expedition data in the answer");
     deps.store.set(LF_BONUS_KEY, bonuses);
     return bonuses;
   }
   async function hydrateLfOncePerSession(deps) {
     const stored = deps.store.get(LF_BONUS_KEY, null);
     if (stored && deps.session.getItem(sessionKey2(deps.store)) === "1") return stored;
-    const fresh = await fetchLfBonuses(deps, "page-load");
     deps.session.setItem(sessionKey2(deps.store), "1");
-    return fresh;
+    return fetchLfBonuses(deps, "page-load");
   }
   function readActiveItems(doc, now = Date.now()) {
     const bar = doc.getElementById("buffBar");
@@ -4657,6 +4850,1479 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 ::selection { background: #2B6F7D; color: #fff; }
 .num, td, .value, .kpi-line { font-variant-numeric: tabular-nums; }
 `;
+
+  // src/engines/sim-links.ts
+  var OSIMS = "https://www.ogameutilities.it/Osims/";
+  var OGAME_TOOLS_SIM = "https://simulator.ogame-tools.com/";
+  var OGOTCHA = "https://ogotcha.oplanet.eu/";
+  var SIM_KEY = "sim.tool";
+  var SIM_TOOLS = {
+    osims: { name: "Osims", url: OSIMS },
+    ogametools: { name: "OGame Simulator", url: OGAME_TOOLS_SIM }
+  };
+  var simTool = (v) => v === "ogametools" ? "ogametools" : "osims";
+  var SIM_RESEARCH = [109, 110, 111, 114, 115, 117, 118];
+  var GENERAL = 2;
+  var WARRIORS = 1;
+  var toolLang = (lang) => lang === "us" ? "en" : lang === "ar" ? "es" : lang || "en";
+  function simPrefill(server, attacker, defenderCoords) {
+    const planet = (c) => {
+      const [galaxy, system, position] = c.split(":");
+      return { galaxy, system, position };
+    };
+    const cls = attacker?.classId ?? 0;
+    const booster = attacker?.lf?.classBooster?.[String(cls)] ?? 0;
+    let bonus = cls === GENERAL ? 2 + Math.floor(booster * 100 / 50) : 0;
+    if (attacker?.allianceClass === WARRIORS) bonus++;
+    const research = {};
+    for (const id of SIM_RESEARCH) research[id] = { level: (attacker?.researches[String(id)] ?? 0) + (id <= 111 ? bonus : 0) };
+    const lifeformBonuses = { BaseStatsBooster: {}, CharacterClassBooster: { [cls]: booster } };
+    for (const [id, b] of Object.entries(attacker?.lf?.ships ?? {})) {
+      lifeformBonuses.BaseStatsBooster[id] = { weapon: b.weapon, shield: b.shield, armor: b.armor, cargo: b.cargo, speed: b.speed };
+      if (b.fuel) lifeformBonuses.ShipFuelConsumption = Math.abs(b.fuel);
+    }
+    const data = {
+      settings: { server },
+      0: [{ planet: planet(attacker?.coords ?? "0:0:0"), research, class: cls, characterClassesEnabled: true, allianceClass: attacker?.allianceClass ?? 0, lifeformBonuses }],
+      1: [{ planet: planet(defenderCoords), research: {}, resources: {}, defence: {} }]
+    };
+    return btoa(JSON.stringify(data));
+  }
+  function simLink(tool, apiKey, lang, prefill) {
+    return `${SIM_TOOLS[tool].url}${toolLang(lang)}?SR_KEY=${encodeURIComponent(apiKey)}#prefill=${prefill}`;
+  }
+  function converterLink(apiKey, lang) {
+    return `${OGOTCHA}${toolLang(lang)}?CR_KEY=${encodeURIComponent(apiKey)}`;
+  }
+
+  // src/data/messages.ts
+  var json = (value, fallback) => {
+    if (!value || value === "-") return fallback;
+    try {
+      return JSON.parse(value) ?? fallback;
+    } catch {
+      return fallback;
+    }
+  };
+  var int2 = (value) => {
+    const n = Number.parseInt(value ?? "", 10);
+    return Number.isFinite(n) ? n : 0;
+  };
+  var num2 = (value) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : 0;
+  };
+  function readRes(raw) {
+    return {
+      metal: num2(raw.metal),
+      crystal: num2(raw.crystal),
+      deuterium: num2(raw.deuterium ?? raw.deut),
+      food: num2(raw.food),
+      darkMatter: num2(raw.darkMatter ?? raw.darkmatter)
+    };
+  }
+  function readUnits(raw) {
+    const out = {};
+    for (const [key2, value] of Object.entries(raw)) {
+      const id = Math.abs(Number(key2));
+      const amount = typeof value === "object" && value ? num2(value.amount) : num2(value);
+      if (id > 0 && amount) out[id] = (out[id] ?? 0) + amount;
+    }
+    return out;
+  }
+  function outcome(type, d, artefacts, lfXp) {
+    if (type === 61) return artefacts > 0 ? "artefact" : lfXp > 0 ? "lifeform" : "nothing";
+    const nav = json(d.rawNavigation, {});
+    switch (d.rawExpeditionresult) {
+      case "ressources":
+      case "resources":
+        return "resource";
+      case "darkmatter":
+        return "darkmatter";
+      case "nothing":
+        return "nothing";
+      case "shipwrecks":
+        return "ship";
+      case "trader":
+        return "trader";
+      case "items":
+        return "item";
+      case "fleetLost":
+        return "blackhole";
+      case "navigation":
+        return (nav.returnTimeMultiplier ?? 1) < 1 ? "early" : "late";
+      case "combatPirates":
+        return "pirate";
+      case "combatAliens":
+        return "alien";
+      default:
+        return "unknown";
+    }
+  }
+  var SIZES = { huge: 0, big: 1, normal: 2 };
+  function readMessage(msg, ownPlayerId2) {
+    const raw = msg.querySelector(".rawMessageData");
+    const id = msg.getAttribute("data-msg-id");
+    if (!raw || !id) return null;
+    const d = raw.dataset;
+    const type = int2(d.rawMessagetype);
+    const at = int2(d.rawTimestamp || d.rawDatetime) * 1e3 || Date.now();
+    if (type === 41 || type === 61 || d.rawExpeditionresult !== void 0) {
+      const artefacts = int2(d.rawArtifactsfound);
+      const lfXp = int2(d.rawLifeformgainedexperience);
+      const result = outcome(type, d, artefacts, lfXp);
+      const items = json(d.rawItemsgained, null);
+      const first = Array.isArray(items) ? items[0] : items && typeof items === "object" ? Object.values(items)[0] : null;
+      const sizeRaw = d.rawSize ?? d.rawArtifactssize ?? "";
+      const sized = !["nothing", "trader", "blackhole", "lifeform", "unknown"].includes(result);
+      return {
+        kind: type === 61 ? "discovery" : "expedition",
+        id,
+        at,
+        result,
+        size: !sized ? -1 : sizeRaw in SIZES ? SIZES[sizeRaw] : /^[0-2]$/.test(sizeRaw) ? Number(sizeRaw) : -1,
+        depletion: int2(d.rawDepletion),
+        res: readRes(json(d.rawResourcesgained, {})),
+        ships: readUnits(json(d.rawTechnologiesgained, {})),
+        lost: readUnits(json(d.rawShipslost, {})),
+        item: first && typeof first === "object" ? String(first.name ?? "") || null : null,
+        lfXp,
+        lifeform: int2(d.rawLifeform),
+        artefacts,
+        coords: d.rawCoords || d.rawCoordinates || null
+      };
+    }
+    if (d.rawCoordinates !== void 0 && d.rawResources !== void 0 && d.rawLoot !== void 0) {
+      if (d.rawTargetplayerid === "99999") return null;
+      const counter = int2(d.rawTargetplayerid) === ownPlayerId2 && ownPlayerId2 > 0;
+      const hiddenFleet = d.rawHiddenships === "1";
+      const hiddenDef = d.rawHiddendef === "1";
+      const isActive = int2(d.rawActive) === 1;
+      let activity = d.rawActivity === void 0 ? -1 : int2(d.rawActivity);
+      if (activity === -1 || !isActive && activity < 15) activity = 60;
+      else if (isActive && activity < 15) activity = 0;
+      return {
+        kind: "spy",
+        id,
+        at,
+        coords: d.rawCoordinates,
+        moon: int2(d.rawTargetplanettype) === 3,
+        playerId: int2(d.rawTargetplayerid),
+        playerName: d.rawPlayername ?? "",
+        statuses: json(d.rawPlayerstatus, []).filter((x) => typeof x === "string"),
+        counter,
+        sourceName: d.rawSourceplayername ?? "",
+        sourceCoords: d.rawSourceplanetcoordinates ?? "",
+        activity,
+        res: { metal: int2(d.rawMetal), crystal: int2(d.rawCrystal), deuterium: int2(d.rawDeuterium), food: int2(d.rawFood) },
+        loot: int2(d.rawLoot) / 100,
+        fleetValue: hiddenFleet ? -1 : int2(d.rawFleetvalue),
+        defValue: hiddenDef ? -1 : int2(d.rawDefensevalue),
+        attacked: int2(d.rawAttacking) === 1,
+        apiKey: d.rawHashcode ?? ""
+      };
+    }
+    if (d.rawResult !== void 0 && d.rawFleets !== void 0) return readCombat(id, at, d, ownPlayerId2);
+    if (type === 48)
+      return {
+        kind: "combat",
+        id,
+        at,
+        coords: d.rawCoords || d.rawTargetplanetcoordinates || null,
+        attacker: true,
+        winner: "lost",
+        loot: { metal: 0, crystal: 0, deuterium: 0 },
+        lost: readUnits(json(d.rawShipslost, {})),
+        debris: { metal: 0, crystal: 0, deuterium: 0 },
+        apiKey: d.rawHashcode ?? ""
+      };
+    const place2 = (side) => {
+      const coords = d[`raw${side === "source" ? "Source" : "Target"}planetcoordinates`];
+      if (!coords) return null;
+      return { name: d[`raw${side === "source" ? "Source" : "Target"}planetname`] ?? "", coords, moon: int2(d[`raw${side === "source" ? "Source" : "Target"}planettype`]) === 3 };
+    };
+    const recycled = readRes(json(d.rawRecycledresources, {}));
+    if (type === 32 || recycled.metal + recycled.crystal + recycled.deuterium > 0) {
+      const field = readRes(json(d.rawDebrisresources, {}));
+      return {
+        kind: "recycle",
+        id,
+        at,
+        coords: d.rawCoords || d.rawTargetcoordinates || null,
+        res: { metal: recycled.metal, crystal: recycled.crystal, deuterium: recycled.deuterium, food: 0 },
+        from: null,
+        to: null,
+        left: { metal: Math.max(0, field.metal - recycled.metal), crystal: Math.max(0, field.crystal - recycled.crystal), deuterium: Math.max(0, field.deuterium - recycled.deuterium) }
+      };
+    }
+    const cargo = readRes(json(d.rawCargo, {}));
+    if (type === 33 || type === 34 || cargo.metal + cargo.crystal + cargo.deuterium + cargo.food > 0) {
+      let from = place2("source");
+      if (!from) {
+        const seen = /\[(\d+:\d+:\d+)\]/.exec(msg.querySelector(".msgContent")?.textContent ?? "");
+        if (seen) from = { name: "", coords: seen[1], moon: false };
+      }
+      const back = type === 34 && from?.coords.split(":")[2] === "16";
+      return {
+        kind: back ? "return" : type === 34 ? "deploy" : "transport",
+        id,
+        at,
+        coords: d.rawTargetplanetcoordinates || d.rawCoords || null,
+        res: { metal: cargo.metal, crystal: cargo.crystal, deuterium: cargo.deuterium, food: cargo.food },
+        from,
+        to: place2("target")
+      };
+    }
+    return null;
+  }
+  function readCombat(id, at, d, own) {
+    const fleets = json(d.rawFleets, []);
+    const rounds = json(d.rawCombatrounds, []);
+    const result = json(d.rawResult, {});
+    const defender = json(d.rawDefenderspaceobject, {});
+    const mine = (Array.isArray(fleets) ? fleets : []).filter((f) => f.player?.id === own);
+    const ownIds = new Set(mine.map((f) => f.fleetId));
+    const sides = new Set(mine.map((f) => f.side));
+    const attacker = sides.has("attacker");
+    const winner = result.winner === "none" ? "draw" : result.winner && sides.has(result.winner) ? "won" : result.winner ? "lost" : "unknown";
+    const pick = (list, key2) => {
+      const of = (r) => num2(list?.find((x) => x.resource === r)?.[key2]);
+      return { metal: of("metal"), crystal: of("crystal"), deuterium: of("deuterium") };
+    };
+    let loot = { metal: 0, crystal: 0, deuterium: 0 };
+    const taken = pick(result.loot?.resources, "amount");
+    if (winner === "won" && attacker) loot = taken;
+    else if (winner === "lost" && defender.owner?.id === own) loot = { metal: -taken.metal, crystal: -taken.crystal, deuterium: -taken.deuterium };
+    const lost = {};
+    const last2 = Array.isArray(rounds) ? rounds[rounds.length - 1] : void 0;
+    for (const f of last2?.fleets ?? [])
+      if (ownIds.has(f.fleetId)) {
+        for (const tech of f.technologies ?? []) if (tech.technologyId && tech.destroyedTotal) lost[tech.technologyId] = (lost[tech.technologyId] ?? 0) + tech.destroyedTotal;
+      }
+    if (!attacker && defender.owner?.id === own) {
+      for (const r of result.repairedTechnologies ?? []) if (r.technologyId && lost[r.technologyId]) lost[r.technologyId] = Math.max(0, lost[r.technologyId] - num2(r.amount));
+    }
+    return { kind: "combat", id, at, coords: d.rawCoords || null, attacker, winner, loot, lost, debris: pick(result.debris?.resources, "remaining"), apiKey: d.rawHashcode ?? "" };
+  }
+  function ownPlayerId(doc) {
+    return int2(doc.querySelector('meta[name="ogame-player-id"]')?.getAttribute("content") ?? "");
+  }
+  function isMessagesPage(doc) {
+    const q = new URLSearchParams(doc.location?.search ?? "");
+    return q.get("page") === "messages" || q.get("component") === "messages" || !!doc.querySelector("#messagecontainercomponent, #messagescomponent");
+  }
+
+  // src/data/ship-icons.ts
+  var SHIP_ICONS = {
+    202: "https://gf2.geo.gfsrv.net/cdnd9/60555c3c87b9eb3b5ddf76780b5712.jpg",
+    203: "https://gf1.geo.gfsrv.net/cdn34/fdbcc505474e3e108d10a3ed4a19f4.jpg",
+    204: "https://gf2.geo.gfsrv.net/cdnd2/9ed5c1b6aea28fa51f84cdb8cb1e7e.jpg",
+    205: "https://gf1.geo.gfsrv.net/cdnf1/8266a2cbae5ad630c5fedbdf270f3e.jpg",
+    206: "https://gf2.geo.gfsrv.net/cdn45/b7ee4f9d556a0f39dae8d2133e05b7.jpg",
+    207: "https://gf1.geo.gfsrv.net/cdn32/3f4a081f4d15662bed33473db53d5b.jpg",
+    208: "https://gf1.geo.gfsrv.net/cdn6f/41a21e4253d2231f8937ddef1ba43e.jpg",
+    209: "https://gf1.geo.gfsrv.net/cdn07/6246eb3d7fa67414f6b818fa79dd9b.jpg",
+    210: "https://gf3.geo.gfsrv.net/cdnb5/347821e80cafc52aec04f27c3a2a4d.jpg",
+    211: "https://gf1.geo.gfsrv.net/cdnca/4d55a520aed09d0c43e7b962f33e27.jpg",
+    213: "https://gf3.geo.gfsrv.net/cdn2a/c2b9fedc9c93ef22f2739c49fbac52.jpg",
+    214: "https://gf3.geo.gfsrv.net/cdn84/155e9e24fc1d34ed4660de8d428f45.jpg",
+    215: "https://gf3.geo.gfsrv.net/cdn5a/24f511ec14a71e2d83fd750aa0dee2.jpg",
+    217: "https://gf3.geo.gfsrv.net/cdn26/28e8d79a5b489dc795cc47f3adf165.jpg",
+    218: "https://gf1.geo.gfsrv.net/cdn39/12d016c8bb0d71e053b901560c17cc.jpg",
+    219: "https://gf3.geo.gfsrv.net/cdne2/b8d8d18f2baf674acedb7504c7cc83.jpg"
+  };
+
+  // src/engines/raids.ts
+  var SPY_BOARD_KEY = "spy.board";
+  var SPY_MAX_AGE = 72 * 36e5;
+  var spyKey = (coords, moon) => `${coords}${moon ? ":m" : ""}`;
+  function rememberSpies(board, reports, now, shared = false) {
+    let changed = 0;
+    for (const r of reports) {
+      if (r.counter || !r.playerId) continue;
+      const key2 = spyKey(r.coords, r.moon);
+      const known = board[key2];
+      if (known && known.id === r.id && shared && !known.shared) {
+        known.shared = true;
+        changed++;
+      }
+      if (known && (known.at > r.at || known.at === r.at && (known.apiKey || !r.apiKey))) continue;
+      board[key2] = {
+        key: key2,
+        id: r.id,
+        at: r.at,
+        coords: r.coords,
+        moon: r.moon,
+        playerId: r.playerId,
+        playerName: r.playerName,
+        statuses: r.statuses,
+        activity: r.activity,
+        res: { metal: r.res.metal, crystal: r.res.crystal, deuterium: r.res.deuterium },
+        loot: r.loot,
+        fleetValue: r.fleetValue,
+        defValue: r.defValue,
+        apiKey: r.apiKey,
+        ...shared ? { shared: true } : {}
+      };
+      changed++;
+    }
+    for (const [key2, e] of Object.entries(board)) if (now - e.at > SPY_MAX_AGE) {
+      delete board[key2];
+      changed++;
+    }
+    return changed;
+  }
+  var parse = (coords) => coords.split(":").map(Number);
+  var ring = (d, size, donut) => donut ? Math.min(d, size - d) : d;
+  function distance(from, to, u) {
+    const [g1, s1, p1] = parse(from);
+    const [g2, s2, p2] = parse(to);
+    if (g1 !== g2) return 2e4 * ring(Math.abs(g1 - g2), u.galaxies, u.donutGalaxy);
+    if (s1 !== s2) return 2700 + 95 * ring(Math.abs(s1 - s2), u.systems, u.donutSystem);
+    if (p1 !== p2) return 1e3 + 5 * Math.abs(p1 - p2);
+    return 5;
+  }
+  function flightSeconds(dist, speed, u, percent = 100) {
+    return Math.round((10 + 3500 * (100 / percent) * Math.sqrt(10 * dist / speed)) / u.fleetSpeed);
+  }
+  function nearestBase(bases, coords, u) {
+    let base = null;
+    let dist = Infinity;
+    for (const b of bases) {
+      const d = distance(b.coords, coords, u);
+      if (d < dist) {
+        dist = d;
+        base = b;
+      }
+    }
+    return { base, dist };
+  }
+  function targetRows(board, bases, o) {
+    return Object.values(board).map((entry) => {
+      const lootRes = Math.floor((entry.res.metal + entry.res.crystal + entry.res.deuterium) * entry.loot);
+      const lootMsu = (entry.res.metal + entry.res.crystal * 1.5 + entry.res.deuterium * 3) * entry.loot;
+      const { base, dist } = nearestBase(bases, entry.coords, o.universe);
+      const flight = base && o.speed > 0 ? flightSeconds(dist, o.speed, o.universe) : null;
+      return {
+        entry,
+        lootRes,
+        lootMsu,
+        ships: o.capacity > 0 ? Math.ceil(lootRes / o.capacity) : 0,
+        base,
+        flight,
+        msuPerHour: flight ? lootMsu / (2 * flight / 3600) : null,
+        ageMinutes: Math.max(0, Math.round((o.now - entry.at) / 6e4))
+      };
+    });
+  }
+
+  // src/modules/messages/style.ts
+  var OUTCOME_COLORS = {
+    resource: "#4FD1E8",
+    darkmatter: "#B58CDB",
+    ship: "#4FE0B0",
+    nothing: "#8A9BB0",
+    trader: "#F59E4B",
+    item: "#D08A5B",
+    blackhole: "#9AA3AD",
+    early: "#7FA7FF",
+    late: "#E06A6A",
+    pirate: "#F5D547",
+    alien: "#7EE05A",
+    artefact: "#D4A93A",
+    lifeform: "#E07BC8",
+    unknown: "#5B6B80"
+  };
+  var RARITY = ["#B57BFF", "#4AA3FF", "#6BD66B"];
+  var outcomeCss = Object.entries(OUTCOME_COLORS).map(([k, c]) => `.fut-out-${k} { --tone: ${c}; }`).join("\n");
+  var MESSAGES_CSS = `
+/* One set of tokens for the summaries, the "just read" panel and the spy table. Text tokens keep
+   at least 4.5:1 on every background they sit on; --faint is for decoration only (ticks, tracks). */
+.fut-msg, .fut-fresh, #fut-spypanel {
+  --hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1; --faint: #4E5B6A; --line: #2E4356;
+  --link: #6F9FC8; --accent: #4FD1E8; --neg: #F07A6E; --warn: #E3B341; --ok: #7BC47F; --ship: #4FE0B0; --on-tone: #0D1116;
+}
+.fut-msg { display: grid; grid-template-columns: 124px minmax(0, 1fr) minmax(84px, auto) auto; align-items: center; column-gap: 10px;
+  box-sizing: border-box; margin: 4px 8px 6px; padding: 5px 8px; min-height: 30px;
+  border-radius: 4px; background: rgba(120, 150, 180, 0.06); cursor: pointer; text-align: left;
+  font: 11px/16px Verdana, Arial, Helvetica, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums; }
+.fut-msg:hover { background: rgba(120, 150, 180, 0.11); }
+.fut-msg:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.fut-msg-pillcell { display: flex; min-width: 0; }
+.fut-pill { --tone: #8A9BB0; display: inline-block; max-width: 100%; box-sizing: border-box; padding: 1px 8px; border-radius: 9px;
+  border: 1px solid color-mix(in srgb, var(--tone) 55%, transparent); background: color-mix(in srgb, var(--tone) 9%, transparent);
+  color: color-mix(in srgb, var(--tone) 78%, #fff); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Expedition size as game rarity, on the whole row: an edge, a tint, the value in the colour, the word for big and huge. */
+${RARITY.map((c, i) => `.fut-rar-${i} { --rar: ${c}; }`).join(" ")}
+.fut-msg[class*="fut-rar-"] { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rar) 30%, transparent); background: color-mix(in srgb, var(--rar) 7%, transparent); }
+.fut-msg[class*="fut-rar-"]:hover { background: color-mix(in srgb, var(--rar) 12%, transparent); }
+.fut-msg[class*="fut-rar-"] .fut-msg-val b { color: var(--rar); }
+.fut-msg.fut-rar-1 { background: color-mix(in srgb, var(--rar) 11%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rar) 60%, transparent); }
+.fut-msg.fut-rar-0 { background: color-mix(in srgb, var(--rar) 17%, transparent); box-shadow: inset 0 0 0 1px var(--rar); }
+.fut-msg.fut-rar-0 .fut-msg-val b { font-size: 14px; }
+.fut-rar-tag { margin-right: 4px; color: var(--rar); font-weight: 700; }
+${outcomeCss}
+.fut-msg-body { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; min-width: 0; }
+/* Resources: the initial in a badge of the resource's colour, so colour is never the only cue. */
+.fut-r { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.fut-r::before { content: attr(data-k); box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; flex: none;
+  min-width: 16px; height: 16px; padding: 0 3px; border-radius: 8px; background: var(--dot); color: var(--on-tone); font-size: 10px; font-weight: 700; line-height: 1; }
+.fut-r-m { --dot: #A9B1C9; } .fut-r-c { --dot: #8DCEEC; } .fut-r-d { --dot: #4FC3A8; } .fut-r-f { --dot: #D6A8C8; } .fut-r-dm { --dot: #B58CDB; }
+.fut-u { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.fut-msg-icon { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; flex: none; }
+.fut-msg-icon-none { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #1A2733; font-size: 8px; color: var(--mute); }
+.fut-note { white-space: nowrap; color: var(--txt); }
+.fut-msg .fut-muted { color: var(--mute); } .fut-msg .fut-warn { color: var(--warn); } .fut-msg .fut-neg { color: var(--neg); }
+.fut-msg .fut-item { color: #D08A5B; } .fut-msg .fut-lf { color: #E07BC8; } .fut-msg .fut-art { color: #D4A93A; }
+.fut-route { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0 6px; color: var(--txt); }
+.fut-place { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+.fut-msg .fut-coords { color: var(--link); text-decoration: none; }
+.fut-msg a.fut-coords:hover, .fut-msg a.fut-coords:focus-visible { color: var(--hi); }
+.fut-arrow { flex: none; color: var(--mute); }
+.fut-msg-moon { color: var(--mute); }
+.fut-depl { display: inline-flex; gap: 2px; margin-left: auto; padding: 2px 0; }
+.fut-depl i { width: 4px; height: 10px; border-radius: 1px; background: #26323F; }
+.fut-depl i.on { background: var(--mute); }
+.fut-msg-val { justify-self: end; display: flex; align-items: baseline; gap: 4px; white-space: nowrap; }
+.fut-msg-val b { font-size: 13px; color: var(--hi); }
+.fut-msg-val b.fut-neg { color: var(--neg); }
+.fut-msg-val b.fut-dm { color: #B58CDB; }
+.fut-msg-val small { font-size: 11px; color: var(--mute); }
+.fut-dash { color: var(--dim); }
+.fut-msg-acts { display: flex; gap: 4px; }
+.fut-msg-acts:empty { display: none; }
+.fut-msg a.fut-msg-link { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 12px; border: 1px solid var(--line);
+  color: #8FB6D8; text-decoration: none; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.fut-msg a.fut-msg-link:hover, .fut-msg a.fut-msg-link:focus-visible { border-color: var(--link); color: var(--hi); outline: none; }
+/* Today's recap heads the Expeditions tab with the same columns as the reports below. */
+.fut-msg.fut-recap { margin: 0 8px 8px; padding: 7px 8px; background: rgba(79, 209, 232, 0.08); box-shadow: inset 0 0 0 1px rgba(79, 209, 232, 0.4); }
+.fut-msg.fut-recap:hover { background: rgba(79, 209, 232, 0.13); }
+.fut-recap .fut-msg-val b { font-size: 14px; }
+/* "Just read": under today's recap, gone after a countdown (paused on hover / focus). */
+.fut-fresh { box-sizing: border-box; margin: -6px 8px 10px; padding: 0 10px 10px; border-radius: 0 0 4px 4px; overflow: hidden;
+  background: #0E151C; font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums; }
+.fut-fresh-timer { height: 3px; margin: 0 -10px 8px; background: #1A2530; }
+.fut-fresh-timer i { display: block; height: 100%; background: #F5A623; transform-origin: left center; animation: fut-fresh-countdown linear forwards; }
+.fut-fresh:hover .fut-fresh-timer i, .fut-fresh:focus-within .fut-fresh-timer i { animation-play-state: paused; }
+@keyframes fut-fresh-countdown { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+.fut-fresh-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-bottom: 8px; }
+.fut-fresh-head > b { font-size: 12px; color: var(--hi); }
+.fut-fresh-count { color: var(--mute); }
+.fut-rar-chip { padding: 0 7px; border-radius: 9px; border: 1px solid color-mix(in srgb, var(--rar) 60%, transparent);
+  background: color-mix(in srgb, var(--rar) 14%, transparent); color: var(--rar); font-weight: 700; white-space: nowrap; }
+.fut-fresh-total { margin-left: auto; display: flex; align-items: baseline; gap: 4px; }
+.fut-fresh-total b { font-size: 15px; color: var(--hi); }
+.fut-fresh-total.fut-neg b { color: var(--neg); }
+.fut-fresh-total small { color: var(--mute); font-size: 11px; }
+.fut-fresh-close { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--mute); cursor: pointer; }
+.fut-fresh-close:hover, .fut-fresh-close:focus-visible { color: var(--hi); background: rgba(120, 150, 180, 0.14); outline: none; }
+.fut-fresh-close:focus-visible { outline: 2px solid var(--accent); }
+.fut-fresh-res { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.fut-fresh-tile { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 7px 9px; border-radius: 4px; background: rgba(120, 150, 180, 0.07); }
+.fut-fresh-name { display: flex; align-items: center; gap: 5px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fut-fresh-name::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--dot); flex: none; }
+.fut-fresh-tile b { font-size: 16px; line-height: 1.2; color: var(--dot); white-space: nowrap; }
+.fut-fresh-tile.zero b { color: var(--dim); }
+.fut-fresh-ships { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; }
+.fut-fresh-ship { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; color: var(--ship); }
+.fut-fresh-ship.fut-neg { color: var(--neg); }
+@media (max-width: 640px) { .fut-fresh-res { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) {
+  .fut-msg { grid-template-columns: auto minmax(0, 1fr) auto; row-gap: 4px; }
+  .fut-msg-body { grid-column: 1 / -1; grid-row: 2; }
+  .fut-msg-acts { grid-column: 1 / -1; grid-row: 3; }
+}
+.msg.fut-msg-folded .msgContent, .msg.fut-msg-folded .msg_content, .msg.fut-msg-folded > .content-box { display: none !important; }
+
+/* Spy table, above the Espionage reports. Same type, tokens and pills as the summaries. */
+#fut-spypanel { margin: 0 0 8px; padding: 8px; border-radius: 4px; background: #0A0F14; font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt);
+  font-variant-numeric: tabular-nums; }
+#fut-spypanel button { font: inherit; cursor: pointer; }
+#fut-spypanel button:focus-visible, #fut-spypanel a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.fut-sp-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+#fut-spypanel .fut-sp-title { display: flex; align-items: baseline; gap: 8px; flex: 1 0 100%; box-sizing: border-box; min-height: 28px; padding: 4px 6px;
+  border: 0; border-radius: 4px; background: none; color: var(--hi); }
+#fut-spypanel .fut-sp-title:hover { background: rgba(120, 150, 180, 0.08); }
+.fut-sp-title b { font-size: 13px; }
+.fut-sp-title span { color: var(--mute); }
+.fut-sp-chev { align-self: center; color: var(--mute); transition: transform 120ms ease-out; }
+.fut-sp-title[aria-expanded="false"] .fut-sp-chev { transform: rotate(-90deg); }
+@media (prefers-reduced-motion: reduce) { .fut-sp-chev { transition: none; } }
+.fut-sp-group { display: inline-flex; }
+#fut-spypanel .fut-sp-chip { height: 24px; padding: 0 10px; border: 1px solid var(--line); border-radius: 12px; background: none; color: var(--mute); white-space: nowrap; }
+#fut-spypanel .fut-sp-group .fut-sp-chip { border-radius: 0; }
+#fut-spypanel .fut-sp-group .fut-sp-chip:first-child { border-radius: 12px 0 0 12px; }
+#fut-spypanel .fut-sp-group .fut-sp-chip + .fut-sp-chip { border-left: 0; }
+#fut-spypanel .fut-sp-group .fut-sp-chip:last-child { border-radius: 0 12px 12px 0; }
+#fut-spypanel .fut-sp-chip:hover { color: var(--hi); border-color: #4A6A86; }
+#fut-spypanel .fut-sp-chip[aria-pressed="true"] { background: rgba(79, 209, 232, 0.14); border-color: var(--accent); color: #CFF5FC; }
+.fut-sp-row { display: grid; grid-template-columns: minmax(0, 1fr) 62px 80px 56px 56px 156px; gap: 8px; align-items: center;
+  min-height: 38px; padding: 4px 8px; border-radius: 4px; }
+.fut-sp-list { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
+.fut-sp-list .fut-sp-row { background: rgba(120, 150, 180, 0.05); }
+.fut-sp-list .fut-sp-row:hover { background: rgba(120, 150, 180, 0.1); }
+.fut-sp-cols { min-height: 0; margin-top: 8px; padding-top: 0; padding-bottom: 2px; }
+.fut-sp-cols > [role="columnheader"] { display: flex; justify-content: flex-end; min-width: 0; }
+.fut-sp-cols > [role="columnheader"]:first-child { justify-content: flex-start; }
+#fut-spypanel .fut-sp-h { display: inline-flex; align-items: center; gap: 3px; min-height: 24px; padding: 0 2px; border: 0; background: none; color: var(--mute);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#fut-spypanel button.fut-sp-h:hover { color: var(--hi); }
+#fut-spypanel .fut-sp-h.sortBy { color: #CFF5FC; }
+[aria-sort="ascending"] > .fut-sp-h .fut-sp-sort { transform: rotate(180deg); }
+.fut-sp-who { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.fut-sp-line { display: flex; align-items: center; gap: 4px; min-width: 0; }
+#fut-spypanel a.fut-sp-name { color: var(--hi); font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#fut-spypanel a.fut-sp-name:hover, #fut-spypanel a.fut-sp-name:focus-visible { color: var(--accent); text-decoration: underline; }
+#fut-spypanel .fut-mk-flag { min-width: 24px; min-height: 24px; }
+.fut-sp-st { padding: 0 5px; border-radius: 8px; background: #1A2733; font-size: 11px; line-height: 16px; color: var(--txt); white-space: nowrap; }
+.fut-sp-st.st-inactive, .fut-sp-st.st-longinactive { color: var(--ok); }
+.fut-sp-st.st-vacation { color: #7FB8FF; }
+.fut-sp-st.st-shared { color: #D2B8FF; background: rgba(181, 123, 255, 0.16); }
+.fut-sp-st.st-noob, .fut-sp-st.st-strong, .fut-sp-st.st-honorableTarget { color: var(--warn); }
+#fut-spypanel a.fut-sp-coords { color: var(--link); text-decoration: none; white-space: nowrap; }
+#fut-spypanel a.fut-sp-coords:hover { color: var(--hi); }
+.fut-sp-moon { margin-right: 3px; vertical-align: -1px; }
+.fut-sp-num { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; white-space: nowrap; min-width: 0; }
+.fut-sp-num b { color: var(--hi); font-size: 12px; }
+.fut-sp-num small { font-size: 11px; color: var(--mute); overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.fut-sp-num small .fut-msg-icon { width: 14px; height: 14px; vertical-align: -3px; margin-right: 3px; }
+#fut-spypanel .fresh { color: var(--ok); } #fut-spypanel .warm { color: var(--warn); } #fut-spypanel .old, #fut-spypanel .bad { color: var(--neg); }
+#fut-spypanel .zero { color: var(--dim); }
+.fut-sp-acts { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+#fut-spypanel .fut-sp-attack { height: 24px; padding: 0 10px; border: 1px solid #C0533F; border-radius: 12px; background: rgba(192, 83, 63, 0.18); color: #FFD9D2; font-weight: 700; }
+#fut-spypanel .fut-sp-attack:hover { background: rgba(192, 83, 63, 0.34); }
+#fut-spypanel .fut-sp-sim { height: 24px; padding: 0 10px; border: 1px solid var(--line); border-radius: 12px; background: none; color: #8FB6D8; font-weight: 700; }
+#fut-spypanel .fut-sp-sim:hover { color: var(--hi); border-color: var(--link); background: rgba(120, 150, 180, 0.12); }
+#fut-spypanel .fut-sp-del { flex: none; width: 24px; min-width: 24px; height: 24px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+  border: 0; border-radius: 50%; background: none; color: var(--dim); }
+#fut-spypanel .fut-sp-del:hover { color: var(--neg); background: rgba(240, 122, 110, 0.12); }
+.fut-sp-note { max-width: 80ch; margin: 8px 4px 0; color: var(--mute); font-size: 11px; line-height: 1.5; }
+@media (max-width: 640px) {
+  .fut-sp-cols { display: none; }
+  .fut-sp-row { grid-template-columns: minmax(0, 1fr) auto auto; }
+  .fut-sp-row > .fut-sp-acts { grid-column: 1 / -1; justify-content: flex-start; }
+}
+`;
+  var JOURNAL_CSS = `
+:host { --panel-w: 860px; }
+.kpi .value { font-size: 18px; font-family: var(--mono); }
+.kpi .detail { display: flex; flex-wrap: wrap; gap: 8px; }
+.bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: #0D1522; gap: 2px; }
+.bar span { display: block; height: 100%; min-width: 2px; }
+.legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 4px 12px; margin-top: 8px; font-size: 12px; }
+.legend div { display: flex; align-items: center; gap: 6px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.legend .n { margin-left: auto; font-family: "JetBrains Mono", Consolas, monospace; color: #C9D4E2; }
+.legend .pct { color: #8A9BB0; font-size: 11px; min-width: 38px; text-align: right; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { text-align: right; color: #8A9BB0; font-weight: 400; padding: 3px 6px; border-bottom: 1px solid #1F2C40; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+td { text-align: right; padding: 3px 6px; border-bottom: 1px solid #172334; font-family: "JetBrains Mono", Consolas, monospace; white-space: nowrap; }
+td:first-child { font-family: Arial, sans-serif; color: #C9D4E2; }
+.scroll { overflow-x: auto; }
+.sizes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.rar { padding: 1px 8px; border-radius: 9px; font-size: 12px; font-weight: 700; color: var(--rar);
+  border: 1px solid color-mix(in srgb, var(--rar) 60%, transparent); background: color-mix(in srgb, var(--rar) 14%, transparent); }
+${RARITY.map((c, i) => `.rar-${i} { --rar: ${c}; }`).join(" ")}
+/* Resources found: the big numbers of the journal. */
+.res { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.res-tile { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 10px 12px; border-radius: 6px; background: #111B27; }
+.res-tile.m { --dot: #A9B1C9; } .res-tile.c { --dot: #8DCEEC; } .res-tile.d { --dot: #4FC3A8; } .res-tile.dm { --dot: #B58CDB; }
+.res-name { display: flex; align-items: center; gap: 6px; color: #8A9BB0; font-size: 12px; }
+.res-name::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--dot); flex: none; }
+.res-tile b { font-size: 22px; line-height: 1.15; color: var(--dot); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.res-tile.zero b { color: #4E5B6A; }
+/* Ships found: compact, many per row; the count matters more than the picture. */
+.ships { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 4px 10px; }
+.ship { display: flex; align-items: center; gap: 6px; padding: 1px 0; min-width: 0; }
+.ship-img { width: 24px; height: 24px; flex: none; border-radius: 50%; object-fit: cover; background: #16202E; }
+.ship-img-none { display: flex; align-items: center; justify-content: center; color: #8A9BB0; font-size: 9px; }
+.ship-info { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.ship-info b { font-size: 12px; font-variant-numeric: tabular-nums; }
+.ship-name { color: #8A9BB0; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 560px) { .res { grid-template-columns: repeat(2, minmax(0, 1fr)); } .res-tile b { font-size: 18px; } }
+h4.lost { margin: 10px 0 6px; color: var(--bad); }
+.foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.opt { display: flex; gap: 6px; align-items: center; color: #B4C2D3; font-size: 12px; cursor: pointer; }
+.acts { display: flex; gap: 6px; }
+@media (max-width: 560px) { .kpi .value { font-size: 15px; } }
+`;
+
+  // src/modules/messages/spy-table.ts
+  var SPY_PANEL_ID = "fut-spypanel";
+  var VIEW_KEY2 = "spy.view";
+  var SPY_SHARED_KEY = "spy.shared";
+  var SORT_KEYS = ["target", "age", "loot", "fleet", "def"];
+  var DEFAULT_VIEW = { sort: "loot", desc: true, ship: 203, hideDefended: false, inactiveOnly: false, open: true };
+  function universeOf(doc, data) {
+    const meta = (name) => doc.querySelector(`meta[name="${name}"]`)?.getAttribute("content") ?? "";
+    return {
+      galaxies: data?.galaxies || 9,
+      systems: data?.systems || 499,
+      donutGalaxy: data ? data.donutGalaxy : meta("ogame-donut-galaxy") !== "0",
+      donutSystem: data ? data.donutSystem : meta("ogame-donut-system") !== "0",
+      fleetSpeed: data?.speedFleetWar || Number(meta("ogame-universe-speed-fleet-war")) || 1
+    };
+  }
+  var INACTIVE = ["inactive", "longinactive"];
+  var defended = (r) => r.entry.defValue !== 0 || r.entry.fleetValue !== 0;
+  function sortRows(rows, view) {
+    const val = (r) => {
+      switch (view.sort) {
+        case "target":
+          return r.entry.playerName.toLowerCase();
+        case "age":
+          return r.ageMinutes;
+        case "loot":
+          return r.lootRes;
+        case "fleet":
+          return r.entry.fleetValue;
+        case "def":
+          return r.entry.defValue;
+      }
+    };
+    const dir = view.desc ? -1 : 1;
+    return [...rows].sort((a, b) => {
+      const x = val(a), y = val(b);
+      return (x < y ? -1 : x > y ? 1 : 0) * dir;
+    });
+  }
+  var isSpyTab = (doc) => !!doc.querySelector('[data-subtab-id="20"].active, [data-subtab-id="20"][aria-selected="true"]');
+  function mountSpyPanel(o) {
+    const { doc } = o;
+    ensureMarksStyle(doc);
+    const holder = doc.querySelector("#messages .messagesHolder");
+    const sortRow = doc.querySelector("#messages #filteredHeadersRow");
+    const anchor = sortRow && sortRow.parentElement === holder?.parentElement ? sortRow : holder;
+    const old = doc.getElementById(SPY_PANEL_ID);
+    if (!holder || !isSpyTab(doc)) {
+      old?.remove();
+      return;
+    }
+    const board = o.store.get(SPY_BOARD_KEY, {});
+    const view = { ...DEFAULT_VIEW, ...o.store.get(VIEW_KEY2, {}) };
+    if (!SORT_KEYS.includes(view.sort)) view.sort = "loot";
+    const prefs = [o.store.get(SPY_SHARED_KEY, true), o.store.get(SIM_KEY, "osims")];
+    const sig = JSON.stringify([Object.values(board).map((e) => e.id), view, prefs, Math.floor((o.now?.() ?? Date.now()) / 6e4)]);
+    if (old && old.dataset.sig === sig && old.nextElementSibling === anchor) return;
+    const panel = renderPanel(o, board, view);
+    panel.dataset.sig = sig;
+    if (old) old.remove();
+    anchor.before(panel);
+  }
+  function renderPanel(o, board, view) {
+    const { doc, store, t, locale, spy } = o;
+    const now = o.now?.() ?? Date.now();
+    const fmt = (n) => formatUnits(n, locale);
+    const exact = (n) => Math.round(n).toLocaleString(locale);
+    const el5 = (tag, cls = "", text) => {
+      const n = doc.createElement(tag);
+      if (cls) n.className = cls;
+      if (text !== void 0) n.textContent = text;
+      return n;
+    };
+    const redraw = (next = {}) => {
+      store.set(VIEW_KEY2, { ...view, ...next });
+      mountSpyPanel(o);
+    };
+    const button3 = (cls, text, title, onClick) => {
+      const b = el5("button", cls, text);
+      b.type = "button";
+      b.title = title;
+      b.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        onClick();
+      });
+      return b;
+    };
+    const ships = store.get(SHIPS_INFO_KEY, {});
+    const info = ships[String(view.ship)];
+    const capacity = info?.capacity || (view.ship === 202 ? 5e3 : 25e3);
+    const universe = universeOf(doc, store.get(SERVER_DATA_KEY, null));
+    const showShared = store.get(SPY_SHARED_KEY, true);
+    const tool = simTool(store.get(SIM_KEY, "osims"));
+    const all2 = targetRows(board, spy.bases, { capacity, speed: info?.speed ?? 0, universe, now }).filter((r) => showShared || !r.entry.shared);
+    const rows = sortRows(all2.filter((r) => (!view.hideDefended || !defended(r)) && (!view.inactiveOnly || r.entry.statuses.some((s) => INACTIVE.includes(s)))), view);
+    const panel = el5("div", "fut-sp");
+    panel.id = SPY_PANEL_ID;
+    const head = el5("div", "fut-sp-head");
+    const toggle = el5("button", "fut-sp-title");
+    toggle.type = "button";
+    toggle.setAttribute("aria-expanded", String(view.open));
+    toggle.append(icon(doc, "chevron", 12, "fut-sp-chev"), el5("b", "", t("spy.title")), el5("span", "", t("spy.sub", { n: rows.length, loot: fmt(rows.reduce((s, r) => s + r.lootRes, 0)) })));
+    toggle.addEventListener("click", () => redraw({ open: !view.open }));
+    head.append(toggle);
+    if (view.open) {
+      const chip2 = (text, pressed, next) => {
+        const b = el5("button", "fut-sp-chip", text);
+        b.type = "button";
+        b.setAttribute("aria-pressed", String(pressed));
+        b.addEventListener("click", () => redraw(next));
+        return b;
+      };
+      const cargo = el5("span", "fut-sp-group");
+      cargo.setAttribute("role", "group");
+      cargo.setAttribute("aria-label", t("spy.cargoShip"));
+      cargo.append(chip2(shipName(203, ships, t), view.ship === 203, { ship: 203 }), chip2(shipName(202, ships, t), view.ship === 202, { ship: 202 }));
+      head.append(
+        cargo,
+        chip2(t("spy.hideDefended"), view.hideDefended, { hideDefended: !view.hideDefended }),
+        chip2(t("spy.inactiveOnly"), view.inactiveOnly, { inactiveOnly: !view.inactiveOnly })
+      );
+    }
+    panel.append(head);
+    if (!view.open) return panel;
+    if (!rows.length) {
+      panel.append(el5("p", "fut-sp-note", t(all2.length ? "spy.noneFiltered" : "spy.none")));
+      return panel;
+    }
+    const table = el5("div", "fut-sp-table");
+    table.setAttribute("role", "table");
+    table.setAttribute("aria-label", t("spy.title"));
+    const cols = el5("div", "fut-sp-row fut-sp-cols");
+    cols.setAttribute("role", "row");
+    const headers = [["target", "spy.col.target"], ["age", "spy.col.age"], ["loot", "spy.col.loot"], ["fleet", "spy.col.fleet"], ["def", "spy.col.def"], [null, "spy.col.actions"]];
+    for (const [key2, label] of headers) {
+      const cell = el5("div");
+      cell.setAttribute("role", "columnheader");
+      const c = el5(key2 ? "button" : "span", `fut-sp-h${view.sort === key2 ? " sortBy" : ""}`, t(label));
+      if (key2 && view.sort === key2) c.append(icon(doc, "chevron", 10, "fut-sp-sort"));
+      if (key2) {
+        c.type = "button";
+        cell.setAttribute("aria-sort", view.sort === key2 ? view.desc ? "descending" : "ascending" : "none");
+        c.addEventListener("click", () => redraw(view.sort === key2 ? { desc: !view.desc } : { sort: key2, desc: key2 !== "target" && key2 !== "age" }));
+      } else c.setAttribute("aria-label", t("spy.col.actionsName"));
+      cell.append(c);
+      cols.append(cell);
+    }
+    table.append(cols);
+    const list = el5("div", "fut-sp-list");
+    list.setAttribute("role", "rowgroup");
+    for (const r of rows) {
+      const e = r.entry;
+      const [g, s, p] = e.coords.split(":");
+      const row = el5("div", `fut-sp-row${defended(r) ? " defended" : ""}`);
+      row.setAttribute("role", "row");
+      const who = el5("div", "fut-sp-who");
+      const top = el5("div", "fut-sp-line");
+      const name = el5("a", "fut-sp-name overlay", e.playerName || "?");
+      name.href = `${doc.location.origin}/game/index.php?page=ajax&component=messagedetails&messageId=${encodeURIComponent(e.id)}`;
+      name.dataset.overlayTitle = t("spy.report");
+      name.title = t("spy.reportHint", { name: e.playerName || "?" });
+      top.append(name, flagButton({ doc, store, t }, e.playerId, e.playerName));
+      if (e.shared) {
+        const ally = el5("span", "fut-sp-st st-shared", t("spy.shared"));
+        ally.title = t("spy.sharedHint");
+        top.append(ally);
+      }
+      for (const st of e.statuses.filter((x) => x !== "active")) top.append(el5("span", `fut-sp-st st-${st}`, t(`spy.status.${st}`)));
+      const gal = el5("a", "fut-sp-coords", `[${e.coords}]`);
+      gal.href = `/game/index.php?page=ingame&component=galaxy&galaxy=${g}&system=${s}`;
+      if (e.moon) gal.prepend(icon(doc, "moon", 10, "fut-sp-moon"));
+      const bottom = el5("div", "fut-sp-line");
+      bottom.append(gal);
+      who.append(top, bottom);
+      const age = el5("div", "fut-sp-num");
+      age.append(
+        el5("b", r.ageMinutes > 360 ? "old" : r.ageMinutes > 60 ? "warm" : "fresh", r.ageMinutes < 60 ? `${r.ageMinutes}m` : `${Math.floor(r.ageMinutes / 60)}h`),
+        el5("small", e.activity === 0 ? "bad" : e.activity < 60 ? "warm" : "", e.activity === 0 ? t("msg.spy.active") : e.activity >= 60 ? ">60m" : `${e.activity}m`)
+      );
+      age.title = new Date(e.at).toLocaleString(locale);
+      const loot = el5("div", "fut-sp-num");
+      const need = el5("small", "", r.ships.toLocaleString(locale));
+      need.prepend(shipIcon(doc, view.ship, shipName(view.ship, ships, t), "fut-msg-icon"));
+      loot.append(el5("b", "", fmt(r.lootRes)), need);
+      loot.title = t("spy.lootHint", {
+        pct: Math.round(e.loot * 100),
+        m: fmt(e.res.metal * e.loot),
+        c: fmt(e.res.crystal * e.loot),
+        d: fmt(e.res.deuterium * e.loot),
+        n: r.ships.toLocaleString(locale),
+        ship: shipName(view.ship, ships, t)
+      });
+      const value = (v, label) => {
+        const cell = el5("div", "fut-sp-num");
+        cell.append(el5("b", v < 0 ? "warm" : v > 0 ? "warm" : "zero", v < 0 ? "?" : v > 0 ? fmt(v) : "0"));
+        cell.title = `${label}: ${v < 0 ? t("spy.hidden") : exact(v)}`;
+        return cell;
+      };
+      const acts = el5("div", "fut-sp-acts");
+      if (r.base) {
+        const base = r.base;
+        const am = r.ships > 0 ? `&am${view.ship}=${r.ships}` : "";
+        acts.append(button3("fut-sp-attack", t("spy.attack"), t("spy.attackHint", { name: base.name, n: r.ships.toLocaleString(locale), ship: shipName(view.ship, ships, t) }), () => {
+          doc.location.assign(`/game/index.php?page=ingame&component=fleetdispatch&cp=${base.id}&galaxy=${g}&system=${s}&position=${p}&type=${e.moon ? 3 : 1}&mission=1${am}`);
+        }));
+      }
+      if (e.apiKey) {
+        const key2 = e.apiKey;
+        acts.append(button3("fut-sp-sim", t("spy.simulate"), t("spy.simulateHint", { tool: SIM_TOOLS[tool].name }), () => {
+          const prefill = simPrefill(spy.server, r.base ? { coords: r.base.coords, researches: spy.researches, classId: spy.classId, allianceClass: spy.allianceClass, lf: spy.lf ?? void 0 } : null, e.coords);
+          doc.defaultView?.open(simLink(tool, key2, spy.lang, prefill), "_blank", "noopener");
+        }));
+      }
+      const del = button3("fut-sp-del", "", t("spy.remove"), () => {
+        const b = store.get(SPY_BOARD_KEY, {});
+        delete b[e.key];
+        store.set(SPY_BOARD_KEY, b);
+        mountSpyPanel(o);
+      });
+      del.setAttribute("aria-label", t("spy.remove"));
+      del.append(icon(doc, "close", 11));
+      acts.append(del);
+      const cells = [who, age, loot, value(e.fleetValue, t("msg.spy.fleet")), value(e.defValue, t("msg.spy.def")), acts];
+      for (const c of cells) c.setAttribute("role", "cell");
+      row.append(...cells);
+      list.append(row);
+    }
+    table.append(list);
+    panel.append(table, el5("p", "fut-sp-note", t("spy.hint")));
+    return panel;
+  }
+
+  // src/modules/messages/exp-recap.ts
+  var RECAP_ID = "fut-exprecap";
+  var FRESH_ID = "fut-expfresh";
+  var FRESH_MS = 1e4;
+  var isExpeditionTab = (doc) => !!doc.querySelector('[data-subtab-id="22"].active, [data-subtab-id="22"][aria-selected="true"]');
+  function mountExpeditionRecap(o) {
+    const { doc, t, locale } = o;
+    const holder = doc.querySelector("#messages .messagesHolder");
+    const sortRow = doc.querySelector("#messages #filteredHeadersRow");
+    const anchor = sortRow && sortRow.parentElement === holder?.parentElement ? sortRow : holder;
+    const old = doc.getElementById(RECAP_ID);
+    if (!holder || !anchor || !isExpeditionTab(doc)) {
+      old?.remove();
+      doc.getElementById(FRESH_ID)?.remove();
+      return;
+    }
+    const now = o.now?.() ?? Date.now();
+    const s = periodStats(entriesIn(o.store.get(JOURNAL_KEY, {}), periodRange("today", now)));
+    const ships = msu(s.shipsValue) - msu(s.lostValue);
+    const sig = JSON.stringify([s.count, s.discoveries, s.res, ships, s.artefacts, s.lfXp, s.netMsu]);
+    const placed = old && (old.nextElementSibling === anchor || old.nextElementSibling?.id === FRESH_ID);
+    if (old && placed && old.dataset.sig === sig) return;
+    const line = summaryLine(doc, "fut-recap", { locale, t, ships: o.store.get(SHIPS_INFO_KEY, {}) });
+    const box = line.box;
+    box.setAttribute("role", "button");
+    box.tabIndex = 0;
+    box.id = RECAP_ID;
+    box.dataset.sig = sig;
+    box.title = t("recap.open");
+    line.pill(t("recap.title"), "resource");
+    line.note(t("recap.count", { n: s.count.toLocaleString(locale) }), "muted");
+    line.res(s.res);
+    if (ships) line.note(`${t("recap.ships")} ${formatUnits(ships, locale)}`, ships < 0 ? "neg" : "", t("recap.shipsHint", { n: Math.round(ships).toLocaleString(locale) }));
+    if (s.artefacts) line.note(t("msg.artefacts", { n: s.artefacts.toLocaleString(locale) }), "art");
+    if (s.lfXp) line.note(t("msg.lfXp", { n: s.lfXp.toLocaleString(locale) }), "lf");
+    line.value(s.netMsu);
+    if (o.onOpen) {
+      const open = o.onOpen;
+      box.addEventListener("click", open);
+      box.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        e.preventDefault();
+        open();
+      });
+    }
+    if (old && placed) old.replaceWith(box);
+    else {
+      old?.remove();
+      anchor.before(box);
+    }
+  }
+  var shown = /* @__PURE__ */ new WeakMap();
+  function showFreshExpeditions(o, entries) {
+    const { doc, t, locale } = o;
+    const recap = doc.getElementById(RECAP_ID);
+    if (!recap) return;
+    const old = doc.getElementById(FRESH_ID);
+    const all2 = [...old ? shown.get(old) ?? [] : [], ...entries];
+    const s = periodStats(all2);
+    const fmt = (n) => formatUnits(n, locale);
+    const exact = (n) => Math.round(n).toLocaleString(locale);
+    const ships = o.store.get(SHIPS_INFO_KEY, {});
+    const el5 = (tag, cls = "", text) => {
+      const n = doc.createElement(tag);
+      if (cls) n.className = cls;
+      if (text !== void 0) n.textContent = text;
+      return n;
+    };
+    const panel = el5("section", "fut-fresh");
+    panel.id = FRESH_ID;
+    panel.setAttribute("aria-live", "polite");
+    panel.setAttribute("aria-label", t("fresh.title"));
+    shown.set(panel, all2);
+    const timer2 = el5("div", "fut-fresh-timer");
+    const bar = el5("i");
+    bar.style.animationDuration = `${FRESH_MS}ms`;
+    bar.addEventListener("animationend", () => panel.remove());
+    timer2.append(bar);
+    const head = el5("div", "fut-fresh-head");
+    head.append(el5("b", "", t("fresh.title")), el5("span", "fut-fresh-count", t("recap.count", { n: (s.count + s.discoveries).toLocaleString(locale) })));
+    for (const i of [0, 1, 2]) if (s.sizes[i]) head.append(el5("span", `fut-rar-chip fut-rar-${i}`, `${s.sizes[i]} ${t(`msg.size.${i}`).toLowerCase()}`));
+    const total = el5("span", `fut-fresh-total${s.netMsu < 0 ? " fut-neg" : ""}`);
+    total.append(el5("b", "", fmt(s.netMsu)), el5("small", "", "MSU"));
+    total.title = `${exact(s.netMsu)} MSU`;
+    const close = el5("button", "fut-fresh-close");
+    close.type = "button";
+    close.title = t("fresh.close");
+    close.setAttribute("aria-label", t("fresh.close"));
+    close.append(icon(doc, "close", 12));
+    close.addEventListener("click", () => panel.remove());
+    head.append(total, close);
+    panel.append(timer2, head);
+    const res = el5("div", "fut-fresh-res");
+    for (const [key2, c] of [["metal", "m"], ["crystal", "c"], ["deuterium", "d"], ["darkMatter", "dm"]]) {
+      const v = s.res[key2];
+      const tile2 = el5("div", `fut-fresh-tile fut-r-${c}${v ? "" : " zero"}`);
+      tile2.title = `${t(`msg.res.${key2}`)}: ${exact(v)}`;
+      tile2.append(el5("span", "fut-fresh-name", t(`msg.res.${key2}`)), el5("b", "", v ? fmt(v) : "0"));
+      res.append(tile2);
+    }
+    panel.append(res);
+    const found = Object.entries(s.shipsFound);
+    const lost = Object.entries(s.lost);
+    if (found.length || lost.length) {
+      const list = el5("div", "fut-fresh-ships");
+      for (const [units, isLost] of [[found, false], [lost, true]]) {
+        for (const [id, n] of [...units].sort((a, b) => Number(a[0]) - Number(b[0]))) {
+          const name = shipName(Number(id), ships, t);
+          const tile2 = el5("span", `fut-fresh-ship${isLost ? " fut-neg" : ""}`, `${isLost ? "\u2212" : "+"}${n.toLocaleString(locale)}`);
+          tile2.prepend(shipIcon(doc, Number(id), name, "fut-msg-icon"));
+          tile2.title = name;
+          list.append(tile2);
+        }
+      }
+      panel.append(list);
+    }
+    if (old) old.replaceWith(panel);
+    else recap.after(panel);
+  }
+
+  // src/modules/messages/index.ts
+  var FOLD_KEY = "msg.fold";
+  function h2(doc, tag, cls = "", text) {
+    const node = doc.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== void 0) node.textContent = text;
+    return node;
+  }
+  function shipIcon(doc, id, name, cls) {
+    const url = SHIP_ICONS[id];
+    if (!url) return h2(doc, "span", `${cls} ${cls}-none`, name.slice(0, 3));
+    const img = h2(doc, "img", cls);
+    img.src = url;
+    img.alt = name;
+    img.title = name;
+    img.loading = "lazy";
+    return img;
+  }
+  function shipName(id, ships, t) {
+    const name = ships[String(id)]?.name;
+    if (name) return name;
+    const key2 = `ship.${id}`;
+    const fallback = t(key2);
+    return fallback === key2 ? `#${id}` : fallback;
+  }
+  function summaryLine(doc, cls, o) {
+    const { t, locale } = o;
+    const fmt = (n) => formatUnits(n, locale);
+    const exact = (n) => Math.round(n).toLocaleString(locale);
+    const box = h2(doc, "div", `fut-msg ${cls}`);
+    const pillCell = h2(doc, "div", "fut-msg-pillcell");
+    const body = h2(doc, "div", "fut-msg-body");
+    const value = h2(doc, "div", "fut-msg-val");
+    const acts = h2(doc, "div", "fut-msg-acts");
+    box.append(pillCell, body, value, acts);
+    return {
+      box,
+      body,
+      /** The outcome pill; `size` 0 huge, 1 big, 2 normal (brighter = bigger find). */
+      pill(text, tone, title, size = -1) {
+        const p = h2(doc, "span", `fut-pill fut-out-${tone}${size >= 0 ? ` fut-size-${size}` : ""}`, text);
+        if (title) p.title = title;
+        pillCell.append(p);
+        return p;
+      },
+      /** Resources with a colour dot each; `sign` −1 for what was taken from you. */
+      res(r, sign = 1, prefix = "") {
+        const keys = [["metal", "m"], ["crystal", "c"], ["deuterium", "d"], ["food", "f"], ["darkMatter", "dm"]];
+        let any = false;
+        for (const [key2, c] of keys) {
+          const v = (r[key2] ?? 0) * sign;
+          if (!v) continue;
+          any = true;
+          const s = h2(doc, "span", `fut-r fut-r-${c}${v < 0 ? " fut-neg" : ""}`, `${v < 0 ? "\u2212" : prefix}${fmt(Math.abs(v))}`);
+          s.dataset.k = t(`msg.abbr.${key2}`);
+          s.title = `${t(`msg.res.${key2}`)}: ${exact(v)}`;
+          s.setAttribute("aria-label", s.title);
+          body.append(s);
+        }
+        return any;
+      },
+      /** Ships with the game's picture: found (+), lost (−) or just counted. */
+      ships(units, mode) {
+        for (const [id, n] of Object.entries(units).sort((a, b) => Number(a[0]) - Number(b[0]))) {
+          if (!n) continue;
+          const name = shipName(Number(id), o.ships, t);
+          const s = h2(doc, "span", `fut-u${mode === "lost" ? " fut-neg" : ""}`, `${mode === "found" ? "+" : mode === "lost" ? "\u2212" : ""}${n.toLocaleString(locale)}`);
+          s.prepend(shipIcon(doc, Number(id), name, "fut-msg-icon"));
+          s.title = name;
+          body.append(s);
+        }
+      },
+      /** A short labelled fact ("Difesa 876M"); `tone` warn / neg / muted. */
+      note(text, tone = "", title) {
+        const s = h2(doc, "span", `fut-note${tone ? ` fut-${tone}` : ""}`, text);
+        if (title) s.title = title;
+        body.append(s);
+        return s;
+      },
+      /** An amount that is not MSU (dark matter), in the value column with its own unit. */
+      amount(n, unit, cls2, title) {
+        value.replaceChildren(h2(doc, "b", cls2, `+${fmt(n)}`), h2(doc, "small", "", unit));
+        value.title = `${exact(n)} ${title}`;
+      },
+      /** The value in MSU, or a dash when the report carries nothing. */
+      value(msuValue, title = t("msg.msuHint")) {
+        value.replaceChildren();
+        if (!msuValue) {
+          value.append(h2(doc, "span", "fut-dash", "\u2014"));
+          return;
+        }
+        value.append(h2(doc, "b", msuValue < 0 ? "fut-neg" : "", `${msuValue < 0 ? "\u2212" : ""}${fmt(Math.abs(msuValue))}`), h2(doc, "small", "", "MSU"));
+        value.title = `${exact(msuValue)} MSU \xB7 ${title}`;
+      },
+      /** The find's size in words before the value (big and huge only; normal is the default). */
+      rarity(label) {
+        value.prepend(h2(doc, "span", "fut-rar-tag", label));
+      },
+      /** A small text button that opens an outside tool in a new tab (the player's click). */
+      link(text, href, title) {
+        const a = h2(doc, "a", "fut-msg-link", text);
+        a.href = href;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.title = title;
+        acts.append(a);
+      },
+      /** Depletion of the expedition spot, as three ticks. */
+      depletion(n) {
+        const meter = h2(doc, "span", "fut-depl");
+        meter.title = t("msg.depletion", { n });
+        meter.setAttribute("role", "img");
+        meter.setAttribute("aria-label", meter.title);
+        for (let i = 1; i <= 3; i++) meter.append(h2(doc, "i", i <= n ? "on" : ""));
+        body.append(meter);
+      }
+    };
+  }
+  function summaryFor(doc, m, o) {
+    const { t, locale } = o;
+    const fmt = (n) => formatUnits(n, locale);
+    const line = summaryLine(doc, `fut-msg-${m.kind}`, o);
+    switch (m.kind) {
+      case "expedition":
+      case "discovery": {
+        const sizeName = m.size >= 0 ? t(`msg.size.${m.size}`) : "";
+        const full = t(`msg.out.${m.result}`);
+        const short = t(`msg.pill.${m.result}`);
+        const name = short === `msg.pill.${m.result}` ? full : short;
+        const label = m.kind === "discovery" ? `${t("msg.discovery")} \xB7 ${name}` : name;
+        line.pill(label, m.result, [m.kind === "discovery" ? t("msg.discovery") : "", full, sizeName].filter(Boolean).join(" \xB7 "));
+        if (sizeName) {
+          line.box.dataset.size = sizeName;
+          line.box.classList.add(`fut-rar-${m.size}`);
+        }
+        line.res(m.res, 1, "+");
+        line.ships(m.ships, "found");
+        line.ships(m.lost, "lost");
+        if (m.item) line.note(m.item, "item");
+        if (m.lfXp) line.note(t("msg.lfXp", { n: m.lfXp.toLocaleString(locale) }), "lf");
+        if (m.artefacts) line.note(t("msg.artefacts", { n: m.artefacts.toLocaleString(locale) }), "art");
+        if (m.depletion > 0) line.depletion(m.depletion);
+        const worth = msu(m.res) + msu(unitsValue(m.ships)) - msu(unitsValue(m.lost));
+        if (!worth && m.res.darkMatter) line.amount(m.res.darkMatter, t("msg.dmUnit"), "fut-dm", t("msg.res.darkMatter"));
+        else line.value(worth);
+        if (m.size === 0 || m.size === 1) line.rarity(sizeName.toLowerCase());
+        return line.box;
+      }
+      case "spy": {
+        if (m.counter) {
+          line.pill(t("msg.spy.counterPill"), "alien");
+          const who = h2(doc, "span", "fut-note", `${m.sourceName || "?"} `);
+          if (m.sourceCoords) {
+            const [g, s] = m.sourceCoords.split(":");
+            const a = h2(doc, "a", "fut-coords", `[${m.sourceCoords}]`);
+            a.href = `/game/index.php?page=ingame&component=galaxy&galaxy=${g}&system=${s}`;
+            who.append(a);
+          }
+          line.body.append(who);
+          return line.box;
+        }
+        const act2 = m.activity === 0 ? t("msg.spy.active") : m.activity >= 60 ? t("msg.spy.inactive") : t("msg.spy.activity", { n: m.activity });
+        line.pill(act2, m.activity === 0 ? "pirate" : m.activity < 60 ? "late" : "nothing");
+        line.res({ metal: m.res.metal * m.loot, crystal: m.res.crystal * m.loot, deuterium: m.res.deuterium * m.loot });
+        const loot = Math.floor((m.res.metal + m.res.crystal + m.res.deuterium) * m.loot);
+        const capacity = o.ships["203"]?.capacity || 25e3;
+        if (loot > 0) line.ships({ 203: Math.ceil(loot / capacity) }, "count");
+        const fleet = m.fleetValue < 0 ? "?" : m.fleetValue ? fmt(m.fleetValue) : "0";
+        const def = m.defValue < 0 ? "?" : m.defValue ? fmt(m.defValue) : "0";
+        line.note(`${t("msg.spy.fleet")} ${fleet}`, m.fleetValue !== 0 ? "warn" : "muted");
+        line.note(`${t("msg.spy.def")} ${def}`, m.defValue !== 0 ? "warn" : "muted");
+        if (m.attacked) line.note(t("msg.spy.attacked"), "muted");
+        line.value(msu(m.res) * m.loot, `${t("msg.spy.loot")} ${Math.round(m.loot * 100)}%`);
+        if (m.apiKey && o.spy && o.universe) {
+          const base = nearestBase(o.spy.bases, m.coords, o.universe).base;
+          const prefill = simPrefill(o.spy.server, base ? { coords: base.coords, researches: o.spy.researches, classId: o.spy.classId, allianceClass: o.spy.allianceClass, lf: o.spy.lf ?? void 0 } : null, m.coords);
+          const tool = o.sim ?? "osims";
+          line.link(t("spy.simulate"), simLink(tool, m.apiKey, o.spy.lang, prefill), t("spy.simulateHint", { tool: SIM_TOOLS[tool].name }));
+        }
+        return line.box;
+      }
+      case "transport":
+      case "deploy":
+      case "return":
+      case "recycle": {
+        line.pill(t(`msg.${m.kind}`), m.kind === "recycle" ? "resource" : m.kind === "transport" ? "trader" : "early");
+        if (m.from && m.to) {
+          const place2 = (p) => {
+            const s = h2(doc, "span", "fut-place", p.name ? `${p.name} ` : "");
+            if (p.moon) s.prepend(icon(doc, "moon", 10, "fut-msg-moon"));
+            s.append(h2(doc, "span", "fut-coords", `[${p.coords}]`));
+            return s;
+          };
+          const route = h2(doc, "span", "fut-route");
+          const arrow = icon(doc, "next", 12, "fut-arrow");
+          arrow.setAttribute("aria-label", "\u2192");
+          route.append(place2(m.from), arrow, place2(m.to));
+          line.body.append(route);
+        }
+        const any = line.res(m.res);
+        if (!any) line.note(t("msg.empty"), "muted");
+        const left = m.left ? m.left.metal + m.left.crystal + m.left.deuterium : 0;
+        if (left > 0) line.note(t("msg.debrisLeft", { n: fmt(left) }), "warn", `${Math.round(m.left.metal).toLocaleString(locale)} / ${Math.round(m.left.crystal).toLocaleString(locale)} / ${Math.round(m.left.deuterium).toLocaleString(locale)}`);
+        line.value(any ? msu(m.res) : null);
+        return line.box;
+      }
+      case "combat": {
+        line.pill(t(`msg.combat.${m.winner}`), m.winner === "won" ? "resource" : m.winner === "lost" ? "late" : "nothing");
+        const sum = m.loot.metal + m.loot.crystal + m.loot.deuterium;
+        if (sum) line.res(m.loot, 1, sum > 0 ? "+" : "");
+        const lost = msu(unitsValue(m.lost));
+        if (lost) line.note(`${t("msg.combat.losses")} ${fmt(lost)}`, "neg", Object.entries(m.lost).map(([id, n]) => `${n.toLocaleString(locale)} ${shipName(Number(id), o.ships, t)}`).join(", "));
+        const debris = m.debris.metal + m.debris.crystal + m.debris.deuterium;
+        if (debris) line.note(`${t("msg.combat.debris")} ${fmt(debris)}`, "muted");
+        line.value(msu(m.loot) - lost, t("msg.combat.netHint"));
+        if (m.apiKey) line.link(t("msg.combat.converter"), converterLink(m.apiKey, o.spy?.lang || locale), t("msg.combat.converterHint"));
+        return line.box;
+      }
+    }
+  }
+  function place(msg, box) {
+    const header = msg.querySelector(":scope > .msgFilteredHeaderRow");
+    if (header) return void header.after(box);
+    const head = msg.querySelector(":scope .msgHead");
+    if (head && !head.closest(".messageContentWrapper")) return void head.after(box);
+    const actions = msg.querySelector(".msg_actions, message-footer");
+    if (actions?.parentElement) actions.before(box);
+    else (msg.querySelector(".msgContent") ?? msg).after(box);
+  }
+  function processMessages(o) {
+    const { doc, store, t, locale } = o;
+    const ships = store.get(SHIPS_INFO_KEY, {});
+    const universe = universeOf(doc, store.get(SERVER_DATA_KEY, null));
+    const fold = store.get(FOLD_KEY, true);
+    const sim = simTool(store.get(SIM_KEY, "osims"));
+    const sharedTab = !!doc.querySelector('[data-subtab-id="11"].active, [data-subtab-id="11"][aria-selected="true"]');
+    const expeditions = [];
+    const spies = [];
+    let journal = null;
+    let added = 0;
+    const fresh = [];
+    for (const msg of Array.from(doc.querySelectorAll(".msg[data-msg-id]"))) {
+      if (msg.hasAttribute("data-fut-done") || msg.closest("#fut-journal")) continue;
+      msg.setAttribute("data-fut-done", "");
+      const parsed = readMessage(msg, o.playerId);
+      if (!parsed) continue;
+      const box = summaryFor(doc, parsed, { locale, t, ships, spy: o.spy, universe, sim });
+      if (box) {
+        box.title = [box.dataset.size, t("msg.toggle")].filter(Boolean).join(" \xB7 ");
+        box.tabIndex = 0;
+        box.setAttribute("role", "button");
+        const cell = () => msg.querySelector(":scope > .msgFilteredHeaderRow .msgFilteredHeaderCell");
+        const sync = () => {
+          if (!cell()) box.setAttribute("aria-expanded", String(!msg.classList.contains("fut-msg-folded")));
+        };
+        const toggle = () => {
+          const c = cell();
+          if (c) return void c.click();
+          msg.classList.toggle("fut-msg-folded");
+          sync();
+        };
+        box.addEventListener("click", (e) => {
+          if (e.target.closest("a, button")) return;
+          toggle();
+        });
+        box.addEventListener("keydown", (e) => {
+          if (e.target !== box || e.key !== "Enter" && e.key !== " ") return;
+          e.preventDefault();
+          toggle();
+        });
+        place(msg, box);
+        if (fold && (parsed.kind === "expedition" || parsed.kind === "discovery" || parsed.kind === "recycle" || parsed.kind === "transport" || parsed.kind === "deploy" || parsed.kind === "return")) msg.classList.add("fut-msg-folded");
+        sync();
+      }
+      if (parsed.kind === "expedition" || parsed.kind === "discovery") expeditions.push(parsed);
+      if (parsed.kind === "spy") spies.push(parsed);
+      if (parsed.kind === "combat" && parsed.coords?.split(":")[2] === "16" && Object.keys(parsed.lost).length) {
+        journal ?? (journal = store.get(JOURNAL_KEY, {}));
+        const r = recordCombat(journal, parsed.id, parsed.at, parsed.lost, parsed.coords);
+        journal = r.journal;
+        added += r.added;
+        if (r.added) fresh.push(journal[parsed.id]);
+      }
+    }
+    if (expeditions.length) {
+      journal ?? (journal = store.get(JOURNAL_KEY, {}));
+      const before = journal;
+      const r = record2(journal, expeditions);
+      journal = r.journal;
+      added += r.added;
+      for (const e of expeditions) if (!before[e.id]) fresh.push(journal[e.id]);
+    }
+    if (spies.length) {
+      const board = store.get(SPY_BOARD_KEY, {});
+      if (rememberSpies(board, spies, o.now?.() ?? Date.now(), sharedTab)) store.set(SPY_BOARD_KEY, board);
+    }
+    if (o.spy) mountSpyPanel({ doc, store, t, locale, spy: o.spy, now: o.now });
+    if (journal && added) {
+      store.set(JOURNAL_KEY, trim(journal, o.now?.() ?? Date.now()));
+      o.onJournal?.(added);
+    }
+    const recap = { doc, store, t, locale, now: o.now, onOpen: o.onOpenJournal };
+    mountExpeditionRecap(recap);
+    if (fresh.length) showFreshExpeditions(recap, fresh);
+    return added;
+  }
+  function watchMessages(o) {
+    const { doc } = o;
+    if (!doc.getElementById("fut-msg-style")) {
+      const style = h2(doc, "style");
+      style.id = "fut-msg-style";
+      style.textContent = MESSAGES_CSS;
+      doc.head.append(style);
+    }
+    processMessages(o);
+    let queued = false;
+    const observer = new MutationObserver(() => {
+      if (queued) return;
+      queued = true;
+      setTimeout(() => {
+        queued = false;
+        processMessages(o);
+      }, 50);
+    });
+    observer.observe(doc.body, { childList: true, subtree: true });
+    return () => {
+      doc.querySelectorAll(".msg .fut-msg").forEach((n) => n.remove());
+      doc.querySelectorAll(".msg[data-fut-done]").forEach((m) => {
+        m.removeAttribute("data-fut-done");
+        m.classList.remove("fut-msg-folded");
+      });
+      processMessages(o);
+    };
+  }
+
+  // src/modules/settings/index.ts
+  var SETTINGS_ID = "fut-settings-window";
+  var TAB_KEY = "settings.tab";
+  var SECTIONS = ["menu", "mail", "data"];
+  var CSS2 = `
+:host { --panel-w: 620px; }
+.body { display: flex; flex-direction: column; gap: 6px; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 16px; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 7px; background: var(--raised); }
+.row .name { color: var(--text); font-size: 12px; font-weight: 700; }
+.row .desc { grid-column: 1; color: var(--muted); font-size: 11px; line-height: 1.4; }
+.row .control { grid-column: 2; grid-row: 1 / span 2; display: inline-flex; }
+.seg { height: 26px; padding: 0 12px; border: 1px solid var(--line); background: #0A111C; color: var(--muted); font: 12px Arial, sans-serif; cursor: pointer; white-space: nowrap; }
+.seg:first-child { border-radius: 13px 0 0 13px; }
+.seg:last-child { border-radius: 0 13px 13px 0; }
+.seg + .seg { border-left: 0; }
+.seg:only-child { border-radius: 13px; }
+.seg:hover { color: var(--text); }
+.seg[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--text); font-weight: 700; }
+.seg[aria-pressed="true"] + .seg { border-left: 1px solid var(--line); }
+.seg:disabled { opacity: 0.45; cursor: not-allowed; }
+.status { min-height: 16px; padding: 0 4px; color: var(--accent); font-size: 11px; }
+.notes { padding: 2px 4px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+@media (max-width: 520px) { .row { grid-template-columns: 1fr; } .row .control { grid-column: 1; grid-row: auto; } }
+`;
+  var keyHandler = null;
+  function closeSettings(doc) {
+    doc.getElementById(SETTINGS_ID)?.remove();
+    if (keyHandler) doc.removeEventListener("keydown", keyHandler, true);
+    keyHandler = null;
+  }
+  function openSettings(o) {
+    const { doc, store, t } = o;
+    closeSettings(doc);
+    const host = doc.createElement("div");
+    host.id = SETTINGS_ID;
+    const root = host.attachShadow({ mode: "open" });
+    const el5 = (tag, cls = "", text) => {
+      const n = doc.createElement(tag);
+      if (cls) n.className = cls;
+      if (text !== void 0) n.textContent = text;
+      return n;
+    };
+    const style = el5("style");
+    style.textContent = WINDOW_SHEET + CSS2;
+    const backdrop = el5("div", "backdrop");
+    const panel = el5("div", "panel");
+    panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-modal", "true");
+    panel.setAttribute("aria-label", t("toolbar.settings"));
+    backdrop.append(panel);
+    backdrop.addEventListener("click", (e) => {
+      if (e.target === backdrop) closeSettings(doc);
+    });
+    root.append(style, backdrop);
+    doc.body.append(host);
+    let section2 = store.get(TAB_KEY, "menu");
+    if (!SECTIONS.includes(section2)) section2 = "menu";
+    let menu = { ...o.menu.settings };
+    let status = "";
+    const choice = (options, current2, onPick, disabled = false) => {
+      const box = el5("span", "control");
+      box.setAttribute("role", "group");
+      for (const [v, label] of options) {
+        const b = el5("button", "seg", label);
+        b.type = "button";
+        b.disabled = disabled;
+        b.setAttribute("aria-pressed", String(v === current2));
+        b.addEventListener("click", () => {
+          if (v === current2) return;
+          onPick(v);
+          draw();
+        });
+        box.append(b);
+      }
+      return box;
+    };
+    const row = (name, desc, control) => {
+      const r = el5("div", "row");
+      r.append(el5("span", "name", name), el5("span", "desc", desc), control);
+      return r;
+    };
+    const yesNo = (v, onPick) => choice([[true, t("settings.on")], [false, t("settings.off")]], v, onPick);
+    const draw = () => {
+      const head = el5("div", "head");
+      const titles = el5("div", "titles");
+      titles.append(el5("h2", "", t("toolbar.settings")), el5("span", "sub", t("settings.sub")));
+      const close = el5("button", "close");
+      close.type = "button";
+      close.title = t("fleet.close");
+      close.setAttribute("aria-label", t("fleet.close"));
+      close.append(icon(doc, "close", 16));
+      close.addEventListener("click", () => closeSettings(doc));
+      head.append(titles, close);
+      const tabs = el5("div", "tabs");
+      tabs.setAttribute("role", "tablist");
+      for (const s of SECTIONS) {
+        const b = el5("button", "tab", t(`settings.section.${s}`));
+        b.type = "button";
+        b.setAttribute("role", "tab");
+        b.setAttribute("aria-selected", String(s === section2));
+        b.setAttribute("aria-pressed", String(s === section2));
+        b.addEventListener("click", () => {
+          section2 = s;
+          status = "";
+          store.set(TAB_KEY, s);
+          draw();
+        });
+        tabs.append(b);
+      }
+      const body = el5("div", "body");
+      body.setAttribute("role", "tabpanel");
+      if (section2 === "menu") {
+        const setMenu = (next) => {
+          menu = { ...menu, ...next };
+          o.menu.onChange(menu);
+        };
+        body.append(
+          row(t("settings.view"), t(o.menu.canSide ? "settings.viewHint" : "settings.viewNarrow"), choice([["side", t("planetMenu.side")], ["compact", t("planetMenu.compact")]], o.menu.canSide ? menu.mode : "compact", (v) => setMenu({ mode: v }), !o.menu.canSide)),
+          row(t("settings.totals"), t("settings.totalsHint"), yesNo(menu.showTotals, (v) => setMenu({ showTotals: v }))),
+          row(t("settings.markIdle"), t("settings.markIdleHint"), yesNo(menu.markIdle, (v) => setMenu({ markIdle: v })))
+        );
+      } else if (section2 === "mail") {
+        const set = (key2, v) => {
+          store.set(key2, v);
+          o.onMailChange?.();
+        };
+        const tools = Object.entries(SIM_TOOLS).map(([k, v]) => [k, v.name]);
+        body.append(
+          row(t("settings.sim"), t("settings.simHint"), choice(tools, simTool(store.get(SIM_KEY, "osims")), (v) => set(SIM_KEY, v))),
+          row(t("settings.shared"), t("settings.sharedHint"), yesNo(store.get(SPY_SHARED_KEY, true), (v) => set(SPY_SHARED_KEY, v))),
+          row(t("settings.fold"), t("settings.foldHint"), yesNo(store.get(FOLD_KEY, true), (v) => set(FOLD_KEY, v)))
+        );
+      } else {
+        if (o.backup) {
+          const { onExport, onImport } = o.backup;
+          const picker = el5("input");
+          picker.type = "file";
+          picker.hidden = true;
+          picker.title = t("settings.backupImportHint");
+          picker.addEventListener("change", () => {
+            const file = picker.files?.[0];
+            picker.value = "";
+            if (!file) return;
+            file.text().then((text) => {
+              const done = onImport(text);
+              status = typeof done === "string" ? done : t("settings.backupRestored", { n: done });
+            }).catch(() => {
+              status = t("settings.backupBad");
+            }).finally(draw);
+          });
+          const action = (label, onClick) => {
+            const box = el5("span", "control");
+            const b = el5("button", "seg", label);
+            b.type = "button";
+            b.addEventListener("click", onClick);
+            box.append(b);
+            return box;
+          };
+          const two = el5("span", "control");
+          for (const [label, fn] of [[t("settings.backupExport"), () => {
+            status = t("settings.backupSaved", { n: onExport() });
+            draw();
+          }], [t("settings.backupImport"), () => picker.click()]]) {
+            const b = el5("button", "seg", label);
+            b.type = "button";
+            b.addEventListener("click", fn);
+            two.append(b);
+          }
+          body.append(
+            row(t("settings.backup"), t("settings.backupHint"), two),
+            row(t("settings.oglight"), t("settings.backupImportHint"), action(t("settings.oglightImport"), () => picker.click())),
+            picker
+          );
+          const s = el5("div", "status", status);
+          s.setAttribute("role", "status");
+          body.append(s);
+        }
+        if (o.notes?.length) body.append(el5("div", "notes", o.notes.join(" \xB7 ")));
+      }
+      panel.replaceChildren(head, tabs, body);
+    };
+    draw();
+    keyHandler = (e) => {
+      if (e.key === "Escape") closeSettings(doc);
+    };
+    doc.addEventListener("keydown", keyHandler, true);
+  }
 
   // src/engines/account.ts
   var KEYS3 = ["metal", "crystal", "deuterium"];
@@ -4759,7 +6425,6 @@ body.fut-on #planetbarcomponent #countColonies { display: none !important; }
 
 #planetbarcomponent:not(.fut-wide) #planetList.fut-menu,
 #planetbarcomponent:not(.fut-wide) .fut-toolbar,
-#planetbarcomponent:not(.fut-wide) .fut-settings,
 #planetbarcomponent:not(.fut-wide) .fut-totals { width: ${NATIVE_WIDTH}px !important; }
 ${L} { width: 100% !important; display: flex !important; flex-direction: column; gap: 2px; padding: 0 !important; background: none !important; }
 ${L} .smallplanet.fut-row {
@@ -4917,26 +6582,13 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
 #planetbarcomponent .fut-tool:disabled { opacity: 0.35; cursor: default; background: none; }
 #planetbarcomponent .fut-tool[aria-expanded="true"] { background: #12283A !important; color: #4FD1E8; }
 #planetbarcomponent .fut-tool.fut-stale { color: #F5B547; }
+#planetbarcomponent .fut-tool.fut-failed { color: #E5534B; }
 #planetbarcomponent .fut-tool.fut-busy svg { animation: fut-spin 1s linear infinite; }
 #planetbarcomponent:not(.fut-wide) .fut-cell { padding: 3px 3px 4px; }
 #planetbarcomponent:not(.fut-wide) .fut-cell-v { font-size: 10px; }
 #planetbarcomponent:not(.fut-wide) .fut-cell-k { font-size: 10px; }
 @keyframes fut-spin { to { transform: rotate(360deg); } }
 
-.fut-settings {
-  box-sizing: border-box; margin: 0 0 3px; padding: 6px 8px; border: 1px solid #1F2C40; border-radius: 7px;
-  background: #111B2A; font: 11px Arial, sans-serif; color: #C9D4E2; display: flex; flex-direction: column; gap: 5px;
-}
-.fut-settings[hidden] { display: none; }
-.fut-set-row { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-.fut-set-label { flex: 1 0 100%; color: #8A9BB0; }
-.fut-chip {
-  flex: 1; height: 22px; border-radius: 5px; border: 1px solid #1F2C40; background: #0A111C;
-  color: #B4C2D3; font: 11px Arial, sans-serif; cursor: pointer;
-}
-.fut-chip[aria-pressed="true"] { border-color: #4FD1E8; background: #12283A; color: #E6EDF5; font-weight: 700; }
-.fut-chip:disabled { opacity: 0.4; cursor: default; }
-.fut-set-note { color: #8A9BB0; }
 
 .fut-totals {
   box-sizing: border-box; margin-top: 4px; padding: 6px 8px; border-radius: 7px;
@@ -4949,7 +6601,6 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
 
   // src/modules/planet-menu/index.ts
   var STYLE_ID = "fut-planet-menu-style";
-  var panelOpen = false;
   var ICONS = {
     journal: '<path d="M5 3.5h11a3 3 0 0 1 3 3V20.5H8a3 3 0 0 1-3-3z" fill="none" stroke-width="2"/><path d="M5 17.5a3 3 0 0 1 3-3h11" fill="none" stroke-width="2"/><path stroke="none" d="M9.5 6.5l1 2.2 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3L6.2 9l2.3-.3z"/>',
     planner: '<path d="M9 6h11M9 12h11M9 18h11" fill="none" stroke-width="2.2"/><path stroke="none" d="M3 4.5h3v3H3zM3 10.5h3v3H3zM3 16.5h3v3H3z"/>',
@@ -5071,7 +6722,7 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
   function formatTime(at, locale) {
     return new Date(at).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
   }
-  function toolbar(o, colonies) {
+  function toolbar(o, colonies, roomy) {
     const { doc, t } = o;
     const bar = el2(doc, "div", "fut-toolbar");
     if (colonies) bar.title = colonies;
@@ -5108,93 +6759,19 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     const sync = iconButton2(doc, "sync", [t("sync.button"), lastSync].filter(Boolean).join(" \xB7 "), () => {
       if (sync.classList.contains("fut-busy")) return;
       sync.classList.add("fut-busy");
-      o.onSync().finally(() => sync.classList.remove("fut-busy"));
+      sync.classList.remove("fut-failed");
+      o.onSync().then((ok) => {
+        if (ok) return;
+        sync.classList.add("fut-failed");
+        sync.title = t("sync.failed");
+      }).finally(() => sync.classList.remove("fut-busy"));
     });
     if (!o.snapshot || o.now - o.snapshot.fetchedAt > 36e5) sync.classList.add("fut-stale");
-    const gear = iconButton2(doc, "settings", t("toolbar.settings"), () => {
-      panelOpen = !panelOpen;
-      gear.setAttribute("aria-expanded", String(panelOpen));
-      doc.querySelector(".fut-settings")?.toggleAttribute("hidden", !panelOpen);
-    });
-    gear.setAttribute("aria-expanded", String(panelOpen));
+    const gear = iconButton2(doc, "settings", t("toolbar.settings"), () => o.onOpenSettings?.({ roomy, colonies }));
+    gear.setAttribute("aria-haspopup", "dialog");
     side.append(sync, gear);
     bar.append(side);
     return bar;
-  }
-  function settingsPanel(o, mode, roomy, colonies) {
-    const { doc, t } = o;
-    const panel = el2(doc, "div", "fut-settings");
-    panel.toggleAttribute("hidden", !panelOpen);
-    const row = (label, ...controls) => {
-      const line = el2(doc, "div", "fut-set-row");
-      line.append(el2(doc, "span", "fut-set-label", label), ...controls);
-      panel.append(line);
-    };
-    const choice = (text, pressed, onClick, disabled = false) => {
-      const b = el2(doc, "button", "fut-chip", text);
-      b.type = "button";
-      b.setAttribute("aria-pressed", String(pressed));
-      b.disabled = disabled;
-      b.addEventListener("click", onClick);
-      return b;
-    };
-    row(
-      t("settings.view"),
-      choice(t("planetMenu.side"), mode === "side", () => o.onSettingsChange({ ...o.settings, mode: "side" }), !roomy),
-      choice(t("planetMenu.compact"), mode === "compact", () => o.onSettingsChange({ ...o.settings, mode: "compact" }))
-    );
-    row(
-      t("settings.totals"),
-      choice(t("settings.on"), o.settings.showTotals, () => o.onSettingsChange({ ...o.settings, showTotals: true })),
-      choice(t("settings.off"), !o.settings.showTotals, () => o.onSettingsChange({ ...o.settings, showTotals: false }))
-    );
-    row(
-      t("settings.markIdle"),
-      choice(t("settings.on"), o.settings.markIdle, () => o.onSettingsChange({ ...o.settings, markIdle: true })),
-      choice(t("settings.off"), !o.settings.markIdle, () => o.onSettingsChange({ ...o.settings, markIdle: false }))
-    );
-    if (o.onBackupExport && o.onBackupImport) {
-      const action = (text, onClick) => {
-        const b = el2(doc, "button", "fut-chip", text);
-        b.type = "button";
-        b.addEventListener("click", onClick);
-        return b;
-      };
-      const exportBackup2 = o.onBackupExport;
-      const importBackup2 = o.onBackupImport;
-      const note = el2(doc, "div", "fut-set-note");
-      note.setAttribute("role", "status");
-      const picker = el2(doc, "input", "");
-      picker.type = "file";
-      picker.title = t("settings.backupImportHint");
-      picker.hidden = true;
-      picker.addEventListener("change", () => {
-        const file = picker.files?.[0];
-        picker.value = "";
-        if (!file) return;
-        file.text().then((text) => {
-          const done = importBackup2(text);
-          note.textContent = typeof done === "string" ? done : t("settings.backupRestored", { n: done });
-        }).catch(() => {
-          note.textContent = t("settings.backupBad");
-        });
-      });
-      row(
-        t("settings.backup"),
-        action(t("settings.backupExport"), () => {
-          note.textContent = t("settings.backupSaved", { n: exportBackup2() });
-        }),
-        action(t("settings.backupImport"), () => picker.click())
-      );
-      row(
-        t("settings.oglight"),
-        action(t("settings.oglightImport"), () => picker.click())
-      );
-      panel.append(picker, note);
-    }
-    if (colonies) panel.append(el2(doc, "div", "fut-set-note", colonies));
-    if (o.snapshot) panel.append(el2(doc, "div", "fut-set-note", t("toolbar.lastSync", { time: formatTime(o.snapshot.fetchedAt, o.locale) })));
-    return panel;
   }
   function renderPlanetMenu(o) {
     const { doc } = o;
@@ -5252,7 +6829,7 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     }
     startAgeClock(doc);
     const colonies = (doc.getElementById("countColonies")?.textContent ?? "").replace(/\s+/g, " ").trim();
-    list.before(toolbar(o, colonies), settingsPanel(o, mode, roomy, colonies));
+    list.before(toolbar(o, colonies, roomy));
     if (o.snapshot && o.settings.showTotals) {
       const { stock: stock2, perHour } = totals(o.snapshot, o.now);
       const msu4 = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
@@ -5531,938 +7108,6 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     return out;
   }
 
-  // src/data/messages.ts
-  var json = (value, fallback) => {
-    if (!value || value === "-") return fallback;
-    try {
-      return JSON.parse(value) ?? fallback;
-    } catch {
-      return fallback;
-    }
-  };
-  var int2 = (value) => {
-    const n = Number.parseInt(value ?? "", 10);
-    return Number.isFinite(n) ? n : 0;
-  };
-  var num2 = (value) => {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : 0;
-  };
-  function readRes(raw) {
-    return {
-      metal: num2(raw.metal),
-      crystal: num2(raw.crystal),
-      deuterium: num2(raw.deuterium ?? raw.deut),
-      food: num2(raw.food),
-      darkMatter: num2(raw.darkMatter ?? raw.darkmatter)
-    };
-  }
-  function readUnits(raw) {
-    const out = {};
-    for (const [key2, value] of Object.entries(raw)) {
-      const id = Math.abs(Number(key2));
-      const amount = typeof value === "object" && value ? num2(value.amount) : num2(value);
-      if (id > 0 && amount) out[id] = (out[id] ?? 0) + amount;
-    }
-    return out;
-  }
-  function outcome(type, d, artefacts, lfXp) {
-    if (type === 61) return artefacts > 0 ? "artefact" : lfXp > 0 ? "lifeform" : "nothing";
-    const nav = json(d.rawNavigation, {});
-    switch (d.rawExpeditionresult) {
-      case "ressources":
-      case "resources":
-        return "resource";
-      case "darkmatter":
-        return "darkmatter";
-      case "nothing":
-        return "nothing";
-      case "shipwrecks":
-        return "ship";
-      case "trader":
-        return "trader";
-      case "items":
-        return "item";
-      case "fleetLost":
-        return "blackhole";
-      case "navigation":
-        return (nav.returnTimeMultiplier ?? 1) < 1 ? "early" : "late";
-      case "combatPirates":
-        return "pirate";
-      case "combatAliens":
-        return "alien";
-      default:
-        return "unknown";
-    }
-  }
-  var SIZES = { huge: 0, big: 1, normal: 2 };
-  function readMessage(msg, ownPlayerId2) {
-    const raw = msg.querySelector(".rawMessageData");
-    const id = msg.getAttribute("data-msg-id");
-    if (!raw || !id) return null;
-    const d = raw.dataset;
-    const type = int2(d.rawMessagetype);
-    const at = int2(d.rawTimestamp || d.rawDatetime) * 1e3 || Date.now();
-    if (type === 41 || type === 61 || d.rawExpeditionresult !== void 0) {
-      const artefacts = int2(d.rawArtifactsfound);
-      const lfXp = int2(d.rawLifeformgainedexperience);
-      const result = outcome(type, d, artefacts, lfXp);
-      const items = json(d.rawItemsgained, null);
-      const first = Array.isArray(items) ? items[0] : items && typeof items === "object" ? Object.values(items)[0] : null;
-      const sizeRaw = d.rawSize ?? d.rawArtifactssize ?? "";
-      const sized = !["nothing", "trader", "blackhole", "lifeform", "unknown"].includes(result);
-      return {
-        kind: type === 61 ? "discovery" : "expedition",
-        id,
-        at,
-        result,
-        size: !sized ? -1 : sizeRaw in SIZES ? SIZES[sizeRaw] : /^[0-2]$/.test(sizeRaw) ? Number(sizeRaw) : -1,
-        depletion: int2(d.rawDepletion),
-        res: readRes(json(d.rawResourcesgained, {})),
-        ships: readUnits(json(d.rawTechnologiesgained, {})),
-        lost: readUnits(json(d.rawShipslost, {})),
-        item: first && typeof first === "object" ? String(first.name ?? "") || null : null,
-        lfXp,
-        lifeform: int2(d.rawLifeform),
-        artefacts,
-        coords: d.rawCoords || d.rawCoordinates || null
-      };
-    }
-    if (d.rawCoordinates !== void 0 && d.rawResources !== void 0 && d.rawLoot !== void 0) {
-      if (d.rawTargetplayerid === "99999") return null;
-      const counter = int2(d.rawTargetplayerid) === ownPlayerId2 && ownPlayerId2 > 0;
-      const hiddenFleet = d.rawHiddenships === "1";
-      const hiddenDef = d.rawHiddendef === "1";
-      const isActive = int2(d.rawActive) === 1;
-      let activity = d.rawActivity === void 0 ? -1 : int2(d.rawActivity);
-      if (activity === -1 || !isActive && activity < 15) activity = 60;
-      else if (isActive && activity < 15) activity = 0;
-      return {
-        kind: "spy",
-        id,
-        at,
-        coords: d.rawCoordinates,
-        moon: int2(d.rawTargetplanettype) === 3,
-        playerId: int2(d.rawTargetplayerid),
-        playerName: d.rawPlayername ?? "",
-        statuses: json(d.rawPlayerstatus, []).filter((x) => typeof x === "string"),
-        counter,
-        sourceName: d.rawSourceplayername ?? "",
-        sourceCoords: d.rawSourceplanetcoordinates ?? "",
-        activity,
-        res: { metal: int2(d.rawMetal), crystal: int2(d.rawCrystal), deuterium: int2(d.rawDeuterium), food: int2(d.rawFood) },
-        loot: int2(d.rawLoot) / 100,
-        fleetValue: hiddenFleet ? -1 : int2(d.rawFleetvalue),
-        defValue: hiddenDef ? -1 : int2(d.rawDefensevalue),
-        attacked: int2(d.rawAttacking) === 1,
-        apiKey: d.rawHashcode ?? ""
-      };
-    }
-    if (d.rawResult !== void 0 && d.rawFleets !== void 0) return readCombat(id, at, d, ownPlayerId2);
-    if (type === 48)
-      return {
-        kind: "combat",
-        id,
-        at,
-        coords: d.rawCoords || d.rawTargetplanetcoordinates || null,
-        attacker: true,
-        winner: "lost",
-        loot: { metal: 0, crystal: 0, deuterium: 0 },
-        lost: readUnits(json(d.rawShipslost, {})),
-        debris: { metal: 0, crystal: 0, deuterium: 0 },
-        apiKey: d.rawHashcode ?? ""
-      };
-    const place2 = (side) => {
-      const coords = d[`raw${side === "source" ? "Source" : "Target"}planetcoordinates`];
-      if (!coords) return null;
-      return { name: d[`raw${side === "source" ? "Source" : "Target"}planetname`] ?? "", coords, moon: int2(d[`raw${side === "source" ? "Source" : "Target"}planettype`]) === 3 };
-    };
-    const recycled = readRes(json(d.rawRecycledresources, {}));
-    if (type === 32 || recycled.metal + recycled.crystal + recycled.deuterium > 0) {
-      const field = readRes(json(d.rawDebrisresources, {}));
-      return {
-        kind: "recycle",
-        id,
-        at,
-        coords: d.rawCoords || d.rawTargetcoordinates || null,
-        res: { metal: recycled.metal, crystal: recycled.crystal, deuterium: recycled.deuterium, food: 0 },
-        from: null,
-        to: null,
-        left: { metal: Math.max(0, field.metal - recycled.metal), crystal: Math.max(0, field.crystal - recycled.crystal), deuterium: Math.max(0, field.deuterium - recycled.deuterium) }
-      };
-    }
-    const cargo = readRes(json(d.rawCargo, {}));
-    if (type === 33 || type === 34 || cargo.metal + cargo.crystal + cargo.deuterium + cargo.food > 0) {
-      let from = place2("source");
-      if (!from) {
-        const seen = /\[(\d+:\d+:\d+)\]/.exec(msg.querySelector(".msgContent")?.textContent ?? "");
-        if (seen) from = { name: "", coords: seen[1], moon: false };
-      }
-      const back = type === 34 && from?.coords.split(":")[2] === "16";
-      return {
-        kind: back ? "return" : type === 34 ? "deploy" : "transport",
-        id,
-        at,
-        coords: d.rawTargetplanetcoordinates || d.rawCoords || null,
-        res: { metal: cargo.metal, crystal: cargo.crystal, deuterium: cargo.deuterium, food: cargo.food },
-        from,
-        to: place2("target")
-      };
-    }
-    return null;
-  }
-  function readCombat(id, at, d, own) {
-    const fleets = json(d.rawFleets, []);
-    const rounds = json(d.rawCombatrounds, []);
-    const result = json(d.rawResult, {});
-    const defender = json(d.rawDefenderspaceobject, {});
-    const mine = (Array.isArray(fleets) ? fleets : []).filter((f) => f.player?.id === own);
-    const ownIds = new Set(mine.map((f) => f.fleetId));
-    const sides = new Set(mine.map((f) => f.side));
-    const attacker = sides.has("attacker");
-    const winner = result.winner === "none" ? "draw" : result.winner && sides.has(result.winner) ? "won" : result.winner ? "lost" : "unknown";
-    const pick = (list, key2) => {
-      const of = (r) => num2(list?.find((x) => x.resource === r)?.[key2]);
-      return { metal: of("metal"), crystal: of("crystal"), deuterium: of("deuterium") };
-    };
-    let loot = { metal: 0, crystal: 0, deuterium: 0 };
-    const taken = pick(result.loot?.resources, "amount");
-    if (winner === "won" && attacker) loot = taken;
-    else if (winner === "lost" && defender.owner?.id === own) loot = { metal: -taken.metal, crystal: -taken.crystal, deuterium: -taken.deuterium };
-    const lost = {};
-    const last2 = Array.isArray(rounds) ? rounds[rounds.length - 1] : void 0;
-    for (const f of last2?.fleets ?? [])
-      if (ownIds.has(f.fleetId)) {
-        for (const tech of f.technologies ?? []) if (tech.technologyId && tech.destroyedTotal) lost[tech.technologyId] = (lost[tech.technologyId] ?? 0) + tech.destroyedTotal;
-      }
-    if (!attacker && defender.owner?.id === own) {
-      for (const r of result.repairedTechnologies ?? []) if (r.technologyId && lost[r.technologyId]) lost[r.technologyId] = Math.max(0, lost[r.technologyId] - num2(r.amount));
-    }
-    return { kind: "combat", id, at, coords: d.rawCoords || null, attacker, winner, loot, lost, debris: pick(result.debris?.resources, "remaining"), apiKey: d.rawHashcode ?? "" };
-  }
-  function ownPlayerId(doc) {
-    return int2(doc.querySelector('meta[name="ogame-player-id"]')?.getAttribute("content") ?? "");
-  }
-  function isMessagesPage(doc) {
-    const q = new URLSearchParams(doc.location?.search ?? "");
-    return q.get("page") === "messages" || q.get("component") === "messages" || !!doc.querySelector("#messagecontainercomponent, #messagescomponent");
-  }
-
-  // src/data/ship-icons.ts
-  var SHIP_ICONS = {
-    202: "https://gf2.geo.gfsrv.net/cdnd9/60555c3c87b9eb3b5ddf76780b5712.jpg",
-    203: "https://gf1.geo.gfsrv.net/cdn34/fdbcc505474e3e108d10a3ed4a19f4.jpg",
-    204: "https://gf2.geo.gfsrv.net/cdnd2/9ed5c1b6aea28fa51f84cdb8cb1e7e.jpg",
-    205: "https://gf1.geo.gfsrv.net/cdnf1/8266a2cbae5ad630c5fedbdf270f3e.jpg",
-    206: "https://gf2.geo.gfsrv.net/cdn45/b7ee4f9d556a0f39dae8d2133e05b7.jpg",
-    207: "https://gf1.geo.gfsrv.net/cdn32/3f4a081f4d15662bed33473db53d5b.jpg",
-    208: "https://gf1.geo.gfsrv.net/cdn6f/41a21e4253d2231f8937ddef1ba43e.jpg",
-    209: "https://gf1.geo.gfsrv.net/cdn07/6246eb3d7fa67414f6b818fa79dd9b.jpg",
-    210: "https://gf3.geo.gfsrv.net/cdnb5/347821e80cafc52aec04f27c3a2a4d.jpg",
-    211: "https://gf1.geo.gfsrv.net/cdnca/4d55a520aed09d0c43e7b962f33e27.jpg",
-    213: "https://gf3.geo.gfsrv.net/cdn2a/c2b9fedc9c93ef22f2739c49fbac52.jpg",
-    214: "https://gf3.geo.gfsrv.net/cdn84/155e9e24fc1d34ed4660de8d428f45.jpg",
-    215: "https://gf3.geo.gfsrv.net/cdn5a/24f511ec14a71e2d83fd750aa0dee2.jpg",
-    217: "https://gf3.geo.gfsrv.net/cdn26/28e8d79a5b489dc795cc47f3adf165.jpg",
-    218: "https://gf1.geo.gfsrv.net/cdn39/12d016c8bb0d71e053b901560c17cc.jpg",
-    219: "https://gf3.geo.gfsrv.net/cdne2/b8d8d18f2baf674acedb7504c7cc83.jpg"
-  };
-
-  // src/engines/raids.ts
-  var SPY_BOARD_KEY = "spy.board";
-  var SPY_MAX_AGE = 72 * 36e5;
-  var spyKey = (coords, moon) => `${coords}${moon ? ":m" : ""}`;
-  function rememberSpies(board, reports, now) {
-    let changed = 0;
-    for (const r of reports) {
-      if (r.counter || !r.playerId) continue;
-      const key2 = spyKey(r.coords, r.moon);
-      const known = board[key2];
-      if (known && (known.at > r.at || known.at === r.at && (known.apiKey || !r.apiKey))) continue;
-      board[key2] = {
-        key: key2,
-        id: r.id,
-        at: r.at,
-        coords: r.coords,
-        moon: r.moon,
-        playerId: r.playerId,
-        playerName: r.playerName,
-        statuses: r.statuses,
-        activity: r.activity,
-        res: { metal: r.res.metal, crystal: r.res.crystal, deuterium: r.res.deuterium },
-        loot: r.loot,
-        fleetValue: r.fleetValue,
-        defValue: r.defValue,
-        apiKey: r.apiKey
-      };
-      changed++;
-    }
-    for (const [key2, e] of Object.entries(board)) if (now - e.at > SPY_MAX_AGE) {
-      delete board[key2];
-      changed++;
-    }
-    return changed;
-  }
-  var parse = (coords) => coords.split(":").map(Number);
-  var ring = (d, size, donut) => donut ? Math.min(d, size - d) : d;
-  function distance(from, to, u) {
-    const [g1, s1, p1] = parse(from);
-    const [g2, s2, p2] = parse(to);
-    if (g1 !== g2) return 2e4 * ring(Math.abs(g1 - g2), u.galaxies, u.donutGalaxy);
-    if (s1 !== s2) return 2700 + 95 * ring(Math.abs(s1 - s2), u.systems, u.donutSystem);
-    if (p1 !== p2) return 1e3 + 5 * Math.abs(p1 - p2);
-    return 5;
-  }
-  function flightSeconds(dist, speed, u, percent = 100) {
-    return Math.round((10 + 3500 * (100 / percent) * Math.sqrt(10 * dist / speed)) / u.fleetSpeed);
-  }
-  function nearestBase(bases, coords, u) {
-    let base = null;
-    let dist = Infinity;
-    for (const b of bases) {
-      const d = distance(b.coords, coords, u);
-      if (d < dist) {
-        dist = d;
-        base = b;
-      }
-    }
-    return { base, dist };
-  }
-  function targetRows(board, bases, o) {
-    return Object.values(board).map((entry) => {
-      const lootRes = Math.floor((entry.res.metal + entry.res.crystal + entry.res.deuterium) * entry.loot);
-      const lootMsu = (entry.res.metal + entry.res.crystal * 1.5 + entry.res.deuterium * 3) * entry.loot;
-      const { base, dist } = nearestBase(bases, entry.coords, o.universe);
-      const flight = base && o.speed > 0 ? flightSeconds(dist, o.speed, o.universe) : null;
-      return {
-        entry,
-        lootRes,
-        lootMsu,
-        ships: o.capacity > 0 ? Math.ceil(lootRes / o.capacity) : 0,
-        base,
-        flight,
-        msuPerHour: flight ? lootMsu / (2 * flight / 3600) : null,
-        ageMinutes: Math.max(0, Math.round((o.now - entry.at) / 6e4))
-      };
-    });
-  }
-
-  // src/modules/messages/style.ts
-  var OUTCOME_COLORS = {
-    resource: "#4FD1E8",
-    darkmatter: "#B58CDB",
-    ship: "#4FE0B0",
-    nothing: "#8A9BB0",
-    trader: "#F59E4B",
-    item: "#D08A5B",
-    blackhole: "#9AA3AD",
-    early: "#7FA7FF",
-    late: "#E06A6A",
-    pirate: "#F5D547",
-    alien: "#7EE05A",
-    artefact: "#D4A93A",
-    lifeform: "#E07BC8",
-    unknown: "#5B6B80"
-  };
-  var outcomeCss = Object.entries(OUTCOME_COLORS).map(([k, c]) => `.fut-msg .fut-out-${k} { color: ${c}; border-color: ${c}55; background: ${c}14; }`).join("\n");
-  var MESSAGES_CSS = `
-.fut-msg { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin: 6px 8px; padding: 5px 6px;
-  border: 1px solid #1F2C40; border-radius: 8px; background: rgba(10,17,28,0.92); cursor: pointer;
-  font: 11px/14px Arial, Helvetica, sans-serif; color: #E6EDF5; text-align: left; }
-.fut-msg:hover { border-color: #2B6F7D; }
-.fut-msg-chip { display: inline-flex; align-items: center; padding: 1px 7px; border: 1px solid #1F2C40; border-radius: 10px;
-  background: #0E1724; white-space: nowrap; }
-.fut-msg-out { font-weight: 700; }
-/* Only the outcome is a pill; the values are plain, spaced text. */
-.fut-msg .fut-msg-chip:not(.fut-msg-out) { border-color: transparent; background: none; padding: 1px 4px; }
-.fut-msg-place { display: inline-flex; align-items: center; gap: 3px; }
-.fut-msg-arrow { margin: 0 5px; color: #8A9BB0; }
-.fut-msg-moon { color: #8A9BB0; }
-.fut-msg-res, .fut-msg-msu, .fut-msg-loot { font-family: "JetBrains Mono", Consolas, monospace; }
-.fut-msg-m { color: #B8C2CC; } .fut-msg-c { color: #7FB8FF; } .fut-msg-d { color: #4FE0B0; } .fut-msg-f { color: #D6A8C8; } .fut-msg-dm { color: #B58CDB; }
-.fut-msg-msu { color: #C9D4E2; } .fut-msg-loot { color: #4FD1E8; }
-.fut-msg-ship { color: #4FE0B0; gap: 4px; padding-left: 2px; font-family: "JetBrains Mono", Consolas, monospace; }
-.fut-msg-icon { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; flex: none; }
-.fut-msg-icon-none { font-size: 10px; color: #8A9BB0; } .fut-msg-item { color: #D08A5B; } .fut-msg-lf { color: #E07BC8; } .fut-msg-art { color: #D4A93A; }
-.fut-msg-route { color: #C9D4E2; }
-.fut-msg-warn { color: #F5B547; } .fut-msg-muted { color: #8A9BB0; }
-.fut-msg .fut-msg-neg { color: #FF7A7A; border-color: #FF7A7A44; }
-${outcomeCss}
-.fut-msg.fut-msg-rows { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 5px; }
-.fut-msg-row { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
-.fut-msg-found { justify-content: center; }
-.fut-msg-foot { justify-content: center; }
-.fut-msg-foot .fut-msg-chip { border-color: transparent; background: none; font-size: 10px; padding: 0 4px; }
-.fut-msg-big { font-size: 12px; font-weight: 700; }
-.fut-msg-top .fut-msg-size { margin-left: auto; }
-/* Size: normal = grey, big = cyan, huge = gold (frame and label). */
-.fut-msg.fut-size-2 { border-color: #2A3B55; }
-.fut-msg.fut-size-1 { border-color: #4FD1E8aa; }
-.fut-msg.fut-size-0 { border-color: #F5D547cc; background: #17150C; }
-.fut-msg-chip.fut-size-2 { color: #8A9BB0; }
-.fut-msg-chip.fut-size-1 { color: #4FD1E8; border-color: #4FD1E855; }
-.fut-msg-chip.fut-size-0 { color: #F5D547; border-color: #F5D54777; font-weight: 700; }
-a.fut-msg-link { color: #4FD1E8; text-decoration: none; cursor: pointer; }
-a.fut-msg-link:hover, a.fut-msg-link:focus-visible { border-color: #4FD1E8; color: #E6EDF5; }
-/* Spy table inside the Espionage tab: the game's own inbox look (Verdana 11px, #111A21 rows). */
-#fut-spypanel { margin: 0 0 6px; padding: 5px; background: #000; font: 11px/1.3 Verdana, Arial, sans-serif; color: #848484; }
-#fut-spypanel button { font: inherit; }
-.fut-sp-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
-.fut-sp-title { display: flex; align-items: baseline; gap: 8px; margin-right: auto; height: 26px; padding: 0 8px; border: 0; border-radius: 3px;
-  background: linear-gradient(#617C8D, #2E4356); color: #fff; cursor: pointer; }
-.fut-sp-title b { font-size: 12px; }
-.fut-sp-title span { color: #C9D4E2; }
-.fut-sp-title[aria-expanded="false"] { background: #111A21; color: #F1F1F1; }
-.fut-sp-chip { height: 22px; padding: 0 8px; border: 1px solid #2E4356; border-radius: 3px; background: #111A21; color: #848484; cursor: pointer; }
-.fut-sp-chip:hover, .fut-sp-chip:focus-visible { color: #F1F1F1; border-color: #617C8D; }
-.fut-sp-chip[aria-pressed="true"] { background: linear-gradient(#617C8D, #2E4356); border-color: #617C8D; color: #fff; }
-.fut-sp-row { display: grid; grid-template-columns: minmax(0, 1.15fr) 42px minmax(0, 1.35fr) 46px 48px 70px 122px; gap: 6px; align-items: center;
-  padding: 4px 6px 4px 9px; background: #111A21; }
-.fut-sp-list { display: flex; flex-direction: column; gap: 2px; }
-.fut-sp-row.defended { box-shadow: inset 2px 0 0 #9C6A2A; }
-.fut-sp-cols { margin-top: 5px; padding-top: 0; padding-bottom: 0; background: none; height: 26px; }
-.fut-sp-h { display: flex; align-items: center; justify-content: flex-end; height: 26px; padding: 0 2px; border: 0; border-radius: 3px; background: none; color: #848484; font-size: 12px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-button.fut-sp-h { cursor: pointer; }
-button.fut-sp-h:hover, button.fut-sp-h:focus-visible { color: #F1F1F1; }
-.fut-sp-h.sortBy { background: linear-gradient(#617C8D, #2E4356); color: #fff; }
-.fut-sp-h:first-child { justify-content: flex-start; padding-left: 4px; }
-.fut-sp-h:last-child { justify-content: flex-end; }
-.fut-sp-who { min-width: 0; }
-.fut-sp-name { color: #F1F1F1; margin-right: 4px; }
-.fut-sp-st { margin-right: 3px; padding: 0 4px; border-radius: 3px; background: #1A2733; font-size: 10px; color: #C9D4E2; }
-.fut-sp-st.st-inactive, .fut-sp-st.st-longinactive { color: #7BC47F; }
-.fut-sp-st.st-vacation { color: #7FB8FF; }
-.fut-sp-st.st-noob, .fut-sp-st.st-strong, .fut-sp-st.st-honorableTarget { color: #E3BB28; }
-.fut-sp-coords { display: block; color: #6F9FC8; text-decoration: none; }
-.fut-sp-coords:hover, .fut-sp-coords:focus-visible { color: #F1F1F1; }
-.fut-sp-moon { margin-right: 3px; vertical-align: -1px; }
-.fut-sp-num { text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fut-sp-num b { color: #F1F1F1; font-weight: 700; }
-.fut-sp-num small { display: block; font-size: 9px; color: #6A7682; overflow: hidden; text-overflow: ellipsis; }
-.fut-sp-num b.rate { color: #4FD1E8; }
-#fut-spypanel .fresh { color: #7BC47F; } #fut-spypanel .warm { color: #E3BB28; } #fut-spypanel .old, #fut-spypanel .bad { color: #D86A6A; }
-.fut-sp-acts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px; }
-.fut-sp-acts .custom_btn { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 2px; cursor: pointer; }
-.fut-sp-tool { font-size: 10px; font-weight: 700; color: #F1F1F1; }
-.fut-sp-del .custom_btn { color: #848484; }
-.fut-sp-note { margin: 6px 4px 2px; color: #6A7682; font-size: 10px; line-height: 1.4; }
-.msg.fut-msg-folded .msgContent, .msg.fut-msg-folded .msg_content, .msg.fut-msg-folded > .content-box { display: none !important; }
-`;
-  var JOURNAL_CSS = `
-:host { --panel-w: 860px; }
-.kpi .value { font-size: 18px; font-family: var(--mono); }
-.kpi .detail { display: flex; flex-wrap: wrap; gap: 8px; }
-.bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: #0D1522; gap: 2px; }
-.bar span { display: block; height: 100%; min-width: 2px; }
-.legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 4px 12px; margin-top: 8px; font-size: 12px; }
-.legend div { display: flex; align-items: center; gap: 6px; }
-.dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
-.legend .n { margin-left: auto; font-family: "JetBrains Mono", Consolas, monospace; color: #C9D4E2; }
-.legend .pct { color: #8A9BB0; font-size: 11px; min-width: 38px; text-align: right; }
-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-th { text-align: right; color: #8A9BB0; font-weight: 400; padding: 3px 6px; border-bottom: 1px solid #1F2C40; white-space: nowrap; }
-th:first-child, td:first-child { text-align: left; }
-td { text-align: right; padding: 3px 6px; border-bottom: 1px solid #172334; font-family: "JetBrains Mono", Consolas, monospace; white-space: nowrap; }
-td:first-child { font-family: Arial, sans-serif; color: #C9D4E2; }
-.scroll { overflow-x: auto; }
-.ships { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px; }
-.ship { display: flex; align-items: center; gap: 8px; padding: 2px 0; min-width: 0; }
-.ship-img { width: 44px; height: 44px; flex: none; border-radius: 6px; object-fit: cover; background: #16202E; }
-.ship-img-none { display: flex; align-items: center; justify-content: center; color: #8A9BB0; font-size: 11px; }
-.ship-info { display: flex; flex-direction: column; min-width: 0; }
-.ship-info b { font-family: "JetBrains Mono", Consolas, monospace; font-size: 14px; }
-.ship-name { color: #B4C2D3; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-h4.lost { margin: 10px 0 6px; color: var(--bad); }
-.foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
-.opt { display: flex; gap: 6px; align-items: center; color: #B4C2D3; font-size: 12px; cursor: pointer; }
-.acts { display: flex; gap: 6px; }
-@media (max-width: 560px) { .kpi .value { font-size: 15px; } }
-`;
-
-  // src/engines/sim-links.ts
-  var OSIMS = "https://www.ogameutilities.it/Osims/";
-  var OGAME_TOOLS_SIM = "https://simulator.ogame-tools.com/";
-  var OGOTCHA = "https://ogotcha.oplanet.eu/";
-  var SIM_RESEARCH = [109, 110, 111, 114, 115, 117, 118];
-  var GENERAL = 2;
-  var toolLang = (lang) => lang === "us" ? "en" : lang === "ar" ? "es" : lang || "en";
-  function simPrefill(server, attacker, defenderCoords) {
-    const planet = (c) => {
-      const [galaxy, system, position] = c.split(":");
-      return { galaxy, system, position };
-    };
-    const research = {};
-    const bonus = attacker?.classId === GENERAL ? 2 : 0;
-    for (const id of SIM_RESEARCH) research[id] = { level: (attacker?.researches[String(id)] ?? 0) + (id <= 111 ? bonus : 0) };
-    const data = {
-      settings: { server },
-      0: [{ planet: planet(attacker?.coords ?? "0:0:0"), research, class: attacker?.classId ?? 0, characterClassesEnabled: true, allianceClass: 0 }],
-      1: [{ planet: planet(defenderCoords), research: {}, resources: {}, defence: {} }]
-    };
-    return btoa(JSON.stringify(data));
-  }
-  function osimsLink(apiKey, prefill) {
-    return `${OSIMS}?SR_KEY=${encodeURIComponent(apiKey)}#prefill=${prefill}`;
-  }
-  function ogameToolsSimLink(apiKey, lang, prefill) {
-    return `${OGAME_TOOLS_SIM}${toolLang(lang)}?SR_KEY=${encodeURIComponent(apiKey)}#prefill=${prefill}`;
-  }
-  var gameSimLink = (apiKey) => `/game/index.php?page=standalone&component=combatsim&reportHash=${encodeURIComponent(apiKey)}`;
-  function converterLink(apiKey, lang) {
-    return `${OGOTCHA}${toolLang(lang)}?CR_KEY=${encodeURIComponent(apiKey)}`;
-  }
-
-  // src/modules/messages/spy-table.ts
-  var SPY_PANEL_ID = "fut-spypanel";
-  var VIEW_KEY2 = "spy.view";
-  var DEFAULT_VIEW = { sort: "rate", desc: true, ship: 203, hideDefended: false, inactiveOnly: false, open: true };
-  function universeOf(doc, data) {
-    const meta = (name) => doc.querySelector(`meta[name="${name}"]`)?.getAttribute("content") ?? "";
-    return {
-      galaxies: data?.galaxies || 9,
-      systems: data?.systems || 499,
-      donutGalaxy: data ? data.donutGalaxy : meta("ogame-donut-galaxy") !== "0",
-      donutSystem: data ? data.donutSystem : meta("ogame-donut-system") !== "0",
-      fleetSpeed: data?.speedFleetWar || Number(meta("ogame-universe-speed-fleet-war")) || 1
-    };
-  }
-  var INACTIVE = ["inactive", "longinactive"];
-  var defended = (r) => r.entry.defValue !== 0 || r.entry.fleetValue !== 0;
-  function sortRows(rows, view) {
-    const val = (r) => {
-      switch (view.sort) {
-        case "target":
-          return r.entry.playerName.toLowerCase();
-        case "age":
-          return r.ageMinutes;
-        case "loot":
-          return r.lootMsu;
-        case "def":
-          return Math.max(0, r.entry.defValue) + Math.max(0, r.entry.fleetValue);
-        case "flight":
-          return r.flight ?? Infinity;
-        case "rate":
-          return r.msuPerHour ?? r.lootMsu / 1e9;
-      }
-    };
-    const dir = view.desc ? -1 : 1;
-    return [...rows].sort((a, b) => {
-      const x = val(a), y = val(b);
-      return (x < y ? -1 : x > y ? 1 : 0) * dir;
-    });
-  }
-  var duration = (s) => {
-    const hh = Math.floor(s / 3600), mm = Math.floor(s % 3600 / 60), ss = s % 60;
-    return hh ? `${hh}h ${String(mm).padStart(2, "0")}m` : `${mm}m ${String(ss).padStart(2, "0")}s`;
-  };
-  var isSpyTab = (doc) => !!doc.querySelector('[data-subtab-id="20"].active, [data-subtab-id="20"][aria-selected="true"]');
-  function mountSpyPanel(o) {
-    const { doc } = o;
-    ensureMarksStyle(doc);
-    const holder = doc.querySelector("#messages .messagesHolder");
-    const sortRow = doc.querySelector("#messages #filteredHeadersRow");
-    const anchor = sortRow && sortRow.parentElement === holder?.parentElement ? sortRow : holder;
-    const old = doc.getElementById(SPY_PANEL_ID);
-    if (!holder || !isSpyTab(doc)) {
-      old?.remove();
-      return;
-    }
-    const board = o.store.get(SPY_BOARD_KEY, {});
-    const view = { ...DEFAULT_VIEW, ...o.store.get(VIEW_KEY2, {}) };
-    const sig = JSON.stringify([Object.values(board).map((e) => e.id), view, Math.floor((o.now?.() ?? Date.now()) / 6e4)]);
-    if (old && old.dataset.sig === sig && old.nextElementSibling === anchor) return;
-    const panel = renderPanel(o, board, view);
-    panel.dataset.sig = sig;
-    if (old) old.replaceWith(panel);
-    anchor.before(panel);
-  }
-  function renderPanel(o, board, view) {
-    const { doc, store, t, locale, spy } = o;
-    const now = o.now?.() ?? Date.now();
-    const fmt = (n) => formatUnits(n, locale);
-    const el5 = (tag, cls = "", text) => {
-      const n = doc.createElement(tag);
-      if (cls) n.className = cls;
-      if (text !== void 0) n.textContent = text;
-      return n;
-    };
-    const redraw = (next = {}) => {
-      store.set(VIEW_KEY2, { ...view, ...next });
-      mountSpyPanel(o);
-    };
-    const gameButton = (child, title, onClick, cls = "") => {
-      const wrap = el5("gradient-button", cls);
-      wrap.setAttribute("sq20", "");
-      const b = el5("button", "custom_btn");
-      b.type = "button";
-      b.title = title;
-      b.setAttribute("aria-label", title);
-      b.append(child);
-      b.addEventListener("click", (e) => {
-        e.preventDefault();
-        onClick();
-      });
-      wrap.append(b);
-      return wrap;
-    };
-    const gameIcon = (name) => {
-      const img = el5("img");
-      img.src = `/cdn/img/icons/basic/${name}.png`;
-      img.alt = "";
-      img.width = img.height = 16;
-      return img;
-    };
-    const ships = store.get(SHIPS_INFO_KEY, {});
-    const info = ships[String(view.ship)];
-    const capacity = info?.capacity || (view.ship === 202 ? 5e3 : 25e3);
-    const universe = universeOf(doc, store.get(SERVER_DATA_KEY, null));
-    const all2 = targetRows(board, spy.bases, { capacity, speed: info?.speed ?? 0, universe, now });
-    const rows = sortRows(all2.filter((r) => (!view.hideDefended || !defended(r)) && (!view.inactiveOnly || r.entry.statuses.some((s) => INACTIVE.includes(s)))), view);
-    const panel = el5("div", "fut-sp");
-    panel.id = SPY_PANEL_ID;
-    const head = el5("div", "fut-sp-head");
-    const toggle = el5("button", "fut-sp-title");
-    toggle.type = "button";
-    toggle.setAttribute("aria-expanded", String(view.open));
-    toggle.append(el5("b", "", t("spy.title")), el5("span", "", t("spy.sub", { n: rows.length, msu: fmt(rows.reduce((s, r) => s + r.lootMsu, 0)) })));
-    toggle.addEventListener("click", () => redraw({ open: !view.open }));
-    head.append(toggle);
-    if (view.open) {
-      const chip2 = (text, pressed, next) => {
-        const b = el5("button", "fut-sp-chip", text);
-        b.type = "button";
-        b.setAttribute("aria-pressed", String(pressed));
-        b.addEventListener("click", () => redraw(next));
-        return b;
-      };
-      head.append(
-        chip2(shipName(203, ships, t), view.ship === 203, { ship: 203 }),
-        chip2(shipName(202, ships, t), view.ship === 202, { ship: 202 }),
-        chip2(t("spy.hideDefended"), view.hideDefended, { hideDefended: !view.hideDefended }),
-        chip2(t("spy.inactiveOnly"), view.inactiveOnly, { inactiveOnly: !view.inactiveOnly })
-      );
-    }
-    panel.append(head);
-    if (!view.open) return panel;
-    if (!info?.speed) panel.append(el5("p", "fut-sp-note", t("spy.noSpeed")));
-    if (!rows.length) {
-      panel.append(el5("p", "fut-sp-note", t(all2.length ? "spy.noneFiltered" : "spy.none")));
-      return panel;
-    }
-    const cols = el5("div", "fut-sp-row fut-sp-cols");
-    const headers = [["target", "spy.col.target"], ["age", "spy.col.age"], ["loot", "spy.col.loot"], [null, "spy.col.ships"], ["def", "spy.col.def"], ["rate", "spy.col.rate"], [null, "spy.col.actions"]];
-    for (const [key2, label] of headers) {
-      const c = el5(key2 ? "button" : "span", `fut-sp-h${view.sort === key2 ? " sortBy" : ""}`, t(label));
-      if (key2) {
-        c.type = "button";
-        c.setAttribute("aria-sort", view.sort === key2 ? view.desc ? "descending" : "ascending" : "none");
-        c.addEventListener("click", () => redraw(view.sort === key2 ? { desc: !view.desc } : { sort: key2, desc: key2 === "loot" || key2 === "rate" }));
-      }
-      cols.append(c);
-    }
-    panel.append(cols);
-    const list = el5("div", "fut-sp-list");
-    for (const r of rows) {
-      const e = r.entry;
-      const [g, s, p] = e.coords.split(":");
-      const row = el5("div", `fut-sp-row${defended(r) ? " defended" : ""}`);
-      const who = el5("div", "fut-sp-who");
-      const name = el5("span", "fut-sp-name", e.playerName || "?");
-      who.append(name, flagButton({ doc, store, t }, e.playerId, e.playerName));
-      for (const st of e.statuses.filter((x) => x !== "active")) who.append(el5("span", `fut-sp-st st-${st}`, t(`spy.status.${st}`)));
-      const gal = el5("a", "fut-sp-coords", `[${e.coords}]`);
-      gal.href = `/game/index.php?page=ingame&component=galaxy&galaxy=${g}&system=${s}`;
-      if (e.moon) gal.prepend(icon(doc, "moon", 10, "fut-sp-moon"));
-      who.append(gal);
-      const age = el5("div", "fut-sp-num");
-      age.append(
-        el5("span", r.ageMinutes > 360 ? "old" : r.ageMinutes > 60 ? "warm" : "fresh", r.ageMinutes < 60 ? `${r.ageMinutes}m` : `${Math.floor(r.ageMinutes / 60)}h`),
-        el5("small", e.activity === 0 ? "bad" : e.activity < 60 ? "warm" : "", e.activity === 0 ? t("msg.spy.active") : e.activity >= 60 ? ">60m" : `${e.activity}m`)
-      );
-      age.title = new Date(e.at).toLocaleString(locale);
-      const loot = el5("div", "fut-sp-num");
-      loot.append(el5("b", "", fmt(r.lootMsu)), el5("small", "", `${fmt(e.res.metal * e.loot)} \xB7 ${fmt(e.res.crystal * e.loot)} \xB7 ${fmt(e.res.deuterium * e.loot)}`));
-      loot.title = `${Math.round(e.loot * 100)}% \xB7 ${r.lootRes.toLocaleString(locale)}`;
-      const cargo = el5("div", "fut-sp-num", r.ships ? `${r.ships.toLocaleString(locale)}\xD7` : "0");
-      cargo.title = shipName(view.ship, ships, t);
-      const def = el5("div", `fut-sp-num${defended(r) ? " warm" : ""}`, e.defValue < 0 || e.fleetValue < 0 ? "?" : defended(r) ? fmt(Math.max(0, e.defValue) + Math.max(0, e.fleetValue)) : "0");
-      def.title = `${t("msg.spy.fleet")} ${e.fleetValue < 0 ? "?" : fmt(e.fleetValue)} \xB7 ${t("msg.spy.def")} ${e.defValue < 0 ? "?" : fmt(e.defValue)}`;
-      const rate = el5("div", "fut-sp-num");
-      rate.append(el5("b", "rate", r.msuPerHour !== null ? `${fmt(r.msuPerHour)}/h` : "\u2014"), el5("small", "", r.flight !== null ? duration(r.flight) : "\u2014"));
-      if (r.base) rate.title = t("spy.from", { name: r.base.name, coords: r.base.coords });
-      const acts = el5("div", "fut-sp-acts");
-      if (r.base) {
-        const base = r.base;
-        acts.append(gameButton(gameIcon("attack"), t("spy.attackHint", { name: base.name }), () => {
-          doc.location.assign(`/game/index.php?page=ingame&component=fleetdispatch&cp=${base.id}&galaxy=${g}&system=${s}&position=${p}&type=${e.moon ? 3 : 1}&mission=1`);
-        }));
-      }
-      if (e.apiKey) {
-        const key2 = e.apiKey;
-        const open = (url) => doc.defaultView?.open(url, "_blank", "noopener");
-        const prefill = () => simPrefill(spy.server, r.base ? { coords: r.base.coords, researches: spy.researches, classId: spy.classId } : null, e.coords);
-        acts.append(
-          gameButton(gameIcon("speed"), t("spy.simGame"), () => open(gameSimLink(key2))),
-          gameButton(el5("span", "fut-sp-tool", "OS"), t("spy.simOsims"), () => open(osimsLink(key2, prefill()))),
-          gameButton(el5("span", "fut-sp-tool", "OT"), t("spy.simOgameTools"), () => open(ogameToolsSimLink(key2, spy.lang, prefill())))
-        );
-      }
-      acts.append(gameButton(icon(doc, "close", 12), t("spy.remove"), () => {
-        const b = store.get(SPY_BOARD_KEY, {});
-        delete b[e.key];
-        store.set(SPY_BOARD_KEY, b);
-        mountSpyPanel(o);
-      }, "fut-sp-del"));
-      row.append(who, age, loot, cargo, def, rate, acts);
-      list.append(row);
-    }
-    panel.append(list, el5("p", "fut-sp-note", t("spy.hint")));
-    return panel;
-  }
-
-  // src/modules/messages/index.ts
-  var FOLD_KEY = "msg.fold";
-  function h2(doc, tag, cls = "", text) {
-    const node = doc.createElement(tag);
-    if (cls) node.className = cls;
-    if (text !== void 0) node.textContent = text;
-    return node;
-  }
-  function shipIcon(doc, id, name, cls) {
-    const url = SHIP_ICONS[id];
-    if (!url) return h2(doc, "span", `${cls} ${cls}-none`, name.slice(0, 3));
-    const img = h2(doc, "img", cls);
-    img.src = url;
-    img.alt = name;
-    img.title = name;
-    img.loading = "lazy";
-    return img;
-  }
-  function shipName(id, ships, t) {
-    const name = ships[String(id)]?.name;
-    if (name) return name;
-    const key2 = `ship.${id}`;
-    const fallback = t(key2);
-    return fallback === key2 ? `#${id}` : fallback;
-  }
-  function summaryFor(doc, m, o) {
-    const { t, locale } = o;
-    const fmt = (n) => formatUnits(n, locale);
-    const box = h2(doc, "div", `fut-msg fut-msg-${m.kind}`);
-    let into = box;
-    const chip2 = (text, cls = "", title) => {
-      const c = h2(doc, "span", `fut-msg-chip ${cls}`.trim(), text);
-      if (title) c.title = title;
-      into.append(c);
-      return c;
-    };
-    const linkChip = (text, href, title) => {
-      const a = h2(doc, "a", "fut-msg-chip fut-msg-link", text);
-      a.href = href;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      a.title = title;
-      into.append(a);
-    };
-    const resChips = (r, sign = 1) => {
-      const keys = [
-        ["metal", "m"],
-        ["crystal", "c"],
-        ["deuterium", "d"],
-        ["food", "f"],
-        ["darkMatter", "dm"]
-      ];
-      let any = false;
-      for (const [key2, cls] of keys) {
-        const v = (r[key2] ?? 0) * sign;
-        if (!v) continue;
-        any = true;
-        chip2(`${v > 0 && sign > 0 ? "+" : ""}${fmt(v)}`, `fut-msg-res fut-msg-${cls}${v < 0 ? " fut-msg-neg" : ""}`, `${t(`msg.res.${key2}`)}: ${Math.round(v).toLocaleString(locale)}`);
-      }
-      return any;
-    };
-    const unitChips = (units, lost) => {
-      for (const [id, n] of Object.entries(units).sort((a, b) => Number(a[0]) - Number(b[0]))) {
-        const name = shipName(Number(id), o.ships, t);
-        const c = chip2(`${lost ? "\u2212" : "+"}${n.toLocaleString(locale)}`, lost ? "fut-msg-ship fut-msg-neg" : "fut-msg-ship", name);
-        c.prepend(shipIcon(doc, Number(id), name, "fut-msg-icon"));
-      }
-    };
-    switch (m.kind) {
-      case "expedition":
-      case "discovery": {
-        box.classList.add("fut-msg-rows");
-        if (m.size >= 0) {
-          box.classList.add(`fut-size-${m.size}`);
-          box.dataset.size = t(`msg.size.${m.size}`);
-        }
-        const row = (cls) => {
-          const r = h2(doc, "div", `fut-msg-row ${cls}`);
-          box.append(r);
-          into = r;
-          return r;
-        };
-        row("fut-msg-top");
-        chip2(m.kind === "discovery" ? `${t("msg.discovery")} \xB7 ${t(`msg.out.${m.result}`)}` : t(`msg.out.${m.result}`), `fut-msg-out fut-out-${m.result}`);
-        const value = msu(m.res) + msu(unitsValue(m.ships)) - msu(unitsValue(m.lost));
-        if (value) chip2(`${fmt(value)} MSU`, `fut-msg-msu fut-msg-big${value < 0 ? " fut-msg-neg" : ""}`, t("msg.msuHint"));
-        const found = row("fut-msg-found");
-        resChips(m.res);
-        unitChips(m.ships, false);
-        unitChips(m.lost, true);
-        if (m.item) chip2(m.item, "fut-msg-item");
-        if (m.lfXp) chip2(t("msg.lfXp", { n: m.lfXp.toLocaleString(locale) }), "fut-msg-lf");
-        if (m.artefacts) chip2(t("msg.artefacts", { n: m.artefacts.toLocaleString(locale) }), "fut-msg-art");
-        if (!found.childElementCount) found.remove();
-        if (m.depletion > 0) {
-          row("fut-msg-foot");
-          chip2(t("msg.depletion", { n: m.depletion }), "fut-msg-muted");
-        }
-        return box;
-      }
-      case "spy": {
-        if (m.counter) {
-          chip2(t("msg.spy.counter", { name: m.sourceName || "?", coords: m.sourceCoords || "?" }), "fut-msg-out fut-out-alien");
-          return box;
-        }
-        const act2 = m.activity === 0 ? t("msg.spy.active") : m.activity >= 60 ? t("msg.spy.inactive") : t("msg.spy.activity", { n: m.activity });
-        chip2(act2, m.activity === 0 ? "fut-msg-out fut-out-pirate" : m.activity < 60 ? "fut-msg-out fut-out-late" : "fut-msg-out fut-out-nothing");
-        const total = m.res.metal + m.res.crystal + m.res.deuterium;
-        const loot = Math.floor(total * m.loot);
-        chip2(`${t("msg.spy.loot")} ${fmt(loot)}`, "fut-msg-loot", `${Math.round(m.loot * 100)}% \xB7 ${Math.round(loot).toLocaleString(locale)}`);
-        const lootMsu = msu(m.res) * m.loot;
-        chip2(`${fmt(lootMsu)} MSU`, "fut-msg-msu", t("msg.msuHint"));
-        const capacity = o.ships["203"]?.capacity || 25e3;
-        if (loot > 0) chip2(t("msg.spy.cargo", { n: Math.ceil(loot / capacity).toLocaleString(locale), ship: shipName(203, o.ships, t) }), "fut-msg-ship");
-        chip2(`${t("msg.spy.fleet")} ${m.fleetValue < 0 ? "?" : fmt(m.fleetValue)}`, m.fleetValue > 0 ? "fut-msg-warn" : "fut-msg-muted");
-        chip2(`${t("msg.spy.def")} ${m.defValue < 0 ? "?" : fmt(m.defValue)}`, m.defValue > 0 ? "fut-msg-warn" : "fut-msg-muted");
-        if (m.attacked) chip2(t("msg.spy.attacked"), "fut-msg-muted");
-        if (m.apiKey && o.spy && o.universe) {
-          const base = nearestBase(o.spy.bases, m.coords, o.universe).base;
-          const prefill = simPrefill(o.spy.server, base ? { coords: base.coords, researches: o.spy.researches, classId: o.spy.classId } : null, m.coords);
-          linkChip("Osims", osimsLink(m.apiKey, prefill), t("spy.simOsims"));
-          linkChip("OGame Simulator", ogameToolsSimLink(m.apiKey, o.spy.lang, prefill), t("spy.simOgameTools"));
-        }
-        return box;
-      }
-      case "transport":
-      case "deploy":
-      case "return":
-      case "recycle": {
-        chip2(t(`msg.${m.kind}`), `fut-msg-out ${m.kind === "recycle" ? "fut-out-resource" : m.kind === "transport" ? "fut-out-trader" : "fut-out-early"}`);
-        if (m.from && m.to) {
-          const route = chip2("", "fut-msg-route");
-          const place2 = (p) => {
-            const s = h2(doc, "span", "fut-msg-place", `${p.name ? `${p.name} ` : ""}[${p.coords}]`);
-            if (p.moon) s.prepend(icon(doc, "moon", 10, "fut-msg-moon"));
-            return s;
-          };
-          route.append(place2(m.from), h2(doc, "span", "fut-msg-arrow", "\u2192"), place2(m.to));
-        }
-        const any = resChips(m.res);
-        if (any) chip2(`${fmt(msu(m.res))} MSU`, "fut-msg-msu", t("msg.msuHint"));
-        else chip2(t("msg.empty"), "fut-msg-muted");
-        const left = m.left ? m.left.metal + m.left.crystal + m.left.deuterium : 0;
-        if (left > 0) chip2(t("msg.debrisLeft", { n: fmt(left) }), "fut-msg-warn", `${Math.round(m.left.metal).toLocaleString(locale)} / ${Math.round(m.left.crystal).toLocaleString(locale)} / ${Math.round(m.left.deuterium).toLocaleString(locale)}`);
-        return box;
-      }
-      case "combat": {
-        if (m.coords) chip2(`[${m.coords}]`, "fut-msg-route");
-        chip2(t(`msg.combat.${m.winner}`), `fut-msg-out ${m.winner === "won" ? "fut-out-resource" : m.winner === "lost" ? "fut-out-blackhole" : "fut-out-nothing"}`);
-        const sum = m.loot.metal + m.loot.crystal + m.loot.deuterium;
-        if (sum) {
-          chip2(t(sum > 0 ? "msg.combat.loot" : "msg.combat.raided"), "fut-msg-muted");
-          resChips(m.loot);
-        }
-        const lost = msu(unitsValue(m.lost));
-        if (lost) chip2(`${t("msg.combat.losses")} ${fmt(lost)} MSU`, "fut-msg-neg", Object.entries(m.lost).map(([id, n]) => `${n.toLocaleString(locale)} ${shipName(Number(id), o.ships, t)}`).join(", "));
-        const debris = m.debris.metal + m.debris.crystal + m.debris.deuterium;
-        if (debris) chip2(`${t("msg.combat.debris")} ${fmt(debris)}`, "fut-msg-loot");
-        if (m.apiKey) linkChip(t("msg.combat.converter"), converterLink(m.apiKey, o.spy?.lang || locale), t("msg.combat.converterHint"));
-        return box;
-      }
-    }
-  }
-  function place(msg, box) {
-    const header = msg.querySelector(":scope > .msgFilteredHeaderRow");
-    if (header) return void header.after(box);
-    const actions = msg.querySelector(".msg_actions, message-footer");
-    if (actions?.parentElement) actions.before(box);
-    else (msg.querySelector(".msgContent") ?? msg).after(box);
-  }
-  function processMessages(o) {
-    const { doc, store, t, locale } = o;
-    const ships = store.get(SHIPS_INFO_KEY, {});
-    const universe = universeOf(doc, store.get(SERVER_DATA_KEY, null));
-    const fold = store.get(FOLD_KEY, true);
-    const expeditions = [];
-    const spies = [];
-    let journal = null;
-    let added = 0;
-    for (const msg of Array.from(doc.querySelectorAll(".msg[data-msg-id]"))) {
-      if (msg.hasAttribute("data-fut-done") || msg.closest("#fut-journal")) continue;
-      msg.setAttribute("data-fut-done", "");
-      const parsed = readMessage(msg, o.playerId);
-      if (!parsed) continue;
-      const box = summaryFor(doc, parsed, { locale, t, ships, spy: o.spy, universe });
-      if (box) {
-        box.title = [box.dataset.size, t("msg.toggle")].filter(Boolean).join(" \xB7 ");
-        box.addEventListener("click", (e) => {
-          if (e.target.closest("a, button")) return;
-          const cell = msg.querySelector(":scope > .msgFilteredHeaderRow .msgFilteredHeaderCell");
-          if (cell) return void cell.click();
-          msg.classList.toggle("fut-msg-folded");
-        });
-        place(msg, box);
-        if (fold && (parsed.kind === "expedition" || parsed.kind === "discovery" || parsed.kind === "recycle" || parsed.kind === "transport" || parsed.kind === "deploy" || parsed.kind === "return")) msg.classList.add("fut-msg-folded");
-      }
-      if (parsed.kind === "expedition" || parsed.kind === "discovery") expeditions.push(parsed);
-      if (parsed.kind === "spy") spies.push(parsed);
-      if (parsed.kind === "combat" && parsed.coords?.split(":")[2] === "16" && Object.keys(parsed.lost).length) {
-        journal ?? (journal = store.get(JOURNAL_KEY, {}));
-        const r = recordCombat(journal, parsed.id, parsed.at, parsed.lost, parsed.coords);
-        journal = r.journal;
-        added += r.added;
-      }
-    }
-    if (expeditions.length) {
-      journal ?? (journal = store.get(JOURNAL_KEY, {}));
-      const r = record2(journal, expeditions);
-      journal = r.journal;
-      added += r.added;
-    }
-    if (spies.length) {
-      const board = store.get(SPY_BOARD_KEY, {});
-      if (rememberSpies(board, spies, o.now?.() ?? Date.now())) store.set(SPY_BOARD_KEY, board);
-    }
-    if (o.spy) mountSpyPanel({ doc, store, t, locale, spy: o.spy, now: o.now });
-    if (journal && added) {
-      store.set(JOURNAL_KEY, trim(journal, o.now?.() ?? Date.now()));
-      o.onJournal?.(added);
-    }
-    return added;
-  }
-  function watchMessages(o) {
-    const { doc } = o;
-    if (!doc.getElementById("fut-msg-style")) {
-      const style = h2(doc, "style");
-      style.id = "fut-msg-style";
-      style.textContent = MESSAGES_CSS;
-      doc.head.append(style);
-    }
-    processMessages(o);
-    let queued = false;
-    const observer = new MutationObserver(() => {
-      if (queued) return;
-      queued = true;
-      setTimeout(() => {
-        queued = false;
-        processMessages(o);
-      }, 50);
-    });
-    observer.observe(doc.body, { childList: true, subtree: true });
-  }
-
   // src/modules/dashboard/style.ts
   var DASHBOARD_CSS = `
 :host { --panel-w: 1120px; }
@@ -6587,7 +7232,7 @@ table.queues td.acts { width: 1%; text-align: right; }
   var tab = "summary";
   var scrapBody = null;
   var scrapRate = 35;
-  var keyHandler = null;
+  var keyHandler2 = null;
   function h3(tag, className = "", text) {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -6596,8 +7241,8 @@ table.queues td.acts { width: 1%; text-align: right; }
   }
   function closeDashboard(doc) {
     doc.getElementById(HOST_ID)?.remove();
-    if (keyHandler) doc.removeEventListener("keydown", keyHandler);
-    keyHandler = null;
+    if (keyHandler2) doc.removeEventListener("keydown", keyHandler2);
+    keyHandler2 = null;
   }
   function orderedBodies(snapshot, entries) {
     if (!snapshot) return [];
@@ -6673,10 +7318,10 @@ table.queues td.acts { width: 1%; text-align: right; }
     backdrop.append(panel);
     root.append(backdrop);
     const close = () => closeDashboard(doc);
-    keyHandler = (e) => {
+    keyHandler2 = (e) => {
       if (e.key === "Escape") close();
     };
-    doc.addEventListener("keydown", keyHandler);
+    doc.addEventListener("keydown", keyHandler2);
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop) close();
     });
@@ -7120,19 +7765,19 @@ table.queues td.acts { width: 1%; text-align: right; }
   }
   function unitsTab(parent, ctx, ids, ships) {
     const { t, doc } = ctx.o;
-    const shown = ids.filter((id) => ctx.bodies.some((b) => level(b, id) > 0));
+    const shown2 = ids.filter((id) => ctx.bodies.some((b) => level(b, id) > 0));
     const s = section(parent, t(ships ? "dash.tab.ships" : "dash.tab.defence"));
-    if (!shown.length) {
+    if (!shown2.length) {
       s.append(h3("p", "hint", t("dash.unitsNone")));
       return;
     }
-    const bodies = ctx.bodies.filter((b) => shown.some((id) => level(b, id) > 0));
+    const bodies = ctx.bodies.filter((b) => shown2.some((id) => level(b, id) > 0));
     s.append(
-      bodyMatrix(ctx, bodies, shown, {
+      bodyMatrix(ctx, bodies, shown2, {
         units: true,
         foot: "sum",
         head: ships ? (id) => shipIcon(doc, id, ctx.name(id), "unit-ico") : void 0,
-        extra: [{ label: t("dash.valueMsu"), value: (b) => ctx.fmt(unitsMsu(b, shown).msu) }]
+        extra: [{ label: t("dash.valueMsu"), value: (b) => ctx.fmt(unitsMsu(b, shown2).msu) }]
       })
     );
   }
@@ -7281,15 +7926,15 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (!root) return null;
     const id = Number(root.getAttribute("data-technology-id") ?? root.querySelector("[data-technology-id]")?.getAttribute("data-technology-id"));
     if (!id) return null;
-    const shown = {};
+    const shown2 = {};
     const metal = costValue(root, "metal");
     const crystal = costValue(root, "crystal");
     const deuterium = costValue(root, "deuterium");
     const energy = costValue(root, "energy");
-    if (metal !== void 0) shown.metal = metal;
-    if (crystal !== void 0) shown.crystal = crystal;
-    if (deuterium !== void 0) shown.deuterium = deuterium;
-    if (energy !== void 0) shown.energy = energy;
+    if (metal !== void 0) shown2.metal = metal;
+    if (crystal !== void 0) shown2.crystal = crystal;
+    if (deuterium !== void 0) shown2.deuterium = deuterium;
+    if (energy !== void 0) shown2.energy = energy;
     const time = root.querySelector(".build_duration time, .build_duration [datetime]");
     const durationMs = time ? isoDurationMs(time.getAttribute("datetime") ?? "") : null;
     return {
@@ -7297,7 +7942,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       id,
       name: root.querySelector("h3")?.textContent?.trim() ?? String(id),
       panelLevel: num3(root.querySelector(".information .level")?.getAttribute("data-value")),
-      shown,
+      shown: shown2,
       durationMs,
       amountInput: root.querySelector("#build_amount")
     };
@@ -8483,7 +9128,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     if (modalKeyHandler) doc.removeEventListener("keydown", modalKeyHandler, true);
     modalKeyHandler = null;
   }
-  function openSettings(o, tab2, onChange) {
+  function openSettings2(o, tab2, onChange) {
     const { doc, t } = o;
     closeModal(doc);
     const host = el3(doc, "div");
@@ -8733,7 +9378,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           t("fleet.btn.fleetsave"),
           profile.save ? `\u2192 ${profile.save.position}` : "",
           profile.save ? t("fleet.tip.fleetsave") : t("fleet.err.noFleetsave"),
-          () => profile.save ? run.fleetsave() : openSettings(o, "body", redraw),
+          () => profile.save ? run.fleetsave() : openSettings2(o, "body", redraw),
           profile.save ? "" : "dim",
           FLEET_KEYS.fleetsave
         ),
@@ -8767,7 +9412,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), repeat: !loadSettings(o.store).repeat });
           redraw();
         }, settings.repeat ? "on" : ""),
-        iconToggle(doc, "settings", t("fleet.settingsTitle"), () => openSettings(o, "body", redraw))
+        iconToggle(doc, "settings", t("fleet.settingsTitle"), () => openSettings2(o, "body", redraw))
       );
       const top = el3(doc, "div", "fut-frow");
       top.append(tiles, side);
@@ -9206,8 +9851,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const label = li.querySelector("strong")?.textContent?.replace(/\s+/g, " ").trim() ?? "";
       const why = value?.getAttribute("data-tooltip-title") ?? value?.getAttribute("title") ?? "";
       const cls = Array.from(li.classList).find((c) => icons[c]) ?? "";
-      const shown = cls.includes("energy") ? `-${text}` : value ? text : text.replace(label, "").trim();
-      out.push(chip(doc, icons[cls] ?? "", shown, [label, why].filter(Boolean).join(" "), cls.includes("energy") ? "fut-tp-energy" : cls ? "fut-tp-start" : ""));
+      const shown2 = cls.includes("energy") ? `-${text}` : value ? text : text.replace(label, "").trim();
+      out.push(chip(doc, icons[cls] ?? "", shown2, [label, why].filter(Boolean).join(" "), cls.includes("energy") ? "fut-tp-energy" : cls ? "fut-tp-start" : ""));
     }
     return out;
   }
@@ -9407,7 +10052,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   var RES2 = [["metal", "m"], ["crystal", "c"], ["deuterium", "d"]];
   var toggled = /* @__PURE__ */ new Set();
   var PLANNER_ID = "fut-planner";
-  var keyHandler2 = null;
+  var keyHandler3 = null;
   function h4(tag, cls = "", text) {
     const node = document.createElement(tag);
     if (cls) node.className = cls;
@@ -9416,8 +10061,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   }
   function closePlanner(doc) {
     doc.getElementById(PLANNER_ID)?.remove();
-    if (keyHandler2) doc.removeEventListener("keydown", keyHandler2, true);
-    keyHandler2 = null;
+    if (keyHandler3) doc.removeEventListener("keydown", keyHandler3, true);
+    keyHandler3 = null;
   }
   function accountResources(bodies, haveOf, inFlight) {
     if (!bodies.length) return null;
@@ -9663,10 +10308,10 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop) closePlanner(doc);
     });
-    keyHandler2 = (e) => {
+    keyHandler3 = (e) => {
       if (e.key === "Escape") closePlanner(doc);
     };
-    doc.addEventListener("keydown", keyHandler2, true);
+    doc.addEventListener("keydown", keyHandler3, true);
     draw();
   }
 
@@ -9676,7 +10321,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   var KIND_KEY = "exp.kind";
   var PERIODS = ["today", "yesterday", "week", "month", "all"];
   var ORDER = ["resource", "darkmatter", "ship", "item", "trader", "early", "late", "pirate", "alien", "blackhole", "nothing", "artefact", "lifeform", "unknown"];
-  var keyHandler3 = null;
+  var keyHandler4 = null;
   function h5(tag, cls = "", text) {
     const node = document.createElement(tag);
     if (cls) node.className = cls;
@@ -9685,8 +10330,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   }
   function closeJournal(doc) {
     doc.getElementById(JOURNAL_ID)?.remove();
-    if (keyHandler3) doc.removeEventListener("keydown", keyHandler3, true);
-    keyHandler3 = null;
+    if (keyHandler4) doc.removeEventListener("keydown", keyHandler4, true);
+    keyHandler4 = null;
   }
   function openJournal(o) {
     const { doc, t, locale, store } = o;
@@ -9771,8 +10416,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         }
         if (!isDisc && kind !== "raid") {
           kpi(t("exp.count"), s.count.toLocaleString(locale));
-          kpi(t("exp.resources"), `${fmt(msu(s.res))} MSU`, "", triple(s.res));
-          kpi(t("exp.dm"), fmt(s.res.darkMatter), "dm");
+          kpi(t("exp.resources"), `${fmt(msu(s.res))} MSU`);
           kpi(t("exp.shipsFound"), `${fmt(msu(s.shipsValue))} MSU`, "pos", triple(s.shipsValue));
           kpi(t("exp.lost"), msu(s.lostValue) ? `\u2212${fmt(msu(s.lostValue))} MSU` : "\u2014", msu(s.lostValue) ? "neg" : "", msu(s.lostValue) ? triple(s.lostValue) : void 0);
           kpi(t("exp.net"), `${fmt(s.netMsu)} MSU`, s.netMsu < 0 ? "neg" : "pos");
@@ -9784,6 +10428,20 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           }
         }
         if (kind !== "raid") parts.push(kpis);
+        if (!isDisc && kind !== "raid" && (msu(s.res) || s.res.darkMatter)) {
+          const card = h5("div", "card");
+          card.append(h5("h3", "", t("exp.resourcesFound")));
+          const grid2 = h5("div", "res");
+          for (const [key2, c] of [["metal", "m"], ["crystal", "c"], ["deuterium", "d"], ["darkMatter", "dm"]]) {
+            const v = s.res[key2];
+            const tile2 = h5("div", `res-tile ${c}${v ? "" : " zero"}`);
+            tile2.title = `${t(`msg.res.${key2}`)}: ${Math.round(v).toLocaleString(locale)}`;
+            tile2.append(h5("span", "res-name", t(`msg.res.${key2}`)), h5("b", "", fmt(v)));
+            grid2.append(tile2);
+          }
+          card.append(grid2);
+          parts.push(card);
+        }
         const outs = h5("div", "card");
         if (kind !== "raid") outs.append(h5("h3", "", t("exp.outcomes")));
         const total = Object.values(s.outcomes).reduce((a, b) => a + (b ?? 0), 0) || 1;
@@ -9807,8 +10465,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         const sized = s.sizes[0] + s.sizes[1] + s.sizes[2];
         if (sized) {
           const sizes = h5("div", "detail");
-          sizes.style.cssText = "display:flex;gap:12px;margin-top:8px;color:#8A9BB0;font-size:12px";
-          for (const i of [2, 1, 0]) sizes.append(h5("span", "", `${t(`msg.size.${i}`)} ${s.sizes[i].toLocaleString(locale)} (${(s.sizes[i] / sized).toLocaleString(locale, { style: "percent", maximumFractionDigits: 0 })})`));
+          sizes.className = "sizes";
+          for (const i of [2, 1, 0]) sizes.append(h5("span", `rar rar-${i}`, `${t(`msg.size.${i}`)} ${s.sizes[i].toLocaleString(locale)} (${(s.sizes[i] / sized).toLocaleString(locale, { style: "percent", maximumFractionDigits: 0 })})`));
           outs.append(sizes);
         }
         if (kind !== "raid") parts.push(outs);
@@ -9932,10 +10590,10 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop) closeJournal(doc);
     });
-    keyHandler3 = (e) => {
+    keyHandler4 = (e) => {
       if (e.key === "Escape") closeJournal(doc);
     };
-    doc.addEventListener("keydown", keyHandler3, true);
+    doc.addEventListener("keydown", keyHandler4, true);
     draw();
   }
 
@@ -10006,7 +10664,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   // src/modules/highscore/index.ts
   var daily = null;
   var isHighscorePage = (doc) => new URL(doc.location?.href ?? "http://x/").searchParams.get("component") === "highscore";
-  var CSS2 = `
+  var CSS3 = `
 #ranks .fut-hs-gap { display: block; font-size: 10px; line-height: 1.3; }
 #ranks .fut-hs-gap.up { color: #7BC47F; } #ranks .fut-hs-gap.down { color: #D86A6A; } #ranks .fut-hs-gap.flat { color: #6A7682; }
 .fut-hs-note { margin: 4px 0 6px; color: #848484; font: 11px Verdana, Arial, sans-serif; }
@@ -10071,7 +10729,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     if (!o.doc.getElementById("fut-hs-style")) {
       const style = o.doc.createElement("style");
       style.id = "fut-hs-style";
-      style.textContent = CSS2;
+      style.textContent = CSS3;
       o.doc.head.append(style);
     }
     decorateHighscore(o);
@@ -10249,7 +10907,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const locale = detectLocale(document);
     const t = translator(locale);
     let snapshot = store.get(SNAPSHOT_KEY, null);
-    const saver = new IdleSaver(() => store.set(SNAPSHOT_KEY, snapshot));
+    const saver = new IdleSaver(() => {
+      if (!snapshot) return;
+      const stored = store.get(SNAPSHOT_KEY, null);
+      store.set(SNAPSHOT_KEY, stored ? mergeNewerResources(stored, snapshot) : snapshot);
+    });
     window.addEventListener("beforeunload", () => saver.saveNow());
     const bodyIds = readPlanetList(document).flatMap((e) => [e.planetId, e.moonId]).filter((id) => id !== null);
     let queues = store.get(QUEUES_KEY, null);
@@ -10318,6 +10980,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const gap = accountGap(plan, accountResources(snapshot?.bodies ?? [], stock2, inFlight)).missing;
       return gap ? gap.metal + gap.crystal * 1.5 + gap.deuterium * 3 : null;
     };
+    let refreshInbox = null;
     const draw = () => renderPlanetMenu({
       doc: document,
       entries: readPlanetList(document),
@@ -10327,28 +10990,41 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       now: Date.now(),
       locale,
       t,
-      onSettingsChange: (next) => {
-        settings = next;
-        store.set("planetMenu.mode", next.mode);
-        store.set("planetMenu.totals", next.showTotals);
-        store.set("planetMenu.markIdle", next.markIdle);
-        draw();
-      },
-      onBackupExport: () => downloadBackup(document, gm, Date.now()),
-      onBackupImport: (text) => {
-        let json2 = null;
-        try {
-          json2 = JSON.parse(text);
-        } catch {
-        }
-        if (!isOglightDb(json2)) return importBackup(gm, text);
-        const out = convertOglight(json2, loadMarks(store.get(MARKS_KEY, null)), store.get(POSITIONS_KEY, {}), Date.now());
-        store.set(MARKS_KEY, out.marks);
-        store.set(POSITIONS_KEY, out.positions);
-        const days = convertOglightStats(json2.stats ?? {}, store.get(JOURNAL_KEY, {}));
-        store.set(JOURNAL_KEY, days.journal);
-        return t("settings.oglightDone", { players: out.players, planets: out.planets, seen: out.seen, exp: days.expeditions.toLocaleString(locale), raids: days.raids.toLocaleString(locale), days: days.days });
-      },
+      onOpenSettings: ({ roomy, colonies }) => openSettings({
+        doc: document,
+        store,
+        t,
+        menu: {
+          settings,
+          canSide: roomy,
+          onChange: (next) => {
+            settings = next;
+            store.set("planetMenu.mode", next.mode);
+            store.set("planetMenu.totals", next.showTotals);
+            store.set("planetMenu.markIdle", next.markIdle);
+            draw();
+          }
+        },
+        backup: {
+          onExport: () => downloadBackup(document, gm, Date.now()),
+          onImport: (text) => {
+            let json2 = null;
+            try {
+              json2 = JSON.parse(text);
+            } catch {
+            }
+            if (!isOglightDb(json2)) return importBackup(gm, text);
+            const out = convertOglight(json2, loadMarks(store.get(MARKS_KEY, null)), store.get(POSITIONS_KEY, {}), Date.now());
+            store.set(MARKS_KEY, out.marks);
+            store.set(POSITIONS_KEY, out.positions);
+            const days = convertOglightStats(json2.stats ?? {}, store.get(JOURNAL_KEY, {}));
+            store.set(JOURNAL_KEY, days.journal);
+            return t("settings.oglightDone", { players: out.players, planets: out.planets, seen: out.seen, exp: days.expeditions.toLocaleString(locale), raids: days.raids.toLocaleString(locale), days: days.days });
+          }
+        },
+        notes: [colonies, snapshot ? t("toolbar.lastSync", { time: new Date(snapshot.fetchedAt).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) }) : ""].filter(Boolean),
+        onMailChange: () => refreshInbox?.()
+      }),
       onOpenDashboard: () => openDashboard({
         doc: document,
         snapshot,
@@ -10400,11 +11076,17 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
             syncQueuesOnUserClick({ guard, store, ids: bodyIds }),
             fetchLfBonuses({ guard, store }, "user-sync")
           ]);
-          if (account.status === "fulfilled") snapshot = account.value;
           if (queue.status === "fulfilled") queues = queue.value;
+          if (account.status === "rejected") {
+            console.warn(`[${t("app.name")}]`, account.reason);
+            return false;
+          }
+          snapshot = account.value;
           draw();
+          return true;
         } catch (error) {
           console.warn(`[${t("app.name")}]`, error);
+          return false;
         }
       }
     });
@@ -10436,18 +11118,23 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     watchEventList(reminders);
     if (isHighscorePage(document)) watchHighscore({ doc: document, store, locale, t, guard });
     if (isMessagesPage(document))
-      watchMessages({
+      refreshInbox = watchMessages({
         doc: document,
         store,
         playerId: ownPlayerId(document),
         locale,
         t,
+        // "Diario oggi" in the toolbar follows the reports as they are read.
+        onJournal: () => draw(),
+        onOpenJournal: () => openJournal({ doc: document, store, now: Date.now(), locale, t }),
         spy: {
           bases: (snapshot?.bodies ?? []).map((b) => ({ id: b.id, name: b.name, coords: b.coords, moon: b.type === "moon" })),
           researches: snapshot?.researches ?? {},
           classId: Number(pageMeta("ogame-player-characterclass-id")) || 0,
           server: pageMeta("ogame-universe").split(".")[0] ?? "",
-          lang: pageMeta("ogame-ui-language") || pageMeta("ogame-language")
+          lang: pageMeta("ogame-ui-language") || pageMeta("ogame-language"),
+          allianceClass: Number(pageMeta("ogame-allianceclass-id")) || 0,
+          lf: store.get(LF_BONUS_KEY, null)
         }
       });
     if (isFleetDispatch(document) && currentId) {

@@ -5,10 +5,10 @@ import { translator } from '../src/core/i18n';
 import { PLANET_LIST_HTML, SNAPSHOT } from './fixtures';
 
 const t = translator('it');
-const draw = (mode: 'side' | 'compact', onSettingsChange = vi.fn(), onSync = vi.fn(async () => {})) =>
+const draw = (mode: 'side' | 'compact', onOpenSettings = vi.fn(), onSync = vi.fn(async () => true)) =>
   renderPlanetMenu({
     doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { mode, showTotals: true, markIdle: true },
-    now: 0, locale: 'it', t, onSettingsChange, onSync,
+    now: 0, locale: 'it', t, onOpenSettings, onSync,
   });
 
 beforeEach(() => {
@@ -85,20 +85,11 @@ describe('renderPlanetMenu', () => {
     draw('side');
     draw('compact');
     expect(document.querySelectorAll('.fut-toolbar')).toHaveLength(1);
-    expect(document.querySelectorAll('.fut-settings')).toHaveLength(1);
     expect(document.querySelectorAll('.fut-nomoon')).toHaveLength(1);
     expect(document.querySelectorAll('#planet-1 .fut-res')).toHaveLength(2); // planet + moon
     expect(document.querySelectorAll('.fut-name')).toHaveLength(2);
     expect(document.querySelectorAll('.fut-idle')).toHaveLength(1);
     expect(document.getElementById('planetList')?.classList.contains('fut-mode-compact')).toBe(true);
-  });
-
-  it('the view switch (in the settings panel) only calls back, with no navigation', () => {
-    const onSettingsChange = vi.fn();
-    draw('side', onSettingsChange);
-    const compact = Array.from(document.querySelectorAll<HTMLButtonElement>('.fut-settings .fut-chip')).find((b) => b.textContent === t('planetMenu.compact'))!;
-    compact.click();
-    expect(onSettingsChange).toHaveBeenCalledWith({ mode: 'compact', showTotals: true, markIdle: true });
   });
 
   it('toolbar buttons show data and open their window', () => {
@@ -107,7 +98,7 @@ describe('renderPlanetMenu', () => {
     const onOpenTargets = vi.fn();
     renderPlanetMenu({
       doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { mode: 'side', showTotals: true, markIdle: true },
-      now: 0, locale: 'it', t, onSettingsChange: vi.fn(), onSync: vi.fn(async () => {}),
+      now: 0, locale: 'it', t, onSync: vi.fn(async () => true),
       onOpenDashboard: vi.fn(), onOpenPlanner, onOpenJournal, onOpenTargets, targetsCount: 8, planCount: 50, planGap: 1.2e9, journalToday: { count: 25, net: 4e7 },
     });
     const cells = Array.from(document.querySelectorAll<HTMLButtonElement>('.fut-toolbar .fut-cell'));
@@ -124,24 +115,18 @@ describe('renderPlanetMenu', () => {
   });
 
   it('sync runs only from the button click', () => {
-    const onSync = vi.fn(async () => {});
+    const onSync = vi.fn(async () => true);
     draw('side', vi.fn(), onSync);
     expect(onSync).not.toHaveBeenCalled();
     document.querySelector<HTMLButtonElement>('.fut-toolbar .fut-tool-sync')!.click();
     expect(onSync).toHaveBeenCalledTimes(1);
   });
 
-  it('settings panel opens from the gear and can hide the totals', () => {
-    const onSettingsChange = vi.fn();
-    draw('side', onSettingsChange);
-    const panel = document.querySelector('.fut-settings')!;
-    expect(panel.hasAttribute('hidden')).toBe(true);
+  it('the gear opens the settings window, saying whether side by side fits', () => {
+    const onOpenSettings = vi.fn();
+    draw('side', onOpenSettings);
     document.querySelector<HTMLButtonElement>('.fut-tool-settings')!.click();
-    expect(panel.hasAttribute('hidden')).toBe(false);
-    const off = Array.from(panel.querySelectorAll<HTMLButtonElement>('.fut-chip')).find((b) => b.textContent === 'No')!;
-    off.click();
-    expect(onSettingsChange).toHaveBeenCalledWith({ mode: 'side', showTotals: false, markIdle: true });
-    document.querySelector<HTMLButtonElement>('.fut-tool-settings')!.click(); // close again for later tests
+    expect(onOpenSettings).toHaveBeenCalledWith(expect.objectContaining({ roomy: true }));
   });
 });
 

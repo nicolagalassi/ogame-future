@@ -60,12 +60,25 @@ export class NetworkGuard {
 
     // The universe's public API (/api/*.xml) never gets the session cookies, whatever the reason.
     const isGame = this.isGameUrl(url) && !this.isPublicApi(url);
-    return this.fetchImpl(url, {
-      ...init,
-      credentials: isGame ? 'include' : 'omit',
-      headers: isGame ? { 'X-Requested-With': 'XMLHttpRequest', ...(init.headers ?? {}) } : init.headers,
+    const send = () =>
+      this.fetchImpl(url, {
+        ...init,
+        credentials: isGame ? 'include' : 'omit',
+        headers: isGame ? { 'X-Requested-With': 'XMLHttpRequest', ...(init.headers ?? {}) } : init.headers,
+      });
+    if (!isGame) return send();
+    // One session call at a time: two at once make the game answer one of them with
+    // {"components":[],"newAjaxToken":…} instead of the data (seen on s269-it, 2026-11-10).
+    // The body is read inside the queue, so the next call starts only when this one is done.
+    const run = this.sessionQueue.then(async () => {
+      const res = await send();
+      return new Response(await res.text(), { status: res.status, statusText: res.statusText, headers: res.headers });
     });
+    this.sessionQueue = run.catch(() => undefined);
+    return run;
   }
+
+  private sessionQueue: Promise<unknown> = Promise.resolve();
 
   private check(url: string, reason: CallReason): string | null {
     if (reason === 'page-load' && !this.pageLoadOpen) {

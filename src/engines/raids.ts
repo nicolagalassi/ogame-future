@@ -26,6 +26,8 @@ export interface SpyEntry {
   defValue: number;
   /** API key of the report, for the simulators ('' in entries saved before 2026-11-06). */
   apiKey?: string;
+  /** Read from Communication › shared espionage reports: an alliance member's probe, not yours. */
+  shared?: boolean;
 }
 
 export type SpyBoard = Record<string, SpyEntry>;
@@ -37,17 +39,23 @@ export const SPY_MAX_AGE = 72 * 3_600_000;
 export const spyKey = (coords: string, moon: boolean) => `${coords}${moon ? ':m' : ''}`;
 
 /** Adds reports (newest per target wins), drops old ones. Returns how many entries changed. */
-export function rememberSpies(board: SpyBoard, reports: SpyMessage[], now: number): number {
+export function rememberSpies(board: SpyBoard, reports: SpyMessage[], now: number, shared = false): number {
   let changed = 0;
   for (const r of reports) {
     if (r.counter || !r.playerId) continue;
     const key = spyKey(r.coords, r.moon);
     const known = board[key];
+    // The same report met again in the shared tab: it was an alliance member's probe.
+    if (known && known.id === r.id && shared && !known.shared) {
+      known.shared = true;
+      changed++;
+    }
     // Same report seen again: skip, unless the stored copy predates the API key.
     if (known && (known.at > r.at || (known.at === r.at && (known.apiKey || !r.apiKey)))) continue;
     board[key] = {
       key, id: r.id, at: r.at, coords: r.coords, moon: r.moon, playerId: r.playerId, playerName: r.playerName, statuses: r.statuses,
       activity: r.activity, res: { metal: r.res.metal, crystal: r.res.crystal, deuterium: r.res.deuterium }, loot: r.loot, fleetValue: r.fleetValue, defValue: r.defValue, apiKey: r.apiKey,
+      ...(shared ? { shared: true } : {}),
     };
     changed++;
   }

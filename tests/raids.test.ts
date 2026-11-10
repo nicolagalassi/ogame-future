@@ -42,8 +42,9 @@ describe('spy board', () => {
     expect(near).toMatchObject({ lootRes: 1500, lootMsu: 2750, ships: 2, flight: 1806, ageMinutes: 1 });
     expect(near.base?.name).toBe('Home');
     expect(near.msuPerHour).toBeCloseTo(2750 / ((2 * 1806) / 3600));
-    const sorted = sortRows(rows, { sort: 'rate', desc: true });
-    expect(sorted[0]!.entry.coords).toBe('1:476:11');
+    // Sorted by the resources you can carry away: the far target has more.
+    const sorted = sortRows(rows, { sort: 'loot', desc: true });
+    expect(sorted[0]!.entry.coords).toBe('5:100:1');
     expect(targetRows(board, bases, { capacity: 1000, speed: 0, universe: U, now: 0 })[0]!.msuPerHour).toBeNull();
   });
 });

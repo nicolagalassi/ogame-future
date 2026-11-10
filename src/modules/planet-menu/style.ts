@@ -29,7 +29,6 @@ body.fut-on #planetbarcomponent #countColonies { display: none !important; }
 
 #planetbarcomponent:not(.fut-wide) #planetList.fut-menu,
 #planetbarcomponent:not(.fut-wide) .fut-toolbar,
-#planetbarcomponent:not(.fut-wide) .fut-settings,
 #planetbarcomponent:not(.fut-wide) .fut-totals { width: ${NATIVE_WIDTH}px !important; }
 ${L} { width: 100% !important; display: flex !important; flex-direction: column; gap: 2px; padding: 0 !important; background: none !important; }
 ${L} .smallplanet.fut-row {
@@ -187,26 +186,13 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
 #planetbarcomponent .fut-tool:disabled { opacity: 0.35; cursor: default; background: none; }
 #planetbarcomponent .fut-tool[aria-expanded="true"] { background: #12283A !important; color: #4FD1E8; }
 #planetbarcomponent .fut-tool.fut-stale { color: #F5B547; }
+#planetbarcomponent .fut-tool.fut-failed { color: #E5534B; }
 #planetbarcomponent .fut-tool.fut-busy svg { animation: fut-spin 1s linear infinite; }
 #planetbarcomponent:not(.fut-wide) .fut-cell { padding: 3px 3px 4px; }
 #planetbarcomponent:not(.fut-wide) .fut-cell-v { font-size: 10px; }
 #planetbarcomponent:not(.fut-wide) .fut-cell-k { font-size: 10px; }
 @keyframes fut-spin { to { transform: rotate(360deg); } }
 
-.fut-settings {
-  box-sizing: border-box; margin: 0 0 3px; padding: 6px 8px; border: 1px solid #1F2C40; border-radius: 7px;
-  background: #111B2A; font: 11px Arial, sans-serif; color: #C9D4E2; display: flex; flex-direction: column; gap: 5px;
-}
-.fut-settings[hidden] { display: none; }
-.fut-set-row { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-.fut-set-label { flex: 1 0 100%; color: #8A9BB0; }
-.fut-chip {
-  flex: 1; height: 22px; border-radius: 5px; border: 1px solid #1F2C40; background: #0A111C;
-  color: #B4C2D3; font: 11px Arial, sans-serif; cursor: pointer;
-}
-.fut-chip[aria-pressed="true"] { border-color: #4FD1E8; background: #12283A; color: #E6EDF5; font-weight: 700; }
-.fut-chip:disabled { opacity: 0.4; cursor: default; }
-.fut-set-note { color: #8A9BB0; }
 
 .fut-totals {
   box-sizing: border-box; margin-top: 4px; padding: 6px 8px; border-radius: 7px;

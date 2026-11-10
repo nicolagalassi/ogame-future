@@ -316,8 +316,11 @@ import { expeditionMax } from '../src/engines/fleet';
 
 describe('expedition bonuses', () => {
   it('reads the lifeform booster and the active items', () => {
-    expect(parseSpeciesBonuses({ data: { expedition: { ResultBooster: { totalBonus: { ResultBooster: 0.9184 } } } } }, 1).expedition).toBe(0.9184);
-    expect(parseSpeciesBonuses({}, 1).expedition).toBe(0);
+    expect(parseSpeciesBonuses({ data: { expedition: { ResultBooster: { totalBonus: { ResultBooster: 0.9184 } } } } }, 1)!.expedition).toBe(0.9184);
+    expect(parseSpeciesBonuses({ data: { expedition: {} } }, 1)!.expedition).toBe(0);
+    // An answer without the expedition section is broken, not "no bonus" (seen on s269-it, 2026-11-10).
+    expect(parseSpeciesBonuses({}, 1)).toBeNull();
+    expect(parseSpeciesBonuses({ data: {} }, 1)).toBeNull();
     document.body.innerHTML = `<div id="buffBar"><div data-uuid=""></div><div data-uuid="b0f6477d68c9683170cb8d32be2df1177669c5a0"></div><div data-uuid="615beac7f493e7724db5f6ef4f182e3be8d9545c"></div></div>`;
     const items = readActiveItems(document, 5)!;
     expect(items.uuids).toHaveLength(2);

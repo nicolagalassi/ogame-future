@@ -9,7 +9,7 @@ import { IdleSaver } from './core/idle-saver';
 import { detectLocale, translator } from './core/i18n';
 import { SNAPSHOT_KEY, hydrateAccountOncePerSession, syncAccountOnUserClick, type AccountSnapshot } from './data/account-info';
 import { currentBodyId, readCurrentResources, readPlanetList } from './data/planet-list';
-import { applyPageResources } from './engines/resources';
+import { applyPageResources, mergeNewerResources } from './engines/resources';
 import { SCORE_KEY, watchScore, type Score } from './data/score';
 import { HISTORY_KEY, recordDay, type History } from './engines/history';
 import { loadServerDataOnPageLoad } from './data/server-data';
@@ -19,7 +19,8 @@ import { loadMarks, MARKS_KEY, migrateOld, type Marks } from './engines/marks';
 import { convertOglight, convertOglightStats, isOglightDb } from './engines/oglight-import';
 import { POSITIONS_KEY, type Positions } from './engines/positions';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
-import { ITEMS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems } from './data/bonuses';
+import { ITEMS_KEY, LF_BONUS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems, type LfBonuses } from './data/bonuses';
+import { openSettings } from './modules/settings';
 import { dayFigures, openDashboard } from './modules/dashboard';
 import { TECH_NAMES_KEY, learnTechNames, type TechNames } from './data/tech-names';
 import { readTechList } from './data/tech-details';
@@ -62,7 +63,12 @@ async function bootstrap(): Promise<void> {
   const locale = detectLocale(document);
   const t = translator(locale);
   let snapshot: AccountSnapshot | null = store.get<AccountSnapshot | null>(SNAPSHOT_KEY, null);
-  const saver = new IdleSaver(() => store.set(SNAPSHOT_KEY, snapshot));
+  const saver = new IdleSaver(() => {
+    if (!snapshot) return;
+    // Merge, do not replace: other tabs may have saved newer amounts of other bodies meanwhile.
+    const stored = store.get<AccountSnapshot | null>(SNAPSHOT_KEY, null);
+    store.set(SNAPSHOT_KEY, stored ? mergeNewerResources(stored, snapshot) : snapshot);
+  });
   window.addEventListener('beforeunload', () => saver.saveNow());
 
   const bodyIds = readPlanetList(document).flatMap((e) => [e.planetId, e.moonId]).filter((id): id is number => id !== null);
@@ -148,6 +154,8 @@ async function bootstrap(): Promise<void> {
     const gap = accountGap(plan, accountResources(snapshot?.bodies ?? [], stock, inFlight)).missing;
     return gap ? gap.metal + gap.crystal * 1.5 + gap.deuterium * 3 : null;
   };
+  /** Redraws the inbox panels after a choice in the settings (set once the inbox is watched). */
+  let refreshInbox: (() => void) | null = null;
   const draw = () =>
     renderPlanetMenu({
       doc: document,
@@ -158,26 +166,40 @@ async function bootstrap(): Promise<void> {
       now: Date.now(),
       locale,
       t,
-      onSettingsChange: (next) => {
-        settings = next;
-        store.set('planetMenu.mode', next.mode);
-        store.set('planetMenu.totals', next.showTotals);
-        store.set('planetMenu.markIdle', next.markIdle);
-        draw();
-      },
-      onBackupExport: () => downloadBackup(document, gm, Date.now()),
-      onBackupImport: (text) => {
-        // OGLight's "Export data" file: converted into this universe's marks and positions.
-        let json: unknown = null;
-        try { json = JSON.parse(text); } catch { /* not JSON: importBackup says so */ }
-        if (!isOglightDb(json)) return importBackup(gm, text);
-        const out = convertOglight(json, loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null)), store.get<Positions>(POSITIONS_KEY, {}), Date.now());
-        store.set(MARKS_KEY, out.marks);
-        store.set(POSITIONS_KEY, out.positions);
-        const days = convertOglightStats(json.stats ?? {}, store.get<Journal>(JOURNAL_KEY, {}));
-        store.set(JOURNAL_KEY, days.journal);
-        return t('settings.oglightDone', { players: out.players, planets: out.planets, seen: out.seen, exp: days.expeditions.toLocaleString(locale), raids: days.raids.toLocaleString(locale), days: days.days });
-      },
+      onOpenSettings: ({ roomy, colonies }) =>
+        openSettings({
+          doc: document,
+          store,
+          t,
+          menu: {
+            settings,
+            canSide: roomy,
+            onChange: (next) => {
+              settings = next;
+              store.set('planetMenu.mode', next.mode);
+              store.set('planetMenu.totals', next.showTotals);
+              store.set('planetMenu.markIdle', next.markIdle);
+              draw();
+            },
+          },
+          backup: {
+            onExport: () => downloadBackup(document, gm, Date.now()),
+            onImport: (text) => {
+              // OGLight's "Export data" file: converted into this universe's marks and positions.
+              let json: unknown = null;
+              try { json = JSON.parse(text); } catch { /* not JSON: importBackup says so */ }
+              if (!isOglightDb(json)) return importBackup(gm, text);
+              const out = convertOglight(json, loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null)), store.get<Positions>(POSITIONS_KEY, {}), Date.now());
+              store.set(MARKS_KEY, out.marks);
+              store.set(POSITIONS_KEY, out.positions);
+              const days = convertOglightStats(json.stats ?? {}, store.get<Journal>(JOURNAL_KEY, {}));
+              store.set(JOURNAL_KEY, days.journal);
+              return t('settings.oglightDone', { players: out.players, planets: out.planets, seen: out.seen, exp: days.expeditions.toLocaleString(locale), raids: days.raids.toLocaleString(locale), days: days.days });
+            },
+          },
+          notes: [colonies, snapshot ? t('toolbar.lastSync', { time: new Date(snapshot.fetchedAt).toLocaleString(locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) }) : ''].filter(Boolean),
+          onMailChange: () => refreshInbox?.(),
+        }),
       onOpenDashboard: () =>
         openDashboard({
           doc: document,
@@ -230,11 +252,17 @@ async function bootstrap(): Promise<void> {
             syncQueuesOnUserClick({ guard, store, ids: bodyIds }),
             fetchLfBonuses({ guard, store }, 'user-sync'),
           ]);
-          if (account.status === 'fulfilled') snapshot = account.value;
           if (queue.status === 'fulfilled') queues = queue.value;
+          if (account.status === 'rejected') {
+            console.warn(`[${t('app.name')}]`, account.reason);
+            return false;
+          }
+          snapshot = account.value;
           draw();
+          return true;
         } catch (error) {
           console.warn(`[${t('app.name')}]`, error);
+          return false;
         }
       },
     });
@@ -281,14 +309,19 @@ async function bootstrap(): Promise<void> {
 
   // Inbox: a summary on each report; expedition reports go into the journal.
   if (isMessagesPage(document))
-    watchMessages({
+    refreshInbox = watchMessages({
       doc: document, store, playerId: ownPlayerId(document), locale, t,
+      // "Diario oggi" in the toolbar follows the reports as they are read.
+      onJournal: () => draw(),
+      onOpenJournal: () => openJournal({ doc: document, store, now: Date.now(), locale, t }),
       spy: {
         bases: (snapshot?.bodies ?? []).map((b) => ({ id: b.id, name: b.name, coords: b.coords, moon: b.type === 'moon' })),
         researches: snapshot?.researches ?? {},
         classId: Number(pageMeta('ogame-player-characterclass-id')) || 0,
         server: pageMeta('ogame-universe').split('.')[0] ?? '',
         lang: pageMeta('ogame-ui-language') || pageMeta('ogame-language'),
+        allianceClass: Number(pageMeta('ogame-allianceclass-id')) || 0,
+        lf: store.get<LfBonuses | null>(LF_BONUS_KEY, null),
       },
     });
 

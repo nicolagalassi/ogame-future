@@ -3,8 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { loadServerDataOnPageLoad, parseServerData, SERVER_DATA_KEY } from '../src/data/server-data';
 import { NetworkGuard } from '../src/core/guard';
 import { MemoryStore, Store } from '../src/core/storage';
-import { converterLink, ogameToolsSimLink, osimsLink, simPrefill } from '../src/engines/sim-links';
-import { mountSpyPanel, SPY_PANEL_ID, universeOf } from '../src/modules/messages/spy-table';
+import { converterLink, SIM_KEY, simLink, simPrefill } from '../src/engines/sim-links';
+import { mountSpyPanel, SPY_PANEL_ID, SPY_SHARED_KEY, universeOf } from '../src/modules/messages/spy-table';
 import { SPY_BOARD_KEY } from '../src/engines/raids';
 import { translator } from '../src/core/i18n';
 
@@ -37,9 +37,24 @@ describe('simulator and converter links', () => {
     expect(data[0][0].research[109].level).toBe(22);
     expect(data[0][0].research[115].level).toBe(21);
     expect(data[1][0].planet.position).toBe('11');
-    expect(osimsLink('sr-en-808-ab', prefill)).toBe(`https://www.ogameutilities.it/Osims/?SR_KEY=sr-en-808-ab#prefill=${prefill}`);
-    expect(ogameToolsSimLink('sr-en-808-ab', 'it', prefill)).toMatch(/^https:\/\/simulator\.ogame-tools\.com\/it\?SR_KEY=sr-en-808-ab#prefill=/);
+    // Same shape as OGLight: tool, language, report key, prefill.
+    expect(simLink('osims', 'sr-en-808-ab', 'it', prefill)).toBe(`https://www.ogameutilities.it/Osims/it?SR_KEY=sr-en-808-ab#prefill=${prefill}`);
+    expect(simLink('ogametools', 'sr-en-808-ab', 'us', prefill)).toMatch(/^https:\/\/simulator\.ogame-tools\.com\/en\?SR_KEY=sr-en-808-ab#prefill=/);
     expect(converterLink('cr-en-808-cd', 'us')).toBe('https://ogotcha.oplanet.eu/en?CR_KEY=cr-en-808-cd');
+  });
+});
+
+describe('simulator prefill, as OGLight fills it', () => {
+  it('adds the General lifeform boost, the Warriors level, the class booster and the ship bonuses', () => {
+    const ship = { weapon: 0.1, shield: 0.2, armor: 0.3, cargo: 0.4, speed: 0.05, fuel: -0.08 };
+    const data = JSON.parse(atob(simPrefill('s269-it', { coords: '1:2:3', researches: { 109: 20 }, classId: 2, allianceClass: 1, lf: { ships: { 207: ship }, classBooster: { 2: 0.52 } } }, '4:5:6')));
+    const me = data[0][0];
+    // 20 + 2 (General) + 1 (52% booster: one more per 50%) + 1 (Warriors).
+    expect(me.research[109].level).toBe(24);
+    expect(me.allianceClass).toBe(1);
+    expect(me.lifeformBonuses.CharacterClassBooster).toEqual({ 2: 0.52 });
+    expect(me.lifeformBonuses.BaseStatsBooster[207]).toEqual({ weapon: 0.1, shield: 0.2, armor: 0.3, cargo: 0.4, speed: 0.05 });
+    expect(me.lifeformBonuses.ShipFuelConsumption).toBe(0.08);
   });
 });
 
@@ -53,12 +68,44 @@ describe('spy panel in the inbox', () => {
     const panel = document.getElementById(SPY_PANEL_ID)!;
     expect(panel.nextElementSibling?.className).toBe('messagesHolder');
     expect(panel.querySelectorAll('.fut-sp-list .fut-sp-row')).toHaveLength(1);
-    expect(panel.querySelectorAll('.fut-sp-acts .custom_btn')).toHaveLength(5);
+    // Columns: no MSU per hour; loot is the resources you can carry away (1M × 50%).
+    expect(Array.from(panel.querySelectorAll('.fut-sp-cols .fut-sp-h')).map((h) => h.textContent)).toEqual(['Bersaglio', 'Età', 'Bottino', 'Flotta', 'Difesa', '']);
+    expect(panel.querySelector('.fut-sp-list .fut-sp-row .fut-sp-num:nth-child(3) b')?.textContent).toBe('500k');
+    // The name opens the full report in the game's own window.
+    const name = panel.querySelector<HTMLAnchorElement>('a.fut-sp-name')!;
+    expect(name.classList.contains('overlay')).toBe(true);
+    expect(name.href).toContain('component=messagedetails&messageId=9');
+    // Attack, one Simulate (the picked tool), remove.
+    const acts = panel.querySelector('.fut-sp-list .fut-sp-acts')!;
+    expect(Array.from(acts.querySelectorAll('button')).map((b) => b.className)).toEqual(['fut-sp-attack', 'fut-sp-sim', 'fut-sp-del']);
+    expect(acts.querySelector('.fut-sp-sim')?.getAttribute('title')).toContain('Osims');
+    store.set(SIM_KEY, 'ogametools');
+    mountSpyPanel(o);
+    expect(document.querySelector('.fut-sp-sim')?.getAttribute('title')).toContain('OGame Simulator');
     mountSpyPanel(o);
     expect(document.querySelectorAll(`#${SPY_PANEL_ID}`)).toHaveLength(1);
     document.querySelector('[data-subtab-id="20"]')!.classList.remove('active');
     mountSpyPanel(o);
     expect(document.getElementById(SPY_PANEL_ID)).toBeNull();
+  });
+});
+
+describe('reports shared by the alliance', () => {
+  it('are marked and can be left out of the table', () => {
+    document.body.innerHTML = '<div data-subtab-id="20" class="active"></div><div id="messages"><div class="messagesHolder"></div></div>';
+    const store = new Store(new MemoryStore(), 'x');
+    const entry = { at: 1000, moon: false, playerId: 5, statuses: [], activity: 60, res: { metal: 1e6, crystal: 0, deuterium: 0 }, loot: 0.5, fleetValue: 0, defValue: 0 };
+    store.set(SPY_BOARD_KEY, {
+      '1:1:1': { ...entry, key: '1:1:1', id: '1', coords: '1:1:1', playerName: 'Mine' },
+      '2:2:2': { ...entry, key: '2:2:2', id: '2', coords: '2:2:2', playerName: 'Ally', shared: true },
+    });
+    const o = { doc: document, store, t: translator('it'), locale: 'it', now: () => 61_000, spy: { bases: [], researches: {}, classId: 0, server: 's269-it', lang: 'it' } };
+    mountSpyPanel(o);
+    expect(document.querySelectorAll('.fut-sp-list .fut-sp-row')).toHaveLength(2);
+    expect(document.querySelectorAll('.st-shared')).toHaveLength(1);
+    store.set(SPY_SHARED_KEY, false);
+    mountSpyPanel(o);
+    expect(Array.from(document.querySelectorAll('.fut-sp-name')).map((n) => n.textContent)).toEqual(['Mine']);
   });
 });
 

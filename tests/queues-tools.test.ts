@@ -51,7 +51,7 @@ describe('production queue', () => {
     renderPlanetMenu({
       doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, queues,
       settings: { mode: 'side', showTotals: true, markIdle: false }, now: 1_000_000, locale: 'it',
-      t: translator('it'), onSettingsChange: () => {}, onSync: async () => {},
+      t: translator('it'), onSync: async () => true,
     });
     const stripes = document.querySelectorAll('#planet-1 a.planetlink .fut-q');
     expect(Array.from(stripes).map((s) => s.className)).toEqual(['fut-q fut-q-building', 'fut-q fut-q-ship']);

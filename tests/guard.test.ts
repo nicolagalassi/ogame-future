@@ -57,3 +57,26 @@ describe('NetworkGuard', () => {
     expect(fetchImpl).toHaveBeenCalledOnce();
   });
 });
+
+describe('NetworkGuard session queue', () => {
+  it('sends game calls one at a time, and a failure does not block the next', async () => {
+    let open = 0, most = 0, n = 0;
+    const fetchImpl = vi.fn(async (_url: string, _init?: RequestInit) => {
+      open++; most = Math.max(most, open);
+      await new Promise((r) => setTimeout(r, 5));
+      open--;
+      if (++n === 2) throw new Error('network');
+      return new Response(`{"n":${n}}`);
+    });
+    const guard = new NetworkGuard(fetchImpl, ORIGIN);
+    const [a, b, c] = await Promise.allSettled([
+      guard.request('/game/index.php?page=a', 'page-load'),
+      guard.request('/game/index.php?page=b', 'page-load'),
+      guard.request('/game/index.php?page=c', 'page-load'),
+    ]);
+    expect(most).toBe(1);
+    expect(a.status === 'fulfilled' && (await a.value.json())).toEqual({ n: 1 });
+    expect(b.status).toBe('rejected');
+    expect(c.status === 'fulfilled' && (await c.value.json())).toEqual({ n: 3 });
+  });
+});
