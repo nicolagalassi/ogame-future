@@ -151,3 +151,19 @@ describe('data age badge', () => {
     expect(dataAge(0, 2 * 86_400_000)).toEqual({ text: '2d', cls: 'fut-age-old' });
   });
 });
+
+describe('when the game reloads the planet bar', () => {
+  it('draws the menu again, once', async () => {
+    const { watchPlanetBar } = await import('../src/modules/planet-menu');
+    document.body.innerHTML = `<div id="planetbarcomponent">${PLANET_LIST_HTML}</div>`;
+    const redraw = vi.fn(() => draw('side'));
+    redraw();
+    watchPlanetBar(document, redraw);
+    expect(document.querySelector('.fut-toolbar')).not.toBeNull();
+    // What reloadComponent('planetbar') does: the bar's content replaced with the game's own.
+    document.getElementById('planetbarcomponent')!.innerHTML = PLANET_LIST_HTML;
+    await new Promise((r) => setTimeout(r, 10));
+    expect(redraw).toHaveBeenCalledTimes(2);
+    expect(document.querySelectorAll('.fut-toolbar')).toHaveLength(1);
+  });
+});

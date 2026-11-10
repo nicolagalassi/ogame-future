@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.5
+// @version      0.3.6
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -6773,6 +6773,20 @@ ${L}.fut-mode-compact a.moonlink img.icon-moon { width: 18px !important; height:
     bar.append(side);
     return bar;
   }
+  function watchPlanetBar(doc, redraw) {
+    const bar = doc.getElementById("planetbarcomponent");
+    const view = doc.defaultView;
+    if (!bar || !view) return;
+    let queued = false;
+    new view.MutationObserver(() => {
+      if (queued || bar.querySelector(".fut-toolbar") || !doc.getElementById("planetList")) return;
+      queued = true;
+      view.setTimeout(() => {
+        queued = false;
+        if (!bar.querySelector(".fut-toolbar") && doc.getElementById("planetList")) redraw();
+      }, 0);
+    }).observe(bar, { childList: true, subtree: true });
+  }
   function renderPlanetMenu(o) {
     const { doc } = o;
     const list = doc.getElementById("planetList");
@@ -11091,6 +11105,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       }
     });
     draw();
+    watchPlanetBar(document, draw);
     const currentId = currentBodyId(document);
     const list = readPlanetList(document);
     if (currentId) {

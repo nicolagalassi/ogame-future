@@ -281,6 +281,27 @@ function toolbar(o: PlanetMenuOptions, colonies: string, roomy: boolean): HTMLEl
 }
 
 
+/**
+ * The game reloads the whole planet bar on its own (`reloadComponent('planetbar')`, from its
+ * websocket when a construction ends or a fleet event arrives), wiping Future's menu. Watch the
+ * bar and redraw when the toolbar is gone. Page only: no network call, no game action.
+ */
+export function watchPlanetBar(doc: Document, redraw: () => void): void {
+  const bar = doc.getElementById('planetbarcomponent');
+  const view = doc.defaultView;
+  if (!bar || !view) return;
+  let queued = false;
+  new view.MutationObserver(() => {
+    if (queued || bar.querySelector('.fut-toolbar') || !doc.getElementById('planetList')) return;
+    queued = true;
+    // After the game has finished filling the bar in.
+    view.setTimeout(() => {
+      queued = false;
+      if (!bar.querySelector('.fut-toolbar') && doc.getElementById('planetList')) redraw();
+    }, 0);
+  }).observe(bar, { childList: true, subtree: true });
+}
+
 export function renderPlanetMenu(o: PlanetMenuOptions): void {
   const { doc } = o;
   const list = doc.getElementById('planetList');

@@ -40,7 +40,7 @@ import { watchMessages } from './modules/messages';
 import { openJournal } from './modules/messages/journal-view';
 import { isHighscorePage, watchHighscore } from './modules/highscore';
 import { bellButton, clockOffset, startReminders, watchEventList } from './modules/reminders';
-import { renderPlanetMenu, type MenuMode, type MenuSettings } from './modules/planet-menu';
+import { renderPlanetMenu, watchPlanetBar, type MenuMode, type MenuSettings } from './modules/planet-menu';
 
 async function bootstrap(): Promise<void> {
   const namespace = serverNamespace(document);
@@ -267,6 +267,8 @@ async function bootstrap(): Promise<void> {
       },
     });
   draw();
+  // The game reloads the planet bar by itself now and then: draw the menu again when it does.
+  watchPlanetBar(document, draw);
 
   const currentId = currentBodyId(document);
   const list = readPlanetList(document);
