@@ -9,6 +9,9 @@
  * - 'user-view' calls are allowed later too, but only to the universe's public API
  *   (/api/*.xml, no session, no cookies) and only from what the player points at
  *   (as OGLight does for player data in the galaxy view). The caller caches the answer.
+ * - The one outside service is PTRE's public ranking (`PTRE_RANKS`), again only as 'user-view' from
+ *   the highscore page the player opened, without cookies, as OGLight does (only the country and the
+ *   universe number are sent).
  * - The `cp` (change planet) parameter is refused on every game URL:
  *   it mutates the session's active planet.
  * - Every attempt, allowed or refused, is written to an in-memory log so the
@@ -16,6 +19,9 @@
  */
 
 export type CallReason = 'page-load' | 'user-sync' | 'user-view';
+
+/** PTRE's public ranking snapshot, the only outside address Future may call. */
+export const PTRE_RANKS = 'https://ptre.chez.gg/scripts/api_get_ranks.php';
 
 export interface GuardLogEntry {
   at: number;
@@ -84,8 +90,11 @@ export class NetworkGuard {
     if (reason === 'page-load' && !this.pageLoadOpen) {
       return 'Background call refused: the page has finished loading (AGENTS.md §4).';
     }
-    if (reason === 'user-view' && !this.isPublicApi(url)) {
-      return "Call refused: 'user-view' reaches only the universe's public API (AGENTS.md §6).";
+    if (reason === 'user-view' && !this.isPublicApi(url) && !this.isPtre(url)) {
+      return "Call refused: 'user-view' reaches only the universe's public API and PTRE's ranking (AGENTS.md §6).";
+    }
+    if (this.isOutside(url) && !(reason === 'user-view' && this.isPtre(url))) {
+      return 'Call refused: no outside service but PTRE\'s ranking, and only from what the player opens.';
     }
     if (this.isGameUrl(url) && new URL(url, this.gameOrigin).searchParams.has('cp')) {
       return 'Call refused: the cp parameter changes the active planet (AGENTS.md §4.2).';
@@ -95,6 +104,15 @@ export class NetworkGuard {
 
   private isPublicApi(url: string): boolean {
     return this.isGameUrl(url) && /^\/api\/\w+\.xml$/.test(new URL(url, this.gameOrigin).pathname);
+  }
+
+  private isPtre(url: string): boolean {
+    const u = new URL(url, this.gameOrigin);
+    return `${u.origin}${u.pathname}` === PTRE_RANKS;
+  }
+
+  private isOutside(url: string): boolean {
+    return !this.isGameUrl(url);
   }
 
   private isGameUrl(url: string): boolean {

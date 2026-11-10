@@ -2,11 +2,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import { daysToCatch, readHighscore } from '../src/data/highscore';
 import { decorateHighscore } from '../src/modules/highscore';
-import { dailyBase, parseHighscoreXml, updateBase } from '../src/data/highscore-api';
+import { parsePtreRanks, ptreRanks, ptreServer, PTRE_KEY } from '../src/data/ptre';
 import { NetworkGuard } from '../src/core/guard';
 import { MemoryStore, Store } from '../src/core/storage';
 import { translator } from '../src/core/i18n';
-import { dayKey, HISTORY_KEY, recordDay, type History } from '../src/engines/history';
+import { HISTORY_KEY, recordDay, type History } from '../src/engines/history';
 import { MARKS_KEY } from '../src/engines/marks';
 
 // Shape of the game's highscore table (OGame 13.1), made-up players.
@@ -33,17 +33,18 @@ describe('highscore page', () => {
     expect(daysToCatch(-5, 1)).toBe(0);
   });
 
-  it('shows the points made since midnight, days to catch up and the player flag', async () => {
+  it('shows the points since the PTRE snapshot, its age, days to catch up and the player flag', async () => {
     page();
+    document.querySelector('#ranks')!.insertAdjacentHTML('afterbegin', '<thead><tr><td class="position">#</td><td class="name">Nome</td><td class="score">Punti</td></tr></thead>');
+    document.body.insertAdjacentHTML('afterbegin', '<p class="fut-hs-note">old note</p>');
     const now = new Date(2026, 10, 8, 15).getTime();
     const store = new Store(new MemoryStore(), 'x');
     let h: History = [];
     h = recordDay(h, { at: new Date(2026, 10, 1, 12).getTime(), points: 930_000_000, rank: 12, prodDay: 0, fleet: 0 });
     h = recordDay(h, { at: new Date(2026, 10, 8, 12).getTime(), points: 1_000_000_000, rank: 11, prodDay: 0, fleet: 0 });
     store.set(HISTORY_KEY, h);
-    // Today's base, read an hour ago: no new API call needed.
-    const reading = { at: new Date(2026, 10, 8, 0, 5).getTime(), readAt: now - 3_000_000, scores: { 1: 1_090_000_000, 2: 1_000_000_000, 3: 995_000_000 } };
-    store.set('hs.daily.0', { day: dayKey(now), base: reading, last: reading });
+    // PTRE's snapshot at midnight, read an hour ago: no new call needed.
+    store.set(PTRE_KEY, { readAt: now - 3_600_000, at: new Date(2026, 10, 8, 0).getTime(), scores: { 1: 1_090_000_000, 2: 1_000_000_000, 3: 995_000_000 } });
     const fetchImpl = vi.fn();
     const o = { doc: document, store, locale: 'it', t: translator('it'), guard: new NetworkGuard(fetchImpl, 'https://s1-it.ogame.gameforge.com'), now: () => now };
     decorateHighscore(o);
@@ -55,44 +56,41 @@ describe('highscore page', () => {
     expect(document.querySelector('#position2 .fut-hs-gap')?.textContent).toBe('0');
     expect(document.querySelector('#position3 .fut-hs-gap')?.textContent).toBe('−5,0M');
     expect(document.querySelector('#position3 .fut-hs-gap')?.className).toContain('down');
+    expect(document.querySelector('#ranks thead .fut-hs-age')?.textContent).toBe('(Δ 15h)');
+    expect(document.querySelector('.fut-hs-note')).toBeNull();
     expect(ahead.querySelector('.fut-hs-eta')?.textContent).toBe('ti avvicini: 10 g');
-    expect(document.querySelector('.fut-hs-note')?.textContent).toContain('00:05');
     expect(document.getElementById('position2')!.querySelector('.fut-mk-flag')).toBeNull();
     (ahead.querySelector<HTMLButtonElement>('.fut-mk-flag')!).dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true }));
     expect(store.get<{ players: Record<string, { flag: string }> }>(MARKS_KEY, { players: {} }).players['1']?.flag).toBe('watch');
     expect(document.querySelectorAll('#position1 .fut-hs-gap')).toHaveLength(1);
+    expect(document.querySelectorAll('#ranks thead .fut-hs-age')).toHaveLength(1);
   });
 });
 
-describe('daily base from the public highscore', () => {
-  const xml = (ts: number, score: number) => `<?xml version="1.0"?><highscore category="1" type="0" timestamp="${ts}"><player position="1" id="7" score="${score}"/></highscore>`;
+describe('PTRE ranking snapshot', () => {
+  const answer = { code: 1, message: 'Got ranks for TS 1794265200.', ranks_array: [{ player_id: '7', timestamp: '1794265200', total_rank: '1', total_score: '6535295477', status: '' }], ranks_array_last: [] };
 
-  it('parses the file', () => {
-    expect(parseHighscoreXml(xml(1000, 55.5), 9)).toEqual({ at: 1_000_000, readAt: 9, scores: { 7: 55 } });
-    expect(parseHighscoreXml('nope', 9)).toBeNull();
+  it('parses the answer and the server', () => {
+    expect(parsePtreRanks(answer, 9)).toEqual({ readAt: 9, at: 1_794_265_200_000, scores: { 7: 6_535_295_477 } });
+    expect(parsePtreRanks({ code: 0, message: 'no' }, 9)).toBeNull();
+    expect(ptreServer('s269-it.ogame.gameforge.com')).toEqual({ univers: '269', country: 'it' });
+    expect(ptreServer('lobby.ogame.gameforge.com')).toBeNull();
   });
 
-  it('keeps the first reading of the day, or yesterday 23:xx when close to midnight', () => {
-    const r = (d: number, hh: number, score: number) => ({ at: new Date(2026, 10, d, hh, 10).getTime(), readAt: 0, scores: { 7: score } });
-    let b = updateBase(null, r(8, 9, 100));
-    b = updateBase(b, r(8, 14, 150));
-    expect([b.base.scores[7], b.last.scores[7]]).toEqual([100, 150]);
-    b = updateBase(b, r(8, 23, 200));
-    const next = updateBase(b, r(9, 0, 210));
-    expect(next.base.scores[7]).toBe(200);
-    expect(updateBase(updateBase(null, r(8, 20, 1)), r(9, 3, 2)).base.scores[7]).toBe(2);
-  });
-
-  it('asks the public API without cookies, at most once an hour', async () => {
-    const fetchImpl = vi.fn(async (_u: string, _i?: RequestInit) => new Response(xml(Math.floor(new Date(2026, 10, 8, 10).getTime() / 1000), 5)));
-    const guard = new NetworkGuard(fetchImpl, 'https://s1-it.ogame.gameforge.com');
+  it('asks PTRE without cookies, sending only the country and the universe, at most every 6 hours', async () => {
+    const fetchImpl = vi.fn(async (_u: string, _i?: RequestInit) => new Response(JSON.stringify(answer)));
+    const guard = new NetworkGuard(fetchImpl, 'https://s269-it.ogame.gameforge.com');
     guard.closePageLoadWindow();
     const store = new Store(new MemoryStore(), 'x');
-    const now = new Date(2026, 10, 8, 10, 30).getTime();
-    await dailyBase({ guard, store, origin: 'https://s1-it.ogame.gameforge.com', type: 0, now });
-    await dailyBase({ guard, store, origin: 'https://s1-it.ogame.gameforge.com', type: 0, now: now + 600_000 });
+    const now = 1_794_300_000_000;
+    await ptreRanks({ guard, store, host: 's269-it.ogame.gameforge.com', now });
+    await ptreRanks({ guard, store, host: 's269-it.ogame.gameforge.com', now: now + 5 * 3_600_000 });
     expect(fetchImpl).toHaveBeenCalledOnce();
-    expect(String(fetchImpl.mock.calls[0]![0])).toContain('/api/highscore.xml?category=1&type=0');
+    const url = new URL(String(fetchImpl.mock.calls[0]![0]));
+    expect(`${url.origin}${url.pathname}`).toBe('https://ptre.chez.gg/scripts/api_get_ranks.php');
+    expect(Object.fromEntries(url.searchParams)).toEqual({ country: 'it', univers: '269', timestamp: '-1', tool: 'future' });
     expect(fetchImpl.mock.calls[0]![1]?.credentials).toBe('omit');
+    await ptreRanks({ guard, store, host: 's269-it.ogame.gameforge.com', now: now + 7 * 3_600_000 });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
   });
 });

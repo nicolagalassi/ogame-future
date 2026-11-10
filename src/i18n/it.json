@@ -451,12 +451,9 @@
   "msg.combat.converter": "Convertitore",
   "msg.combat.converterHint": "Apre il rapporto nel convertitore Ogotcha (nuova scheda)",
   "hs.days": "ti avvicini: {n} g",
-  "hs.today": "{n} punti da mezzanotte (base alle {time})",
   "hs.never": "al ritmo attuale no",
   "hs.etaMine": "Al tuo ritmo degli ultimi 7 giorni (+{mine}/g)",
   "hs.passToday": "lo superi oggi",
-  "hs.note": "Sotto i punti: quanto ha fatto oggi ogni giocatore, dalla classifica pubblica delle {time}.",
-  "hs.noteWaiting": "Lettura della classifica pubblica per i punti di oggi…",
   "mark.flag.watch": "Da controllare",
   "mark.flag.target": "Bersaglio",
   "mark.flag.farm": "Frigo",
@@ -600,5 +597,7 @@
   "msg.abbr.deuterium": "D",
   "msg.abbr.food": "Ci",
   "msg.abbr.darkMatter": "MO",
-  "spy.col.actionsName": "Azioni"
+  "spy.col.actionsName": "Azioni",
+  "hs.ptreAge": "Differenza dalla classifica PTRE del {time}",
+  "hs.sincePtre": "{n} punti dalla classifica PTRE del {time}"
 }

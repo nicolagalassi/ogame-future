@@ -60,6 +60,8 @@ async function bootstrap(): Promise<void> {
     store.set('rivals.list', []);
   }
   if (store.get('rivals.points', null) !== null) store.set('rivals.points', null);
+  // Points since midnight from the public highscore (until 0.3.7): replaced by PTRE's snapshot.
+  for (const type of [0, 1, 2, 3, 8]) if (store.get(`hs.daily.${type}`, null) !== null) store.set(`hs.daily.${type}`, null);
   const locale = detectLocale(document);
   const t = translator(locale);
   let snapshot: AccountSnapshot | null = store.get<AccountSnapshot | null>(SNAPSHOT_KEY, null);

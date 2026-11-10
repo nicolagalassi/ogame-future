@@ -451,12 +451,9 @@
   "msg.combat.converter": "Convertisseur",
   "msg.combat.converterHint": "Ouvre le rapport dans le convertisseur Ogotcha (nouvel onglet)",
   "hs.days": "rattrapé en {n} j",
-  "hs.today": "{n} points depuis minuit (base à {time})",
   "hs.never": "pas à ce rythme",
   "hs.etaMine": "À votre rythme des 7 derniers jours (+{mine}/j)",
   "hs.passToday": "dépassé aujourd'hui",
-  "hs.note": "Sous les points : ce que chaque joueur a fait aujourd'hui, d'après le classement public de {time}.",
-  "hs.noteWaiting": "Lecture du classement public pour les points du jour…",
   "mark.flag.watch": "À surveiller",
   "mark.flag.target": "Cible",
   "mark.flag.farm": "Ferme",
@@ -600,5 +597,7 @@
   "msg.abbr.deuterium": "D",
   "msg.abbr.food": "N",
   "msg.abbr.darkMatter": "AN",
-  "spy.col.actionsName": "Actions"
+  "spy.col.actionsName": "Actions",
+  "hs.ptreAge": "Différence depuis le classement PTRE du {time}",
+  "hs.sincePtre": "{n} points depuis le classement PTRE du {time}"
 }
