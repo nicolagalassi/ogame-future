@@ -161,14 +161,14 @@ export function summaryLine(doc: Document, cls: string, o: Pick<SummaryContext, 
       a.title = title;
       acts.append(a);
     },
-    /** Depletion of the expedition spot, as three ticks. */
+    /** Depletion of the expedition spot, as three ticks, over the value (call it after `value`). */
     depletion(n: number) {
       const meter = h(doc, 'span', 'fut-depl');
       meter.title = t('msg.depletion', { n });
       meter.setAttribute('role', 'img');
       meter.setAttribute('aria-label', meter.title);
       for (let i = 1; i <= 3; i++) meter.append(h(doc, 'i', i <= n ? 'on' : ''));
-      body.append(meter);
+      value.prepend(meter);
     },
   };
 }
@@ -209,11 +209,11 @@ export function summaryFor(doc: Document, m: ParsedMessage, o: SummaryContext): 
       if (m.item && SELF_EVIDENT.has(m.result)) line.note(m.item, 'item');
       if (m.lfXp) line.note(t('msg.lfXp', { n: m.lfXp.toLocaleString(locale) }), 'lf');
       if (m.artefacts) line.note(t('msg.artefacts', { n: m.artefacts.toLocaleString(locale) }), 'art');
-      if (m.depletion > 0) line.depletion(m.depletion);
       const worth = msu(m.res) + msu(unitsValue(m.ships)) - msu(unitsValue(m.lost));
       // Dark matter has no MSU value: its amount takes the value column instead of a dash.
       if (!worth && m.res.darkMatter) line.amount(m.res.darkMatter, t('msg.dmUnit'), 'fut-dm', t('msg.res.darkMatter'));
       else line.value(worth);
+      if (m.depletion > 0) line.depletion(m.depletion);
       return line.box;
     }
     case 'spy': {
