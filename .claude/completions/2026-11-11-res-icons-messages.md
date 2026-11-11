@@ -19,3 +19,9 @@
 ## 0.3.23
 - Niente più parola "grande/enorme" accanto al valore (resta il colore del messaggio).
 - Pillola solo dove serve: niente per risorse, navi, materia oscura, artefatti, esperienza forme di vita (`SELF_EVIDENT`); resta per ritardo, anticipo, niente, oggetto (col nome nella riga), mercante, pirati, alieni, buco nero, scoperte. Il trattino del valore (niente trovato) non sale accanto al titolo.
+
+## 0.3.25 — proposta C ("In testa") per tutta la posta
+- Vista a schede: il riepilogo va DENTRO `.msgHead`, sulla riga del mittente, a destra (esito solo se serve, risorse/navi, valore). Chiuso (predefinito), la scheda è solo l intestazione: testo e pulsanti del gioco nascosti; un clic sull intestazione (non sui suoi link/pulsanti) apre e chiude. Trasporti/rientri/riciclaggi: niente parola (la dice il titolo), percorso con i soli nomi.
+- Tolto `spread()` (pillola nel piede, valore accanto al titolo). Vista a lista invariata.
+- Proposte in `docs/mockups/messages-options.html`.
+- Da verificare sul markup vero: che la riga del mittente sia l ultima di `.msgHead` (il riepilogo è ancorato in basso a destra).

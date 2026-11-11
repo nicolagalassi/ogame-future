@@ -37,7 +37,7 @@ const outcomeCss = Object.entries(OUTCOME_COLORS)
 export const MESSAGES_CSS = `
 /* One set of tokens for the summaries, the "just read" panel and the spy table. Text tokens keep
    at least 4.5:1 on every background they sit on; --faint is for decoration only (ticks, tracks). */
-.fut-msg, .fut-msg-top, .fut-msg-foot, .fut-fresh, #fut-spypanel {
+.fut-msg, .fut-fresh, #fut-spypanel {
   --hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1; --faint: #4E5B6A; --line: #2E4356;
   --link: #6F9FC8; --accent: #4FD1E8; --neg: #F07A6E; --warn: #E3B341; --ok: #7BC47F; --ship: #4FE0B0; --on-tone: #0D1116;
   --loot: #F0A35A; --name: #E8D27A; --on-accent: #CFF5FC; --attack: #FF9B8A; --attack-line: #C0533F; --sim: #8FB6D8; --chip: #1A2733;
@@ -49,22 +49,28 @@ export const MESSAGES_CSS = `
 .fut-msg:hover { background: rgba(120, 150, 180, 0.11); }
 .fut-msg:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .fut-msg-pillcell { display: flex; min-width: 0; }
-/* Card view, spread over the game's message: what was found in the middle and bigger; the value
-   beside the title, smaller; the outcome pill in the game's footer, between its buttons. */
-.fut-msg.fut-msg-spread { grid-template-columns: minmax(0, 1fr) auto; padding: 7px 16px; }
-.fut-msg-spread .fut-msg-body { justify-content: center; gap: 4px 18px; font-size: 13px; line-height: 20px; }
-.fut-msg-spread .fut-r .fut-res-ico { width: 18px; height: 18px; }
-.fut-msg-spread .fut-msg-icon { width: 24px; height: 24px; }
-.fut-msg-spread .fut-depl { margin-left: 0; }
-.msg .msgHead:has(> .fut-msg-top), .msg message-footer:has(> .fut-msg-foot), .msg .msg_actions:has(> .fut-msg-foot) { position: relative !important; }
-.fut-msg-top { position: absolute; top: 50%; left: 58%; transform: translate(-50%, -50%); display: flex; align-items: baseline; gap: 4px; white-space: nowrap;
-  font: 11px/14px Verdana, Arial, Helvetica, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums; }
-.fut-msg-top b { font-size: 12px; color: var(--hi); }
-.fut-msg-top b.fut-neg { color: var(--neg); }
-.fut-msg-top small { font-size: 10px; color: var(--mute); }
-.msg.fut-msgrar .fut-msg-top b { color: var(--rar); }
-.msg.fut-msgrar-0 .fut-msg-top b { font-size: 13px; }
-.fut-msg-foot { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; font: 11px/16px Verdana, Arial, Helvetica, sans-serif; }
+/* Card view: the summary lives in the game's header, on the sender's line, right-aligned (outcome,
+   what was carried, value). Folded, the card is just that header; a click on it opens the rest. */
+.msg .msgHead.fut-msghead { position: relative !important; cursor: pointer; }
+.fut-msg.fut-msg-inhead { position: absolute; right: 8px; bottom: 3px; left: 46%; display: flex; justify-content: flex-end; align-items: center; gap: 12px;
+  margin: 0; padding: 0; min-height: 0; background: none; overflow: hidden; }
+.fut-msg.fut-msg-inhead:hover { background: none; }
+.fut-msg-inhead:hover .fut-msg-body { color: var(--hi); }
+.fut-msg-inhead .fut-msg-pillcell { flex: none; }
+.fut-msg-inhead .fut-msg-pillcell:empty { display: none; }
+.fut-msg-inhead .fut-msg-body { flex: 0 1 auto; flex-wrap: nowrap; gap: 10px; overflow: hidden; }
+.fut-msg-inhead .fut-pill { padding: 0; border: 0; background: none; color: var(--tone); }
+/* The title already says delivery, return, recycling: no word for it. Names only on the route (coordinates in the game's text). */
+.fut-msg-inhead.fut-msg-transport .fut-msg-pillcell, .fut-msg-inhead.fut-msg-deploy .fut-msg-pillcell,
+.fut-msg-inhead.fut-msg-return .fut-msg-pillcell, .fut-msg-inhead.fut-msg-recycle .fut-msg-pillcell { display: none; }
+.fut-msg-inhead .fut-route { flex-basis: auto; flex-wrap: nowrap; }
+.fut-msg-inhead .fut-route .fut-coords { display: none; }
+.fut-msg-inhead .fut-msg-val { flex: none; min-width: 64px; }
+.fut-msg-inhead .fut-msg-val b { font-size: 12px; }
+.fut-msg-inhead .fut-dash { display: none; }
+.fut-msg-inhead .fut-msg-icon { width: 16px; height: 16px; }
+.fut-msg-inhead .fut-depl { margin-left: 0; }
+.fut-msg-inhead .fut-msg-acts a.fut-msg-link { height: 18px; padding: 0 8px; }
 .fut-pill { --tone: #8A9BB0; display: inline-block; max-width: 100%; box-sizing: border-box; padding: 1px 8px; border-radius: 9px;
   border: 1px solid color-mix(in srgb, var(--tone) 55%, transparent); background: color-mix(in srgb, var(--tone) 9%, transparent);
   color: color-mix(in srgb, var(--tone) 78%, #fff); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -152,6 +158,8 @@ ${outcomeCss}
   .fut-msg-acts { grid-column: 1 / -1; grid-row: 3; }
 }
 .msg.fut-msg-folded .msgContent, .msg.fut-msg-folded .msg_content, .msg.fut-msg-folded > .content-box { display: none !important; }
+/* Card view folded: the game's buttons go too, the header alone stays (it opens the report). */
+.msg.fut-msg-folded:not(:has(> .msgFilteredHeaderRow)) message-footer, .msg.fut-msg-folded:not(:has(> .msgFilteredHeaderRow)) .msg_actions { display: none !important; }
 
 /* Spy table, above the Espionage reports: one compact line per target, as OGLight lays it out. */
 #fut-spypanel { margin: 0 0 8px; padding: 6px 8px 8px; border-radius: 4px; background: #0A0F14; font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt);

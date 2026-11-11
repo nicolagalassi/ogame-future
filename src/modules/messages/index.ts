@@ -266,48 +266,29 @@ export function summaryFor(doc: Document, m: ParsedMessage, o: SummaryContext): 
   }
 }
 
-/** Where the summary goes: right under the report's header, in both of the game's views. */
-function place(msg: Element, box: HTMLElement): void {
-  // List view (13.x, "collapsible" reports): the body stays hidden until opened, so the
-  // summary goes under the game's header row to be seen with the report closed.
+/**
+ * Where the summary goes. Card view: INSIDE the game's header, on the sender's line, right-aligned
+ * (outcome, what was carried, the value): with the report folded the card is just its header.
+ * List view (13.x): under the header row, whose body the game keeps hidden until opened.
+ * Returns true when the summary sits in the card's header.
+ */
+function place(msg: Element, box: HTMLElement): boolean {
   const header = msg.querySelector(':scope > .msgFilteredHeaderRow');
-  if (header) return void header.after(box);
-  // Card view: under the title and sender, above the game's text.
-  const head = msg.querySelector(':scope .msgHead');
-  if (head && !head.closest('.messageContentWrapper')) return void head.after(box);
+  if (header) {
+    header.after(box);
+    return false;
+  }
+  const head = msg.querySelector<HTMLElement>(':scope .msgHead');
+  if (head && !head.closest('.messageContentWrapper')) {
+    head.classList.add('fut-msghead');
+    box.classList.add('fut-msg-inhead');
+    head.append(box);
+    return true;
+  }
   const actions = msg.querySelector('.msg_actions, message-footer');
   if (actions?.parentElement) actions.before(box);
   else (msg.querySelector('.msgContent') ?? msg).after(box);
-}
-
-/**
- * Card view (title over the text, buttons at the bottom): the outcome pill moves into the game's
- * footer and the value up beside the title, smaller; our line keeps what was found, bigger and in
- * the middle. The list view keeps everything on the line (its footer is hidden until opened).
- */
-function spread(msg: Element, box: HTMLElement): void {
-  if (msg.querySelector(':scope > .msgFilteredHeaderRow')) return;
-  const head = msg.querySelector<HTMLElement>(':scope .msgHead');
-  const foot = msg.querySelector<HTMLElement>(':scope message-footer, :scope .msg_actions');
-  if (!head || !foot || head.closest('.messageContentWrapper')) return;
-  const doc = msg.ownerDocument;
-  const pill = box.querySelector('.fut-msg-pillcell');
-  const value = box.querySelector<HTMLElement>('.fut-msg-val');
-  if (pill?.childElementCount) {
-    const at = h(doc, 'div', 'fut-msg-foot');
-    at.append(...Array.from(pill.childNodes));
-    foot.append(at);
-  }
-  // Only a real value goes up beside the title; a dash (nothing found) is just left out.
-  if (value?.querySelector('b')) {
-    const at = h(doc, 'div', 'fut-msg-top');
-    at.title = value.title;
-    at.append(...Array.from(value.childNodes));
-    head.append(at);
-  }
-  pill?.remove();
-  value?.remove();
-  box.classList.add('fut-msg-spread');
+  return false;
 }
 
 /** Reads and summarises every report on the page not done yet. Returns new journal entries. */
@@ -356,9 +337,13 @@ export function processMessages(o: MessagesOptions): number {
         e.preventDefault();
         toggle();
       });
-      place(msg, box);
-      // Only expedition-like reports are laid out over the game's card; the others keep their single line.
-      if (parsed.kind === 'expedition' || parsed.kind === 'discovery') spread(msg, box);
+      if (place(msg, box)) {
+        // The whole header opens and closes the report, not only our part of it (the game's own links and buttons keep theirs).
+        box.parentElement?.addEventListener('click', (e) => {
+          if (box.contains(e.target as Node) || (e.target as Element).closest('a, button, input, [role="button"]')) return;
+          toggle();
+        });
+      }
       // Big and huge finds tint the whole message, not only our line.
       const rar = box.className.match(/fut-rar-([01])/);
       if (rar) msg.classList.add('fut-msgrar', `fut-msgrar-${rar[1]}`);
@@ -427,7 +412,7 @@ export function watchMessages(o: MessagesOptions): () => void {
   });
   observer.observe(doc.body, { childList: true, subtree: true });
   return () => {
-    doc.querySelectorAll('.msg .fut-msg, .msg .fut-msg-top, .msg .fut-msg-foot').forEach((n) => n.remove());
+    doc.querySelectorAll('.msg .fut-msg').forEach((n) => n.remove());
     doc.querySelectorAll('.msg[data-fut-done]').forEach((m) => {
       m.removeAttribute('data-fut-done');
       m.classList.remove('fut-msg-folded', 'fut-msgrar', 'fut-msgrar-0', 'fut-msgrar-1');
