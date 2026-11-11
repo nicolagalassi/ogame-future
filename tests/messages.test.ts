@@ -313,15 +313,23 @@ describe('expedition rarity', () => {
 describe('card view', () => {
   it('moves the pill into the footer and the value beside the title', () => {
     document.body.innerHTML = '';
-    const el = msg('51', deut);
+    const el = msg('51', { ...deut, expeditionresult: 'nothing', resourcesgained: '' });
     el.querySelector('.msgContent')!.insertAdjacentHTML('beforebegin', '<div class="msgHead">Risultato della Spedizione</div>');
     document.body.append(el);
     processMessages({ doc: document, store: new Store(new MemoryStore(), 'card'), playerId: OWN, locale: 'it', t });
     expect(el.querySelector('message-footer .fut-msg-foot .fut-pill')).not.toBeNull();
-    expect(el.querySelector('.msgHead .fut-msg-top')?.textContent).toContain('MSU');
+    expect(el.querySelector('.msgHead .fut-msg-top')).toBeNull();
     const line = el.querySelector('.fut-msg')!;
     expect(line.classList.contains('fut-msg-spread')).toBe(true);
     expect(line.querySelector('.fut-pill, .fut-msg-val')).toBeNull();
-    expect(line.querySelector('.fut-r')).not.toBeNull();
+    // A find that speaks for itself (resources) has no pill; the size word is gone too.
+    const res = msg('52', { ...deut, size: '0', timestamp: '1793891490' });
+    res.querySelector('.msgContent')!.insertAdjacentHTML('beforebegin', '<div class="msgHead">Risultato della Spedizione</div>');
+    document.body.append(res);
+    processMessages({ doc: document, store: new Store(new MemoryStore(), 'card2'), playerId: OWN, locale: 'it', t });
+    expect(res.querySelector('.fut-pill')).toBeNull();
+    expect(res.querySelector('.msgHead .fut-msg-top')?.textContent).toContain('MSU');
+    expect(res.querySelector('.fut-msg-top')?.textContent).not.toMatch(/enorme/);
+    expect(res.querySelector('.fut-msg .fut-r')).not.toBeNull();
   });
 });

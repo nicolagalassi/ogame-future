@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.22
+// @version      0.3.23
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -6081,7 +6081,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .fut-msg-top b { font-size: 12px; color: var(--hi); }
 .fut-msg-top b.fut-neg { color: var(--neg); }
 .fut-msg-top small { font-size: 10px; color: var(--mute); }
-.fut-msg-top .fut-rar-tag { font-size: 11px; }
 .msg.fut-msgrar .fut-msg-top b { color: var(--rar); }
 .msg.fut-msgrar-0 .fut-msg-top b { font-size: 13px; }
 .fut-msg-foot { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; font: 11px/16px Verdana, Arial, Helvetica, sans-serif; }
@@ -6099,7 +6098,6 @@ ${RARITY.map((c, i) => `.fut-rar-${i}, .fut-msgrar-${i} { --rar: ${c}; }`).join(
 .msg.fut-msgrar .msgHead, .msg.fut-msgrar .msgContent, .msg.fut-msgrar .msgFilteredHeaderRow, .msg.fut-msgrar .messageContentWrapper,
 .msg.fut-msgrar message-footer, .msg.fut-msgrar .msg_actions, .msg.fut-msgrar .fut-msg { background: transparent !important; box-shadow: none !important; }
 .msg.fut-msgrar .fut-msg:hover { background: color-mix(in srgb, var(--rar) 8%, transparent) !important; }
-.fut-rar-tag { margin-right: 4px; color: var(--rar); font-weight: 700; }
 ${outcomeCss}
 .fut-msg-body { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; min-width: 0; }
 /* Resources: the shared symbol (core/res-icons) in the resource's colour; its shape is the cue, not only the colour. */
@@ -6876,10 +6874,6 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         value.append(h2(doc, "b", msuValue < 0 ? "fut-neg" : "", `${msuValue < 0 ? "\u2212" : ""}${fmt(Math.abs(msuValue))}`), h2(doc, "small", "", "MSU"));
         value.title = `${exact(msuValue)} MSU \xB7 ${title}`;
       },
-      /** The find's size in words before the value (big and huge only; normal is the default). */
-      rarity(label) {
-        value.prepend(h2(doc, "span", "fut-rar-tag", label));
-      },
       /** A small text button that opens an outside tool in a new tab (the player's click). */
       link(text, href, title) {
         const a = h2(doc, "a", "fut-msg-link", text);
@@ -6900,6 +6894,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
       }
     };
   }
+  var SELF_EVIDENT = /* @__PURE__ */ new Set(["resource", "darkmatter", "ship", "artefact", "lifeform"]);
   function summaryFor(doc, m, o) {
     const { t, locale } = o;
     const fmt = (n) => formatUnits(n, locale);
@@ -6912,7 +6907,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         const short = t(`msg.pill.${m.result}`);
         const name = short === `msg.pill.${m.result}` ? full : short;
         const label = m.kind === "discovery" ? `${t("msg.discovery")} \xB7 ${name}` : name;
-        line.pill(label, m.result, [m.kind === "discovery" ? t("msg.discovery") : "", full, sizeName].filter(Boolean).join(" \xB7 "));
+        if (m.kind === "discovery" || !SELF_EVIDENT.has(m.result)) line.pill(label, m.result, [m.kind === "discovery" ? t("msg.discovery") : "", full, sizeName].filter(Boolean).join(" \xB7 "));
         if (sizeName) line.box.dataset.size = sizeName;
         if (m.size === 0 || m.size === 1) line.box.classList.add(`fut-rar-${m.size}`);
         line.res(m.res, 1, "+");
@@ -6925,7 +6920,6 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         const worth = msu(m.res) + msu(unitsValue(m.ships)) - msu(unitsValue(m.lost));
         if (!worth && m.res.darkMatter) line.amount(m.res.darkMatter, t("msg.dmUnit"), "fut-dm", t("msg.res.darkMatter"));
         else line.value(worth);
-        if (m.size === 0 || m.size === 1) line.rarity(sizeName.toLowerCase());
         return line.box;
       }
       case "spy": {
@@ -7004,7 +6998,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
       at.append(...Array.from(pill.childNodes));
       foot.append(at);
     }
-    if (value?.childElementCount) {
+    if (value?.querySelector("b")) {
       const at = h2(doc, "div", "fut-msg-top");
       at.title = value.title;
       at.append(...Array.from(value.childNodes));

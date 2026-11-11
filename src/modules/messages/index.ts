@@ -152,10 +152,6 @@ export function summaryLine(doc: Document, cls: string, o: Pick<SummaryContext, 
       value.append(h(doc, 'b', msuValue < 0 ? 'fut-neg' : '', `${msuValue < 0 ? '−' : ''}${fmt(Math.abs(msuValue))}`), h(doc, 'small', '', 'MSU'));
       value.title = `${exact(msuValue)} MSU · ${title}`;
     },
-    /** The find's size in words before the value (big and huge only; normal is the default). */
-    rarity(label: string) {
-      value.prepend(h(doc, 'span', 'fut-rar-tag', label));
-    },
     /** A small text button that opens an outside tool in a new tab (the player's click). */
     link(text: string, href: string, title: string) {
       const a = h(doc, 'a', 'fut-msg-link', text);
@@ -177,6 +173,9 @@ export function summaryLine(doc: Document, cls: string, o: Pick<SummaryContext, 
   };
 }
 
+/** Expedition outcomes the found things already make plain: no pill for these. */
+const SELF_EVIDENT = new Set(['resource', 'darkmatter', 'ship', 'artefact', 'lifeform']);
+
 /** Summary line for one report, or null when there is nothing worth showing. */
 export function summaryFor(doc: Document, m: ParsedMessage, o: SummaryContext): HTMLElement | null {
   const { t, locale } = o;
@@ -192,7 +191,9 @@ export function summaryFor(doc: Document, m: ParsedMessage, o: SummaryContext): 
       const short = t(`msg.pill.${m.result}`);
       const name = short === `msg.pill.${m.result}` ? full : short;
       const label = m.kind === 'discovery' ? `${t('msg.discovery')} · ${name}` : name;
-      line.pill(label, m.result, [m.kind === 'discovery' ? t('msg.discovery') : '', full, sizeName].filter(Boolean).join(' · '));
+      // The pill only where the line does not already say it: resources, ships, dark matter, artefacts
+      // and lifeform XP show themselves; delay, early return, nothing, item, trader, pirates… need the word.
+      if (m.kind === 'discovery' || !SELF_EVIDENT.has(m.result)) line.pill(label, m.result, [m.kind === 'discovery' ? t('msg.discovery') : '', full, sizeName].filter(Boolean).join(' · '));
       // Size as game rarity: normal = common (no tint), big = rare (blue), huge = epic (purple).
       if (sizeName) line.box.dataset.size = sizeName;
       if (m.size === 0 || m.size === 1) line.box.classList.add(`fut-rar-${m.size}`);
@@ -207,7 +208,6 @@ export function summaryFor(doc: Document, m: ParsedMessage, o: SummaryContext): 
       // Dark matter has no MSU value: its amount takes the value column instead of a dash.
       if (!worth && m.res.darkMatter) line.amount(m.res.darkMatter, t('msg.dmUnit'), 'fut-dm', t('msg.res.darkMatter'));
       else line.value(worth);
-      if (m.size === 0 || m.size === 1) line.rarity(sizeName.toLowerCase());
       return line.box;
     }
     case 'spy': {
@@ -298,7 +298,8 @@ function spread(msg: Element, box: HTMLElement): void {
     at.append(...Array.from(pill.childNodes));
     foot.append(at);
   }
-  if (value?.childElementCount) {
+  // Only a real value goes up beside the title; a dash (nothing found) is just left out.
+  if (value?.querySelector('b')) {
     const at = h(doc, 'div', 'fut-msg-top');
     at.title = value.title;
     at.append(...Array.from(value.childNodes));
