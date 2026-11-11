@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.32
+// @version      0.3.33
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -930,7 +930,13 @@
     "exp.focusAll": "Tutto il periodo",
     "exp.noneHere": "Niente qui.",
     "exp.daysTable": "I giorni",
-    "dock.todayCount": "{n} spedizioni"
+    "dock.todayCount": "{n} spedizioni",
+    "marks.st.vacation": "in vacanza",
+    "marks.st.banned": "bannato",
+    "marks.st.inactive": "inattivo (7 giorni)",
+    "marks.st.longinactive": "inattivo da 28 giorni",
+    "marks.st.outlaw": "fuorilegge",
+    "marks.st.admin": "amministratore"
   };
 
   // src/i18n/en.json
@@ -1677,7 +1683,13 @@
     "exp.focusAll": "Whole period",
     "exp.noneHere": "Nothing here.",
     "exp.daysTable": "The days",
-    "dock.todayCount": "{n} expeditions"
+    "dock.todayCount": "{n} expeditions",
+    "marks.st.vacation": "on vacation",
+    "marks.st.banned": "banned",
+    "marks.st.inactive": "inactive (7 days)",
+    "marks.st.longinactive": "inactive for 28 days",
+    "marks.st.outlaw": "outlaw",
+    "marks.st.admin": "administrator"
   };
 
   // src/i18n/fr.json
@@ -2424,7 +2436,13 @@
     "exp.focusAll": "Toute la p\xE9riode",
     "exp.noneHere": "Rien ici.",
     "exp.daysTable": "Les jours",
-    "dock.todayCount": "{n} exp\xE9ditions"
+    "dock.todayCount": "{n} exp\xE9ditions",
+    "marks.st.vacation": "en vacances",
+    "marks.st.banned": "banni",
+    "marks.st.inactive": "inactif (7 jours)",
+    "marks.st.longinactive": "inactif depuis 28 jours",
+    "marks.st.outlaw": "hors-la-loi",
+    "marks.st.admin": "administrateur"
   };
 
   // src/i18n/de.json
@@ -3171,7 +3189,13 @@
     "exp.focusAll": "Ganzer Zeitraum",
     "exp.noneHere": "Nichts hier.",
     "exp.daysTable": "Die Tage",
-    "dock.todayCount": "{n} Expeditionen"
+    "dock.todayCount": "{n} Expeditionen",
+    "marks.st.vacation": "im Urlaub",
+    "marks.st.banned": "gesperrt",
+    "marks.st.inactive": "inaktiv (7 Tage)",
+    "marks.st.longinactive": "seit 28 Tagen inaktiv",
+    "marks.st.outlaw": "Outlaw",
+    "marks.st.admin": "Administrator"
   };
 
   // src/core/i18n.ts
@@ -3520,8 +3544,8 @@
       const owner = r?.planetId && r.playerId ? r.playerId : 0;
       if (owner && (keep(owner, coords) || db[coords])) {
         put(coords, { player: owner, name: r.planetName, moon: !!r.moonId, debris: Math.round(r.debris), act: [r.activity.planet, r.moonId ? r.activity.moon : null], at: now });
-      } else if (!owner && db[coords]) {
-        if (db[coords].player) put(coords, { player: 0, name: "", moon: false, debris: Math.round(r?.debris ?? 0), act: [null, null], at: now });
+      } else if (!owner && (db[coords]?.player || !db[coords] && keep(0, coords))) {
+        put(coords, { player: 0, name: "", moon: false, debris: Math.round(r?.debris ?? 0), act: [null, null], at: now });
       }
     }
     if (!next) return null;
@@ -3534,9 +3558,10 @@
   function planetsOf(id, api, db) {
     const out = /* @__PURE__ */ new Map();
     const apiAt = api?.updated ?? api?.at ?? 0;
+    const listAt = api?.planetsSince ?? apiAt;
     for (const p of api?.planets ?? []) {
       const seen = db[p.coords];
-      if (seen && seen.player !== id && seen.at > apiAt) continue;
+      if (seen && seen.player !== id && seen.at > listAt) continue;
       out.set(p.coords, { coords: p.coords, name: seen?.player === id ? seen.name || p.name : p.name, moon: seen?.player === id && seen.at > apiAt ? seen.moon : !!p.moon, seen: seen?.player === id ? seen : null, fresh: false });
     }
     for (const [coords, seen] of Object.entries(db)) {
@@ -3912,6 +3937,9 @@
     if (!res.ok) return hit ?? null;
     const fresh = parsePlayerData(await res.text(), now);
     if (!fresh) return hit ?? null;
+    const key = (p) => (p?.planets ?? []).map((x) => x.coords).sort().join(",");
+    const weekBefore = (fresh.updated ?? now) - 7 * 24 * 36e5;
+    fresh.planetsSince = !hit?.planets ? weekBefore : key(hit) === key(fresh) ? hit.planetsSince ?? weekBefore : fresh.updated ?? now;
     cache[String(id)] = fresh;
     const ids = Object.keys(cache).sort((a, b) => (cache[b]?.at ?? 0) - (cache[a]?.at ?? 0));
     for (const old of ids.slice(KEEP)) delete cache[old];
@@ -4100,6 +4128,33 @@
     return fresh;
   }
 
+  // src/data/universe-ranks.ts
+  var UNIVERSE_RANKS_KEY = "universe.ranks";
+  var TTL4 = 36e5;
+  function parseHighscoreXml(xml, now) {
+    const doc = new DOMParser().parseFromString(xml, "text/html");
+    const root = doc.querySelector("highscore");
+    if (!root) return null;
+    const ranks = {};
+    for (const p of root.querySelectorAll("player")) {
+      const id = p.getAttribute("id");
+      const rank = Number(p.getAttribute("position"));
+      const points = Number(p.getAttribute("score"));
+      if (id && rank > 0) ranks[id] = [rank, Number.isFinite(points) ? Math.floor(points) : 0];
+    }
+    return Object.keys(ranks).length ? { at: now, ranks } : null;
+  }
+  async function universeRanks(deps) {
+    const now = deps.now ?? Date.now();
+    const cached = deps.store.get(UNIVERSE_RANKS_KEY, null);
+    if (cached && now - cached.at < TTL4) return cached;
+    const res = await deps.guard.request(`${deps.origin}/api/highscore.xml?category=1&type=0`, "user-view");
+    const fresh = res.ok ? parseHighscoreXml(await res.text(), now) : null;
+    if (!fresh) return cached;
+    deps.store.set(UNIVERSE_RANKS_KEY, fresh);
+    return fresh;
+  }
+
   // src/modules/marks/side.ts
   var SIDE_ID = "fut-side";
   var SIDE_W = 390;
@@ -4110,6 +4165,8 @@
   var last = null;
   var sheetData = /* @__PURE__ */ new Map();
   var uni = null;
+  var ranksLoading = false;
+  var STATUS_ORDER = ["banned", "vacation", "longinactive", "inactive", "outlaw", "admin"];
   var SCORE_LOOK = [
     ["total", "star", "#F5B547"],
     ["economy", "swap", "#7FB8FF"],
@@ -4205,6 +4262,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .pname:hover, .pname:focus-visible { color: #4FD1E8; }
 .pnote { color: #9AA9BC; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rank { color: #9AA9BC; font: 11px Consolas, monospace; }
+.pline { display: flex; align-items: baseline; gap: 5px; min-width: 0; }
+.pline .pname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pst { flex: none; font: 11px Consolas, monospace; color: #9AA9BC; }
 .act { display: inline-flex; align-items: center; justify-content: flex-end; gap: 2px; height: 22px; padding: 0 2px; border-radius: 4px; font: 700 12px Consolas, monospace; text-decoration: none; color: #617C8D; }
 .act svg { color: #617C8D; flex: none; }
 a.act:hover { background: #1D3350; }
@@ -4397,12 +4457,28 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       chips.append(b);
     }
     side.append(chips);
-    const list = view2.flagTab === "recent" ? marks.recent : Object.entries(marks.players).filter(([, p]) => p.flag === view2.flagTab).map(([id, p]) => ({ id: Number(id), name: p.name })).sort((a, b) => a.name.localeCompare(b.name));
+    const ranks = o.store.get(UNIVERSE_RANKS_KEY, null);
+    if ((!ranks || Date.now() - ranks.at > 36e5) && !ranksLoading) {
+      ranksLoading = true;
+      void universeRanks({ guard: o.guard, store: o.store, origin: doc.location.origin }).catch(() => null).then((r) => {
+        ranksLoading = false;
+        if (r && r.at !== ranks?.at) refreshSide();
+      });
+    }
+    if (!uni) void universePlayers({ guard: o.guard, store: o.store, origin: doc.location.origin }).catch(() => null).then((u) => {
+      if (u) {
+        uni = u;
+        refreshSide();
+      }
+    });
+    const cache = o.store.get(PLAYER_SCORES_KEY, {});
+    const rankOf = (id) => ranks?.ranks[String(id)]?.[0] ?? cache[String(id)]?.scores.total?.rank ?? null;
+    const byRank = (a, b) => (rankOf(a.id) ?? Infinity) - (rankOf(b.id) ?? Infinity) || a.name.localeCompare(b.name);
+    const list = view2.flagTab === "recent" ? marks.recent : Object.entries(marks.players).filter(([, p]) => p.flag === view2.flagTab).map(([id, p]) => ({ id: Number(id), name: p.name })).sort(byRank);
     if (!list.length) {
       scroll.append(h(doc, "p", "empty", t(view2.flagTab === "recent" ? "marks.noRecent" : "marks.noPlayers")));
       return;
     }
-    const cache = o.store.get(PLAYER_SCORES_KEY, {});
     const wrap = h(doc, "div", "ps");
     list.forEach((p, i) => {
       const row = h(doc, "div", "row");
@@ -4410,9 +4486,20 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       name.type = "button";
       name.title = t("marks.openSheet");
       name.addEventListener("click", () => go({ player: p.id }));
-      const rank = cache[String(p.id)]?.scores.total?.rank;
+      const rank = rankOf(p.id);
       const who = h(doc, "span", "who2");
-      who.append(name);
+      const letters = uni?.players[String(p.id)]?.[1] ?? "";
+      const names = statusNames(letters);
+      const top = STATUS_ORDER.find((st) => names.includes(st));
+      const line1 = h(doc, "span", "pline");
+      if (top) name.classList.add(`st-${top}`);
+      line1.append(name);
+      if (letters) {
+        const tag = h(doc, "span", `pst${top ? ` st-${top}` : ""}`, `(${letters})`);
+        tag.title = names.map((st) => t(`marks.st.${st}`)).join(", ");
+        line1.append(tag);
+      }
+      who.append(line1);
       const note = marks.players[String(p.id)]?.note;
       if (note) {
         const line = h(doc, "span", "pnote", note);
@@ -4732,7 +4819,13 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     if (!s) return;
     const marks = loadMarks(o.store.get(MARKS_KEY, null));
     const recent = new Set(marks.recent.map((r) => r.id));
-    const keep = (id, coords) => !!marks.players[String(id)] || recent.has(id) || !!marks.planets[coords];
+    const cards = o.store.get(PLAYER_SCORES_KEY, {});
+    const listed = /* @__PURE__ */ new Set();
+    for (const [pid, card] of Object.entries(cards)) {
+      if (!marks.players[pid] && !recent.has(Number(pid))) continue;
+      for (const p of card.planets ?? []) listed.add(p.coords);
+    }
+    const keep = (id, coords) => id ? !!marks.players[String(id)] || recent.has(id) || !!marks.planets[coords] : listed.has(coords);
     const rows = s.rows.filter((r) => !(r.planetId && o.ownPlanetIds.has(r.planetId))).map((r) => ({ ...r, debris: r.debris ? debrisTotal(r.debris) : 0 }));
     const next = recordSystem(o.store.get(POSITIONS_KEY, {}), s.galaxy, s.system, rows, keep, Date.now());
     if (next) o.store.set(POSITIONS_KEY, next);
@@ -5232,20 +5325,20 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     for (const key of KEYS2) if (cost[key] > 0 && (best === null || cost[key] > cost[best])) best = key;
     return best;
   }
-  function discountFrom(id, level2, shown) {
+  function discountFrom(id, level2, shown2) {
     const raw = rawCost(id, level2);
     const key = main(raw);
     if (!key) return null;
-    const value = shown[key];
+    const value = shown2[key];
     if (value === void 0 || !(value > 0)) return null;
     const ratio = value / raw[key];
     if (ratio > 1.001 || ratio < 0.2) return null;
     return Math.max(0, 1 - ratio);
   }
-  function matchShownLevel(id, candidates, shown) {
+  function matchShownLevel(id, candidates, shown2) {
     let best = null;
     for (const level2 of new Set(candidates.filter((l) => l >= 1))) {
-      const discount = discountFrom(id, level2, shown);
+      const discount = discountFrom(id, level2, shown2);
       if (discount === null) continue;
       if (!best || discount < best.discount) best = { level: level2, discount };
     }
@@ -6203,7 +6296,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   var MESSAGES_CSS = `
 /* One set of tokens for the summaries, the "just read" panel and the spy table. Text tokens keep
    at least 4.5:1 on every background they sit on; --faint is for decoration only (ticks, tracks). */
-.fut-msg, #fut-spypanel {
+.fut-msg, .fut-fresh, #fut-spypanel {
   --hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1; --faint: #4E5B6A; --line: #2E4356;
   --link: #6F9FC8; --accent: #4FD1E8; --neg: #F07A6E; --warn: #E3B341; --ok: #7BC47F; --ship: #4FE0B0; --on-tone: #0D1116;
   --loot: #F0A35A; --name: #E8D27A; --on-accent: #CFF5FC; --attack: #FF9B8A; --attack-line: #C0533F; --sim: #8FB6D8; --chip: #1A2733;
@@ -6215,6 +6308,36 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .fut-msg:hover { background: rgba(120, 150, 180, 0.11); }
 .fut-msg:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .fut-msg-pillcell { display: flex; min-width: 0; }
+/* "Just read": what the reports read a moment ago brought, above the reports, gone after a countdown. */
+.fut-fresh { box-sizing: border-box; margin: 0 0 10px; padding: 0 16px 10px; border-radius: 0; overflow: hidden;
+  background: #0E151C; font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums; }
+.fut-fresh-timer { height: 3px; margin: 0 -16px 8px; background: #1A2530; }
+.fut-fresh-timer i { display: block; height: 100%; background: #F5A623; transform-origin: left center; animation: fut-fresh-countdown linear forwards; }
+.fut-fresh:hover .fut-fresh-timer i, .fut-fresh:focus-within .fut-fresh-timer i { animation-play-state: paused; }
+@keyframes fut-fresh-countdown { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+.fut-fresh-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-bottom: 8px; }
+.fut-fresh-head > b { font-size: 12px; color: var(--hi); }
+.fut-fresh-count { color: var(--mute); }
+.fut-rar-chip { padding: 0 7px; border-radius: 9px; border: 1px solid color-mix(in srgb, var(--rar) 60%, transparent);
+  background: color-mix(in srgb, var(--rar) 14%, transparent); color: var(--rar); font-weight: 700; white-space: nowrap; }
+.fut-fresh-total { margin-left: auto; display: flex; align-items: baseline; gap: 4px; }
+.fut-fresh-total b { font-size: 15px; color: var(--hi); }
+.fut-fresh-total.fut-neg b { color: var(--neg); }
+.fut-fresh-total small { color: var(--mute); font-size: 11px; }
+.fut-fresh-close { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--mute); cursor: pointer; }
+.fut-fresh-close:hover, .fut-fresh-close:focus-visible { color: var(--hi); background: rgba(120, 150, 180, 0.14); outline: none; }
+.fut-fresh-close:focus-visible { outline: 2px solid var(--accent); }
+.fut-fresh-res { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.fut-fresh-name { display: inline-flex; align-items: center; gap: 4px; }
+.fut-fresh-name .fut-res-ico { color: var(--dot); }
+.fut-fresh-tile { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 7px 9px; border-radius: 4px; background: rgba(120, 150, 180, 0.07); }
+.fut-fresh-name { display: flex; align-items: center; gap: 5px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fut-fresh-tile b { font-size: 16px; line-height: 1.2; color: var(--dot); white-space: nowrap; }
+.fut-fresh-tile.zero b { color: var(--dim); }
+.fut-fresh-ships { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; }
+.fut-fresh-ship { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; color: var(--ship); }
+.fut-fresh-ship.fut-neg { color: var(--neg); }
+@media (max-width: 640px) { .fut-fresh-res { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 /* B \xB7 Loot: each thing found is a tile, its symbol over its amount; an outcome the tiles do not show
    gets a wide tile with its word and what happened; the value stands on the right, after a rule. */
 .fut-msg.fut-msg-b { grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: stretch; column-gap: 8px; margin: 2px 0 4px; padding: 8px 12px 10px; background: none; }
@@ -6842,6 +6965,90 @@ td.spark-cell { width: 90px; }
     return panel;
   }
 
+  // src/modules/messages/exp-fresh.ts
+  var FRESH_ID = "fut-expfresh";
+  var FRESH_MS = 1e4;
+  var isExpeditionTab = (doc) => !!doc.querySelector('[data-subtab-id="22"].active, [data-subtab-id="22"][aria-selected="true"]');
+  function freshAnchor(doc) {
+    const holder = doc.querySelector("#messages .messagesHolder");
+    const sortRow = doc.querySelector("#messages #filteredHeadersRow");
+    if (!holder || !isExpeditionTab(doc)) return null;
+    return sortRow && sortRow.parentElement === holder.parentElement ? sortRow : holder;
+  }
+  var shown = /* @__PURE__ */ new WeakMap();
+  function showFreshExpeditions(o, entries) {
+    const { doc, t, locale } = o;
+    const old = doc.getElementById(FRESH_ID);
+    const anchor = freshAnchor(doc);
+    if (!anchor) {
+      old?.remove();
+      return;
+    }
+    const all2 = [...old ? shown.get(old) ?? [] : [], ...entries];
+    const s = periodStats(all2);
+    const fmt = (n) => formatUnits(n, locale);
+    const exact = (n) => Math.round(n).toLocaleString(locale);
+    const ships = o.store.get(SHIPS_INFO_KEY, {});
+    const el6 = (tag, cls = "", text) => {
+      const n = doc.createElement(tag);
+      if (cls) n.className = cls;
+      if (text !== void 0) n.textContent = text;
+      return n;
+    };
+    const panel = el6("section", "fut-fresh");
+    panel.id = FRESH_ID;
+    panel.setAttribute("aria-live", "polite");
+    panel.setAttribute("aria-label", t("fresh.title"));
+    shown.set(panel, all2);
+    const timer2 = el6("div", "fut-fresh-timer");
+    const bar = el6("i");
+    bar.style.animationDuration = `${FRESH_MS}ms`;
+    bar.addEventListener("animationend", () => panel.remove());
+    timer2.append(bar);
+    const head = el6("div", "fut-fresh-head");
+    head.append(el6("b", "", t("fresh.title")), el6("span", "fut-fresh-count", t("recap.count", { n: (s.count + s.discoveries).toLocaleString(locale) })));
+    for (const i of [0, 1, 2]) if (s.sizes[i]) head.append(el6("span", `fut-rar-chip fut-rar-${i}`, `${s.sizes[i]} ${t(`msg.size.${i}`).toLowerCase()}`));
+    const total = el6("span", `fut-fresh-total${s.netMsu < 0 ? " fut-neg" : ""}`);
+    total.append(el6("b", "", fmt(s.netMsu)), el6("small", "", "MSU"));
+    total.title = `${exact(s.netMsu)} MSU`;
+    const close = el6("button", "fut-fresh-close");
+    close.type = "button";
+    close.title = t("fresh.close");
+    close.setAttribute("aria-label", t("fresh.close"));
+    close.append(icon(doc, "close", 12));
+    close.addEventListener("click", () => panel.remove());
+    head.append(total, close);
+    panel.append(timer2, head);
+    const res = el6("div", "fut-fresh-res");
+    for (const [key, c] of [["metal", "m"], ["crystal", "c"], ["deuterium", "d"], ["darkMatter", "dm"]]) {
+      const v = s.res[key];
+      const tile2 = el6("div", `fut-fresh-tile fut-r-${c}${v ? "" : " zero"}`);
+      tile2.title = `${t(`msg.res.${key}`)}: ${exact(v)}`;
+      const name = el6("span", "fut-fresh-name", t(`msg.res.${key}`));
+      name.insertAdjacentHTML("afterbegin", resIconSvg(key, 13));
+      tile2.append(name, el6("b", "", v ? fmt(v) : "0"));
+      res.append(tile2);
+    }
+    panel.append(res);
+    const found = Object.entries(s.shipsFound);
+    const lost = Object.entries(s.lost);
+    if (found.length || lost.length) {
+      const list = el6("div", "fut-fresh-ships");
+      for (const [units, isLost] of [[found, false], [lost, true]]) {
+        for (const [id, n] of [...units].sort((a, b) => Number(a[0]) - Number(b[0]))) {
+          const name = shipName(Number(id), ships, t);
+          const tile2 = el6("span", `fut-fresh-ship${isLost ? " fut-neg" : ""}`, `${isLost ? "\u2212" : "+"}${n.toLocaleString(locale)}`);
+          tile2.prepend(shipIcon(doc, Number(id), name, "fut-msg-icon"));
+          tile2.title = name;
+          list.append(tile2);
+        }
+      }
+      panel.append(list);
+    }
+    if (old) old.replaceWith(panel);
+    else anchor.before(panel);
+  }
+
   // src/modules/messages/index.ts
   var FOLD_KEY = "msg.fold";
   function h2(doc, tag, cls = "", text) {
@@ -7063,6 +7270,7 @@ td.spark-cell { width: 90px; }
     const spies = [];
     let journal = null;
     let added = 0;
+    const fresh = [];
     for (const msg of Array.from(doc.querySelectorAll(".msg[data-msg-id]"))) {
       if (msg.hasAttribute("data-fut-done") || msg.closest("#fut-journal")) continue;
       msg.setAttribute("data-fut-done", "");
@@ -7106,13 +7314,16 @@ td.spark-cell { width: 90px; }
         const r = recordCombat(journal, parsed.id, parsed.at, parsed.lost, parsed.coords);
         journal = r.journal;
         added += r.added;
+        if (r.added) fresh.push(journal[parsed.id]);
       }
     }
     if (expeditions.length) {
       journal ?? (journal = store.get(JOURNAL_KEY, {}));
+      const before = journal;
       const r = record2(journal, expeditions);
       journal = r.journal;
       added += r.added;
+      for (const e of expeditions) if (!before[e.id]) fresh.push(journal[e.id]);
     }
     if (spies.length) {
       const board = store.get(SPY_BOARD_KEY, {});
@@ -7123,6 +7334,7 @@ td.spark-cell { width: 90px; }
       store.set(JOURNAL_KEY, trim(journal, o.now?.() ?? Date.now()));
       o.onJournal?.(added);
     }
+    if (fresh.length) showFreshExpeditions({ doc, store, t, locale }, fresh);
     return added;
   }
   function watchMessages(o) {
@@ -9785,12 +9997,12 @@ table.queues td.acts { width: 1%; text-align: right; }
     head.append(seg);
     s.append(head);
     const bodies = of(unitScope);
-    const shown = ids.filter((id) => bodies.some((b) => level(b, id) > 0));
-    if (!shown.length) {
+    const shown2 = ids.filter((id) => bodies.some((b) => level(b, id) > 0));
+    if (!shown2.length) {
       s.append(h3("p", "hint", t("dash.unitsNone")));
       return;
     }
-    s.append(bodyMatrix(ctx, bodies, shown, { units: true, foot: "sum", extra: [{ label: t("dash.valueMsu"), value: (b) => ctx.fmt(unitsValue2(b, shown).value) }] }));
+    s.append(bodyMatrix(ctx, bodies, shown2, { units: true, foot: "sum", extra: [{ label: t("dash.valueMsu"), value: (b) => ctx.fmt(unitsValue2(b, shown2).value) }] }));
   }
   function bodyPicker(ctx, ids, current3, onPick) {
     const { doc, t } = ctx.o;
@@ -9991,15 +10203,15 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (!root) return null;
     const id = Number(root.getAttribute("data-technology-id") ?? root.querySelector("[data-technology-id]")?.getAttribute("data-technology-id"));
     if (!id) return null;
-    const shown = {};
+    const shown2 = {};
     const metal = costValue(root, "metal");
     const crystal = costValue(root, "crystal");
     const deuterium = costValue(root, "deuterium");
     const energy = costValue(root, "energy");
-    if (metal !== void 0) shown.metal = metal;
-    if (crystal !== void 0) shown.crystal = crystal;
-    if (deuterium !== void 0) shown.deuterium = deuterium;
-    if (energy !== void 0) shown.energy = energy;
+    if (metal !== void 0) shown2.metal = metal;
+    if (crystal !== void 0) shown2.crystal = crystal;
+    if (deuterium !== void 0) shown2.deuterium = deuterium;
+    if (energy !== void 0) shown2.energy = energy;
     const popEl = root.querySelector(".costs .population");
     const pop = costValue(root, "population");
     const population = popEl && pop !== void 0 ? { value: pop, enough: !popEl.classList.contains("insufficient") } : null;
@@ -10010,7 +10222,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       id,
       name: root.querySelector("h3")?.textContent?.trim() ?? String(id),
       panelLevel: num3(root.querySelector(".information .level")?.getAttribute("data-value")),
-      shown,
+      shown: shown2,
       population,
       durationMs,
       amountInput: root.querySelector("#build_amount")
@@ -12181,8 +12393,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       const label = li.querySelector("strong")?.textContent?.replace(/\s+/g, " ").trim() ?? "";
       const why = value?.getAttribute("data-tooltip-title") ?? value?.getAttribute("title") ?? "";
       const cls = Array.from(li.classList).find((c) => icons[c]) ?? "";
-      const shown = cls.includes("energy") ? `-${text}` : value ? text : text.replace(label, "").trim();
-      out.push(chip(doc, icons[cls] ?? "", shown, [label, why].filter(Boolean).join(" "), cls.includes("energy") ? "fut-tp-energy" : cls ? "fut-tp-start" : ""));
+      const shown2 = cls.includes("energy") ? `-${text}` : value ? text : text.replace(label, "").trim();
+      out.push(chip(doc, icons[cls] ?? "", shown2, [label, why].filter(Boolean).join(" "), cls.includes("energy") ? "fut-tp-energy" : cls ? "fut-tp-start" : ""));
     }
     return out;
   }
@@ -13270,7 +13482,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
 
   // src/data/ptre.ts
   var PTRE_KEY = "ptre.ranks";
-  var TTL4 = 6 * 36e5;
+  var TTL5 = 6 * 36e5;
   function parsePtreRanks(json2, readAt) {
     const d = json2 ?? {};
     if (Number(d.code) !== 1 || !Array.isArray(d.ranks_array) || !d.ranks_array.length) return null;
@@ -13290,7 +13502,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   async function ptreRanks(deps) {
     const now = deps.now ?? Date.now();
     const stored = deps.store.get(PTRE_KEY, null);
-    if (stored && now - stored.readAt < TTL4) return stored;
+    if (stored && now - stored.readAt < TTL5) return stored;
     const server = ptreServer(deps.host);
     if (!server) return stored;
     const query = new URLSearchParams({ country: server.country, univers: server.univers, timestamp: "-1", tool: "future" });
