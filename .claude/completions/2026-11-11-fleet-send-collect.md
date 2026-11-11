@@ -1,0 +1,25 @@
+# Flotta: Trasporto/Schiera semplici, Raccolta spedizioni secondaria; icone piene; Dashboard (2026-11-11)
+
+Versione 0.3.12.
+
+## Flotta (`src/modules/fleet/`)
+- **Trasporto (T) / Schiera (D)** ora sono le azioni normali del gioco, senza riserve: destinazione
+  scritta in fleet1 (`g:s:p`, pianeta/luna, freccia = scegli tra i tuoi corpi) e risorse da portare
+  (vuoto = tutto, 0 = niente, `2m`/`500k`). Riga `sendRow()`, salvata in `FleetSettings.sendTarget` /
+  `sendPick`. Navi: quelle scelte a mano sui riquadri del gioco; altrimenti i cargo necessari
+  (trasporto) o tutte (schiera). `prepareSend()` in `actions.ts`, `pickedLoad()` / `parseCoords()` in
+  `engines/fleet.ts`. Non entrano in "Ripeti".
+- **Raccolta spedizioni** (secondaria, a destra con la Luna): un riquadro che apre un menu con
+  1 · Trasporto e 2 · Schieramento verso la luna principale (le vecchie T/D, con le riserve; tasti
+  C e V, azioni `fleet.collect` / `fleet.collectDeploy`) e "una volta sola verso" un altro corpo.
+  Modi interni rinominati `collect` / `collectDeploy` (anche nell'URL di "Ripeti").
+- Icone: piene (`fill=currentColor`, seconda tinta con opacità), argento su ardesia; accento meno
+  saturo (#6FB6C8) solo per interruttori e fuoco.
+
+## Dashboard
+- Forme di vita: `table-layout: fixed` con `<colgroup>`, colonne pianeta tutte uguali, nomi su due righe.
+- Navi/Difese: icone pianeta e luna nel selettore Pianeti | Lune.
+
+## Da verificare in gioco
+- Riga destinazione/risorse alla larghezza reale della pagina flotta (prova in Chromium a 660px: una riga).
+- Trasporto semplice con navi già selezionate a mano.

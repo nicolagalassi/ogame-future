@@ -191,6 +191,24 @@ export interface FleetSettings {
   gateOn: boolean;
   /** Food stays home in every fleet, also with the game's own buttons (OGLight precedent). */
   ignoreFood: boolean;
+  /** Plain Trasporto / Schiera: the destination typed or picked on page 1, and the resources to bring. */
+  sendTarget: SendTarget | null;
+  sendPick: ResourcePick;
+}
+
+/** Destination of the plain Trasporto / Schiera: any coordinates, planet (1) or moon (3). */
+export interface SendTarget {
+  galaxy: number;
+  system: number;
+  position: number;
+  type: 1 | 3;
+}
+
+/** Resources chosen for the plain Trasporto / Schiera: null = all there is, a number = at most that. */
+export interface ResourcePick {
+  metal: number | null;
+  crystal: number | null;
+  deuterium: number | null;
 }
 
 export const SETTINGS_KEY = 'fleet.settings';
@@ -208,6 +226,8 @@ export const DEFAULT_SETTINGS: FleetSettings = {
   resourcesOn: true,
   gateOn: true,
   ignoreFood: false,
+  sendTarget: null,
+  sendPick: { metal: null, crystal: null, deuterium: null },
 };
 
 /** Stored settings with the defaults; the old single "reserves" switch becomes the ships and resources ones. */
@@ -215,6 +235,28 @@ export function settingsFrom(stored: Partial<FleetSettings> & { reserveOn?: bool
   const { reserveOn, ...rest } = stored;
   const legacy = reserveOn === undefined ? {} : { shipsOn: reserveOn, resourcesOn: reserveOn };
   return { ...DEFAULT_SETTINGS, ...legacy, ...rest };
+}
+
+/**
+ * Plain Trasporto / Schiera: what the player picked, capped by what is here (deuterium also keeps
+ * the flight's fuel) and by the cargo space, in the game's own order (deuterium, crystal, metal).
+ * No reserve: these two buttons are the plain game actions, the reserves belong to the collection.
+ */
+export function pickedLoad(onPlanet: Resources, pick: ResourcePick, fuel: number, capacity: number): Resources {
+  const want = (k: keyof Resources, have: number) => Math.max(0, Math.floor(Math.min(have, pick[k] ?? have)));
+  let room = Math.max(0, Math.floor(capacity));
+  const deuterium = Math.min(want('deuterium', onPlanet.deuterium - fuel), room);
+  room -= deuterium;
+  const crystal = Math.min(want('crystal', onPlanet.crystal), room);
+  room -= crystal;
+  const metal = Math.min(want('metal', onPlanet.metal), room);
+  return { metal, crystal, deuterium };
+}
+
+/** Coordinates typed as "1:234:5" (any separator), or null. */
+export function parseCoords(text: string): [number, number, number] | null {
+  const parts = text.trim().split(/[^\d]+/).filter(Boolean).map(Number);
+  return parts.length === 3 && parts.every((n) => n > 0) ? (parts as [number, number, number]) : null;
 }
 
 /** Resources still to bring to a planned body (planner "Porta risorse"). */
