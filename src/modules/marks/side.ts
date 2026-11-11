@@ -26,7 +26,7 @@ import { statusNames, universePlayers, type UniversePlayers } from '../../data/u
 import { UNIVERSE_RANKS_KEY, universeRanks, type UniverseRanks } from '../../data/universe-ranks';
 import { FLAGS, flagPlayer, loadMarks, MARKS_KEY, notePlayer, rememberRecent, type Flag, type Marks } from '../../engines/marks';
 import { ageParts, planetsOf, POSITIONS_KEY, type Positions, type Seen } from '../../engines/positions';
-import { FLAG_COLORS, FLAG_ICONS, flagButton, MARKS_CSS } from './picker';
+import { FLAG_COLORS, flagButton, markIcon, MARKS_CSS } from './picker';
 
 type T = (key: string, vars?: Record<string, string | number>) => string;
 
@@ -368,7 +368,7 @@ function playersList(o: SideOptions, side: HTMLElement, scroll: HTMLElement, vie
     b.setAttribute('aria-label', b.title);
     b.setAttribute('aria-pressed', String(view.flagTab === f));
     if (f !== 'recent') b.style.color = FLAG_COLORS[f];
-    b.append(icon(doc, f === 'recent' ? 'eye' : FLAG_ICONS[f], 12), h(doc, 'span', 'n', String(f === 'recent' ? marks.recent.length : counts[f] ?? 0)));
+    b.append(f === 'recent' ? icon(doc, 'eye', 12) : markIcon(doc, f, 13), h(doc, 'span', 'n', String(f === 'recent' ? marks.recent.length : counts[f] ?? 0)));
     b.addEventListener('click', () => go({ flagTab: f }));
     chips.append(b);
   }

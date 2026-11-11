@@ -10,7 +10,7 @@
 import { icon, type IconName } from '../../core/icons';
 import { formatUnits } from '../../core/format';
 import { FLAGS, type Flag, type Marks } from '../../engines/marks';
-import { FLAG_COLORS, FLAG_ICONS } from '../marks/picker';
+import { FLAG_COLORS, markIcon } from '../marks/picker';
 
 export const DOCK_ID = 'fut-dock';
 const STYLE_ID = 'fut-dock-style';
@@ -154,7 +154,7 @@ export function renderDock(o: DockOptions): void {
     const b = button('flag', `${t(`mark.flag.${f}`)}: ${n}`, () => o.onOpenTargets({ flagTab: f }));
     b.style.color = FLAG_COLORS[f];
     b.setAttribute('aria-label', `${t(`mark.flag.${f}`)}: ${n}`);
-    b.append(icon(doc, FLAG_ICONS[f], 13), el(doc, 'i', '', String(n)));
+    b.append(markIcon(doc, f, 13), el(doc, 'i', '', String(n)));
     flags.append(b);
   }
   if (flags.childElementCount) targets.append(flags);
