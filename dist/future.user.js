@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.19
+// @version      0.3.20
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -766,11 +766,6 @@
     "settings.fold": "Testo del gioco ripiegato",
     "settings.foldHint": "Nasconde il testo lungo di spedizioni e trasporti sotto il riepilogo; un clic sul riepilogo lo riapre.",
     "settings.backupHint": "Esporta tutti i dati di Future in un file, o li ripristina da un file.",
-    "msg.abbr.metal": "M",
-    "msg.abbr.crystal": "C",
-    "msg.abbr.deuterium": "D",
-    "msg.abbr.food": "Ci",
-    "msg.abbr.darkMatter": "MO",
     "spy.col.actionsName": "Azioni",
     "hs.ptreAge": "Differenza dalla classifica PTRE del {time}",
     "hs.sincePtre": "{n} punti dalla classifica PTRE del {time}",
@@ -1503,11 +1498,6 @@
     "settings.fold": "Game text folded",
     "settings.foldHint": "Hides the long text of expeditions and transports under the summary; a click on the summary opens it.",
     "settings.backupHint": "Saves all Future data to a file, or restores it from one.",
-    "msg.abbr.metal": "M",
-    "msg.abbr.crystal": "C",
-    "msg.abbr.deuterium": "D",
-    "msg.abbr.food": "F",
-    "msg.abbr.darkMatter": "DM",
     "spy.col.actionsName": "Actions",
     "hs.ptreAge": "Difference from PTRE's ranking of {time}",
     "hs.sincePtre": "{n} points since PTRE's ranking of {time}",
@@ -2240,11 +2230,6 @@
     "settings.fold": "Texte du jeu repli\xE9",
     "settings.foldHint": "Cache le long texte des exp\xE9ditions et transports sous le r\xE9sum\xE9 ; un clic sur le r\xE9sum\xE9 le rouvre.",
     "settings.backupHint": "Enregistre toutes les donn\xE9es de Future dans un fichier, ou les restaure.",
-    "msg.abbr.metal": "M",
-    "msg.abbr.crystal": "C",
-    "msg.abbr.deuterium": "D",
-    "msg.abbr.food": "N",
-    "msg.abbr.darkMatter": "AN",
     "spy.col.actionsName": "Actions",
     "hs.ptreAge": "Diff\xE9rence depuis le classement PTRE du {time}",
     "hs.sincePtre": "{n} points depuis le classement PTRE du {time}",
@@ -2977,11 +2962,6 @@
     "settings.fold": "Spieltext eingeklappt",
     "settings.foldHint": "Versteckt den langen Text von Expeditionen und Transporten unter der Zusammenfassung; ein Klick \xF6ffnet ihn.",
     "settings.backupHint": "Speichert alle Future-Daten in einer Datei oder stellt sie wieder her.",
-    "msg.abbr.metal": "M",
-    "msg.abbr.crystal": "K",
-    "msg.abbr.deuterium": "D",
-    "msg.abbr.food": "N",
-    "msg.abbr.darkMatter": "DM",
     "spy.col.actionsName": "Aktionen",
     "hs.ptreAge": "Unterschied zur PTRE-Rangliste vom {time}",
     "hs.sincePtre": "{n} Punkte seit der PTRE-Rangliste vom {time}",
@@ -5706,6 +5686,23 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     return `${OGOTCHA}${toolLang(lang)}?CR_KEY=${encodeURIComponent(apiKey)}`;
   }
 
+  // src/core/res-icons.ts
+  var RES_PATHS = {
+    // Metal: three ingots stacked, the top one in front.
+    metal: '<path d="M1.8 21 3.6 15.6h7.3L12.7 21z" opacity=".7"/><path d="M11.3 21l1.8-5.4h7.3l1.8 5.4z" opacity=".7"/><path d="M6.5 14 8.3 8.6h7.4L17.5 14z"/><path d="M8.3 8.6h7.4l-.6 1.6H8.9z" opacity=".55"/>',
+    // Crystal: a tall cut gem, the left facets darker.
+    crystal: '<path d="M12 1.8 18.6 9 12 22.2 5.4 9z"/><path d="M12 1.8 5.4 9 12 22.2 9.6 9z" opacity=".55"/><path d="M5.4 9h13.2" fill="none" stroke="currentColor" stroke-width="1" opacity=".35"/>',
+    // Deuterium: a drop, a lighter bubble inside.
+    deuterium: '<path fill-rule="evenodd" d="M12 2c4 4.8 6.8 8.7 6.8 12.4a6.8 6.8 0 0 1-13.6 0C5.2 10.7 8 6.8 12 2zm-2.3 11.2a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4z"/>',
+    // Food: a leaf, its vein in the second tone.
+    food: '<path fill-rule="evenodd" d="M20.5 3.5C11 3.5 4.5 8.6 4.5 15.6c0 1.5.4 2.8 1 3.9l-2 2 1.4 1.4 2-2c1.1.6 2.4 1 3.9 1 7 0 9.7-8.4 9.7-18.4zM7.3 18.5l8.1-9.4.9.8-8.1 9.4z"/>',
+    // Dark matter: a dark core inside a faint halo.
+    darkMatter: '<circle cx="12" cy="12" r="10" opacity=".3"/><circle cx="12" cy="12" r="5.6"/>'
+  };
+  function resIconSvg(key, size = 14) {
+    return `<svg class="fut-res-ico" viewBox="0 0 24 24" width="${size}" height="${size}" fill="currentColor" aria-hidden="true">${RES_PATHS[key]}</svg>`;
+  }
+
   // src/data/messages.ts
   var json = (value, fallback) => {
     if (!value || value === "-") return fallback;
@@ -6085,10 +6082,9 @@ ${RARITY.map((c, i) => `.fut-rar-${i} { --rar: ${c}; }`).join(" ")}
 .fut-rar-tag { margin-right: 4px; color: var(--rar); font-weight: 700; }
 ${outcomeCss}
 .fut-msg-body { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; min-width: 0; }
-/* Resources: the initial in a badge of the resource's colour, so colour is never the only cue. */
-.fut-r { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
-.fut-r::before { content: attr(data-k); box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; flex: none;
-  min-width: 16px; height: 16px; padding: 0 3px; border-radius: 8px; background: var(--dot); color: var(--on-tone); font-size: 10px; font-weight: 700; line-height: 1; }
+/* Resources: the shared symbol (core/res-icons) in the resource's colour; its shape is the cue, not only the colour. */
+.fut-r { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.fut-r .fut-res-ico { flex: none; color: var(--dot); }
 .fut-r-m { --dot: ${RES_COLORS.metal}; } .fut-r-c { --dot: ${RES_COLORS.crystal}; } .fut-r-d { --dot: ${RES_COLORS.deuterium}; } .fut-r-f { --dot: ${RES_COLORS.food}; } .fut-r-dm { --dot: ${RES_COLORS.darkMatter}; }
 .fut-u { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 .fut-msg-icon { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; flex: none; }
@@ -6096,7 +6092,8 @@ ${outcomeCss}
 .fut-note { white-space: nowrap; color: var(--txt); }
 .fut-msg .fut-muted { color: var(--mute); } .fut-msg .fut-warn { color: var(--warn); } .fut-msg .fut-neg { color: var(--neg); }
 .fut-msg .fut-item { color: #D08A5B; } .fut-msg .fut-lf { color: #E07BC8; } .fut-msg .fut-art { color: #D4A93A; }
-.fut-route { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0 6px; color: var(--txt); }
+/* The route takes the first line on its own: what was carried is all on the line under it. */
+.fut-route { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0 6px; flex-basis: 100%; color: var(--txt); }
 .fut-place { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
 .fut-msg .fut-coords { color: var(--link); text-decoration: none; }
 .fut-msg a.fut-coords:hover, .fut-msg a.fut-coords:focus-visible { color: var(--hi); }
@@ -6140,6 +6137,8 @@ ${outcomeCss}
 .fut-fresh-close:hover, .fut-fresh-close:focus-visible { color: var(--hi); background: rgba(120, 150, 180, 0.14); outline: none; }
 .fut-fresh-close:focus-visible { outline: 2px solid var(--accent); }
 .fut-fresh-res { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.fut-fresh-name { display: inline-flex; align-items: center; gap: 4px; }
+.fut-fresh-name .fut-res-ico { color: var(--dot); }
 .fut-fresh-tile { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 7px 9px; border-radius: 4px; background: rgba(120, 150, 180, 0.07); }
 .fut-fresh-name { display: flex; align-items: center; gap: 5px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fut-fresh-name::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--dot); flex: none; }
@@ -6739,7 +6738,9 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
       const v = s.res[key];
       const tile2 = el6("div", `fut-fresh-tile fut-r-${c}${v ? "" : " zero"}`);
       tile2.title = `${t(`msg.res.${key}`)}: ${exact(v)}`;
-      tile2.append(el6("span", "fut-fresh-name", t(`msg.res.${key}`)), el6("b", "", v ? fmt(v) : "0"));
+      const name = el6("span", "fut-fresh-name", t(`msg.res.${key}`));
+      name.insertAdjacentHTML("afterbegin", resIconSvg(key, 13));
+      tile2.append(name, el6("b", "", v ? fmt(v) : "0"));
       res.append(tile2);
     }
     panel.append(res);
@@ -6807,7 +6808,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         pillCell.append(p);
         return p;
       },
-      /** Resources with a colour dot each; `sign` −1 for what was taken from you. */
+      /** Resources, each with its symbol (core/res-icons) in its colour; `sign` −1 for what was taken from you. */
       res(r, sign = 1, prefix = "") {
         const keys = [["metal", "m"], ["crystal", "c"], ["deuterium", "d"], ["food", "f"], ["darkMatter", "dm"]];
         let any = false;
@@ -6816,7 +6817,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
           if (!v) continue;
           any = true;
           const s = h2(doc, "span", `fut-r fut-r-${c}${v < 0 ? " fut-neg" : ""}`, `${v < 0 ? "\u2212" : prefix}${fmt(Math.abs(v))}`);
-          s.dataset.k = t(`msg.abbr.${key}`);
+          s.insertAdjacentHTML("afterbegin", resIconSvg(key, 15));
           s.title = `${t(`msg.res.${key}`)}: ${exact(v)}`;
           s.setAttribute("aria-label", s.title);
           body.append(s);
@@ -6923,25 +6924,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
           line.body.append(who);
           return line.box;
         }
-        const act2 = m.activity === 0 ? t("msg.spy.active") : m.activity >= 60 ? t("msg.spy.inactive") : t("msg.spy.activity", { n: m.activity });
-        line.pill(act2, m.activity === 0 ? "pirate" : m.activity < 60 ? "late" : "nothing");
-        line.res({ metal: m.res.metal * m.loot, crystal: m.res.crystal * m.loot, deuterium: m.res.deuterium * m.loot });
-        const loot = Math.floor((m.res.metal + m.res.crystal + m.res.deuterium) * m.loot);
-        const capacity = o.ships["203"]?.capacity || 25e3;
-        if (loot > 0) line.ships({ 203: Math.ceil(loot / capacity) }, "count");
-        const fleet = m.fleetValue < 0 ? "?" : m.fleetValue ? fmt(m.fleetValue) : "0";
-        const def = m.defValue < 0 ? "?" : m.defValue ? fmt(m.defValue) : "0";
-        line.note(`${t("msg.spy.fleet")} ${fleet}`, m.fleetValue !== 0 ? "warn" : "muted");
-        line.note(`${t("msg.spy.def")} ${def}`, m.defValue !== 0 ? "warn" : "muted");
-        if (m.attacked) line.note(t("msg.spy.attacked"), "muted");
-        line.value(msu(m.res) * m.loot, `${t("msg.spy.loot")} ${Math.round(m.loot * 100)}%`);
-        if (m.apiKey && o.spy && o.universe) {
-          const base = nearestBase(o.spy.bases, m.coords, o.universe).base;
-          const prefill = simPrefill(o.spy.server, base ? { coords: base.coords, researches: o.spy.researches, classId: o.spy.classId, allianceClass: o.spy.allianceClass, lf: o.spy.lf ?? void 0 } : null, m.coords);
-          const tool = o.sim ?? "osims";
-          line.link(t("spy.simulate"), simLink(tool, m.apiKey, o.spy.lang, prefill), t("spy.simulateHint", { tool: SIM_TOOLS[tool].name }));
-        }
-        return line.box;
+        return null;
       }
       case "transport":
       case "deploy":
@@ -7359,6 +7342,8 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
   // src/modules/fleet/icons.ts
   var LINE = 'fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"';
   var ICONS = {
+    // Resource symbols: one source for every place that shows them (core/res-icons).
+    ...RES_PATHS,
     moon: '<path d="M14.6 2.6A9.6 9.6 0 1 0 21.4 16 8 8 0 0 1 14.6 2.6z"/>',
     planet: `<circle cx="12" cy="12" r="6.2"/><ellipse cx="12" cy="12" rx="10.4" ry="3.1" transform="rotate(-22 12 12)" ${LINE} stroke-width="1.7" opacity=".7"/>`,
     // A crate on its way: three faces in three tones, a solid arrow.
@@ -7381,13 +7366,6 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     // A gem: a lighter crown over a solid point.
     resources: '<path d="M7 3.4h10l4.6 5.6H2.4z" opacity=".55"/><path d="M2.4 9h19.2L12 21.2z"/>',
     gate: '<path fill-rule="evenodd" d="M8.6 2.5c3.3 0 6 4.3 6 9.5s-2.7 9.5-6 9.5-6-4.3-6-9.5 2.7-9.5 6-9.5zm0 3.6c-1.5 0-2.8 2.6-2.8 5.9s1.3 5.9 2.8 5.9 2.8-2.6 2.8-5.9-1.3-5.9-2.8-5.9z"/><path d="M15.8 10.6h2.8V7.8l4 4.2-4 4.2v-2.8h-2.8z" opacity=".8"/>',
-    // Resource symbols, coloured by their place (metal grey, crystal blue, deuterium green).
-    // Metal: three ingots stacked, the top one in front.
-    metal: '<path d="M1.8 21 3.6 15.6h7.3L12.7 21z" opacity=".7"/><path d="M11.3 21l1.8-5.4h7.3l1.8 5.4z" opacity=".7"/><path d="M6.5 14 8.3 8.6h7.4L17.5 14z"/><path d="M8.3 8.6h7.4l-.6 1.6H8.9z" opacity=".55"/>',
-    // Crystal: a tall cut gem, the left facets darker.
-    crystal: '<path d="M12 1.8 18.6 9 12 22.2 5.4 9z"/><path d="M12 1.8 5.4 9 12 22.2 9.6 9z" opacity=".55"/><path d="M5.4 9h13.2" fill="none" stroke="currentColor" stroke-width="1" opacity=".35"/>',
-    // Deuterium: a drop, a lighter bubble inside.
-    deuterium: '<path fill-rule="evenodd" d="M12 2c4 4.8 6.8 8.7 6.8 12.4a6.8 6.8 0 0 1-13.6 0C5.2 10.7 8 6.8 12 2zm-2.3 11.2a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4z"/>',
     // Totals: the sum of the three (a sigma).
     total: '<path d="M5 3h14v4.2h-2.4V5.6H9.4l5.3 6.4-5.3 6.4h7.2v-1.6H19V21H5v-1.8l6.1-7.2L5 4.8z"/>',
     // The fleet's worth: a ship seen from the side, wings in the second tone, a lit window.

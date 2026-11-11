@@ -5,18 +5,19 @@
  * no game action (the game's own buttons, probe included, stay as they are).
  */
 import { icon } from '../../core/icons';
+import { resIconSvg } from '../../core/res-icons';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
 import { readMessage, type ExpeditionMessage, type ParsedMessage, type Res, type SpyMessage } from '../../data/messages';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { SHIP_ICONS } from '../../data/ship-icons';
 import { JOURNAL_KEY, record, recordCombat, trim, unitsValue, msu, type Journal, type JournalEntry } from '../../engines/expeditions';
-import { nearestBase, rememberSpies, SPY_BOARD_KEY, type SpyBoard, type Universe } from '../../engines/raids';
+import { rememberSpies, SPY_BOARD_KEY, type SpyBoard, type Universe } from '../../engines/raids';
 import { MESSAGES_CSS } from './style';
 import { mountSpyPanel, universeOf, type SpyContext } from './spy-table';
 import { mountExpeditionRecap, showFreshExpeditions } from './exp-recap';
 import { SERVER_DATA_KEY, type ServerData } from '../../data/server-data';
-import { converterLink, SIM_KEY, SIM_TOOLS, simLink, simPrefill, simTool, type SimTool } from '../../engines/sim-links';
+import { converterLink, SIM_KEY, simTool, type SimTool } from '../../engines/sim-links';
 
 export type T = (key: string, vars?: Record<string, string | number>) => string;
 
@@ -101,7 +102,7 @@ export function summaryLine(doc: Document, cls: string, o: Pick<SummaryContext, 
       pillCell.append(p);
       return p;
     },
-    /** Resources with a colour dot each; `sign` −1 for what was taken from you. */
+    /** Resources, each with its symbol (core/res-icons) in its colour; `sign` −1 for what was taken from you. */
     res(r: Partial<Res & { food: number; darkMatter: number }>, sign = 1, prefix = '') {
       const keys = [['metal', 'm'], ['crystal', 'c'], ['deuterium', 'd'], ['food', 'f'], ['darkMatter', 'dm']] as const;
       let any = false;
@@ -110,8 +111,8 @@ export function summaryLine(doc: Document, cls: string, o: Pick<SummaryContext, 
         if (!v) continue;
         any = true;
         const s = h(doc, 'span', `fut-r fut-r-${c}${v < 0 ? ' fut-neg' : ''}`, `${v < 0 ? '−' : prefix}${fmt(Math.abs(v))}`);
-        // The initial in the coloured badge: the resource is readable without telling colours apart.
-        s.dataset.k = t(`msg.abbr.${key}`);
+        // The symbol tells the resource apart by its shape, not only by its colour.
+        s.insertAdjacentHTML('afterbegin', resIconSvg(key, 15));
         s.title = `${t(`msg.res.${key}`)}: ${exact(v)}`;
         s.setAttribute('aria-label', s.title);
         body.append(s);
@@ -224,25 +225,8 @@ export function summaryFor(doc: Document, m: ParsedMessage, o: SummaryContext): 
         line.body.append(who);
         return line.box;
       }
-      const act = m.activity === 0 ? t('msg.spy.active') : m.activity >= 60 ? t('msg.spy.inactive') : t('msg.spy.activity', { n: m.activity });
-      line.pill(act, m.activity === 0 ? 'pirate' : m.activity < 60 ? 'late' : 'nothing');
-      line.res({ metal: m.res.metal * m.loot, crystal: m.res.crystal * m.loot, deuterium: m.res.deuterium * m.loot });
-      const loot = Math.floor((m.res.metal + m.res.crystal + m.res.deuterium) * m.loot);
-      const capacity = o.ships['203']?.capacity || 25000;
-      if (loot > 0) line.ships({ 203: Math.ceil(loot / capacity) }, 'count');
-      const fleet = m.fleetValue < 0 ? '?' : m.fleetValue ? fmt(m.fleetValue) : '0';
-      const def = m.defValue < 0 ? '?' : m.defValue ? fmt(m.defValue) : '0';
-      line.note(`${t('msg.spy.fleet')} ${fleet}`, m.fleetValue !== 0 ? 'warn' : 'muted');
-      line.note(`${t('msg.spy.def')} ${def}`, m.defValue !== 0 ? 'warn' : 'muted');
-      if (m.attacked) line.note(t('msg.spy.attacked'), 'muted');
-      line.value(msu(m.res) * m.loot, `${t('msg.spy.loot')} ${Math.round(m.loot * 100)}%`);
-      if (m.apiKey && o.spy && o.universe) {
-        const base = nearestBase(o.spy.bases, m.coords, o.universe).base;
-        const prefill = simPrefill(o.spy.server, base ? { coords: base.coords, researches: o.spy.researches, classId: o.spy.classId, allianceClass: o.spy.allianceClass, lf: o.spy.lf ?? undefined } : null, m.coords);
-        const tool = o.sim ?? 'osims';
-        line.link(t('spy.simulate'), simLink(tool, m.apiKey, o.spy.lang, prefill), t('spy.simulateHint', { tool: SIM_TOOLS[tool].name }));
-      }
-      return line.box;
+      // Spy reports: the spy table above the list already shows all of this, so no summary here.
+      return null;
     }
     case 'transport':
     case 'deploy':

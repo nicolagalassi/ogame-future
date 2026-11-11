@@ -63,10 +63,9 @@ ${RARITY.map((c, i) => `.fut-rar-${i} { --rar: ${c}; }`).join(' ')}
 .fut-rar-tag { margin-right: 4px; color: var(--rar); font-weight: 700; }
 ${outcomeCss}
 .fut-msg-body { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; min-width: 0; }
-/* Resources: the initial in a badge of the resource's colour, so colour is never the only cue. */
-.fut-r { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
-.fut-r::before { content: attr(data-k); box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; flex: none;
-  min-width: 16px; height: 16px; padding: 0 3px; border-radius: 8px; background: var(--dot); color: var(--on-tone); font-size: 10px; font-weight: 700; line-height: 1; }
+/* Resources: the shared symbol (core/res-icons) in the resource's colour; its shape is the cue, not only the colour. */
+.fut-r { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.fut-r .fut-res-ico { flex: none; color: var(--dot); }
 .fut-r-m { --dot: ${RES_COLORS.metal}; } .fut-r-c { --dot: ${RES_COLORS.crystal}; } .fut-r-d { --dot: ${RES_COLORS.deuterium}; } .fut-r-f { --dot: ${RES_COLORS.food}; } .fut-r-dm { --dot: ${RES_COLORS.darkMatter}; }
 .fut-u { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 .fut-msg-icon { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; flex: none; }
@@ -74,7 +73,8 @@ ${outcomeCss}
 .fut-note { white-space: nowrap; color: var(--txt); }
 .fut-msg .fut-muted { color: var(--mute); } .fut-msg .fut-warn { color: var(--warn); } .fut-msg .fut-neg { color: var(--neg); }
 .fut-msg .fut-item { color: #D08A5B; } .fut-msg .fut-lf { color: #E07BC8; } .fut-msg .fut-art { color: #D4A93A; }
-.fut-route { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0 6px; color: var(--txt); }
+/* The route takes the first line on its own: what was carried is all on the line under it. */
+.fut-route { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0 6px; flex-basis: 100%; color: var(--txt); }
 .fut-place { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
 .fut-msg .fut-coords { color: var(--link); text-decoration: none; }
 .fut-msg a.fut-coords:hover, .fut-msg a.fut-coords:focus-visible { color: var(--hi); }
@@ -118,6 +118,8 @@ ${outcomeCss}
 .fut-fresh-close:hover, .fut-fresh-close:focus-visible { color: var(--hi); background: rgba(120, 150, 180, 0.14); outline: none; }
 .fut-fresh-close:focus-visible { outline: 2px solid var(--accent); }
 .fut-fresh-res { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.fut-fresh-name { display: inline-flex; align-items: center; gap: 4px; }
+.fut-fresh-name .fut-res-ico { color: var(--dot); }
 .fut-fresh-tile { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 7px 9px; border-radius: 4px; background: rgba(120, 150, 180, 0.07); }
 .fut-fresh-name { display: flex; align-items: center; gap: 5px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fut-fresh-name::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--dot); flex: none; }

@@ -3,6 +3,7 @@
  * redrawn every time the reports just read enter the journal. Same columns as the report
  * summaries below it, so its total sits above their values. Reads local data only.
  */
+import { resIconSvg } from '../../core/res-icons';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
 import { icon } from '../../core/icons';
@@ -140,7 +141,9 @@ export function showFreshExpeditions(o: RecapOptions, entries: JournalEntry[]): 
     const v = s.res[key];
     const tile = el('div', `fut-fresh-tile fut-r-${c}${v ? '' : ' zero'}`);
     tile.title = `${t(`msg.res.${key}`)}: ${exact(v)}`;
-    tile.append(el('span', 'fut-fresh-name', t(`msg.res.${key}`)), el('b', '', v ? fmt(v) : '0'));
+    const name = el('span', 'fut-fresh-name', t(`msg.res.${key}`));
+    name.insertAdjacentHTML('afterbegin', resIconSvg(key, 13));
+    tile.append(name, el('b', '', v ? fmt(v) : '0'));
     res.append(tile);
   }
   panel.append(res);
