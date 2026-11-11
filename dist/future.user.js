@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.37
+// @version      0.3.38
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -13250,9 +13250,11 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
 #ranks tr.fut-hs-top .highscoreNameFieldWrapper { height: 40px !important; }
 #ranks tr.fut-hs-top .highscoreNameAndTitleHolder > :not(.highscoreNameHolder) { font-size: 11px !important; line-height: 1.2; }
 /* The flag of Future's targets, in the column of the game's "i", before it. */
-/* The game's "i" is left exactly as it is (its box has its own sizing): the flag sits in room made on the left. */
-#ranks td.fut-hs-act { position: relative; padding-left: 22px !important; }
-#ranks td.fut-hs-act > .fut-mk-flag { position: absolute; left: 2px; top: 50%; transform: translateY(-50%); margin: 0; }
+/* The flag at the right edge of the name cell, next to the game's "i" (whose cell is left alone);
+   the name and honour points keep clear of it. */
+#ranks td.fut-hs-fl { position: relative; }
+#ranks td.fut-hs-fl > .fut-mk-flag { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); margin: 0; }
+#ranks tr:not(.fut-hs-top) td.fut-hs-fl .highscoreNameAndTitleHolder { width: calc(100% - 54px) !important; }
 #fut-hs-top { position: fixed; right: 18px; bottom: 44px; z-index: 1000; display: none; width: 34px; height: 34px; padding: 0; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--fut-line); border-radius: 6px; background: var(--fut-btn); color: var(--fut-txt); }
 #fut-hs-top.on { display: flex; } #fut-hs-top:hover, #fut-hs-top:focus-visible { border-color: var(--fut-link); color: var(--fut-hi); }
 #fut-hs-top svg { transform: rotate(180deg); }`;
@@ -13296,15 +13298,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         scoreCell.append(g);
       }
       const nameCell = r.row.querySelector("td.name");
-      const next = nameCell?.nextElementSibling;
-      const actCell = next && !next.classList.contains("score") ? next : null;
-      const home = actCell ?? r.row.querySelector(".highscoreNameHolder");
-      if (home && !r.mine && !r.row.querySelector(".fut-mk-flag")) {
-        const flag = flagButton({ doc, store, t }, r.playerId, r.name);
-        if (actCell) {
-          actCell.classList.add("fut-hs-act");
-          actCell.prepend(flag);
-        } else home.append(flag);
+      if (nameCell && !r.mine && !r.row.querySelector(".fut-mk-flag")) {
+        nameCell.classList.add("fut-hs-fl");
+        nameCell.append(flagButton({ doc, store, t }, r.playerId, r.name));
       }
     }
   }
