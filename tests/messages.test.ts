@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import { readMessage } from '../src/data/messages';
-import { byDay, entriesIn, JOURNAL_KEY, periodRange, periodStats, record, recordCombat, trim, type Journal } from '../src/engines/expeditions';
+import { byDay, daySeries, entriesIn, hourSeries, JOURNAL_KEY, periodRange, periodStats, record, recordCombat, trim, valueMix, type Journal } from '../src/engines/expeditions';
 import { processMessages } from '../src/modules/messages';
 import { openJournal, closeJournal } from '../src/modules/messages/journal-view';
 import { MemoryStore, Store } from '../src/core/storage';
@@ -275,5 +275,42 @@ describe('card view', () => {
     expect(res.querySelector('.fut-msg-b .fut-r svg')).not.toBeNull();
     expect(res.querySelector('.fut-msg-val')?.textContent).toContain('MSU');
     expect(res.querySelector('.fut-msg')?.textContent).not.toMatch(/enorme/);
+  });
+});
+
+describe('journal as a statement', () => {
+  const at = (d: number, h: number) => new Date(2026, 10, d, h, 30).getTime();
+  const entry = (when: number, res: Record<string, number>, result = 'resource') =>
+    ({ kind: 'expedition', at: when, coords: '1:1:16', size: 2, result, res: { metal: 0, crystal: 0, deuterium: 0, darkMatter: 0, food: 0, ...res }, ships: {}, lost: {}, depletion: 0, lfXp: 0, artefacts: 0 }) as never;
+
+  it('splits a day by hour and a period by day, empty ones included', () => {
+    const list = [entry(at(11, 9), { metal: 100 }), entry(at(11, 9), { crystal: 10 }), entry(at(11, 21), { deuterium: 1 }), entry(at(9, 3), { metal: 5 })];
+    const hours = hourSeries(list, new Date(2026, 10, 11).getTime());
+    expect(hours).toHaveLength(24);
+    expect(hours[9]!.stats.count).toBe(2);
+    expect(hours[21]!.stats.res.deuterium).toBe(1);
+    const days = daySeries(list, at(11, 12), 7);
+    expect(days.map((d) => d.stats.count)).toEqual([0, 0, 0, 0, 1, 0, 3]);
+    expect(valueMix(days[6]!.stats)).toEqual({ metal: 100, crystal: 15, deuterium: 3, ships: 0 });
+  });
+
+  it('a click on a column shows the outcomes of that column', () => {
+    document.body.innerHTML = '';
+    const store = new Store(new MemoryStore(), 'jr');
+    const now = at(11, 22);
+    store.set(JOURNAL_KEY, { a: entry(at(11, 9), { metal: 100 }), b: entry(at(10, 9), {}, 'nothing'), c: entry(at(10, 10), {}, 'late') });
+    store.set('exp.period', 'week');
+    openJournal({ doc: document, store, now, locale: 'it', t });
+    const root = document.getElementById('fut-journal')!.shadowRoot!;
+    expect(root.querySelector('.hero-v')!.textContent).toBe('100MSU');
+    const cols = root.querySelectorAll<HTMLButtonElement>('.col');
+    expect(cols).toHaveLength(7);
+    cols[5]!.click();
+    const outs = () => [...root.querySelectorAll('.outs .o-l')].map((n) => n.textContent);
+    expect(outs()).toEqual(['Ritardo', 'Niente']);
+    expect(root.querySelector('.col.on')).not.toBeNull();
+    root.querySelector<HTMLButtonElement>('.card-head .act')!.click();
+    expect(outs()).toEqual(['Risorse', 'Ritardo', 'Niente']);
+    closeJournal(document);
   });
 });

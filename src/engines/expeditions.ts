@@ -186,6 +186,40 @@ export function byDay(entries: JournalEntry[], limit = 14): { day: number; stats
     .map(([day, list]) => ({ day, stats: periodStats(list) }));
 }
 
+/** One column of the journal chart: when it starts and what happened in it. */
+export interface Bucket {
+  start: number;
+  stats: PeriodStats;
+}
+
+/** The 24 hours of the day starting at `day` (local time), raids left out. */
+export function hourSeries(entries: JournalEntry[], day: number): Bucket[] {
+  const lists: JournalEntry[][] = Array.from({ length: 24 }, () => []);
+  for (const e of entries) {
+    if (e.kind === 'raid' || dayStart(e.at) !== day) continue;
+    lists[new Date(e.at).getHours()]!.push(e);
+  }
+  return lists.map((list, h) => ({ start: new Date(day).setHours(h, 0, 0, 0), stats: periodStats(list) }));
+}
+
+/** `n` days ending with the day of `last` (local days, oldest first), empty days included, raids left out. */
+export function daySeries(entries: JournalEntry[], last: number, n: number): Bucket[] {
+  const starts: number[] = [];
+  let d = dayStart(last);
+  for (let i = 0; i < n; i++) {
+    starts.unshift(d);
+    d = dayStart(d - 1);
+  }
+  const lists = new Map(starts.map((s) => [s, [] as JournalEntry[]]));
+  for (const e of entries) if (e.kind !== 'raid') lists.get(dayStart(e.at))?.push(e);
+  return starts.map((start) => ({ start, stats: periodStats(lists.get(start)!) }));
+}
+
+/** Where a period's value came from, in MSU: each resource at its rate, then the ships found (dark matter has no MSU). */
+export function valueMix(s: PeriodStats): { metal: number; crystal: number; deuterium: number; ships: number } {
+  return { metal: s.res.metal, crystal: s.res.crystal * 1.5, deuterium: s.res.deuterium * 3, ships: msu(s.shipsValue) };
+}
+
 /** Raids (from an OGLight import): how many, loot, ships lost. */
 export interface RaidStats {
   count: number;

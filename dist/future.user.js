@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.29
+// @version      0.3.30
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -922,7 +922,15 @@
     "msg.say.trader": "un mercante offre uno scambio",
     "msg.say.pirate": "scontro con i pirati",
     "msg.say.alien": "scontro con gli alieni",
-    "msg.say.blackhole": "la flotta \xE8 finita in un buco nero"
+    "msg.say.blackhole": "la flotta \xE8 finita in un buco nero",
+    "exp.heroCount": "spedizioni",
+    "exp.heroAvg": "a spedizione",
+    "exp.heroLost": "navi perse",
+    "exp.byHour": "Ora per ora",
+    "exp.focusAll": "Tutto il periodo",
+    "exp.noneHere": "Niente qui.",
+    "exp.daysTable": "I giorni",
+    "dock.todayCount": "{n} spedizioni"
   };
 
   // src/i18n/en.json
@@ -1661,7 +1669,15 @@
     "msg.say.trader": "a trader offers an exchange",
     "msg.say.pirate": "a fight with pirates",
     "msg.say.alien": "a fight with aliens",
-    "msg.say.blackhole": "the fleet was lost in a black hole"
+    "msg.say.blackhole": "the fleet was lost in a black hole",
+    "exp.heroCount": "expeditions",
+    "exp.heroAvg": "per expedition",
+    "exp.heroLost": "ships lost",
+    "exp.byHour": "Hour by hour",
+    "exp.focusAll": "Whole period",
+    "exp.noneHere": "Nothing here.",
+    "exp.daysTable": "The days",
+    "dock.todayCount": "{n} expeditions"
   };
 
   // src/i18n/fr.json
@@ -2400,7 +2416,15 @@
     "msg.say.trader": "un marchand propose un \xE9change",
     "msg.say.pirate": "combat contre des pirates",
     "msg.say.alien": "combat contre des aliens",
-    "msg.say.blackhole": "la flotte a disparu dans un trou noir"
+    "msg.say.blackhole": "la flotte a disparu dans un trou noir",
+    "exp.heroCount": "exp\xE9ditions",
+    "exp.heroAvg": "par exp\xE9dition",
+    "exp.heroLost": "vaisseaux perdus",
+    "exp.byHour": "Heure par heure",
+    "exp.focusAll": "Toute la p\xE9riode",
+    "exp.noneHere": "Rien ici.",
+    "exp.daysTable": "Les jours",
+    "dock.todayCount": "{n} exp\xE9ditions"
   };
 
   // src/i18n/de.json
@@ -3139,7 +3163,15 @@
     "msg.say.trader": "ein H\xE4ndler bietet einen Tausch an",
     "msg.say.pirate": "Kampf mit Piraten",
     "msg.say.alien": "Kampf mit Aliens",
-    "msg.say.blackhole": "die Flotte ging in einem Schwarzen Loch verloren"
+    "msg.say.blackhole": "die Flotte ging in einem Schwarzen Loch verloren",
+    "exp.heroCount": "Expeditionen",
+    "exp.heroAvg": "pro Expedition",
+    "exp.heroLost": "Schiffe verloren",
+    "exp.byHour": "Stunde f\xFCr Stunde",
+    "exp.focusAll": "Ganzer Zeitraum",
+    "exp.noneHere": "Nichts hier.",
+    "exp.daysTable": "Die Tage",
+    "dock.todayCount": "{n} Expeditionen"
   };
 
   // src/core/i18n.ts
@@ -4813,7 +4845,19 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
 #${DOCK_ID} .head svg { flex: none; color: #4FD1E8; }
 #${DOCK_ID} .head .n { color: #9AA9BC; font: 12px Consolas, "JetBrains Mono", monospace; }
 #${DOCK_ID} .head:hover, #${DOCK_ID} .line:hover { background: #16243A; }
-/* Journal: one line per period. */
+/* Journal: today's net gain large, the last 7 days as small columns (today lit), then the week. */
+#${DOCK_ID} .jtoday { display: flex; flex-direction: column; gap: 1px; width: 100%; padding: 7px 8px 6px; border: 0; background: none; }
+#${DOCK_ID} .jtoday:hover { background: #16243A; }
+#${DOCK_ID} .jtoday .k { color: #9AA9BC; font-size: 11px; }
+#${DOCK_ID} .jtoday .v { font: 700 18px/22px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; }
+#${DOCK_ID} .jtoday .v.neg { color: #FF8A7A; } #${DOCK_ID} .jtoday .v.none { color: #617C8D; font-weight: 400; }
+#${DOCK_ID} .jtoday .v small { margin-left: 4px; font: 11px Arial, Helvetica, sans-serif; color: #9AA9BC; }
+#${DOCK_ID} .jtoday .c { color: #9AA9BC; font-size: 11px; }
+#${DOCK_ID} .days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: end; gap: 3px; height: 30px; margin-top: 6px; }
+#${DOCK_ID} .days i { display: block; min-height: 2px; border-radius: 2px 2px 0 0; background: #2C5366; }
+#${DOCK_ID} .days i.zero { background: #1F2C40; }
+#${DOCK_ID} .days i.today { background: #4FD1E8; }
+/* One line per period. */
 #${DOCK_ID} .line { display: grid; grid-template-columns: minmax(0, 1fr) auto 52px; align-items: baseline; gap: 6px; width: 100%; min-height: 24px; padding: 3px 8px; border: 0; background: none; }
 #${DOCK_ID} .line + .line { border-top: 1px solid #16202F; }
 #${DOCK_ID} .line .k { color: #9AA9BC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -4870,15 +4914,30 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     };
     const journal = el2(doc, "section", "card");
     journal.append(head("chart", t("dock.journal"), t("exp.title"), o.onOpenJournal));
-    const cols = el2(doc, "div", "cols");
-    cols.append(el2(doc, "span"), el2(doc, "span", "", t("dock.count")), el2(doc, "span", "", "MSU"));
-    journal.append(cols);
-    for (const [key, s] of [["dock.today", o.journal.today], ["dock.week", o.journal.week]]) {
-      const line = button3("line", t("dock.journalHint", { n: s.count }), o.onOpenJournal);
-      const net = s.count ? `${s.net >= 0 ? "+" : "\u2212"}${fmt(Math.abs(s.net))}` : "\u2014";
-      line.append(el2(doc, "span", "k", t(key)), el2(doc, "span", "c", s.count ? String(s.count) : ""), el2(doc, "span", `v ${s.count ? s.net >= 0 ? "pos" : "neg" : "none"}`, net));
-      journal.append(line);
+    const signed = (n) => `${n >= 0 ? "+" : "\u2212"}${fmt(Math.abs(n))}`;
+    const today = o.journal.today;
+    const block = button3("jtoday", t("dock.journalHint", { n: today.count }), o.onOpenJournal);
+    const big = el2(doc, "span", `v${today.count ? today.net < 0 ? " neg" : "" : " none"}`, today.count ? signed(today.net) : "\u2014");
+    if (today.count) big.append(el2(doc, "small", "", "MSU"));
+    block.append(el2(doc, "span", "k", t("dock.today")), big, el2(doc, "span", "c", t("dock.todayCount", { n: today.count })));
+    const days = o.journal.days ?? [];
+    if (days.length) {
+      const cols = el2(doc, "span", "days");
+      cols.setAttribute("aria-hidden", "true");
+      const top = Math.max(1, ...days.map((d) => d.net));
+      days.forEach((d, i) => {
+        const bar = el2(doc, "i", d.net > 0 ? i === days.length - 1 ? "today" : "" : "zero");
+        bar.style.height = `${Math.max(0, d.net / top * 100)}%`;
+        bar.title = `${new Date(d.start).toLocaleDateString(o.locale, { weekday: "short", day: "2-digit", month: "2-digit" })} \xB7 ${d.count} \xB7 ${d.count ? signed(d.net) : "\u2014"} MSU`;
+        cols.append(bar);
+      });
+      block.append(cols);
     }
+    journal.append(block);
+    const week = o.journal.week;
+    const line = button3("line", t("dock.journalHint", { n: week.count }), o.onOpenJournal);
+    line.append(el2(doc, "span", "k", t("dock.week")), el2(doc, "span", "c", week.count ? String(week.count) : ""), el2(doc, "span", `v ${week.count ? week.net >= 0 ? "pos" : "neg" : "none"}`, week.count ? signed(week.net) : "\u2014"));
+    journal.append(line);
     const players = Object.values(o.marks.players);
     const planets = Object.values(o.marks.planets);
     const targets = el2(doc, "section", "card");
@@ -4896,7 +4955,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     }
     if (flags.childElementCount) targets.append(flags);
     if (planets.length) {
-      const line = button3("line", t("dock.planetsHint"), () => o.onOpenTargets({ tab: "planets" }));
+      const line2 = button3("line", t("dock.planetsHint"), () => o.onOpenTargets({ tab: "planets" }));
       const dots = el2(doc, "span", "tags");
       for (const tag of TAGS) {
         if (!planets.some((p) => p.tag === tag)) continue;
@@ -4904,8 +4963,8 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
         dot.style.background = TAG_COLORS[tag];
         dots.append(dot);
       }
-      line.append(el2(doc, "span", "k", t("marks.tab.planets")), dots, el2(doc, "span", "v", String(planets.length)));
-      targets.append(line);
+      line2.append(el2(doc, "span", "k", t("marks.tab.planets")), dots, el2(doc, "span", "v", String(planets.length)));
+      targets.append(line2);
     }
     dock.append(journal, targets);
     if (menu) menu.append(dock);
@@ -5331,6 +5390,28 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       days.set(key, list);
     }
     return [...days.entries()].sort((a, b) => b[0] - a[0]).slice(0, limit).map(([day, list]) => ({ day, stats: periodStats(list) }));
+  }
+  function hourSeries(entries, day) {
+    const lists = Array.from({ length: 24 }, () => []);
+    for (const e of entries) {
+      if (e.kind === "raid" || dayStart(e.at) !== day) continue;
+      lists[new Date(e.at).getHours()].push(e);
+    }
+    return lists.map((list, h6) => ({ start: new Date(day).setHours(h6, 0, 0, 0), stats: periodStats(list) }));
+  }
+  function daySeries(entries, last2, n) {
+    const starts = [];
+    let d = dayStart(last2);
+    for (let i = 0; i < n; i++) {
+      starts.unshift(d);
+      d = dayStart(d - 1);
+    }
+    const lists = new Map(starts.map((s) => [s, []]));
+    for (const e of entries) if (e.kind !== "raid") lists.get(dayStart(e.at))?.push(e);
+    return starts.map((start) => ({ start, stats: periodStats(lists.get(start)) }));
+  }
+  function valueMix(s) {
+    return { metal: s.res.metal, crystal: s.res.crystal * 1.5, deuterium: s.res.deuterium * 3, ships: msu(s.shipsValue) };
   }
   function raidStats(entries) {
     const s = { count: 0, res: ZERO(), lost: {}, lostValue: ZERO(), netMsu: 0 };
@@ -6314,6 +6395,56 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
 .opt { min-height: 24px; display: flex; gap: 6px; align-items: center; color: var(--text-2); font-size: 12px; cursor: pointer; }
 .acts { display: flex; gap: 6px; }
 @media (max-width: 560px) { .kpi .value { font-size: 15px; } }
+/* Expeditions as a statement: net gain first, where it came from, then the columns. */
+.gi { display: inline-flex; flex: none; }
+.hero { display: flex; flex-direction: column; gap: 12px; padding: 16px 18px; }
+.hero-top { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 28px; }
+.hero-net { display: flex; flex-direction: column; gap: 4px; }
+.hero-k { color: var(--muted); font-size: 12px; }
+.hero-v { font: 700 36px/1 var(--mono); color: var(--text); letter-spacing: -0.5px; }
+.hero-v.neg { color: var(--bad); }
+.hero-v small { margin-left: 6px; font: 400 14px Arial, sans-serif; color: var(--muted); letter-spacing: 0; }
+.hero-sub { margin: 0 0 3px; color: var(--muted); font-size: 12px; }
+.hero-sub b { color: var(--text-2); font: 400 12px var(--mono); }
+.hero-sub b.neg { color: var(--bad); }
+.mix { display: flex; gap: 2px; height: 12px; border-radius: 3px; overflow: hidden; }
+.mix i { display: block; height: 100%; min-width: 3px; }
+.mix-keys { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 12px; }
+.mix-key { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); }
+.mix-key b { font: 700 12px var(--mono); color: var(--text); }
+.mix-key.m .gi { color: var(--m); } .mix-key.c .gi { color: var(--c); } .mix-key.d .gi { color: var(--d); } .mix-key.dm .gi { color: var(--dm); } .mix-key.sh .gi { color: #4FE0B0; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.card-head h3 { margin: 0; }
+/* The columns: one per hour or day, stacked by where the value came from; a click shows its detail. */
+.chart { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 8px; align-items: stretch; height: 190px; }
+.chart.dense { gap: 3px; height: 160px; }
+.col { display: flex; flex-direction: column; align-items: stretch; gap: 4px; min-width: 0; padding: 0; border: 0; background: none; cursor: pointer; font: inherit; color: inherit; }
+.col .tot { min-height: 15px; text-align: center; font: 700 11px var(--mono); color: var(--text); white-space: nowrap; overflow: hidden; }
+.col .area { flex: 1; display: flex; align-items: flex-end; min-height: 0; border-bottom: 1px solid var(--line); }
+.col .stack { display: flex; flex-direction: column-reverse; width: 100%; min-height: 0; border-radius: 3px 3px 0 0; overflow: hidden; }
+.col .stack i { display: block; flex: none; }
+.col.empty .area { border-bottom-color: var(--line-soft); }
+.col .lbl { min-height: 14px; text-align: center; color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; }
+.col:hover .stack { filter: brightness(1.15); }
+.col:hover .lbl, .col:focus-visible .lbl { color: var(--text); }
+.col:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+.col.on .stack { box-shadow: 0 0 0 2px var(--accent); }
+.col.on .lbl { color: var(--accent); font-weight: 700; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.outs { display: grid; grid-template-columns: max-content minmax(40px, 1fr) auto 48px; align-items: center; gap: 5px 10px; font-size: 12px; }
+.outs .track { height: 8px; border-radius: 2px; background: var(--line-soft); overflow: hidden; }
+.outs .track i { display: block; height: 100%; border-radius: 2px; }
+.outs .o-n { text-align: right; font-family: var(--mono); color: var(--text); }
+.outs .o-p { text-align: right; font-family: var(--mono); color: var(--muted); font-size: 11px; }
+.sizes .sz { color: var(--rar); font-size: 12px; } .sizes .sz b { font-family: var(--mono); }
+.sizes { gap: 16px; padding-top: 10px; border-top: 1px solid var(--line-soft); }
+th .gi { vertical-align: -2px; }
+th .gi:has(svg) { color: var(--muted); }
+td.hi { color: var(--text); }
+tr.on td { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+td.spark-cell { width: 90px; }
+.spark { display: block; height: 7px; border-radius: 2px; background: var(--accent); opacity: 0.55; }
+@media (max-width: 640px) { .two { grid-template-columns: 1fr; } .hero-v { font-size: 28px; } .chart:not(.dense) .tot { font-size: 10px; } }
 `;
 
   // src/modules/messages/spy-table.ts
@@ -12655,6 +12786,219 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     if (!PERIODS.includes(period)) period = "week";
     let confirmClear = false;
     let kind = store.get(KIND_KEY, "expedition");
+    let focus = null;
+    const MIX_COLORS = { metal: "var(--m)", crystal: "var(--c)", deuterium: "var(--d)", ships: "#2E9E7E" };
+    const svg2 = (html) => {
+      const span = h5("span", "gi");
+      span.innerHTML = html;
+      return span;
+    };
+    const shipGrid = (units, lost) => {
+      const list = h5("div", `ships${lost ? " lost" : ""}`);
+      for (const [id, n] of units.sort((x, y) => Number(x[0]) - Number(y[0]))) {
+        const name = shipName(Number(id), ships, t);
+        const tile2 = h5("div", "ship");
+        const info = h5("div", "ship-info");
+        info.append(h5("b", lost ? "neg" : "pos", `${lost ? "\u2212" : "+"}${n.toLocaleString(locale)}`), h5("span", "ship-name", name));
+        tile2.append(shipIcon(doc, Number(id), name, "ship-img"), info);
+        list.append(tile2);
+      }
+      return list;
+    };
+    const expeditionView = (entries, s) => {
+      const out = [];
+      const sign = (n) => `${n < 0 ? "\u2212" : ""}${fmt(Math.abs(n))}`;
+      const hero = h5("div", "card hero");
+      const top = h5("div", "hero-top");
+      const net = h5("div", "hero-net");
+      net.append(h5("span", "hero-k", `${t("exp.net")} \xB7 ${t(`exp.period.${period}`)}`));
+      const big = h5("b", `hero-v${s.netMsu < 0 ? " neg" : ""}`, sign(s.netMsu));
+      big.append(h5("small", "", "MSU"));
+      net.append(big);
+      const sub = h5("p", "hero-sub");
+      sub.append(
+        h5("b", "", s.count.toLocaleString(locale)),
+        ` ${t("exp.heroCount")} \xB7 `,
+        h5("b", "", s.count ? fmt(s.netMsu / s.count) : "\u2014"),
+        ` ${t("exp.heroAvg")}`
+      );
+      if (msu(s.lostValue)) sub.append(" \xB7 ", `${t("exp.heroLost")} `, h5("b", "neg", `\u2212${fmt(msu(s.lostValue))}`));
+      top.append(net, sub);
+      const mix = valueMix(s);
+      const mixTotal = mix.metal + mix.crystal + mix.deuterium + mix.ships;
+      const bar = h5("div", "mix");
+      for (const k of ["metal", "crystal", "deuterium", "ships"]) {
+        if (!mix[k]) continue;
+        const seg = h5("i");
+        seg.style.width = `${mix[k] / (mixTotal || 1) * 100}%`;
+        seg.style.background = MIX_COLORS[k];
+        seg.title = `${k === "ships" ? t("exp.shipsFound") : t(`msg.res.${k}`)}: ${fmt(mix[k])} MSU (${Math.round(mix[k] / (mixTotal || 1) * 100)}%)`;
+        bar.append(seg);
+      }
+      const keys = h5("div", "mix-keys");
+      const key = (glyph2, label2, value, cls) => {
+        const k = h5("span", `mix-key ${cls}`);
+        k.append(glyph2, h5("span", "mk-l", label2), h5("b", "", value));
+        keys.append(k);
+      };
+      key(svg2(resIconSvg("metal", 15)), t("msg.res.metal"), fmt(s.res.metal), "m");
+      key(svg2(resIconSvg("crystal", 15)), t("msg.res.crystal"), fmt(s.res.crystal), "c");
+      key(svg2(resIconSvg("deuterium", 15)), t("msg.res.deuterium"), fmt(s.res.deuterium), "d");
+      key(svg2(iconSvg("fleetValue", 15)), t("exp.shipsFound"), `${fmt(msu(s.shipsValue))} MSU`, "sh");
+      if (s.res.darkMatter) key(svg2(resIconSvg("darkMatter", 15)), t("msg.res.darkMatter"), fmt(s.res.darkMatter), "dm");
+      hero.append(top);
+      if (mixTotal) hero.append(bar);
+      hero.append(keys);
+      out.push(hero);
+      const single = period === "today" || period === "yesterday";
+      const [from] = periodRange(period, o.now);
+      const buckets = single ? hourSeries(entries, from) : daySeries(entries, o.now, period === "week" ? 7 : 30);
+      const label = (b, short) => {
+        const d = new Date(b.start);
+        if (single) return short ? d.getHours() % 3 === 0 ? String(d.getHours()) : "" : `${String(d.getHours()).padStart(2, "0")}:00`;
+        if (buckets.length <= 7) return d.toLocaleDateString(locale, { weekday: "short", day: "2-digit" });
+        return short ? (buckets.length - 1 - buckets.indexOf(b)) % 5 === 0 ? String(d.getDate()) : "" : d.toLocaleDateString(locale, { weekday: "short", day: "2-digit", month: "2-digit" });
+      };
+      if (focus !== null && !buckets.some((b) => b.start === focus)) focus = null;
+      const chartCard = h5("div", "card");
+      const chartHead = h5("div", "card-head");
+      chartHead.append(h5("h3", "", t(single ? "exp.byHour" : "exp.byDay")));
+      if (focus !== null) {
+        const all2 = h5("button", "act ghost", t("exp.focusAll"));
+        all2.addEventListener("click", () => {
+          focus = null;
+          draw();
+        });
+        chartHead.append(all2);
+      }
+      chartCard.append(chartHead);
+      const chart = h5("div", `chart${buckets.length > 14 ? " dense" : ""}`);
+      chart.style.setProperty("--n", String(buckets.length));
+      const max = Math.max(1, ...buckets.map((b) => {
+        const m = valueMix(b.stats);
+        return m.metal + m.crystal + m.deuterium + m.ships;
+      }));
+      for (const b of buckets) {
+        const m = valueMix(b.stats);
+        const tot = m.metal + m.crystal + m.deuterium + m.ships;
+        const col = h5("button", `col${focus === b.start ? " on" : ""}${b.stats.count ? "" : " empty"}`);
+        col.type = "button";
+        col.title = `${label(b, false)} \xB7 ${b.stats.count.toLocaleString(locale)} ${t("exp.heroCount")} \xB7 ${sign(b.stats.netMsu)} MSU`;
+        col.setAttribute("aria-pressed", String(focus === b.start));
+        if (buckets.length <= 14) col.append(h5("span", "tot", b.stats.count ? sign(b.stats.netMsu) : ""));
+        const stack = h5("span", "stack");
+        stack.style.height = `${Math.round(tot / max * 100)}%`;
+        for (const k of ["metal", "crystal", "deuterium", "ships"]) {
+          if (!m[k]) continue;
+          const seg = h5("i");
+          seg.style.height = `${m[k] / tot * 100}%`;
+          seg.style.background = MIX_COLORS[k];
+          stack.append(seg);
+        }
+        const area = h5("span", "area");
+        area.append(stack);
+        col.append(area, h5("span", "lbl", label(b, true)));
+        col.addEventListener("click", () => {
+          focus = focus === b.start ? null : b.start;
+          draw();
+        });
+        chart.append(col);
+      }
+      chartCard.append(chart);
+      out.push(chartCard);
+      const picked2 = focus !== null ? buckets.find((b) => b.start === focus) : null;
+      const fs = picked2 ? picked2.stats : s;
+      const suffix = picked2 ? ` \xB7 ${label(picked2, false)}` : "";
+      const two = h5("div", "two");
+      const outs = h5("div", "card");
+      outs.append(h5("h3", "", `${t("exp.outcomes")}${suffix}`));
+      const rows = ORDER.filter((k) => fs.outcomes[k]).sort((a, b) => (fs.outcomes[b] ?? 0) - (fs.outcomes[a] ?? 0));
+      const total = rows.reduce((a, k) => a + (fs.outcomes[k] ?? 0), 0);
+      const top1 = Math.max(1, ...rows.map((k) => fs.outcomes[k] ?? 0));
+      if (!rows.length) outs.append(h5("p", "empty", t("exp.noneHere")));
+      const list = h5("div", "outs");
+      for (const k of rows) {
+        const n = fs.outcomes[k] ?? 0;
+        const track = h5("span", "track");
+        const fill = h5("i");
+        fill.style.width = `${n / top1 * 100}%`;
+        fill.style.background = OUTCOME_COLORS[k] ?? "#5B6B80";
+        track.append(fill);
+        list.append(h5("span", "o-l", t(`msg.out.${k}`)), track, h5("span", "o-n", n.toLocaleString(locale)), h5("span", "o-p", (n / total).toLocaleString(locale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 })));
+      }
+      if (rows.length) outs.append(list);
+      const sized = fs.sizes[0] + fs.sizes[1] + fs.sizes[2];
+      if (sized) {
+        const sizes = h5("div", "sizes");
+        for (const i of [2, 1, 0]) {
+          const sz = h5("span", `sz rar-${i}`, `${t(`msg.size.${i}`)} `);
+          sz.append(h5("b", "", fs.sizes[i].toLocaleString(locale)));
+          sizes.append(sz);
+        }
+        outs.append(sizes);
+      }
+      const shipsCard = h5("div", "card");
+      shipsCard.append(h5("h3", "", `${t("exp.shipsFound")}${suffix}`));
+      const found = Object.entries(fs.shipsFound);
+      const lost = Object.entries(fs.lost);
+      if (found.length) shipsCard.append(shipGrid(found, false));
+      else shipsCard.append(h5("p", "empty", t("exp.noneHere")));
+      if (lost.length) {
+        shipsCard.append(h5("h4", "lost", t("exp.lost")));
+        shipsCard.append(shipGrid(lost, true));
+      }
+      two.append(outs, shipsCard);
+      out.push(two);
+      if (!single) {
+        const card = h5("div", "card");
+        card.append(h5("h3", "", t("exp.daysTable")));
+        const scroll = h5("div", "scroll");
+        const table = h5("table");
+        const hr = h5("tr");
+        const th = (content, title = "") => {
+          const c = h5("th");
+          c.append(content);
+          if (title) c.title = title;
+          hr.append(c);
+        };
+        th(t("exp.day"));
+        th(t("exp.countShort"));
+        th(svg2(resIconSvg("metal", 13)), t("msg.res.metal"));
+        th(svg2(resIconSvg("crystal", 13)), t("msg.res.crystal"));
+        th(svg2(resIconSvg("deuterium", 13)), t("msg.res.deuterium"));
+        th(svg2(resIconSvg("darkMatter", 13)), t("msg.res.darkMatter"));
+        th(svg2(iconSvg("fleetValue", 13)), t("exp.shipsShort"));
+        th("MSU");
+        th("");
+        table.append(hr);
+        const days = byDay(entries, 31);
+        const top2 = Math.max(1, ...days.map((d) => d.stats.netMsu));
+        for (const { day, stats } of days) {
+          const tr = h5("tr");
+          if (focus === day) tr.className = "on";
+          const spark = h5("td", "spark-cell");
+          const sp = h5("i", "spark");
+          sp.style.width = `${Math.max(0, stats.netMsu / top2 * 100)}%`;
+          spark.append(sp);
+          tr.append(
+            h5("td", "", new Date(day).toLocaleDateString(locale, { weekday: "short", day: "2-digit", month: "2-digit" })),
+            h5("td", "", String(stats.count)),
+            h5("td", "m", fmt(stats.res.metal)),
+            h5("td", "c", fmt(stats.res.crystal)),
+            h5("td", "d", fmt(stats.res.deuterium)),
+            h5("td", "dm", fmt(stats.res.darkMatter)),
+            h5("td", "pos", fmt(msu(stats.shipsValue) - msu(stats.lostValue))),
+            h5("td", stats.netMsu < 0 ? "neg" : "hi", fmt(stats.netMsu)),
+            spark
+          );
+          table.append(tr);
+        }
+        scroll.append(table);
+        card.append(scroll);
+        out.push(card);
+      }
+      return out;
+    };
     const draw = () => {
       const journal = store.get(JOURNAL_KEY, {});
       const inPeriod = entriesIn(journal, periodRange(period, o.now));
@@ -12677,6 +13021,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         b.setAttribute("aria-pressed", String(p === period));
         b.addEventListener("click", () => {
           period = p;
+          focus = null;
           store.set(PERIOD_KEY, p);
           draw();
         });
@@ -12690,6 +13035,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         b.setAttribute("aria-pressed", String(k === kind));
         b.addEventListener("click", () => {
           kind = k;
+          focus = null;
           store.set(KIND_KEY, k);
           draw();
         });
@@ -12698,6 +13044,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       const parts = [head, kinds, tabs];
       if (!entries.length) {
         parts.push(h5("p", "empty", Object.keys(journal).length ? t("exp.emptyPeriod") : t("exp.empty")));
+      } else if (kind === "expedition") {
+        parts.push(...expeditionView(entries, s));
       } else {
         const kpis = h5("div", "kpis");
         const kpi = (label, value, cls = "", detail) => {
@@ -12717,34 +13065,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           kpi(t("exp.lfXp"), s.lfXp.toLocaleString(locale));
           kpi(t("exp.artefactsAvg"), s.discoveries ? (s.artefacts / s.discoveries).toLocaleString(locale, { maximumFractionDigits: 2 }) : "\u2014");
         }
-        if (!isDisc && kind !== "raid") {
-          kpi(t("exp.count"), s.count.toLocaleString(locale));
-          kpi(t("exp.resources"), `${fmt(msu(s.res))} MSU`);
-          kpi(t("exp.shipsFound"), `${fmt(msu(s.shipsValue))} MSU`, "pos", triple(s.shipsValue));
-          kpi(t("exp.lost"), msu(s.lostValue) ? `\u2212${fmt(msu(s.lostValue))} MSU` : "\u2014", msu(s.lostValue) ? "neg" : "", msu(s.lostValue) ? triple(s.lostValue) : void 0);
-          kpi(t("exp.net"), `${fmt(s.netMsu)} MSU`, s.netMsu < 0 ? "neg" : "pos");
-          kpi(t("exp.average"), s.count ? `${fmt(s.netMsu / s.count)} MSU` : "\u2014");
-          if (s.lfXp || s.artefacts) {
-            const d = h5("div", "detail");
-            if (s.artefacts) d.append(h5("span", "", t("msg.artefacts", { n: s.artefacts.toLocaleString(locale) })));
-            kpi(t("exp.lfXp"), s.lfXp.toLocaleString(locale), "", d);
-          }
-        }
         if (kind !== "raid") parts.push(kpis);
-        if (!isDisc && kind !== "raid" && (msu(s.res) || s.res.darkMatter)) {
-          const card = h5("div", "card");
-          card.append(h5("h3", "", t("exp.resourcesFound")));
-          const grid2 = h5("div", "res");
-          for (const [key, c] of [["metal", "m"], ["crystal", "c"], ["deuterium", "d"], ["darkMatter", "dm"]]) {
-            const v = s.res[key];
-            const tile2 = h5("div", `res-tile ${c}${v ? "" : " zero"}`);
-            tile2.title = `${t(`msg.res.${key}`)}: ${Math.round(v).toLocaleString(locale)}`;
-            tile2.append(h5("span", "res-name", t(`msg.res.${key}`)), h5("b", "", fmt(v)));
-            grid2.append(tile2);
-          }
-          card.append(grid2);
-          parts.push(card);
-        }
         const outs = h5("div", "card");
         if (kind !== "raid") outs.append(h5("h3", "", t("exp.outcomes")));
         const total = Object.values(s.outcomes).reduce((a, b) => a + (b ?? 0), 0) || 1;
@@ -12773,30 +13094,6 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           outs.append(sizes);
         }
         if (kind !== "raid") parts.push(outs);
-        const found = Object.entries(s.shipsFound);
-        const lost = Object.entries(s.lost);
-        if (kind === "expedition" && (found.length || lost.length)) {
-          const card = h5("div", "card");
-          card.append(h5("h3", "", t("exp.ships")));
-          const grid2 = (units, lost2) => {
-            const list = h5("div", `ships${lost2 ? " lost" : ""}`);
-            for (const [id, n] of units.sort((x, y) => Number(x[0]) - Number(y[0]))) {
-              const name = shipName(Number(id), ships, t);
-              const tile2 = h5("div", "ship");
-              const info = h5("div", "ship-info");
-              info.append(h5("b", lost2 ? "neg" : "pos", `${lost2 ? "\u2212" : "+"}${n.toLocaleString(locale)}`), h5("span", "ship-name", name));
-              tile2.append(shipIcon(doc, Number(id), name, "ship-img"), info);
-              list.append(tile2);
-            }
-            return list;
-          };
-          if (found.length) card.append(grid2(found, false));
-          if (lost.length) {
-            card.append(h5("h4", "lost", t("exp.lost")));
-            card.append(grid2(lost, true));
-          }
-          parts.push(card);
-        }
         const r = raidStats(entries);
         if (kind === "raid") {
           const card = h5("div", "card");
@@ -13440,7 +13737,11 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         doc: document,
         t,
         locale,
-        journal: { today: stats("today"), week: stats("week") },
+        journal: {
+          today: stats("today"),
+          week: stats("week"),
+          days: daySeries(Object.values(journal), Date.now(), 7).map((b) => ({ start: b.start, count: b.stats.count, net: b.stats.netMsu }))
+        },
         marks: loadMarks(store.get(MARKS_KEY, null)),
         onOpenJournal: () => openJournal({ doc: document, store, now: Date.now(), locale, t }),
         onOpenTargets: (view2) => view2 ? openSide(side, view2) : toggleSide(side)
