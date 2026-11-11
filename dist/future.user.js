@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.28
+// @version      0.3.29
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -5135,20 +5135,20 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     for (const key of KEYS2) if (cost[key] > 0 && (best === null || cost[key] > cost[best])) best = key;
     return best;
   }
-  function discountFrom(id, level2, shown2) {
+  function discountFrom(id, level2, shown) {
     const raw = rawCost(id, level2);
     const key = main(raw);
     if (!key) return null;
-    const value = shown2[key];
+    const value = shown[key];
     if (value === void 0 || !(value > 0)) return null;
     const ratio = value / raw[key];
     if (ratio > 1.001 || ratio < 0.2) return null;
     return Math.max(0, 1 - ratio);
   }
-  function matchShownLevel(id, candidates, shown2) {
+  function matchShownLevel(id, candidates, shown) {
     let best = null;
     for (const level2 of new Set(candidates.filter((l) => l >= 1))) {
-      const discount = discountFrom(id, level2, shown2);
+      const discount = discountFrom(id, level2, shown);
       if (discount === null) continue;
       if (!best || discount < best.discount) best = { level: level2, discount };
     }
@@ -6084,7 +6084,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   var MESSAGES_CSS = `
 /* One set of tokens for the summaries, the "just read" panel and the spy table. Text tokens keep
    at least 4.5:1 on every background they sit on; --faint is for decoration only (ticks, tracks). */
-.fut-msg, .fut-fresh, #fut-spypanel {
+.fut-msg, #fut-spypanel {
   --hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1; --faint: #4E5B6A; --line: #2E4356;
   --link: #6F9FC8; --accent: #4FD1E8; --neg: #F07A6E; --warn: #E3B341; --ok: #7BC47F; --ship: #4FE0B0; --on-tone: #0D1116;
   --loot: #F0A35A; --name: #E8D27A; --on-accent: #CFF5FC; --attack: #FF9B8A; --attack-line: #C0533F; --sim: #8FB6D8; --chip: #1A2733;
@@ -6180,40 +6180,6 @@ ${outcomeCss}
 .fut-msg a.fut-msg-link { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 12px; border: 1px solid var(--line);
   color: var(--sim); text-decoration: none; font-size: 11px; font-weight: 700; white-space: nowrap; }
 .fut-msg a.fut-msg-link:hover, .fut-msg a.fut-msg-link:focus-visible { border-color: var(--link); color: var(--hi); outline: none; }
-/* Today's recap heads the Expeditions tab with the same columns as the reports below. */
-.fut-msg.fut-recap { margin: 0 0 8px; padding: 8px 16px; background: rgba(79, 209, 232, 0.08); box-shadow: inset 0 1px 0 rgba(79, 209, 232, 0.4), inset 0 -1px 0 rgba(79, 209, 232, 0.4); }
-.fut-msg.fut-recap:hover { background: rgba(79, 209, 232, 0.13); }
-.fut-recap .fut-msg-val b { font-size: 14px; }
-/* "Just read": under today's recap, gone after a countdown (paused on hover / focus). */
-.fut-fresh { box-sizing: border-box; margin: -8px 0 10px; padding: 0 16px 10px; border-radius: 0; overflow: hidden;
-  background: #0E151C; font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums; }
-.fut-fresh-timer { height: 3px; margin: 0 -16px 8px; background: #1A2530; }
-.fut-fresh-timer i { display: block; height: 100%; background: #F5A623; transform-origin: left center; animation: fut-fresh-countdown linear forwards; }
-.fut-fresh:hover .fut-fresh-timer i, .fut-fresh:focus-within .fut-fresh-timer i { animation-play-state: paused; }
-@keyframes fut-fresh-countdown { from { transform: scaleX(1); } to { transform: scaleX(0); } }
-.fut-fresh-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-bottom: 8px; }
-.fut-fresh-head > b { font-size: 12px; color: var(--hi); }
-.fut-fresh-count { color: var(--mute); }
-.fut-rar-chip { padding: 0 7px; border-radius: 9px; border: 1px solid color-mix(in srgb, var(--rar) 60%, transparent);
-  background: color-mix(in srgb, var(--rar) 14%, transparent); color: var(--rar); font-weight: 700; white-space: nowrap; }
-.fut-fresh-total { margin-left: auto; display: flex; align-items: baseline; gap: 4px; }
-.fut-fresh-total b { font-size: 15px; color: var(--hi); }
-.fut-fresh-total.fut-neg b { color: var(--neg); }
-.fut-fresh-total small { color: var(--mute); font-size: 11px; }
-.fut-fresh-close { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--mute); cursor: pointer; }
-.fut-fresh-close:hover, .fut-fresh-close:focus-visible { color: var(--hi); background: rgba(120, 150, 180, 0.14); outline: none; }
-.fut-fresh-close:focus-visible { outline: 2px solid var(--accent); }
-.fut-fresh-res { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
-.fut-fresh-name { display: inline-flex; align-items: center; gap: 4px; }
-.fut-fresh-name .fut-res-ico { color: var(--dot); }
-.fut-fresh-tile { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 7px 9px; border-radius: 4px; background: rgba(120, 150, 180, 0.07); }
-.fut-fresh-name { display: flex; align-items: center; gap: 5px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fut-fresh-tile b { font-size: 16px; line-height: 1.2; color: var(--dot); white-space: nowrap; }
-.fut-fresh-tile.zero b { color: var(--dim); }
-.fut-fresh-ships { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; }
-.fut-fresh-ship { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; color: var(--ship); }
-.fut-fresh-ship.fut-neg { color: var(--neg); }
-@media (max-width: 640px) { .fut-fresh-res { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) {
   .fut-msg { grid-template-columns: auto minmax(0, 1fr) auto; row-gap: 4px; }
   .fut-msg-body { grid-column: 1 / -1; grid-row: 2; }
@@ -6707,128 +6673,6 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     return panel;
   }
 
-  // src/modules/messages/exp-recap.ts
-  var RECAP_ID = "fut-exprecap";
-  var FRESH_ID = "fut-expfresh";
-  var FRESH_MS = 1e4;
-  var isExpeditionTab = (doc) => !!doc.querySelector('[data-subtab-id="22"].active, [data-subtab-id="22"][aria-selected="true"]');
-  function mountExpeditionRecap(o) {
-    const { doc, t, locale } = o;
-    const holder = doc.querySelector("#messages .messagesHolder");
-    const sortRow = doc.querySelector("#messages #filteredHeadersRow");
-    const anchor = sortRow && sortRow.parentElement === holder?.parentElement ? sortRow : holder;
-    const old = doc.getElementById(RECAP_ID);
-    if (!holder || !anchor || !isExpeditionTab(doc)) {
-      old?.remove();
-      doc.getElementById(FRESH_ID)?.remove();
-      return;
-    }
-    const now = o.now?.() ?? Date.now();
-    const s = periodStats(entriesIn(o.store.get(JOURNAL_KEY, {}), periodRange("today", now)));
-    const ships = msu(s.shipsValue) - msu(s.lostValue);
-    const sig = JSON.stringify([s.count, s.discoveries, s.res, ships, s.artefacts, s.lfXp, s.netMsu]);
-    const placed = old && (old.nextElementSibling === anchor || old.nextElementSibling?.id === FRESH_ID);
-    if (old && placed && old.dataset.sig === sig) return;
-    const line = summaryLine(doc, "fut-recap", { locale, t, ships: o.store.get(SHIPS_INFO_KEY, {}) });
-    const box = line.box;
-    box.setAttribute("role", "button");
-    box.tabIndex = 0;
-    box.id = RECAP_ID;
-    box.dataset.sig = sig;
-    box.title = t("recap.open");
-    line.pill(t("recap.title"), "resource");
-    line.note(t("recap.count", { n: s.count.toLocaleString(locale) }), "muted");
-    line.res(s.res);
-    if (ships) line.note(`${t("recap.ships")} ${formatUnits(ships, locale)}`, ships < 0 ? "neg" : "", t("recap.shipsHint", { n: Math.round(ships).toLocaleString(locale) }));
-    if (s.artefacts) line.note(t("msg.artefacts", { n: s.artefacts.toLocaleString(locale) }), "art");
-    if (s.lfXp) line.note(t("msg.lfXp", { n: s.lfXp.toLocaleString(locale) }), "lf");
-    line.value(s.netMsu);
-    if (o.onOpen) {
-      const open = o.onOpen;
-      box.addEventListener("click", open);
-      box.addEventListener("keydown", (e) => {
-        if (e.key !== "Enter" && e.key !== " ") return;
-        e.preventDefault();
-        open();
-      });
-    }
-    if (old && placed) old.replaceWith(box);
-    else {
-      old?.remove();
-      anchor.before(box);
-    }
-  }
-  var shown = /* @__PURE__ */ new WeakMap();
-  function showFreshExpeditions(o, entries) {
-    const { doc, t, locale } = o;
-    const recap = doc.getElementById(RECAP_ID);
-    if (!recap) return;
-    const old = doc.getElementById(FRESH_ID);
-    const all2 = [...old ? shown.get(old) ?? [] : [], ...entries];
-    const s = periodStats(all2);
-    const fmt = (n) => formatUnits(n, locale);
-    const exact = (n) => Math.round(n).toLocaleString(locale);
-    const ships = o.store.get(SHIPS_INFO_KEY, {});
-    const el6 = (tag, cls = "", text) => {
-      const n = doc.createElement(tag);
-      if (cls) n.className = cls;
-      if (text !== void 0) n.textContent = text;
-      return n;
-    };
-    const panel = el6("section", "fut-fresh");
-    panel.id = FRESH_ID;
-    panel.setAttribute("aria-live", "polite");
-    panel.setAttribute("aria-label", t("fresh.title"));
-    shown.set(panel, all2);
-    const timer2 = el6("div", "fut-fresh-timer");
-    const bar = el6("i");
-    bar.style.animationDuration = `${FRESH_MS}ms`;
-    bar.addEventListener("animationend", () => panel.remove());
-    timer2.append(bar);
-    const head = el6("div", "fut-fresh-head");
-    head.append(el6("b", "", t("fresh.title")), el6("span", "fut-fresh-count", t("recap.count", { n: (s.count + s.discoveries).toLocaleString(locale) })));
-    for (const i of [0, 1, 2]) if (s.sizes[i]) head.append(el6("span", `fut-rar-chip fut-rar-${i}`, `${s.sizes[i]} ${t(`msg.size.${i}`).toLowerCase()}`));
-    const total = el6("span", `fut-fresh-total${s.netMsu < 0 ? " fut-neg" : ""}`);
-    total.append(el6("b", "", fmt(s.netMsu)), el6("small", "", "MSU"));
-    total.title = `${exact(s.netMsu)} MSU`;
-    const close = el6("button", "fut-fresh-close");
-    close.type = "button";
-    close.title = t("fresh.close");
-    close.setAttribute("aria-label", t("fresh.close"));
-    close.append(icon(doc, "close", 12));
-    close.addEventListener("click", () => panel.remove());
-    head.append(total, close);
-    panel.append(timer2, head);
-    const res = el6("div", "fut-fresh-res");
-    for (const [key, c] of [["metal", "m"], ["crystal", "c"], ["deuterium", "d"], ["darkMatter", "dm"]]) {
-      const v = s.res[key];
-      const tile2 = el6("div", `fut-fresh-tile fut-r-${c}${v ? "" : " zero"}`);
-      tile2.title = `${t(`msg.res.${key}`)}: ${exact(v)}`;
-      const name = el6("span", "fut-fresh-name", t(`msg.res.${key}`));
-      name.insertAdjacentHTML("afterbegin", resIconSvg(key, 13));
-      tile2.append(name, el6("b", "", v ? fmt(v) : "0"));
-      res.append(tile2);
-    }
-    panel.append(res);
-    const found = Object.entries(s.shipsFound);
-    const lost = Object.entries(s.lost);
-    if (found.length || lost.length) {
-      const list = el6("div", "fut-fresh-ships");
-      for (const [units, isLost] of [[found, false], [lost, true]]) {
-        for (const [id, n] of [...units].sort((a, b) => Number(a[0]) - Number(b[0]))) {
-          const name = shipName(Number(id), ships, t);
-          const tile2 = el6("span", `fut-fresh-ship${isLost ? " fut-neg" : ""}`, `${isLost ? "\u2212" : "+"}${n.toLocaleString(locale)}`);
-          tile2.prepend(shipIcon(doc, Number(id), name, "fut-msg-icon"));
-          tile2.title = name;
-          list.append(tile2);
-        }
-      }
-      panel.append(list);
-    }
-    if (old) old.replaceWith(panel);
-    else recap.after(panel);
-  }
-
   // src/modules/messages/index.ts
   var FOLD_KEY = "msg.fold";
   function h2(doc, tag, cls = "", text) {
@@ -7050,7 +6894,6 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     const spies = [];
     let journal = null;
     let added = 0;
-    const fresh = [];
     for (const msg of Array.from(doc.querySelectorAll(".msg[data-msg-id]"))) {
       if (msg.hasAttribute("data-fut-done") || msg.closest("#fut-journal")) continue;
       msg.setAttribute("data-fut-done", "");
@@ -7094,16 +6937,13 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         const r = recordCombat(journal, parsed.id, parsed.at, parsed.lost, parsed.coords);
         journal = r.journal;
         added += r.added;
-        if (r.added) fresh.push(journal[parsed.id]);
       }
     }
     if (expeditions.length) {
       journal ?? (journal = store.get(JOURNAL_KEY, {}));
-      const before = journal;
       const r = record2(journal, expeditions);
       journal = r.journal;
       added += r.added;
-      for (const e of expeditions) if (!before[e.id]) fresh.push(journal[e.id]);
     }
     if (spies.length) {
       const board = store.get(SPY_BOARD_KEY, {});
@@ -7114,9 +6954,6 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
       store.set(JOURNAL_KEY, trim(journal, o.now?.() ?? Date.now()));
       o.onJournal?.(added);
     }
-    const recap = { doc, store, t, locale, now: o.now, onOpen: o.onOpenJournal };
-    mountExpeditionRecap(recap);
-    if (fresh.length) showFreshExpeditions(recap, fresh);
     return added;
   }
   function watchMessages(o) {
@@ -9773,12 +9610,12 @@ table.queues td.acts { width: 1%; text-align: right; }
     head.append(seg);
     s.append(head);
     const bodies = of(unitScope);
-    const shown2 = ids.filter((id) => bodies.some((b) => level(b, id) > 0));
-    if (!shown2.length) {
+    const shown = ids.filter((id) => bodies.some((b) => level(b, id) > 0));
+    if (!shown.length) {
       s.append(h3("p", "hint", t("dash.unitsNone")));
       return;
     }
-    s.append(bodyMatrix(ctx, bodies, shown2, { units: true, foot: "sum", extra: [{ label: t("dash.valueMsu"), value: (b) => ctx.fmt(unitsValue2(b, shown2).value) }] }));
+    s.append(bodyMatrix(ctx, bodies, shown, { units: true, foot: "sum", extra: [{ label: t("dash.valueMsu"), value: (b) => ctx.fmt(unitsValue2(b, shown).value) }] }));
   }
   function bodyPicker(ctx, ids, current3, onPick) {
     const { doc, t } = ctx.o;
@@ -9979,15 +9816,15 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (!root) return null;
     const id = Number(root.getAttribute("data-technology-id") ?? root.querySelector("[data-technology-id]")?.getAttribute("data-technology-id"));
     if (!id) return null;
-    const shown2 = {};
+    const shown = {};
     const metal = costValue(root, "metal");
     const crystal = costValue(root, "crystal");
     const deuterium = costValue(root, "deuterium");
     const energy = costValue(root, "energy");
-    if (metal !== void 0) shown2.metal = metal;
-    if (crystal !== void 0) shown2.crystal = crystal;
-    if (deuterium !== void 0) shown2.deuterium = deuterium;
-    if (energy !== void 0) shown2.energy = energy;
+    if (metal !== void 0) shown.metal = metal;
+    if (crystal !== void 0) shown.crystal = crystal;
+    if (deuterium !== void 0) shown.deuterium = deuterium;
+    if (energy !== void 0) shown.energy = energy;
     const popEl = root.querySelector(".costs .population");
     const pop = costValue(root, "population");
     const population = popEl && pop !== void 0 ? { value: pop, enough: !popEl.classList.contains("insufficient") } : null;
@@ -9998,7 +9835,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       id,
       name: root.querySelector("h3")?.textContent?.trim() ?? String(id),
       panelLevel: num3(root.querySelector(".information .level")?.getAttribute("data-value")),
-      shown: shown2,
+      shown,
       population,
       durationMs,
       amountInput: root.querySelector("#build_amount")
@@ -12166,8 +12003,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       const label = li.querySelector("strong")?.textContent?.replace(/\s+/g, " ").trim() ?? "";
       const why = value?.getAttribute("data-tooltip-title") ?? value?.getAttribute("title") ?? "";
       const cls = Array.from(li.classList).find((c) => icons[c]) ?? "";
-      const shown2 = cls.includes("energy") ? `-${text}` : value ? text : text.replace(label, "").trim();
-      out.push(chip(doc, icons[cls] ?? "", shown2, [label, why].filter(Boolean).join(" "), cls.includes("energy") ? "fut-tp-energy" : cls ? "fut-tp-start" : ""));
+      const shown = cls.includes("energy") ? `-${text}` : value ? text : text.replace(label, "").trim();
+      out.push(chip(doc, icons[cls] ?? "", shown, [label, why].filter(Boolean).join(" "), cls.includes("energy") ? "fut-tp-energy" : cls ? "fut-tp-start" : ""));
     }
     return out;
   }
@@ -13627,7 +13464,6 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         t,
         // "Diario oggi" in the toolbar follows the reports as they are read.
         onJournal: () => draw(),
-        onOpenJournal: () => openJournal({ doc: document, store, now: Date.now(), locale, t }),
         spy: {
           bases: (snapshot?.bodies ?? []).map((b) => ({ id: b.id, name: b.name, coords: b.coords, moon: b.type === "moon" })),
           researches: snapshot?.researches ?? {},
