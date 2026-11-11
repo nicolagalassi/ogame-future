@@ -191,15 +191,17 @@ export interface FleetSettings {
   gateOn: boolean;
   /** Food stays home in every fleet, also with the game's own buttons (OGLight precedent). */
   ignoreFood: boolean;
-  /** Plain Trasporto / Schiera: the destination typed or picked on page 1, and the resources to bring. */
+  /** Plain Trasporto / Schiera: which one is on (it stays on until pressed again), null = neither. */
+  sendMode: 'transport' | 'deploy' | null;
+  /** The destination typed or picked on page 1, and the resources to bring. */
   sendTarget: SendTarget | null;
   sendPick: ResourcePick;
 }
 
-/** Destination of the plain Trasporto / Schiera: any coordinates, planet (1) or moon (3). */
+/** Destination of the plain Trasporto / Schiera: planet (1) or moon (3). Empty galaxy/system = the origin's. */
 export interface SendTarget {
-  galaxy: number;
-  system: number;
+  galaxy: number | null;
+  system: number | null;
   position: number;
   type: 1 | 3;
 }
@@ -226,6 +228,7 @@ export const DEFAULT_SETTINGS: FleetSettings = {
   resourcesOn: true,
   gateOn: true,
   ignoreFood: false,
+  sendMode: null,
   sendTarget: null,
   sendPick: { metal: null, crystal: null, deuterium: null },
 };
@@ -251,6 +254,21 @@ export function pickedLoad(onPlanet: Resources, pick: ResourcePick, fuel: number
   room -= crystal;
   const metal = Math.min(want('metal', onPlanet.metal), room);
   return { metal, crystal, deuterium };
+}
+
+/**
+ * Cargo ships of one kind for `amount`, after what the other ships already picked can carry.
+ * Never fewer than the player already put of that kind, never more than there are.
+ */
+export function cargoCount(amount: number, othersCapacity: number, capacity: number, available: number, already = 0): number {
+  if (capacity <= 0) return Math.min(available, already);
+  const need = Math.ceil(Math.max(0, amount - othersCapacity) / capacity);
+  return Math.min(available, Math.max(need, already));
+}
+
+/** The typed destination with empty galaxy/system filled from the origin (as the fleetsave does). */
+export function resolveSend(t: SendTarget, origin: { galaxy: number; system: number }): { galaxy: number; system: number; position: number; type: 1 | 3 } {
+  return { galaxy: t.galaxy ?? origin.galaxy, system: t.system ?? origin.system, position: t.position, type: t.type };
 }
 
 /** Coordinates typed as "1:234:5" (any separator), or null. */

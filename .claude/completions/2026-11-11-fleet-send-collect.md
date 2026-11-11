@@ -23,3 +23,11 @@ Versione 0.3.12.
 ## Da verificare in gioco
 - Riga destinazione/risorse alla larghezza reale della pagina flotta (prova in Chromium a 660px: una riga).
 - Trasporto semplice con navi già selezionate a mano.
+
+## Revisione (0.3.13, richiesta di Nicola)
+- T / D non preparano più nulla da soli: accendono (e spengono) la modalità, che apre il pannello
+  `sendPanel()` sotto i pulsanti. Coordinate in tre campi (incollare `1:234:5` li riempie tutti),
+  risorse con i simboli M/C/D, a destra CL / CP con il numero di cargo che servono (contato mentre si
+  scrive). CL / CP chiama `prepareSend(..., cargoShip)`: cargo di quel tipo per le risorse, dopo la
+  capacità delle navi scelte a mano (che restano); avvisa se i cargo non bastano (`missing`).
+- `FleetSettings.sendMode`; `SendTarget.galaxy/system` possono essere null; `cargoCount`, `resolveSend`.
