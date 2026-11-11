@@ -708,3 +708,37 @@ describe('expedition collection settings', () => {
     expect([fd.cargoMetal, fd.cargoCrystal, fd.cargoDeuterium]).toEqual([0, 0, 0]);
   });
 });
+
+describe('thousands in number fields', () => {
+  it('groups always, also under 10.000, and while typing', async () => {
+    const { groupInt, groupWhileTyping } = await import('../src/core/format');
+    expect(groupInt(5000, 'it')).toBe('5.000');
+    expect(groupInt(700000000, 'it')).toBe('700.000.000');
+    expect(groupInt(5000, 'en')).toBe('5,000');
+    document.body.innerHTML = '<input id="n">';
+    const input = document.getElementById('n') as HTMLInputElement;
+    groupWhileTyping(input, 'it');
+    input.value = '100000';
+    input.dispatchEvent(new Event('input'));
+    expect(input.value).toBe('100.000');
+    expect(parseAmount(input.value)).toBe(100000);
+    input.value = '2m';
+    input.dispatchEvent(new Event('input'));
+    expect(input.value).toBe('2m');
+    input.dispatchEvent(new Event('blur'));
+    expect(input.value).toBe('2.000.000');
+  });
+
+  it('the rules window shows stored amounts grouped', async () => {
+    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    const doc = fleetPage();
+    const store = new Store(new MemoryStore(), 'grp');
+    store.set('fleet.profiles', { '1': { reserve: reserve({ '203': 50000 }, { metal: 0, crystal: 0, deuterium: 700000000 }), save: null } });
+    renderFleetTools({ doc, store, bodyId: 1, bodies: [{ planetId: 1, moonId: null, name: 'Casa', coords: '5:185:8' }], t: (k: string) => k, locale: 'it', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch' });
+    (doc.querySelector('.fut-frules-open') as HTMLButtonElement).click();
+    const root = doc.getElementById('fut-fleet-modal')!.shadowRoot!;
+    const values = [...root.querySelectorAll<HTMLInputElement>('.fut-ffield input')].map((i) => i.value).filter(Boolean);
+    expect(values).toContain('50.000');
+    expect(values).toContain('700.000.000');
+  });
+});

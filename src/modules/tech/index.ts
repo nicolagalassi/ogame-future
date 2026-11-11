@@ -13,7 +13,7 @@
 import { rememberTechIcons } from '../../data/tech-icons';
 import { icon } from '../../core/icons';
 import type { Store } from '../../core/storage';
-import { formatUnits } from '../../core/format';
+import { formatUnits, groupInt, groupWhileTyping } from '../../core/format';
 import { levelsOf, readTechDetails, readTechList, type TechDetails } from '../../data/tech-details';
 import {
   isLevelled,
@@ -297,7 +297,8 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
     const amount = el(doc, 'input', 'fut-tp-amount');
     amount.type = 'text';
     amount.inputMode = 'numeric';
-    amount.value = String(Math.max(1, Math.floor(Number(details.amountInput?.value) || 1)));
+    amount.value = groupInt(Math.max(1, Math.floor(Number(details.amountInput?.value) || 1)), locale);
+    groupWhileTyping(amount, locale);
     amount.title = t('tech.amountHint');
     // Keys typed here are ours: the game must not catch them (shortcuts, Enter = build).
     for (const type of ['keydown', 'keyup', 'keypress']) amount.addEventListener(type, (e) => e.stopPropagation());
@@ -340,7 +341,7 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
     const input = details.amountInput;
     const follow = () =>
       setTimeout(() => {
-        amount.value = String(Math.max(1, Math.floor(Number(input?.value) || 1)));
+        amount.value = groupInt(Math.max(1, Math.floor(Number(input?.value) || 1)), locale);
         draw();
       }, 0);
     if (input) {

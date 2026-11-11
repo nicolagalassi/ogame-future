@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.30
+// @version      0.3.31
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -3770,6 +3770,44 @@
       }
     }
     return Math.round(value).toLocaleString(locale);
+  }
+  function groupInt(value, locale = "it") {
+    const n = Math.round(value);
+    try {
+      return new Intl.NumberFormat(locale, { useGrouping: "always", maximumFractionDigits: 0 }).format(n);
+    } catch {
+      return n.toLocaleString(locale);
+    }
+  }
+  function groupWhileTyping(input, locale = "it") {
+    if (input.dataset.futGroup) return;
+    input.dataset.futGroup = "1";
+    const digitsOnly = (s) => /^[\d.,'\s  ]*$/.test(s);
+    input.addEventListener("input", () => {
+      const raw = input.value;
+      if (!digitsOnly(raw)) return;
+      const digits = raw.replace(/\D/g, "");
+      if (!digits) return;
+      const caret = input.selectionStart ?? raw.length;
+      const before = raw.slice(0, caret).replace(/\D/g, "").length;
+      const out = groupInt(Number(digits), locale);
+      if (out === raw) return;
+      input.value = out;
+      let pos = 0;
+      for (let seen = 0; pos < out.length && seen < before; pos++) if (/\d/.test(out[pos])) seen++;
+      try {
+        input.setSelectionRange(pos, pos);
+      } catch {
+      }
+    });
+    input.addEventListener("blur", () => {
+      const raw = input.value.trim().toLowerCase().replace(/\s/g, "");
+      const m = raw.match(/^([\d.,]+)([kmg])$/);
+      if (!m) return;
+      const unit = m[2] === "k" ? 1e3 : m[2] === "m" ? 1e6 : 1e9;
+      const n = Math.floor(Number(m[1].replace(",", ".")) * unit);
+      if (Number.isFinite(n) && n > 0) input.value = groupInt(n, locale);
+    });
   }
 
   // src/data/galaxy.ts
@@ -10696,15 +10734,16 @@ input[type="checkbox"] { accent-color: var(--accent); }
     input.addEventListener("keyup", (e) => e.stopPropagation());
     input.addEventListener("keypress", (e) => e.stopPropagation());
   }
-  function numberField(doc, label, value, placeholder = "") {
+  function numberField(doc, label, value, placeholder = "", locale) {
     const wrap = el4(doc, "label", "fut-ffield");
     wrap.append(el4(doc, "span", "", label));
     const input = el4(doc, "input");
     input.type = "text";
     input.inputMode = "numeric";
     input.placeholder = placeholder;
-    input.value = value ? String(value) : "";
+    input.value = value ? locale && typeof value === "number" ? groupInt(value, locale) : String(value) : "";
     isolate(input);
+    if (locale) groupWhileTyping(input, locale);
     wrap.append(input);
     return [wrap, input];
   }
@@ -10751,7 +10790,7 @@ input[type="checkbox"] { accent-color: var(--accent); }
     const grid2 = el4(o.doc, "div", "fut-fgrid");
     const inputs = [];
     for (const slot of readShipSlots(o.doc)) {
-      const [wrap, input] = numberField(o.doc, slot.name, ships[slot.id] ?? null, "0");
+      const [wrap, input] = numberField(o.doc, slot.name, ships[slot.id] ?? null, "0", o.locale);
       grid2.append(wrap);
       inputs.push([slot.id, input]);
     }
@@ -10771,7 +10810,7 @@ input[type="checkbox"] { accent-color: var(--accent); }
   function resourceFields(o, res) {
     const grid2 = el4(o.doc, "div", "fut-fgrid");
     const inputs = ["metal", "crystal", "deuterium"].map((k) => {
-      const [wrap, input] = numberField(o.doc, o.t(`res.${k}`), res[k] || null, "0");
+      const [wrap, input] = numberField(o.doc, o.t(`res.${k}`), res[k] || null, "0", o.locale);
       grid2.append(wrap);
       return [k, input];
     });
@@ -11327,8 +11366,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       input.placeholder = "0";
       input.setAttribute("aria-label", t(`res.${k}`));
       const v = settings.sendPick[k];
-      input.value = v === null ? "" : v.toLocaleString(o.locale);
+      input.value = v === null ? "" : groupInt(v, o.locale);
       isolate(input);
+      groupWhileTyping(input, o.locale);
       wrap.append(sym, input);
       res.append(wrap);
       peek(input, t(`res.${k}`), t("fleet.send.resHint"));
@@ -11394,7 +11434,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         const fd = getDispatcher();
         if (!fd) return;
         const have = { metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet }[k];
-        input.value = Math.max(0, Math.floor(have || 0)).toLocaleString(o.locale);
+        input.value = groupInt(Math.max(0, Math.floor(have || 0)), o.locale);
         save({ sendPick: readPick() });
         recount();
       });
@@ -11829,7 +11869,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         field.inputMode = "numeric";
         field.placeholder = t("fleet.jumpgateStay");
         field.title = t("fleet.jumpgateKeep");
-        field.value = stored[id] ? String(stored[id]) : "";
+        field.value = stored[id] ? groupInt(stored[id], doc.documentElement.lang || "it") : "";
+        groupWhileTyping(field, doc.documentElement.lang || "it");
         field.setAttribute("aria-label", t("fleet.jumpgateKeep"));
         field.setAttribute("autocomplete", "off");
         for (const ev of ["keydown", "keyup", "keypress"]) field.addEventListener(ev, (e) => e.stopPropagation());
@@ -12232,7 +12273,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       const amount = el5(doc, "input", "fut-tp-amount");
       amount.type = "text";
       amount.inputMode = "numeric";
-      amount.value = String(Math.max(1, Math.floor(Number(details.amountInput?.value) || 1)));
+      amount.value = groupInt(Math.max(1, Math.floor(Number(details.amountInput?.value) || 1)), locale);
+      groupWhileTyping(amount, locale);
       amount.title = t("tech.amountHint");
       for (const type of ["keydown", "keyup", "keypress"]) amount.addEventListener(type, (e) => e.stopPropagation());
       const amountOf = () => Math.max(1, Math.floor(Number(amount.value.replace(/\D/g, "")) || 1));
@@ -12271,7 +12313,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       draw();
       const input = details.amountInput;
       const follow = () => setTimeout(() => {
-        amount.value = String(Math.max(1, Math.floor(Number(input?.value) || 1)));
+        amount.value = groupInt(Math.max(1, Math.floor(Number(input?.value) || 1)), locale);
         draw();
       }, 0);
       if (input) {
