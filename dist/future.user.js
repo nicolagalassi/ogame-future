@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.27
+// @version      0.3.28
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -6101,6 +6101,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .fut-msg.fut-msg-b { grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: stretch; column-gap: 8px; margin: 2px 0 4px; padding: 8px 12px 10px; background: none; }
 .fut-msg.fut-msg-b:hover { background: rgba(120, 150, 180, 0.05); }
 .fut-msg-b .fut-msg-pillcell:empty { display: none; }
+/* Fixed columns: a missing outcome tile or action must not shift the tiles under the value. */
+.fut-msg-b > .fut-msg-pillcell { grid-column: 1; } .fut-msg-b > .fut-msg-body { grid-column: 2; }
+.fut-msg-b > .fut-msg-val { grid-column: 3; } .fut-msg-b > .fut-msg-acts { grid-column: 4; }
 .fut-msg-b .fut-msg-body { align-items: stretch; gap: 6px; }
 /* The title already says delivery, return, recycling: no outcome word for those. */
 .fut-msg-b.fut-msg-transport .fut-msg-pillcell, .fut-msg-b.fut-msg-deploy .fut-msg-pillcell,
@@ -6114,15 +6117,20 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .fut-msg-b .fut-r.fut-neg, .fut-msg-b .fut-u.fut-neg { color: var(--neg); }
 .fut-msg-b .fut-r .fut-res-ico { width: 20px; height: 20px; }
 .fut-msg-b .fut-msg-icon { width: 24px; height: 24px; }
+/* Ships can be many (resources are three at most): smaller tiles, they wrap onto more lines. */
+.fut-msg-b .fut-u { min-width: 52px; padding: 5px 6px 4px; gap: 2px; font-size: 11px; }
+.fut-msg-b .fut-u .fut-msg-icon { width: 22px; height: 22px; }
 .fut-msg-b .fut-note { flex-direction: row; font-weight: 400; color: var(--txt); }
 .fut-msg-b .fut-pill { display: flex; align-items: center; gap: 10px; height: 100%; min-height: 34px; padding: 6px 12px; border: 0; border-radius: 4px;
   background: rgba(120, 150, 180, 0.09); color: color-mix(in srgb, var(--tone) 85%, #fff); font-size: 12px; }
 .fut-msg-b .fut-say { font-size: 11px; font-weight: 400; color: var(--mute); white-space: normal; }
 .fut-msg-b .fut-msg-val { flex-direction: column; align-items: flex-end; justify-content: center; gap: 0; min-width: 76px; padding-left: 10px; border-left: 1px solid rgba(120, 150, 180, 0.14); }
-.fut-msg-b .fut-msg-val:has(.fut-dash) { display: none; }
+/* Value column, top to bottom: depletion ticks, the amount, its unit. */
+.fut-msg-b .fut-msg-val .fut-depl { margin: 0 0 5px; padding: 0; }
+.fut-msg-b .fut-dash { display: none; }
+.fut-msg-b .fut-msg-val:not(:has(b)):not(:has(.fut-depl)) { display: none; }
 .fut-msg-b .fut-msg-val b { font-size: 15px; line-height: 18px; }
 .fut-msg-b .fut-msg-val small { font-size: 10px; }
-.fut-msg-b .fut-depl { align-self: center; margin-left: auto; }
 .msg.fut-msgrar .fut-msg-b .fut-r, .msg.fut-msgrar .fut-msg-b .fut-u { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rar) 55%, transparent); }
 .msg.fut-msgrar-0 .fut-msg-b .fut-msg-val b { font-size: 17px; }
 .fut-pill { --tone: #8A9BB0; display: inline-block; max-width: 100%; box-sizing: border-box; padding: 1px 8px; border-radius: 9px;
@@ -6924,14 +6932,14 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         a.title = title;
         acts.append(a);
       },
-      /** Depletion of the expedition spot, as three ticks. */
+      /** Depletion of the expedition spot, as three ticks, over the value (call it after `value`). */
       depletion(n) {
         const meter = h2(doc, "span", "fut-depl");
         meter.title = t("msg.depletion", { n });
         meter.setAttribute("role", "img");
         meter.setAttribute("aria-label", meter.title);
         for (let i = 1; i <= 3; i++) meter.append(h2(doc, "i", i <= n ? "on" : ""));
-        body.append(meter);
+        value.prepend(meter);
       }
     };
   }
@@ -6962,10 +6970,10 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         if (m.item && SELF_EVIDENT.has(m.result)) line.note(m.item, "item");
         if (m.lfXp) line.note(t("msg.lfXp", { n: m.lfXp.toLocaleString(locale) }), "lf");
         if (m.artefacts) line.note(t("msg.artefacts", { n: m.artefacts.toLocaleString(locale) }), "art");
-        if (m.depletion > 0) line.depletion(m.depletion);
         const worth = msu(m.res) + msu(unitsValue(m.ships)) - msu(unitsValue(m.lost));
         if (!worth && m.res.darkMatter) line.amount(m.res.darkMatter, t("msg.dmUnit"), "fut-dm", t("msg.res.darkMatter"));
         else line.value(worth);
+        if (m.depletion > 0) line.depletion(m.depletion);
         return line.box;
       }
       case "spy": {

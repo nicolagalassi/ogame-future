@@ -31,3 +31,8 @@
 
 ## 0.3.27 — proposta B ("Bottino") per tutta la posta
 - Tolta la C (riepilogo nell intestazione). Il riepilogo torna sotto `.msgHead` (o sotto la riga della vista a lista) con classe `fut-msg-b`: tessere per risorse, navi e note (simbolo sopra, numero sotto), valore a destra dopo una riga verticale, grande. Esiti non evidenti: tessera larga con la parola e una frase (`msg.say.*`; per gli oggetti il nome dell oggetto). Trasporti/rientri: percorso sopra, nessuna parola d esito. Raro/epico: bordo colorato sulle tessere e valore colorato. Chiuso: solo il testo del gioco è nascosto, pulsanti visibili.
+
+## 0.3.28
+- Bug: senza tessera d esito la griglia scalava di una colonna e le tessere finivano sotto il valore (molte navi). Colonne fisse (`grid-column` per pillcell/body/val/acts).
+- Colonna del valore: tacche di esaurimento in alto, numero, "MSU" sotto (`depletion()` ora va nel valore, chiamata dopo `value()`).
+- Navi: tessere più piccole (52px, immagine 22px), vanno a capo su più righe; le risorse restano a tessere grandi (al massimo tre).

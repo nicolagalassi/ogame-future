@@ -54,6 +54,9 @@ export const MESSAGES_CSS = `
 .fut-msg.fut-msg-b { grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: stretch; column-gap: 8px; margin: 2px 0 4px; padding: 8px 12px 10px; background: none; }
 .fut-msg.fut-msg-b:hover { background: rgba(120, 150, 180, 0.05); }
 .fut-msg-b .fut-msg-pillcell:empty { display: none; }
+/* Fixed columns: a missing outcome tile or action must not shift the tiles under the value. */
+.fut-msg-b > .fut-msg-pillcell { grid-column: 1; } .fut-msg-b > .fut-msg-body { grid-column: 2; }
+.fut-msg-b > .fut-msg-val { grid-column: 3; } .fut-msg-b > .fut-msg-acts { grid-column: 4; }
 .fut-msg-b .fut-msg-body { align-items: stretch; gap: 6px; }
 /* The title already says delivery, return, recycling: no outcome word for those. */
 .fut-msg-b.fut-msg-transport .fut-msg-pillcell, .fut-msg-b.fut-msg-deploy .fut-msg-pillcell,
@@ -67,15 +70,20 @@ export const MESSAGES_CSS = `
 .fut-msg-b .fut-r.fut-neg, .fut-msg-b .fut-u.fut-neg { color: var(--neg); }
 .fut-msg-b .fut-r .fut-res-ico { width: 20px; height: 20px; }
 .fut-msg-b .fut-msg-icon { width: 24px; height: 24px; }
+/* Ships can be many (resources are three at most): smaller tiles, they wrap onto more lines. */
+.fut-msg-b .fut-u { min-width: 52px; padding: 5px 6px 4px; gap: 2px; font-size: 11px; }
+.fut-msg-b .fut-u .fut-msg-icon { width: 22px; height: 22px; }
 .fut-msg-b .fut-note { flex-direction: row; font-weight: 400; color: var(--txt); }
 .fut-msg-b .fut-pill { display: flex; align-items: center; gap: 10px; height: 100%; min-height: 34px; padding: 6px 12px; border: 0; border-radius: 4px;
   background: rgba(120, 150, 180, 0.09); color: color-mix(in srgb, var(--tone) 85%, #fff); font-size: 12px; }
 .fut-msg-b .fut-say { font-size: 11px; font-weight: 400; color: var(--mute); white-space: normal; }
 .fut-msg-b .fut-msg-val { flex-direction: column; align-items: flex-end; justify-content: center; gap: 0; min-width: 76px; padding-left: 10px; border-left: 1px solid rgba(120, 150, 180, 0.14); }
-.fut-msg-b .fut-msg-val:has(.fut-dash) { display: none; }
+/* Value column, top to bottom: depletion ticks, the amount, its unit. */
+.fut-msg-b .fut-msg-val .fut-depl { margin: 0 0 5px; padding: 0; }
+.fut-msg-b .fut-dash { display: none; }
+.fut-msg-b .fut-msg-val:not(:has(b)):not(:has(.fut-depl)) { display: none; }
 .fut-msg-b .fut-msg-val b { font-size: 15px; line-height: 18px; }
 .fut-msg-b .fut-msg-val small { font-size: 10px; }
-.fut-msg-b .fut-depl { align-self: center; margin-left: auto; }
 .msg.fut-msgrar .fut-msg-b .fut-r, .msg.fut-msgrar .fut-msg-b .fut-u { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rar) 55%, transparent); }
 .msg.fut-msgrar-0 .fut-msg-b .fut-msg-val b { font-size: 17px; }
 .fut-pill { --tone: #8A9BB0; display: inline-block; max-width: 100%; box-sizing: border-box; padding: 1px 8px; border-radius: 9px;
