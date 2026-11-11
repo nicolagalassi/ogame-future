@@ -84,7 +84,7 @@ export const FLEET_CSS = `
 }
 .fut-fsend .lbl { grid-column: 1; color: var(--mute); }
 .fut-fdest { grid-column: 2; grid-row: 1; display: inline-flex; align-items: center; gap: 3px; }
-.fut-fres { grid-column: 2; grid-row: 2; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.fut-fres { grid-column: 2; grid-row: 2; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
 .fut-fdest .colon { color: var(--dim); }
 .fut-fdest .fut-fpick { margin: 0 4px 0 2px; }
 .fut-fin { box-sizing: border-box; height: 26px; padding: 0 6px; border: 1px solid var(--line); border-radius: 5px; background: var(--field); color: var(--hi); font: 11px/1 Verdana, Arial, sans-serif; font-variant-numeric: tabular-nums; }
@@ -93,7 +93,7 @@ export const FLEET_CSS = `
 .fut-fin.bad { border-color: var(--neg); }
 .fut-fin.g, .fut-fin.p { width: 34px; text-align: center; }
 .fut-fin.s { width: 46px; text-align: center; }
-.fut-fin.amount { width: 86px; text-align: right; }
+.fut-fin.amount { width: 74px; text-align: right; }
 .fut-fpick { width: 24px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--mute); }
 .fut-fpick:hover { border-color: #47607D; color: var(--hi); }
 .fut-fseg { display: inline-flex; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
@@ -101,8 +101,9 @@ export const FLEET_CSS = `
 .fut-fseg button + button { border-left: 1px solid var(--line); }
 .fut-fseg button:hover { color: var(--txt); }
 .fut-fseg button[aria-pressed="true"] { background: var(--tile-hi); color: var(--hi); }
-.fut-fresin { display: inline-flex; align-items: center; gap: 4px; }
-.fut-fresin .sym { display: inline-flex; }
+.fut-fresin { display: inline-flex; align-items: center; gap: 2px; }
+.fut-fresin .sym { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 26px; padding: 0; border: 1px solid transparent; border-radius: 5px; background: none; }
+.fut-fresin .sym:hover { border-color: var(--line); background: var(--tile); }
 .fut-fresin.metal .sym { color: #B8C2CC; }
 .fut-fresin.crystal .sym { color: #7FB8FF; }
 .fut-fresin.deuterium .sym { color: #4FE0B0; }

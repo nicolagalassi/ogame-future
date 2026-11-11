@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.13
+// @version      0.3.14
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -895,13 +895,11 @@
     "fleet.send.destHint": "galassia, sistema, posizione (vuoti = quelli di questo corpo); si pu\xF2 incollare 1:234:5",
     "fleet.send.pick": "I tuoi pianeti e lune",
     "fleet.send.pickHint": "scrive le coordinate e il tipo del corpo scelto",
-    "fleet.send.allHint": "svuota i campi: tutte le risorse",
-    "fleet.send.resHint": "vuoto = tutto, 0 = niente, si pu\xF2 scrivere 2m o 500k",
+    "fleet.send.resHint": "vuoto = niente, si pu\xF2 scrivere 2m o 500k; clic sul simbolo = tutto",
     "fleet.err.noTarget": "Scrivi la destinazione (galassia:sistema:posizione) o sceglila tra i tuoi corpi",
     "fleet.err.sameBody": "La destinazione \xE8 il corpo da cui parte la flotta",
     "fleet.err.nothingPicked": "Nessuna risorsa da trasportare con le quantit\xE0 scelte",
     "fleet.send.res": "Risorse",
-    "fleet.send.allBtn": "Tutto",
     "fleet.send.small": "CL",
     "fleet.send.large": "CP",
     "fleet.send.cargoWith": "Prepara con",
@@ -910,7 +908,10 @@
     "fleet.send.onDeploy": "Schiera: scegli le navi, destinazione e risorse, poi CL o CP",
     "fleet.ok.cargoShort": "{ships} navi, {cargo} risorse caricate: mancano {missing} cargo per il resto",
     "fleet.err.noCargoShip": "Nessun cargo di questo tipo su questo corpo",
-    "fleet.send.all": "tutto"
+    "fleet.send.max": "tutto",
+    "fleet.send.maxHint": "clic: tutto quello che c'\xE8 qui",
+    "fleet.send.clearBtn": "Svuota",
+    "fleet.send.clearHint": "svuota i campi delle risorse"
   };
 
   // src/i18n/en.json
@@ -1622,13 +1623,11 @@
     "fleet.send.destHint": "galaxy, system, position (empty = this body's); 1:234:5 can be pasted",
     "fleet.send.pick": "Your planets and moons",
     "fleet.send.pickHint": "writes the coordinates and type of the chosen body",
-    "fleet.send.allHint": "clear the fields: all resources",
-    "fleet.send.resHint": "empty = all, 0 = none, 2m or 500k work",
+    "fleet.send.resHint": "empty = none, 2m or 500k work; click the symbol = all",
     "fleet.err.noTarget": "Type the destination (galaxy:system:position) or pick one of your bodies",
     "fleet.err.sameBody": "The destination is the body the fleet leaves from",
     "fleet.err.nothingPicked": "No resources to transport with the chosen amounts",
     "fleet.send.res": "Resources",
-    "fleet.send.allBtn": "All",
     "fleet.send.small": "SC",
     "fleet.send.large": "LC",
     "fleet.send.cargoWith": "Prepare with",
@@ -1637,7 +1636,10 @@
     "fleet.send.onDeploy": "Deploy: pick the ships, destination and resources, then SC or LC",
     "fleet.ok.cargoShort": "{ships} ships, {cargo} resources loaded: {missing} more cargo ships needed for the rest",
     "fleet.err.noCargoShip": "No cargo ship of this kind on this body",
-    "fleet.send.all": "all"
+    "fleet.send.max": "all",
+    "fleet.send.maxHint": "click: all there is here",
+    "fleet.send.clearBtn": "Clear",
+    "fleet.send.clearHint": "clear the resource fields"
   };
 
   // src/i18n/fr.json
@@ -2349,13 +2351,11 @@
     "fleet.send.destHint": "galaxie, syst\xE8me, position (vides = ceux de ce corps) ; on peut coller 1:234:5",
     "fleet.send.pick": "Vos plan\xE8tes et lunes",
     "fleet.send.pickHint": "\xE9crit les coordonn\xE9es et le type du corps choisi",
-    "fleet.send.allHint": "vider les champs : toutes les ressources",
-    "fleet.send.resHint": "vide = tout, 0 = rien, 2m ou 500k accept\xE9s",
+    "fleet.send.resHint": "vide = rien, 2m ou 500k accept\xE9s ; clic sur le symbole = tout",
     "fleet.err.noTarget": "Saisissez la destination (galaxie:syst\xE8me:position) ou choisissez un de vos corps",
     "fleet.err.sameBody": "La destination est le corps de d\xE9part de la flotte",
     "fleet.err.nothingPicked": "Aucune ressource \xE0 transporter avec les quantit\xE9s choisies",
     "fleet.send.res": "Ressources",
-    "fleet.send.allBtn": "Tout",
     "fleet.send.small": "PT",
     "fleet.send.large": "GT",
     "fleet.send.cargoWith": "Pr\xE9parer avec",
@@ -2364,7 +2364,10 @@
     "fleet.send.onDeploy": "Stationner : choisissez les vaisseaux, destination et ressources, puis PT ou GT",
     "fleet.ok.cargoShort": "{ships} vaisseaux, {cargo} ressources charg\xE9es : il manque {missing} transporteurs pour le reste",
     "fleet.err.noCargoShip": "Aucun transporteur de ce type sur ce corps",
-    "fleet.send.all": "tout"
+    "fleet.send.max": "tout",
+    "fleet.send.maxHint": "clic : tout ce qu'il y a ici",
+    "fleet.send.clearBtn": "Vider",
+    "fleet.send.clearHint": "vider les champs des ressources"
   };
 
   // src/i18n/de.json
@@ -3076,13 +3079,11 @@
     "fleet.send.destHint": "Galaxie, System, Position (leer = die dieses K\xF6rpers); 1:234:5 kann eingef\xFCgt werden",
     "fleet.send.pick": "Deine Planeten und Monde",
     "fleet.send.pickHint": "tr\xE4gt Koordinaten und Typ des gew\xE4hlten K\xF6rpers ein",
-    "fleet.send.allHint": "Felder leeren: alle Rohstoffe",
-    "fleet.send.resHint": "leer = alles, 0 = nichts, 2m oder 500k gehen",
+    "fleet.send.resHint": "leer = nichts, 2m oder 500k gehen; Klick aufs Symbol = alles",
     "fleet.err.noTarget": "Ziel eingeben (Galaxie:System:Position) oder einen eigenen K\xF6rper w\xE4hlen",
     "fleet.err.sameBody": "Das Ziel ist der Startk\xF6rper der Flotte",
     "fleet.err.nothingPicked": "Mit den gew\xE4hlten Mengen gibt es nichts zu transportieren",
     "fleet.send.res": "Rohstoffe",
-    "fleet.send.allBtn": "Alles",
     "fleet.send.small": "KT",
     "fleet.send.large": "GT",
     "fleet.send.cargoWith": "Vorbereiten mit",
@@ -3091,7 +3092,10 @@
     "fleet.send.onDeploy": "Stationieren: Schiffe, Ziel und Rohstoffe w\xE4hlen, dann KT oder GT",
     "fleet.ok.cargoShort": "{ships} Schiffe, {cargo} Rohstoffe geladen: es fehlen {missing} Frachter f\xFCr den Rest",
     "fleet.err.noCargoShip": "Keine Frachter dieser Art auf diesem K\xF6rper",
-    "fleet.send.all": "alles"
+    "fleet.send.max": "alles",
+    "fleet.send.maxHint": "Klick: alles, was hier ist",
+    "fleet.send.clearBtn": "Leeren",
+    "fleet.send.clearHint": "Rohstofffelder leeren"
   };
 
   // src/core/i18n.ts
@@ -7174,7 +7178,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     return { ...DEFAULT_SETTINGS, ...legacy, ...rest };
   }
   function pickedLoad(onPlanet2, pick, fuel, capacity) {
-    const want = (k, have) => Math.max(0, Math.floor(Math.min(have, pick[k] ?? have)));
+    const want = (k, have) => Math.max(0, Math.floor(Math.min(have, pick[k] ?? 0)));
     let room = Math.max(0, Math.floor(capacity));
     const deuterium = Math.min(want("deuterium", onPlanet2.deuterium - fuel), room);
     room -= deuterium;
@@ -10376,7 +10380,7 @@ table.queues td.acts { width: 1%; text-align: right; }
 }
 .fut-fsend .lbl { grid-column: 1; color: var(--mute); }
 .fut-fdest { grid-column: 2; grid-row: 1; display: inline-flex; align-items: center; gap: 3px; }
-.fut-fres { grid-column: 2; grid-row: 2; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.fut-fres { grid-column: 2; grid-row: 2; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
 .fut-fdest .colon { color: var(--dim); }
 .fut-fdest .fut-fpick { margin: 0 4px 0 2px; }
 .fut-fin { box-sizing: border-box; height: 26px; padding: 0 6px; border: 1px solid var(--line); border-radius: 5px; background: var(--field); color: var(--hi); font: 11px/1 Verdana, Arial, sans-serif; font-variant-numeric: tabular-nums; }
@@ -10385,7 +10389,7 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fin.bad { border-color: var(--neg); }
 .fut-fin.g, .fut-fin.p { width: 34px; text-align: center; }
 .fut-fin.s { width: 46px; text-align: center; }
-.fut-fin.amount { width: 86px; text-align: right; }
+.fut-fin.amount { width: 74px; text-align: right; }
 .fut-fpick { width: 24px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--mute); }
 .fut-fpick:hover { border-color: #47607D; color: var(--hi); }
 .fut-fseg { display: inline-flex; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
@@ -10393,8 +10397,9 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fseg button + button { border-left: 1px solid var(--line); }
 .fut-fseg button:hover { color: var(--txt); }
 .fut-fseg button[aria-pressed="true"] { background: var(--tile-hi); color: var(--hi); }
-.fut-fresin { display: inline-flex; align-items: center; gap: 4px; }
-.fut-fresin .sym { display: inline-flex; }
+.fut-fresin { display: inline-flex; align-items: center; gap: 2px; }
+.fut-fresin .sym { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 26px; padding: 0; border: 1px solid transparent; border-radius: 5px; background: none; }
+.fut-fresin .sym:hover { border-color: var(--line); background: var(--tile); }
 .fut-fresin.metal .sym { color: #B8C2CC; }
 .fut-fresin.crystal .sym { color: #7FB8FF; }
 .fut-fresin.deuterium .sym { color: #4FE0B0; }
@@ -11190,13 +11195,16 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     for (const input of [gIn, sIn, pIn]) peek(input, t("fleet.send.dest"), t("fleet.send.destHint"));
     const res = el4(doc, "span", "fut-fres");
     const inputs = ["metal", "crystal", "deuterium"].map((k) => {
-      const wrap = el4(doc, "label", `fut-fresin ${k}`);
-      const sym = el4(doc, "span", "sym");
+      const wrap = el4(doc, "span", `fut-fresin ${k}`);
+      const sym = el4(doc, "button", "sym");
+      sym.type = "button";
       sym.innerHTML = iconSvg(k, 18);
+      sym.setAttribute("aria-label", `${t(`res.${k}`)}: ${t("fleet.send.max")}`);
+      peek(sym, t(`res.${k}`), t("fleet.send.maxHint"));
       const input = el4(doc, "input", "fut-fin amount");
       input.type = "text";
       input.inputMode = "numeric";
-      input.placeholder = t("fleet.send.all");
+      input.placeholder = "0";
       input.setAttribute("aria-label", t(`res.${k}`));
       const v = settings.sendPick[k];
       input.value = v === null ? "" : v.toLocaleString(o.locale);
@@ -11213,8 +11221,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     };
     const clear = el4(doc, "button", "fut-fclear");
     clear.type = "button";
-    clear.textContent = t("fleet.send.allBtn");
-    peek(clear, t("fleet.send.allBtn"), t("fleet.send.allHint"));
+    clear.textContent = t("fleet.send.clearBtn");
+    peek(clear, t("fleet.send.clearBtn"), t("fleet.send.clearHint"));
     res.append(clear);
     const cargoBox = el4(doc, "span", "fut-fcargo");
     const counts = /* @__PURE__ */ new Map();
@@ -11250,11 +11258,21 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         n.parentElement?.classList.toggle("none", !have);
       }
     };
-    for (const [, input] of inputs)
+    for (const [k, input] of inputs) {
       input.addEventListener("input", () => {
         save({ sendPick: readPick() });
         recount();
       });
+      input.parentElement?.querySelector(".sym")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        const fd = getDispatcher();
+        if (!fd) return;
+        const have = { metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet }[k];
+        input.value = Math.max(0, Math.floor(have || 0)).toLocaleString(o.locale);
+        save({ sendPick: readPick() });
+        recount();
+      });
+    }
     clear.addEventListener("click", (e) => {
       e.preventDefault();
       for (const [, input] of inputs) input.value = "";
@@ -11267,6 +11285,20 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     panel.append(label(t("fleet.send.dest")), dest, label(t("fleet.send.res")), res, cargoBox);
     return panel;
   }
+  function readMissionLink(href) {
+    let p;
+    try {
+      p = new URL(href).searchParams;
+    } catch {
+      return null;
+    }
+    if (p.get("futmode")) return null;
+    const mission = Number(p.get("mission"));
+    const mode = mission === 3 ? "transport" : mission === 4 ? "deploy" : null;
+    const [g, sys, pos] = ["galaxy", "system", "position"].map((k) => Number(p.get(k)));
+    if (!mode || !(g > 0) || !(sys > 0) || !(pos >= 1 && pos <= 17)) return null;
+    return { mode, target: { galaxy: g, system: sys, position: pos, type: p.get("type") === "3" ? 3 : 1 } };
+  }
   function renderFleetTools(o) {
     const { doc, t } = o;
     if (!doc.getElementById(STYLE_ID3)) {
@@ -11278,6 +11310,13 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     doc.querySelectorAll(".fut-fbar").forEach((n) => n.remove());
     const href = o.href ?? doc.location?.href ?? "";
     const navigate = o.navigate ?? ((url) => doc.location.assign(url));
+    const link = readMissionLink(href);
+    let focusRes = false;
+    if (link && !doc.documentElement.dataset.futMissionLink) {
+      doc.documentElement.dataset.futMissionLink = "1";
+      o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), sendMode: link.mode, sendTarget: link.target });
+      focusRes = true;
+    }
     const settings = loadSettings(o.store);
     const stored = profileFor(loadProfiles(o.store), o.bodyId);
     const profile = activeProfile(stored, settings);
@@ -11484,6 +11523,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       bottom.append(rules, out.box);
       bar.append(top);
       if (settings.sendMode) bar.append(sendPanel(o, out.peek, sendWith));
+      if (focusRes) doc.querySelector(".fut-fsend .fut-fresin.metal input")?.focus();
       bar.append(bottom);
       anchor1.before(bar);
       addInvertButtons(o);

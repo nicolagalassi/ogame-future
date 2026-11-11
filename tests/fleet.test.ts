@@ -529,14 +529,15 @@ describe('plain Trasporto / Schiera', () => {
     expect(parseCoords('4 12 6')).toEqual([4, 12, 6]);
     expect(parseCoords('4:12')).toBeNull();
     const here = { metal: 100, crystal: 50, deuterium: 30 };
-    expect(pickedLoad(here, { metal: null, crystal: null, deuterium: null }, 10, 1_000)).toEqual({ metal: 100, crystal: 50, deuterium: 20 });
-    expect(pickedLoad(here, { metal: 40, crystal: 0, deuterium: null }, 10, 1_000)).toEqual({ metal: 40, crystal: 0, deuterium: 20 });
-    expect(pickedLoad(here, { metal: null, crystal: null, deuterium: null }, 10, 60)).toEqual({ metal: 0, crystal: 40, deuterium: 20 });
+    // Empty = none; a number is capped by what is here (deuterium keeps the fuel) and by the room.
+    expect(pickedLoad(here, { metal: null, crystal: null, deuterium: null }, 10, 1_000)).toEqual({ metal: 0, crystal: 0, deuterium: 0 });
+    expect(pickedLoad(here, { metal: 40, crystal: null, deuterium: 99 }, 10, 1_000)).toEqual({ metal: 40, crystal: 0, deuterium: 20 });
+    expect(pickedLoad(here, { metal: 100, crystal: 50, deuterium: 30 }, 10, 60)).toEqual({ metal: 0, crystal: 40, deuterium: 20 });
   });
 
   it('transport: as many CP or CL as the picked resources need, no reserve', () => {
     const target = { galaxy: 1, system: 2, position: 3, type: 1 };
-    const pick = { metal: 100_000, crystal: null, deuterium: 0 };
+    const pick = { metal: 100_000, crystal: 50_000, deuterium: null };
     const fd = fakeDispatcher();
     const r = prepareSend(fd, fleetPage(), DEFAULT_SETTINGS, target, pick, 'transport', 203);
     expect(fd.selected).toEqual({ 203: 75 });
@@ -546,7 +547,7 @@ describe('plain Trasporto / Schiera', () => {
     // Not enough small cargo: all 50, and how many are missing.
     const small = fakeDispatcher();
     expect(prepareSend(small, fleetPage(), DEFAULT_SETTINGS, target, pick, 'transport', 202)).toMatchObject({ ok: true, ships: 50, cargo: 25_000, missing: 250 });
-    const none = prepareSend(fakeDispatcher(), fleetPage(), DEFAULT_SETTINGS, target, { metal: 0, crystal: 0, deuterium: 0 }, 'transport', 203);
+    const none = prepareSend(fakeDispatcher(), fleetPage(), DEFAULT_SETTINGS, target, { metal: null, crystal: null, deuterium: null }, 'transport', 203);
     expect(none).toMatchObject({ ok: false, reason: 'fleet.err.nothingPicked' });
     expect(cargoCount(10_000, 3_000, 2_000, 100)).toBe(4);
     expect(cargoCount(10_000, 0, 2_000, 3)).toBe(3);
@@ -565,7 +566,7 @@ describe('plain Trasporto / Schiera', () => {
   });
 
   it('T stays on and opens its panel; destination in three fields, resources kept', async () => {
-    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    const { renderFleetTools, readMissionLink } = await import('../src/modules/fleet/index');
     const doc = fleetPage();
     const store = new Store(new MemoryStore(), 'send');
     const bodies = [
@@ -607,7 +608,38 @@ describe('plain Trasporto / Schiera', () => {
     expect(saved().sendTarget).toEqual({ galaxy: 5, system: 186, position: 8, type: 3 });
     // Collection: one secondary tile opening its two sends.
     doc.querySelector<HTMLButtonElement>('.fut-fsecond .fut-fact.more')!.click();
+    expect(readMissionLink('https://x/game/index.php?page=ingame&component=fleetdispatch&galaxy=4&system=234&position=9&type=3&mission=3')).toEqual({
+      mode: 'transport',
+      target: { galaxy: 4, system: 234, position: 9, type: 3 },
+    });
+    expect(readMissionLink('https://x/game/index.php?page=ingame&component=fleetdispatch&galaxy=4&system=234&position=9&mission=1')).toBeNull();
     const menu = doc.querySelector('.fut-fcollect')!;
     expect([...menu.querySelectorAll('.fut-fmain b')].map((b) => b.textContent)).toEqual(['fleet.collect.transport', 'fleet.collect.deploy']);
+  });
+});
+
+describe('fleet page opened from the galaxy', () => {
+  it('turns on Trasporto with the target; the symbol fills all of a resource, Svuota clears', async () => {
+    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    const doc = fleetPage();
+    delete doc.documentElement.dataset.futMissionLink;
+    const store = new Store(new MemoryStore(), 'gal');
+    (window as unknown as { fleetDispatcher: unknown }).fleetDispatcher = fakeDispatcher();
+    const href = 'https://x/game/index.php?page=ingame&component=fleetdispatch&galaxy=4&system=234&position=9&type=3&mission=3';
+    const bodies = [{ planetId: 1, moonId: null, name: 'Casa', coords: '5:185:8' }];
+    renderFleetTools({ doc, store, bodyId: 1, bodies, t: (k: string) => k, locale: 'en', href });
+    const field = (c: string) => doc.querySelector<HTMLInputElement>(`.fut-fsend .fut-fin.${c}`)!.value;
+    expect([field('g'), field('s'), field('p')]).toEqual(['4', '234', '9']);
+    expect(doc.querySelector('.fut-fact[aria-label="fleet.btn.transport"]')!.getAttribute('aria-pressed')).toBe('true');
+    doc.querySelector<HTMLButtonElement>('.fut-fresin.crystal .sym')!.click();
+    expect(doc.querySelector<HTMLInputElement>('.fut-fresin.crystal input')!.value).toBe('50,000');
+    expect(store.get<typeof DEFAULT_SETTINGS>('fleet.settings', DEFAULT_SETTINGS).sendPick).toEqual({ metal: null, crystal: 50_000, deuterium: null });
+    doc.querySelector<HTMLButtonElement>('.fut-fclear')!.click();
+    expect(store.get<typeof DEFAULT_SETTINGS>('fleet.settings', DEFAULT_SETTINGS).sendPick).toEqual({ metal: null, crystal: null, deuterium: null });
+    // A redraw (e.g. after a switch) does not apply the link again over the player's edits.
+    store.set('fleet.settings', { ...store.get('fleet.settings', {}), sendTarget: { galaxy: 1, system: 1, position: 1, type: 1 } });
+    renderFleetTools({ doc, store, bodyId: 1, bodies, t: (k: string) => k, locale: 'en', href });
+    expect(field('p')).toBe('1');
+    delete (window as unknown as { fleetDispatcher?: unknown }).fleetDispatcher;
   });
 });

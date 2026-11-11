@@ -920,13 +920,17 @@ function sendPanel(
   // Resources: each with its symbol; empty = all, a number = at most that much (k / m / g understood).
   const res = el(doc, 'span', 'fut-fres');
   const inputs = (['metal', 'crystal', 'deuterium'] as const).map((k) => {
-    const wrap = el(doc, 'label', `fut-fresin ${k}`);
-    const sym = el(doc, 'span', 'sym');
+    const wrap = el(doc, 'span', `fut-fresin ${k}`);
+    // The symbol is a button: it fills the field with all of that resource here.
+    const sym = el(doc, 'button', 'sym');
+    sym.type = 'button';
     sym.innerHTML = iconSvg(k, 18);
+    sym.setAttribute('aria-label', `${t(`res.${k}`)}: ${t('fleet.send.max')}`);
+    peek(sym, t(`res.${k}`), t('fleet.send.maxHint'));
     const input = el(doc, 'input', 'fut-fin amount');
     input.type = 'text';
     input.inputMode = 'numeric';
-    input.placeholder = t('fleet.send.all');
+    input.placeholder = '0';
     input.setAttribute('aria-label', t(`res.${k}`));
     const v = settings.sendPick[k];
     input.value = v === null ? '' : v.toLocaleString(o.locale);
@@ -943,8 +947,8 @@ function sendPanel(
   };
   const clear = el(doc, 'button', 'fut-fclear');
   clear.type = 'button';
-  clear.textContent = t('fleet.send.allBtn');
-  peek(clear, t('fleet.send.allBtn'), t('fleet.send.allHint'));
+  clear.textContent = t('fleet.send.clearBtn');
+  peek(clear, t('fleet.send.clearBtn'), t('fleet.send.clearHint'));
   res.append(clear);
 
   // CL / CP: how many of each the resources need, recounted while typing (fuel is added when preparing).
@@ -982,11 +986,22 @@ function sendPanel(
       n.parentElement?.classList.toggle('none', !have);
     }
   };
-  for (const [, input] of inputs)
+  for (const [k, input] of inputs) {
     input.addEventListener('input', () => {
       save({ sendPick: readPick() });
       recount();
     });
+    input.parentElement?.querySelector('.sym')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      const fd = getDispatcher();
+      if (!fd) return;
+      const have = { metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet }[k];
+      // All of it: the flight's fuel is kept back when loading.
+      input.value = Math.max(0, Math.floor(have || 0)).toLocaleString(o.locale);
+      save({ sendPick: readPick() });
+      recount();
+    });
+  }
   clear.addEventListener('click', (e) => {
     e.preventDefault();
     for (const [, input] of inputs) input.value = '';
@@ -1001,6 +1016,25 @@ function sendPanel(
   return panel;
 }
 
+/**
+ * The game's own Trasporto / Schiera links (galaxy view, planet menu) open the fleet page with the
+ * target in the URL: mission 3 or 4, galaxy, system, position, type. Read once per page.
+ */
+export function readMissionLink(href: string): { mode: 'transport' | 'deploy'; target: SendTarget } | null {
+  let p: URLSearchParams;
+  try {
+    p = new URL(href).searchParams;
+  } catch {
+    return null;
+  }
+  if (p.get('futmode')) return null;
+  const mission = Number(p.get('mission'));
+  const mode = mission === 3 ? 'transport' : mission === 4 ? 'deploy' : null;
+  const [g, sys, pos] = ['galaxy', 'system', 'position'].map((k) => Number(p.get(k)));
+  if (!mode || !(g! > 0) || !(sys! > 0) || !(pos! >= 1 && pos! <= 17)) return null;
+  return { mode, target: { galaxy: g!, system: sys!, position: pos!, type: p.get('type') === '3' ? 3 : 1 } };
+}
+
 export function renderFleetTools(o: FleetOptions): void {
   const { doc, t } = o;
   if (!doc.getElementById(STYLE_ID)) {
@@ -1012,6 +1046,15 @@ export function renderFleetTools(o: FleetOptions): void {
   doc.querySelectorAll('.fut-fbar').forEach((n) => n.remove());
   const href = o.href ?? doc.location?.href ?? '';
   const navigate = o.navigate ?? ((url: string) => doc.location.assign(url));
+  // Opened from the galaxy's Trasporto / Schiera: that mode on, its target typed, the panel open.
+  // Only fills our fields (no request, nothing selected); once per page so a redraw keeps the player's edits.
+  const link = readMissionLink(href);
+  let focusRes = false;
+  if (link && !doc.documentElement.dataset.futMissionLink) {
+    doc.documentElement.dataset.futMissionLink = '1';
+    o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), sendMode: link.mode, sendTarget: link.target });
+    focusRes = true;
+  }
   const settings = loadSettings(o.store);
   const stored = profileFor(loadProfiles(o.store), o.bodyId);
   // Switched-off rules are kept in the settings, not applied. The fleetsave's own reserve always is.
@@ -1244,6 +1287,7 @@ export function renderFleetTools(o: FleetOptions): void {
     bottom.append(rules, out.box);
     bar.append(top);
     if (settings.sendMode) bar.append(sendPanel(o, out.peek, sendWith));
+    if (focusRes) doc.querySelector<HTMLInputElement>('.fut-fsend .fut-fresin.metal input')?.focus();
     bar.append(bottom);
     anchor1.before(bar);
     addInvertButtons(o);
