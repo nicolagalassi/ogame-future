@@ -14,6 +14,7 @@ import { activeItems, queueLabel, type QueueItem, type QueueSnapshot } from '../
 import { formatUnits } from '../../core/format';
 import { estimateResources, storageFill, totals } from '../../engines/resources';
 import { fleetValue } from '../../engines/account';
+import type { PlanState } from '../../engines/planner';
 import { MENU_WIDTH, NATIVE_WIDTH, PLANET_MENU_CSS } from './style';
 import { iconSvg, type IconName as FleetIcon } from '../fleet/icons';
 
@@ -49,6 +50,17 @@ export interface PlanetMenuOptions {
   planCount?: number;
   /** What the plan still misses in MSU (null when no stock is known for its bodies). */
   planGap?: number | null;
+  /** Bodies with something in the plan, and where their resources stand. */
+  planMarks?: Record<string, PlanMark>;
+}
+
+export interface PlanMark {
+  state: PlanState;
+  /** "Miniera di metallo liv. 46–48", one per planned technology. */
+  items: string[];
+  lack: { metal: number; crystal: number; deuterium: number } | null;
+  /** Resources on their way (or landed, not yet read) and when the last lands. */
+  pending: { metal: number; crystal: number; deuterium: number; arriveAt: number };
 }
 
 const STYLE_ID = 'fut-planet-menu-style';
@@ -213,10 +225,47 @@ function queueDots(doc: Document, items: QueueItem[], building: HTMLAnchorElemen
   return box;
 }
 
+/**
+ * The plan on a body: a small list icon coloured by where its resources stand (red: missing,
+ * cyan: on their way, amber: landed but not read yet, green: all there, grey: stock unknown).
+ * What is planned, and the amounts, in the tooltip.
+ */
+function planBadge(doc: Document, mark: PlanMark | undefined, o: PlanetMenuOptions): HTMLElement | null {
+  if (!mark) return null;
+  const b = el(doc, 'span', `fut-plan fut-plan-${mark.state}`);
+  b.innerHTML = '<svg viewBox="0 0 24 24" width="9" height="9" aria-hidden="true" fill="currentColor"><path d="M3 4h4v4H3zM3 10h4v4H3zM3 16h4v4H3z"/><path d="M9 4.8h12v2.4H9zM9 10.8h12v2.4H9zM9 16.8h12v2.4H9z" opacity=".7"/></svg>';
+  b.append(doc.createTextNode(String(mark.items.length)));
+  const f = (n: number) => formatUnits(n, o.locale);
+  const res = (r: { metal: number; crystal: number; deuterium: number }) => `${f(r.metal)} · ${f(r.crystal)} · ${f(r.deuterium)}`;
+  const time = (ms: number) => new Date(ms).toLocaleTimeString(o.locale, { hour: '2-digit', minute: '2-digit' });
+  const lines = [o.t('plan.title'), ...mark.items.map((i) => `• ${i}`), ''];
+  if (mark.state === 'ready') lines.push(o.t('plan.readyHere'));
+  else if (mark.state === 'unknown') lines.push(o.t('plan.unknownHere'));
+  else if (mark.state === 'arriving') lines.push(`${o.t('plan.sentArriving', { time: time(mark.pending.arriveAt) })}: ${res(mark.pending)}`);
+  else if (mark.state === 'arrived') lines.push(`${o.t('plan.sentArrived')}: ${res(mark.pending)}`);
+  else {
+    lines.push(`${o.t('plan.missingHere')}: ${res(mark.lack ?? { metal: 0, crystal: 0, deuterium: 0 })}`);
+    if (mark.pending.metal + mark.pending.crystal + mark.pending.deuterium > 0) {
+      lines.push(`${mark.pending.arriveAt > o.now ? o.t('plan.sentArriving', { time: time(mark.pending.arriveAt) }) : o.t('plan.sentArrived')}: ${res(mark.pending)}`);
+    }
+  }
+  b.title = lines.join('\n');
+  return b;
+}
+
+/** Bottom corner of a body: the plan badge, then the queue dots. */
+function corner(doc: Document, parts: (HTMLElement | null)[]): HTMLElement | null {
+  const got = parts.filter((p): p is HTMLElement => !!p);
+  if (!got.length) return null;
+  const box = el(doc, 'span', 'fut-corner');
+  box.append(...got);
+  return box;
+}
+
 /** Removes everything Future added, so the menu can be redrawn without duplicates. */
 export function clearPlanetMenu(doc: Document): void {
   doc
-    .querySelectorAll('.fut-res, .fut-fleet, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue')
+    .querySelectorAll('.fut-res, .fut-fleet, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue, .fut-corner')
     .forEach((n) => n.remove());
   doc.querySelectorAll('.fut-name').forEach((wrap) => wrap.replaceWith(...Array.from(wrap.childNodes)));
   doc.querySelectorAll('.fut-row').forEach((n) => n.classList.remove('fut-row', 'fut-current'));
@@ -380,7 +429,8 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       if (age) link.append(age);
       // The game's wrench is hidden: the dots say what is being built, not only that something is.
       const pq = queueDots(doc, entry.planetId ? activeItems(o.queues?.bodies[String(entry.planetId)], o.now) : [], entry.construction.planet, o.now, o.t, o.locale);
-      if (pq) link.append(pq);
+      const pc = corner(doc, [planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : undefined, o), pq]);
+      if (pc) link.append(pc);
     }
 
     const moon = entry.moonLink;
@@ -390,7 +440,8 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       const age = ageBadge(doc, moonBody, o.now, o.t);
       if (age) moon.append(age);
       const mq = queueDots(doc, entry.moonId ? activeItems(o.queues?.bodies[String(entry.moonId)], o.now) : [], entry.construction.moon, o.now, o.t, o.locale);
-      if (mq) moon.append(mq);
+      const mc = corner(doc, [planBadge(doc, entry.moonId ? o.planMarks?.[String(entry.moonId)] : undefined, o), mq]);
+      if (mc) moon.append(mc);
     } else {
       // Keeps the planet columns aligned on planets without a moon.
       link?.after(el(doc, 'span', 'fut-nomoon'));

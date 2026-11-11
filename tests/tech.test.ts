@@ -444,3 +444,16 @@ describe('started builds leave the plan', () => {
     expect(out.plan['10']!.map((x) => x.level)).toEqual([47]);
   });
 });
+
+import { planStatus } from '../src/engines/planner';
+describe('plan status per body', () => {
+  const items = [{ id: 1, level: 10, name: 'Miniera', cost: { metal: 100, crystal: 50, deuterium: 0, energy: 0 }, added: 0 }];
+  const none = { metal: 0, crystal: 0, deuterium: 0, arriveAt: 0 };
+  it('ready, arriving, arrived, missing, unknown', () => {
+    expect(planStatus(items, { metal: 100, crystal: 50, deuterium: 0 }, none, 5).state).toBe('ready');
+    expect(planStatus(items, { metal: 0, crystal: 50, deuterium: 0 }, { ...none, metal: 100, arriveAt: 9 }, 5).state).toBe('arriving');
+    expect(planStatus(items, { metal: 0, crystal: 50, deuterium: 0 }, { ...none, metal: 100, arriveAt: 3 }, 5).state).toBe('arrived');
+    expect(planStatus(items, { metal: 0, crystal: 50, deuterium: 0 }, { ...none, metal: 40, arriveAt: 9 }, 5)).toEqual({ state: 'missing', lack: { metal: 60, crystal: 0, deuterium: 0, energy: 0 } });
+    expect(planStatus(items, null, none, 5).state).toBe('unknown');
+  });
+});

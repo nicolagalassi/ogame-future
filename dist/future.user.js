@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.40
+// @version      0.3.41
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -8297,9 +8297,20 @@ ${L} .fut-age-old { color: #EF7676; }
 
 /* What is being built: one dot per queue kind (OGLight colours) where the game's wrench was; details in the tooltip. */
 ${L} .smallplanet .constructionIcon { display: none !important; }
-${L} .fut-queue { position: absolute; left: 2px; bottom: 2px; z-index: 2; display: flex; gap: 2px; padding: 2px; border-radius: 6px; background: rgba(5,10,18,0.85); }
+${L} .fut-corner { position: absolute; left: 2px; bottom: 2px; z-index: 2; display: flex; align-items: center; gap: 2px; }
+${L} a.moonlink .fut-corner { bottom: auto; top: 1px; }
+${L} .fut-queue { display: flex; gap: 2px; padding: 2px; border-radius: 6px; background: rgba(5,10,18,0.85); }
+/* The plan on this body, coloured by where its resources stand. */
+${L} .fut-plan { display: inline-flex; align-items: center; gap: 1px; padding: 0 3px 0 2px; border-radius: 6px; background: rgba(5,10,18,0.88);
+  font: 700 10px/12px Arial, sans-serif; cursor: help; }
+${L} .fut-plan svg { display: block; }
+${L} .fut-plan-missing { color: #EF7676; }
+${L} .fut-plan-arriving { color: #4FD1E8; }
+${L} .fut-plan-arrived { color: #E3BB28; }
+${L} .fut-plan-ready { color: #38C56E; }
+${L} .fut-plan-unknown { color: #8592A1; }
 ${L} .fut-q { display: block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-${L} a.moonlink .fut-queue { left: 2px; bottom: auto; top: 1px; padding: 1px 2px; }
+${L} a.moonlink .fut-queue { padding: 1px 2px; }
 ${L} a.moonlink .fut-q { width: 5px; height: 5px; }
 ${L} .fut-q-building { color: #FF8200; }
 ${L} .fut-q-research { color: #32FB2F; }
@@ -8518,8 +8529,37 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     }
     return box;
   }
+  function planBadge(doc, mark, o) {
+    if (!mark) return null;
+    const b = el3(doc, "span", `fut-plan fut-plan-${mark.state}`);
+    b.innerHTML = '<svg viewBox="0 0 24 24" width="9" height="9" aria-hidden="true" fill="currentColor"><path d="M3 4h4v4H3zM3 10h4v4H3zM3 16h4v4H3z"/><path d="M9 4.8h12v2.4H9zM9 10.8h12v2.4H9zM9 16.8h12v2.4H9z" opacity=".7"/></svg>';
+    b.append(doc.createTextNode(String(mark.items.length)));
+    const f = (n) => formatUnits(n, o.locale);
+    const res = (r) => `${f(r.metal)} \xB7 ${f(r.crystal)} \xB7 ${f(r.deuterium)}`;
+    const time = (ms) => new Date(ms).toLocaleTimeString(o.locale, { hour: "2-digit", minute: "2-digit" });
+    const lines = [o.t("plan.title"), ...mark.items.map((i) => `\u2022 ${i}`), ""];
+    if (mark.state === "ready") lines.push(o.t("plan.readyHere"));
+    else if (mark.state === "unknown") lines.push(o.t("plan.unknownHere"));
+    else if (mark.state === "arriving") lines.push(`${o.t("plan.sentArriving", { time: time(mark.pending.arriveAt) })}: ${res(mark.pending)}`);
+    else if (mark.state === "arrived") lines.push(`${o.t("plan.sentArrived")}: ${res(mark.pending)}`);
+    else {
+      lines.push(`${o.t("plan.missingHere")}: ${res(mark.lack ?? { metal: 0, crystal: 0, deuterium: 0 })}`);
+      if (mark.pending.metal + mark.pending.crystal + mark.pending.deuterium > 0) {
+        lines.push(`${mark.pending.arriveAt > o.now ? o.t("plan.sentArriving", { time: time(mark.pending.arriveAt) }) : o.t("plan.sentArrived")}: ${res(mark.pending)}`);
+      }
+    }
+    b.title = lines.join("\n");
+    return b;
+  }
+  function corner(doc, parts) {
+    const got = parts.filter((p) => !!p);
+    if (!got.length) return null;
+    const box = el3(doc, "span", "fut-corner");
+    box.append(...got);
+    return box;
+  }
   function clearPlanetMenu(doc) {
-    doc.querySelectorAll(".fut-res, .fut-fleet, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue").forEach((n) => n.remove());
+    doc.querySelectorAll(".fut-res, .fut-fleet, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue, .fut-corner").forEach((n) => n.remove());
     doc.querySelectorAll(".fut-name").forEach((wrap) => wrap.replaceWith(...Array.from(wrap.childNodes)));
     doc.querySelectorAll(".fut-row").forEach((n) => n.classList.remove("fut-row", "fut-current"));
   }
@@ -8643,7 +8683,8 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
         const age = ageBadge(doc, planetBody, o.now, o.t);
         if (age) link.append(age);
         const pq = queueDots(doc, entry.planetId ? activeItems(o.queues?.bodies[String(entry.planetId)], o.now) : [], entry.construction.planet, o.now, o.t, o.locale);
-        if (pq) link.append(pq);
+        const pc = corner(doc, [planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : void 0, o), pq]);
+        if (pc) link.append(pc);
       }
       const moon = entry.moonLink;
       if (moon) {
@@ -8652,7 +8693,8 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
         const age = ageBadge(doc, moonBody, o.now, o.t);
         if (age) moon.append(age);
         const mq = queueDots(doc, entry.moonId ? activeItems(o.queues?.bodies[String(entry.moonId)], o.now) : [], entry.construction.moon, o.now, o.t, o.locale);
-        if (mq) moon.append(mq);
+        const mc = corner(doc, [planBadge(doc, entry.moonId ? o.planMarks?.[String(entry.moonId)] : void 0, o), mq]);
+        if (mc) moon.append(mc);
       } else {
         link?.after(el3(doc, "span", "fut-nomoon"));
       }
@@ -10065,6 +10107,15 @@ table.queues td.acts { width: 1%; text-align: right; }
       out.arriveAt = Math.max(out.arriveAt, s.arriveAt);
     }
     return out;
+  }
+  function planStatus(items, have, pending, now) {
+    if (!have) return { state: "unknown", lack: null };
+    const total = planTotal(items);
+    const now0 = missing(total, have);
+    if (!now0.metal && !now0.crystal && !now0.deuterium) return { state: "ready", lack: null };
+    const lack = missing(total, { metal: have.metal + pending.metal, crystal: have.crystal + pending.crystal, deuterium: have.deuterium + pending.deuterium });
+    if (lack.metal || lack.crystal || lack.deuterium) return { state: "missing", lack };
+    return { state: pending.arriveAt > now ? "arriving" : "arrived", lack: null };
   }
   function prunePending(list, plan, seenAtOf) {
     return list.filter((s) => (plan[String(s.target)]?.length ?? 0) > 0 && s.arriveAt > seenAtOf(s.target));
@@ -13593,6 +13644,31 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       showFleet: store.get("planetMenu.fleet", false),
       totalView: store.get("planetMenu.totalView", "msu") === "sum" ? "sum" : "msu"
     };
+    const planMarks = () => {
+      const plan = store.get(PLAN_KEY, {});
+      const sent = store.get(SENT_KEY, []);
+      const now = Date.now();
+      const here = currentBodyId(document);
+      const onScreen = readCurrentResources(document);
+      const out = {};
+      for (const [key, items2] of Object.entries(plan)) {
+        if (!items2.length) continue;
+        const id = Number(key);
+        const body = snapshot?.bodies.find((b) => b.id === id);
+        const have = here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
+        const pending = pendingFor(sent, id, here === id ? now : body?.resourcesAt ?? 0);
+        const { state, lack } = planStatus(items2, have, pending, now);
+        const lines = [];
+        for (const i of items2) {
+          const last2 = lines[lines.length - 1];
+          if (last2 && last2.name === i.name && i.level !== void 0 && last2.to !== void 0 && i.level === last2.to + 1) last2.to = i.level;
+          else lines.push({ name: i.name, from: i.level, to: i.level, amount: i.amount });
+        }
+        const label = (l) => l.amount !== void 0 ? `${l.name} \xD7${l.amount.toLocaleString(locale)}` : `${l.name} ${l.from === l.to ? t("plan.level", { level: l.from ?? 0 }) : t("plan.levels", { from: l.from ?? 0, to: l.to ?? 0 })}`;
+        out[key] = { state, lack, pending, items: lines.map(label) };
+      }
+      return out;
+    };
     const planGap = () => {
       const plan = store.get(PLAN_KEY, {});
       const sent = store.get(SENT_KEY, []);
@@ -13695,6 +13771,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         }),
         planCount: planCount(store.get(PLAN_KEY, {})),
         planGap: planGap(),
+        planMarks: planMarks(),
         onOpenPlanner: () => {
           const id = currentBodyId(document);
           const resources = readCurrentResources(document);

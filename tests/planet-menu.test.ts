@@ -71,6 +71,24 @@ describe('renderPlanetMenu', () => {
     expect(Array.from(document.querySelectorAll('#planet-3 .fut-q')).map((d) => d.className)).toEqual(['fut-q fut-q-unknown']);
   });
 
+  it('shows the plan on a body, coloured by where its resources stand, before the queue dots', () => {
+    renderPlanetMenu({
+      doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { mode: 'side', showTotals: true }, now: 1_000, locale: 'it', t, onSync: vi.fn(async () => true),
+      planMarks: {
+        3: { state: 'arriving', items: ['Miniera di metallo liv. 46–48'], lack: null, pending: { metal: 5_000_000, crystal: 0, deuterium: 0, arriveAt: 61_000 } },
+        2: { state: 'missing', items: ['Falange liv. 7', 'Portale liv. 2'], lack: { metal: 1, crystal: 0, deuterium: 0 }, pending: { metal: 0, crystal: 0, deuterium: 0, arriveAt: 0 } },
+      },
+    });
+    const p3 = document.querySelector('#planet-3 a.planetlink .fut-corner')!;
+    expect(p3.firstElementChild?.className).toBe('fut-plan fut-plan-arriving');
+    expect(p3.lastElementChild?.classList.contains('fut-queue')).toBe(true);
+    expect(p3.querySelector('.fut-plan')!.getAttribute('title')).toContain('Miniera di metallo liv. 46–48');
+    const moon = document.querySelector('#planet-1 a.moonlink .fut-plan')!;
+    expect(moon.className).toBe('fut-plan fut-plan-missing');
+    expect(moon.textContent).toBe('2');
+    expect(document.querySelector('#planet-1 a.planetlink .fut-plan')).toBeNull();
+  });
+
   it('paints storage fill behind planet numbers only, never on moons', () => {
     draw('side');
     const cell = document.querySelector<HTMLElement>('#planet-1 a.planetlink .fut-m')!;
