@@ -63,8 +63,8 @@ ${L} .fut-name .planet-koords {
   width: auto !important; max-width: none !important; height: auto !important; line-height: 1.15 !important;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left !important; background: none !important;
 }
-${L} .fut-name .planet-name { font: 700 12px Arial, sans-serif !important; color: #E6EDF5 !important; }
-${L} .fut-name .planet-koords { font: 11px monospace !important; color: #C9D4E2 !important; }
+${L} .fut-name .planet-name { font: 700 11px Arial, sans-serif !important; color: #E6EDF5 !important; }
+${L} .fut-name .planet-koords { font: 10px monospace !important; color: #C9D4E2 !important; }
 
 /* Resources: one per line (metal, crystal, deuterium). */
 ${L} .fut-res {
@@ -165,7 +165,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 }
 #planetbarcomponent .fut-toolbar .fut-cell {
   box-sizing: border-box !important; height: 40px !important; width: auto !important; box-shadow: none !important; border-radius: 0 !important; font: inherit;
-  display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 3px; min-width: 0; padding: 0 8px; margin: 0;
+  display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 3px; min-width: 0; padding: 0 6px 0 8px; margin: 0;
   border: 0 !important; border-right: 1px solid #1F2C40 !important; background: none !important; color: inherit; text-align: left; cursor: pointer;
 }
 #planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) { background: #16243A !important; }
@@ -175,8 +175,8 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 #planetbarcomponent .fut-cell-t { display: flex; align-items: center; gap: 5px; min-width: 0; }
 #planetbarcomponent .fut-cell-i { flex: none; display: inline-flex; color: #8A9BB0; }
 #planetbarcomponent .fut-cell-k { min-width: 0; font: 11px/12px Arial, sans-serif; color: #9AA9BC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#planetbarcomponent .fut-cell-v { min-width: 0; font: 700 13px/14px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#planetbarcomponent .fut-cell-v small { font: 10px/14px Arial, sans-serif; color: #8A9BB0; font-weight: 400; }
+#planetbarcomponent .fut-cell-v { min-width: 0; font: 700 12px/14px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#planetbarcomponent .fut-cell-v small { font: 10px/14px Arial, sans-serif; letter-spacing: -0.2px; color: #8A9BB0; font-weight: 400; }
 #planetbarcomponent .fut-cell-v.fut-warn { color: #F5B547; } #planetbarcomponent .fut-cell-v.fut-ok { color: #4FE0B0; }
 #planetbarcomponent .fut-side { display: flex; flex-direction: column; grid-column: 3; grid-row: 1; }
 #planetbarcomponent .fut-tool {
@@ -203,12 +203,14 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
   box-sizing: border-box; margin-top: 4px; padding: 2px 8px 4px; border-radius: 7px; border: 1px solid #1F2C40; background: #111B2A;
   font: 12px/1.3 Arial, Helvetica, sans-serif; font-variant-numeric: tabular-nums;
 }
-.fut-totals .fut-trow { display: grid; grid-template-columns: minmax(0, 1fr) 58px 62px; align-items: baseline; gap: 6px; min-height: 20px; padding: 2px 0; }
+.fut-totals .fut-trow { display: grid; grid-template-columns: minmax(0, 1fr) 58px 62px; align-items: center; gap: 6px; min-height: 20px; padding: 2px 0; }
 .fut-totals .fut-trow + .fut-trow { border-top: 1px solid #16202F; }
 .fut-totals .fut-thead { min-height: 0; color: #9AA9BC; font-size: 11px; }
 .fut-totals .fut-thead + .fut-trow { border-top-color: #1F2C40; }
 .fut-totals .fut-tname { display: flex; align-items: center; gap: 6px; min-width: 0; white-space: nowrap; overflow: hidden; }
-.fut-totals .fut-trow:not(.fut-thead) .fut-tname::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.fut-totals .fut-tico { flex: none; display: inline-flex; }
+.fut-totals .fut-tlabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: #C9D4E2; }
+.fut-totals .fut-msu .fut-tlabel { color: #4FD1E8; }
 .fut-totals .fut-tnum { text-align: right; white-space: nowrap; color: #E6EDF5; font: 700 12px Consolas, "JetBrains Mono", monospace; }
 .fut-totals .fut-tnum:last-child { color: #B4C2D3; font-weight: 400; }
 .fut-totals .fut-thead .fut-tnum { color: inherit; font: inherit; }
@@ -216,7 +218,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 .fut-totals .fut-msu .fut-tname { color: #4FD1E8; font-weight: 700; }
 .fut-totals .fut-msu .fut-tnum:last-child { color: #E6EDF5; }
 #planetbarcomponent:not(.fut-wide) .fut-totals { padding: 2px 4px 4px; }
-#planetbarcomponent:not(.fut-wide) .fut-totals .fut-trow { grid-template-columns: 8px minmax(0, 1fr) minmax(0, 1fr); gap: 3px; }
-#planetbarcomponent:not(.fut-wide) .fut-totals .fut-tname { font-size: 0; gap: 0; }
+#planetbarcomponent:not(.fut-wide) .fut-totals .fut-trow { grid-template-columns: 13px minmax(0, 1fr) minmax(0, 1fr); gap: 3px; }
+#planetbarcomponent:not(.fut-wide) .fut-totals .fut-tlabel { display: none; }
 #planetbarcomponent:not(.fut-wide) .fut-totals .fut-tnum { font-size: 11px; }
 `;

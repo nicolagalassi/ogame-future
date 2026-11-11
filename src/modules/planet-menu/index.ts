@@ -15,6 +15,7 @@ import { formatUnits } from '../../core/format';
 import { estimateResources, storageFill, totals } from '../../engines/resources';
 import { fleetValue } from '../../engines/account';
 import { MENU_WIDTH, NATIVE_WIDTH, PLANET_MENU_CSS } from './style';
+import { iconSvg, type IconName as FleetIcon } from '../fleet/icons';
 
 export type MenuMode = 'side' | 'compact';
 
@@ -215,7 +216,7 @@ function queueDots(doc: Document, items: QueueItem[], building: HTMLAnchorElemen
 /** Removes everything Future added, so the menu can be redrawn without duplicates. */
 export function clearPlanetMenu(doc: Document): void {
   doc
-    .querySelectorAll('.fut-res, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue')
+    .querySelectorAll('.fut-res, .fut-fleet, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue')
     .forEach((n) => n.remove());
   doc.querySelectorAll('.fut-name').forEach((wrap) => wrap.replaceWith(...Array.from(wrap.childNodes)));
   doc.querySelectorAll('.fut-row').forEach((n) => n.classList.remove('fut-row', 'fut-current'));
@@ -407,25 +408,32 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
     const msu = (r: { metal: number; crystal: number; deuterium: number }) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
     const box = el(doc, 'div', 'fut-totals');
     box.setAttribute('role', 'table');
-    const row = (cls: string, cells: [string, string, string]) => {
+    const row = (cls: string, cells: [string, string, string], glyph?: FleetIcon) => {
       const r = el(doc, 'div', `fut-trow ${cls}`.trim());
       r.setAttribute('role', 'row');
       cells.forEach((text, i) => {
-        const c = el(doc, 'span', i ? 'fut-tnum' : 'fut-tname', text);
+        const c = el(doc, 'span', i ? 'fut-tnum' : 'fut-tname');
         c.setAttribute('role', cls === 'fut-thead' ? 'columnheader' : 'cell');
+        // Each line's symbol (the same as the fleet page's), in that line's colour.
+        if (!i && glyph) {
+          const ico = el(doc, 'span', 'fut-tico');
+          ico.innerHTML = iconSvg(glyph, 13);
+          c.append(ico);
+        }
+        c.append(el(doc, 'span', 'fut-tlabel', text));
         r.append(c);
       });
       box.append(r);
     };
     row('fut-thead', ['', o.t('totals.stock'), o.t('totals.day')]);
-    const line = (label: string, value: number, rate: number, cls: string) => row(cls, [label, formatUnits(value, o.locale), `+${formatUnits(rate * 24, o.locale)}`]);
-    line(o.t('res.metal'), stock.metal, perHour.metal, 'fut-m');
-    line(o.t('res.crystal'), stock.crystal, perHour.crystal, 'fut-c');
-    line(o.t('res.deuterium'), stock.deuterium, perHour.deuterium, 'fut-d');
+    const line = (label: string, value: number, rate: number, cls: string, glyph: FleetIcon) => row(cls, [label, formatUnits(value, o.locale), `+${formatUnits(rate * 24, o.locale)}`], glyph);
+    line(o.t('res.metal'), stock.metal, perHour.metal, 'fut-m', 'metal');
+    line(o.t('res.crystal'), stock.crystal, perHour.crystal, 'fut-c', 'crystal');
+    line(o.t('res.deuterium'), stock.deuterium, perHour.deuterium, 'fut-d', 'deuterium');
     const plain = (r: { metal: number; crystal: number; deuterium: number }) => r.metal + r.crystal + r.deuterium;
-    if (o.settings.totalView === 'sum') line(o.t('totals.sum'), plain(stock), plain(perHour), 'fut-msu');
-    else line('MSU', msu(stock), msu(perHour), 'fut-msu');
-    if (view.fleet) row('fut-fleetrow', [o.t('planetMenu.fleet'), formatUnits(o.snapshot.bodies.reduce((sum, b) => sum + fleetValue(b), 0), o.locale), '']);
+    if (o.settings.totalView === 'sum') line(o.t('totals.sum'), plain(stock), plain(perHour), 'fut-msu', 'total');
+    else line('MSU', msu(stock), msu(perHour), 'fut-msu', 'total');
+    if (view.fleet) row('fut-fleetrow', [o.t('planetMenu.fleet'), formatUnits(o.snapshot.bodies.reduce((sum, b) => sum + fleetValue(b), 0), o.locale), ''], 'fleetValue');
     list.after(box);
   }
 }

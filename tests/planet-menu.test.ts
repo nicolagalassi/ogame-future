@@ -33,6 +33,18 @@ describe('readPlanetList', () => {
 });
 
 describe('renderPlanetMenu', () => {
+  it('a redraw (e.g. after adding to the plan) leaves one fleet line per planet, inside the name column', () => {
+    const snapshot = { ...SNAPSHOT, bodies: SNAPSHOT.bodies.map((b) => ({ ...b, levels: { 203: 10 } })) };
+    const once = () => renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot, settings: { mode: 'side', showTotals: true, showFleet: true }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true) });
+    once();
+    once();
+    const fleets = document.querySelectorAll('#planet-1 .fut-fleet');
+    expect(fleets).toHaveLength(1);
+    expect(fleets[0]!.parentElement!.classList.contains('fut-name')).toBe(true);
+    // Totals: each line with its symbol, the fleet included.
+    expect(document.querySelectorAll('.fut-totals .fut-tico svg').length).toBe(5);
+  });
+
   it('adds planet and moon rows on the game links themselves', () => {
     draw('side');
     const planetLink = document.querySelector('#planet-1 a.planetlink')!;
