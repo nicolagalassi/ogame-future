@@ -41,7 +41,8 @@ const CSS = `
 /* A cleaner table, as OGLight's: no cell borders, one hairline between rows, the game's row colours
    (own, alliance) kept but quieter, every row compact with a small picture. */
 #ranks tbody tr > td { border: 0 !important; border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important; box-shadow: inset 0 0 0 9999px rgba(6, 10, 16, 0.45); padding-top: 2px !important; padding-bottom: 2px !important; line-height: 1.25; vertical-align: middle; }
-#ranks tbody tr.myrank > td { box-shadow: inset 0 0 0 9999px rgba(6, 10, 16, 0.15); }
+#ranks tbody tr.myrank > td { box-shadow: inset 0 0 0 9999px rgba(6, 10, 16, 0.55); }
+#ranks tbody tr.myrank > td:first-child { box-shadow: inset 3px 0 0 #6F9FC8, inset 0 0 0 9999px rgba(6, 10, 16, 0.55); }
 #ranks tbody tr:hover > td { box-shadow: inset 0 0 0 9999px rgba(6, 10, 16, 0.25); }
 #ranks .highscoreNameFieldWrapper { height: 34px !important; align-items: center; }
 #ranks .highscoreNameFieldWrapper profile-picture { zoom: .6; }
@@ -53,8 +54,9 @@ const CSS = `
 #ranks tr.fut-hs-top .highscoreNameFieldWrapper { height: 40px !important; }
 #ranks tr.fut-hs-top .highscoreNameAndTitleHolder > :not(.highscoreNameHolder) { font-size: 11px !important; line-height: 1.2; }
 /* The flag of Future's targets, in the column of the game's "i", before it. */
-#ranks .fut-hs-act { white-space: nowrap; }
-#ranks .fut-hs-act .fut-mk-flag { margin: 0 4px 0 0; vertical-align: middle; }
+#ranks td.fut-hs-act { white-space: nowrap; text-align: right; }
+#ranks td.fut-hs-act > .fut-mk-flag, #ranks td.fut-hs-act > .sendmsg_content { display: inline-flex !important; align-items: center; float: none !important; width: auto !important; vertical-align: middle; }
+#ranks td.fut-hs-act > .fut-mk-flag { margin: 0 3px 0 0; }
 #fut-hs-top { position: fixed; right: 18px; bottom: 44px; z-index: 1000; display: none; width: 34px; height: 34px; padding: 0; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--fut-line); border-radius: 6px; background: var(--fut-btn); color: var(--fut-txt); }
 #fut-hs-top.on { display: flex; } #fut-hs-top:hover, #fut-hs-top:focus-visible { border-color: var(--fut-link); color: var(--fut-hi); }
 #fut-hs-top svg { transform: rotate(180deg); }`;
