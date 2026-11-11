@@ -17,6 +17,7 @@ import { fleetValue } from '../../engines/account';
 import type { PlanState } from '../../engines/planner';
 import { MENU_WIDTH, NATIVE_WIDTH, PLANET_MENU_CSS } from './style';
 import { iconSvg, type IconName as FleetIcon } from '../fleet/icons';
+import { resIconSvg } from '../../core/res-icons';
 
 export type MenuMode = 'side' | 'compact';
 
@@ -226,37 +227,97 @@ function queueDots(doc: Document, items: QueueItem[], building: HTMLAnchorElemen
 }
 
 /**
- * The plan on a body: a small list icon coloured by where its resources stand (red: missing,
- * cyan: on their way, amber: landed but not read yet, green: all there, grey: stock unknown).
- * What is planned, and the amounts, in the tooltip.
+ * The plan on a body: a list icon and the number of planned items, on a tile coloured by where its
+ * resources stand (red: missing, cyan: on their way, amber: landed but not read yet, green: all
+ * there, grey: stock unknown). Hovering shows a card in the game's own style; a click opens the plan.
  */
-function planBadge(doc: Document, mark: PlanMark | undefined, o: PlanetMenuOptions): HTMLElement | null {
+const PLAN_ICON = '<path d="M3 4h4v4H3zM3 10h4v4H3zM3 16h4v4H3z"/><path d="M9 4.8h12v2.4H9zM9 10.8h12v2.4H9zM9 16.8h12v2.4H9z" opacity=".7"/>';
+const TIP_ID = 'fut-plan-tip';
+
+function planBadge(doc: Document, mark: PlanMark | undefined, o: PlanetMenuOptions, where: { name: string; coords: string; moon: boolean }): HTMLElement | null {
   if (!mark) return null;
   const b = el(doc, 'span', `fut-plan fut-plan-${mark.state}`);
-  b.innerHTML = '<svg viewBox="0 0 24 24" width="9" height="9" aria-hidden="true" fill="currentColor"><path d="M3 4h4v4H3zM3 10h4v4H3zM3 16h4v4H3z"/><path d="M9 4.8h12v2.4H9zM9 10.8h12v2.4H9zM9 16.8h12v2.4H9z" opacity=".7"/></svg>';
+  b.innerHTML = `<svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" fill="currentColor">${PLAN_ICON}</svg>`;
   b.append(doc.createTextNode(String(mark.items.length)));
-  const f = (n: number) => formatUnits(n, o.locale);
-  const res = (r: { metal: number; crystal: number; deuterium: number }) => `${f(r.metal)} · ${f(r.crystal)} · ${f(r.deuterium)}`;
-  const time = (ms: number) => new Date(ms).toLocaleTimeString(o.locale, { hour: '2-digit', minute: '2-digit' });
-  const lines = [o.t('plan.title'), ...mark.items.map((i) => `• ${i}`), ''];
-  if (mark.state === 'ready') lines.push(o.t('plan.readyHere'));
-  else if (mark.state === 'unknown') lines.push(o.t('plan.unknownHere'));
-  else if (mark.state === 'arriving') lines.push(`${o.t('plan.sentArriving', { time: time(mark.pending.arriveAt) })}: ${res(mark.pending)}`);
-  else if (mark.state === 'arrived') lines.push(`${o.t('plan.sentArrived')}: ${res(mark.pending)}`);
-  else {
-    lines.push(`${o.t('plan.missingHere')}: ${res(mark.lack ?? { metal: 0, crystal: 0, deuterium: 0 })}`);
-    if (mark.pending.metal + mark.pending.crystal + mark.pending.deuterium > 0) {
-      lines.push(`${mark.pending.arriveAt > o.now ? o.t('plan.sentArriving', { time: time(mark.pending.arriveAt) }) : o.t('plan.sentArrived')}: ${res(mark.pending)}`);
+  b.tabIndex = 0;
+  b.setAttribute('role', 'button');
+  b.setAttribute('aria-label', `${o.t('plan.title')}: ${where.name} [${where.coords}] · ${mark.items.join(', ')}`);
+  const show = () => showPlanTip(doc, b, mark, o, where);
+  const hide = () => doc.getElementById(TIP_ID)?.remove();
+  b.addEventListener('mouseenter', show);
+  b.addEventListener('focus', show);
+  b.addEventListener('mouseleave', hide);
+  b.addEventListener('blur', hide);
+  b.addEventListener('click', () => {
+    hide();
+    o.onOpenPlanner?.();
+  });
+  b.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      hide();
+      o.onOpenPlanner?.();
     }
-  }
-  b.title = lines.join('\n');
+  });
   return b;
+}
+
+/** The hover card: body, what is planned, where the resources stand, with the game's resource symbols. */
+function showPlanTip(doc: Document, anchor: HTMLElement, mark: PlanMark, o: PlanetMenuOptions, where: { name: string; coords: string; moon: boolean }): void {
+  doc.getElementById(TIP_ID)?.remove();
+  const tip = el(doc, 'div', `fut-plan-tip fut-plan-${mark.state}`);
+  tip.id = TIP_ID;
+  tip.setAttribute('role', 'tooltip');
+  const head = el(doc, 'div', 'fut-pt-head');
+  head.append(el(doc, 'b', '', where.name), el(doc, 'span', '', `[${where.coords}]${where.moon ? ` · ${o.t('planetMenu.moon')}` : ''}`));
+  const title = el(doc, 'div', 'fut-pt-title');
+  title.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="currentColor">${PLAN_ICON}</svg>`;
+  title.append(doc.createTextNode(o.t('plan.title')));
+  const list = el(doc, 'ul', 'fut-pt-items');
+  for (const i of mark.items) list.append(el(doc, 'li', '', i));
+  const time = (ms: number) => new Date(ms).toLocaleTimeString(o.locale, { hour: '2-digit', minute: '2-digit' });
+  const resRow = (r: { metal: number; crystal: number; deuterium: number }) => {
+    const row = el(doc, 'div', 'fut-pt-res');
+    for (const k of ['metal', 'crystal', 'deuterium'] as const) {
+      if (!r[k]) continue;
+      const c = el(doc, 'span', `fut-pt-${k}`);
+      c.innerHTML = resIconSvg(k, 12);
+      c.append(doc.createTextNode(formatUnits(r[k], o.locale)));
+      row.append(c);
+    }
+    return row;
+  };
+  const status = el(doc, 'div', 'fut-pt-status');
+  const say = (text: string) => status.append(el(doc, 'div', 'fut-pt-say', text));
+  const sent = mark.pending.metal + mark.pending.crystal + mark.pending.deuterium > 0;
+  const sentText = mark.pending.arriveAt > o.now ? o.t('plan.sentArriving', { time: time(mark.pending.arriveAt) }) : o.t('plan.sentArrived');
+  if (mark.state === 'ready') say(o.t('plan.readyHere'));
+  else if (mark.state === 'unknown') say(o.t('plan.unknownHere'));
+  else if (mark.state === 'missing') {
+    say(o.t('plan.missingHere'));
+    status.append(resRow(mark.lack ?? { metal: 0, crystal: 0, deuterium: 0 }));
+  }
+  if (mark.state !== 'ready' && mark.state !== 'unknown' && sent) {
+    const line = el(doc, 'div', 'fut-pt-say fut-pt-sent', sentText);
+    status.append(line, resRow(mark.pending));
+  }
+  tip.append(head, title, list, status);
+  doc.body.append(tip);
+  const box = anchor.getBoundingClientRect();
+  const view = doc.defaultView;
+  const w = tip.offsetWidth;
+  const hgt = tip.offsetHeight;
+  const vw = view?.innerWidth ?? 1200;
+  const vh = view?.innerHeight ?? 800;
+  const left = box.right + 10 + w > vw ? box.left - 10 - w : box.right + 10;
+  tip.style.left = `${Math.max(4, left)}px`;
+  tip.style.top = `${Math.max(4, Math.min(box.top + box.height / 2 - hgt / 2, vh - hgt - 4))}px`;
 }
 
 /** Removes everything Future added, so the menu can be redrawn without duplicates. */
 export function clearPlanetMenu(doc: Document): void {
   doc
-    .querySelectorAll('.fut-res, .fut-fleet, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue, .fut-plancol')
+    .querySelectorAll('.fut-res, .fut-fleet, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue, .fut-plancol, #fut-plan-tip')
     .forEach((n) => n.remove());
   doc.querySelectorAll('.fut-name').forEach((wrap) => wrap.replaceWith(...Array.from(wrap.childNodes)));
   doc.querySelectorAll('.fut-row').forEach((n) => n.classList.remove('fut-row', 'fut-current'));
@@ -441,8 +502,9 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
     // The plan, in a slim column at the row's outer end (only when something is planned somewhere).
     if (planned) {
       const col = el(doc, 'span', 'fut-plancol');
-      const pb = planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : undefined, o);
-      const mb = planBadge(doc, entry.moonId ? o.planMarks?.[String(entry.moonId)] : undefined, o);
+      const pb = planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : undefined, o, { name: entry.name, coords: entry.coords, moon: false });
+      const moonName = entry.moonLink?.querySelector('img')?.getAttribute('alt') || entry.name;
+      const mb = planBadge(doc, entry.moonId ? o.planMarks?.[String(entry.moonId)] : undefined, o, { name: moonName, coords: entry.coords, moon: true });
       if (pb) pb.classList.add('fut-plan-p');
       if (mb) mb.classList.add('fut-plan-m');
       // Planet on top, moon below: each keeps its half even when the other has nothing planned.

@@ -6,7 +6,7 @@
  */
 import { RES_COLORS } from '../../core/sheet';
 /** Width of the side-by-side menu (tolerated OGLight uses 208px; ours is a bit wider for larger text). */
-export const MENU_WIDTH = 242;
+export const MENU_WIDTH = 247;
 /** Native width of the planet column (#rechts) in OGame 13. */
 export const NATIVE_WIDTH = 137;
 
@@ -132,11 +132,12 @@ ${L} .smallplanet .constructionIcon { display: none !important; }
 ${L} .fut-queue { position: absolute; left: 2px; bottom: 2px; z-index: 2; display: flex; gap: 2px; padding: 2px; border-radius: 6px; background: rgba(5,10,18,0.85); }
 /* The plan: a slim column at the outer end of each row, right of the moon; one tile per planned body
    (planet on top, moon below), coloured by where its resources stand. */
-${L} .fut-plancol { flex-shrink: 0; display: flex; flex-direction: column; width: 15px; border-left: 1px solid #1A2638; background: #0D1522; }
+${L} .fut-plancol { flex-shrink: 0; display: flex; flex-direction: column; width: 20px; border-left: 1px solid #1A2638; background: #0D1522; }
 ${L} .fut-plancol > span { flex: 1; min-height: 0; }
-${L} .fut-plan { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-  font: 700 10px/10px Arial, sans-serif; cursor: help; background: color-mix(in srgb, currentColor 16%, #0D1522); }
 ${L} .fut-plancol > :last-child { border-top: 1px solid #1A2638; }
+${L} .fut-plan { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  font: 700 12px/12px Arial, sans-serif; cursor: pointer; background: color-mix(in srgb, currentColor 18%, #0D1522); outline: none; }
+${L} .fut-plan:hover, ${L} .fut-plan:focus-visible { background: color-mix(in srgb, currentColor 32%, #0D1522); }
 ${L} .fut-plan svg { display: block; }
 ${L}.fut-mode-compact .fut-plancol { display: none; }
 ${L} .fut-plan-missing { color: #EF7676; }
@@ -235,4 +236,27 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 #planetbarcomponent:not(.fut-wide) .fut-totals .fut-trow { grid-template-columns: 13px minmax(0, 1fr) minmax(0, 1fr); gap: 3px; }
 #planetbarcomponent:not(.fut-wide) .fut-totals .fut-tlabel { display: none; }
 #planetbarcomponent:not(.fut-wide) .fut-totals .fut-tnum { font-size: 11px; }
+
+/* The plan's hover card, in the game's tooltip style (dark blue gradient, thin frame, centred title). */
+.fut-plan-tip { position: fixed; z-index: 100000; min-width: 170px; max-width: 260px; padding: 10px 12px; box-sizing: border-box;
+  border: 1px solid #2C3E57; border-radius: 6px; background: linear-gradient(180deg, #1C2A3A 0%, #0F1923 100%);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6); color: #C9D4E2; font: 11px/1.45 Verdana, Arial, sans-serif; pointer-events: none; }
+.fut-plan-tip .fut-pt-head { display: flex; flex-direction: column; align-items: center; margin-bottom: 6px; }
+.fut-plan-tip .fut-pt-head b { color: #fff; font-size: 13px; }
+.fut-plan-tip .fut-pt-head span { color: #8592A1; font-size: 10px; }
+.fut-plan-tip .fut-pt-title { display: flex; align-items: center; gap: 5px; padding: 4px 0 3px; border-top: 1px solid #2C3E57; color: #9AA9BC; font-weight: 700; }
+.fut-plan-tip .fut-pt-items { margin: 0 0 6px; padding: 0; list-style: none; }
+.fut-plan-tip .fut-pt-items li { padding: 1px 0 1px 8px; color: #6F9FC8; position: relative; }
+.fut-plan-tip .fut-pt-items li::before { content: ""; position: absolute; left: 0; top: 7px; width: 3px; height: 3px; border-radius: 50%; background: #4A6683; }
+.fut-plan-tip .fut-pt-status { padding-top: 5px; border-top: 1px solid #2C3E57; }
+.fut-plan-tip .fut-pt-say { font-weight: 700; }
+.fut-plan-tip.fut-plan-missing .fut-pt-say { color: #EF7676; }
+.fut-plan-tip.fut-plan-arriving .fut-pt-say, .fut-plan-tip .fut-pt-sent { color: #4FD1E8 !important; }
+.fut-plan-tip.fut-plan-arrived .fut-pt-say { color: #E3BB28; }
+.fut-plan-tip.fut-plan-ready .fut-pt-say { color: #38C56E; }
+.fut-plan-tip.fut-plan-unknown .fut-pt-say { color: #8592A1; }
+.fut-plan-tip .fut-pt-sent { margin-top: 4px; }
+.fut-plan-tip .fut-pt-res { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 2px; font: 700 11px Consolas, monospace; }
+.fut-plan-tip .fut-pt-res span { display: inline-flex; align-items: center; gap: 3px; }
+.fut-plan-tip .fut-pt-metal { color: #B8C2CC; } .fut-plan-tip .fut-pt-crystal { color: #7FB8FF; } .fut-plan-tip .fut-pt-deuterium { color: #4FE0B0; }
 `;
