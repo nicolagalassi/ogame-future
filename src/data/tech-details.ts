@@ -42,6 +42,8 @@ export interface TechDetails {
   panelLevel: number | null;
   /** Cost the game shows (one level, or one unit for ships and defences). */
   shown: Partial<Cost>;
+  /** Population the level shown needs (some lifeform buildings), and whether the planet has it, as the game says. */
+  population: { value: number; enough: boolean } | null;
   /** Build time the game shows, in ms. */
   durationMs: number | null;
   /** Ships and defences: the game's amount field. */
@@ -70,6 +72,9 @@ export function readTechDetails(doc: Document): TechDetails | null {
   if (crystal !== undefined) shown.crystal = crystal;
   if (deuterium !== undefined) shown.deuterium = deuterium;
   if (energy !== undefined) shown.energy = energy;
+  const popEl = root.querySelector<HTMLElement>('.costs .population');
+  const pop = costValue(root, 'population');
+  const population = popEl && pop !== undefined ? { value: pop, enough: !popEl.classList.contains('insufficient') } : null;
   const time = root.querySelector<HTMLElement>('.build_duration time, .build_duration [datetime]');
   const durationMs = time ? isoDurationMs(time.getAttribute('datetime') ?? '') : null;
   return {
@@ -78,6 +83,7 @@ export function readTechDetails(doc: Document): TechDetails | null {
     name: root.querySelector('h3')?.textContent?.trim() ?? String(id),
     panelLevel: num(root.querySelector('.information .level')?.getAttribute('data-value')),
     shown,
+    population,
     durationMs,
     amountInput: root.querySelector<HTMLInputElement>('#build_amount'),
   };

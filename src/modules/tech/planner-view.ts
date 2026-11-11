@@ -28,6 +28,8 @@ const toggled = new Set<number>();
 let view: 'body' | 'tech' = 'body';
 /** Rows picked in the planet view: body id → indexes in its list. Emptied when the plan changes. */
 const picked = new Map<number, Set<number>>();
+/** Planets opened onto their rows in the planet view (only those with more than one thing planned). */
+const opened = new Set<number>();
 import type { T } from './index';
 
 export const PLANNER_ID = 'fut-planner';
@@ -274,14 +276,58 @@ export function openPlanner(o: PlannerOptions): void {
     const gap = have ? planMissing(scope, have) : null;
     const short = gap ? gap.metal + gap.crystal + gap.deuterium : 0;
 
+    const toggle = (r: { indexes: number[] }, on: boolean) => {
+      const next = new Set(chosen);
+      for (const i of r.indexes) on ? next.delete(i) : next.add(i);
+      if (next.size) picked.set(bodyId, next);
+      else picked.delete(bodyId);
+      draw();
+    };
+    const isOn = (r: { indexes: number[] }) => r.indexes.every((i) => chosen.has(i));
+    /** "46", "46–48", "×100": the level or amount, as short as it gets. */
+    const brief = (r: { from?: number; to?: number; amount?: number }) =>
+      r.amount !== undefined ? `×${fmt(r.amount)}` : r.from === r.to ? String(r.from ?? 0) : `${r.from ?? 0}–${r.to ?? 0}`;
+
+    // One line per planet: who, what (a picture and a level per planned thing), what it costs, the button.
     const tile = h('div', 'group body');
     tile.dataset.body = String(bodyId);
     const top = h('div', 'ghead');
     const name = h('div', 'gname');
-    name.append(h('span', 'gtitle', labelOf(bodyId)), h('span', 'gmeta', chosen.size ? t('plan.pickedOf', { n: chosen.size, of: items.length }) : items.length > 1 ? t('plan.items', { n: items.length }) : ''));
-    const mark = h('span', 'bmark');
-    mark.append(icon(doc, byId.get(bodyId)?.type === 'moon' ? 'moon' : 'planet', 16));
-    top.append(mark, name, ...triple(total, gapAll));
+    const label = h('span', 'gtitle');
+    if (byId.get(bodyId)?.type === 'moon') label.append(icon(doc, 'moon', 11));
+    label.append(labelOf(bodyId));
+    name.append(label);
+    const chips = h('div', 'pchips');
+    for (const r of rows) {
+      const on = isOn(r);
+      const chip = h('button', 'pchip');
+      chip.type = 'button';
+      chip.setAttribute('aria-pressed', String(on));
+      chip.title = `${r.name} · ${what(r)} · ${fmt(r.cost.metal)} / ${fmt(r.cost.crystal)} / ${fmt(r.cost.deuterium)} — ${t('plan.pickHint')}`;
+      chip.setAttribute('aria-label', `${r.name} ${what(r)}`);
+      chip.append(techIconEl(doc, icons[String(r.id)], 20), h('span', '', brief(r)));
+      chip.addEventListener('click', () => toggle(r, on));
+      chips.append(chip);
+    }
+    const many = rows.length > 1;
+    const open = many && opened.has(bodyId);
+    if (many) {
+      const caret = h('button', 'ib');
+      caret.type = 'button';
+      caret.setAttribute('aria-expanded', String(open));
+      caret.title = t(open ? 'plan.collapse' : 'plan.expand');
+      caret.setAttribute('aria-label', caret.title);
+      const mark = icon(doc, 'chevron', 13);
+      if (open) mark.style.transform = 'rotate(180deg)';
+      caret.append(mark);
+      caret.addEventListener('click', () => {
+        if (open) opened.delete(bodyId);
+        else opened.add(bodyId);
+        draw();
+      });
+      chips.append(caret);
+    }
+    top.append(name, chips, ...triple(total, gapAll));
     const acts = h('div', 'acts');
     const p = pendingOf(bodyId);
     const onWay = p.metal + p.crystal + p.deuterium > 0;
@@ -303,45 +349,42 @@ export function openPlanner(o: PlannerOptions): void {
     remove.type = 'button';
     remove.append(icon(doc, 'close', 13));
     remove.title = t('plan.removeBody');
-    remove.setAttribute('aria-label', remove.title);
+    remove.setAttribute('aria-label', `${remove.title}: ${labelOf(bodyId)}`);
     remove.addEventListener('click', () => save(clearBody(plan, bodyId)));
     acts.append(remove);
     top.append(acts);
     tile.append(top);
 
-    const list = h('div', 'grows');
-    for (const r of rows) {
-      const on = r.indexes.every((i) => chosen.has(i));
-      const row = h('div', `grow pick${on ? ' on' : ''}`);
-      const pick = h('button', 'gbody');
-      pick.type = 'button';
-      pick.title = t('plan.pickHint');
-      pick.setAttribute('aria-pressed', String(on));
-      pick.append(techIconEl(doc, icons[String(r.id)], 22), h('span', '', r.name), h('span', 'lv', what(r)));
-      pick.addEventListener('click', () => {
-        const next = new Set(chosen);
-        for (const i of r.indexes) on ? next.delete(i) : next.add(i);
-        if (next.size) picked.set(bodyId, next);
-        else picked.delete(bodyId);
-        draw();
-      });
-      row.append(pick, ...triple(r.cost));
-      const a = h('div', 'acts');
-      const x = h('button', 'x');
-      x.type = 'button';
-      x.append(icon(doc, 'close', 13));
-      x.title = t('plan.remove');
-      x.setAttribute('aria-label', `${t('plan.remove')}: ${r.name}`);
-      x.addEventListener('click', () => {
-        let next = plan;
-        for (const i of [...r.indexes].reverse()) next = removeFromPlan(next, bodyId, i);
-        save(next);
-      });
-      a.append(x);
-      row.append(a);
-      list.append(row);
+    // More than one thing planned here: the arrow opens them one per line, each with its own cost.
+    if (open) {
+      const list = h('div', 'grows');
+      for (const r of rows) {
+        const on = isOn(r);
+        const row = h('div', `grow pick${on ? ' on' : ''}`);
+        const pick = h('button', 'gbody');
+        pick.type = 'button';
+        pick.title = t('plan.pickHint');
+        pick.setAttribute('aria-pressed', String(on));
+        pick.append(techIconEl(doc, icons[String(r.id)], 20), h('span', '', r.name), h('span', 'lv', what(r)));
+        pick.addEventListener('click', () => toggle(r, on));
+        row.append(pick, h('span'), ...triple(r.cost));
+        const a = h('div', 'acts');
+        const x = h('button', 'x');
+        x.type = 'button';
+        x.append(icon(doc, 'close', 13));
+        x.title = t('plan.remove');
+        x.setAttribute('aria-label', `${t('plan.remove')}: ${r.name}`);
+        x.addEventListener('click', () => {
+          let next = plan;
+          for (const i of [...r.indexes].reverse()) next = removeFromPlan(next, bodyId, i);
+          save(next);
+        });
+        a.append(x);
+        row.append(a);
+        list.append(row);
+      }
+      tile.append(list);
     }
-    tile.append(list);
     return tile;
   };
 

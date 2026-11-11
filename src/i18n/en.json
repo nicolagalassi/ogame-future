@@ -681,5 +681,18 @@
   "fleet.pickOnce": "Another destination, for this fleet only",
   "fleet.pickOnceHint": "The button goes to the default destination, which is chosen in the Settings.",
   "fleet.err.noDefault": "No default destination: choose it in the Settings (gear) or use the arrow for this fleet.",
-  "fleet.invert": "Invert this ship's selection"
+  "fleet.invert": "Invert this ship's selection",
+  "settings.section.galaxy": "Galaxy",
+  "settings.bigDebris": "Debris to highlight",
+  "settings.bigDebrisHint": "From this size up (metal + crystal + deuterium) a debris field is highlighted, in the galaxy, in deep space and in the targets bar. Examples: 500k, 1M, 2.5G.",
+  "settings.bigDebrisSaved": "Highlighted from {n} up.",
+  "settings.bigDebrisBad": "Type a number, for example 1M.",
+  "marks.home": "Home planet",
+  "marks.col.name": "Name",
+  "marks.note": "Note",
+  "marks.notePlaceholder": "Note about this player…",
+  "marks.noteNeedsFlag": "Flag the player to write a note.",
+  "marks.writeShort": "Write",
+  "tech.population": "Population needed for level {level}",
+  "tech.populationShort": "not enough on this planet"
 }

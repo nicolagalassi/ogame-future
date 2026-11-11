@@ -23,7 +23,7 @@ import { pageWindow } from '../../data/fleet-dispatcher';
 import type { Activity } from '../../data/galaxy';
 import { PLAYER_SCORES_KEY, playerScores, type PlayerScores, type ScoreType } from '../../data/player-api';
 import { statusNames, universePlayers, type UniversePlayers } from '../../data/universe-players';
-import { FLAGS, flagPlayer, loadMarks, MARKS_KEY, planetsInRange, rememberRecent, TAGS, type Flag, type Marks, type Tag } from '../../engines/marks';
+import { FLAGS, flagPlayer, loadMarks, MARKS_KEY, notePlayer, planetsInRange, rememberRecent, TAGS, type Flag, type Marks, type Tag } from '../../engines/marks';
 import { ageParts, planetsOf, POSITIONS_KEY, type Positions, type Seen } from '../../engines/positions';
 import { FLAG_COLORS, FLAG_ICONS, flagButton, MARKS_CSS, TAG_COLORS, tagButton } from './picker';
 
@@ -32,6 +32,9 @@ type T = (key: string, vars?: Record<string, string | number>) => string;
 export const SIDE_ID = 'fut-side';
 export const SIDE_W = 390;
 const VIEW_KEY = 'marks.view';
+/** Debris from which a field is worth a second look (set in the settings, galaxy section). */
+export const BIG_DEBRIS_KEY = 'galaxy.bigDebris';
+export const BIG_DEBRIS = 1_000_000;
 const HOUR = 3_600_000;
 
 interface View {
@@ -67,83 +70,112 @@ const SCORE_LOOK: [ScoreType, IconName, string][] = [
 const CSS = `
 :host { all: initial; }
 * { box-sizing: border-box; }
+/* As wide as the room left of the game's page allows, between 300 and ${SIDE_W}px (--w, set from the page). */
 .side {
-  position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000000; width: ${SIDE_W}px; display: flex; flex-direction: column; gap: 6px;
+  container-type: inline-size;
+  position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000000; width: var(--w, ${SIDE_W}px); max-width: 100vw; display: flex; flex-direction: column; gap: 6px;
   padding: 8px; background: #0B121D; border-right: 1px solid #1F2C40; box-shadow: 6px 0 24px rgba(0,0,0,0.45);
-  font: 13px Arial, Helvetica, sans-serif; color: #C9D4E2; overflow: hidden;
+  font: 12px/1.3 Arial, Helvetica, sans-serif; color: #C9D4E2; font-variant-numeric: tabular-nums; overflow: hidden;
 }
-button { font: inherit; color: inherit; }
-button:focus-visible, a:focus-visible, input:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -1px; }
-.mono, .coords, .num { font-family: Consolas, "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; }
+button, input, textarea { font: inherit; color: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -1px; }
+.mono, .coords, .num { font-family: Consolas, "JetBrains Mono", monospace; }
 
-/* Head: back, title, close: the planet menu's toolbar look. */
-.head { display: flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 2px 0 4px; border: 1px solid #1F2C40; border-radius: 6px; background: #111B2A; }
-.title { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 4px; font: 700 14px Arial, sans-serif; color: #E6EDF5; white-space: nowrap; overflow: hidden; }
+/* Head: back, who or what, close. */
+.head { display: flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 2px 0 4px; border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; }
+.title { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; font: 700 14px Arial, sans-serif; color: #E6EDF5; white-space: nowrap; overflow: hidden; }
 .title .name { overflow: hidden; text-overflow: ellipsis; }
-.title a { color: #8A9BB0; font-weight: 400; text-decoration: none; }
+.title a { color: #9AA9BC; font-weight: 400; font-size: 12px; text-decoration: none; }
 .title a:hover { color: #4FD1E8; }
-.ib { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 5px; background: none; color: #8A9BB0; cursor: pointer; flex: none; text-decoration: none; }
+.ib { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 5px; background: none; color: #9AA9BC; cursor: pointer; flex: none; text-decoration: none; }
 .ib:hover { background: #16243A; color: #E6EDF5; }
 
-/* Tabs and filters: the settings chips of the planet menu. */
+/* Tabs and filters. */
 .chips { display: flex; flex-wrap: wrap; gap: 3px; }
-.chip { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: 1 0 auto; min-width: 30px; height: 28px; padding: 0 6px; border-radius: 5px; border: 1px solid #1F2C40; background: #0A111C; color: #B4C2D3; cursor: pointer; }
+.chip { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: 1 0 auto; min-width: 30px; height: 26px; padding: 0 6px; border-radius: 5px; border: 1px solid #1F2C40; background: #0A111C; color: #B4C2D3; cursor: pointer; }
 .chip:hover { border-color: #2C5A73; }
 .chip[aria-pressed="true"] { border-color: currentColor; background: #12283A; color: #E6EDF5; font-weight: 700; }
-.chip .n { font: 12px Consolas, monospace; color: #8A9BB0; }
-.seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #1F2C40; border-radius: 6px; overflow: hidden; }
-.seg button { height: 28px; border: 0; background: #0B121D; color: #8A9BB0; cursor: pointer; }
+.chip .n { font: 12px Consolas, monospace; color: #9AA9BC; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #1F2C40; border-radius: 7px; overflow: hidden; flex: none; }
+.seg button { height: 28px; border: 0; background: #0B121D; color: #9AA9BC; cursor: pointer; }
 .seg button + button { border-left: 1px solid #1F2C40; }
 .seg button[aria-pressed="true"] { background: #12283A; color: #E6EDF5; font-weight: 700; box-shadow: inset 0 -2px 0 #4FD1E8; }
 
-/* Scores: the toolbar cells, two per line. */
-.scores { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
-.score { display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 8px; border: 1px solid #1F2C40; border-radius: 6px; background: #111B2A; min-width: 0; }
-.score b { flex: 1; text-align: right; font: 700 14px Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.score i { font: normal 12px Consolas, monospace; color: #8A9BB0; }
-.actions { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid #1F2C40; border-radius: 6px; background: #0B121D; overflow: hidden; }
-.actions a, .actions button { display: flex; align-items: center; justify-content: center; height: 32px; border: 0; background: none; color: #8A9BB0; text-decoration: none; cursor: pointer; }
-.actions > * + * { border-left: 1px solid #1F2C40 !important; }
-.actions a:hover, .actions button:hover { background: #111D2D; color: #E6EDF5; }
+/* Scores: what the number is, the number, the rank. Three per line. */
+.scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden; flex: none; }
+.score { display: flex; flex-direction: column; gap: 1px; min-width: 0; padding: 5px 8px 6px; box-shadow: 1px 0 0 #1F2C40, 0 1px 0 #1F2C40; }
+.score .k { display: flex; align-items: center; gap: 4px; color: #9AA9BC; font-size: 11px; white-space: nowrap; overflow: hidden; }
+.score b { font: 700 14px/16px Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.score i { font: normal 11px Consolas, monospace; color: #9AA9BC; }
+/* The game's own pages about this player. */
+.actions { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid #1F2C40; border-radius: 7px; background: #0B121D; overflow: hidden; flex: none; }
+.actions a { display: flex; align-items: center; justify-content: center; gap: 6px; height: 28px; padding: 0 4px; color: #B4C2D3; text-decoration: none; white-space: nowrap; overflow: hidden; }
+.actions > * + * { border-left: 1px solid #1F2C40; }
+.actions a:hover { background: #111D2D; color: #E6EDF5; }
+/* The player's note. */
+.note { display: flex; align-items: flex-start; gap: 6px; padding: 5px 8px; border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; flex: none; }
+.note svg { flex: none; margin-top: 3px; color: #F5B547; }
+.note textarea { flex: 1; min-width: 0; min-height: 20px; max-height: 120px; padding: 2px 0; border: 0; background: none; color: #E6EDF5; resize: vertical; line-height: 1.4; field-sizing: content; }
+.note textarea::placeholder { color: #617C8D; }
+.note textarea:focus { outline: none; }
+.note:focus-within { border-color: #4FD1E8; }
+.note.off { color: #9AA9BC; }
 
-.range { display: flex; align-items: center; gap: 4px; color: #8A9BB0; }
-.range input { width: 76px; height: 26px; padding: 0 5px; border: 1px solid #1F2C40; border-radius: 5px; background: #0A111C; color: #E6EDF5; font: 13px Consolas, monospace; }
+.range { display: flex; align-items: center; gap: 4px; color: #9AA9BC; }
+.range input { width: 76px; height: 26px; padding: 0 5px; border: 1px solid #1F2C40; border-radius: 5px; background: #0A111C; color: #E6EDF5; font: 12px Consolas, monospace; }
 
-/* Rows: the planet menu's .fut-row, one line each. */
-.scroll { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding-right: 2px; scrollbar-color: #2A3B55 #0B121D; scrollbar-width: thin; }
-.cols, .row { display: grid; align-items: center; gap: 4px; min-height: 32px; padding: 0 4px; }
-.cols { min-height: 18px; color: #4A5B72; font-size: 12px; }
-.row { border: 1px solid #1F2C40; border-radius: 6px; background: #111B2A; }
-.row.gap { margin-top: 4px; }
-.row.active { border-color: #4FD1E8; background: rgba(79,209,232,0.14); box-shadow: inset 3px 0 0 #4FD1E8; }
-.pl .cols, .pl .row { grid-template-columns: 22px 80px 1fr 44px 44px 48px; }
-.tg .cols, .tg .row { grid-template-columns: 22px 80px 1fr 44px 48px 24px; }
-.ps .row { grid-template-columns: 22px 1fr auto auto; }
-.idx { color: #4A5B72; font: 12px Consolas, monospace; text-align: right; }
-.coords { all: unset; display: inline-flex; align-items: center; gap: 3px; padding: 2px 4px; border-radius: 4px; color: #C9D4E2; font: 13px Consolas, monospace; cursor: pointer; }
-.coords:hover { background: #1D3350; color: #E6EDF5; }
+/* Lists: one card, a hairline between rows, the cyan bar on the system on screen. */
+.scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: #2A3B55 #0B121D; scrollbar-width: thin; }
+.pl, .tg, .ps { border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden; }
+.cols, .row { display: grid; align-items: center; gap: 6px; min-height: 28px; padding: 0 6px; }
+.cols { min-height: 22px; color: #9AA9BC; font-size: 11px; background: #0B121D; border-bottom: 1px solid #1F2C40; }
+.row + .row { border-top: 1px solid #16202F; }
+.row.gap { border-top-color: #2C3E57; }
+.row:hover { background: #16243A; }
+.row.active { background: rgba(79,209,232,0.12); box-shadow: inset 3px 0 0 #4FD1E8; }
+.pl .cols, .pl .row { grid-template-columns: 18px 84px minmax(0, 1fr) 46px 40px 40px 34px; }
+.tg .cols, .tg .row { grid-template-columns: 18px 76px minmax(0, 1fr) 40px 34px 22px; }
+.ps .row { grid-template-columns: 18px minmax(0, 1fr) auto auto; min-height: 30px; }
+.idx { color: #617C8D; font: 11px Consolas, monospace; text-align: right; }
+.coords { all: unset; display: inline-flex; align-items: center; gap: 3px; padding: 2px 3px; border-radius: 4px; color: #E6EDF5; font: 12px Consolas, monospace; cursor: pointer; white-space: nowrap; }
+.coords:hover { background: #1D3350; color: #8BE4F2; }
 .row.active .coords { color: #8BE4F2; }
 .coords.new::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #4FD1E8; }
-.cell-r { text-align: right; font: 13px Consolas, monospace; color: #8A9BB0; white-space: nowrap; overflow: hidden; }
+.where { display: inline-flex; align-items: center; gap: 2px; min-width: 0; }
+.home { flex: none; color: #F5B547; }
+.pn { min-width: 0; color: #9AA9BC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cell-r { text-align: right; font: 12px Consolas, monospace; color: #617C8D; white-space: nowrap; overflow: hidden; }
+.cols .cell-r { font: inherit; color: inherit; }
 .cell-r.has { color: #C9D4E2; }
 .cell-r.big { color: #F5B547; font-weight: 700; }
 .txt { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E6EDF5; }
-.txt .who { color: #8A9BB0; }
+.txt .who { color: #9AA9BC; }
+.who2 { display: flex; flex-direction: column; min-width: 0; padding: 3px 0; }
 .pname { all: unset; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E6EDF5; font-weight: 700; cursor: pointer; }
 .pname:hover, .pname:focus-visible { color: #4FD1E8; }
-.rank { color: #8A9BB0; font: 12px Consolas, monospace; }
-.act { display: inline-flex; align-items: center; justify-content: flex-end; gap: 2px; height: 24px; padding: 0 3px; border-radius: 4px; font: 700 13px Consolas, monospace; text-decoration: none; color: #4A5B72; }
+.pnote { color: #9AA9BC; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank { color: #9AA9BC; font: 11px Consolas, monospace; }
+.act { display: inline-flex; align-items: center; justify-content: flex-end; gap: 2px; height: 22px; padding: 0 2px; border-radius: 4px; font: 700 12px Consolas, monospace; text-decoration: none; color: #617C8D; }
 .act svg { color: #617C8D; flex: none; }
 a.act:hover { background: #1D3350; }
 .act.on { color: #EF7676; } .act.mid { color: #E3BB28; } .act.off { color: #38C56E; } .act.unknown { color: #617C8D; font-weight: 400; }
-.age { text-align: right; font: 13px Consolas, monospace; }
-.age.fresh { color: #38C56E; } .age.warm { color: #E3BB28; } .age.old { color: #EF7676; } .age.none { color: #4A5B72; }
-.st-inactive { color: #9BE36D !important; } .st-longinactive { color: #8A9BB0 !important; } .st-vacation { color: #7FDBFF !important; } .st-banned { color: #FF7A7A !important; text-decoration: line-through; }
-.foot { display: flex; justify-content: space-between; gap: 6px; color: #617C8D; font-size: 12px; }
-kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background: #0D1522; color: #C9D4E2; font: 12px Consolas, monospace; }
-.empty { margin: 4px 0; padding: 14px 10px; border: 1px dashed #1F2C40; border-radius: 6px; color: #8A9BB0; text-align: center; line-height: 1.4; }
+.age { text-align: right; font: 12px Consolas, monospace; }
+.age.fresh { color: #38C56E; } .age.warm { color: #E3BB28; } .age.old { color: #EF7676; } .age.none { color: #617C8D; }
+.st-inactive { color: #9BE36D !important; } .st-longinactive { color: #9AA9BC !important; } .st-vacation { color: #7FDBFF !important; } .st-banned { color: #FF7A7A !important; text-decoration: line-through; }
+.foot { display: flex; justify-content: space-between; gap: 6px; margin: 6px 0 0; color: #9AA9BC; font-size: 11px; flex: none; }
+kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background: #0D1522; color: #C9D4E2; font: 11px Consolas, monospace; }
+.empty { margin: 4px 0; padding: 14px 10px; border: 1px dashed #1F2C40; border-radius: 7px; color: #9AA9BC; text-align: center; line-height: 1.4; }
 .err { color: #EF7676; }
 .fut-mk { margin: 0; }
+/* Narrow screens: the planet's name and the row number give their room to the numbers. */
+@container (max-width: 350px) {
+  .pl .cols, .pl .row { grid-template-columns: 84px minmax(0, 1fr) 40px 40px 34px; }
+  .tg .cols, .tg .row { grid-template-columns: 76px minmax(0, 1fr) 40px 34px 22px; }
+  .pl .idx, .tg .idx, .pl .pn { display: none; }
+  .pl .cols > :first-child, .tg .cols > :first-child, .pl .cols > :nth-child(3) { display: none; }
+  .scores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .actions a span { display: none; }
+}
 ` + MARKS_CSS;
 
 function h<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, cls = '', text?: string): HTMLElementTagNameMap[K] {
@@ -205,6 +237,22 @@ export function closeSide(doc: Document, store: Store): void {
   store.set(VIEW_KEY, { ...store.get<Partial<View>>(VIEW_KEY, {}), open: false });
 }
 
+/** The game's empire page is a table as wide as the screen: the side bar would only cover it. */
+const isEmpire = (doc: Document): boolean => /[?&]component=empire\b/.test(doc.location?.href ?? '');
+
+/**
+ * As wide as the room left of the game's content, so the bar covers the menu at most and never the
+ * page being played; never under 300px (the rows need it) nor over SIDE_W.
+ */
+function fitWidth(doc: Document): void {
+  const host = doc.getElementById(SIDE_ID);
+  if (!host) return;
+  const content = doc.getElementById('middle') ?? doc.getElementById('contentWrapper') ?? doc.getElementById('pageContent');
+  const room = content ? Math.floor(content.getBoundingClientRect().left) : SIDE_W;
+  host.style.setProperty('--w', `${Math.max(300, Math.min(SIDE_W, room))}px`);
+}
+const fitted = new WeakSet<Document>();
+
 /** The "Bersagli" button: opens the side bar, or closes it when open. */
 export function toggleSide(o: SideOptions): void {
   if (isSideOpen(o.doc)) closeSide(o.doc, o.store);
@@ -213,7 +261,7 @@ export function toggleSide(o: SideOptions): void {
 
 /** Opens the side bar again on a new page when the player left it open (no request if cached). */
 export function restoreSide(o: SideOptions): void {
-  if (readView(o).open) openSide(o, {});
+  if (readView(o).open && !isEmpire(o.doc)) openSide(o, {});
 }
 
 /** Redraws the open side bar (after the galaxy showed another system). */
@@ -236,6 +284,7 @@ export function nextInSide(doc: Document): boolean {
 export function openSide(o: SideOptions, change: Partial<View>): void {
   last = o;
   const { doc, store, t, locale } = o;
+  if (isEmpire(doc)) return;
   const view = { ...readView(o), ...change, open: true };
   store.set(VIEW_KEY, view);
   const keepScroll = doc.getElementById(SIDE_ID)?.shadowRoot?.querySelector('.scroll')?.scrollTop ?? 0;
@@ -297,6 +346,12 @@ export function openSide(o: SideOptions, change: Partial<View>): void {
 
   root.replaceChildren(style, side);
   scroll.scrollTop = keepScroll;
+  // The width is a custom property on the host: the shadow tree inherits it.
+  fitWidth(doc);
+  if (!fitted.has(doc) && doc.defaultView) {
+    fitted.add(doc);
+    doc.defaultView.addEventListener('resize', () => fitWidth(doc));
+  }
 }
 
 function iconButton(doc: Document, name: IconName, label: string): HTMLButtonElement {
@@ -343,7 +398,15 @@ function playersList(o: SideOptions, side: HTMLElement, scroll: HTMLElement, vie
     name.title = t('marks.openSheet');
     name.addEventListener('click', () => go({ player: p.id }));
     const rank = cache[String(p.id)]?.scores.total?.rank;
-    row.append(h(doc, 'span', 'idx', String(i + 1)), name, h(doc, 'span', 'rank', rank ? `#${rank.toLocaleString(locale)}` : ''), flagButton(picker, p.id, p.name));
+    const who = h(doc, 'span', 'who2');
+    who.append(name);
+    const note = marks.players[String(p.id)]?.note;
+    if (note) {
+      const line = h(doc, 'span', 'pnote', note);
+      line.title = note;
+      who.append(line);
+    }
+    row.append(h(doc, 'span', 'idx', String(i + 1)), who, h(doc, 'span', 'rank', rank ? `#${rank.toLocaleString(locale)}` : ''), flagButton(picker, p.id, p.name));
     wrap.append(row);
   });
   scroll.append(wrap);
@@ -416,22 +479,22 @@ function playerSheet(o: SideOptions, side: HTMLElement, scroll: HTMLElement, tit
   }
 
   const scores = h(doc, 'div', 'scores');
+  const score = (ico: IconName, color: string, label: string, value: string, rankText: string) => {
+    const cell = h(doc, 'div', 'score');
+    const k = h(doc, 'span', 'k');
+    const ic = icon(doc, ico, 12);
+    ic.style.color = color;
+    k.append(ic, doc.createTextNode(label));
+    const b = h(doc, 'b', '', value);
+    b.style.color = color;
+    cell.append(k, b, h(doc, 'i', '', rankText));
+    scores.append(cell);
+  };
   for (const [key, ico, color] of SCORE_LOOK) {
     const v = data?.scores[key];
-    const cell = h(doc, 'div', 'score');
-    cell.title = t(`galaxy.score.${key}`);
-    const ic = icon(doc, ico, 14);
-    ic.style.color = color;
-    const b = h(doc, 'b', '', v ? formatUnits(v.points, locale) : '—');
-    b.style.color = color;
-    cell.append(ic, b);
-    if (v) cell.append(h(doc, 'i', '', `#${v.rank.toLocaleString(locale)}`));
-    scores.append(cell);
+    score(ico, color, t(`galaxy.score.${key}`), v ? formatUnits(v.points, locale) : '—', v ? `#${v.rank.toLocaleString(locale)}` : '');
   }
-  const ships = h(doc, 'div', 'score');
-  ships.title = t('marks.ships');
-  ships.append(icon(doc, 'fleet', 14), h(doc, 'b', '', data?.ships ? data.ships.toLocaleString(locale) : '—'));
-  scores.append(ships);
+  score('fleet', '#C9D4E2', t('marks.ships'), data?.ships ? data.ships.toLocaleString(locale) : '—', '');
   side.append(scores);
 
   const actions = h(doc, 'div', 'actions');
@@ -439,36 +502,70 @@ function playerSheet(o: SideOptions, side: HTMLElement, scroll: HTMLElement, tit
     const a = h(doc, 'a');
     a.href = href;
     a.title = label;
-    a.setAttribute('aria-label', label);
-    a.append(icon(doc, ico, 15));
+    a.append(icon(doc, ico, 13), h(doc, 'span', '', label));
     actions.append(a);
   };
-  link('pen', t('marks.write'), `/game/index.php?page=ingame&component=chat&playerId=${id}`);
+  link('pen', t('marks.writeShort'), `/game/index.php?page=ingame&component=chat&playerId=${id}`);
   link('user', t('marks.profile'), `/game/index.php?page=ingame&component=playerprofile&profileId=${id}`);
   link('chart', t('marks.rank'), `/game/index.php?page=ingame&component=highscore&category=1&searchRelId=${id}${rank ? `&site=${Math.max(1, Math.ceil(rank / 100))}` : ''}`);
   side.append(actions);
+
+  // A note of the player's own on this one: kept with the flag, so it needs one.
+  const flagged = marks.players[String(id)];
+  const noteBox = h(doc, 'label', `note${flagged ? '' : ' off'}`);
+  noteBox.append(icon(doc, 'note', 13));
+  if (flagged) {
+    const area = h(doc, 'textarea');
+    area.rows = 1;
+    area.maxLength = 500;
+    area.placeholder = t('marks.notePlaceholder');
+    area.setAttribute('aria-label', t('marks.note'));
+    area.value = flagged.note ?? '';
+    // Typing here must not reach the game's keys nor Future's shortcuts.
+    for (const ev of ['keydown', 'keyup', 'keypress'] as const) area.addEventListener(ev, (e) => e.stopPropagation());
+    area.addEventListener('change', () => store.set(MARKS_KEY, notePlayer(readMarks(store), id, area.value)));
+    noteBox.append(area);
+  } else noteBox.append(h(doc, 'span', '', t('marks.noteNeedsFlag')));
+  side.append(noteBox);
 
   if (!data) {
     scroll.append(h(doc, 'p', 'empty err', t('galaxy.apiError')));
     return;
   }
   const lines = planetsOf(id, data, positions);
+  // The home planet is the first one the player ever had: the lowest id in the API's list.
+  const first = (data.planets ?? []).reduce<{ id: number; coords: string } | null>((lo, p) => (p.id > 0 && (!lo || p.id < lo.id) ? p : lo), null);
+  const big = store.get<number>(BIG_DEBRIS_KEY, BIG_DEBRIS);
   const now = Date.now();
   const wrap = h(doc, 'div', 'pl');
   const cols = h(doc, 'div', 'cols');
-  cols.append(h(doc, 'span', ''), h(doc, 'span', '', t('marks.col.coords')), h(doc, 'span', 'cell-r', t('marks.col.debris')), h(doc, 'span', 'cell-r', t('marks.col.planet')), h(doc, 'span', 'cell-r', t('marks.col.moon')), h(doc, 'span', 'cell-r', t('marks.col.seen')));
+  cols.append(h(doc, 'span', ''), h(doc, 'span', '', t('marks.col.coords')), h(doc, 'span', '', t('marks.col.name')), h(doc, 'span', 'cell-r', t('marks.col.debris')), h(doc, 'span', 'cell-r', t('marks.col.planet')), h(doc, 'span', 'cell-r', t('marks.col.moon')), h(doc, 'span', 'cell-r', t('marks.col.seen')));
   wrap.append(cols);
   let lastSystem = '';
   lines.forEach((p, i) => {
     const system = p.coords.split(':').slice(0, 2).join(':');
-    const row = h(doc, 'div', `row${i > 0 && system !== lastSystem ? ' gap' : ''}${system === here ? ' active' : ''}`);
+    const isHome = first?.coords === p.coords;
+    const row = h(doc, 'div', `row${i > 0 && system !== lastSystem ? ' gap' : ''}${system === here ? ' active' : ''}${isHome ? ' is-home' : ''}`);
     lastSystem = system;
-    row.title = p.name;
     const debris = p.seen?.debris ?? 0;
+    const where = h(doc, 'span', 'where');
+    where.append(coordsButton(doc, t, p.coords, p.fresh));
+    if (isHome) {
+      const mark = icon(doc, 'home', 12, 'home');
+      mark.setAttribute('role', 'img');
+      mark.setAttribute('aria-label', t('marks.home'));
+      const tip = doc.createElementNS('http://www.w3.org/2000/svg', 'title');
+      tip.textContent = t('marks.home');
+      mark.append(tip);
+      where.append(mark);
+    }
+    const pn = h(doc, 'span', 'pn', p.name);
+    pn.title = isHome ? `${p.name} · ${t('marks.home')}` : p.name;
     row.append(
       h(doc, 'span', 'idx', String(i + 1)),
-      coordsButton(doc, t, p.coords, p.fresh),
-      h(doc, 'span', `cell-r${debris ? ' has' : ''}${debris >= 1_000_000 ? ' big' : ''}`, p.seen ? formatUnits(debris, locale) : '—'),
+      where,
+      pn,
+      h(doc, 'span', `cell-r${debris ? ' has' : ''}${debris >= big ? ' big' : ''}`, p.seen ? formatUnits(debris, locale) : '—'),
       activityCell(doc, t, p.coords, 1, p.seen?.act[0] ?? null, p.seen, now),
       p.moon ? activityCell(doc, t, p.coords, 3, p.seen?.act[1] ?? null, p.seen, now) : h(doc, 'span', ''),
       ageCell(doc, t, p.seen, now, locale),

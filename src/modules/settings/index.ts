@@ -10,15 +10,17 @@ import { SIM_KEY, SIM_TOOLS, simTool, type SimTool } from '../../engines/sim-lin
 import { FOLD_KEY } from '../messages';
 import { SPY_SHARED_KEY } from '../messages/spy-table';
 import type { MenuSettings } from '../planet-menu';
-import { CARGO_SHIPS, SETTINGS_KEY as FLEET_SETTINGS_KEY, settingsFrom, type FleetSettings } from '../../engines/fleet';
+import { CARGO_SHIPS, parseAmount, SETTINGS_KEY as FLEET_SETTINGS_KEY, settingsFrom, type FleetSettings } from '../../engines/fleet';
+import { formatUnits } from '../../core/format';
+import { BIG_DEBRIS, BIG_DEBRIS_KEY } from '../marks/side';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { iconSvg, type IconName as FleetIcon } from '../fleet/icons';
 import { ACTIONS, assignKey, glyph, keyLabel, keymap, resetKeys, TOUCH_KEY, usableKey, type TouchMode } from '../shortcuts';
 
 export const SETTINGS_ID = 'fut-settings-window';
 const TAB_KEY = 'settings.tab';
-export type Section = 'menu' | 'mail' | 'fleet' | 'keys' | 'data';
-const SECTIONS: Section[] = ['menu', 'mail', 'fleet', 'keys', 'data'];
+export type Section = 'menu' | 'mail' | 'galaxy' | 'fleet' | 'keys' | 'data';
+const SECTIONS: Section[] = ['menu', 'mail', 'galaxy', 'fleet', 'keys', 'data'];
 
 export interface SettingsOptions {
   doc: Document;
@@ -392,6 +394,25 @@ export function openSettings(o: SettingsOptions): void {
         row(t('settings.shared'), t('settings.sharedHint'), yesNo(store.get<boolean>(SPY_SHARED_KEY, true), (v) => set(SPY_SHARED_KEY, v))),
         row(t('settings.fold'), t('settings.foldHint'), yesNo(store.get<boolean>(FOLD_KEY, true), (v) => set(FOLD_KEY, v))),
       );
+    } else if (section === 'galaxy') {
+      // Debris from this size up is lit in the galaxy and in the targets bar: "1M", "500k", "2,5G".
+      const current = store.get<number>(BIG_DEBRIS_KEY, BIG_DEBRIS);
+      const box = el('span', 'control');
+      const input = el('input', 'field');
+      input.type = 'text';
+      input.value = formatUnits(current, doc.documentElement.lang || 'it');
+      input.setAttribute('aria-label', t('settings.bigDebris'));
+      input.addEventListener('keydown', (e) => e.stopPropagation());
+      input.addEventListener('change', () => {
+        const n = parseAmount(input.value);
+        if (n > 0) store.set(BIG_DEBRIS_KEY, n);
+        status = n > 0 ? t('settings.bigDebrisSaved', { n: n.toLocaleString(doc.documentElement.lang || 'it') }) : t('settings.bigDebrisBad');
+        draw();
+      });
+      box.append(input);
+      const st = el('div', 'status', status);
+      st.setAttribute('role', 'status');
+      body.append(row(t('settings.bigDebris'), t('settings.bigDebrisHint'), box), st);
     } else if (section === 'fleet') {
       body.append(...fleetRows());
     } else if (section === 'keys') {

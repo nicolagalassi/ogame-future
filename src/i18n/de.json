@@ -681,5 +681,18 @@
   "fleet.pickOnce": "Anderes Ziel, nur für diese Flotte",
   "fleet.pickOnceHint": "Der Knopf fliegt zum Standardziel, das in den Einstellungen gewählt wird.",
   "fleet.err.noDefault": "Kein Standardziel: in den Einstellungen (Zahnrad) wählen oder den Pfeil für diese Flotte nutzen.",
-  "fleet.invert": "Auswahl dieses Schiffs umkehren"
+  "fleet.invert": "Auswahl dieses Schiffs umkehren",
+  "settings.section.galaxy": "Galaxie",
+  "settings.bigDebris": "Hervorzuhebende Trümmer",
+  "settings.bigDebrisHint": "Ab dieser Größe (Metall + Kristall + Deuterium) wird ein Trümmerfeld hervorgehoben: in der Galaxie, im Tiefenraum und in der Zielleiste. Beispiele: 500k, 1M, 2,5G.",
+  "settings.bigDebrisSaved": "Hervorgehoben ab {n}.",
+  "settings.bigDebrisBad": "Gib eine Zahl ein, zum Beispiel 1M.",
+  "marks.home": "Heimatplanet",
+  "marks.col.name": "Name",
+  "marks.note": "Notiz",
+  "marks.notePlaceholder": "Notiz zu diesem Spieler…",
+  "marks.noteNeedsFlag": "Markiere den Spieler, um eine Notiz zu schreiben.",
+  "marks.writeShort": "Schreiben",
+  "tech.population": "Benötigte Bevölkerung für Stufe {level}",
+  "tech.populationShort": "reicht auf diesem Planeten nicht"
 }

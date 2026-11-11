@@ -16,11 +16,10 @@ import { formatUnits } from '../../core/format';
 import { debrisTotal, readGalaxy, type GalaxyRow, type GalaxySystem } from '../../data/galaxy';
 import { playerScores, SCORE_TYPES, type PlayerScores, type ScoreType } from '../../data/player-api';
 import { GALAXY_CSS } from './style';
+import { BIG_DEBRIS, BIG_DEBRIS_KEY } from '../marks/side';
 
 /** Galaxy targets saved before 2026-11-06, moved into the planet marks (engines/marks). */
 export const TARGETS_KEY = 'galaxy.targets';
-/** Debris worth a second look (metal + crystal + deuterium). */
-const BIG_DEBRIS = 1_000_000;
 
 export interface GalaxyOptions {
   doc: Document;
@@ -136,6 +135,14 @@ function decorate(o: GalaxyOptions, content: Element): void {
   if (!s) return;
   const marks = loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null));
   const redraw = () => decorate(o, content);
+  // Debris from this size up is lit (the player's own threshold, set in the settings).
+  const big = store.get<number>(BIG_DEBRIS_KEY, BIG_DEBRIS);
+  /** The field's size as a number, in place of the game's icon (which stays there, unseen, for its tooltip). */
+  const value = (total: number, cls = '') => {
+    const v = el(doc, 'span', `fut-g-dval${total >= big ? ' big' : ''}${cls}`, formatUnits(total, locale));
+    v.title = total.toLocaleString(locale);
+    return v;
+  };
   const picker = { doc, store, t, onChange: redraw };
 
   for (const r of s.rows) {
@@ -182,30 +189,32 @@ function decorate(o: GalaxyOptions, content: Element): void {
       if (!own) badge.after(flagButton(picker, id, r.playerName));
     }
 
-    // Debris value under the game's icon.
+    // Debris: the value alone, lit from the threshold up.
     const debrisCell = r.row.querySelector('.cellDebris');
-    if (debrisCell && r.debris && !debrisCell.querySelector('.fut-g-dval')) {
-      const total = debrisTotal(r.debris);
-      debrisCell.append(el(doc, 'span', `fut-g-dval${total >= BIG_DEBRIS ? ' big' : ''}`, formatUnits(total, locale)));
-    }
+    debrisCell?.querySelector('.fut-g-dval')?.remove();
+    if (debrisCell && r.debris) debrisCell.append(value(debrisTotal(r.debris)));
   }
+  // Deep space (position 16): the same, next to the game's own slot.
+  const deep = doc.getElementById('expeditionDebrisSlotDebrisContainer');
+  deep?.querySelector('.fut-g-dval')?.remove();
+  if (deep && s.deepDebris) deep.append(value(debrisTotal(s.deepDebris), ' deep'));
 
   renderBar(o, content, s);
 }
 
 function renderBar(o: GalaxyOptions, content: Element, s: GalaxySystem): void {
   const { doc, t, locale } = o;
+  const BIG = o.store.get<number>(BIG_DEBRIS_KEY, BIG_DEBRIS);
   const sum = systemSummary(s, o.ownPlanetIds);
   const bar = el(doc, 'div', 'fut-g-bar');
   bar.id = 'fut-galaxy-bar';
   const part = (cls: string, text: string) => bar.append(el(doc, 'span', cls, text));
-  bar.append(el(doc, 'b', '', `${s.galaxy}:${s.system}`));
   part('', t('galaxy.players', { count: sum.players }));
   part('fut-g-inact', t('galaxy.inactive', { count: sum.inactive }) + (sum.longInactive ? ` (${t('galaxy.longInactive', { count: sum.longInactive })})` : ''));
   part('fut-g-vac', t('galaxy.vacation', { count: sum.vacation }));
   part('fut-g-muted', t('galaxy.moons', { count: sum.moons }));
-  part(sum.debris >= BIG_DEBRIS ? 'fut-g-deb' : 'fut-g-muted', sum.fields ? t('galaxy.debris', { msu: formatUnits(sum.debris, locale), count: sum.fields }) : t('galaxy.noDebris'));
-  if (sum.deep) part(sum.deep >= BIG_DEBRIS ? 'fut-g-deb' : 'fut-g-muted', t('galaxy.deep', { msu: formatUnits(sum.deep, locale) }));
+  part(sum.debris >= BIG ? 'fut-g-deb' : 'fut-g-muted', sum.fields ? t('galaxy.debris', { msu: formatUnits(sum.debris, locale), count: sum.fields }) : t('galaxy.noDebris'));
+  if (sum.deep) part(sum.deep >= BIG ? 'fut-g-deb' : 'fut-g-muted', t('galaxy.deep', { msu: formatUnits(sum.deep, locale) }));
   doc.getElementById(bar.id)?.remove();
   content.before(bar);
 }
