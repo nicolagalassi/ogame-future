@@ -19,6 +19,7 @@
  * target itself when page 2 opens. See ./repeat.ts for the "Ripeti" precedent (OGLight).
  */
 import { icon } from '../../core/icons';
+import { groupInt, groupWhileTyping } from '../../core/format';
 import { WINDOW_SHEET } from '../../core/sheet';
 import { PLAN_KEY, SENT_KEY, type Plan, type Shipment } from '../../engines/planner';
 import { expeditionItemBoost, ITEMS_KEY, LF_BONUS_KEY, type ActiveItems, type LfBonuses } from '../../data/bonuses';
@@ -160,15 +161,17 @@ function isolate(input: HTMLInputElement | HTMLSelectElement): void {
   input.addEventListener('keypress', (e) => e.stopPropagation());
 }
 
-function numberField(doc: Document, label: string, value: number | string | null, placeholder = ''): [HTMLLabelElement, HTMLInputElement] {
+/** A number field; with a locale, amounts show their thousands grouped (5.000, 700.000.000). */
+function numberField(doc: Document, label: string, value: number | string | null, placeholder = '', locale?: string): [HTMLLabelElement, HTMLInputElement] {
   const wrap = el(doc, 'label', 'fut-ffield');
   wrap.append(el(doc, 'span', '', label));
   const input = el(doc, 'input');
   input.type = 'text';
   input.inputMode = 'numeric';
   input.placeholder = placeholder;
-  input.value = value ? String(value) : '';
+  input.value = value ? (locale && typeof value === 'number' ? groupInt(value, locale) : String(value)) : '';
   isolate(input);
+  if (locale) groupWhileTyping(input, locale);
   wrap.append(input);
   return [wrap, input];
 }
@@ -236,7 +239,7 @@ function shipFields(o: FleetOptions, ships: Record<string, number>): { el: HTMLE
   const inputs: [string, HTMLInputElement][] = [];
   // Every ship type, not only those on this body: the rule can be copied to other bodies.
   for (const slot of readShipSlots(o.doc)) {
-    const [wrap, input] = numberField(o.doc, slot.name, ships[slot.id] ?? null, '0');
+    const [wrap, input] = numberField(o.doc, slot.name, ships[slot.id] ?? null, '0', o.locale);
     grid.append(wrap);
     inputs.push([slot.id, input]);
   }
@@ -258,7 +261,7 @@ function shipFields(o: FleetOptions, ships: Record<string, number>): { el: HTMLE
 function resourceFields(o: FleetOptions, res: Reserve['resources']): { el: HTMLElement; read: () => Reserve['resources'] } {
   const grid = el(o.doc, 'div', 'fut-fgrid');
   const inputs = (['metal', 'crystal', 'deuterium'] as const).map((k) => {
-    const [wrap, input] = numberField(o.doc, o.t(`res.${k}`), res[k] || null, '0');
+    const [wrap, input] = numberField(o.doc, o.t(`res.${k}`), res[k] || null, '0', o.locale);
     grid.append(wrap);
     return [k, input] as const;
   });
@@ -935,8 +938,9 @@ function sendPanel(
     input.placeholder = '0';
     input.setAttribute('aria-label', t(`res.${k}`));
     const v = settings.sendPick[k];
-    input.value = v === null ? '' : v.toLocaleString(o.locale);
+    input.value = v === null ? '' : groupInt(v, o.locale);
     isolate(input);
+    groupWhileTyping(input, o.locale);
     wrap.append(sym, input);
     res.append(wrap);
     peek(input, t(`res.${k}`), t('fleet.send.resHint'));
@@ -1007,7 +1011,7 @@ function sendPanel(
       if (!fd) return;
       const have = { metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet }[k];
       // All of it: the flight's fuel is kept back when loading.
-      input.value = Math.max(0, Math.floor(have || 0)).toLocaleString(o.locale);
+      input.value = groupInt(Math.max(0, Math.floor(have || 0)), o.locale);
       save({ sendPick: readPick() });
       recount();
     });

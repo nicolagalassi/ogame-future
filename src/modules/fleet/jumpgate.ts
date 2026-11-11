@@ -8,6 +8,7 @@
 import type { Store } from '../../core/storage';
 import { parseAmount, profileFor, PROFILES_KEY, SETTINGS_KEY } from '../../engines/fleet';
 import { iconSvg } from './icons';
+import { groupInt, groupWhileTyping } from '../../core/format';
 import { pageWindow } from '../../data/fleet-dispatcher';
 import { loadProfiles, loadSettings } from './index';
 
@@ -78,7 +79,9 @@ export function applyJumpgateReserve(doc: Document, store: Store, bodyId: number
       field.inputMode = 'numeric';
       field.placeholder = t('fleet.jumpgateStay');
       field.title = t('fleet.jumpgateKeep');
-      field.value = stored[id] ? String(stored[id]) : '';
+      // Thousands grouped as in every other number field (the page's own language).
+      field.value = stored[id] ? groupInt(stored[id], doc.documentElement.lang || 'it') : '';
+      groupWhileTyping(field, doc.documentElement.lang || 'it');
       field.setAttribute('aria-label', t('fleet.jumpgateKeep'));
       field.setAttribute('autocomplete', 'off');
       for (const ev of ['keydown', 'keyup', 'keypress']) field.addEventListener(ev, (e) => e.stopPropagation());
