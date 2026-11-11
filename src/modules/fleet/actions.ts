@@ -93,6 +93,12 @@ function setTarget(fd: FleetDispatcher, doc: Document, target: Target): void {
   set('position', target.position);
 }
 
+/**
+ * What Future's last button selected (any of them: expedition, fleetsave, collection, CL / CP…), to
+ * tell it apart from a selection the player made by hand: only the latter is kept by CL / CP.
+ */
+const ourSelection = new WeakMap<FleetDispatcher, string>();
+
 function selectShips(fd: FleetDispatcher, ships: Record<number, number>): number {
   fd.resetShips();
   fd.resetCargo();
@@ -103,7 +109,19 @@ function selectShips(fd: FleetDispatcher, ships: Record<number, number>): number
       total += n;
     }
   }
+  ourSelection.set(fd, selectionKey(fd));
   return total;
+}
+
+/** Clears ships and cargo when they were put there by one of our buttons (not by the player). */
+export function clearOurSelection(fd: FleetDispatcher): boolean {
+  const key = selectionKey(fd);
+  if (!key || key !== ourSelection.get(fd)) return false;
+  fd.resetShips();
+  fd.resetCargo();
+  ourSelection.delete(fd);
+  fd.refresh();
+  return true;
 }
 
 /** Loads cargo after ships, target and speed are set (fuel depends on all three). */
@@ -245,11 +263,8 @@ export function prepareLast(fd: FleetDispatcher, doc: Document, profile: FleetPr
   return finish(fd, last.mission, count, 0);
 }
 
-/** What our last button selected, to tell it apart from a selection the player made by hand. */
-const ourSelection = new WeakMap<FleetDispatcher, string>();
-
 function selectionKey(fd: FleetDispatcher): string {
-  return fd.shipsToSend
+  return (fd.shipsToSend ?? [])
     .filter((s) => s.number > 0)
     .map((s) => `${s.id}:${s.number}`)
     .sort()
@@ -260,7 +275,7 @@ function selectionKey(fd: FleetDispatcher): string {
 function playerSelection(fd: FleetDispatcher): Record<number, number> | null {
   const key = selectionKey(fd);
   if (!key || key === ourSelection.get(fd)) return null;
-  return Object.fromEntries(fd.shipsToSend.filter((s) => s.number > 0).map((s) => [s.id, s.number]));
+  return Object.fromEntries((fd.shipsToSend ?? []).filter((s) => s.number > 0).map((s) => [s.id, s.number]));
 }
 
 /**
@@ -292,7 +307,6 @@ export function prepareSend(
   const n = cargoCount(amount, othersCapacity, capacity, available, already);
   const needed = capacity > 0 ? Math.ceil(Math.max(0, amount - othersCapacity) / capacity) : 0;
   const count = selectShips(fd, { ...manual, [cargoShip]: n });
-  ourSelection.set(fd, selectionKey(fd));
   setTarget(fd, doc, target);
   setSpeedBar(fd, settings.transportSpeed);
   const code = mission === 'transport' ? TRANSPORT : DEPLOY;

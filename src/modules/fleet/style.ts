@@ -107,18 +107,20 @@ export const FLEET_CSS = `
 .fut-fresin.metal .sym { color: #B8C2CC; }
 .fut-fresin.crystal .sym { color: #7FB8FF; }
 .fut-fresin.deuterium .sym { color: #4FE0B0; }
-.fut-fclear { height: 26px; padding: 0 8px; border: 1px solid var(--line); border-radius: 5px; background: none; color: var(--mute); }
+.fut-fclear { width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--mute); }
 .fut-fclear:hover { border-color: #47607D; color: var(--hi); }
-.fut-fcargo { grid-column: 3; grid-row: 1 / span 2; align-self: stretch; display: flex; gap: 4px; padding-left: 10px; border-left: 1px solid var(--line-soft); }
-.fut-fcl {
-  width: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0;
-  border: 1px solid var(--tile-line); border-radius: 6px; background: var(--tile); color: var(--ico-hi);
-}
-.fut-fcl b { font-size: 13px; letter-spacing: 0.5px; }
-.fut-fcl .n { color: var(--mute); font-size: 11px; }
-.fut-fcl:hover { border-color: var(--accent); background: var(--tile-hi); }
+/* CL / CP: the game's ship pictures, short name in the corner, cargo needed along the bottom. */
+.fut-fcargo { grid-column: 3; grid-row: 1 / span 2; display: flex; align-items: center; gap: 4px; padding-left: 10px; border-left: 1px solid var(--line-soft); }
+.fut-fcl { position: relative; width: 48px; height: 48px; padding: 0; overflow: hidden; border: 1px solid var(--tile-line); border-radius: 6px; background: var(--tile); color: var(--hi); }
+.fut-fcl .pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.85; }
+.fut-fcl b { position: absolute; top: 2px; left: 2px; padding: 0 3px; border-radius: 3px; background: rgba(8, 13, 20, 0.8); font-size: 10px; line-height: 14px; }
+.fut-fcl .n { position: absolute; left: 0; right: 0; bottom: 0; padding: 1px 0; background: rgba(8, 13, 20, 0.82); color: var(--hi); font-size: 10px; line-height: 13px; text-align: center; }
+.fut-fcl .n:empty { display: none; }
+.fut-fcl:hover { border-color: var(--accent); }
+.fut-fcl:hover .pic { opacity: 1; }
 .fut-fcl.short .n { color: var(--warn); }
-.fut-fcl.none { color: var(--dim); background: none; border-style: dashed; }
+.fut-fcl.none { border-style: dashed; }
+.fut-fcl.none .pic { opacity: 0.3; filter: grayscale(1); }
 
 /* Fingers: bigger targets, no key letters. */
 @media (pointer: coarse) {
@@ -136,7 +138,7 @@ export const FLEET_CSS = `
   .fut-fsend .lbl { display: none; }
   .fut-fdest, .fut-fres, .fut-fcargo { grid-column: 1; grid-row: auto; }
   .fut-fcargo { padding-left: 0; border-left: 0; }
-  .fut-fcl { width: 64px; height: 48px; }
+  .fut-fcl { width: 52px; height: 52px; }
   .fut-fseg button { height: 38px; min-width: 44px; }
   .fut-fsecond { margin-left: 0; padding-left: 0; border-left: 0; }
 }

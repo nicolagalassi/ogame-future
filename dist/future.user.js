@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.15
+// @version      0.3.16
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -7336,6 +7336,8 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     crystal: '<path d="M12 1.8 18.6 9 12 22.2 5.4 9z"/><path d="M12 1.8 5.4 9 12 22.2 9.6 9z" opacity=".55"/><path d="M5.4 9h13.2" fill="none" stroke="currentColor" stroke-width="1" opacity=".35"/>',
     // Deuterium: a drop, a lighter bubble inside.
     deuterium: '<path fill-rule="evenodd" d="M12 2c4 4.8 6.8 8.7 6.8 12.4a6.8 6.8 0 0 1-13.6 0C5.2 10.7 8 6.8 12 2zm-2.3 11.2a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4z"/>',
+    // Eraser: clears the fields.
+    erase: '<path d="M5 12l4.5-4.5 7 7L12 19z"/><path d="M9.5 7.5 14 3l7 7-4.5 4.5z" opacity=".55"/><path d="M12 19.4h9v1.8h-9z" opacity=".7"/>',
     food: '<path d="M4.6 2.6H6v5.1h1.1V2.6h1.5v5.1h1.1V2.6h1.4V9a3 3 0 0 1-2.3 2.9v9.5H6.9v-9.5A3 3 0 0 1 4.6 9z" opacity=".75"/><path d="M17.8 2.6c-2 .8-3 3.2-3 6.5 0 2 .8 3.4 2 3.8v8.5H19V2.6z" opacity=".75"/><path d="M3.2 19.4 19.4 3.2l1.4 1.4L4.6 20.8z"/>'
   };
   function iconSvg(name, size = 20) {
@@ -10075,6 +10077,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     set("system", target.system);
     set("position", target.position);
   }
+  var ourSelection = /* @__PURE__ */ new WeakMap();
   function selectShips(fd, ships) {
     fd.resetShips();
     fd.resetCargo();
@@ -10085,7 +10088,17 @@ table.queues td.acts { width: 1%; text-align: right; }
         total += n;
       }
     }
+    ourSelection.set(fd, selectionKey(fd));
     return total;
+  }
+  function clearOurSelection(fd) {
+    const key = selectionKey(fd);
+    if (!key || key !== ourSelection.get(fd)) return false;
+    fd.resetShips();
+    fd.resetCargo();
+    ourSelection.delete(fd);
+    fd.refresh();
+    return true;
   }
   function loadCargo(fd, profile) {
     const load = cargoLoad(onPlanet(fd), profile.reserve, Math.ceil(Number(fd.getConsumption()) || 0), fd.getCargoCapacity());
@@ -10188,14 +10201,13 @@ table.queues td.acts { width: 1%; text-align: right; }
     setSpeedBar(fd, last2.speed);
     return finish(fd, last2.mission, count2, 0);
   }
-  var ourSelection = /* @__PURE__ */ new WeakMap();
   function selectionKey(fd) {
-    return fd.shipsToSend.filter((s) => s.number > 0).map((s) => `${s.id}:${s.number}`).sort().join(",");
+    return (fd.shipsToSend ?? []).filter((s) => s.number > 0).map((s) => `${s.id}:${s.number}`).sort().join(",");
   }
   function playerSelection(fd) {
     const key = selectionKey(fd);
     if (!key || key === ourSelection.get(fd)) return null;
-    return Object.fromEntries(fd.shipsToSend.filter((s) => s.number > 0).map((s) => [s.id, s.number]));
+    return Object.fromEntries((fd.shipsToSend ?? []).filter((s) => s.number > 0).map((s) => [s.id, s.number]));
   }
   function prepareSend(fd, doc, settings, target, pick, mission, cargoShip) {
     const here = onPlanet(fd);
@@ -10212,7 +10224,6 @@ table.queues td.acts { width: 1%; text-align: right; }
     const n = cargoCount(amount, othersCapacity, capacity, available, already);
     const needed = capacity > 0 ? Math.ceil(Math.max(0, amount - othersCapacity) / capacity) : 0;
     const count2 = selectShips(fd, { ...manual, [cargoShip]: n });
-    ourSelection.set(fd, selectionKey(fd));
     setTarget(fd, doc, target);
     setSpeedBar(fd, settings.transportSpeed);
     const code = mission === "transport" ? TRANSPORT : DEPLOY;
@@ -10403,18 +10414,20 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fresin.metal .sym { color: #B8C2CC; }
 .fut-fresin.crystal .sym { color: #7FB8FF; }
 .fut-fresin.deuterium .sym { color: #4FE0B0; }
-.fut-fclear { height: 26px; padding: 0 8px; border: 1px solid var(--line); border-radius: 5px; background: none; color: var(--mute); }
+.fut-fclear { width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--mute); }
 .fut-fclear:hover { border-color: #47607D; color: var(--hi); }
-.fut-fcargo { grid-column: 3; grid-row: 1 / span 2; align-self: stretch; display: flex; gap: 4px; padding-left: 10px; border-left: 1px solid var(--line-soft); }
-.fut-fcl {
-  width: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0;
-  border: 1px solid var(--tile-line); border-radius: 6px; background: var(--tile); color: var(--ico-hi);
-}
-.fut-fcl b { font-size: 13px; letter-spacing: 0.5px; }
-.fut-fcl .n { color: var(--mute); font-size: 11px; }
-.fut-fcl:hover { border-color: var(--accent); background: var(--tile-hi); }
+/* CL / CP: the game's ship pictures, short name in the corner, cargo needed along the bottom. */
+.fut-fcargo { grid-column: 3; grid-row: 1 / span 2; display: flex; align-items: center; gap: 4px; padding-left: 10px; border-left: 1px solid var(--line-soft); }
+.fut-fcl { position: relative; width: 48px; height: 48px; padding: 0; overflow: hidden; border: 1px solid var(--tile-line); border-radius: 6px; background: var(--tile); color: var(--hi); }
+.fut-fcl .pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.85; }
+.fut-fcl b { position: absolute; top: 2px; left: 2px; padding: 0 3px; border-radius: 3px; background: rgba(8, 13, 20, 0.8); font-size: 10px; line-height: 14px; }
+.fut-fcl .n { position: absolute; left: 0; right: 0; bottom: 0; padding: 1px 0; background: rgba(8, 13, 20, 0.82); color: var(--hi); font-size: 10px; line-height: 13px; text-align: center; }
+.fut-fcl .n:empty { display: none; }
+.fut-fcl:hover { border-color: var(--accent); }
+.fut-fcl:hover .pic { opacity: 1; }
 .fut-fcl.short .n { color: var(--warn); }
-.fut-fcl.none { color: var(--dim); background: none; border-style: dashed; }
+.fut-fcl.none { border-style: dashed; }
+.fut-fcl.none .pic { opacity: 0.3; filter: grayscale(1); }
 
 /* Fingers: bigger targets, no key letters. */
 @media (pointer: coarse) {
@@ -10432,7 +10445,7 @@ table.queues td.acts { width: 1%; text-align: right; }
   .fut-fsend .lbl { display: none; }
   .fut-fdest, .fut-fres, .fut-fcargo { grid-column: 1; grid-row: auto; }
   .fut-fcargo { padding-left: 0; border-left: 0; }
-  .fut-fcl { width: 64px; height: 48px; }
+  .fut-fcl { width: 52px; height: 52px; }
   .fut-fseg button { height: 38px; min-width: 44px; }
   .fut-fsecond { margin-left: 0; padding-left: 0; border-left: 0; }
 }
@@ -11221,7 +11234,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     };
     const clear = el4(doc, "button", "fut-fclear");
     clear.type = "button";
-    clear.textContent = t("fleet.send.clearBtn");
+    clear.innerHTML = iconSvg("erase", 15);
+    clear.title = t("fleet.send.clearBtn");
+    clear.setAttribute("aria-label", t("fleet.send.clearHint"));
     peek(clear, t("fleet.send.clearBtn"), t("fleet.send.clearHint"));
     res.append(clear);
     const cargoBox = el4(doc, "span", "fut-fcargo");
@@ -11233,7 +11248,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const full = t(`ship.${id}`);
       b.setAttribute("aria-label", `${t("fleet.send.cargoWith")} ${full}`);
       const n = el4(doc, "small", "n");
-      b.append(el4(doc, "b", "", short), n);
+      const pic = el4(doc, "img", "pic");
+      pic.src = SHIP_ICONS[id] ?? "";
+      pic.alt = "";
+      pic.addEventListener("error", () => pic.remove());
+      b.append(pic, el4(doc, "b", "", short), n);
       counts.set(id, n);
       peek(b, `${short} \xB7 ${full}`, t("fleet.send.cargoHint"));
       b.addEventListener("click", (e) => {
@@ -11405,6 +11424,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const now = loadSettings(o.store);
       const next = now.sendMode === mode ? null : mode;
       o.store.set(SETTINGS_KEY, { ...now, sendMode: next });
+      const fd = getDispatcher();
+      if (fd && next) clearOurSelection(fd);
       redraw();
       if (next) say(t(next === "transport" ? "fleet.send.onTransport" : "fleet.send.onDeploy"));
       doc.querySelector(".fut-fsend .fut-fin.p")?.focus();
