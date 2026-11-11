@@ -3,8 +3,10 @@
  *
  * Page 1 bar, one button per kind of send, each preparing the whole form (ships, target,
  * mission, speed, cargo) on the game's own fleetDispatcher, as OGLight does:
- * - Luna: empties the planet onto its moon with the main cargo ship (second ship for the rest).
- * - Trasporto / Schiera: towards a chosen own planet or moon, with a favourite per button.
+ * - Trasporto / Schiera: the plain game actions, towards coordinates typed (or an own body picked)
+ *   on page 1, with the resources picked there; no reserve.
+ * - Raccolta spedizioni (secondary, for players who gather fleet and resources on a main moon):
+ *   Luna (planet → its moon), then transport or deploy towards the favourite, with the reserves.
  * - Spedizione: best ship and expedition cargo, position 16 of this system.
  * - Fleetsave: the per-body profile (empty galaxy/system = this body's, as in PrOGect).
  * Rules per body, each with its own global switch: ships to keep, resources to keep, ships
@@ -31,6 +33,7 @@ import {
   sectionEmpty,
   settingsFrom,
   parseAmount,
+  parseCoords,
   PROFILES_KEY,
   profileFor,
   SETTINGS_KEY,
@@ -43,6 +46,8 @@ import {
   type ReserveSection,
   type FleetSettings,
   type FleetsaveProfile,
+  type ResourcePick,
+  type SendTarget,
 } from '../../engines/fleet';
 import { originCoords, readShipSlots } from '../../data/fleet-page';
 import { getDispatcher, readShipsInfo, SHIPS_INFO_KEY, whenDispatcherReady, type FleetDispatcher } from '../../data/fleet-dispatcher';
@@ -53,6 +58,7 @@ import {
   prepareDelivery,
   prepareExpedition,
   prepareFleetsave,
+  prepareSend,
   prepareTransport,
   type FleetMode,
   type PrepareResult,
@@ -90,7 +96,7 @@ const MODAL_ID = 'fut-fleet-modal';
 /** Missions offered for fleetsave, in the game's order codes. */
 export const FLEETSAVE_MISSIONS = [3, 4, 6, 8, 15, 5, 1];
 const pageState = new WeakMap<Document, { active: RepeatState | null; o: FleetOptions }>();
-const REPEATABLE: FleetMode[] = ['moon', 'transport', 'deploy', 'expedition', 'fleetsave', 'plan'];
+const REPEATABLE: FleetMode[] = ['moon', 'collect', 'collectDeploy', 'expedition', 'fleetsave', 'plan'];
 
 function el<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, className = '', text?: string) {
   const node = doc.createElement(tag);
@@ -190,11 +196,6 @@ function checkField(doc: Document, label: string, checked: boolean): [HTMLLabelE
 /* ------------------------------------------------------------------ */
 /* Bodies                                                              */
 /* ------------------------------------------------------------------ */
-
-function parseCoords(coords: string): [number, number, number] | null {
-  const parts = coords.replace(/[^\d:]/g, '').split(':').map(Number);
-  return parts.length === 3 && parts.every((n) => n > 0) ? (parts as [number, number, number]) : null;
-}
 
 function bodyTarget(bodies: FleetBody[], id: number): Target | null {
   for (const b of bodies) {
@@ -698,28 +699,9 @@ function addInvertButtons(o: FleetOptions): void {
   }
 }
 
-/** Small list to pick the destination of Trasporto / Schiera for this one fleet. */
-function destinationMenu(o: FleetOptions, anchor: HTMLElement, current: number | null, onPick: (id: number) => void): void {
-  const { doc } = o;
+/** Shows `menu` under `anchor`, on <body> with fixed position, and closes it on a click away or a page scroll. */
+function popup(doc: Document, anchor: HTMLElement, menu: HTMLElement): void {
   doc.querySelectorAll('.fut-fmenu').forEach((n) => n.remove());
-  const menu = el(doc, 'div', 'fut-fmenu');
-  // One row per position: the planet on the left, its moon on the right.
-  const cell = (id: number | null, moon: boolean, b: FleetBody) => {
-    if (id === null) return el(doc, 'span');
-    const item = button(doc, moon ? '' : b.name, () => {
-      menu.remove();
-      onPick(id);
-    }, `${moon ? 'moon' : 'planet'}${id === current ? ' on' : ''}`);
-    if (moon) item.append(icon(doc, 'moon', 14));
-    else item.append(el(doc, 'small', '', b.coords));
-    item.setAttribute('aria-label', `${b.name}${moon ? ` (${o.t('fleet.typeMoon')})` : ''} [${b.coords}]`);
-    if (moon) item.title = `${b.name} (${o.t('fleet.typeMoon')})`;
-    if (id === current) item.setAttribute('aria-current', 'true');
-    // Where the fleet leaves from cannot be where it goes.
-    item.disabled = id === o.bodyId;
-    return item;
-  };
-  for (const b of o.bodies) menu.append(cell(b.planetId, false, b), cell(b.moonId, true, b));
   // On <body> with fixed position: inside the bar the game's ship panels covered and clipped it.
   const r = anchor.getBoundingClientRect();
   menu.style.top = `${Math.round(r.bottom + 4)}px`;
@@ -740,6 +722,214 @@ function destinationMenu(o: FleetOptions, anchor: HTMLElement, current: number |
     doc.defaultView?.removeEventListener('scroll', onScroll, true);
   };
   doc.defaultView?.addEventListener('scroll', onScroll, true);
+}
+
+/** One row per position: the planet on the left, its moon on the right. */
+function bodyGrid(o: FleetOptions, menu: HTMLElement, current: number | null, onPick: (id: number) => void, allowHere = false): HTMLElement[] {
+  const { doc } = o;
+  const cell = (id: number | null, moon: boolean, b: FleetBody) => {
+    if (id === null) return el(doc, 'span');
+    const item = button(doc, moon ? '' : b.name, () => {
+      menu.remove();
+      onPick(id);
+    }, `${moon ? 'moon' : 'planet'}${id === current ? ' on' : ''}`);
+    if (moon) item.innerHTML = iconSvg('moon', 14);
+    else item.append(el(doc, 'small', '', b.coords));
+    item.setAttribute('aria-label', `${b.name}${moon ? ` (${o.t('fleet.typeMoon')})` : ''} [${b.coords}]`);
+    if (moon) item.title = `${b.name} (${o.t('fleet.typeMoon')})`;
+    if (id === current) item.setAttribute('aria-current', 'true');
+    // Where the fleet leaves from cannot be where it goes.
+    item.disabled = !allowHere && id === o.bodyId;
+    return item;
+  };
+  return o.bodies.flatMap((b) => [cell(b.planetId, false, b), cell(b.moonId, true, b)]);
+}
+
+/** Small list to pick an own planet or moon. */
+function destinationMenu(o: FleetOptions, anchor: HTMLElement, current: number | null, onPick: (id: number) => void): void {
+  const menu = el(o.doc, 'div', 'fut-fmenu');
+  menu.append(...bodyGrid(o, menu, current, onPick));
+  popup(o.doc, anchor, menu);
+}
+
+/**
+ * "Raccolta spedizioni": the two collection sends towards the favourite (transport, then deploy,
+ * both with the reserves), and the same once towards another body.
+ */
+function collectMenu(
+  o: FleetOptions,
+  anchor: HTMLElement,
+  settings: FleetSettings,
+  keys: { transport: string; deploy: string },
+  run: (mode: 'collect' | 'collectDeploy', dest: number | null) => void,
+): void {
+  const { doc, t } = o;
+  const menu = el(doc, 'div', 'fut-fmenu fut-fcollect');
+  menu.setAttribute('role', 'menu');
+  menu.append(el(doc, 'p', 'fut-fmhead', t('fleet.btn.collect')));
+  const main = (mode: 'collect' | 'collectDeploy', ico: IconName, label: string, fav: number | null, key: string) => {
+    const b = button(doc, '', () => {
+      menu.remove();
+      run(mode, fav);
+    }, 'fut-fmain');
+    b.setAttribute('role', 'menuitem');
+    const i = el(doc, 'span', 'ico');
+    i.innerHTML = iconSvg(ico, 18);
+    const text = el(doc, 'span', 'txt');
+    text.append(el(doc, 'b', '', label), el(doc, 'span', '', fav ? `→ ${shortLabel(o, fav)}` : t('fleet.collectNoFav')));
+    b.append(i, text);
+    if (key) b.append(el(doc, 'kbd', '', keyLabel(key)));
+    if (!fav) b.classList.add('dim');
+    return b;
+  };
+  menu.append(
+    main('collect', 'transport', t('fleet.collect.transport'), settings.favTransport, keys.transport),
+    main('collectDeploy', 'deploy', t('fleet.collect.deploy'), settings.favDeploy, keys.deploy),
+  );
+  // Once towards another body: which of the two, then where.
+  let mode: 'collect' | 'collectDeploy' = 'collect';
+  const seg = el(doc, 'div', 'fut-fseg');
+  seg.setAttribute('role', 'group');
+  seg.setAttribute('aria-label', t('fleet.collectOnce'));
+  const segBtn = (m: typeof mode, label: string) => {
+    const b = button(doc, label, () => {
+      mode = m;
+      seg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    });
+    b.setAttribute('aria-pressed', String(m === mode));
+    return b;
+  };
+  seg.append(segBtn('collect', t('fleet.collect.transport')), segBtn('collectDeploy', t('fleet.collect.deploy')));
+  menu.append(el(doc, 'p', 'fut-fmsub', t('fleet.collectOnce')), seg);
+  menu.append(...bodyGrid(o, menu, null, (id) => run(mode, id)));
+  popup(doc, anchor, menu);
+}
+
+/** The destination typed on page 1 as a game target (named when it is one of the player's bodies). */
+function sendTargetOf(o: FleetOptions, t: SendTarget | null): Target | null {
+  if (!t) return null;
+  const coords = `${t.galaxy}:${t.system}:${t.position}`;
+  const b = o.bodies.find((x) => x.coords === coords);
+  return { ...t, name: b?.name };
+}
+
+/** The own body at the typed destination, if any. */
+function sendTargetBody(o: FleetOptions, t: SendTarget | null): number | null {
+  if (!t) return null;
+  const b = o.bodies.find((x) => x.coords === `${t.galaxy}:${t.system}:${t.position}`);
+  return (t.type === 3 ? b?.moonId : b?.planetId) ?? null;
+}
+
+/**
+ * Page 1 row of the plain Trasporto / Schiera: where to (typed, or picked among the own bodies),
+ * planet or moon, and the resources to bring (empty = all, 0 = none). Kept between pages.
+ */
+function sendRow(o: FleetOptions, peek: (node: HTMLElement, name: string, detail: string) => void): HTMLElement {
+  const { doc, t } = o;
+  const settings = loadSettings(o.store);
+  const save = (part: Partial<FleetSettings>) => o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), ...part });
+  const row = el(doc, 'div', 'fut-frow fut-fsend');
+  row.setAttribute('role', 'group');
+  row.setAttribute('aria-label', t('fleet.send.label'));
+
+  // Destination: one field for "g:s:p", the planet / moon switch, the list of own bodies.
+  const dest = el(doc, 'span', 'fut-fdest');
+  const coords = el(doc, 'input', 'fut-fin coords');
+  coords.type = 'text';
+  coords.placeholder = t('fleet.send.coordsPh');
+  coords.setAttribute('aria-label', t('fleet.send.dest'));
+  const st = settings.sendTarget;
+  coords.value = st ? `${st.galaxy}:${st.system}:${st.position}` : '';
+  isolate(coords);
+  let type: 1 | 3 = st?.type ?? 1;
+  const typeSeg = el(doc, 'span', 'fut-fseg');
+  typeSeg.setAttribute('role', 'group');
+  typeSeg.setAttribute('aria-label', t('fleet.type'));
+  const store = () => {
+    const c = parseCoords(coords.value);
+    coords.classList.toggle('bad', Boolean(coords.value.trim()) && !c);
+    save({ sendTarget: c ? { galaxy: c[0], system: c[1], position: c[2], type } : null });
+  };
+  const typeBtn = (v: 1 | 3, ico: IconName, label: string) => {
+    const b = el(doc, 'button', 'fut-ftype');
+    b.type = 'button';
+    b.title = label;
+    b.setAttribute('aria-label', label);
+    b.setAttribute('aria-pressed', String(type === v));
+    b.innerHTML = iconSvg(ico, 15);
+    b.addEventListener('click', (e) => {
+      e.preventDefault();
+      type = v;
+      typeSeg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      store();
+    });
+    return b;
+  };
+  typeSeg.append(typeBtn(1, 'planet', t('fleet.typePlanet')), typeBtn(3, 'moon', t('fleet.typeMoon')));
+  coords.addEventListener('input', store);
+  const pick = el(doc, 'button', 'fut-fpick');
+  pick.type = 'button';
+  pick.setAttribute('aria-label', t('fleet.send.pick'));
+  pick.setAttribute('aria-haspopup', 'menu');
+  pick.innerHTML = iconSvg('caret', 14);
+  peek(pick, t('fleet.send.pick'), t('fleet.send.pickHint'));
+  pick.addEventListener('click', (e) => {
+    e.preventDefault();
+    destinationMenu(o, dest, sendTargetBody(o, loadSettings(o.store).sendTarget), (id) => {
+      const tg = bodyTarget(o.bodies, id);
+      if (!tg) return;
+      coords.value = `${tg.galaxy}:${tg.system}:${tg.position}`;
+      type = tg.type === 3 ? 3 : 1;
+      typeSeg.querySelectorAll('button').forEach((x, i) => x.setAttribute('aria-pressed', String((i === 0 ? 1 : 3) === type)));
+      store();
+    });
+  });
+  const destIco = el(doc, 'span', 'lbl');
+  destIco.textContent = t('fleet.send.dest');
+  dest.append(destIco, coords, pick, typeSeg);
+  peek(coords, t('fleet.send.dest'), t('fleet.send.destHint'));
+
+  // Resources: empty = all of it, a number = at most that much (k / m / g understood).
+  const res = el(doc, 'span', 'fut-fres');
+  const pickNow = settings.sendPick;
+  const inputs = (['metal', 'crystal', 'deuterium'] as const).map((k) => {
+    const wrap = el(doc, 'label', `fut-fresin ${k}`);
+    const dot = el(doc, 'i', 'dot');
+    const input = el(doc, 'input', 'fut-fin amount');
+    input.type = 'text';
+    input.inputMode = 'numeric';
+    input.placeholder = t('fleet.send.all');
+    input.setAttribute('aria-label', t(`res.${k}`));
+    const v = pickNow[k];
+    input.value = v === null ? '' : v.toLocaleString(o.locale);
+    isolate(input);
+    wrap.title = `${t(`res.${k}`)}: ${t('fleet.send.resHint')}`;
+    wrap.append(dot, input);
+    res.append(wrap);
+    return [k, input] as const;
+  });
+  const readPick = (): ResourcePick => {
+    const out: ResourcePick = { metal: null, crystal: null, deuterium: null };
+    for (const [k, input] of inputs) out[k] = input.value.trim() ? parseAmount(input.value) : null;
+    return out;
+  };
+  for (const [k, input] of inputs) {
+    input.addEventListener('input', () => save({ sendPick: readPick() }));
+    peek(input, t(`res.${k}`), t('fleet.send.resHint'));
+  }
+  const clear = el(doc, 'button', 'fut-fclear');
+  clear.type = 'button';
+  clear.textContent = t('fleet.send.all');
+  clear.setAttribute('aria-label', t('fleet.send.allHint'));
+  peek(clear, t('fleet.send.all'), t('fleet.send.allHint'));
+  clear.addEventListener('click', (e) => {
+    e.preventDefault();
+    for (const [, input] of inputs) input.value = '';
+    save({ sendPick: readPick() });
+  });
+  res.append(clear);
+  row.append(dest, res);
+  return row;
 }
 
 export function renderFleetTools(o: FleetOptions): void {
@@ -800,20 +990,23 @@ export function renderFleetTools(o: FleetOptions): void {
         begin('moon');
         report(prepareTransport(fd, doc, profile, settings, target), 'fleet.ok.cargo');
       }),
-    transport: (dest) =>
+    collect: (dest) =>
       withDispatcher((fd) => {
         const target = dest ? bodyTarget(o.bodies, dest) : null;
         if (!dest || !target) return say(t('fleet.err.noDest'), true);
-        begin('transport', dest);
+        begin('collect', dest);
         report(prepareTransport(fd, doc, profile, settings, target), 'fleet.ok.cargo');
       }),
-    deploy: (dest) =>
+    collectDeploy: (dest) =>
       withDispatcher((fd) => {
         const target = dest ? bodyTarget(o.bodies, dest) : null;
         if (!dest || !target) return say(t('fleet.err.noDest'), true);
-        begin('deploy', dest);
+        begin('collectDeploy', dest);
         report(prepareDeploy(fd, doc, profile, settings, target), 'fleet.ok.cargo');
       }),
+    // Plain game actions: destination and resources from the row on page 1, read when pressed.
+    transport: () => sendPlain('transport'),
+    deploy: () => sendPlain('deploy'),
     expedition: () =>
       withDispatcher((fd) => {
         begin('expedition');
@@ -848,28 +1041,21 @@ export function renderFleetTools(o: FleetOptions): void {
         report(prepareLast(fd, doc, profile, last), 'fleet.ok.ships');
       }),
   };
-  const favRun = {
-    transport: () => (settings.favTransport ? run.transport(settings.favTransport) : say(t('fleet.err.noDefault'), true)),
-    deploy: () => (settings.favDeploy ? run.deploy(settings.favDeploy) : say(t('fleet.err.noDefault'), true)),
-  };
-
-  // Split button: the tile goes to the default destination (chosen in the settings); the arrow
-  // prepares this one fleet towards another body, without changing the default.
-  const withCaret = (tileEl: HTMLButtonElement, mode: 'transport' | 'deploy', fav: number | null) => {
-    const wrap = el(doc, 'span', 'fut-fsplit');
-    const caret = el(doc, 'button', 'fut-fcaret');
-    caret.type = 'button';
-    caret.title = t('fleet.pickOnce');
-    caret.setAttribute('aria-label', t('fleet.pickOnce'));
-    caret.setAttribute('aria-haspopup', 'menu');
-    caret.innerHTML = iconSvg('caret', 14);
-    caret.addEventListener('click', (e) => {
-      e.preventDefault();
-      destinationMenu(o, wrap, fav, (id) => run[mode](id));
+  function sendPlain(mission: 'transport' | 'deploy'): void {
+    withDispatcher((fd) => {
+      const now = loadSettings(o.store);
+      const target = sendTargetOf(o, now.sendTarget);
+      if (!target) return say(t('fleet.err.noTarget'), true);
+      const c = fd.currentPlanet;
+      if (c && c.galaxy === target.galaxy && c.system === target.system && c.position === target.position && (c.type ?? 1) === target.type)
+        return say(t('fleet.err.sameBody'), true);
+      begin(mission);
+      report(prepareSend(fd, doc, now, target, now.sendPick, mission), 'fleet.ok.cargo');
     });
-    out.peek(caret, t('fleet.pickOnce'), t('fleet.pickOnceHint'));
-    wrap.append(tileEl, caret);
-    return wrap;
+  }
+  const favRun = {
+    collect: () => (settings.favTransport ? run.collect(settings.favTransport) : say(t('fleet.err.noDefault'), true)),
+    collectDeploy: () => (settings.favDeploy ? run.collectDeploy(settings.favDeploy) : say(t('fleet.err.noDefault'), true)),
   };
 
   if (fleet1 && anchor1) {
@@ -887,11 +1073,18 @@ export function renderFleetTools(o: FleetOptions): void {
       return b;
     };
     const to = (id: number | null) => `→ ${shortLabel(o, id)}`;
-    if (here?.moonId) tiles.append(act('moon', 'fleet.moon', t('fleet.btn.moon'), to(here.moonId), t('fleet.tip.moon'), () => run.moon()));
     const last = o.store.get<LastFleet | null>(LAST_FLEET_KEY, null);
+    // Collection of the expeditions: a secondary tool, its two sends behind one tile.
+    const collect = tile(doc, 'collect', t('fleet.btn.collect'), () =>
+      collectMenu(o, collect, settings, { transport: k('fleet.collect'), deploy: k('fleet.collectDeploy') }, (mode, dest) =>
+        dest ? run[mode](dest) : say(t('fleet.err.noDefault'), true),
+      ), 'more');
+    collect.setAttribute('aria-haspopup', 'menu');
+    collect.append(el(doc, 'i', 'more-mark'));
+    out.peek(collect, t('fleet.btn.collect'), t('fleet.tip.collect'));
     tiles.append(
-      withCaret(act('transport', 'fleet.transport', t('fleet.btn.transport'), to(settings.favTransport), t('fleet.tip.transport'), favRun.transport, !settings.favTransport), 'transport', settings.favTransport),
-      withCaret(act('deploy', 'fleet.deploy', t('fleet.btn.deploy'), to(settings.favDeploy), t('fleet.tip.deploy'), favRun.deploy, !settings.favDeploy), 'deploy', settings.favDeploy),
+      act('transport', 'fleet.transport', t('fleet.btn.transport'), '', t('fleet.tip.transport'), () => run.transport()),
+      act('deploy', 'fleet.deploy', t('fleet.btn.deploy'), '', t('fleet.tip.deploy'), () => run.deploy()),
       act('expedition', 'fleet.expedition', t('fleet.btn.expedition'), '', t('fleet.tip.expedition'), () => run.expedition()),
       act(
         'fleetsave',
@@ -904,11 +1097,17 @@ export function renderFleetTools(o: FleetOptions): void {
       ),
       act('last', 'fleet.last', t('fleet.btn.last'), '', last ? t('fleet.tip.last') : t('fleet.err.noLast'), () => run.last(), !last),
     );
+    const secondary = el(doc, 'span', 'fut-fsecond');
+    if (here?.moonId) secondary.append(act('moon', 'fleet.moon', t('fleet.btn.moon'), to(here.moonId), t('fleet.tip.moon'), () => run.moon()));
+    secondary.append(collect);
+    tiles.append(secondary);
     // Same actions on their keys and in the touch bar, like OGLight (one key = one prepared fleet, never a send).
     registerActions(doc, o.store, t, {
       ...(here?.moonId ? { 'fleet.moon': () => run.moon() } : {}),
-      'fleet.transport': favRun.transport,
-      'fleet.deploy': favRun.deploy,
+      'fleet.transport': () => run.transport(),
+      'fleet.deploy': () => run.deploy(),
+      'fleet.collect': favRun.collect,
+      'fleet.collectDeploy': favRun.collectDeploy,
       'fleet.expedition': () => run.expedition(),
       'fleet.fleetsave': () => run.fleetsave(),
       'fleet.last': () => run.last(),
@@ -958,7 +1157,7 @@ export function renderFleetTools(o: FleetOptions): void {
     top.append(tiles, edit);
     const bottom = el(doc, 'div', 'fut-frow');
     bottom.append(rules, out.box);
-    bar.append(top, bottom);
+    bar.append(top, sendRow(o, out.peek), bottom);
     anchor1.before(bar);
     addInvertButtons(o);
   }
@@ -1026,7 +1225,7 @@ export function renderFleetTools(o: FleetOptions): void {
       // After the page has fully loaded, so the game's own first target check has started
       // (withDispatcher then waits for its answer before preparing).
       const go = () => {
-        if (incoming.mode === 'transport' || incoming.mode === 'deploy' || incoming.mode === 'plan') run[incoming.mode](incoming.dest);
+        if (incoming.mode === 'collect' || incoming.mode === 'collectDeploy' || incoming.mode === 'plan') run[incoming.mode](incoming.dest);
         else run[incoming.mode]();
       };
       if (doc.readyState === 'complete') setTimeout(go, 0);

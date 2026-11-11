@@ -232,7 +232,7 @@ export function openSettings(o: SettingsOptions): void {
       row(t('fleet.mainShip'), t('settings.mainShipHint'), select(cargo, String(f.mainShip), (v) => set({ mainShip: Number(v) }))),
       row(t('fleet.secondShip'), t('settings.secondShipHint'), select([['0', t('fleet.none')], ...cargo], String(f.secondShip), (v) => set({ secondShip: Number(v) }))),
       row(t('fleet.speed'), t('settings.speedHint'), select(speeds, String(f.transportSpeed), (v) => set({ transportSpeed: Number(v) }))),
-      group(t('fleet.favTitle'), icon(doc, 'star', 16)),
+      group(t('fleet.favTitle'), fleetGlyph('collect')),
       row(t('fleet.favTransport'), t('settings.favHint'), select(dest, String(f.favTransport ?? 0), (v) => set({ favTransport: Number(v) || null }))),
       row(t('fleet.favDeploy'), t('settings.favHint'), select(dest, String(f.favDeploy ?? 0), (v) => set({ favDeploy: Number(v) || null }))),
       group(t('fleet.expeditionTitle'), fleetGlyph('expedition')),

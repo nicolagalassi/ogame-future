@@ -33,6 +33,8 @@ export const ACTIONS: ActionDef[] = [
   { id: 'fleet.moon', key: 'l', label: 'fleet.btn.moon', group: 'fleet', glyph: { fleet: 'moon' } },
   { id: 'fleet.transport', key: 't', label: 'fleet.btn.transport', group: 'fleet', glyph: { fleet: 'transport' } },
   { id: 'fleet.deploy', key: 'd', label: 'fleet.btn.deploy', group: 'fleet', glyph: { fleet: 'deploy' } },
+  { id: 'fleet.collect', key: 'c', label: 'fleet.btn.collectTransport', group: 'fleet', glyph: { fleet: 'collect' } },
+  { id: 'fleet.collectDeploy', key: 'v', label: 'fleet.btn.collectDeploy', group: 'fleet', glyph: { fleet: 'collect' } },
   { id: 'fleet.expedition', key: 'x', label: 'fleet.btn.expedition', group: 'fleet', glyph: { fleet: 'expedition' } },
   { id: 'fleet.fleetsave', key: 'e', label: 'fleet.btn.fleetsave', group: 'fleet', glyph: { fleet: 'fleetsave' } },
   { id: 'fleet.last', key: 'p', label: 'fleet.btn.last', group: 'fleet', glyph: { fleet: 'last' } },

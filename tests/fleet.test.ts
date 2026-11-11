@@ -16,11 +16,11 @@ import {
 } from '../src/engines/fleet';
 import { readFuel, readShipSlots, originCoords, isFleetDispatch } from '../src/data/fleet-page';
 import { enableOriginAutofill } from '../src/modules/fleet/index';
-import { prepareDelivery, prepareDeploy, prepareExpedition, prepareTransport } from '../src/modules/fleet/actions';
+import { prepareDelivery, prepareDeploy, prepareExpedition, prepareSend, prepareTransport } from '../src/modules/fleet/actions';
 import { applyFood } from '../src/modules/fleet/index';
 import { MemoryStore, Store } from '../src/core/storage';
 import { hookSend, nextInRound, readRepeatParams, repeatUrl } from '../src/modules/fleet/repeat';
-import { DEFAULT_SETTINGS, cargoLoad, cargoShipsFor, expeditionFleet, expeditionMax, expeditionTarget, nextBody } from '../src/engines/fleet';
+import { DEFAULT_SETTINGS, cargoLoad, cargoShipsFor, expeditionFleet, expeditionMax, expeditionTarget, nextBody, parseCoords, pickedLoad } from '../src/engines/fleet';
 import type { FleetDispatcher } from '../src/data/fleet-dispatcher';
 
 const reserve = (ships: Record<string, number>, res = { metal: 0, crystal: 0, deuterium: 0 }) => ({ ships, resources: res });
@@ -315,16 +315,16 @@ describe('repeat', () => {
     { planetId: 2, moonId: 12 },
   ];
   it('round-trips the URL state', () => {
-    const url = repeatUrl('https://s1-it.ogame.gameforge.com/game/index.php?page=ingame&component=overview', 2, { mode: 'transport', first: 1, dest: 12 });
+    const url = repeatUrl('https://s1-it.ogame.gameforge.com/game/index.php?page=ingame&component=overview', 2, { mode: 'collect', first: 1, dest: 12 });
     expect(url).toContain('cp=2');
-    expect(readRepeatParams(url)).toEqual({ mode: 'transport', first: 1, dest: 12 });
+    expect(readRepeatParams(url)).toEqual({ mode: 'collect', first: 1, dest: 12 });
     expect(readRepeatParams('https://x.test/game/index.php?page=ingame')).toBeNull();
   });
 
   it('goes round the bodies and stops at the first one', () => {
     expect(nextInRound({ mode: 'expedition', first: 1, dest: null }, 1, list)).toBe(2);
     expect(nextInRound({ mode: 'expedition', first: 1, dest: null }, 2, list)).toBeNull();
-    expect(nextInRound({ mode: 'transport', first: 11, dest: 12 }, 11, list)).toBeNull();
+    expect(nextInRound({ mode: 'collect', first: 11, dest: 12 }, 11, list)).toBeNull();
     expect(nextInRound({ mode: 'moon', first: 2, dest: null }, 2, list)).toBe(1);
   });
 
@@ -519,5 +519,77 @@ describe('rules window', () => {
     expect(profiles['3']!.reserve.ships).toEqual({ '203': 10 });
     expect(profiles['11']).toBeUndefined();
     expect(root.querySelector('.fut-fbadge')!.textContent).toBe('fleet.rule.on · fleet.rule.alsoOn:Colonia, Terza');
+  });
+});
+
+describe('plain Trasporto / Schiera', () => {
+  it('reads coordinates and loads what was picked, within fuel and room, without reserves', () => {
+    expect(parseCoords('1:234:5')).toEqual([1, 234, 5]);
+    expect(parseCoords('[4:12:16]')).toEqual([4, 12, 16]);
+    expect(parseCoords('4 12 6')).toEqual([4, 12, 6]);
+    expect(parseCoords('4:12')).toBeNull();
+    const here = { metal: 100, crystal: 50, deuterium: 30 };
+    expect(pickedLoad(here, { metal: null, crystal: null, deuterium: null }, 10, 1_000)).toEqual({ metal: 100, crystal: 50, deuterium: 20 });
+    expect(pickedLoad(here, { metal: 40, crystal: 0, deuterium: null }, 10, 1_000)).toEqual({ metal: 40, crystal: 0, deuterium: 20 });
+    expect(pickedLoad(here, { metal: null, crystal: null, deuterium: null }, 10, 60)).toEqual({ metal: 0, crystal: 40, deuterium: 20 });
+  });
+
+  it('transport: cargo ships for the picked resources, no reserve', () => {
+    const fd = fakeDispatcher();
+    const target = { galaxy: 1, system: 2, position: 3, type: 1 };
+    const r = prepareSend(fd, fleetPage(), DEFAULT_SETTINGS, target, { metal: 100_000, crystal: null, deuterium: 0 }, 'transport');
+    expect(fd.selected).toEqual({ 203: 75 });
+    expect(fd.mission).toBe(3);
+    expect([fd.cargoMetal, fd.cargoCrystal, fd.cargoDeuterium]).toEqual([100_000, 50_000, 0]);
+    expect(r).toMatchObject({ ok: true, ships: 75, cargo: 150_000 });
+    const none = prepareSend(fakeDispatcher(), fleetPage(), DEFAULT_SETTINGS, target, { metal: 0, crystal: 0, deuterium: 0 }, 'transport');
+    expect(none).toMatchObject({ ok: false, reason: 'fleet.err.nothingPicked' });
+  });
+
+  it('deploy: every ship, or the ships the player picked by hand', () => {
+    const target = { galaxy: 1, system: 2, position: 3, type: 3 };
+    const all = fakeDispatcher();
+    prepareSend(all, fleetPage(), DEFAULT_SETTINGS, target, { metal: null, crystal: null, deuterium: null }, 'deploy');
+    expect(all.selected).toEqual({ 203: 100, 202: 50, 210: 3 });
+    expect(all.mission).toBe(4);
+    expect(all.targetPlanet.type).toBe(3);
+    const mine = fakeDispatcher({ shipsToSend: [{ id: 202, number: 10 }] });
+    prepareSend(mine, fleetPage(), DEFAULT_SETTINGS, target, { metal: null, crystal: null, deuterium: null }, 'deploy');
+    expect(mine.selected).toEqual({ 202: 10 });
+    expect(mine.cargoDeuterium).toBe(5_000);
+  });
+
+  it('page 1 keeps the typed destination and resources; the collection sits behind one tile', async () => {
+    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    const doc = fleetPage();
+    const store = new Store(new MemoryStore(), 'send');
+    const bodies = [
+      { planetId: 1, moonId: 11, name: 'Casa', coords: '5:185:8' },
+      { planetId: 2, moonId: 12, name: 'Colonia', coords: '5:186:8' },
+    ];
+    const o = { doc, store, bodyId: 1, bodies, t: (k: string) => k, locale: 'it', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch' };
+    renderFleetTools(o);
+    const coords = doc.querySelector<HTMLInputElement>('.fut-fin.coords')!;
+    coords.value = '4:12:6';
+    coords.dispatchEvent(new Event('input'));
+    doc.querySelectorAll<HTMLButtonElement>('.fut-ftype')[1]!.click();
+    const metal = doc.querySelector<HTMLInputElement>('.fut-fresin.metal input')!;
+    metal.value = '2m';
+    metal.dispatchEvent(new Event('input'));
+    const saved = store.get<typeof DEFAULT_SETTINGS>('fleet.settings', DEFAULT_SETTINGS);
+    expect(saved.sendTarget).toEqual({ galaxy: 4, system: 12, position: 6, type: 3 });
+    expect(saved.sendPick).toEqual({ metal: 2_000_000, crystal: null, deuterium: null });
+    // Picking an own body writes its coordinates and type.
+    doc.querySelector<HTMLButtonElement>('.fut-fpick')!.click();
+    [...doc.querySelectorAll<HTMLButtonElement>('.fut-fmenu .fut-fbtn')].find((b) => b.getAttribute('aria-label')?.startsWith('Colonia ('))!.click();
+    expect(store.get<typeof DEFAULT_SETTINGS>('fleet.settings', DEFAULT_SETTINGS).sendTarget).toEqual({ galaxy: 5, system: 186, position: 8, type: 3 });
+    // Redrawn, the row shows what was kept.
+    renderFleetTools(o);
+    expect(doc.querySelector<HTMLInputElement>('.fut-fin.coords')!.value).toBe('5:186:8');
+    // Collection: one secondary tile opening its two sends.
+    const collect = doc.querySelector<HTMLButtonElement>('.fut-fsecond .fut-fact.more')!;
+    collect.click();
+    const menu = doc.querySelector('.fut-fcollect')!;
+    expect([...menu.querySelectorAll('.fut-fmain b')].map((b) => b.textContent)).toEqual(['fleet.collect.transport', 'fleet.collect.deploy']);
   });
 });
