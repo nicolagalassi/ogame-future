@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.17
+// @version      0.3.18
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -7336,6 +7336,10 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     crystal: '<path d="M12 1.8 18.6 9 12 22.2 5.4 9z"/><path d="M12 1.8 5.4 9 12 22.2 9.6 9z" opacity=".55"/><path d="M5.4 9h13.2" fill="none" stroke="currentColor" stroke-width="1" opacity=".35"/>',
     // Deuterium: a drop, a lighter bubble inside.
     deuterium: '<path fill-rule="evenodd" d="M12 2c4 4.8 6.8 8.7 6.8 12.4a6.8 6.8 0 0 1-13.6 0C5.2 10.7 8 6.8 12 2zm-2.3 11.2a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4z"/>',
+    // Totals: the sum of the three (a sigma).
+    total: '<path d="M5 3h14v4.2h-2.4V5.6H9.4l5.3 6.4-5.3 6.4h7.2v-1.6H19V21H5v-1.8l6.1-7.2L5 4.8z"/>',
+    // The fleet's worth: a ship seen from the side, wings in the second tone, a lit window.
+    fleetValue: '<path d="M7.5 8.6 10 3.5h3l3.2 5.1z" opacity=".55"/><path d="M7.5 15.4 10 20.5h3l3.2-5.1z" opacity=".55"/><path fill-rule="evenodd" d="M1.8 12 6.5 8.4h9.7c3.2 0 5.6 1.6 6.2 3.6-.6 2-3 3.6-6.2 3.6H6.5zm14.4-1.6a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2z"/>',
     // Eraser: clears the fields.
     erase: '<path d="M5 12l4.5-4.5 7 7L12 19z"/><path d="M9.5 7.5 14 3l7 7-4.5 4.5z" opacity=".55"/><path d="M12 19.4h9v1.8h-9z" opacity=".7"/>',
     food: '<path d="M4.6 2.6H6v5.1h1.1V2.6h1.5v5.1h1.1V2.6h1.4V9a3 3 0 0 1-2.3 2.9v9.5H6.9v-9.5A3 3 0 0 1 4.6 9z" opacity=".75"/><path d="M17.8 2.6c-2 .8-3 3.2-3 6.5 0 2 .8 3.4 2 3.8v8.5H19V2.6z" opacity=".75"/><path d="M3.2 19.4 19.4 3.2l1.4 1.4L4.6 20.8z"/>'
@@ -8146,8 +8150,8 @@ ${L} .fut-name .planet-koords {
   width: auto !important; max-width: none !important; height: auto !important; line-height: 1.15 !important;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left !important; background: none !important;
 }
-${L} .fut-name .planet-name { font: 700 12px Arial, sans-serif !important; color: #E6EDF5 !important; }
-${L} .fut-name .planet-koords { font: 11px monospace !important; color: #C9D4E2 !important; }
+${L} .fut-name .planet-name { font: 700 11px Arial, sans-serif !important; color: #E6EDF5 !important; }
+${L} .fut-name .planet-koords { font: 10px monospace !important; color: #C9D4E2 !important; }
 
 /* Resources: one per line (metal, crystal, deuterium). */
 ${L} .fut-res {
@@ -8248,7 +8252,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 }
 #planetbarcomponent .fut-toolbar .fut-cell {
   box-sizing: border-box !important; height: 40px !important; width: auto !important; box-shadow: none !important; border-radius: 0 !important; font: inherit;
-  display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 3px; min-width: 0; padding: 0 8px; margin: 0;
+  display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 3px; min-width: 0; padding: 0 6px 0 8px; margin: 0;
   border: 0 !important; border-right: 1px solid #1F2C40 !important; background: none !important; color: inherit; text-align: left; cursor: pointer;
 }
 #planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) { background: #16243A !important; }
@@ -8258,8 +8262,8 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 #planetbarcomponent .fut-cell-t { display: flex; align-items: center; gap: 5px; min-width: 0; }
 #planetbarcomponent .fut-cell-i { flex: none; display: inline-flex; color: #8A9BB0; }
 #planetbarcomponent .fut-cell-k { min-width: 0; font: 11px/12px Arial, sans-serif; color: #9AA9BC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#planetbarcomponent .fut-cell-v { min-width: 0; font: 700 13px/14px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#planetbarcomponent .fut-cell-v small { font: 10px/14px Arial, sans-serif; color: #8A9BB0; font-weight: 400; }
+#planetbarcomponent .fut-cell-v { min-width: 0; font: 700 12px/14px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#planetbarcomponent .fut-cell-v small { font: 10px/14px Arial, sans-serif; letter-spacing: -0.2px; color: #8A9BB0; font-weight: 400; }
 #planetbarcomponent .fut-cell-v.fut-warn { color: #F5B547; } #planetbarcomponent .fut-cell-v.fut-ok { color: #4FE0B0; }
 #planetbarcomponent .fut-side { display: flex; flex-direction: column; grid-column: 3; grid-row: 1; }
 #planetbarcomponent .fut-tool {
@@ -8286,12 +8290,14 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
   box-sizing: border-box; margin-top: 4px; padding: 2px 8px 4px; border-radius: 7px; border: 1px solid #1F2C40; background: #111B2A;
   font: 12px/1.3 Arial, Helvetica, sans-serif; font-variant-numeric: tabular-nums;
 }
-.fut-totals .fut-trow { display: grid; grid-template-columns: minmax(0, 1fr) 58px 62px; align-items: baseline; gap: 6px; min-height: 20px; padding: 2px 0; }
+.fut-totals .fut-trow { display: grid; grid-template-columns: minmax(0, 1fr) 58px 62px; align-items: center; gap: 6px; min-height: 20px; padding: 2px 0; }
 .fut-totals .fut-trow + .fut-trow { border-top: 1px solid #16202F; }
 .fut-totals .fut-thead { min-height: 0; color: #9AA9BC; font-size: 11px; }
 .fut-totals .fut-thead + .fut-trow { border-top-color: #1F2C40; }
 .fut-totals .fut-tname { display: flex; align-items: center; gap: 6px; min-width: 0; white-space: nowrap; overflow: hidden; }
-.fut-totals .fut-trow:not(.fut-thead) .fut-tname::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.fut-totals .fut-tico { flex: none; display: inline-flex; }
+.fut-totals .fut-tlabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: #C9D4E2; }
+.fut-totals .fut-msu .fut-tlabel { color: #4FD1E8; }
 .fut-totals .fut-tnum { text-align: right; white-space: nowrap; color: #E6EDF5; font: 700 12px Consolas, "JetBrains Mono", monospace; }
 .fut-totals .fut-tnum:last-child { color: #B4C2D3; font-weight: 400; }
 .fut-totals .fut-thead .fut-tnum { color: inherit; font: inherit; }
@@ -8299,8 +8305,8 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 .fut-totals .fut-msu .fut-tname { color: #4FD1E8; font-weight: 700; }
 .fut-totals .fut-msu .fut-tnum:last-child { color: #E6EDF5; }
 #planetbarcomponent:not(.fut-wide) .fut-totals { padding: 2px 4px 4px; }
-#planetbarcomponent:not(.fut-wide) .fut-totals .fut-trow { grid-template-columns: 8px minmax(0, 1fr) minmax(0, 1fr); gap: 3px; }
-#planetbarcomponent:not(.fut-wide) .fut-totals .fut-tname { font-size: 0; gap: 0; }
+#planetbarcomponent:not(.fut-wide) .fut-totals .fut-trow { grid-template-columns: 13px minmax(0, 1fr) minmax(0, 1fr); gap: 3px; }
+#planetbarcomponent:not(.fut-wide) .fut-totals .fut-tlabel { display: none; }
 #planetbarcomponent:not(.fut-wide) .fut-totals .fut-tnum { font-size: 11px; }
 `;
 
@@ -8432,7 +8438,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     return box;
   }
   function clearPlanetMenu(doc) {
-    doc.querySelectorAll(".fut-res, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue").forEach((n) => n.remove());
+    doc.querySelectorAll(".fut-res, .fut-fleet, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue").forEach((n) => n.remove());
     doc.querySelectorAll(".fut-name").forEach((wrap) => wrap.replaceWith(...Array.from(wrap.childNodes)));
     doc.querySelectorAll(".fut-row").forEach((n) => n.classList.remove("fut-row", "fut-current"));
   }
@@ -8579,25 +8585,31 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
       const msu4 = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
       const box = el3(doc, "div", "fut-totals");
       box.setAttribute("role", "table");
-      const row = (cls, cells) => {
+      const row = (cls, cells, glyph2) => {
         const r = el3(doc, "div", `fut-trow ${cls}`.trim());
         r.setAttribute("role", "row");
         cells.forEach((text, i) => {
-          const c = el3(doc, "span", i ? "fut-tnum" : "fut-tname", text);
+          const c = el3(doc, "span", i ? "fut-tnum" : "fut-tname");
           c.setAttribute("role", cls === "fut-thead" ? "columnheader" : "cell");
+          if (!i && glyph2) {
+            const ico = el3(doc, "span", "fut-tico");
+            ico.innerHTML = iconSvg(glyph2, 13);
+            c.append(ico);
+          }
+          c.append(el3(doc, "span", "fut-tlabel", text));
           r.append(c);
         });
         box.append(r);
       };
       row("fut-thead", ["", o.t("totals.stock"), o.t("totals.day")]);
-      const line = (label, value, rate, cls) => row(cls, [label, formatUnits(value, o.locale), `+${formatUnits(rate * 24, o.locale)}`]);
-      line(o.t("res.metal"), stock2.metal, perHour.metal, "fut-m");
-      line(o.t("res.crystal"), stock2.crystal, perHour.crystal, "fut-c");
-      line(o.t("res.deuterium"), stock2.deuterium, perHour.deuterium, "fut-d");
+      const line = (label, value, rate, cls, glyph2) => row(cls, [label, formatUnits(value, o.locale), `+${formatUnits(rate * 24, o.locale)}`], glyph2);
+      line(o.t("res.metal"), stock2.metal, perHour.metal, "fut-m", "metal");
+      line(o.t("res.crystal"), stock2.crystal, perHour.crystal, "fut-c", "crystal");
+      line(o.t("res.deuterium"), stock2.deuterium, perHour.deuterium, "fut-d", "deuterium");
       const plain = (r) => r.metal + r.crystal + r.deuterium;
-      if (o.settings.totalView === "sum") line(o.t("totals.sum"), plain(stock2), plain(perHour), "fut-msu");
-      else line("MSU", msu4(stock2), msu4(perHour), "fut-msu");
-      if (view2.fleet) row("fut-fleetrow", [o.t("planetMenu.fleet"), formatUnits(o.snapshot.bodies.reduce((sum, b) => sum + fleetValue(b), 0), o.locale), ""]);
+      if (o.settings.totalView === "sum") line(o.t("totals.sum"), plain(stock2), plain(perHour), "fut-msu", "total");
+      else line("MSU", msu4(stock2), msu4(perHour), "fut-msu", "total");
+      if (view2.fleet) row("fut-fleetrow", [o.t("planetMenu.fleet"), formatUnits(o.snapshot.bodies.reduce((sum, b) => sum + fleetValue(b), 0), o.locale), ""], "fleetValue");
       list.after(box);
     }
   }
