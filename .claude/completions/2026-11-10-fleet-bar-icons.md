@@ -57,3 +57,18 @@ Not committed, version not bumped (still 0.3.9): bump on push.
 - Galaxy: a click on a player's name opens the side bar on that player (`onPlayer`); the game's
   own tooltip on the name is not prevented.
 - Not done: the targets side bar was checked (works, opens from the name) but not redrawn.
+
+## 2026-11-11 (3): after 0.3.10, not committed
+- Targets side bar redrawn (`marks/side.ts`): lists as one card with hairlines, labelled scores,
+  labelled links, a note per flagged player (`PlayerMark.note`, `notePlayer`), home planet marked
+  (lowest planet id in the API list), planet names. Width follows the room left of `#middle`
+  (300–390px, `fitWidth`, container query under 350px). Never opened on `component=empire`.
+- Galaxy debris: the number alone (the game's icon keeps its place and tooltip, picture not
+  drawn), lit from `galaxy.bigDebris` up (Settings → Galassia, default 1M); same for deep space
+  (`#expeditionDebrisSlotDebrisContainer`: not seen live, no debris there when tested).
+- Lifeform buildings: population needed (`.costs .population`) read into `TechDetails.population`
+  and shown as a chip, red when the game marks it insufficient. The game gives it for the level on
+  its panel only: no formula for later levels.
+- Fleet: T/D arrow = one-off destination, default only from the settings; "Tutte − riserva"
+  removed; invert button on each ship; jump gate rule editable in the gate dialog.
+- Planet menu: wrench replaced by queue dots; "Segna pianeti senza costruzioni" removed.

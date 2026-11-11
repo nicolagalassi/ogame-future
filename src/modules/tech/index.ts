@@ -116,6 +116,7 @@ const ICON = {
   time: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
   energy: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>',
   start: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v5h5"/></svg>',
+  pop: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.6 3-5.5 6-5.5s5.4 1.9 6 5.5"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.8M18.5 15c1.5.9 2.3 2.6 2.6 5"/></svg>',
 };
 
 interface View {
@@ -274,6 +275,14 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
             to > start.level ? t('tech.timeHint', { level: to, from: start.level, to }) : t('tech.time'),
           ),
         );
+      }
+      // The game's cost list is replaced by the grid above, which has no row for the population some
+      // lifeform buildings need: shown here, red when the planet does not have it. The game gives it
+      // for the level on its panel only, so the chip names that level once the range goes past it.
+      if (details.population) {
+        const p = details.population;
+        const text = `${to > start.level ? `${t('plan.level', { level: start.level })}: ` : ''}${formatUnits(p.value, locale)}`;
+        row.append(chip(doc, ICON.pop, text, `${t('tech.population', { level: start.level })}: ${p.value.toLocaleString(locale)}${p.enough ? '' : ` · ${t('tech.populationShort')}`}`, p.enough ? 'fut-tp-pop' : 'fut-tp-pop fut-tp-lack'));
       }
       row.append(...chips);
       if (start.discount > 0.0005) row.append(chip(doc, '', t('tech.discountShort', { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), t('tech.discount', { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), 'fut-tp-disc'));

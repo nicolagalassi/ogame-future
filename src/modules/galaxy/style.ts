@@ -2,11 +2,44 @@
 export const GALAXY_CSS = `
 .fut-g-name { cursor: pointer; }
 .fut-g-name:hover { text-decoration: underline; text-decoration-color: #4FD1E8; text-underline-offset: 2px; }
-.fut-g-bar {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin: 4px 0 6px; padding: 6px 10px;
-  border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A;
-  font: 12px/16px Arial, Helvetica, sans-serif; color: #C9D4E2; text-align: left;
+/* The game's own header, drawn as the first row of one card with Future's summary under it:
+   same surface, dark fields, flat buttons. Nothing is moved or hidden, only its look changes. */
+#galaxycomponent #galaxyHeader {
+  box-sizing: border-box; display: flex !important; align-items: center; height: 36px !important; margin: 0 !important; padding: 0 8px !important;
+  border: 1px solid #1F2C40 !important; border-radius: 7px 7px 0 0 !important; background: #111B2A !important;
 }
+#galaxycomponent #galaxyHeader form { display: flex; align-items: center; gap: 3px; width: 100%; margin: 0; }
+#galaxycomponent #galaxyHeader .galaxy_icons { flex: none; float: none !important; margin: 0 !important; }
+#galaxycomponent #galaxyHeader .galaxy_icons.solarsystem { margin-left: 6px !important; }
+#galaxycomponent #galaxyHeader input {
+  box-sizing: border-box; float: none !important; width: 46px !important; height: 24px !important; margin: 0 !important; padding: 0 4px !important;
+  border: 1px solid #24344B !important; border-radius: 5px !important; background: #0A111C !important; color: #E6EDF5 !important;
+  font: 700 13px/22px Consolas, "JetBrains Mono", monospace !important; text-align: center; box-shadow: none !important;
+}
+#galaxycomponent #galaxyHeader input:focus { outline: none; border-color: #4FD1E8 !important; }
+#galaxycomponent #galaxyHeader .btn_blue {
+  box-sizing: border-box; float: none !important; display: inline-flex !important; align-items: center; gap: 5px; height: 24px !important; margin: 0 !important; padding: 0 10px !important;
+  border: 1px solid #2C5A73 !important; border-radius: 5px !important; background: #12283A !important; box-shadow: none !important; text-shadow: none !important;
+  color: #E6EDF5 !important; font: 700 11px/22px Verdana, Arial, sans-serif !important; white-space: nowrap; cursor: pointer;
+}
+#galaxycomponent #galaxyHeader .btn_blue:hover { border-color: #4FD1E8 !important; background: #16344A !important; }
+#galaxycomponent #galaxyHeader .btn_blue[disabled] { border-color: #1F2C40 !important; background: #0B121D !important; color: #8592A1 !important; font-weight: 400 !important; cursor: default; }
+#galaxycomponent #galaxyHeader .btn_blue img { height: 14px; width: auto; margin: 0 !important; }
+#galaxycomponent #galaxyHeader form > .btn_blue { flex: none; }
+#galaxycomponent #galaxyHeader .systembuttons { float: none !important; display: flex; align-items: center; gap: 3px; min-width: 0; margin: 0 0 0 auto !important; position: static !important; }
+#galaxycomponent #galaxyHeader .systembuttons .btn_blue { min-width: 0; padding: 0 6px !important; font-weight: 400 !important; overflow: hidden; }
+.fut-g-bar {
+  box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 14px; min-height: 28px; margin: 0 0 6px; padding: 4px 10px;
+  border: 1px solid #1F2C40; border-top: 0; border-radius: 0 0 7px 7px; background: #0B121D;
+  font: 11px/16px Verdana, Arial, sans-serif; color: #C9D4E2; text-align: left;
+}
+/* The game's rows under the table (fleets in the system, colonised planets, legend): the same quiet strip. */
+#galaxyContent .galaxyRow.ctGalaxyFleetInfo, #galaxyContent .galaxyRow.ctGalaxyFooter {
+  box-sizing: border-box; background: #0B121D !important; border: 1px solid #1F2C40 !important; color: #A3AFBD !important;
+}
+#galaxyContent .galaxyRow.ctGalaxyFleetInfo { border-bottom: 0 !important; border-radius: 7px 7px 0 0; margin-top: 6px; }
+#galaxyContent .galaxyRow.ctGalaxyFooter { border-radius: 0 0 7px 7px; }
+#galaxyContent .galaxyRow.ctGalaxyFooter #colonized { color: #A3AFBD !important; }
 .fut-g-bar b { color: #E6EDF5; font-family: Consolas, "JetBrains Mono", monospace; }
 .fut-g-muted { color: #8A9BB0; }
 .fut-g-inact { color: #9BE36D; }
@@ -50,10 +83,15 @@ export const GALAXY_CSS = `
 #galaxyContent .cellPlayerName .fut-mk-flag { flex: none; width: 16px; height: 16px; margin: 0; border-color: transparent; background: none; opacity: 0; transition: opacity 120ms ease-out; }
 #galaxyContent .galaxyRow:hover .fut-mk-flag, #galaxyContent .fut-mk-flag:focus-visible { opacity: 1; }
 #galaxyContent .cellPlayerName .fut-mk-flag.on { opacity: 1; border-color: transparent; }
+/* Debris: the number in place of the icon. The game's icon keeps its place and its tooltip (the
+   way to send recyclers), only its picture is not drawn. */
 #galaxyContent .cellDebris { position: relative; }
-.fut-g-dval { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); padding: 0 3px; border-radius: 3px; background: rgba(5,10,18,0.85);
-  color: #C9D4E2; font: 10px/12px Consolas, "JetBrains Mono", monospace; white-space: nowrap; pointer-events: none; }
-.fut-g-dval.big { color: #F5B547; font-weight: 700; }
+#galaxyContent .cellDebris .microdebris, #expeditionDebrisSlotDebrisContainer .microdebris { background-image: none !important; }
+#galaxyContent .cellDebris > a, #galaxyContent .cellDebris .microdebris { position: absolute !important; inset: 0; width: auto !important; height: auto !important; margin: 0 !important; }
+.fut-g-dval { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: #C9D4E2; font: 11px/12px Consolas, "JetBrains Mono", monospace; white-space: nowrap; pointer-events: none; }
+.fut-g-dval.big { color: #F5B547; font-weight: 700; text-shadow: 0 0 6px rgba(245, 181, 71, 0.45); }
+.fut-g-dval.deep { position: static; display: inline-flex; margin-left: 6px; font-size: 12px; }
 
 .fut-g-card {
   position: fixed; z-index: 1000002; width: 250px; padding: 10px 12px; border: 1px solid #2C3E57; border-radius: 8px;

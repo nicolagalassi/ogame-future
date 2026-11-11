@@ -681,5 +681,18 @@
   "fleet.pickOnce": "Altra destinazione, solo per questa flotta",
   "fleet.pickOnceHint": "Il tasto va alla destinazione predefinita, che si sceglie nelle Impostazioni.",
   "fleet.err.noDefault": "Nessuna destinazione predefinita: sceglila nelle Impostazioni (ingranaggio) o usa la freccia per questa flotta.",
-  "fleet.invert": "Inverti la selezione di questa nave"
+  "fleet.invert": "Inverti la selezione di questa nave",
+  "settings.section.galaxy": "Galassia",
+  "settings.bigDebris": "Detriti da evidenziare",
+  "settings.bigDebrisHint": "Da questo valore in su (metallo + cristallo + deuterio) il campo detriti è evidenziato, in galassia, nello spazio profondo e nella barra dei bersagli. Esempi: 500k, 1M, 2,5G.",
+  "settings.bigDebrisSaved": "Evidenziati da {n} in su.",
+  "settings.bigDebrisBad": "Scrivi un numero, per esempio 1M.",
+  "marks.home": "Pianeta madre",
+  "marks.col.name": "Nome",
+  "marks.note": "Nota",
+  "marks.notePlaceholder": "Nota su questo giocatore…",
+  "marks.noteNeedsFlag": "Metti una bandierina per scrivere una nota.",
+  "marks.writeShort": "Scrivi",
+  "tech.population": "Popolazione richiesta per il livello {level}",
+  "tech.populationShort": "non basta su questo pianeta"
 }

@@ -15,6 +15,8 @@ export interface PlayerMark {
   flag: Flag;
   name: string;
   at: number;
+  /** The player's own words about this one (kept locally, like the flag). */
+  note?: string;
 }
 
 export interface PlanetMark {
@@ -47,9 +49,20 @@ export const loadMarks = (stored: Partial<Marks> | null): Marks => ({ ...EMPTY_M
 /** Sets (or clears with null) a player's flag; a set flag becomes the one shift+click repeats. */
 export function flagPlayer(m: Marks, id: number, name: string, flag: Flag | null, now: number): Marks {
   const players = { ...m.players };
-  if (flag) players[String(id)] = { flag, name: name || players[String(id)]?.name || '', at: now };
+  if (flag) players[String(id)] = { ...players[String(id)], flag, name: name || players[String(id)]?.name || '', at: now };
   else delete players[String(id)];
   return { ...m, players, lastFlag: flag ?? m.lastFlag };
+}
+
+/** Writes (or clears) the note of a flagged player; a player without a flag has no note. */
+export function notePlayer(m: Marks, id: number, note: string): Marks {
+  const mark = m.players[String(id)];
+  if (!mark) return m;
+  const next = { ...mark };
+  const text = note.trim().slice(0, 500);
+  if (text) next.note = text;
+  else delete next.note;
+  return { ...m, players: { ...m.players, [String(id)]: next } };
 }
 
 /** Sets (or clears with null) a planet's colour. */

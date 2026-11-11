@@ -283,13 +283,17 @@ describe('planner window', () => {
     // Opens by planet: one tile for the body, one row per planned thing.
     expect(root().querySelector('.seg [aria-pressed="true"]')!.textContent).toBe('Per pianeta');
     expect(root().querySelectorAll('.group.body')).toHaveLength(1);
+    // One line per planet: each planned thing is a small picture with its level; the rows open on the arrow.
+    expect([...root().querySelectorAll('.pchip')].map((c) => c.textContent)).toEqual(['31', '5']);
+    expect(root().querySelectorAll('.grow.pick')).toHaveLength(0);
+    root().querySelector<HTMLButtonElement>('.pchips .ib')!.click();
     expect(root().querySelectorAll('.grow.pick')).toHaveLength(2);
     expect(root().querySelector('.bring-all')!.textContent).toBe('Porta tutto');
     root().querySelector<HTMLButtonElement>('.bring-all')!.click();
     expect(went).toContain('futdest=10');
     expect(store.get('plan.delivery', null)).toEqual({ target: 10, need: { metal: 450, crystal: 0, deuterium: 0 } });
     // Picking the second row: only its cost, less what the planet holds.
-    root().querySelectorAll<HTMLButtonElement>('button.gbody')[1]!.click();
+    root().querySelectorAll<HTMLButtonElement>('.pchip')[1]!.click();
     expect(root().querySelector('.bring-all')!.textContent).toBe('Porta 1 scelti');
     root().querySelector<HTMLButtonElement>('.bring-all')!.click();
     expect(store.get('plan.delivery', null)).toEqual({ target: 10, need: { metal: 350, crystal: 0, deuterium: 0 } });

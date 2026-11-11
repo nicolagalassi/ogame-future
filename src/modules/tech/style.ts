@@ -40,6 +40,8 @@ export const TECH_CSS = `
 .fut-tp-chip svg { flex: none; color: #8A9BB0; }
 .fut-tp-energy svg { color: #F5D547; } .fut-tp-start svg { color: #4FD1E8; }
 .fut-tp-disc { color: #8A9BB0; }
+.fut-tp-pop svg { color: #E58CDB; }
+.fut-tp-lack { border-color: #FF7A7A; color: #FF7A7A; } .fut-tp-lack svg { color: #FF7A7A; }
 /* Tools over the picture, like OGLight. */
 .fut-tp-tools { position: absolute; top: 4px; left: 4px; right: 4px; display: flex; gap: 4px; z-index: 2; }
 #technologydetails .fut-tp-btn { flex: 1; height: 24px; display: flex; align-items: center; justify-content: center; padding: 0;
@@ -88,12 +90,22 @@ export const PLANNER_CSS = `
 .seg button + button { border-left: 1px solid var(--line); }
 .seg button:hover { color: var(--text); }
 .seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
-/* Planet view: the head carries the one button that brings everything; rows are picked with a click. */
-.group.body .ghead { grid-template-columns: 28px minmax(0, 1fr) 70px 70px 70px 170px; }
-.group.body .grow { grid-template-columns: minmax(0, 1fr) 70px 70px 70px 170px; padding-left: 6px; }
-.gmeta:empty { display: none; }
-.bmark { display: inline-flex; justify-content: center; color: var(--accent); }
-.bring-all { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border: 1px solid var(--warn); border-radius: 6px; background: rgba(245, 181, 71, 0.1); color: var(--warn); font: 700 12px Arial, sans-serif; white-space: nowrap; cursor: pointer; }
+/* Planet view: one line per planet. Who, what is planned (a picture and a level each, picked with a
+   click), what it costs, the one button that brings it. Tiles sit flush, as rows of one list. */
+.groups:has(.group.body) { gap: 0; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.group.body { border: 0; border-radius: 0; }
+.group.body + .group.body { border-top: 1px solid var(--line-soft); }
+.group.body .ghead, .group.body .grow { grid-template-columns: minmax(130px, 1fr) minmax(0, 1.1fr) 62px 62px 62px 158px; min-height: 32px; padding: 2px 6px 2px 10px; }
+.group.body .ghead:hover { background: #16243A; }
+.group.body .gtitle { display: flex; align-items: center; gap: 5px; font-weight: 700; }
+.group.body .gtitle svg { flex: none; color: var(--muted); }
+.pchips { display: flex; flex-wrap: wrap; align-items: center; gap: 3px; min-width: 0; }
+.pchip { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 7px 0 2px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--text-2); font: 12px var(--mono); cursor: pointer; }
+.pchip:hover { border-color: var(--accent); color: var(--text); }
+.pchip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 700; }
+.group.body .grow { background: var(--surface); border-top: 1px solid var(--line-soft); }
+.group.body .grow .gbody { grid-column: 1 / span 1; }
+.bring-all { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border: 1px solid var(--warn); border-radius: 6px; background: rgba(245, 181, 71, 0.1); color: var(--warn); font: 700 12px Arial, sans-serif; white-space: nowrap; cursor: pointer; }
 .bring-all:hover { background: rgba(245, 181, 71, 0.2); color: var(--text); }
 button.gbody { align-items: center; padding: 2px 6px 2px 2px; border: 1px solid transparent; border-radius: 5px; background: none; font: 12px Arial, sans-serif; text-align: left; cursor: pointer; }
 button.gbody:hover { border-color: var(--line); color: var(--text); }

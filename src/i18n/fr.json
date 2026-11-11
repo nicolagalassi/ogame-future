@@ -681,5 +681,18 @@
   "fleet.pickOnce": "Autre destination, pour cette flotte seulement",
   "fleet.pickOnceHint": "Le bouton va à la destination par défaut, choisie dans les Paramètres.",
   "fleet.err.noDefault": "Pas de destination par défaut : choisissez-la dans les Paramètres (engrenage) ou utilisez la flèche pour cette flotte.",
-  "fleet.invert": "Inverser la sélection de ce vaisseau"
+  "fleet.invert": "Inverser la sélection de ce vaisseau",
+  "settings.section.galaxy": "Galaxie",
+  "settings.bigDebris": "Débris à mettre en évidence",
+  "settings.bigDebrisHint": "À partir de cette taille (métal + cristal + deutérium) le champ de débris est mis en évidence, dans la galaxie, l'espace profond et la barre des cibles. Exemples : 500k, 1M, 2,5G.",
+  "settings.bigDebrisSaved": "Mis en évidence à partir de {n}.",
+  "settings.bigDebrisBad": "Écrivez un nombre, par exemple 1M.",
+  "marks.home": "Planète mère",
+  "marks.col.name": "Nom",
+  "marks.note": "Note",
+  "marks.notePlaceholder": "Note sur ce joueur…",
+  "marks.noteNeedsFlag": "Marquez le joueur pour écrire une note.",
+  "marks.writeShort": "Écrire",
+  "tech.population": "Population requise pour le niveau {level}",
+  "tech.populationShort": "insuffisante sur cette planète"
 }

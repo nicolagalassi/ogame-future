@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.10
+// @version      0.3.11
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -870,7 +870,20 @@
     "fleet.pickOnce": "Altra destinazione, solo per questa flotta",
     "fleet.pickOnceHint": "Il tasto va alla destinazione predefinita, che si sceglie nelle Impostazioni.",
     "fleet.err.noDefault": "Nessuna destinazione predefinita: sceglila nelle Impostazioni (ingranaggio) o usa la freccia per questa flotta.",
-    "fleet.invert": "Inverti la selezione di questa nave"
+    "fleet.invert": "Inverti la selezione di questa nave",
+    "settings.section.galaxy": "Galassia",
+    "settings.bigDebris": "Detriti da evidenziare",
+    "settings.bigDebrisHint": "Da questo valore in su (metallo + cristallo + deuterio) il campo detriti \xE8 evidenziato, in galassia, nello spazio profondo e nella barra dei bersagli. Esempi: 500k, 1M, 2,5G.",
+    "settings.bigDebrisSaved": "Evidenziati da {n} in su.",
+    "settings.bigDebrisBad": "Scrivi un numero, per esempio 1M.",
+    "marks.home": "Pianeta madre",
+    "marks.col.name": "Nome",
+    "marks.note": "Nota",
+    "marks.notePlaceholder": "Nota su questo giocatore\u2026",
+    "marks.noteNeedsFlag": "Metti una bandierina per scrivere una nota.",
+    "marks.writeShort": "Scrivi",
+    "tech.population": "Popolazione richiesta per il livello {level}",
+    "tech.populationShort": "non basta su questo pianeta"
   };
 
   // src/i18n/en.json
@@ -1557,7 +1570,20 @@
     "fleet.pickOnce": "Another destination, for this fleet only",
     "fleet.pickOnceHint": "The button goes to the default destination, which is chosen in the Settings.",
     "fleet.err.noDefault": "No default destination: choose it in the Settings (gear) or use the arrow for this fleet.",
-    "fleet.invert": "Invert this ship's selection"
+    "fleet.invert": "Invert this ship's selection",
+    "settings.section.galaxy": "Galaxy",
+    "settings.bigDebris": "Debris to highlight",
+    "settings.bigDebrisHint": "From this size up (metal + crystal + deuterium) a debris field is highlighted, in the galaxy, in deep space and in the targets bar. Examples: 500k, 1M, 2.5G.",
+    "settings.bigDebrisSaved": "Highlighted from {n} up.",
+    "settings.bigDebrisBad": "Type a number, for example 1M.",
+    "marks.home": "Home planet",
+    "marks.col.name": "Name",
+    "marks.note": "Note",
+    "marks.notePlaceholder": "Note about this player\u2026",
+    "marks.noteNeedsFlag": "Flag the player to write a note.",
+    "marks.writeShort": "Write",
+    "tech.population": "Population needed for level {level}",
+    "tech.populationShort": "not enough on this planet"
   };
 
   // src/i18n/fr.json
@@ -2244,7 +2270,20 @@
     "fleet.pickOnce": "Autre destination, pour cette flotte seulement",
     "fleet.pickOnceHint": "Le bouton va \xE0 la destination par d\xE9faut, choisie dans les Param\xE8tres.",
     "fleet.err.noDefault": "Pas de destination par d\xE9faut : choisissez-la dans les Param\xE8tres (engrenage) ou utilisez la fl\xE8che pour cette flotte.",
-    "fleet.invert": "Inverser la s\xE9lection de ce vaisseau"
+    "fleet.invert": "Inverser la s\xE9lection de ce vaisseau",
+    "settings.section.galaxy": "Galaxie",
+    "settings.bigDebris": "D\xE9bris \xE0 mettre en \xE9vidence",
+    "settings.bigDebrisHint": "\xC0 partir de cette taille (m\xE9tal + cristal + deut\xE9rium) le champ de d\xE9bris est mis en \xE9vidence, dans la galaxie, l'espace profond et la barre des cibles. Exemples : 500k, 1M, 2,5G.",
+    "settings.bigDebrisSaved": "Mis en \xE9vidence \xE0 partir de {n}.",
+    "settings.bigDebrisBad": "\xC9crivez un nombre, par exemple 1M.",
+    "marks.home": "Plan\xE8te m\xE8re",
+    "marks.col.name": "Nom",
+    "marks.note": "Note",
+    "marks.notePlaceholder": "Note sur ce joueur\u2026",
+    "marks.noteNeedsFlag": "Marquez le joueur pour \xE9crire une note.",
+    "marks.writeShort": "\xC9crire",
+    "tech.population": "Population requise pour le niveau {level}",
+    "tech.populationShort": "insuffisante sur cette plan\xE8te"
   };
 
   // src/i18n/de.json
@@ -2931,7 +2970,20 @@
     "fleet.pickOnce": "Anderes Ziel, nur f\xFCr diese Flotte",
     "fleet.pickOnceHint": "Der Knopf fliegt zum Standardziel, das in den Einstellungen gew\xE4hlt wird.",
     "fleet.err.noDefault": "Kein Standardziel: in den Einstellungen (Zahnrad) w\xE4hlen oder den Pfeil f\xFCr diese Flotte nutzen.",
-    "fleet.invert": "Auswahl dieses Schiffs umkehren"
+    "fleet.invert": "Auswahl dieses Schiffs umkehren",
+    "settings.section.galaxy": "Galaxie",
+    "settings.bigDebris": "Hervorzuhebende Tr\xFCmmer",
+    "settings.bigDebrisHint": "Ab dieser Gr\xF6\xDFe (Metall + Kristall + Deuterium) wird ein Tr\xFCmmerfeld hervorgehoben: in der Galaxie, im Tiefenraum und in der Zielleiste. Beispiele: 500k, 1M, 2,5G.",
+    "settings.bigDebrisSaved": "Hervorgehoben ab {n}.",
+    "settings.bigDebrisBad": "Gib eine Zahl ein, zum Beispiel 1M.",
+    "marks.home": "Heimatplanet",
+    "marks.col.name": "Name",
+    "marks.note": "Notiz",
+    "marks.notePlaceholder": "Notiz zu diesem Spieler\u2026",
+    "marks.noteNeedsFlag": "Markiere den Spieler, um eine Notiz zu schreiben.",
+    "marks.writeShort": "Schreiben",
+    "tech.population": "Ben\xF6tigte Bev\xF6lkerung f\xFCr Stufe {level}",
+    "tech.populationShort": "reicht auf diesem Planeten nicht"
   };
 
   // src/core/i18n.ts
@@ -3221,9 +3273,18 @@
   var loadMarks = (stored) => ({ ...EMPTY_MARKS, ...stored ?? {}, players: { ...stored?.players ?? {} }, planets: { ...stored?.planets ?? {} }, recent: [...stored?.recent ?? []] });
   function flagPlayer(m, id, name, flag, now) {
     const players = { ...m.players };
-    if (flag) players[String(id)] = { flag, name: name || players[String(id)]?.name || "", at: now };
+    if (flag) players[String(id)] = { ...players[String(id)], flag, name: name || players[String(id)]?.name || "", at: now };
     else delete players[String(id)];
     return { ...m, players, lastFlag: flag ?? m.lastFlag };
+  }
+  function notePlayer(m, id, note) {
+    const mark = m.players[String(id)];
+    if (!mark) return m;
+    const next = { ...mark };
+    const text = note.trim().slice(0, 500);
+    if (text) next.note = text;
+    else delete next.note;
+    return { ...m, players: { ...m.players, [String(id)]: next } };
   }
   function tagPlanet(m, coords, tag, info, now) {
     const planets = { ...m.planets };
@@ -3321,6 +3382,8 @@
     chart: '<path d="M4 20.5h16"/><path d="M7 17v-5M12 17V6.5M17 17v-8"/>',
     planet: '<circle cx="12" cy="12" r="6"/><path d="M3 15.5c2.5 1.6 15.5-3.5 18-7"/>',
     fleet: '<path d="M3.5 12h11l5-4.5v9l-5-4.5"/><path d="M6.5 8.5L9 12l-2.5 3.5"/>',
+    home: '<path d="M3 11.5L12 4l9 7.5"/><path d="M6 9.5V20h12V9.5"/>',
+    note: '<path d="M5 4h14v11l-5 5H5z"/><path d="M14 20v-5h5M8.5 9h7M8.5 12.5h4"/>',
     chevron: '<path d="M6 9.5l6 6 6-6"/>',
     next: '<path d="M4.5 12h14M13 5.5l6.5 6.5-6.5 6.5"/>',
     sword: '<path d="M19.5 4.5L9 15M19.5 4.5V9M19.5 4.5H15"/><path d="M6.5 12.5l5 5M8 16l-3.5 3.5"/>',
@@ -3634,11 +3697,44 @@
   var GALAXY_CSS = `
 .fut-g-name { cursor: pointer; }
 .fut-g-name:hover { text-decoration: underline; text-decoration-color: #4FD1E8; text-underline-offset: 2px; }
-.fut-g-bar {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin: 4px 0 6px; padding: 6px 10px;
-  border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A;
-  font: 12px/16px Arial, Helvetica, sans-serif; color: #C9D4E2; text-align: left;
+/* The game's own header, drawn as the first row of one card with Future's summary under it:
+   same surface, dark fields, flat buttons. Nothing is moved or hidden, only its look changes. */
+#galaxycomponent #galaxyHeader {
+  box-sizing: border-box; display: flex !important; align-items: center; height: 36px !important; margin: 0 !important; padding: 0 8px !important;
+  border: 1px solid #1F2C40 !important; border-radius: 7px 7px 0 0 !important; background: #111B2A !important;
 }
+#galaxycomponent #galaxyHeader form { display: flex; align-items: center; gap: 3px; width: 100%; margin: 0; }
+#galaxycomponent #galaxyHeader .galaxy_icons { flex: none; float: none !important; margin: 0 !important; }
+#galaxycomponent #galaxyHeader .galaxy_icons.solarsystem { margin-left: 6px !important; }
+#galaxycomponent #galaxyHeader input {
+  box-sizing: border-box; float: none !important; width: 46px !important; height: 24px !important; margin: 0 !important; padding: 0 4px !important;
+  border: 1px solid #24344B !important; border-radius: 5px !important; background: #0A111C !important; color: #E6EDF5 !important;
+  font: 700 13px/22px Consolas, "JetBrains Mono", monospace !important; text-align: center; box-shadow: none !important;
+}
+#galaxycomponent #galaxyHeader input:focus { outline: none; border-color: #4FD1E8 !important; }
+#galaxycomponent #galaxyHeader .btn_blue {
+  box-sizing: border-box; float: none !important; display: inline-flex !important; align-items: center; gap: 5px; height: 24px !important; margin: 0 !important; padding: 0 10px !important;
+  border: 1px solid #2C5A73 !important; border-radius: 5px !important; background: #12283A !important; box-shadow: none !important; text-shadow: none !important;
+  color: #E6EDF5 !important; font: 700 11px/22px Verdana, Arial, sans-serif !important; white-space: nowrap; cursor: pointer;
+}
+#galaxycomponent #galaxyHeader .btn_blue:hover { border-color: #4FD1E8 !important; background: #16344A !important; }
+#galaxycomponent #galaxyHeader .btn_blue[disabled] { border-color: #1F2C40 !important; background: #0B121D !important; color: #8592A1 !important; font-weight: 400 !important; cursor: default; }
+#galaxycomponent #galaxyHeader .btn_blue img { height: 14px; width: auto; margin: 0 !important; }
+#galaxycomponent #galaxyHeader form > .btn_blue { flex: none; }
+#galaxycomponent #galaxyHeader .systembuttons { float: none !important; display: flex; align-items: center; gap: 3px; min-width: 0; margin: 0 0 0 auto !important; position: static !important; }
+#galaxycomponent #galaxyHeader .systembuttons .btn_blue { min-width: 0; padding: 0 6px !important; font-weight: 400 !important; overflow: hidden; }
+.fut-g-bar {
+  box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 14px; min-height: 28px; margin: 0 0 6px; padding: 4px 10px;
+  border: 1px solid #1F2C40; border-top: 0; border-radius: 0 0 7px 7px; background: #0B121D;
+  font: 11px/16px Verdana, Arial, sans-serif; color: #C9D4E2; text-align: left;
+}
+/* The game's rows under the table (fleets in the system, colonised planets, legend): the same quiet strip. */
+#galaxyContent .galaxyRow.ctGalaxyFleetInfo, #galaxyContent .galaxyRow.ctGalaxyFooter {
+  box-sizing: border-box; background: #0B121D !important; border: 1px solid #1F2C40 !important; color: #A3AFBD !important;
+}
+#galaxyContent .galaxyRow.ctGalaxyFleetInfo { border-bottom: 0 !important; border-radius: 7px 7px 0 0; margin-top: 6px; }
+#galaxyContent .galaxyRow.ctGalaxyFooter { border-radius: 0 0 7px 7px; }
+#galaxyContent .galaxyRow.ctGalaxyFooter #colonized { color: #A3AFBD !important; }
 .fut-g-bar b { color: #E6EDF5; font-family: Consolas, "JetBrains Mono", monospace; }
 .fut-g-muted { color: #8A9BB0; }
 .fut-g-inact { color: #9BE36D; }
@@ -3682,10 +3778,15 @@
 #galaxyContent .cellPlayerName .fut-mk-flag { flex: none; width: 16px; height: 16px; margin: 0; border-color: transparent; background: none; opacity: 0; transition: opacity 120ms ease-out; }
 #galaxyContent .galaxyRow:hover .fut-mk-flag, #galaxyContent .fut-mk-flag:focus-visible { opacity: 1; }
 #galaxyContent .cellPlayerName .fut-mk-flag.on { opacity: 1; border-color: transparent; }
+/* Debris: the number in place of the icon. The game's icon keeps its place and its tooltip (the
+   way to send recyclers), only its picture is not drawn. */
 #galaxyContent .cellDebris { position: relative; }
-.fut-g-dval { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); padding: 0 3px; border-radius: 3px; background: rgba(5,10,18,0.85);
-  color: #C9D4E2; font: 10px/12px Consolas, "JetBrains Mono", monospace; white-space: nowrap; pointer-events: none; }
-.fut-g-dval.big { color: #F5B547; font-weight: 700; }
+#galaxyContent .cellDebris .microdebris, #expeditionDebrisSlotDebrisContainer .microdebris { background-image: none !important; }
+#galaxyContent .cellDebris > a, #galaxyContent .cellDebris .microdebris { position: absolute !important; inset: 0; width: auto !important; height: auto !important; margin: 0 !important; }
+.fut-g-dval { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: #C9D4E2; font: 11px/12px Consolas, "JetBrains Mono", monospace; white-space: nowrap; pointer-events: none; }
+.fut-g-dval.big { color: #F5B547; font-weight: 700; text-shadow: 0 0 6px rgba(245, 181, 71, 0.45); }
+.fut-g-dval.deep { position: static; display: inline-flex; margin-left: 6px; font-size: 12px; }
 
 .fut-g-card {
   position: fixed; z-index: 1000002; width: 250px; padding: 10px 12px; border: 1px solid #2C3E57; border-radius: 8px;
@@ -3700,208 +3801,6 @@
 .fut-g-card p { margin: 6px 0 0; color: #8A9BB0; font-size: 11px; }
 .fut-g-card .err { color: #FF7A7A; }
 `;
-
-  // src/modules/galaxy/index.ts
-  var TARGETS_KEY = "galaxy.targets";
-  var BIG_DEBRIS = 1e6;
-  var highlight = "";
-  function highlightPosition(coords) {
-    highlight = coords;
-  }
-  var isGalaxyPage = (doc) => new URL(doc.location?.href ?? "http://x/").searchParams.get("component") === "galaxy";
-  var coordsOf = (s, r) => `${s.galaxy}:${s.system}:${r.position}`;
-  function systemSummary(s, ownPlanetIds) {
-    const players = /* @__PURE__ */ new Set();
-    const inactive = /* @__PURE__ */ new Set();
-    const longInactive = /* @__PURE__ */ new Set();
-    const vacation = /* @__PURE__ */ new Set();
-    let moons = 0;
-    let debris = 0;
-    let fields = 0;
-    for (const r of s.rows) {
-      const who = r.playerId ?? r.playerName;
-      if (r.moonId) moons++;
-      if (r.debris) {
-        fields++;
-        debris += debrisTotal(r.debris);
-      }
-      if (!who || r.planetId && ownPlanetIds.has(r.planetId)) continue;
-      players.add(who);
-      if (r.statuses.includes("vacation")) vacation.add(who);
-      else if (r.statuses.includes("longinactive")) longInactive.add(who);
-      if (!r.statuses.includes("vacation") && (r.statuses.includes("inactive") || r.statuses.includes("longinactive"))) inactive.add(who);
-    }
-    return { players: players.size, inactive: inactive.size, longInactive: longInactive.size, vacation: vacation.size, moons, debris, fields, deep: s.deepDebris ? debrisTotal(s.deepDebris) : 0 };
-  }
-  function el(doc, tag, cls = "", text = "") {
-    const n = doc.createElement(tag);
-    if (cls) n.className = cls;
-    if (text) n.textContent = text;
-    return n;
-  }
-  var isOurs = (n) => n instanceof Element && (/(^|\s)fut-/.test(n.getAttribute("class") ?? "") || !!n.closest('.fut-mk, [class*="fut-g-"]'));
-  function watchGalaxy(o) {
-    const { doc } = o;
-    const component = doc.getElementById("galaxycomponent") ?? doc.getElementById("galaxyContent")?.parentElement;
-    if (!component || !doc.defaultView) return;
-    if (!doc.getElementById("fut-galaxy-css")) {
-      const style = el(doc, "style");
-      style.id = "fut-galaxy-css";
-      style.textContent = GALAXY_CSS;
-      doc.head.append(style);
-    }
-    ensureMarksStyle(doc);
-    highlight = (() => {
-      const q = new URL(doc.location.href).searchParams;
-      return q.get("galaxy") && q.get("system") && q.get("position") ? `${q.get("galaxy")}:${q.get("system")}:${q.get("position")}` : "";
-    })();
-    let queued2 = false;
-    const run = () => {
-      queued2 = false;
-      const content = doc.getElementById("galaxyContent");
-      if (!content) return;
-      remember(o);
-      decorate(o, content);
-      o.onSystem?.();
-    };
-    new doc.defaultView.MutationObserver((records) => {
-      const theirs = records.some((r) => ![...r.addedNodes, ...r.removedNodes].every(isOurs));
-      if (!theirs || queued2) return;
-      queued2 = true;
-      setTimeout(run, 30);
-    }).observe(component, { childList: true, subtree: true });
-    run();
-  }
-  function remember(o) {
-    const s = readGalaxy(o.doc);
-    if (!s) return;
-    const marks = loadMarks(o.store.get(MARKS_KEY, null));
-    const recent = new Set(marks.recent.map((r) => r.id));
-    const keep = (id, coords) => !!marks.players[String(id)] || recent.has(id) || !!marks.planets[coords];
-    const rows = s.rows.filter((r) => !(r.planetId && o.ownPlanetIds.has(r.planetId))).map((r) => ({ ...r, debris: r.debris ? debrisTotal(r.debris) : 0 }));
-    const next = recordSystem(o.store.get(POSITIONS_KEY, {}), s.galaxy, s.system, rows, keep, Date.now());
-    if (next) o.store.set(POSITIONS_KEY, next);
-  }
-  function decorate(o, content) {
-    const { doc, store, t, locale } = o;
-    const s = readGalaxy(doc);
-    if (!s) return;
-    const marks = loadMarks(store.get(MARKS_KEY, null));
-    const redraw = () => decorate(o, content);
-    const picker = { doc, store, t, onChange: redraw };
-    for (const r of s.rows) {
-      const coords = coordsOf(s, r);
-      const own = r.planetId !== null && o.ownPlanetIds.has(r.planetId);
-      const inactive = !r.statuses.includes("vacation") && (r.statuses.includes("inactive") || r.statuses.includes("longinactive"));
-      const tag = marks.planets[coords]?.tag;
-      r.row.classList.toggle("fut-g-own", own);
-      r.row.classList.toggle("fut-g-inactive", inactive && !own);
-      r.row.classList.toggle("fut-g-tagged", !!tag);
-      r.row.classList.toggle("fut-g-hl", coords === highlight);
-      const rowStyle = r.row.style;
-      if (tag) rowStyle.setProperty("--fut-tag", TAG_COLORS[tag]);
-      else rowStyle.removeProperty("--fut-tag");
-      const nameCell = r.row.querySelector(".cellPlanetName");
-      if (nameCell && r.planetId && !own && !nameCell.querySelector(".fut-mk-tag"))
-        nameCell.append(tagButton(picker, coords, { planet: r.planetName, player: r.playerName, playerId: r.playerId, statuses: r.statuses, moon: !!r.moonId }));
-      else if (nameCell && (own || !r.planetId)) nameCell.querySelector(".fut-mk-tag")?.remove();
-      const playerCell = r.row.querySelector(".cellPlayerName");
-      const nameEl = playerCell?.querySelector(".playerName");
-      if (nameEl && r.playerId && !own && o.onPlayer && !nameEl.dataset.futPlayer) {
-        nameEl.dataset.futPlayer = String(r.playerId);
-        nameEl.classList.add("fut-g-name");
-        const id = r.playerId;
-        nameEl.addEventListener("click", () => o.onPlayer?.(id, r.playerName));
-      }
-      if (playerCell && r.playerId && r.rank && !playerCell.querySelector(".fut-g-rank")) {
-        const id = r.playerId;
-        const badge = el(doc, "button", "fut-g-rank", `#${r.rank.toLocaleString(locale)}`);
-        badge.type = "button";
-        badge.setAttribute("aria-label", t("galaxy.rankTitle", { name: r.playerName }));
-        const show2 = () => void openCard(o, badge, id, r.playerName);
-        badge.addEventListener("mouseenter", show2);
-        badge.addEventListener("focus", show2);
-        badge.addEventListener("mouseleave", () => closeCard(doc));
-        badge.addEventListener("blur", () => closeCard(doc));
-        playerCell.querySelector(".playerName")?.after(badge);
-        if (!own) badge.after(flagButton(picker, id, r.playerName));
-      }
-      const debrisCell = r.row.querySelector(".cellDebris");
-      if (debrisCell && r.debris && !debrisCell.querySelector(".fut-g-dval")) {
-        const total = debrisTotal(r.debris);
-        debrisCell.append(el(doc, "span", `fut-g-dval${total >= BIG_DEBRIS ? " big" : ""}`, formatUnits(total, locale)));
-      }
-    }
-    renderBar(o, content, s);
-  }
-  function renderBar(o, content, s) {
-    const { doc, t, locale } = o;
-    const sum = systemSummary(s, o.ownPlanetIds);
-    const bar = el(doc, "div", "fut-g-bar");
-    bar.id = "fut-galaxy-bar";
-    const part = (cls, text) => bar.append(el(doc, "span", cls, text));
-    bar.append(el(doc, "b", "", `${s.galaxy}:${s.system}`));
-    part("", t("galaxy.players", { count: sum.players }));
-    part("fut-g-inact", t("galaxy.inactive", { count: sum.inactive }) + (sum.longInactive ? ` (${t("galaxy.longInactive", { count: sum.longInactive })})` : ""));
-    part("fut-g-vac", t("galaxy.vacation", { count: sum.vacation }));
-    part("fut-g-muted", t("galaxy.moons", { count: sum.moons }));
-    part(sum.debris >= BIG_DEBRIS ? "fut-g-deb" : "fut-g-muted", sum.fields ? t("galaxy.debris", { msu: formatUnits(sum.debris, locale), count: sum.fields }) : t("galaxy.noDebris"));
-    if (sum.deep) part(sum.deep >= BIG_DEBRIS ? "fut-g-deb" : "fut-g-muted", t("galaxy.deep", { msu: formatUnits(sum.deep, locale) }));
-    doc.getElementById(bar.id)?.remove();
-    content.before(bar);
-  }
-  var CARD_ID = "fut-galaxy-card";
-  var cardFor = 0;
-  function closeCard(doc) {
-    cardFor = 0;
-    doc.getElementById(CARD_ID)?.remove();
-  }
-  async function openCard(o, anchor, id, name) {
-    const { doc, t, locale } = o;
-    closeCard(doc);
-    cardFor = id;
-    const card = el(doc, "div", "fut-g-card");
-    card.id = CARD_ID;
-    card.setAttribute("role", "tooltip");
-    card.append(el(doc, "h4", "", t("galaxy.rankTitle", { name })));
-    const note = el(doc, "p", "", t("galaxy.loading"));
-    card.append(note);
-    doc.body.append(card);
-    const place2 = () => {
-      const box = anchor.getBoundingClientRect();
-      const view2 = doc.defaultView;
-      const h6 = card.offsetHeight;
-      const below = box.bottom + 6 + h6 <= (view2?.innerHeight ?? 800);
-      card.style.left = `${Math.max(8, Math.min(box.left, (view2?.innerWidth ?? 1200) - card.offsetWidth - 8))}px`;
-      card.style.top = `${below ? box.bottom + 6 : Math.max(8, box.top - 6 - h6)}px`;
-    };
-    place2();
-    let data = null;
-    try {
-      data = await playerScores(o.guard, o.store, doc.location.origin, id, Date.now());
-    } catch {
-      data = null;
-    }
-    if (cardFor !== id || !card.isConnected) return;
-    if (!data) {
-      note.textContent = t("galaxy.apiError");
-      note.className = "err";
-      return;
-    }
-    const table = el(doc, "table");
-    for (const key of Object.keys(SCORE_TYPES)) {
-      const v = data.scores[key];
-      if (!v) continue;
-      const tr = el(doc, "tr");
-      tr.append(el(doc, "td", "", t(`galaxy.score.${key}`)), el(doc, "td", "", formatUnits(v.points, locale)), el(doc, "td", "r", `#${v.rank.toLocaleString(locale)}`));
-      table.append(tr);
-    }
-    note.before(table);
-    const parts = [t("galaxy.apiAge", { time: new Date(data.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) })];
-    if (data.ships) parts.unshift(t("galaxy.ships", { count: data.ships.toLocaleString(locale) }));
-    note.textContent = parts.join(" \xB7 ");
-    place2();
-  }
 
   // src/data/fleet-dispatcher.ts
   function pageWindow() {
@@ -3979,6 +3878,8 @@
   var SIDE_ID = "fut-side";
   var SIDE_W = 390;
   var VIEW_KEY = "marks.view";
+  var BIG_DEBRIS_KEY = "galaxy.bigDebris";
+  var BIG_DEBRIS = 1e6;
   var HOUR = 36e5;
   var last = null;
   var sheetData = /* @__PURE__ */ new Map();
@@ -3993,83 +3894,112 @@
   var CSS = `
 :host { all: initial; }
 * { box-sizing: border-box; }
+/* As wide as the room left of the game's page allows, between 300 and ${SIDE_W}px (--w, set from the page). */
 .side {
-  position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000000; width: ${SIDE_W}px; display: flex; flex-direction: column; gap: 6px;
+  container-type: inline-size;
+  position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000000; width: var(--w, ${SIDE_W}px); max-width: 100vw; display: flex; flex-direction: column; gap: 6px;
   padding: 8px; background: #0B121D; border-right: 1px solid #1F2C40; box-shadow: 6px 0 24px rgba(0,0,0,0.45);
-  font: 13px Arial, Helvetica, sans-serif; color: #C9D4E2; overflow: hidden;
+  font: 12px/1.3 Arial, Helvetica, sans-serif; color: #C9D4E2; font-variant-numeric: tabular-nums; overflow: hidden;
 }
-button { font: inherit; color: inherit; }
-button:focus-visible, a:focus-visible, input:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -1px; }
-.mono, .coords, .num { font-family: Consolas, "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; }
+button, input, textarea { font: inherit; color: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -1px; }
+.mono, .coords, .num { font-family: Consolas, "JetBrains Mono", monospace; }
 
-/* Head: back, title, close: the planet menu's toolbar look. */
-.head { display: flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 2px 0 4px; border: 1px solid #1F2C40; border-radius: 6px; background: #111B2A; }
-.title { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 4px; font: 700 14px Arial, sans-serif; color: #E6EDF5; white-space: nowrap; overflow: hidden; }
+/* Head: back, who or what, close. */
+.head { display: flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 2px 0 4px; border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; }
+.title { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; font: 700 14px Arial, sans-serif; color: #E6EDF5; white-space: nowrap; overflow: hidden; }
 .title .name { overflow: hidden; text-overflow: ellipsis; }
-.title a { color: #8A9BB0; font-weight: 400; text-decoration: none; }
+.title a { color: #9AA9BC; font-weight: 400; font-size: 12px; text-decoration: none; }
 .title a:hover { color: #4FD1E8; }
-.ib { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 5px; background: none; color: #8A9BB0; cursor: pointer; flex: none; text-decoration: none; }
+.ib { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 5px; background: none; color: #9AA9BC; cursor: pointer; flex: none; text-decoration: none; }
 .ib:hover { background: #16243A; color: #E6EDF5; }
 
-/* Tabs and filters: the settings chips of the planet menu. */
+/* Tabs and filters. */
 .chips { display: flex; flex-wrap: wrap; gap: 3px; }
-.chip { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: 1 0 auto; min-width: 30px; height: 28px; padding: 0 6px; border-radius: 5px; border: 1px solid #1F2C40; background: #0A111C; color: #B4C2D3; cursor: pointer; }
+.chip { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: 1 0 auto; min-width: 30px; height: 26px; padding: 0 6px; border-radius: 5px; border: 1px solid #1F2C40; background: #0A111C; color: #B4C2D3; cursor: pointer; }
 .chip:hover { border-color: #2C5A73; }
 .chip[aria-pressed="true"] { border-color: currentColor; background: #12283A; color: #E6EDF5; font-weight: 700; }
-.chip .n { font: 12px Consolas, monospace; color: #8A9BB0; }
-.seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #1F2C40; border-radius: 6px; overflow: hidden; }
-.seg button { height: 28px; border: 0; background: #0B121D; color: #8A9BB0; cursor: pointer; }
+.chip .n { font: 12px Consolas, monospace; color: #9AA9BC; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #1F2C40; border-radius: 7px; overflow: hidden; flex: none; }
+.seg button { height: 28px; border: 0; background: #0B121D; color: #9AA9BC; cursor: pointer; }
 .seg button + button { border-left: 1px solid #1F2C40; }
 .seg button[aria-pressed="true"] { background: #12283A; color: #E6EDF5; font-weight: 700; box-shadow: inset 0 -2px 0 #4FD1E8; }
 
-/* Scores: the toolbar cells, two per line. */
-.scores { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
-.score { display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 8px; border: 1px solid #1F2C40; border-radius: 6px; background: #111B2A; min-width: 0; }
-.score b { flex: 1; text-align: right; font: 700 14px Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.score i { font: normal 12px Consolas, monospace; color: #8A9BB0; }
-.actions { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid #1F2C40; border-radius: 6px; background: #0B121D; overflow: hidden; }
-.actions a, .actions button { display: flex; align-items: center; justify-content: center; height: 32px; border: 0; background: none; color: #8A9BB0; text-decoration: none; cursor: pointer; }
-.actions > * + * { border-left: 1px solid #1F2C40 !important; }
-.actions a:hover, .actions button:hover { background: #111D2D; color: #E6EDF5; }
+/* Scores: what the number is, the number, the rank. Three per line. */
+.scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden; flex: none; }
+.score { display: flex; flex-direction: column; gap: 1px; min-width: 0; padding: 5px 8px 6px; box-shadow: 1px 0 0 #1F2C40, 0 1px 0 #1F2C40; }
+.score .k { display: flex; align-items: center; gap: 4px; color: #9AA9BC; font-size: 11px; white-space: nowrap; overflow: hidden; }
+.score b { font: 700 14px/16px Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.score i { font: normal 11px Consolas, monospace; color: #9AA9BC; }
+/* The game's own pages about this player. */
+.actions { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid #1F2C40; border-radius: 7px; background: #0B121D; overflow: hidden; flex: none; }
+.actions a { display: flex; align-items: center; justify-content: center; gap: 6px; height: 28px; padding: 0 4px; color: #B4C2D3; text-decoration: none; white-space: nowrap; overflow: hidden; }
+.actions > * + * { border-left: 1px solid #1F2C40; }
+.actions a:hover { background: #111D2D; color: #E6EDF5; }
+/* The player's note. */
+.note { display: flex; align-items: flex-start; gap: 6px; padding: 5px 8px; border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; flex: none; }
+.note svg { flex: none; margin-top: 3px; color: #F5B547; }
+.note textarea { flex: 1; min-width: 0; min-height: 20px; max-height: 120px; padding: 2px 0; border: 0; background: none; color: #E6EDF5; resize: vertical; line-height: 1.4; field-sizing: content; }
+.note textarea::placeholder { color: #617C8D; }
+.note textarea:focus { outline: none; }
+.note:focus-within { border-color: #4FD1E8; }
+.note.off { color: #9AA9BC; }
 
-.range { display: flex; align-items: center; gap: 4px; color: #8A9BB0; }
-.range input { width: 76px; height: 26px; padding: 0 5px; border: 1px solid #1F2C40; border-radius: 5px; background: #0A111C; color: #E6EDF5; font: 13px Consolas, monospace; }
+.range { display: flex; align-items: center; gap: 4px; color: #9AA9BC; }
+.range input { width: 76px; height: 26px; padding: 0 5px; border: 1px solid #1F2C40; border-radius: 5px; background: #0A111C; color: #E6EDF5; font: 12px Consolas, monospace; }
 
-/* Rows: the planet menu's .fut-row, one line each. */
-.scroll { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding-right: 2px; scrollbar-color: #2A3B55 #0B121D; scrollbar-width: thin; }
-.cols, .row { display: grid; align-items: center; gap: 4px; min-height: 32px; padding: 0 4px; }
-.cols { min-height: 18px; color: #4A5B72; font-size: 12px; }
-.row { border: 1px solid #1F2C40; border-radius: 6px; background: #111B2A; }
-.row.gap { margin-top: 4px; }
-.row.active { border-color: #4FD1E8; background: rgba(79,209,232,0.14); box-shadow: inset 3px 0 0 #4FD1E8; }
-.pl .cols, .pl .row { grid-template-columns: 22px 80px 1fr 44px 44px 48px; }
-.tg .cols, .tg .row { grid-template-columns: 22px 80px 1fr 44px 48px 24px; }
-.ps .row { grid-template-columns: 22px 1fr auto auto; }
-.idx { color: #4A5B72; font: 12px Consolas, monospace; text-align: right; }
-.coords { all: unset; display: inline-flex; align-items: center; gap: 3px; padding: 2px 4px; border-radius: 4px; color: #C9D4E2; font: 13px Consolas, monospace; cursor: pointer; }
-.coords:hover { background: #1D3350; color: #E6EDF5; }
+/* Lists: one card, a hairline between rows, the cyan bar on the system on screen. */
+.scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: #2A3B55 #0B121D; scrollbar-width: thin; }
+.pl, .tg, .ps { border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden; }
+.cols, .row { display: grid; align-items: center; gap: 6px; min-height: 28px; padding: 0 6px; }
+.cols { min-height: 22px; color: #9AA9BC; font-size: 11px; background: #0B121D; border-bottom: 1px solid #1F2C40; }
+.row + .row { border-top: 1px solid #16202F; }
+.row.gap { border-top-color: #2C3E57; }
+.row:hover { background: #16243A; }
+.row.active { background: rgba(79,209,232,0.12); box-shadow: inset 3px 0 0 #4FD1E8; }
+.pl .cols, .pl .row { grid-template-columns: 18px 84px minmax(0, 1fr) 46px 40px 40px 34px; }
+.tg .cols, .tg .row { grid-template-columns: 18px 76px minmax(0, 1fr) 40px 34px 22px; }
+.ps .row { grid-template-columns: 18px minmax(0, 1fr) auto auto; min-height: 30px; }
+.idx { color: #617C8D; font: 11px Consolas, monospace; text-align: right; }
+.coords { all: unset; display: inline-flex; align-items: center; gap: 3px; padding: 2px 3px; border-radius: 4px; color: #E6EDF5; font: 12px Consolas, monospace; cursor: pointer; white-space: nowrap; }
+.coords:hover { background: #1D3350; color: #8BE4F2; }
 .row.active .coords { color: #8BE4F2; }
 .coords.new::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #4FD1E8; }
-.cell-r { text-align: right; font: 13px Consolas, monospace; color: #8A9BB0; white-space: nowrap; overflow: hidden; }
+.where { display: inline-flex; align-items: center; gap: 2px; min-width: 0; }
+.home { flex: none; color: #F5B547; }
+.pn { min-width: 0; color: #9AA9BC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cell-r { text-align: right; font: 12px Consolas, monospace; color: #617C8D; white-space: nowrap; overflow: hidden; }
+.cols .cell-r { font: inherit; color: inherit; }
 .cell-r.has { color: #C9D4E2; }
 .cell-r.big { color: #F5B547; font-weight: 700; }
 .txt { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E6EDF5; }
-.txt .who { color: #8A9BB0; }
+.txt .who { color: #9AA9BC; }
+.who2 { display: flex; flex-direction: column; min-width: 0; padding: 3px 0; }
 .pname { all: unset; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E6EDF5; font-weight: 700; cursor: pointer; }
 .pname:hover, .pname:focus-visible { color: #4FD1E8; }
-.rank { color: #8A9BB0; font: 12px Consolas, monospace; }
-.act { display: inline-flex; align-items: center; justify-content: flex-end; gap: 2px; height: 24px; padding: 0 3px; border-radius: 4px; font: 700 13px Consolas, monospace; text-decoration: none; color: #4A5B72; }
+.pnote { color: #9AA9BC; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank { color: #9AA9BC; font: 11px Consolas, monospace; }
+.act { display: inline-flex; align-items: center; justify-content: flex-end; gap: 2px; height: 22px; padding: 0 2px; border-radius: 4px; font: 700 12px Consolas, monospace; text-decoration: none; color: #617C8D; }
 .act svg { color: #617C8D; flex: none; }
 a.act:hover { background: #1D3350; }
 .act.on { color: #EF7676; } .act.mid { color: #E3BB28; } .act.off { color: #38C56E; } .act.unknown { color: #617C8D; font-weight: 400; }
-.age { text-align: right; font: 13px Consolas, monospace; }
-.age.fresh { color: #38C56E; } .age.warm { color: #E3BB28; } .age.old { color: #EF7676; } .age.none { color: #4A5B72; }
-.st-inactive { color: #9BE36D !important; } .st-longinactive { color: #8A9BB0 !important; } .st-vacation { color: #7FDBFF !important; } .st-banned { color: #FF7A7A !important; text-decoration: line-through; }
-.foot { display: flex; justify-content: space-between; gap: 6px; color: #617C8D; font-size: 12px; }
-kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background: #0D1522; color: #C9D4E2; font: 12px Consolas, monospace; }
-.empty { margin: 4px 0; padding: 14px 10px; border: 1px dashed #1F2C40; border-radius: 6px; color: #8A9BB0; text-align: center; line-height: 1.4; }
+.age { text-align: right; font: 12px Consolas, monospace; }
+.age.fresh { color: #38C56E; } .age.warm { color: #E3BB28; } .age.old { color: #EF7676; } .age.none { color: #617C8D; }
+.st-inactive { color: #9BE36D !important; } .st-longinactive { color: #9AA9BC !important; } .st-vacation { color: #7FDBFF !important; } .st-banned { color: #FF7A7A !important; text-decoration: line-through; }
+.foot { display: flex; justify-content: space-between; gap: 6px; margin: 6px 0 0; color: #9AA9BC; font-size: 11px; flex: none; }
+kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background: #0D1522; color: #C9D4E2; font: 11px Consolas, monospace; }
+.empty { margin: 4px 0; padding: 14px 10px; border: 1px dashed #1F2C40; border-radius: 7px; color: #9AA9BC; text-align: center; line-height: 1.4; }
 .err { color: #EF7676; }
 .fut-mk { margin: 0; }
+/* Narrow screens: the planet's name and the row number give their room to the numbers. */
+@container (max-width: 350px) {
+  .pl .cols, .pl .row { grid-template-columns: 84px minmax(0, 1fr) 40px 40px 34px; }
+  .tg .cols, .tg .row { grid-template-columns: 76px minmax(0, 1fr) 40px 34px 22px; }
+  .pl .idx, .tg .idx, .pl .pn { display: none; }
+  .pl .cols > :first-child, .tg .cols > :first-child, .pl .cols > :nth-child(3) { display: none; }
+  .scores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .actions a span { display: none; }
+}
 ` + MARKS_CSS;
   function h(doc, tag, cls = "", text) {
     const n = doc.createElement(tag);
@@ -4119,12 +4049,21 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     doc.getElementById(SIDE_ID)?.remove();
     store.set(VIEW_KEY, { ...store.get(VIEW_KEY, {}), open: false });
   }
+  var isEmpire = (doc) => /[?&]component=empire\b/.test(doc.location?.href ?? "");
+  function fitWidth(doc) {
+    const host = doc.getElementById(SIDE_ID);
+    if (!host) return;
+    const content = doc.getElementById("middle") ?? doc.getElementById("contentWrapper") ?? doc.getElementById("pageContent");
+    const room = content ? Math.floor(content.getBoundingClientRect().left) : SIDE_W;
+    host.style.setProperty("--w", `${Math.max(300, Math.min(SIDE_W, room))}px`);
+  }
+  var fitted = /* @__PURE__ */ new WeakSet();
   function toggleSide(o) {
     if (isSideOpen(o.doc)) closeSide(o.doc, o.store);
     else openSide(o, { open: true });
   }
   function restoreSide(o) {
-    if (readView(o).open) openSide(o, {});
+    if (readView(o).open && !isEmpire(o.doc)) openSide(o, {});
   }
   function refreshSide() {
     if (last && isSideOpen(last.doc)) openSide(last, {});
@@ -4144,6 +4083,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
   function openSide(o, change) {
     last = o;
     const { doc, store, t, locale } = o;
+    if (isEmpire(doc)) return;
     const view2 = { ...readView(o), ...change, open: true };
     store.set(VIEW_KEY, view2);
     const keepScroll = doc.getElementById(SIDE_ID)?.shadowRoot?.querySelector(".scroll")?.scrollTop ?? 0;
@@ -4201,6 +4141,11 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     side.append(foot);
     root.replaceChildren(style, side);
     scroll.scrollTop = keepScroll;
+    fitWidth(doc);
+    if (!fitted.has(doc) && doc.defaultView) {
+      fitted.add(doc);
+      doc.defaultView.addEventListener("resize", () => fitWidth(doc));
+    }
   }
   function iconButton(doc, name, label) {
     const b = h(doc, "button", "ib");
@@ -4240,7 +4185,15 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       name.title = t("marks.openSheet");
       name.addEventListener("click", () => go({ player: p.id }));
       const rank = cache[String(p.id)]?.scores.total?.rank;
-      row.append(h(doc, "span", "idx", String(i + 1)), name, h(doc, "span", "rank", rank ? `#${rank.toLocaleString(locale)}` : ""), flagButton(picker, p.id, p.name));
+      const who = h(doc, "span", "who2");
+      who.append(name);
+      const note = marks.players[String(p.id)]?.note;
+      if (note) {
+        const line = h(doc, "span", "pnote", note);
+        line.title = note;
+        who.append(line);
+      }
+      row.append(h(doc, "span", "idx", String(i + 1)), who, h(doc, "span", "rank", rank ? `#${rank.toLocaleString(locale)}` : ""), flagButton(picker, p.id, p.name));
       wrap.append(row);
     });
     scroll.append(wrap);
@@ -4295,8 +4248,8 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
         sheetData.set(id, fresh);
         if (fresh) {
           let m = rememberRecent(readMarks2(store), id, fresh.name || known);
-          const flagged = m.players[String(id)];
-          if (flagged && !flagged.name) m = flagPlayer(m, id, fresh.name, flagged.flag, Date.now());
+          const flagged2 = m.players[String(id)];
+          if (flagged2 && !flagged2.name) m = flagPlayer(m, id, fresh.name, flagged2.flag, Date.now());
           store.set(MARKS_KEY, m);
         }
         refreshSide();
@@ -4304,57 +4257,87 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       return;
     }
     const scores = h(doc, "div", "scores");
+    const score = (ico, color, label, value, rankText) => {
+      const cell = h(doc, "div", "score");
+      const k = h(doc, "span", "k");
+      const ic = icon(doc, ico, 12);
+      ic.style.color = color;
+      k.append(ic, doc.createTextNode(label));
+      const b = h(doc, "b", "", value);
+      b.style.color = color;
+      cell.append(k, b, h(doc, "i", "", rankText));
+      scores.append(cell);
+    };
     for (const [key, ico, color] of SCORE_LOOK) {
       const v = data?.scores[key];
-      const cell = h(doc, "div", "score");
-      cell.title = t(`galaxy.score.${key}`);
-      const ic = icon(doc, ico, 14);
-      ic.style.color = color;
-      const b = h(doc, "b", "", v ? formatUnits(v.points, locale) : "\u2014");
-      b.style.color = color;
-      cell.append(ic, b);
-      if (v) cell.append(h(doc, "i", "", `#${v.rank.toLocaleString(locale)}`));
-      scores.append(cell);
+      score(ico, color, t(`galaxy.score.${key}`), v ? formatUnits(v.points, locale) : "\u2014", v ? `#${v.rank.toLocaleString(locale)}` : "");
     }
-    const ships = h(doc, "div", "score");
-    ships.title = t("marks.ships");
-    ships.append(icon(doc, "fleet", 14), h(doc, "b", "", data?.ships ? data.ships.toLocaleString(locale) : "\u2014"));
-    scores.append(ships);
+    score("fleet", "#C9D4E2", t("marks.ships"), data?.ships ? data.ships.toLocaleString(locale) : "\u2014", "");
     side.append(scores);
     const actions = h(doc, "div", "actions");
     const link = (ico, label, href) => {
       const a = h(doc, "a");
       a.href = href;
       a.title = label;
-      a.setAttribute("aria-label", label);
-      a.append(icon(doc, ico, 15));
+      a.append(icon(doc, ico, 13), h(doc, "span", "", label));
       actions.append(a);
     };
-    link("pen", t("marks.write"), `/game/index.php?page=ingame&component=chat&playerId=${id}`);
+    link("pen", t("marks.writeShort"), `/game/index.php?page=ingame&component=chat&playerId=${id}`);
     link("user", t("marks.profile"), `/game/index.php?page=ingame&component=playerprofile&profileId=${id}`);
     link("chart", t("marks.rank"), `/game/index.php?page=ingame&component=highscore&category=1&searchRelId=${id}${rank ? `&site=${Math.max(1, Math.ceil(rank / 100))}` : ""}`);
     side.append(actions);
+    const flagged = marks.players[String(id)];
+    const noteBox = h(doc, "label", `note${flagged ? "" : " off"}`);
+    noteBox.append(icon(doc, "note", 13));
+    if (flagged) {
+      const area = h(doc, "textarea");
+      area.rows = 1;
+      area.maxLength = 500;
+      area.placeholder = t("marks.notePlaceholder");
+      area.setAttribute("aria-label", t("marks.note"));
+      area.value = flagged.note ?? "";
+      for (const ev of ["keydown", "keyup", "keypress"]) area.addEventListener(ev, (e) => e.stopPropagation());
+      area.addEventListener("change", () => store.set(MARKS_KEY, notePlayer(readMarks2(store), id, area.value)));
+      noteBox.append(area);
+    } else noteBox.append(h(doc, "span", "", t("marks.noteNeedsFlag")));
+    side.append(noteBox);
     if (!data) {
       scroll.append(h(doc, "p", "empty err", t("galaxy.apiError")));
       return;
     }
     const lines = planetsOf(id, data, positions);
+    const first = (data.planets ?? []).reduce((lo, p) => p.id > 0 && (!lo || p.id < lo.id) ? p : lo, null);
+    const big = store.get(BIG_DEBRIS_KEY, BIG_DEBRIS);
     const now = Date.now();
     const wrap = h(doc, "div", "pl");
     const cols = h(doc, "div", "cols");
-    cols.append(h(doc, "span", ""), h(doc, "span", "", t("marks.col.coords")), h(doc, "span", "cell-r", t("marks.col.debris")), h(doc, "span", "cell-r", t("marks.col.planet")), h(doc, "span", "cell-r", t("marks.col.moon")), h(doc, "span", "cell-r", t("marks.col.seen")));
+    cols.append(h(doc, "span", ""), h(doc, "span", "", t("marks.col.coords")), h(doc, "span", "", t("marks.col.name")), h(doc, "span", "cell-r", t("marks.col.debris")), h(doc, "span", "cell-r", t("marks.col.planet")), h(doc, "span", "cell-r", t("marks.col.moon")), h(doc, "span", "cell-r", t("marks.col.seen")));
     wrap.append(cols);
     let lastSystem = "";
     lines.forEach((p, i) => {
       const system = p.coords.split(":").slice(0, 2).join(":");
-      const row = h(doc, "div", `row${i > 0 && system !== lastSystem ? " gap" : ""}${system === here ? " active" : ""}`);
+      const isHome = first?.coords === p.coords;
+      const row = h(doc, "div", `row${i > 0 && system !== lastSystem ? " gap" : ""}${system === here ? " active" : ""}${isHome ? " is-home" : ""}`);
       lastSystem = system;
-      row.title = p.name;
       const debris = p.seen?.debris ?? 0;
+      const where = h(doc, "span", "where");
+      where.append(coordsButton(doc, t, p.coords, p.fresh));
+      if (isHome) {
+        const mark = icon(doc, "home", 12, "home");
+        mark.setAttribute("role", "img");
+        mark.setAttribute("aria-label", t("marks.home"));
+        const tip = doc.createElementNS("http://www.w3.org/2000/svg", "title");
+        tip.textContent = t("marks.home");
+        mark.append(tip);
+        where.append(mark);
+      }
+      const pn = h(doc, "span", "pn", p.name);
+      pn.title = isHome ? `${p.name} \xB7 ${t("marks.home")}` : p.name;
       row.append(
         h(doc, "span", "idx", String(i + 1)),
-        coordsButton(doc, t, p.coords, p.fresh),
-        h(doc, "span", `cell-r${debris ? " has" : ""}${debris >= 1e6 ? " big" : ""}`, p.seen ? formatUnits(debris, locale) : "\u2014"),
+        where,
+        pn,
+        h(doc, "span", `cell-r${debris ? " has" : ""}${debris >= big ? " big" : ""}`, p.seen ? formatUnits(debris, locale) : "\u2014"),
         activityCell(doc, t, p.coords, 1, p.seen?.act[0] ?? null, p.seen, now),
         p.moon ? activityCell(doc, t, p.coords, 3, p.seen?.act[1] ?? null, p.seen, now) : h(doc, "span", ""),
         ageCell(doc, t, p.seen, now, locale)
@@ -4446,6 +4429,214 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     });
     scroll.append(wrap);
     scroll.append(h(doc, "p", "foot", t("marks.planetsHint", { n: list.length })));
+  }
+
+  // src/modules/galaxy/index.ts
+  var TARGETS_KEY = "galaxy.targets";
+  var highlight = "";
+  function highlightPosition(coords) {
+    highlight = coords;
+  }
+  var isGalaxyPage = (doc) => new URL(doc.location?.href ?? "http://x/").searchParams.get("component") === "galaxy";
+  var coordsOf = (s, r) => `${s.galaxy}:${s.system}:${r.position}`;
+  function systemSummary(s, ownPlanetIds) {
+    const players = /* @__PURE__ */ new Set();
+    const inactive = /* @__PURE__ */ new Set();
+    const longInactive = /* @__PURE__ */ new Set();
+    const vacation = /* @__PURE__ */ new Set();
+    let moons = 0;
+    let debris = 0;
+    let fields = 0;
+    for (const r of s.rows) {
+      const who = r.playerId ?? r.playerName;
+      if (r.moonId) moons++;
+      if (r.debris) {
+        fields++;
+        debris += debrisTotal(r.debris);
+      }
+      if (!who || r.planetId && ownPlanetIds.has(r.planetId)) continue;
+      players.add(who);
+      if (r.statuses.includes("vacation")) vacation.add(who);
+      else if (r.statuses.includes("longinactive")) longInactive.add(who);
+      if (!r.statuses.includes("vacation") && (r.statuses.includes("inactive") || r.statuses.includes("longinactive"))) inactive.add(who);
+    }
+    return { players: players.size, inactive: inactive.size, longInactive: longInactive.size, vacation: vacation.size, moons, debris, fields, deep: s.deepDebris ? debrisTotal(s.deepDebris) : 0 };
+  }
+  function el(doc, tag, cls = "", text = "") {
+    const n = doc.createElement(tag);
+    if (cls) n.className = cls;
+    if (text) n.textContent = text;
+    return n;
+  }
+  var isOurs = (n) => n instanceof Element && (/(^|\s)fut-/.test(n.getAttribute("class") ?? "") || !!n.closest('.fut-mk, [class*="fut-g-"]'));
+  function watchGalaxy(o) {
+    const { doc } = o;
+    const component = doc.getElementById("galaxycomponent") ?? doc.getElementById("galaxyContent")?.parentElement;
+    if (!component || !doc.defaultView) return;
+    if (!doc.getElementById("fut-galaxy-css")) {
+      const style = el(doc, "style");
+      style.id = "fut-galaxy-css";
+      style.textContent = GALAXY_CSS;
+      doc.head.append(style);
+    }
+    ensureMarksStyle(doc);
+    highlight = (() => {
+      const q = new URL(doc.location.href).searchParams;
+      return q.get("galaxy") && q.get("system") && q.get("position") ? `${q.get("galaxy")}:${q.get("system")}:${q.get("position")}` : "";
+    })();
+    let queued2 = false;
+    const run = () => {
+      queued2 = false;
+      const content = doc.getElementById("galaxyContent");
+      if (!content) return;
+      remember(o);
+      decorate(o, content);
+      o.onSystem?.();
+    };
+    new doc.defaultView.MutationObserver((records) => {
+      const theirs = records.some((r) => ![...r.addedNodes, ...r.removedNodes].every(isOurs));
+      if (!theirs || queued2) return;
+      queued2 = true;
+      setTimeout(run, 30);
+    }).observe(component, { childList: true, subtree: true });
+    run();
+  }
+  function remember(o) {
+    const s = readGalaxy(o.doc);
+    if (!s) return;
+    const marks = loadMarks(o.store.get(MARKS_KEY, null));
+    const recent = new Set(marks.recent.map((r) => r.id));
+    const keep = (id, coords) => !!marks.players[String(id)] || recent.has(id) || !!marks.planets[coords];
+    const rows = s.rows.filter((r) => !(r.planetId && o.ownPlanetIds.has(r.planetId))).map((r) => ({ ...r, debris: r.debris ? debrisTotal(r.debris) : 0 }));
+    const next = recordSystem(o.store.get(POSITIONS_KEY, {}), s.galaxy, s.system, rows, keep, Date.now());
+    if (next) o.store.set(POSITIONS_KEY, next);
+  }
+  function decorate(o, content) {
+    const { doc, store, t, locale } = o;
+    const s = readGalaxy(doc);
+    if (!s) return;
+    const marks = loadMarks(store.get(MARKS_KEY, null));
+    const redraw = () => decorate(o, content);
+    const big = store.get(BIG_DEBRIS_KEY, BIG_DEBRIS);
+    const value = (total, cls = "") => {
+      const v = el(doc, "span", `fut-g-dval${total >= big ? " big" : ""}${cls}`, formatUnits(total, locale));
+      v.title = total.toLocaleString(locale);
+      return v;
+    };
+    const picker = { doc, store, t, onChange: redraw };
+    for (const r of s.rows) {
+      const coords = coordsOf(s, r);
+      const own = r.planetId !== null && o.ownPlanetIds.has(r.planetId);
+      const inactive = !r.statuses.includes("vacation") && (r.statuses.includes("inactive") || r.statuses.includes("longinactive"));
+      const tag = marks.planets[coords]?.tag;
+      r.row.classList.toggle("fut-g-own", own);
+      r.row.classList.toggle("fut-g-inactive", inactive && !own);
+      r.row.classList.toggle("fut-g-tagged", !!tag);
+      r.row.classList.toggle("fut-g-hl", coords === highlight);
+      const rowStyle = r.row.style;
+      if (tag) rowStyle.setProperty("--fut-tag", TAG_COLORS[tag]);
+      else rowStyle.removeProperty("--fut-tag");
+      const nameCell = r.row.querySelector(".cellPlanetName");
+      if (nameCell && r.planetId && !own && !nameCell.querySelector(".fut-mk-tag"))
+        nameCell.append(tagButton(picker, coords, { planet: r.planetName, player: r.playerName, playerId: r.playerId, statuses: r.statuses, moon: !!r.moonId }));
+      else if (nameCell && (own || !r.planetId)) nameCell.querySelector(".fut-mk-tag")?.remove();
+      const playerCell = r.row.querySelector(".cellPlayerName");
+      const nameEl = playerCell?.querySelector(".playerName");
+      if (nameEl && r.playerId && !own && o.onPlayer && !nameEl.dataset.futPlayer) {
+        nameEl.dataset.futPlayer = String(r.playerId);
+        nameEl.classList.add("fut-g-name");
+        const id = r.playerId;
+        nameEl.addEventListener("click", () => o.onPlayer?.(id, r.playerName));
+      }
+      if (playerCell && r.playerId && r.rank && !playerCell.querySelector(".fut-g-rank")) {
+        const id = r.playerId;
+        const badge = el(doc, "button", "fut-g-rank", `#${r.rank.toLocaleString(locale)}`);
+        badge.type = "button";
+        badge.setAttribute("aria-label", t("galaxy.rankTitle", { name: r.playerName }));
+        const show2 = () => void openCard(o, badge, id, r.playerName);
+        badge.addEventListener("mouseenter", show2);
+        badge.addEventListener("focus", show2);
+        badge.addEventListener("mouseleave", () => closeCard(doc));
+        badge.addEventListener("blur", () => closeCard(doc));
+        playerCell.querySelector(".playerName")?.after(badge);
+        if (!own) badge.after(flagButton(picker, id, r.playerName));
+      }
+      const debrisCell = r.row.querySelector(".cellDebris");
+      debrisCell?.querySelector(".fut-g-dval")?.remove();
+      if (debrisCell && r.debris) debrisCell.append(value(debrisTotal(r.debris)));
+    }
+    const deep = doc.getElementById("expeditionDebrisSlotDebrisContainer");
+    deep?.querySelector(".fut-g-dval")?.remove();
+    if (deep && s.deepDebris) deep.append(value(debrisTotal(s.deepDebris), " deep"));
+    renderBar(o, content, s);
+  }
+  function renderBar(o, content, s) {
+    const { doc, t, locale } = o;
+    const BIG = o.store.get(BIG_DEBRIS_KEY, BIG_DEBRIS);
+    const sum = systemSummary(s, o.ownPlanetIds);
+    const bar = el(doc, "div", "fut-g-bar");
+    bar.id = "fut-galaxy-bar";
+    const part = (cls, text) => bar.append(el(doc, "span", cls, text));
+    part("", t("galaxy.players", { count: sum.players }));
+    part("fut-g-inact", t("galaxy.inactive", { count: sum.inactive }) + (sum.longInactive ? ` (${t("galaxy.longInactive", { count: sum.longInactive })})` : ""));
+    part("fut-g-vac", t("galaxy.vacation", { count: sum.vacation }));
+    part("fut-g-muted", t("galaxy.moons", { count: sum.moons }));
+    part(sum.debris >= BIG ? "fut-g-deb" : "fut-g-muted", sum.fields ? t("galaxy.debris", { msu: formatUnits(sum.debris, locale), count: sum.fields }) : t("galaxy.noDebris"));
+    if (sum.deep) part(sum.deep >= BIG ? "fut-g-deb" : "fut-g-muted", t("galaxy.deep", { msu: formatUnits(sum.deep, locale) }));
+    doc.getElementById(bar.id)?.remove();
+    content.before(bar);
+  }
+  var CARD_ID = "fut-galaxy-card";
+  var cardFor = 0;
+  function closeCard(doc) {
+    cardFor = 0;
+    doc.getElementById(CARD_ID)?.remove();
+  }
+  async function openCard(o, anchor, id, name) {
+    const { doc, t, locale } = o;
+    closeCard(doc);
+    cardFor = id;
+    const card = el(doc, "div", "fut-g-card");
+    card.id = CARD_ID;
+    card.setAttribute("role", "tooltip");
+    card.append(el(doc, "h4", "", t("galaxy.rankTitle", { name })));
+    const note = el(doc, "p", "", t("galaxy.loading"));
+    card.append(note);
+    doc.body.append(card);
+    const place2 = () => {
+      const box = anchor.getBoundingClientRect();
+      const view2 = doc.defaultView;
+      const h6 = card.offsetHeight;
+      const below = box.bottom + 6 + h6 <= (view2?.innerHeight ?? 800);
+      card.style.left = `${Math.max(8, Math.min(box.left, (view2?.innerWidth ?? 1200) - card.offsetWidth - 8))}px`;
+      card.style.top = `${below ? box.bottom + 6 : Math.max(8, box.top - 6 - h6)}px`;
+    };
+    place2();
+    let data = null;
+    try {
+      data = await playerScores(o.guard, o.store, doc.location.origin, id, Date.now());
+    } catch {
+      data = null;
+    }
+    if (cardFor !== id || !card.isConnected) return;
+    if (!data) {
+      note.textContent = t("galaxy.apiError");
+      note.className = "err";
+      return;
+    }
+    const table = el(doc, "table");
+    for (const key of Object.keys(SCORE_TYPES)) {
+      const v = data.scores[key];
+      if (!v) continue;
+      const tr = el(doc, "tr");
+      tr.append(el(doc, "td", "", t(`galaxy.score.${key}`)), el(doc, "td", "", formatUnits(v.points, locale)), el(doc, "td", "r", `#${v.rank.toLocaleString(locale)}`));
+      table.append(tr);
+    }
+    note.before(table);
+    const parts = [t("galaxy.apiAge", { time: new Date(data.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) })];
+    if (data.ships) parts.unshift(t("galaxy.ships", { count: data.ships.toLocaleString(locale) }));
+    note.textContent = parts.join(" \xB7 ");
+    place2();
   }
 
   // src/modules/dock/index.ts
@@ -7246,7 +7437,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
   // src/modules/settings/index.ts
   var SETTINGS_ID = "fut-settings-window";
   var TAB_KEY = "settings.tab";
-  var SECTIONS = ["menu", "mail", "fleet", "keys", "data"];
+  var SECTIONS = ["menu", "mail", "galaxy", "fleet", "keys", "data"];
   var CSS3 = `
 :host { --panel-w: 620px; }
 .body { display: flex; flex-direction: column; }
@@ -7576,6 +7767,24 @@ input.field { width: 190px; }
           row(t("settings.shared"), t("settings.sharedHint"), yesNo(store.get(SPY_SHARED_KEY, true), (v) => set(SPY_SHARED_KEY, v))),
           row(t("settings.fold"), t("settings.foldHint"), yesNo(store.get(FOLD_KEY, true), (v) => set(FOLD_KEY, v)))
         );
+      } else if (section2 === "galaxy") {
+        const current3 = store.get(BIG_DEBRIS_KEY, BIG_DEBRIS);
+        const box = el6("span", "control");
+        const input = el6("input", "field");
+        input.type = "text";
+        input.value = formatUnits(current3, doc.documentElement.lang || "it");
+        input.setAttribute("aria-label", t("settings.bigDebris"));
+        input.addEventListener("keydown", (e) => e.stopPropagation());
+        input.addEventListener("change", () => {
+          const n = parseAmount(input.value);
+          if (n > 0) store.set(BIG_DEBRIS_KEY, n);
+          status = n > 0 ? t("settings.bigDebrisSaved", { n: n.toLocaleString(doc.documentElement.lang || "it") }) : t("settings.bigDebrisBad");
+          draw();
+        });
+        box.append(input);
+        const st = el6("div", "status", status);
+        st.setAttribute("role", "status");
+        body.append(row(t("settings.bigDebris"), t("settings.bigDebrisHint"), box), st);
       } else if (section2 === "fleet") {
         body.append(...fleetRows());
       } else if (section2 === "keys") {
@@ -9472,6 +9681,9 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (crystal !== void 0) shown2.crystal = crystal;
     if (deuterium !== void 0) shown2.deuterium = deuterium;
     if (energy !== void 0) shown2.energy = energy;
+    const popEl = root.querySelector(".costs .population");
+    const pop = costValue(root, "population");
+    const population = popEl && pop !== void 0 ? { value: pop, enough: !popEl.classList.contains("insufficient") } : null;
     const time = root.querySelector(".build_duration time, .build_duration [datetime]");
     const durationMs = time ? isoDurationMs(time.getAttribute("datetime") ?? "") : null;
     return {
@@ -9480,6 +9692,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       name: root.querySelector("h3")?.textContent?.trim() ?? String(id),
       panelLevel: num3(root.querySelector(".information .level")?.getAttribute("data-value")),
       shown: shown2,
+      population,
       durationMs,
       amountInput: root.querySelector("#build_amount")
     };
@@ -11041,6 +11254,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 .fut-tp-chip svg { flex: none; color: #8A9BB0; }
 .fut-tp-energy svg { color: #F5D547; } .fut-tp-start svg { color: #4FD1E8; }
 .fut-tp-disc { color: #8A9BB0; }
+.fut-tp-pop svg { color: #E58CDB; }
+.fut-tp-lack { border-color: #FF7A7A; color: #FF7A7A; } .fut-tp-lack svg { color: #FF7A7A; }
 /* Tools over the picture, like OGLight. */
 .fut-tp-tools { position: absolute; top: 4px; left: 4px; right: 4px; display: flex; gap: 4px; z-index: 2; }
 #technologydetails .fut-tp-btn { flex: 1; height: 24px; display: flex; align-items: center; justify-content: center; padding: 0;
@@ -11088,12 +11303,22 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 .seg button + button { border-left: 1px solid var(--line); }
 .seg button:hover { color: var(--text); }
 .seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
-/* Planet view: the head carries the one button that brings everything; rows are picked with a click. */
-.group.body .ghead { grid-template-columns: 28px minmax(0, 1fr) 70px 70px 70px 170px; }
-.group.body .grow { grid-template-columns: minmax(0, 1fr) 70px 70px 70px 170px; padding-left: 6px; }
-.gmeta:empty { display: none; }
-.bmark { display: inline-flex; justify-content: center; color: var(--accent); }
-.bring-all { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border: 1px solid var(--warn); border-radius: 6px; background: rgba(245, 181, 71, 0.1); color: var(--warn); font: 700 12px Arial, sans-serif; white-space: nowrap; cursor: pointer; }
+/* Planet view: one line per planet. Who, what is planned (a picture and a level each, picked with a
+   click), what it costs, the one button that brings it. Tiles sit flush, as rows of one list. */
+.groups:has(.group.body) { gap: 0; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.group.body { border: 0; border-radius: 0; }
+.group.body + .group.body { border-top: 1px solid var(--line-soft); }
+.group.body .ghead, .group.body .grow { grid-template-columns: minmax(130px, 1fr) minmax(0, 1.1fr) 62px 62px 62px 158px; min-height: 32px; padding: 2px 6px 2px 10px; }
+.group.body .ghead:hover { background: #16243A; }
+.group.body .gtitle { display: flex; align-items: center; gap: 5px; font-weight: 700; }
+.group.body .gtitle svg { flex: none; color: var(--muted); }
+.pchips { display: flex; flex-wrap: wrap; align-items: center; gap: 3px; min-width: 0; }
+.pchip { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 7px 0 2px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--text-2); font: 12px var(--mono); cursor: pointer; }
+.pchip:hover { border-color: var(--accent); color: var(--text); }
+.pchip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 700; }
+.group.body .grow { background: var(--surface); border-top: 1px solid var(--line-soft); }
+.group.body .grow .gbody { grid-column: 1 / span 1; }
+.bring-all { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border: 1px solid var(--warn); border-radius: 6px; background: rgba(245, 181, 71, 0.1); color: var(--warn); font: 700 12px Arial, sans-serif; white-space: nowrap; cursor: pointer; }
 .bring-all:hover { background: rgba(245, 181, 71, 0.2); color: var(--text); }
 button.gbody { align-items: center; padding: 2px 6px 2px 2px; border: 1px solid transparent; border-radius: 5px; background: none; font: 12px Arial, sans-serif; text-align: left; cursor: pointer; }
 button.gbody:hover { border-color: var(--line); color: var(--text); }
@@ -11165,7 +11390,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     plan: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h1M4 12h1M4 18h1"/></svg>',
     time: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
     energy: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>',
-    start: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v5h5"/></svg>'
+    start: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v5h5"/></svg>',
+    pop: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.6 3-5.5 6-5.5s5.4 1.9 6 5.5"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.8M18.5 15c1.5.9 2.3 2.6 2.6 5"/></svg>'
   };
   function grid(o, view2, have) {
     const { doc, t, locale } = o;
@@ -11300,6 +11526,11 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
             )
           );
         }
+        if (details.population) {
+          const p = details.population;
+          const text = `${to > start.level ? `${t("plan.level", { level: start.level })}: ` : ""}${formatUnits(p.value, locale)}`;
+          row.append(chip(doc, ICON.pop, text, `${t("tech.population", { level: start.level })}: ${p.value.toLocaleString(locale)}${p.enough ? "" : ` \xB7 ${t("tech.populationShort")}`}`, p.enough ? "fut-tp-pop" : "fut-tp-pop fut-tp-lack"));
+        }
         row.append(...chips);
         if (start.discount > 5e-4) row.append(chip(doc, "", t("tech.discountShort", { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), t("tech.discount", { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), "fut-tp-disc"));
         box.replaceChildren(grid(o, view2, have !== null), row);
@@ -11420,6 +11651,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   var toggled = /* @__PURE__ */ new Set();
   var view = "body";
   var picked = /* @__PURE__ */ new Map();
+  var opened = /* @__PURE__ */ new Set();
   var PLANNER_ID = "fut-planner";
   var keyHandler3 = null;
   function h4(tag, cls = "", text) {
@@ -11616,14 +11848,54 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       const gapAll = have ? planMissing(items, have) : null;
       const gap = have ? planMissing(scope, have) : null;
       const short = gap ? gap.metal + gap.crystal + gap.deuterium : 0;
+      const toggle = (r, on) => {
+        const next = new Set(chosen);
+        for (const i of r.indexes) on ? next.delete(i) : next.add(i);
+        if (next.size) picked.set(bodyId, next);
+        else picked.delete(bodyId);
+        draw();
+      };
+      const isOn = (r) => r.indexes.every((i) => chosen.has(i));
+      const brief = (r) => r.amount !== void 0 ? `\xD7${fmt(r.amount)}` : r.from === r.to ? String(r.from ?? 0) : `${r.from ?? 0}\u2013${r.to ?? 0}`;
       const tile2 = h4("div", "group body");
       tile2.dataset.body = String(bodyId);
       const top = h4("div", "ghead");
       const name = h4("div", "gname");
-      name.append(h4("span", "gtitle", labelOf(bodyId)), h4("span", "gmeta", chosen.size ? t("plan.pickedOf", { n: chosen.size, of: items.length }) : items.length > 1 ? t("plan.items", { n: items.length }) : ""));
-      const mark = h4("span", "bmark");
-      mark.append(icon(doc, byId.get(bodyId)?.type === "moon" ? "moon" : "planet", 16));
-      top.append(mark, name, ...triple(total, gapAll));
+      const label = h4("span", "gtitle");
+      if (byId.get(bodyId)?.type === "moon") label.append(icon(doc, "moon", 11));
+      label.append(labelOf(bodyId));
+      name.append(label);
+      const chips = h4("div", "pchips");
+      for (const r of rows) {
+        const on = isOn(r);
+        const chip2 = h4("button", "pchip");
+        chip2.type = "button";
+        chip2.setAttribute("aria-pressed", String(on));
+        chip2.title = `${r.name} \xB7 ${what(r)} \xB7 ${fmt(r.cost.metal)} / ${fmt(r.cost.crystal)} / ${fmt(r.cost.deuterium)} \u2014 ${t("plan.pickHint")}`;
+        chip2.setAttribute("aria-label", `${r.name} ${what(r)}`);
+        chip2.append(techIconEl(doc, icons[String(r.id)], 20), h4("span", "", brief(r)));
+        chip2.addEventListener("click", () => toggle(r, on));
+        chips.append(chip2);
+      }
+      const many = rows.length > 1;
+      const open = many && opened.has(bodyId);
+      if (many) {
+        const caret = h4("button", "ib");
+        caret.type = "button";
+        caret.setAttribute("aria-expanded", String(open));
+        caret.title = t(open ? "plan.collapse" : "plan.expand");
+        caret.setAttribute("aria-label", caret.title);
+        const mark = icon(doc, "chevron", 13);
+        if (open) mark.style.transform = "rotate(180deg)";
+        caret.append(mark);
+        caret.addEventListener("click", () => {
+          if (open) opened.delete(bodyId);
+          else opened.add(bodyId);
+          draw();
+        });
+        chips.append(caret);
+      }
+      top.append(name, chips, ...triple(total, gapAll));
       const acts = h4("div", "acts");
       const p = pendingOf(bodyId);
       const onWay = p.metal + p.crystal + p.deuterium > 0;
@@ -11645,44 +11917,40 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       remove.type = "button";
       remove.append(icon(doc, "close", 13));
       remove.title = t("plan.removeBody");
-      remove.setAttribute("aria-label", remove.title);
+      remove.setAttribute("aria-label", `${remove.title}: ${labelOf(bodyId)}`);
       remove.addEventListener("click", () => save(clearBody(plan, bodyId)));
       acts.append(remove);
       top.append(acts);
       tile2.append(top);
-      const list = h4("div", "grows");
-      for (const r of rows) {
-        const on = r.indexes.every((i) => chosen.has(i));
-        const row = h4("div", `grow pick${on ? " on" : ""}`);
-        const pick = h4("button", "gbody");
-        pick.type = "button";
-        pick.title = t("plan.pickHint");
-        pick.setAttribute("aria-pressed", String(on));
-        pick.append(techIconEl(doc, icons[String(r.id)], 22), h4("span", "", r.name), h4("span", "lv", what(r)));
-        pick.addEventListener("click", () => {
-          const next = new Set(chosen);
-          for (const i of r.indexes) on ? next.delete(i) : next.add(i);
-          if (next.size) picked.set(bodyId, next);
-          else picked.delete(bodyId);
-          draw();
-        });
-        row.append(pick, ...triple(r.cost));
-        const a = h4("div", "acts");
-        const x = h4("button", "x");
-        x.type = "button";
-        x.append(icon(doc, "close", 13));
-        x.title = t("plan.remove");
-        x.setAttribute("aria-label", `${t("plan.remove")}: ${r.name}`);
-        x.addEventListener("click", () => {
-          let next = plan;
-          for (const i of [...r.indexes].reverse()) next = removeFromPlan(next, bodyId, i);
-          save(next);
-        });
-        a.append(x);
-        row.append(a);
-        list.append(row);
+      if (open) {
+        const list = h4("div", "grows");
+        for (const r of rows) {
+          const on = isOn(r);
+          const row = h4("div", `grow pick${on ? " on" : ""}`);
+          const pick = h4("button", "gbody");
+          pick.type = "button";
+          pick.title = t("plan.pickHint");
+          pick.setAttribute("aria-pressed", String(on));
+          pick.append(techIconEl(doc, icons[String(r.id)], 20), h4("span", "", r.name), h4("span", "lv", what(r)));
+          pick.addEventListener("click", () => toggle(r, on));
+          row.append(pick, h4("span"), ...triple(r.cost));
+          const a = h4("div", "acts");
+          const x = h4("button", "x");
+          x.type = "button";
+          x.append(icon(doc, "close", 13));
+          x.title = t("plan.remove");
+          x.setAttribute("aria-label", `${t("plan.remove")}: ${r.name}`);
+          x.addEventListener("click", () => {
+            let next = plan;
+            for (const i of [...r.indexes].reverse()) next = removeFromPlan(next, bodyId, i);
+            save(next);
+          });
+          a.append(x);
+          row.append(a);
+          list.append(row);
+        }
+        tile2.append(list);
       }
-      tile2.append(list);
       return tile2;
     };
     const groupTile = (g, plan, haveOf, pendingOf, save) => {
