@@ -62,6 +62,7 @@ import {
   prepareFleetsave,
   prepareSend,
   prepareTransport,
+  clearOurSelection,
   type FleetMode,
   type PrepareResult,
   type Target,
@@ -70,6 +71,7 @@ import { hookSend, nextInRound, readRepeatParams, repeatUrl, type RepeatState } 
 import { FLEET_CSS, MODAL_CSS } from './style';
 import { keyLabel, keymap, registerActions } from '../shortcuts';
 import { iconSvg, type IconName } from './icons';
+import { SHIP_ICONS } from '../../data/ship-icons';
 
 export interface FleetBody {
   planetId: number | null;
@@ -947,7 +949,9 @@ function sendPanel(
   };
   const clear = el(doc, 'button', 'fut-fclear');
   clear.type = 'button';
-  clear.textContent = t('fleet.send.clearBtn');
+  clear.innerHTML = iconSvg('erase', 15);
+  clear.title = t('fleet.send.clearBtn');
+  clear.setAttribute('aria-label', t('fleet.send.clearHint'));
   peek(clear, t('fleet.send.clearBtn'), t('fleet.send.clearHint'));
   res.append(clear);
 
@@ -961,7 +965,13 @@ function sendPanel(
     const full = t(`ship.${id}`);
     b.setAttribute('aria-label', `${t('fleet.send.cargoWith')} ${full}`);
     const n = el(doc, 'small', 'n');
-    b.append(el(doc, 'b', '', short), n);
+    // The game's own picture of the ship (same CDN as its fleet page), the short name in the corner.
+    const pic = el(doc, 'img', 'pic');
+    pic.src = SHIP_ICONS[id] ?? '';
+    pic.alt = '';
+    // No picture (offline CDN): the tile keeps its name and count.
+    pic.addEventListener('error', () => pic.remove());
+    b.append(pic, el(doc, 'b', '', short), n);
     counts.set(id, n);
     peek(b, `${short} · ${full}`, t('fleet.send.cargoHint'));
     b.addEventListener('click', (e) => {
@@ -1164,6 +1174,9 @@ export function renderFleetTools(o: FleetOptions): void {
     const now = loadSettings(o.store);
     const next = now.sendMode === mode ? null : mode;
     o.store.set(SETTINGS_KEY, { ...now, sendMode: next });
+    // Switching to another kind of send: what another button of ours selected goes (a selection made by hand stays).
+    const fd = getDispatcher();
+    if (fd && next) clearOurSelection(fd);
     redraw();
     if (next) say(t(next === 'transport' ? 'fleet.send.onTransport' : 'fleet.send.onDeploy'));
     doc.querySelector<HTMLInputElement>('.fut-fsend .fut-fin.p')?.focus();

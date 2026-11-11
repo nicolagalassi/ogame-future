@@ -41,3 +41,7 @@ Versione 0.3.12.
 
 ## 0.3.15
 - Modalità T/D, coordinate e risorse si azzerano a ogni nuova pagina (refresh, cambio corpo); restano tra i ridisegni della stessa pagina (`data-fut-send-page`).
+
+## 0.3.16
+- CL / CP: immagini delle navi del gioco (`SHIP_ICONS`), 48px; Svuota = icona gomma.
+- Bug: i pulsanti si sommavano (spedizione poi CL/CP teneva le navi della spedizione). Ora ogni pulsante registra la sua selezione in `selectShips`; CL/CP tiene solo quella fatta a mano; accendere T/D toglie quella lasciata da un altro pulsante (`clearOurSelection`).

@@ -213,12 +213,14 @@ function fakeDispatcher(over: Partial<FleetDispatcher> = {}): FleetDispatcher & 
     apiDataJson: { characterClassId: 3, bonuses: { characterClassBooster: { 3: 0 } } },
     resetShips() {
       for (const k of Object.keys(selected)) delete selected[Number(k)];
+      fd.shipsToSend = [];
     },
     resetCargo() {
       fd.cargoMetal = fd.cargoCrystal = fd.cargoDeuterium = 0;
     },
     selectShip(id: number, n: number) {
       selected[id] = n;
+      fd.shipsToSend = [...fd.shipsToSend.filter((x) => x.id !== id), { id, number: n }];
     },
     getCargoCapacity(): number {
       return Object.entries(selected).reduce((a: number, [id, n]) => a + n * (fd.fleetHelper.shipsData?.[id]?.cargoCapacity ?? 0), 0);
@@ -661,5 +663,22 @@ describe('plain Trasporto / Schiera on a new page', () => {
     const saved = store.get<typeof DEFAULT_SETTINGS>('fleet.settings', DEFAULT_SETTINGS);
     expect([saved.sendMode, saved.sendTarget, saved.sendPick]).toEqual([null, null, { metal: null, crystal: null, deuterium: null }]);
     expect(doc.querySelector('.fut-fsend')).toBeNull();
+  });
+});
+
+describe('one kind of send at a time', () => {
+  it('CL / CP after the expedition button: the expedition ships go, hand-picked ones stay', async () => {
+    const { clearOurSelection } = await import('../src/modules/fleet/actions');
+    const fd = fakeDispatcher();
+    const target = { galaxy: 1, system: 2, position: 3, type: 1 };
+    prepareExpedition(fd, fleetPage(), { reserve: reserve({}), save: null }, DEFAULT_SETTINGS, { economySpeed: 1 });
+    expect(Object.keys(fd.selected).length).toBeGreaterThan(0);
+    prepareSend(fd, fleetPage(), DEFAULT_SETTINGS, target, { metal: 4_000, crystal: null, deuterium: null }, 'transport', 203);
+    expect(fd.selected).toEqual({ 203: 2 });
+    // Turning T / D on clears what our buttons selected, not what the player picked.
+    expect(clearOurSelection(fd)).toBe(true);
+    expect(fd.selected).toEqual({});
+    fd.shipsToSend = [{ id: 210, number: 1 }];
+    expect(clearOurSelection(fd)).toBe(false);
   });
 });
