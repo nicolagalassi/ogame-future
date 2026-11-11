@@ -2,10 +2,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EMPTY_MARKS, flagPlayer, loadMarks, MARKS_KEY, migrateOld, planetsInRange, rememberRecent, RECENT_MAX, tagPlanet, type Marks } from '../src/engines/marks';
 import { flagButton, tagButton } from '../src/modules/marks/picker';
-import { closeSide, isSideOpen, nextInSide, openSide, restoreSide, SIDE_ID, toggleSide } from '../src/modules/marks/side';
+import { closeSide, isSideOpen, nextInSide, openSide, resetSideCache, restoreSide, SIDE_ID, toggleSide } from '../src/modules/marks/side';
 import { POSITIONS_KEY } from '../src/engines/positions';
 import { parsePlayerData } from '../src/data/player-api';
 import { parsePlayersXml, statusNames } from '../src/data/universe-players';
+import { parseHighscoreXml, UNIVERSE_RANKS_KEY } from '../src/data/universe-ranks';
 import { MemoryStore, Store } from '../src/core/storage';
 import { NetworkGuard } from '../src/core/guard';
 import { translator } from '../src/core/i18n';
@@ -88,6 +89,27 @@ describe('public API readers', () => {
 });
 
 describe('targets side bar', () => {
+  it('lists the flagged players by rank, with their status, ranks for all from one public file', async () => {
+    expect(parseHighscoreXml('<?xml version="1.0"?><highscore category="1" type="0" timestamp="1"><player position="2" id="7" score="900"/><player position="18" id="5" score="20"/></highscore>', 4)).toEqual({ at: 4, ranks: { 7: [2, 900], 5: [18, 20] } });
+    const store = new Store(new MemoryStore(), 'rk');
+    let m = flagPlayer(EMPTY_MARKS, 5, 'Abubu', 'danger', 1);
+    m = flagPlayer(m, 7, 'Zed', 'danger', 1);
+    m = flagPlayer(m, 8, 'Mid', 'danger', 1);
+    store.set(MARKS_KEY, m);
+    store.set(UNIVERSE_RANKS_KEY, { at: Date.now(), ranks: { 5: [18, 0], 7: [2, 0], 8: [9, 0] } });
+    const fetchImpl = vi.fn(async () => new Response('<?xml version="1.0"?><players timestamp="1"><player id="7" name="Zed" status="vi"/><player id="5" name="Bob" status=""/><player id="6" name="Al" status="v"/></players>'));
+    const guard = new NetworkGuard(fetchImpl, 'http://localhost:3000');
+    openSide({ doc: document, store, guard, t, locale: 'it' }, { tab: 'players', flagTab: 'danger', player: null });
+    const root = () => document.getElementById(SIDE_ID)!.shadowRoot!;
+    expect([...root().querySelectorAll('.ps .pname')].map((n) => n.textContent)).toEqual(['Zed', 'Mid', 'Abubu']);
+    expect([...root().querySelectorAll('.ps .rank')].map((n) => n.textContent)).toEqual(['#2', '#9', '#18']);
+    // The ranks file is fresh: only players.xml is asked; then Zed shows on vacation.
+    await vi.waitFor(() => expect(root().querySelector('.ps .pst')?.textContent).toBe('(vi)'));
+    expect(root().querySelector('.ps .pname')!.classList.contains('st-vacation')).toBe(true);
+    expect(fetchImpl.mock.calls.every((c) => !String(c[0]).includes('highscore'))).toBe(true);
+    resetSideCache();
+  });
+
   it('lists flagged players and coloured planets, statuses from the public API', async () => {
     const store = new Store(new MemoryStore(), 'x');
     let m = flagPlayer(EMPTY_MARKS, 5, 'Bob', 'watch', 1);

@@ -37,7 +37,7 @@ const outcomeCss = Object.entries(OUTCOME_COLORS)
 export const MESSAGES_CSS = `
 /* One set of tokens for the summaries, the "just read" panel and the spy table. Text tokens keep
    at least 4.5:1 on every background they sit on; --faint is for decoration only (ticks, tracks). */
-.fut-msg, #fut-spypanel {
+.fut-msg, .fut-fresh, #fut-spypanel {
   --hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1; --faint: #4E5B6A; --line: #2E4356;
   --link: #6F9FC8; --accent: #4FD1E8; --neg: #F07A6E; --warn: #E3B341; --ok: #7BC47F; --ship: #4FE0B0; --on-tone: #0D1116;
   --loot: #F0A35A; --name: #E8D27A; --on-accent: #CFF5FC; --attack: #FF9B8A; --attack-line: #C0533F; --sim: #8FB6D8; --chip: #1A2733;
@@ -49,6 +49,36 @@ export const MESSAGES_CSS = `
 .fut-msg:hover { background: rgba(120, 150, 180, 0.11); }
 .fut-msg:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .fut-msg-pillcell { display: flex; min-width: 0; }
+/* "Just read": what the reports read a moment ago brought, above the reports, gone after a countdown. */
+.fut-fresh { box-sizing: border-box; margin: 0 0 10px; padding: 0 16px 10px; border-radius: 0; overflow: hidden;
+  background: #0E151C; font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums; }
+.fut-fresh-timer { height: 3px; margin: 0 -16px 8px; background: #1A2530; }
+.fut-fresh-timer i { display: block; height: 100%; background: #F5A623; transform-origin: left center; animation: fut-fresh-countdown linear forwards; }
+.fut-fresh:hover .fut-fresh-timer i, .fut-fresh:focus-within .fut-fresh-timer i { animation-play-state: paused; }
+@keyframes fut-fresh-countdown { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+.fut-fresh-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-bottom: 8px; }
+.fut-fresh-head > b { font-size: 12px; color: var(--hi); }
+.fut-fresh-count { color: var(--mute); }
+.fut-rar-chip { padding: 0 7px; border-radius: 9px; border: 1px solid color-mix(in srgb, var(--rar) 60%, transparent);
+  background: color-mix(in srgb, var(--rar) 14%, transparent); color: var(--rar); font-weight: 700; white-space: nowrap; }
+.fut-fresh-total { margin-left: auto; display: flex; align-items: baseline; gap: 4px; }
+.fut-fresh-total b { font-size: 15px; color: var(--hi); }
+.fut-fresh-total.fut-neg b { color: var(--neg); }
+.fut-fresh-total small { color: var(--mute); font-size: 11px; }
+.fut-fresh-close { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--mute); cursor: pointer; }
+.fut-fresh-close:hover, .fut-fresh-close:focus-visible { color: var(--hi); background: rgba(120, 150, 180, 0.14); outline: none; }
+.fut-fresh-close:focus-visible { outline: 2px solid var(--accent); }
+.fut-fresh-res { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.fut-fresh-name { display: inline-flex; align-items: center; gap: 4px; }
+.fut-fresh-name .fut-res-ico { color: var(--dot); }
+.fut-fresh-tile { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 7px 9px; border-radius: 4px; background: rgba(120, 150, 180, 0.07); }
+.fut-fresh-name { display: flex; align-items: center; gap: 5px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fut-fresh-tile b { font-size: 16px; line-height: 1.2; color: var(--dot); white-space: nowrap; }
+.fut-fresh-tile.zero b { color: var(--dim); }
+.fut-fresh-ships { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; }
+.fut-fresh-ship { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; color: var(--ship); }
+.fut-fresh-ship.fut-neg { color: var(--neg); }
+@media (max-width: 640px) { .fut-fresh-res { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 /* B · Loot: each thing found is a tile, its symbol over its amount; an outcome the tiles do not show
    gets a wide tile with its word and what happened; the value stands on the right, after a rule. */
 .fut-msg.fut-msg-b { grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: stretch; column-gap: 8px; margin: 2px 0 4px; padding: 8px 12px 10px; background: none; }

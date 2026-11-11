@@ -14,7 +14,7 @@ import type { NetworkGuard } from '../../core/guard';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
 import { debrisTotal, readGalaxy, type GalaxyRow, type GalaxySystem } from '../../data/galaxy';
-import { playerScores, SCORE_TYPES, type PlayerScores, type ScoreType } from '../../data/player-api';
+import { PLAYER_SCORES_KEY, playerScores, SCORE_TYPES, type PlayerScores, type ScoreType } from '../../data/player-api';
 import { GALAXY_CSS } from './style';
 import { BIG_DEBRIS, BIG_DEBRIS_KEY } from '../marks/side';
 
@@ -123,7 +123,14 @@ function remember(o: GalaxyOptions): void {
   if (!s) return;
   const marks = loadMarks(o.store.get<Partial<Marks> | null>(MARKS_KEY, null));
   const recent = new Set(marks.recent.map((r) => r.id));
-  const keep = (id: number, coords: string) => !!marks.players[String(id)] || recent.has(id) || !!marks.planets[coords];
+  // An empty position is kept when the API (a card already read) still gives it to a followed player.
+  const cards = o.store.get<Record<string, PlayerScores>>(PLAYER_SCORES_KEY, {});
+  const listed = new Set<string>();
+  for (const [pid, card] of Object.entries(cards)) {
+    if (!marks.players[pid] && !recent.has(Number(pid))) continue;
+    for (const p of card.planets ?? []) listed.add(p.coords);
+  }
+  const keep = (id: number, coords: string) => (id ? !!marks.players[String(id)] || recent.has(id) || !!marks.planets[coords] : listed.has(coords));
   const rows = s.rows.filter((r) => !(r.planetId && o.ownPlanetIds.has(r.planetId))).map((r) => ({ ...r, debris: r.debris ? debrisTotal(r.debris) : 0 }));
   const next = recordSystem(o.store.get<Positions>(POSITIONS_KEY, {}), s.galaxy, s.system, rows, keep, Date.now());
   if (next) o.store.set(POSITIONS_KEY, next);

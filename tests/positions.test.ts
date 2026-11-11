@@ -58,3 +58,20 @@ describe('positions seen in the galaxy', () => {
     expect(ageParts(3 * 86_400_000)).toEqual({ n: 3, unit: 'd' });
   });
 });
+
+describe('planets gone from the galaxy, still in the API', () => {
+  it('records as empty a position never stored that the API gives to a followed player', () => {
+    const db = recordSystem({}, 4, 104, [], (id, coords) => id === 0 && coords === '4:104:9', 3000)!;
+    expect(db['4:104:9']).toMatchObject({ player: 0, at: 3000 });
+    expect(Object.keys(db)).toEqual(['4:104:9']);
+  });
+
+  it('hides it until the API planet list changes (its weekly release)', () => {
+    const db: Positions = { '4:104:9': { player: 0, name: '', moon: false, debris: 0, act: [null, null], at: 5000 } };
+    const api = (planetsSince: number) => ({ at: 6000, updated: 6000, planetsSince, planets: [{ coords: '1:29:8', name: 'Home', moon: null }, { coords: '4:104:9', name: 'Gone', moon: null }] });
+    // Seen empty after the list last changed: gone, even if the file itself is newer.
+    expect(planetsOf(5, api(1000), db).map((p) => p.coords)).toEqual(['1:29:8']);
+    // A newer list that still names it wins again (recolonised): back until the galaxy shows otherwise.
+    expect(planetsOf(5, api(9000), db).map((p) => p.coords)).toEqual(['1:29:8', '4:104:9']);
+  });
+});

@@ -55,9 +55,10 @@ export function recordSystem(db: Positions, galaxy: number, system: number, rows
     const owner = r?.planetId && r.playerId ? r.playerId : 0;
     if (owner && (keep(owner, coords) || db[coords])) {
       put(coords, { player: owner, name: r!.planetName, moon: !!r!.moonId, debris: Math.round(r!.debris), act: [r!.activity.planet, r!.moonId ? r!.activity.moon : null], at: now });
-    } else if (!owner && db[coords]) {
-      // Emptied (or destroyed): remembered as empty until the API stops listing it.
-      if (db[coords]!.player) put(coords, { player: 0, name: '', moon: false, debris: Math.round(r?.debris ?? 0), act: [null, null], at: now });
+    } else if (!owner && (db[coords]?.player || (!db[coords] && keep(0, coords)))) {
+      // Emptied (or destroyed): remembered as empty until the API stops listing it. `keep(0, …)` asks
+      // for positions never stored that the API still gives to a player the player follows.
+      put(coords, { player: 0, name: '', moon: false, debris: Math.round(r?.debris ?? 0), act: [null, null], at: now });
     }
   }
   if (!next) return null;
@@ -80,15 +81,22 @@ export interface PlanetLine {
 export const coordsValue = (c: string): number => c.split(':').reduce((s, n) => s * 1000 + Number(n), 0);
 
 /**
- * A player's planets: the API list, minus the positions the galaxy has since shown empty or owned by
- * someone else, plus the ones the galaxy has shown and the API does not list yet. In coordinate order.
+ * A player's planets: the API list, minus the positions the galaxy has shown empty or owned by
+ * someone else since that list last changed, plus the ones the galaxy has shown and the API does not list yet. In coordinate order.
  */
-export function planetsOf(id: number, api: { at: number; updated?: number; planets?: { coords: string; name: string; moon: unknown }[] } | null, db: Positions): PlanetLine[] {
+export function planetsOf(
+  id: number,
+  api: { at: number; updated?: number; planetsSince?: number; planets?: { coords: string; name: string; moon: unknown }[] } | null,
+  db: Positions,
+): PlanetLine[] {
   const out = new Map<string, PlanetLine>();
   const apiAt = api?.updated ?? api?.at ?? 0;
+  // The galaxy beats the API until the API's planet list changes (its weekly release): a position seen
+  // empty, or someone else's, after the list last changed is not this player's any more.
+  const listAt = api?.planetsSince ?? apiAt;
   for (const p of api?.planets ?? []) {
     const seen = db[p.coords];
-    if (seen && seen.player !== id && seen.at > apiAt) continue;
+    if (seen && seen.player !== id && seen.at > listAt) continue;
     out.set(p.coords, { coords: p.coords, name: seen?.player === id ? seen.name || p.name : p.name, moon: seen?.player === id && seen.at > apiAt ? seen.moon : !!p.moon, seen: seen?.player === id ? seen : null, fresh: false });
   }
   for (const [coords, seen] of Object.entries(db)) {
