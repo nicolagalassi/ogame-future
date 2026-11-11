@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.18
+// @version      0.3.19
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -911,7 +911,16 @@
     "fleet.send.max": "tutto",
     "fleet.send.maxHint": "clic: tutto quello che c'\xE8 qui",
     "fleet.send.clearBtn": "Svuota",
-    "fleet.send.clearHint": "svuota i campi delle risorse"
+    "fleet.send.clearHint": "svuota i campi delle risorse",
+    "res.short.metal": "M",
+    "res.short.crystal": "C",
+    "res.short.deuterium": "D",
+    "fleet.collectIgnoreShips": "Trasporto: ignora la riserva navi",
+    "settings.collectIgnoreShipsHint": 'Il trasporto della Raccolta (e "Su luna") pu\xF2 usare anche le navi tenute dalla riserva: i cargo tornano indietro. La riserva risorse vale sempre.',
+    "fleet.collectDeployRes": "Schieramento: porta anche le risorse",
+    "settings.collectDeployResHint": "Spento: lo schieramento della Raccolta manda solo le navi, le risorse restano.",
+    "fleet.loadOrder": "Ordine di carico",
+    "settings.loadOrderHint": "Quale risorsa riempie per prima i cargo della Raccolta, poi la seconda e la terza (il gioco fa D \u2192 C \u2192 M)."
   };
 
   // src/i18n/en.json
@@ -1639,7 +1648,16 @@
     "fleet.send.max": "all",
     "fleet.send.maxHint": "click: all there is here",
     "fleet.send.clearBtn": "Clear",
-    "fleet.send.clearHint": "clear the resource fields"
+    "fleet.send.clearHint": "clear the resource fields",
+    "res.short.metal": "M",
+    "res.short.crystal": "C",
+    "res.short.deuterium": "D",
+    "fleet.collectIgnoreShips": "Transport: ignore the ships reserve",
+    "settings.collectIgnoreShipsHint": 'The Collection transport (and "To moon") may also use the ships the reserve keeps: cargo ships come back. The resources reserve always applies.',
+    "fleet.collectDeployRes": "Deploy: take resources too",
+    "settings.collectDeployResHint": "Off: the Collection deploy sends only the ships, the resources stay.",
+    "fleet.loadOrder": "Loading order",
+    "settings.loadOrderHint": "Which resource fills the Collection cargo first, then second and third (the game does D \u2192 C \u2192 M)."
   };
 
   // src/i18n/fr.json
@@ -2367,7 +2385,16 @@
     "fleet.send.max": "tout",
     "fleet.send.maxHint": "clic : tout ce qu'il y a ici",
     "fleet.send.clearBtn": "Vider",
-    "fleet.send.clearHint": "vider les champs des ressources"
+    "fleet.send.clearHint": "vider les champs des ressources",
+    "res.short.metal": "M",
+    "res.short.crystal": "C",
+    "res.short.deuterium": "D",
+    "fleet.collectIgnoreShips": "Transport : ignorer la r\xE9serve de vaisseaux",
+    "settings.collectIgnoreShipsHint": "Le transport de la Collecte (et \xAB Vers lune \xBB) peut utiliser aussi les vaisseaux gard\xE9s par la r\xE9serve : les transporteurs reviennent. La r\xE9serve de ressources s'applique toujours.",
+    "fleet.collectDeployRes": "Stationnement : prendre aussi les ressources",
+    "settings.collectDeployResHint": "D\xE9sactiv\xE9 : le stationnement de la Collecte n'envoie que les vaisseaux, les ressources restent.",
+    "fleet.loadOrder": "Ordre de chargement",
+    "settings.loadOrderHint": "Quelle ressource remplit d'abord les transporteurs de la Collecte, puis la deuxi\xE8me et la troisi\xE8me (le jeu fait D \u2192 C \u2192 M)."
   };
 
   // src/i18n/de.json
@@ -3095,7 +3122,16 @@
     "fleet.send.max": "alles",
     "fleet.send.maxHint": "Klick: alles, was hier ist",
     "fleet.send.clearBtn": "Leeren",
-    "fleet.send.clearHint": "Rohstofffelder leeren"
+    "fleet.send.clearHint": "Rohstofffelder leeren",
+    "res.short.metal": "M",
+    "res.short.crystal": "K",
+    "res.short.deuterium": "D",
+    "fleet.collectIgnoreShips": "Transport: Schiffsreserve ignorieren",
+    "settings.collectIgnoreShipsHint": "Der Transport der Sammlung (und \u201EZum Mond\u201C) darf auch die von der Reserve gehaltenen Schiffe nutzen: Frachter kommen zur\xFCck. Die Rohstoffreserve gilt immer.",
+    "fleet.collectDeployRes": "Stationieren: auch Rohstoffe mitnehmen",
+    "settings.collectDeployResHint": "Aus: das Stationieren der Sammlung schickt nur die Schiffe, die Rohstoffe bleiben.",
+    "fleet.loadOrder": "Ladereihenfolge",
+    "settings.loadOrderHint": "Welcher Rohstoff die Frachter der Sammlung zuerst f\xFCllt, dann der zweite und dritte (das Spiel macht D \u2192 K \u2192 M)."
   };
 
   // src/core/i18n.ts
@@ -7168,6 +7204,9 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     resourcesOn: true,
     gateOn: true,
     ignoreFood: false,
+    collectIgnoreShips: true,
+    collectDeployRes: true,
+    loadOrder: ["deuterium", "crystal", "metal"],
     sendMode: null,
     sendTarget: null,
     sendPick: { metal: null, crystal: null, deuterium: null }
@@ -7227,15 +7266,28 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     }
     return out;
   }
-  function cargoLoad(onPlanet2, reserve, fuel, capacity) {
+  function cargoLoad(onPlanet2, reserve, fuel, capacity, order = GAME_ORDER) {
     const free = resourcesAfterReserve(onPlanet2, reserve, fuel);
     let room = Math.max(0, Math.floor(capacity));
-    const deuterium = Math.max(0, Math.floor(Math.min(free.deuterium, room)));
-    room -= deuterium;
-    const crystal = Math.max(0, Math.floor(Math.min(free.crystal, room)));
-    room -= crystal;
-    const metal = Math.max(0, Math.floor(Math.min(free.metal, room)));
-    return { metal, crystal, deuterium };
+    const out = { metal: 0, crystal: 0, deuterium: 0 };
+    for (const k of validOrder(order)) {
+      out[k] = Math.max(0, Math.floor(Math.min(free[k], room)));
+      room -= out[k];
+    }
+    return out;
+  }
+  var GAME_ORDER = ["deuterium", "crystal", "metal"];
+  var LOAD_ORDERS = [
+    ["deuterium", "crystal", "metal"],
+    ["deuterium", "metal", "crystal"],
+    ["crystal", "deuterium", "metal"],
+    ["crystal", "metal", "deuterium"],
+    ["metal", "crystal", "deuterium"],
+    ["metal", "deuterium", "crystal"]
+  ];
+  function validOrder(order) {
+    const ok = Array.isArray(order) && order.length === 3 && ["metal", "crystal", "deuterium"].every((k) => order.includes(k));
+    return ok ? order : GAME_ORDER;
   }
   var EXPEDITION_TABLE = [
     { topScore: 1e4, base: 10, max: 4e4 },
@@ -7773,6 +7825,17 @@ input.field { width: 190px; }
         group(t("fleet.favTitle"), fleetGlyph("collect")),
         row(t("fleet.favTransport"), t("settings.favHint"), select(dest, String(f.favTransport ?? 0), (v) => set({ favTransport: Number(v) || null }))),
         row(t("fleet.favDeploy"), t("settings.favHint"), select(dest, String(f.favDeploy ?? 0), (v) => set({ favDeploy: Number(v) || null }))),
+        row(t("fleet.collectIgnoreShips"), t("settings.collectIgnoreShipsHint"), yesNo(f.collectIgnoreShips, (v) => set({ collectIgnoreShips: v }))),
+        row(t("fleet.collectDeployRes"), t("settings.collectDeployResHint"), yesNo(f.collectDeployRes, (v) => set({ collectDeployRes: v }))),
+        row(
+          t("fleet.loadOrder"),
+          t("settings.loadOrderHint"),
+          select(
+            LOAD_ORDERS.map((order) => [order.join(","), order.map((k) => t(`res.short.${k}`)).join(" \u2192 ")]),
+            validOrder(f.loadOrder).join(","),
+            (v) => set({ loadOrder: v.split(",") })
+          )
+        ),
         group(t("fleet.expeditionTitle"), fleetGlyph("expedition")),
         row(t("fleet.expeditionShip"), t("settings.expShipHint"), select([["0", t("fleet.bestShip")], ...[219, 203, 202].map((id) => [String(id), shipName2(id)])], String(f.expeditionShip), (v) => set({ expeditionShip: Number(v) }))),
         row(t("fleet.expeditionValue"), t("settings.expValueHint"), value),
@@ -10129,8 +10192,8 @@ table.queues td.acts { width: 1%; text-align: right; }
     fd.refresh();
     return true;
   }
-  function loadCargo(fd, profile) {
-    const load = cargoLoad(onPlanet(fd), profile.reserve, Math.ceil(Number(fd.getConsumption()) || 0), fd.getCargoCapacity());
+  function loadCargo(fd, profile, order) {
+    const load = cargoLoad(onPlanet(fd), profile.reserve, Math.ceil(Number(fd.getConsumption()) || 0), fd.getCargoCapacity(), order);
     fd.cargoMetal = load.metal;
     fd.cargoCrystal = load.crystal;
     fd.cargoDeuterium = load.deuterium;
@@ -10147,6 +10210,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     return Math.max(0, fd.metalOnPlanet - r.metal) + Math.max(0, fd.crystalOnPlanet - r.crystal) + Math.max(0, fd.deuteriumOnPlanet - r.deuterium);
   }
   function prepareTransport(fd, doc, profile, settings, target) {
+    if (settings.collectIgnoreShips) profile = { ...profile, reserve: { ...profile.reserve, ships: {} } };
     const amount = toMove(fd, profile);
     if (amount <= 0) return { ok: false, reason: "fleet.err.noResources", ships: 0, cargo: 0 };
     const ships = cargoShipsFor(amount, stock(fd, profile), settings.mainShip, settings.secondShip);
@@ -10154,7 +10218,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     setTarget(fd, doc, target);
     setSpeedBar(fd, settings.transportSpeed);
     fd.mission = TRANSPORT;
-    const cargo = count2 > 0 ? loadCargo(fd, profile) : 0;
+    const cargo = count2 > 0 ? loadCargo(fd, profile, settings.loadOrder) : 0;
     return finish(fd, TRANSPORT, count2, cargo);
   }
   function prepareDeploy(fd, doc, profile, settings, target) {
@@ -10163,7 +10227,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     setTarget(fd, doc, target);
     setSpeedBar(fd, settings.transportSpeed);
     fd.mission = DEPLOY;
-    const cargo = count2 > 0 ? loadCargo(fd, profile) : 0;
+    const cargo = count2 > 0 && settings.collectDeployRes ? loadCargo(fd, profile, settings.loadOrder) : 0;
     return finish(fd, DEPLOY, count2, cargo);
   }
   function prepareFleetsave(fd, doc, base, save) {

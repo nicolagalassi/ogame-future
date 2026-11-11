@@ -191,6 +191,12 @@ export interface FleetSettings {
   gateOn: boolean;
   /** Food stays home in every fleet, also with the game's own buttons (OGLight precedent). */
   ignoreFood: boolean;
+  /** Expedition collection: the transport leaves the ships rule aside (only the resources rule counts). */
+  collectIgnoreShips: boolean;
+  /** Expedition collection: the deploy also takes resources along (false = ships only). */
+  collectDeployRes: boolean;
+  /** Expedition collection: which resource is loaded first, second, third. */
+  loadOrder: LoadOrder;
   /** Plain Trasporto / Schiera: which one is on (it stays on until pressed again), null = neither. */
   sendMode: 'transport' | 'deploy' | null;
   /** The destination typed or picked on page 1, and the resources to bring. */
@@ -228,6 +234,9 @@ export const DEFAULT_SETTINGS: FleetSettings = {
   resourcesOn: true,
   gateOn: true,
   ignoreFood: false,
+  collectIgnoreShips: true,
+  collectDeployRes: true,
+  loadOrder: ['deuterium', 'crystal', 'metal'],
   sendMode: null,
   sendTarget: null,
   sendPick: { metal: null, crystal: null, deuterium: null },
@@ -332,15 +341,34 @@ export function cargoShipsFor(amount: number, stock: ShipStock[], main: number, 
  * What to load: the game's own order (deuterium, crystal, metal), each capped by what is
  * left after the reserve and by the free cargo space. Deuterium also keeps the fuel.
  */
-export function cargoLoad(onPlanet: Resources, reserve: Reserve, fuel: number, capacity: number): Resources {
+export function cargoLoad(onPlanet: Resources, reserve: Reserve, fuel: number, capacity: number, order: LoadOrder = GAME_ORDER): Resources {
   const free = resourcesAfterReserve(onPlanet, reserve, fuel);
   let room = Math.max(0, Math.floor(capacity));
-  const deuterium = Math.max(0, Math.floor(Math.min(free.deuterium, room)));
-  room -= deuterium;
-  const crystal = Math.max(0, Math.floor(Math.min(free.crystal, room)));
-  room -= crystal;
-  const metal = Math.max(0, Math.floor(Math.min(free.metal, room)));
-  return { metal, crystal, deuterium };
+  const out = { metal: 0, crystal: 0, deuterium: 0 };
+  for (const k of validOrder(order)) {
+    out[k] = Math.max(0, Math.floor(Math.min(free[k], room)));
+    room -= out[k];
+  }
+  return out;
+}
+
+/** Order in which the three resources fill the cargo. */
+export type LoadOrder = ('metal' | 'crystal' | 'deuterium')[];
+/** The game's own order (deuterium, crystal, metal). */
+export const GAME_ORDER: LoadOrder = ['deuterium', 'crystal', 'metal'];
+/** The six possible orders, for the settings. */
+export const LOAD_ORDERS: LoadOrder[] = [
+  ['deuterium', 'crystal', 'metal'],
+  ['deuterium', 'metal', 'crystal'],
+  ['crystal', 'deuterium', 'metal'],
+  ['crystal', 'metal', 'deuterium'],
+  ['metal', 'crystal', 'deuterium'],
+  ['metal', 'deuterium', 'crystal'],
+];
+/** A stored order if it names each resource once; otherwise the game's. */
+export function validOrder(order: unknown): LoadOrder {
+  const ok = Array.isArray(order) && order.length === 3 && ['metal', 'crystal', 'deuterium'].every((k) => order.includes(k));
+  return ok ? (order as LoadOrder) : GAME_ORDER;
 }
 
 /* ------------------------------------------------------------------ */

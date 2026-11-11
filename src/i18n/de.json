@@ -722,5 +722,14 @@
   "fleet.send.max": "alles",
   "fleet.send.maxHint": "Klick: alles, was hier ist",
   "fleet.send.clearBtn": "Leeren",
-  "fleet.send.clearHint": "Rohstofffelder leeren"
+  "fleet.send.clearHint": "Rohstofffelder leeren",
+  "res.short.metal": "M",
+  "res.short.crystal": "K",
+  "res.short.deuterium": "D",
+  "fleet.collectIgnoreShips": "Transport: Schiffsreserve ignorieren",
+  "settings.collectIgnoreShipsHint": "Der Transport der Sammlung (und „Zum Mond“) darf auch die von der Reserve gehaltenen Schiffe nutzen: Frachter kommen zurück. Die Rohstoffreserve gilt immer.",
+  "fleet.collectDeployRes": "Stationieren: auch Rohstoffe mitnehmen",
+  "settings.collectDeployResHint": "Aus: das Stationieren der Sammlung schickt nur die Schiffe, die Rohstoffe bleiben.",
+  "fleet.loadOrder": "Ladereihenfolge",
+  "settings.loadOrderHint": "Welcher Rohstoff die Frachter der Sammlung zuerst füllt, dann der zweite und dritte (das Spiel macht D → K → M)."
 }

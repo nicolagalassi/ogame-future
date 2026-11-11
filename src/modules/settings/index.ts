@@ -10,7 +10,7 @@ import { SIM_KEY, SIM_TOOLS, simTool, type SimTool } from '../../engines/sim-lin
 import { FOLD_KEY } from '../messages';
 import { SPY_SHARED_KEY } from '../messages/spy-table';
 import type { MenuSettings } from '../planet-menu';
-import { CARGO_SHIPS, parseAmount, SETTINGS_KEY as FLEET_SETTINGS_KEY, settingsFrom, type FleetSettings } from '../../engines/fleet';
+import { CARGO_SHIPS, LOAD_ORDERS, parseAmount, SETTINGS_KEY as FLEET_SETTINGS_KEY, settingsFrom, validOrder, type FleetSettings } from '../../engines/fleet';
 import { formatUnits } from '../../core/format';
 import { BIG_DEBRIS, BIG_DEBRIS_KEY } from '../marks/side';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
@@ -235,6 +235,17 @@ export function openSettings(o: SettingsOptions): void {
       group(t('fleet.favTitle'), fleetGlyph('collect')),
       row(t('fleet.favTransport'), t('settings.favHint'), select(dest, String(f.favTransport ?? 0), (v) => set({ favTransport: Number(v) || null }))),
       row(t('fleet.favDeploy'), t('settings.favHint'), select(dest, String(f.favDeploy ?? 0), (v) => set({ favDeploy: Number(v) || null }))),
+      row(t('fleet.collectIgnoreShips'), t('settings.collectIgnoreShipsHint'), yesNo(f.collectIgnoreShips, (v) => set({ collectIgnoreShips: v }))),
+      row(t('fleet.collectDeployRes'), t('settings.collectDeployResHint'), yesNo(f.collectDeployRes, (v) => set({ collectDeployRes: v }))),
+      row(
+        t('fleet.loadOrder'),
+        t('settings.loadOrderHint'),
+        select(
+          LOAD_ORDERS.map((order) => [order.join(','), order.map((k) => t(`res.short.${k}`)).join(' → ')] as [string, string]),
+          validOrder(f.loadOrder).join(','),
+          (v) => set({ loadOrder: v.split(',') as FleetSettings['loadOrder'] }),
+        ),
+      ),
       group(t('fleet.expeditionTitle'), fleetGlyph('expedition')),
       row(t('fleet.expeditionShip'), t('settings.expShipHint'), select([['0', t('fleet.bestShip')], ...[219, 203, 202].map((id) => [String(id), shipName(id)] as [string, string])], String(f.expeditionShip), (v) => set({ expeditionShip: Number(v) }))),
       row(t('fleet.expeditionValue'), t('settings.expValueHint'), value),

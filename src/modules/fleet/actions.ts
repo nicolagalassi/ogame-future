@@ -125,8 +125,8 @@ export function clearOurSelection(fd: FleetDispatcher): boolean {
 }
 
 /** Loads cargo after ships, target and speed are set (fuel depends on all three). */
-function loadCargo(fd: FleetDispatcher, profile: FleetProfile): number {
-  const load = cargoLoad(onPlanet(fd), profile.reserve, Math.ceil(Number(fd.getConsumption()) || 0), fd.getCargoCapacity());
+function loadCargo(fd: FleetDispatcher, profile: FleetProfile, order?: FleetSettings['loadOrder']): number {
+  const load = cargoLoad(onPlanet(fd), profile.reserve, Math.ceil(Number(fd.getConsumption()) || 0), fd.getCargoCapacity(), order);
   fd.cargoMetal = load.metal;
   fd.cargoCrystal = load.crystal;
   fd.cargoDeuterium = load.deuterium;
@@ -149,7 +149,13 @@ function toMove(fd: FleetDispatcher, profile: FleetProfile): number {
 }
 
 /** Transport to an own body with the main cargo ship, the second one covering the rest. */
+/**
+ * Expedition collection, transport (also "Su luna"): the resources after the resources rule, with the
+ * main cargo ship and the second one, loaded in the chosen order. By default the ships rule does not
+ * apply here: the cargo ships come back, only the resources to keep matter (Nicola).
+ */
 export function prepareTransport(fd: FleetDispatcher, doc: Document, profile: FleetProfile, settings: FleetSettings, target: Target): PrepareResult {
+  if (settings.collectIgnoreShips) profile = { ...profile, reserve: { ...profile.reserve, ships: {} } };
   const amount = toMove(fd, profile);
   if (amount <= 0) return { ok: false, reason: 'fleet.err.noResources', ships: 0, cargo: 0 };
   const ships = cargoShipsFor(amount, stock(fd, profile), settings.mainShip, settings.secondShip);
@@ -157,18 +163,18 @@ export function prepareTransport(fd: FleetDispatcher, doc: Document, profile: Fl
   setTarget(fd, doc, target);
   setSpeedBar(fd, settings.transportSpeed);
   fd.mission = TRANSPORT;
-  const cargo = count > 0 ? loadCargo(fd, profile) : 0;
+  const cargo = count > 0 ? loadCargo(fd, profile, settings.loadOrder) : 0;
   return finish(fd, TRANSPORT, count, cargo);
 }
 
-/** All ships after the reserve, with as much cargo as they carry. */
+/** Expedition collection, deploy: all ships after the reserve, with resources in the chosen order unless switched off. */
 export function prepareDeploy(fd: FleetDispatcher, doc: Document, profile: FleetProfile, settings: FleetSettings, target: Target): PrepareResult {
   const ships = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
   const count = selectShips(fd, ships);
   setTarget(fd, doc, target);
   setSpeedBar(fd, settings.transportSpeed);
   fd.mission = DEPLOY;
-  const cargo = count > 0 ? loadCargo(fd, profile) : 0;
+  const cargo = count > 0 && settings.collectDeployRes ? loadCargo(fd, profile, settings.loadOrder) : 0;
   return finish(fd, DEPLOY, count, cargo);
 }
 

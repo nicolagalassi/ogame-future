@@ -45,3 +45,8 @@ Versione 0.3.12.
 ## 0.3.16
 - CL / CP: immagini delle navi del gioco (`SHIP_ICONS`), 48px; Svuota = icona gomma.
 - Bug: i pulsanti si sommavano (spedizione poi CL/CP teneva le navi della spedizione). Ora ogni pulsante registra la sua selezione in `selectShips`; CL/CP tiene solo quella fatta a mano; accendere T/D toglie quella lasciata da un altro pulsante (`clearOurSelection`).
+
+## 0.3.19 — impostazioni Raccolta spedizioni
+- `collectIgnoreShips` (sì di default): trasporto Raccolta e "Su luna" ignorano la riserva navi; la riserva risorse resta.
+- `collectDeployRes` (sì di default): spento, lo schieramento Raccolta manda solo navi.
+- `loadOrder` (default D → C → M come il gioco): ordine di carico per trasporto e schieramento della Raccolta; `cargoLoad(..., order)`, `LOAD_ORDERS`, `validOrder`.

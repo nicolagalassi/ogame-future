@@ -722,5 +722,14 @@
   "fleet.send.max": "tout",
   "fleet.send.maxHint": "clic : tout ce qu'il y a ici",
   "fleet.send.clearBtn": "Vider",
-  "fleet.send.clearHint": "vider les champs des ressources"
+  "fleet.send.clearHint": "vider les champs des ressources",
+  "res.short.metal": "M",
+  "res.short.crystal": "C",
+  "res.short.deuterium": "D",
+  "fleet.collectIgnoreShips": "Transport : ignorer la réserve de vaisseaux",
+  "settings.collectIgnoreShipsHint": "Le transport de la Collecte (et « Vers lune ») peut utiliser aussi les vaisseaux gardés par la réserve : les transporteurs reviennent. La réserve de ressources s'applique toujours.",
+  "fleet.collectDeployRes": "Stationnement : prendre aussi les ressources",
+  "settings.collectDeployResHint": "Désactivé : le stationnement de la Collecte n'envoie que les vaisseaux, les ressources restent.",
+  "fleet.loadOrder": "Ordre de chargement",
+  "settings.loadOrderHint": "Quelle ressource remplit d'abord les transporteurs de la Collecte, puis la deuxième et la troisième (le jeu fait D → C → M)."
 }

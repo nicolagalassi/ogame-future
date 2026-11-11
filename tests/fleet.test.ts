@@ -20,7 +20,7 @@ import { prepareDelivery, prepareDeploy, prepareExpedition, prepareSend, prepare
 import { applyFood } from '../src/modules/fleet/index';
 import { MemoryStore, Store } from '../src/core/storage';
 import { hookSend, nextInRound, readRepeatParams, repeatUrl } from '../src/modules/fleet/repeat';
-import { DEFAULT_SETTINGS, cargoLoad, cargoShipsFor, expeditionFleet, expeditionMax, expeditionTarget, nextBody, cargoCount, parseCoords, pickedLoad, resolveSend } from '../src/engines/fleet';
+import { DEFAULT_SETTINGS, cargoLoad, cargoShipsFor, expeditionFleet, expeditionMax, expeditionTarget, nextBody, cargoCount, parseCoords, pickedLoad, resolveSend, validOrder } from '../src/engines/fleet';
 import type { FleetDispatcher } from '../src/data/fleet-dispatcher';
 
 const reserve = (ships: Record<string, number>, res = { metal: 0, crystal: 0, deuterium: 0 }) => ({ ships, resources: res });
@@ -242,7 +242,7 @@ describe('fleet actions on the game dispatcher', () => {
   it('empties a planet to a target with main + second ship, keeping reserves', () => {
     const doc = fleetPage();
     const fd = fakeDispatcher();
-    const r = prepareTransport(fd, doc, profile, DEFAULT_SETTINGS, { galaxy: 5, system: 185, position: 8, type: 3 });
+    const r = prepareTransport(fd, doc, profile, { ...DEFAULT_SETTINGS, collectIgnoreShips: false }, { galaxy: 5, system: 185, position: 8, type: 3 });
     // 215,000 to move (deut minus 5,000 reserve): 90 large (180k) + 50 small (25k) = 205k room
     expect(fd.selected).toEqual({ 203: 90, 202: 50 });
     expect(fd.mission).toBe(3);
@@ -680,5 +680,31 @@ describe('one kind of send at a time', () => {
     expect(fd.selected).toEqual({});
     fd.shipsToSend = [{ id: 210, number: 1 }];
     expect(clearOurSelection(fd)).toBe(false);
+  });
+});
+
+describe('expedition collection settings', () => {
+  const profile = { reserve: { ships: { '203': 10 }, resources: { metal: 0, crystal: 0, deuterium: 5_000 } }, save: null };
+  const target = { galaxy: 5, system: 185, position: 8, type: 3 };
+
+  it('transport ignores the ships reserve by default, keeps the resources one, loads in the chosen order', () => {
+    const fd = fakeDispatcher();
+    prepareTransport(fd, fleetPage(), profile, DEFAULT_SETTINGS, target);
+    // 215,000 to move: all 100 large cargo (200k) + 30 small (15k); the 10 kept by the ships rule go too.
+    expect(fd.selected).toEqual({ 203: 100, 202: 30 });
+    expect(fd.cargoDeuterium).toBe(14_000);
+    const metalFirst = fakeDispatcher({ shipsOnPlanet: [{ id: 203, number: 50 }] });
+    prepareTransport(metalFirst, fleetPage(), profile, { ...DEFAULT_SETTINGS, loadOrder: ['metal', 'crystal', 'deuterium'] }, target);
+    // 100k of room: metal first fills it.
+    expect([metalFirst.cargoMetal, metalFirst.cargoCrystal, metalFirst.cargoDeuterium]).toEqual([100_000, 0, 0]);
+    expect(cargoLoad({ metal: 10, crystal: 10, deuterium: 10 }, reserve({}), 0, 15, ['crystal', 'metal', 'deuterium'])).toEqual({ metal: 5, crystal: 10, deuterium: 0 });
+    expect(validOrder(['metal', 'metal', 'crystal'])).toEqual(['deuterium', 'crystal', 'metal']);
+  });
+
+  it('deploy can leave the resources home', () => {
+    const fd = fakeDispatcher();
+    prepareDeploy(fd, fleetPage(), profile, { ...DEFAULT_SETTINGS, collectDeployRes: false }, target);
+    expect(fd.selected).toEqual({ 203: 90, 202: 50, 210: 3 });
+    expect([fd.cargoMetal, fd.cargoCrystal, fd.cargoDeuterium]).toEqual([0, 0, 0]);
   });
 });
