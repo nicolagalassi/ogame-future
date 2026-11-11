@@ -54,6 +54,8 @@ describe('highscore page', () => {
     expect(ahead.querySelector('.fut-hs-eta')).toBeNull();
     expect(document.querySelector('.fut-hs-top')).toBeNull();
     expect(document.getElementById('position2')!.querySelector('.fut-mk-flag')).toBeNull();
+    // Next to the game's "i" when that cell is there (the test rows have none: after the name).
+    expect(ahead.querySelector('.highscoreNameHolder .fut-mk-flag')).not.toBeNull();
     (ahead.querySelector<HTMLButtonElement>('.fut-mk-flag')!).dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true }));
     expect(store.get<{ players: Record<string, { flag: string }> }>(MARKS_KEY, { players: {} }).players['1']?.flag).toBe('watch');
     expect(document.querySelectorAll('#position1 .fut-hs-gap')).toHaveLength(1);
@@ -98,5 +100,17 @@ describe('PTRE ranking snapshot', () => {
     expect(fetchImpl.mock.calls[0]![1]?.credentials).toBe('omit');
     await ptreRanks({ guard, store, host: 's269-it.ogame.gameforge.com', now: now + 7 * 3_600_000 });
     expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('highscore flag placement', () => {
+  it('puts the flag in the cell of the game\'s "i", before it', () => {
+    document.body.innerHTML = `<div id="categoryButtons"><a id="player" class="active navButton"></a></div><div id="typeButtons"><a id="points" class="stat_filter active navButton"></a></div>
+      <table id="ranks"><tbody><tr id="position7"><td class="position">4</td><td class="name"><div class="highscoreNameHolder"><span class="playername">LadyK</span></div></td><td class="sendmsg"><a class="info">i</a></td><td class="score">2.433.351.880</td></tr></tbody></table>`;
+    decorateHighscore({ doc: document, store: new Store(new MemoryStore(), 'f'), locale: 'it', t: translator('it') });
+    const cell = document.querySelector('#position7 td.sendmsg')!;
+    expect(cell.firstElementChild?.classList.contains('fut-mk-flag')).toBe(true);
+    expect(cell.classList.contains('fut-hs-act')).toBe(true);
+    expect(document.querySelector('#position7 .highscoreNameHolder .fut-mk-flag')).toBeNull();
   });
 });
