@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diario: tre proposte</title>
+<style>
+/* Mockup only (not shipped): three layouts for the expedition journal window, same week of data. */
+:root {
+  --page: #05080D; --panel: #0D1522; --box: #111B2A; --box-hi: #16243A; --line: #1F2C40; --line-soft: #172233;
+  --txt: #C9D4E2; --mute: #8A9BB0; --hi: #E6EDF5; --accent: #4FD1E8;
+  --m: #B8C2CC; --c: #7FB8FF; --d: #4FE0B0; --dm: #B58CDB; --ship: #4FE0B0; --neg: #F07A6E; --pos: #4FE0B0;
+  --rare: #4AA3FF; --epic: #B57BFF;
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px 16px 60px; background: var(--page); color: var(--txt); font: 12px/1.45 Arial, Helvetica, sans-serif; }
+main { max-width: 980px; margin: 0 auto; }
+h1 { margin: 0 0 6px; font-size: 18px; color: var(--hi); }
+.intro { margin: 0 0 28px; color: var(--mute); max-width: 70ch; }
+section.opt { margin: 0 0 48px; }
+section.opt > h2 { margin: 0 0 4px; font-size: 15px; color: var(--hi); }
+section.opt > p { margin: 0 0 12px; color: var(--mute); max-width: 72ch; }
+.num { font-family: Consolas, "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; }
+.ico { display: inline-block; flex: none; vertical-align: -3px; }
+.m { color: var(--m); } .c { color: var(--c); } .d { color: var(--d); } .dm { color: var(--dm); } .pos { color: var(--pos); } .neg { color: var(--neg); }
+
+/* The window frame, as Future's windows look today. */
+.win { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+.win-head { display: flex; align-items: center; gap: 12px; padding: 4px 6px; }
+.win-head b { font-size: 15px; color: var(--hi); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.seg span { padding: 5px 12px; color: var(--mute); }
+.seg span + span { border-left: 1px solid var(--line); }
+.seg span.on { background: #12283A; color: var(--hi); box-shadow: inset 0 -2px 0 var(--accent); font-weight: 700; }
+.win-head .seg { margin-left: auto; }
+.box { border: 1px solid var(--line); border-radius: 8px; background: var(--box); padding: 12px 14px; }
+.box h3 { margin: 0 0 10px; font-size: 13px; color: var(--hi); }
+.ship-img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; background: #22324A; flex: none; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: right; padding: 4px 8px; color: var(--mute); font-weight: 400; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+td { text-align: right; padding: 5px 8px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
+
+/* ---------- 1 · Rendiconto ---------- */
+.r-hero { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 28px; align-items: end; padding: 16px 18px; }
+.r-net { font-size: 38px; line-height: 1; font-weight: 700; color: var(--hi); }
+.r-net small { font-size: 14px; color: var(--mute); font-weight: 400; margin-left: 4px; }
+.r-sub { color: var(--mute); }
+.r-sub b { color: var(--txt); font-weight: 400; }
+.r-mix { grid-column: 1 / -1; margin-top: 12px; }
+.r-bar { display: flex; height: 14px; border-radius: 3px; overflow: hidden; gap: 2px; }
+.r-bar i { display: block; height: 100%; }
+.r-keys { display: flex; flex-wrap: wrap; gap: 6px 22px; margin-top: 8px; }
+.r-keys span { display: inline-flex; align-items: center; gap: 6px; }
+.r-keys b { color: var(--hi); font-weight: 700; }
+.r-two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.r-out { display: grid; grid-template-columns: 110px minmax(0, 1fr) 34px 44px; align-items: center; gap: 4px 10px; }
+.r-out .lbl { white-space: nowrap; }
+.r-out .track { height: 8px; border-radius: 2px; background: #1A2638; overflow: hidden; }
+.r-out .track i { display: block; height: 100%; border-radius: 2px; }
+.r-out .n { text-align: right; color: var(--hi); }
+.r-out .p { text-align: right; color: var(--mute); }
+.r-ships { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.r-ship { display: flex; align-items: center; gap: 8px; }
+.r-ship b { display: block; color: var(--ship); }
+.r-ship span { color: var(--mute); font-size: 11px; }
+.r-sizes { display: flex; gap: 14px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line-soft); color: var(--mute); }
+.r-sizes b { font-weight: 700; }
+td .spark { display: inline-block; height: 8px; border-radius: 2px; background: var(--accent); opacity: 0.55; vertical-align: middle; }
+
+/* ---------- 2 · Settimana ---------- */
+.w-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.w-kpis div { background: var(--box); padding: 10px 14px; }
+.w-kpis span { display: block; color: var(--mute); font-size: 11px; }
+.w-kpis b { font-size: 20px; color: var(--hi); }
+.w-chart { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; align-items: end; height: 190px; padding: 6px 4px 0; }
+.w-day { display: flex; flex-direction: column; align-items: stretch; gap: 6px; height: 100%; justify-content: flex-end; cursor: pointer; }
+.w-stack { display: flex; flex-direction: column-reverse; border-radius: 4px 4px 0 0; overflow: hidden; }
+.w-stack i { display: block; }
+.w-day .tot { text-align: center; color: var(--hi); font-weight: 700; }
+.w-day .lbl { text-align: center; color: var(--mute); border-top: 1px solid var(--line); padding-top: 4px; }
+.w-day.on .lbl { color: var(--accent); }
+.w-day.on .w-stack { outline: 2px solid var(--accent); outline-offset: 2px; }
+.w-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; color: var(--mute); }
+.w-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.w-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.w-two { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 10px; }
+.w-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.w-chip { display: inline-flex; align-items: center; gap: 8px; padding: 5px 10px; border-radius: 6px; background: #16212F; }
+.w-chip b { color: var(--hi); }
+.w-chip span { color: var(--mute); }
+.w-chip i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+/* ---------- 3 · Due colonne ---------- */
+.t-grid { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 10px; align-items: start; }
+.t-side { display: flex; flex-direction: column; gap: 0; padding: 0; overflow: hidden; }
+.t-row { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 9px 14px; border-top: 1px solid var(--line-soft); }
+.t-row:first-child { border-top: 0; }
+.t-row .k { color: var(--mute); }
+.t-row .v { color: var(--hi); font-weight: 700; }
+.t-row.big { padding: 14px; background: #12202F; }
+.t-row.big .v { font-size: 22px; }
+.t-row.sum { border-top: 1px solid var(--line); }
+.t-main { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.t-out { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 24px; }
+.t-out div { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto 40px; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid var(--line-soft); }
+.t-out i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.t-out .n { color: var(--hi); text-align: right; }
+.t-out .p { color: var(--mute); text-align: right; }
+.t-ships { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.t-ships span { display: inline-flex; align-items: center; gap: 6px; }
+.t-ships b { color: var(--ship); }
+
+@media (max-width: 720px) {
+  .r-two, .w-two, .t-grid { grid-template-columns: 1fr; }
+  .w-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .r-hero { grid-template-columns: 1fr; }
+  .w-chart { gap: 4px; }
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>Diario: tre proposte</h1>
+  <p class="intro">Stessa settimana (246 spedizioni), tre modi di guardarla. In tutte: periodo in alto a destra, simboli delle risorse condivisi con il resto di Future, tabella dei giorni in fondo. Cambia cosa si vede per primo.</p>
+
+  <section class="opt" id="o1">
+    <h2>1 · Rendiconto</h2>
+    <p>Prima il guadagno netto, grande, e da dove viene (una barra: metallo, cristallo, deuterio, navi). Sotto, esiti e navi affiancati; i giorni con una barretta del valore. Risponde a "quanto mi rendono le spedizioni".</p>
+    <div class="win" id="win1"></div>
+  </section>
+
+  <section class="opt" id="o2">
+    <h2>2 · Settimana</h2>
+    <p>Prima l'andamento: una colonna per giorno, alta quanto il valore e divisa per provenienza; un clic su un giorno ne mostra il dettaglio sotto. Quattro numeri chiave in alto. Risponde a "come sta andando giorno per giorno".</p>
+    <div class="win" id="win2"></div>
+  </section>
+
+  <section class="opt" id="o3">
+    <h2>3 · Due colonne</h2>
+    <p>A sinistra il conto, riga per riga come uno scontrino (risorse, navi, perdite, netto); a destra esiti e navi. Tutto in un colpo d'occhio, senza scorrere; la tabella dei giorni sotto. La più vicina a quella di oggi, ma ordinata.</p>
+    <div class="win" id="win3"></div>
+  </section>
+</main>
+
+<script>
+const RES = {
+  metal: '<path d="M1.8 21 3.6 15.6h7.3L12.7 21z" opacity=".7"/><path d="M11.3 21l1.8-5.4h7.3l1.8 5.4z" opacity=".7"/><path d="M6.5 14 8.3 8.6h7.4L17.5 14z"/><path d="M8.3 8.6h7.4l-.6 1.6H8.9z" opacity=".55"/>',
+  crystal: '<path d="M12 1.8 18.6 9 12 22.2 5.4 9z"/><path d="M12 1.8 5.4 9 12 22.2 9.6 9z" opacity=".55"/>',
+  deuterium: '<path fill-rule="evenodd" d="M12 2c4 4.8 6.8 8.7 6.8 12.4a6.8 6.8 0 0 1-13.6 0C5.2 10.7 8 6.8 12 2zm-2.3 11.2a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4z"/>',
+  darkMatter: '<circle cx="12" cy="12" r="10" opacity=".3"/><circle cx="12" cy="12" r="5.6"/>',
+  ships: '<path d="M7.5 8.6 10 3.5h3l3.2 5.1z" opacity=".55"/><path d="M7.5 15.4 10 20.5h3l3.2-5.1z" opacity=".55"/><path fill-rule="evenodd" d="M1.8 12 6.5 8.4h9.7c3.2 0 5.6 1.6 6.2 3.6-.6 2-3 3.6-6.2 3.6H6.5zm14.4-1.6a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2z"/>',
+  total: '<path d="M5 3h14v4.2h-2.4V5.6H9.4l5.3 6.4-5.3 6.4h7.2v-1.6H19V21H5v-1.8l6.1-7.2L5 4.8z"/>',
+};
+const ico = (k, cls, s = 15) => `<svg class="ico ${cls}" viewBox="0 0 24 24" width="${s}" height="${s}" fill="currentColor" aria-hidden="true">${RES[k]}</svg>`;
+const CDN = { 202: 'https://gf2.geo.gfsrv.net/cdnd9/60555c3c87b9eb3b5ddf76780b5712.jpg', 204: 'https://gf2.geo.gfsrv.net/cdnd2/9ed5c1b6aea28fa51f84cdb8cb1e7e.jpg', 210: 'https://gf3.geo.gfsrv.net/cdnb5/347821e80cafc52aec04f27c3a2a4d.jpg' };
+const img = (id) => `<img class="ship-img" src="${CDN[id]}" alt="" onerror="this.removeAttribute('src')">`;
+
+// One week, as in the current window.
+const W = { count: 246, net: '3,6G', avg: '14,6M', res: { metal: '469M', crystal: '430M', deuterium: '732M', darkMatter: '12,9k' }, resMsu: '3,3G', ships: '284M', lost: '2,0M' };
+const MIX = [['metal', 469, 'var(--m)'], ['crystal', 645, 'var(--c)'], ['deuterium', 2196, 'var(--d)'], ['ships', 284, '#2E9E7E']];
+const NAMES = { metal: 'Metallo', crystal: 'Cristallo', deuterium: 'Deuterio', ships: 'Navi', darkMatter: 'Materia oscura' };
+const OUT = [['Risorse', 62, '#4FD1E8'], ['Navi', 27, '#4FE0B0'], ['Ritardo', 27, '#E5604F'], ['Oggetto', 25, '#D08A5B'], ['Pirati', 24, '#E3C33B'], ['Niente', 23, '#8A9BB0'], ['Rientro anticipato', 23, '#7C9CF5'], ['Materia oscura', 19, '#B58CDB'], ['Alieni', 16, '#7BD65B']];
+const SHIPS = [[204, '+53.057', 'Caccia leggero'], [210, '+13.098', 'Sonda spia'], [202, '+5.023', 'Cargo leggero']];
+const DAYS = [['mer 11/11', 20, '15,6M', '0', '38,2M', '3,3k', '21,2M', '151M', 151], ['mar 10/11', 38, '42,6M', '160M', '104M', '2,4k', '55,9M', '650M', 650], ['lun 09/11', 31, '90,9M', '1,5M', '92,1M', '585', '27,1M', '397M', 397], ['dom 08/11', 37, '246k', '21,4M', '158M', '1,6k', '50,4M', '557M', 557], ['sab 07/11', 35, '97,0M', '77,6M', '83,3M', '0', '36,8M', '500M', 500], ['ven 06/11', 42, '103M', '46,2M', '228M', '4,0k', '9,3M', '867M', 867], ['gio 05/11', 43, '119M', '123M', '28,4M', '972', '80,9M', '470M', 470]];
+const total = OUT.reduce((a, o) => a + o[1], 0);
+const pct = (n) => (n / total * 100).toFixed(1).replace('.', ',') + '%';
+const head = (tabs = true) => `<div class="win-head"><b>Diario spedizioni</b><span class="seg"><span class="on">Spedizioni · 246</span><span>Artefatti · 0</span></span>${tabs ? '<span class="seg"><span>Oggi</span><span>Ieri</span><span class="on">7 giorni</span><span>30 giorni</span><span>Tutto</span></span>' : ''}</div>`;
+const dayTable = (spark) => `<div class="box"><h3>Giorno per giorno</h3><table><tr><th>Giorno</th><th>N.</th><th>${ico('metal', 'm', 13)}</th><th>${ico('crystal', 'c', 13)}</th><th>${ico('deuterium', 'd', 13)}</th><th>${ico('darkMatter', 'dm', 13)}</th><th>${ico('ships', 'pos', 13)}</th><th>MSU</th>${spark ? '<th></th>' : ''}</tr>${DAYS.map((d) => `<tr><td>${d[0]}</td><td class="num">${d[1]}</td><td class="num m">${d[2]}</td><td class="num c">${d[3]}</td><td class="num d">${d[4]}</td><td class="num dm">${d[5]}</td><td class="num pos">${d[6]}</td><td class="num" style="color:var(--hi)">${d[7]}</td>${spark ? `<td style="width:120px"><span class="spark" style="width:${Math.round(d[8] / 867 * 110)}px"></span></td>` : ''}</tr>`).join('')}</table></div>`;
+
+// 1 · Statement
+const mixTotal = MIX.reduce((a, m) => a + m[1], 0);
+document.getElementById('win1').innerHTML = head() + `
+<div class="box r-hero">
+  <div><div class="r-sub">Guadagno netto · 7 giorni</div><div class="r-net num">${W.net}<small>MSU</small></div></div>
+  <div class="r-sub"><b class="num">${W.count}</b> spedizioni · <b class="num">${W.avg}</b> a spedizione · perse navi per <b class="num neg">${W.lost}</b></div>
+  <div class="r-mix"><div class="r-bar">${MIX.map((m) => `<i style="width:${m[1] / mixTotal * 100}%;background:${m[2]}" title="${NAMES[m[0]]}"></i>`).join('')}</div>
+  <div class="r-keys">${['metal', 'crystal', 'deuterium'].map((k) => `<span>${ico(k, k[0] === 'm' ? 'm' : k[0] === 'c' ? 'c' : 'd')}${NAMES[k]} <b class="num">${W.res[k]}</b></span>`).join('')}<span>${ico('ships', 'pos')}Navi <b class="num">${W.ships}</b></span><span>${ico('darkMatter', 'dm')}Materia oscura <b class="num">${W.res.darkMatter}</b></span></div></div>
+</div>
+<div class="r-two">
+  <div class="box"><h3>Esiti</h3><div class="r-out">${OUT.map((o) => `<span class="lbl">${o[0]}</span><span class="track"><i style="width:${o[1] / 62 * 100}%;background:${o[2]}"></i></span><span class="n num">${o[1]}</span><span class="p num">${pct(o[1])}</span>`).join('')}</div>
+  <div class="r-sizes">Normali <b>173</b><span style="color:var(--rare)">Grandi <b>55</b></span><span style="color:var(--epic)">Enormi <b>18</b></span></div></div>
+  <div class="box"><h3>Navi trovate</h3><div class="r-ships">${SHIPS.map((s) => `<div class="r-ship">${img(s[0])}<div><b class="num">${s[1]}</b><span>${s[2]}</span></div></div>`).join('')}</div>
+  <h3 style="margin-top:14px;color:var(--neg)">Navi perse</h3><div class="r-ships"><div class="r-ship">${img(202)}<div><b class="num neg">−391</b><span>Cargo leggero</span></div></div></div></div>
+</div>` + dayTable(true);
+
+// 2 · Week
+document.getElementById('win2').innerHTML = head() + `
+<div class="w-kpis"><div><span>Spedizioni</span><b class="num">${W.count}</b></div><div><span>Guadagno netto</span><b class="num">${W.net}</b></div><div><span>Media</span><b class="num">${W.avg}</b></div><div><span>Navi perse</span><b class="num neg">−${W.lost}</b></div></div>
+<div class="box"><h3>Valore per giorno</h3><div class="w-chart">${[...DAYS].reverse().map((d, i) => {
+  const h = Math.round(d[8] / 867 * 130);
+  const parts = [[0.12, 'var(--m)'], [0.18, 'var(--c)'], [0.6, 'var(--d)'], [0.1, '#2E9E7E']];
+  return `<div class="w-day${i === 5 ? ' on' : ''}"><span class="tot num">${d[7]}</span><div class="w-stack" style="height:${h}px">${parts.map((p) => `<i style="height:${p[0] * 100}%;background:${p[1]}"></i>`).join('')}</div><span class="lbl">${d[0]}</span></div>`;
+}).join('')}</div>
+<div class="w-legend">${MIX.map((m) => `<span><i style="background:${m[2]}"></i>${NAMES[m[0]]}</span>`).join('')}</div></div>
+<div class="w-two">
+  <div class="box"><h3>Esiti · mar 10/11</h3><div class="w-chips">${OUT.map((o) => `<span class="w-chip"><i style="background:${o[2]}"></i>${o[0]}<b class="num">${Math.max(1, Math.round(o[1] / 6.5))}</b></span>`).join('')}</div></div>
+  <div class="box"><h3>Navi · mar 10/11</h3><div class="r-ships">${SHIPS.map((s) => `<div class="r-ship">${img(s[0])}<div><b class="num">${s[1]}</b><span>${s[2]}</span></div></div>`).join('')}</div></div>
+</div>`;
+
+// 3 · Two columns
+document.getElementById('win3').innerHTML = head() + `
+<div class="t-grid">
+  <div class="box t-side">
+    <div class="t-row big"><span>${ico('total', '', 16)}</span><span class="k">Guadagno netto</span><span class="v num" style="color:var(--hi)">${W.net}</span></div>
+    <div class="t-row"><span></span><span class="k">Spedizioni</span><span class="v num">${W.count}</span></div>
+    <div class="t-row"><span></span><span class="k">Media a spedizione</span><span class="v num">${W.avg}</span></div>
+    ${['metal', 'crystal', 'deuterium', 'darkMatter'].map((k) => `<div class="t-row"><span>${ico(k, { metal: 'm', crystal: 'c', deuterium: 'd', darkMatter: 'dm' }[k])}</span><span class="k">${NAMES[k]}</span><span class="v num ${{ metal: 'm', crystal: 'c', deuterium: 'd', darkMatter: 'dm' }[k]}">${W.res[k]}</span></div>`).join('')}
+    <div class="t-row"><span>${ico('ships', 'pos')}</span><span class="k">Navi trovate</span><span class="v num pos">+${W.ships}</span></div>
+    <div class="t-row"><span>${ico('ships', 'neg')}</span><span class="k">Navi perse</span><span class="v num neg">−${W.lost}</span></div>
+  </div>
+  <div class="t-main">
+    <div class="box"><h3>Esiti <span style="font-weight:400;color:var(--mute);margin-left:8px">normali 173 · <span style="color:var(--rare)">grandi 55</span> · <span style="color:var(--epic)">enormi 18</span></span></h3><div class="t-out">${OUT.map((o) => `<div><i style="background:${o[2]}"></i><span>${o[0]}</span><span class="n num">${o[1]}</span><span class="p num">${pct(o[1])}</span></div>`).join('')}</div></div>
+    <div class="box"><h3>Navi</h3><div class="t-ships">${SHIPS.map((s) => `<span>${img(s[0])}<b class="num">${s[1]}</b>${s[2]}</span>`).join('')}<span>${img(202)}<b class="num neg">−391</b>Cargo leggero</span></div></div>
+  </div>
+</div>` + dayTable(false);
+</script>
+</body>
+</html>
