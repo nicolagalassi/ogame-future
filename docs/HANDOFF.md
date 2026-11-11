@@ -115,7 +115,7 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     Chiave API dei report = `data-raw-hashcode`. Link Osims/OGame Simulator anche nei riepiloghi di spionaggio,
     link al convertitore Ogotcha (`ogotcha.oplanet.eu`) nei riepiloghi di combattimento: **da verificare** su un
     CR vero (nessuno in posta il 2026-11-06). Il guard non manda mai i cookie all'API pubblica `/api/*.xml`.
-11. **Bersagli** (2026-11-06, al posto di rivali e mirino; `src/engines/marks.ts`, `src/engines/positions.ts`,
+11. **Bersagli** — 2026-11-11: i **pianeti colorati sono stati tolti ovunque** (galassia, scheda Pianeti della barra, pannellino, import OGLight, modello dati: quelli salvati non si caricano più); restano bandierine e note dei giocatori, lista per classifica e stato. Storia: (2026-11-06, al posto di rivali e mirino; `src/engines/marks.ts`, `src/engines/positions.ts`,
     `src/modules/marks/`), come i pinned players e tagged planets di OGLight: bandierina per giocatore (Da
     controllare, Bersaglio, Frigo, Pericolo, Amico, Commercio) in galassia, classifica e tabella spiate; colore
     per pianeta in galassia; clic = scelta, Maiusc+clic = ultima usata. **Barra laterale** a sinistra (cella

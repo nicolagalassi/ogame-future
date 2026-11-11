@@ -1,7 +1,7 @@
 /**
  * Targets side bar, after OGLight's side panel: it stays open on the left while the player moves in
  * the galaxy, and across pages. Lists the flagged players (one tab per flag, plus the ones opened
- * lately) and the coloured planets; a player's sheet shows points and every planet and moon with
+ * lately), by rank with their status; a player's sheet shows points and every planet and moon with
  * debris, activity and the age of the last galaxy reading. A click on coordinates (or the M key)
  * shows that system in the galaxy view.
  *
@@ -24,9 +24,9 @@ import type { Activity } from '../../data/galaxy';
 import { PLAYER_SCORES_KEY, playerScores, type PlayerScores, type ScoreType } from '../../data/player-api';
 import { statusNames, universePlayers, type UniversePlayers } from '../../data/universe-players';
 import { UNIVERSE_RANKS_KEY, universeRanks, type UniverseRanks } from '../../data/universe-ranks';
-import { FLAGS, flagPlayer, loadMarks, MARKS_KEY, notePlayer, planetsInRange, rememberRecent, TAGS, type Flag, type Marks, type Tag } from '../../engines/marks';
+import { FLAGS, flagPlayer, loadMarks, MARKS_KEY, notePlayer, rememberRecent, type Flag, type Marks } from '../../engines/marks';
 import { ageParts, planetsOf, POSITIONS_KEY, type Positions, type Seen } from '../../engines/positions';
-import { FLAG_COLORS, FLAG_ICONS, flagButton, MARKS_CSS, TAG_COLORS, tagButton } from './picker';
+import { FLAG_COLORS, FLAG_ICONS, flagButton, MARKS_CSS } from './picker';
 
 type T = (key: string, vars?: Record<string, string | number>) => string;
 
@@ -40,14 +40,9 @@ const HOUR = 3_600_000;
 
 interface View {
   open: boolean;
-  tab: 'players' | 'planets';
   flagTab: Flag | 'recent';
   /** Player whose sheet is open. */
   player: number | null;
-  from: string;
-  to: string;
-  tags: Tag[];
-  hide: string[];
 }
 
 export interface SideOptions {
@@ -106,10 +101,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .chip:hover { border-color: #2C5A73; }
 .chip[aria-pressed="true"] { border-color: currentColor; background: #12283A; color: #E6EDF5; font-weight: 700; }
 .chip .n { font: 12px Consolas, monospace; color: #9AA9BC; }
-.seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #1F2C40; border-radius: 7px; overflow: hidden; flex: none; }
-.seg button { height: 28px; border: 0; background: #0B121D; color: #9AA9BC; cursor: pointer; }
-.seg button + button { border-left: 1px solid #1F2C40; }
-.seg button[aria-pressed="true"] { background: #12283A; color: #E6EDF5; font-weight: 700; box-shadow: inset 0 -2px 0 #4FD1E8; }
 
 /* Scores: what the number is, the number, the rank. Three per line. */
 .scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden; flex: none; }
@@ -131,12 +122,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .note:focus-within { border-color: #4FD1E8; }
 .note.off { color: #9AA9BC; }
 
-.range { display: flex; align-items: center; gap: 4px; color: #9AA9BC; }
-.range input { width: 76px; height: 26px; padding: 0 5px; border: 1px solid #1F2C40; border-radius: 5px; background: #0A111C; color: #E6EDF5; font: 12px Consolas, monospace; }
 
 /* Lists: one card, a hairline between rows, the cyan bar on the system on screen. */
 .scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: #2A3B55 #0B121D; scrollbar-width: thin; }
-.pl, .tg, .ps { border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden; }
+.pl, .ps { border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden; }
 .cols, .row { display: grid; align-items: center; gap: 6px; min-height: 28px; padding: 0 6px; }
 .cols { min-height: 22px; color: #9AA9BC; font-size: 11px; background: #0B121D; border-bottom: 1px solid #1F2C40; }
 .row + .row { border-top: 1px solid #16202F; }
@@ -144,7 +133,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .row:hover { background: #16243A; }
 .row.active { background: rgba(79,209,232,0.12); box-shadow: inset 3px 0 0 #4FD1E8; }
 .pl .cols, .pl .row { grid-template-columns: 18px 84px minmax(0, 1fr) 46px 40px 40px 34px; }
-.tg .cols, .tg .row { grid-template-columns: 18px 76px minmax(0, 1fr) 40px 34px 22px; }
 .ps .row { grid-template-columns: 18px minmax(0, 1fr) auto auto; min-height: 30px; }
 .idx { color: #617C8D; font: 11px Consolas, monospace; text-align: right; }
 .coords { all: unset; display: inline-flex; align-items: center; gap: 3px; padding: 2px 3px; border-radius: 4px; color: #E6EDF5; font: 12px Consolas, monospace; cursor: pointer; white-space: nowrap; }
@@ -183,9 +171,8 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
 /* Narrow screens: the planet's name and the row number give their room to the numbers. */
 @container (max-width: 350px) {
   .pl .cols, .pl .row { grid-template-columns: 84px minmax(0, 1fr) 40px 40px 34px; }
-  .tg .cols, .tg .row { grid-template-columns: 76px minmax(0, 1fr) 40px 34px 22px; }
-  .pl .idx, .tg .idx, .pl .pn { display: none; }
-  .pl .cols > :first-child, .tg .cols > :first-child, .pl .cols > :nth-child(3) { display: none; }
+  .pl .idx, .pl .pn { display: none; }
+  .pl .cols > :first-child, .pl .cols > :nth-child(3) { display: none; }
   .scores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .actions a span { display: none; }
 }
@@ -208,7 +195,9 @@ const fleetHref = (coords: string, type: 1 | 3) => {
 };
 
 const readView = (o: SideOptions): View => {
-  return { open: false, tab: 'players', flagTab: 'watch', player: null, from: '', to: '', tags: [...TAGS], hide: ['vacation', 'banned'], ...o.store.get<Partial<View>>(VIEW_KEY, {}) };
+  // Older saves may carry the planets tab's fields: only these three are read.
+  const saved = o.store.get<Partial<View>>(VIEW_KEY, {});
+  return { open: saved.open ?? false, flagTab: saved.flagTab ?? 'watch', player: saved.player ?? null };
 };
 const readMarks = (store: Store) => loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null));
 
@@ -338,17 +327,7 @@ export function openSide(o: SideOptions, change: Partial<View>): void {
   if (view.player !== null) playerSheet(o, side, scroll, title, view.player, marks, positions, picker, here);
   else {
     title.append(h(doc, 'span', 'name', t('marks.title')));
-    const seg = h(doc, 'div', 'seg');
-    for (const id of ['players', 'planets'] as const) {
-      const b = h(doc, 'button', '', t(`marks.tab.${id}`));
-      b.type = 'button';
-      b.setAttribute('aria-pressed', String(view.tab === id));
-      b.addEventListener('click', () => go({ tab: id }));
-      seg.append(b);
-    }
-    side.append(seg);
-    if (view.tab === 'players') playersList(o, side, scroll, view, marks, picker, go);
-    else taggedList(o, side, scroll, view, marks, positions, picker, go, here);
+    playersList(o, side, scroll, view, marks, picker, go);
   }
   side.append(scroll);
   const foot = h(doc, 'div', 'foot');
@@ -615,87 +594,4 @@ function playerSheet(o: SideOptions, side: HTMLElement, scroll: HTMLElement, tit
   });
   scroll.append(wrap);
   scroll.append(h(doc, 'p', 'foot', t('marks.planets', { n: lines.length, moons: lines.filter((l) => l.moon).length }) + ' · ' + t('galaxy.apiAge', { time: new Date(data.at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) })));
-}
-
-function taggedList(o: SideOptions, side: HTMLElement, scroll: HTMLElement, view: View, marks: Marks, positions: Positions, picker: Picker, go: (v: Partial<View>) => void, here: string | null): void {
-  const { doc, t, locale } = o;
-  const range = h(doc, 'div', 'range');
-  const input = (value: string, label: string, placeholder: string) => {
-    const i = h(doc, 'input');
-    i.value = value;
-    i.placeholder = placeholder;
-    i.inputMode = 'numeric';
-    i.setAttribute('aria-label', label);
-    return i;
-  };
-  const from = input(view.from, t('marks.from'), '1:1');
-  const to = input(view.to, t('marks.to'), '9:499');
-  const apply = () => {
-    // Empty = no bound.
-    const ok = (v: string) => !v.trim() || /^\d{1,2}:\d{1,3}$/.test(v.trim());
-    if (ok(from.value) && ok(to.value)) go({ from: from.value.trim(), to: to.value.trim() });
-  };
-  for (const i of [from, to]) i.addEventListener('change', apply);
-  range.append(h(doc, 'span', '', t('marks.from')), from, h(doc, 'span', '', t('marks.to')), to);
-  side.append(range);
-
-  const chips = h(doc, 'div', 'chips');
-  for (const tag of TAGS) {
-    const b = h(doc, 'button', 'chip');
-    b.type = 'button';
-    const on = view.tags.includes(tag);
-    b.title = t(`mark.tag.${tag}`);
-    b.setAttribute('aria-label', b.title);
-    b.setAttribute('aria-pressed', String(on));
-    b.style.color = TAG_COLORS[tag];
-    const dot = h(doc, 'span', 'fut-mk-dot');
-    dot.style.background = TAG_COLORS[tag];
-    dot.style.borderColor = 'transparent';
-    b.append(dot);
-    b.addEventListener('click', () => go({ tags: on ? view.tags.filter((x) => x !== tag) : [...view.tags, tag] }));
-    chips.append(b);
-  }
-  side.append(chips);
-  const hides = h(doc, 'div', 'chips');
-  for (const st of ['vacation', 'banned', 'inactive'] as const) {
-    const b = h(doc, 'button', 'chip', t(`marks.hide.${st}`));
-    b.type = 'button';
-    const on = view.hide.includes(st);
-    b.setAttribute('aria-pressed', String(on));
-    b.addEventListener('click', () => go({ hide: on ? view.hide.filter((x) => x !== st) : [...view.hide, st] }));
-    hides.append(b);
-  }
-  side.append(hides);
-
-  // Today's statuses from the public API (read once, cached a day), else the ones the galaxy showed.
-  const statusOf = (playerId: number | null, saved: string[]) => {
-    const row = playerId ? uni?.players[String(playerId)] : undefined;
-    return row ? statusNames(row[1]) : saved;
-  };
-  const withStatus: Marks = { ...marks, planets: Object.fromEntries(Object.entries(marks.planets).map(([c, p]) => [c, { ...p, statuses: statusOf(p.playerId, p.statuses) }])) };
-  const hide = view.hide.flatMap((s) => (s === 'inactive' ? ['inactive', 'longinactive'] : [s]));
-  const list = planetsInRange(withStatus, view.from || '1:0', view.to || '99:999', { tags: view.tags, hide });
-  if (!uni) void universePlayers({ guard: o.guard, store: o.store, origin: doc.location.origin }).catch(() => null).then((u) => { if (u) { uni = u; refreshSide(); } });
-  if (!list.length) {
-    scroll.append(h(doc, 'p', 'empty', t(Object.keys(marks.planets).length ? 'marks.noneInRange' : 'marks.noPlanets')));
-    return;
-  }
-  const now = Date.now();
-  const wrap = h(doc, 'div', 'tg');
-  const cols = h(doc, 'div', 'cols');
-  cols.append(h(doc, 'span', ''), h(doc, 'span', '', t('marks.col.coords')), h(doc, 'span', '', t('marks.col.who')), h(doc, 'span', 'cell-r', t('marks.col.planet')), h(doc, 'span', 'cell-r', t('marks.col.seen')), h(doc, 'span', ''));
-  wrap.append(cols);
-  list.forEach(([coords, p], i) => {
-    const system = coords.split(':').slice(0, 2).join(':');
-    const seenRaw = positions[coords];
-    const seen = seenRaw && (!p.playerId || seenRaw.player === p.playerId) ? seenRaw : null;
-    const row = h(doc, 'div', `row${system === here ? ' active' : ''}`);
-    const txt = h(doc, 'span', 'txt', p.planet || '?');
-    txt.append(h(doc, 'span', `who${p.statuses[0] ? ` st-${p.statuses[0]}` : ''}`, p.player ? ` · ${p.player}` : ''));
-    txt.title = `${p.planet} · ${p.player}`;
-    row.append(h(doc, 'span', 'idx', String(i + 1)), coordsButton(doc, t, coords), txt, activityCell(doc, t, coords, 1, seen?.act[0] ?? null, seen, now), ageCell(doc, t, seen, now, locale), tagButton(picker, coords, p));
-    wrap.append(row);
-  });
-  scroll.append(wrap);
-  scroll.append(h(doc, 'p', 'foot', t('marks.planetsHint', { n: list.length })));
 }
