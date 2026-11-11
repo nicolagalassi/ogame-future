@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.23
+// @version      0.3.24
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -7050,7 +7050,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
           toggle();
         });
         place(msg, box);
-        spread(msg, box);
+        if (parsed.kind === "expedition" || parsed.kind === "discovery") spread(msg, box);
         const rar = box.className.match(/fut-rar-([01])/);
         if (rar) msg.classList.add("fut-msgrar", `fut-msgrar-${rar[1]}`);
         if (fold && (parsed.kind === "expedition" || parsed.kind === "discovery" || parsed.kind === "recycle" || parsed.kind === "transport" || parsed.kind === "deploy" || parsed.kind === "return")) msg.classList.add("fut-msg-folded");

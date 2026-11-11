@@ -357,7 +357,8 @@ export function processMessages(o: MessagesOptions): number {
         toggle();
       });
       place(msg, box);
-      spread(msg, box);
+      // Only expedition-like reports are laid out over the game's card; the others keep their single line.
+      if (parsed.kind === 'expedition' || parsed.kind === 'discovery') spread(msg, box);
       // Big and huge finds tint the whole message, not only our line.
       const rar = box.className.match(/fut-rar-([01])/);
       if (rar) msg.classList.add('fut-msgrar', `fut-msgrar-${rar[1]}`);
