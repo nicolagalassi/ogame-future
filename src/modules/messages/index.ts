@@ -280,6 +280,35 @@ function place(msg: Element, box: HTMLElement): void {
   else (msg.querySelector('.msgContent') ?? msg).after(box);
 }
 
+/**
+ * Card view (title over the text, buttons at the bottom): the outcome pill moves into the game's
+ * footer and the value up beside the title, smaller; our line keeps what was found, bigger and in
+ * the middle. The list view keeps everything on the line (its footer is hidden until opened).
+ */
+function spread(msg: Element, box: HTMLElement): void {
+  if (msg.querySelector(':scope > .msgFilteredHeaderRow')) return;
+  const head = msg.querySelector<HTMLElement>(':scope .msgHead');
+  const foot = msg.querySelector<HTMLElement>(':scope message-footer, :scope .msg_actions');
+  if (!head || !foot || head.closest('.messageContentWrapper')) return;
+  const doc = msg.ownerDocument;
+  const pill = box.querySelector('.fut-msg-pillcell');
+  const value = box.querySelector<HTMLElement>('.fut-msg-val');
+  if (pill?.childElementCount) {
+    const at = h(doc, 'div', 'fut-msg-foot');
+    at.append(...Array.from(pill.childNodes));
+    foot.append(at);
+  }
+  if (value?.childElementCount) {
+    const at = h(doc, 'div', 'fut-msg-top');
+    at.title = value.title;
+    at.append(...Array.from(value.childNodes));
+    head.append(at);
+  }
+  pill?.remove();
+  value?.remove();
+  box.classList.add('fut-msg-spread');
+}
+
 /** Reads and summarises every report on the page not done yet. Returns new journal entries. */
 export function processMessages(o: MessagesOptions): number {
   const { doc, store, t, locale } = o;
@@ -327,6 +356,7 @@ export function processMessages(o: MessagesOptions): number {
         toggle();
       });
       place(msg, box);
+      spread(msg, box);
       // Big and huge finds tint the whole message, not only our line.
       const rar = box.className.match(/fut-rar-([01])/);
       if (rar) msg.classList.add('fut-msgrar', `fut-msgrar-${rar[1]}`);
@@ -395,7 +425,7 @@ export function watchMessages(o: MessagesOptions): () => void {
   });
   observer.observe(doc.body, { childList: true, subtree: true });
   return () => {
-    doc.querySelectorAll('.msg .fut-msg').forEach((n) => n.remove());
+    doc.querySelectorAll('.msg .fut-msg, .msg .fut-msg-top, .msg .fut-msg-foot').forEach((n) => n.remove());
     doc.querySelectorAll('.msg[data-fut-done]').forEach((m) => {
       m.removeAttribute('data-fut-done');
       m.classList.remove('fut-msg-folded', 'fut-msgrar', 'fut-msgrar-0', 'fut-msgrar-1');

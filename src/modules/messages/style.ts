@@ -37,7 +37,7 @@ const outcomeCss = Object.entries(OUTCOME_COLORS)
 export const MESSAGES_CSS = `
 /* One set of tokens for the summaries, the "just read" panel and the spy table. Text tokens keep
    at least 4.5:1 on every background they sit on; --faint is for decoration only (ticks, tracks). */
-.fut-msg, .fut-fresh, #fut-spypanel {
+.fut-msg, .fut-msg-top, .fut-msg-foot, .fut-fresh, #fut-spypanel {
   --hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1; --faint: #4E5B6A; --line: #2E4356;
   --link: #6F9FC8; --accent: #4FD1E8; --neg: #F07A6E; --warn: #E3B341; --ok: #7BC47F; --ship: #4FE0B0; --on-tone: #0D1116;
   --loot: #F0A35A; --name: #E8D27A; --on-accent: #CFF5FC; --attack: #FF9B8A; --attack-line: #C0533F; --sim: #8FB6D8; --chip: #1A2733;
@@ -49,6 +49,23 @@ export const MESSAGES_CSS = `
 .fut-msg:hover { background: rgba(120, 150, 180, 0.11); }
 .fut-msg:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .fut-msg-pillcell { display: flex; min-width: 0; }
+/* Card view, spread over the game's message: what was found in the middle and bigger; the value
+   beside the title, smaller; the outcome pill in the game's footer, between its buttons. */
+.fut-msg.fut-msg-spread { grid-template-columns: minmax(0, 1fr) auto; padding: 7px 16px; }
+.fut-msg-spread .fut-msg-body { justify-content: center; gap: 4px 18px; font-size: 13px; line-height: 20px; }
+.fut-msg-spread .fut-r .fut-res-ico { width: 18px; height: 18px; }
+.fut-msg-spread .fut-msg-icon { width: 24px; height: 24px; }
+.fut-msg-spread .fut-depl { margin-left: 0; }
+.msg .msgHead:has(> .fut-msg-top), .msg message-footer:has(> .fut-msg-foot), .msg .msg_actions:has(> .fut-msg-foot) { position: relative !important; }
+.fut-msg-top { position: absolute; top: 50%; left: 58%; transform: translate(-50%, -50%); display: flex; align-items: baseline; gap: 4px; white-space: nowrap;
+  font: 11px/14px Verdana, Arial, Helvetica, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums; }
+.fut-msg-top b { font-size: 12px; color: var(--hi); }
+.fut-msg-top b.fut-neg { color: var(--neg); }
+.fut-msg-top small { font-size: 10px; color: var(--mute); }
+.fut-msg-top .fut-rar-tag { font-size: 11px; }
+.msg.fut-msgrar .fut-msg-top b { color: var(--rar); }
+.msg.fut-msgrar-0 .fut-msg-top b { font-size: 13px; }
+.fut-msg-foot { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; font: 11px/16px Verdana, Arial, Helvetica, sans-serif; }
 .fut-pill { --tone: #8A9BB0; display: inline-block; max-width: 100%; box-sizing: border-box; padding: 1px 8px; border-radius: 9px;
   border: 1px solid color-mix(in srgb, var(--tone) 55%, transparent); background: color-mix(in srgb, var(--tone) 9%, transparent);
   color: color-mix(in srgb, var(--tone) 78%, #fff); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -125,7 +142,6 @@ ${outcomeCss}
 .fut-fresh-name .fut-res-ico { color: var(--dot); }
 .fut-fresh-tile { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 7px 9px; border-radius: 4px; background: rgba(120, 150, 180, 0.07); }
 .fut-fresh-name { display: flex; align-items: center; gap: 5px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fut-fresh-name::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--dot); flex: none; }
 .fut-fresh-tile b { font-size: 16px; line-height: 1.2; color: var(--dot); white-space: nowrap; }
 .fut-fresh-tile.zero b { color: var(--dim); }
 .fut-fresh-ships { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; }
