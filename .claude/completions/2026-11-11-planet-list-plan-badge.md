@@ -6,3 +6,8 @@
 - Planet menu: `.fut-corner` in basso a sinistra (sulla luna in alto) con il badge `.fut-plan` (icona lista + numero di voci,
   colore per stato) e i pallini della coda. Tooltip con le voci e quantità mancanti / in viaggio con orario d'arrivo.
 - Solo dati locali, nessuna chiamata di rete.
+
+## 0.3.42
+- Il segnalino nell'angolo dell'immagine era troppo piccolo: ora c'è una colonnina di 15px all'estremità destra
+  della riga, fuori dalla luna (`.fut-plancol`), metà alta = pianeta, metà bassa = luna, colorata per stato.
+  Presente solo se qualcosa è in piano; nascosta in vista compatta. `MENU_WIDTH` 228 → 242 per farle posto.

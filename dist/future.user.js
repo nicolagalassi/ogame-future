@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.41
+// @version      0.3.42
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -8177,7 +8177,7 @@ input.field { width: 190px; }
   }
 
   // src/modules/planet-menu/style.ts
-  var MENU_WIDTH = 228;
+  var MENU_WIDTH = 242;
   var NATIVE_WIDTH = 137;
   var L = "#planetbarcomponent #planetList.fut-menu";
   var MOON_W = 68;
@@ -8297,20 +8297,23 @@ ${L} .fut-age-old { color: #EF7676; }
 
 /* What is being built: one dot per queue kind (OGLight colours) where the game's wrench was; details in the tooltip. */
 ${L} .smallplanet .constructionIcon { display: none !important; }
-${L} .fut-corner { position: absolute; left: 2px; bottom: 2px; z-index: 2; display: flex; align-items: center; gap: 2px; }
-${L} a.moonlink .fut-corner { bottom: auto; top: 1px; }
-${L} .fut-queue { display: flex; gap: 2px; padding: 2px; border-radius: 6px; background: rgba(5,10,18,0.85); }
-/* The plan on this body, coloured by where its resources stand. */
-${L} .fut-plan { display: inline-flex; align-items: center; gap: 1px; padding: 0 3px 0 2px; border-radius: 6px; background: rgba(5,10,18,0.88);
-  font: 700 10px/12px Arial, sans-serif; cursor: help; }
+${L} .fut-queue { position: absolute; left: 2px; bottom: 2px; z-index: 2; display: flex; gap: 2px; padding: 2px; border-radius: 6px; background: rgba(5,10,18,0.85); }
+/* The plan: a slim column at the outer end of each row, right of the moon; one tile per planned body
+   (planet on top, moon below), coloured by where its resources stand. */
+${L} .fut-plancol { flex-shrink: 0; display: flex; flex-direction: column; width: 15px; border-left: 1px solid #1A2638; background: #0D1522; }
+${L} .fut-plancol > span { flex: 1; min-height: 0; }
+${L} .fut-plan { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  font: 700 10px/10px Arial, sans-serif; cursor: help; background: color-mix(in srgb, currentColor 16%, #0D1522); }
+${L} .fut-plancol > :last-child { border-top: 1px solid #1A2638; }
 ${L} .fut-plan svg { display: block; }
+${L}.fut-mode-compact .fut-plancol { display: none; }
 ${L} .fut-plan-missing { color: #EF7676; }
 ${L} .fut-plan-arriving { color: #4FD1E8; }
 ${L} .fut-plan-arrived { color: #E3BB28; }
 ${L} .fut-plan-ready { color: #38C56E; }
 ${L} .fut-plan-unknown { color: #8592A1; }
 ${L} .fut-q { display: block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-${L} a.moonlink .fut-queue { padding: 1px 2px; }
+${L} a.moonlink .fut-queue { left: 2px; bottom: auto; top: 1px; padding: 1px 2px; }
 ${L} a.moonlink .fut-q { width: 5px; height: 5px; }
 ${L} .fut-q-building { color: #FF8200; }
 ${L} .fut-q-research { color: #32FB2F; }
@@ -8551,15 +8554,8 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     b.title = lines.join("\n");
     return b;
   }
-  function corner(doc, parts) {
-    const got = parts.filter((p) => !!p);
-    if (!got.length) return null;
-    const box = el3(doc, "span", "fut-corner");
-    box.append(...got);
-    return box;
-  }
   function clearPlanetMenu(doc) {
-    doc.querySelectorAll(".fut-res, .fut-fleet, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue, .fut-corner").forEach((n) => n.remove());
+    doc.querySelectorAll(".fut-res, .fut-fleet, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue, .fut-plancol").forEach((n) => n.remove());
     doc.querySelectorAll(".fut-name").forEach((wrap) => wrap.replaceWith(...Array.from(wrap.childNodes)));
     doc.querySelectorAll(".fut-row").forEach((n) => n.classList.remove("fut-row", "fut-current"));
   }
@@ -8667,6 +8663,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     const byId = new Map((o.snapshot?.bodies ?? []).map((b) => [b.id, b]));
     const view2 = { fleet: o.settings.showFleet === true, t: o.t };
     list.style.removeProperty("--fut-row-h");
+    const planned = Object.keys(o.planMarks ?? {}).length > 0;
     for (const entry of o.entries) {
       entry.element.classList.add("fut-row");
       if (entry.current) entry.element.classList.add("fut-current");
@@ -8683,20 +8680,31 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
         const age = ageBadge(doc, planetBody, o.now, o.t);
         if (age) link.append(age);
         const pq = queueDots(doc, entry.planetId ? activeItems(o.queues?.bodies[String(entry.planetId)], o.now) : [], entry.construction.planet, o.now, o.t, o.locale);
-        const pc = corner(doc, [planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : void 0, o), pq]);
-        if (pc) link.append(pc);
+        if (pq) link.append(pq);
       }
       const moon = entry.moonLink;
+      let gap = null;
       if (moon) {
         const moonBody = entry.moonId ? byId.get(entry.moonId) : void 0;
         moon.append(resourceColumn(doc, moonBody, o.now, o.locale, false, view2));
         const age = ageBadge(doc, moonBody, o.now, o.t);
         if (age) moon.append(age);
         const mq = queueDots(doc, entry.moonId ? activeItems(o.queues?.bodies[String(entry.moonId)], o.now) : [], entry.construction.moon, o.now, o.t, o.locale);
-        const mc = corner(doc, [planBadge(doc, entry.moonId ? o.planMarks?.[String(entry.moonId)] : void 0, o), mq]);
-        if (mc) moon.append(mc);
+        if (mq) moon.append(mq);
       } else {
-        link?.after(el3(doc, "span", "fut-nomoon"));
+        gap = el3(doc, "span", "fut-nomoon");
+        link?.after(gap);
+      }
+      if (planned) {
+        const col = el3(doc, "span", "fut-plancol");
+        const pb = planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : void 0, o);
+        const mb = planBadge(doc, entry.moonId ? o.planMarks?.[String(entry.moonId)] : void 0, o);
+        if (pb) pb.classList.add("fut-plan-p");
+        if (mb) mb.classList.add("fut-plan-m");
+        col.append(pb ?? el3(doc, "span", ""), mb ?? el3(doc, "span", ""));
+        const after = moon ?? gap;
+        if (after) after.after(col);
+        else entry.element.append(col);
       }
       entry.element.querySelectorAll("img.planetPic, img.icon-moon").forEach(guardSkin);
     }
