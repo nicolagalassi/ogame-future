@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.38
+// @version      0.3.39
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -3529,14 +3529,36 @@
   }
 
   // src/modules/marks/picker.ts
-  var FLAG_ICONS = { watch: "eye", target: "target", farm: "farm", danger: "warn", friend: "user", trade: "swap" };
   var FLAG_COLORS = { watch: "#4FD1E8", target: "#FF7A7A", farm: "#7BC47F", danger: "#F5B547", friend: "#7FB8FF", trade: "#B58CDB" };
+  var MARK_PATHS = {
+    watch: '<path fill-rule="evenodd" d="M12 4.5C6 4.5 2 12 2 12s4 7.5 10 7.5S22 12 22 12s-4-7.5-10-7.5zm0 3.4a4.1 4.1 0 1 1 0 8.2 4.1 4.1 0 0 1 0-8.2z"/><circle cx="12" cy="12" r="2.1"/>',
+    target: '<path fill-rule="evenodd" d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm0 3.3a6.7 6.7 0 1 0 0 13.4 6.7 6.7 0 0 0 0-13.4z"/><circle cx="12" cy="12" r="6.7" opacity=".3"/><circle cx="12" cy="12" r="3.3"/>',
+    farm: '<path d="M12 2.6 1.8 10.6l1.3 1.6L12 5.3l8.9 6.9 1.3-1.6z" opacity=".6"/><path fill-rule="evenodd" d="M12 6.9l7.4 5.8V21H4.6v-8.3zM10 21v-5.4h4V21z"/>',
+    danger: '<path fill-rule="evenodd" d="M10.3 3.4a2 2 0 0 1 3.4 0l8.6 15.1a2 2 0 0 1-1.7 3H3.4a2 2 0 0 1-1.7-3zM10.8 8.6h2.4l-.35 6.4h-1.7zM12 16.4a1.45 1.45 0 1 0 0 2.9 1.45 1.45 0 0 0 0-2.9z"/>',
+    friend: '<circle cx="12" cy="7.4" r="4.6"/><path d="M2.8 21.6c.5-5.1 4.2-8.2 9.2-8.2s8.7 3.1 9.2 8.2z" opacity=".75"/>',
+    trade: '<path d="M2.5 6.2h12.3V2.6L21.5 8l-6.7 5.4V9.8H2.5z"/><path d="M21.5 17.8H9.2v3.6L2.5 16l6.7-5.4v3.6h12.3z" opacity=".6"/>',
+    none: '<rect x="4.2" y="2" width="2.2" height="20" rx="1.1"/><path d="M6.4 3.2h13.4l-3.3 4.9 3.3 4.9H6.4z" opacity=".6"/>'
+  };
+  function markIcon(doc, flag, size = 14) {
+    const svg2 = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg2.setAttribute("viewBox", "0 0 24 24");
+    svg2.setAttribute("width", String(size));
+    svg2.setAttribute("height", String(size));
+    svg2.setAttribute("fill", "currentColor");
+    svg2.setAttribute("aria-hidden", "true");
+    svg2.setAttribute("class", "fut-ico fut-mk-ico");
+    svg2.innerHTML = MARK_PATHS[flag];
+    return svg2;
+  }
   var POP_ID = "fut-mk-pop";
   var MARKS_CSS = `
 .fut-mk { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin: 0 2px; padding: 0;
-  border: 1px solid #2E4356; border-radius: 4px; background: #0D1522; color: #7A8CA3; cursor: pointer; vertical-align: middle; }
-.fut-mk:hover, .fut-mk:focus-visible { border-color: #617C8D; color: #C9D4E2; outline: none; }
-.fut-mk.on { border-color: currentColor; background: #0D1522; }
+  border: 0; border-radius: 4px; background: none; color: #6B7F94; cursor: pointer; vertical-align: middle; }
+.fut-mk .fut-mk-ico { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7)); transition: transform 120ms ease-out; }
+.fut-mk:hover, .fut-mk:focus-visible { color: #C9D4E2; outline: none; }
+.fut-mk:hover .fut-mk-ico, .fut-mk:focus-visible .fut-mk-ico { transform: scale(1.15); }
+.fut-mk:focus-visible { box-shadow: 0 0 0 1px #617C8D; }
+.fut-mk.on { background: none; }
 #fut-mk-pop { position: fixed; z-index: 1000003; display: flex; gap: 3px; padding: 5px; border: 1px solid #2E4356; border-radius: 8px;
   background: #111B2A; box-shadow: 0 8px 22px rgba(0,0,0,0.55); font: 11px Verdana, Arial, sans-serif; }
 #fut-mk-pop button { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; padding: 0; border: 1px solid #1F2C40;
@@ -3578,7 +3600,7 @@
     doc.addEventListener("keydown", away, true);
   }
   function paintFlag(b, flag, t, name) {
-    b.replaceChildren(icon(b.ownerDocument, flag ? FLAG_ICONS[flag] : "flag", 11));
+    b.replaceChildren(markIcon(b.ownerDocument, flag ?? "none", 15));
     b.classList.toggle("on", !!flag);
     b.style.color = flag ? FLAG_COLORS[flag] : "";
     b.title = flag ? `${t(`mark.flag.${flag}`)} \xB7 ${t("mark.change")}` : t("mark.flagAdd");
@@ -3615,7 +3637,7 @@
         it.setAttribute("aria-pressed", String((current3 ?? null) === flag));
         it.title = flag ? t(`mark.flag.${flag}`) : t("mark.none");
         it.setAttribute("aria-label", it.title);
-        it.append(icon(doc, flag ? FLAG_ICONS[flag] : "close", 13));
+        it.append(flag ? markIcon(doc, flag, 15) : icon(doc, "close", 13));
         if (flag) it.style.color = FLAG_COLORS[flag];
         it.addEventListener("click", () => {
           closePop(doc);
@@ -4282,7 +4304,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       b.setAttribute("aria-label", b.title);
       b.setAttribute("aria-pressed", String(view2.flagTab === f));
       if (f !== "recent") b.style.color = FLAG_COLORS[f];
-      b.append(icon(doc, f === "recent" ? "eye" : FLAG_ICONS[f], 12), h(doc, "span", "n", String(f === "recent" ? marks.recent.length : counts[f] ?? 0)));
+      b.append(f === "recent" ? icon(doc, "eye", 12) : markIcon(doc, f, 13), h(doc, "span", "n", String(f === "recent" ? marks.recent.length : counts[f] ?? 0)));
       b.addEventListener("click", () => go({ flagTab: f }));
       chips.append(b);
     }
@@ -4816,7 +4838,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       const b = button3("flag", `${t(`mark.flag.${f}`)}: ${n}`, () => o.onOpenTargets({ flagTab: f }));
       b.style.color = FLAG_COLORS[f];
       b.setAttribute("aria-label", `${t(`mark.flag.${f}`)}: ${n}`);
-      b.append(icon(doc, FLAG_ICONS[f], 13), el2(doc, "i", "", String(n)));
+      b.append(markIcon(doc, f, 13), el2(doc, "i", "", String(n)));
       flags.append(b);
     }
     if (flags.childElementCount) targets.append(flags);
