@@ -386,6 +386,24 @@ describe('shortcuts, last fleet and jump gate', () => {
     expect(nextBody([{ planetId: 1, moonId: null }, { planetId: 2, moonId: null }, { planetId: 3, moonId: null }], 1, { backwards: true })).toBe(3);
   });
 
+  it('no shortcut while typing in a field inside a Shadow DOM (the note in the targets bar)', async () => {
+    const { registerActions, resetShortcuts } = await import('../src/modules/shortcuts');
+    resetShortcuts();
+    let n = 0;
+    document.body.innerHTML = '<div id="host"></div>';
+    const root = document.getElementById('host')!.attachShadow({ mode: 'open' });
+    root.innerHTML = '<textarea></textarea>';
+    const area = root.querySelector('textarea')!;
+    registerActions(document, new Store(new MemoryStore(), 'k2'), (k) => k, { 'planet.next': () => n++ });
+    area.focus();
+    area.dispatchEvent(new KeyboardEvent('keydown', { key: 'o', bubbles: true, composed: true }));
+    expect(n).toBe(0);
+    area.blur();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'o' }));
+    // Out of the field the key works again (the earlier test's listener on this document runs too).
+    expect(n).toBeGreaterThan(0);
+  });
+
   it('lets the player change keys: a taken key moves, fixed keys stay, the default comes back', async () => {
     const { assignKey, keymap, resetKeys, registerActions, resetShortcuts } = await import('../src/modules/shortcuts');
     resetShortcuts();

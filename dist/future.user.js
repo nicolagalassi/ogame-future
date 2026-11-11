@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.31
+// @version      0.3.32
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -7500,11 +7500,17 @@ td.spark-cell { width: 90px; }
   var runs = /* @__PURE__ */ new Map();
   var installed = null;
   var current = null;
-  function typing(doc) {
-    const a = doc.activeElement;
-    if (!a) return false;
+  var isField = (n) => {
+    const a = n;
+    if (!a || typeof a.tagName !== "string") return false;
     const tag = a.tagName;
     return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || a.isContentEditable;
+  };
+  function typing(doc, e) {
+    if (e && isField(e.composedPath?.()[0])) return true;
+    let a = doc.activeElement;
+    while (a?.shadowRoot?.activeElement) a = a.shadowRoot.activeElement;
+    return isField(a);
   }
   var WINDOWS = ["fut-fleet-modal", "fut-dashboard", "fut-planner", "fut-journal", "fut-settings-window"];
   function registerActions(doc, store, t, list) {
@@ -7516,7 +7522,7 @@ td.spark-cell { width: 90px; }
         "keydown",
         (e) => {
           if (e.repeat || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey || !current) return;
-          if (typing(doc) || WINDOWS.some((w) => doc.getElementById(w))) return;
+          if (typing(doc, e) || WINDOWS.some((w) => doc.getElementById(w))) return;
           const k = e.key.toLowerCase();
           for (const [id, key] of keymap(current.store)) {
             const def = ACTIONS.find((a) => a.id === id);

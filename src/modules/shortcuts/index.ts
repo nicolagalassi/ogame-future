@@ -96,11 +96,22 @@ const runs = new Map<string, () => void>();
 let installed: Document | null = null;
 let current: { doc: Document; store: Store; t: (k: string) => string } | null = null;
 
-function typing(doc: Document): boolean {
-  const a = doc.activeElement as HTMLElement | null;
-  if (!a) return false;
+const isField = (n: unknown): boolean => {
+  const a = n as HTMLElement | null;
+  if (!a || typeof a.tagName !== 'string') return false;
   const tag = a.tagName;
   return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || a.isContentEditable;
+};
+
+/**
+ * Is the player typing? The focused element is looked for inside Shadow DOMs too (the targets bar,
+ * Future's windows): from the page, a textarea in a shadow root shows only as its host.
+ */
+function typing(doc: Document, e?: Event): boolean {
+  if (e && isField(e.composedPath?.()[0])) return true;
+  let a = doc.activeElement as HTMLElement | null;
+  while (a?.shadowRoot?.activeElement) a = a.shadowRoot.activeElement as HTMLElement;
+  return isField(a);
 }
 
 const WINDOWS = ['fut-fleet-modal', 'fut-dashboard', 'fut-planner', 'fut-journal', 'fut-settings-window'];
@@ -115,7 +126,7 @@ export function registerActions(doc: Document, store: Store, t: (k: string) => s
       'keydown',
       (e) => {
         if (e.repeat || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey || !current) return;
-        if (typing(doc) || WINDOWS.some((w) => doc.getElementById(w))) return;
+        if (typing(doc, e) || WINDOWS.some((w) => doc.getElementById(w))) return;
         const k = e.key.toLowerCase();
         for (const [id, key] of keymap(current.store)) {
           const def = ACTIONS.find((a) => a.id === id)!;
