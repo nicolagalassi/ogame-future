@@ -62,7 +62,7 @@ describe('fleet and keys sections', () => {
     const store = new Store(new MemoryStore(), 'fk');
     const onFleetChange = vi.fn();
     const w = open(store, { onFleetChange, bodies: [{ id: 5, label: 'Casa [1:2:3]' }], section: 'fleet' });
-    const fav = Array.from(w.root.querySelectorAll('.row')).find((r) => r.querySelector('.name')!.textContent === 'Trasporto verso')!.querySelector('select')!;
+    const fav = Array.from(w.root.querySelectorAll('.row')).find((r) => r.querySelector('.name')!.textContent === '1 · Trasporto verso')!.querySelector('select')!;
     fav.value = '5';
     fav.dispatchEvent(new Event('change'));
     expect(store.get<{ favTransport: number }>('fleet.settings', { favTransport: 0 }).favTransport).toBe(5);

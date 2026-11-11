@@ -640,6 +640,11 @@ function lifeformsTab(parent: HTMLElement, ctx: Ctx): void {
     }
     const wrap = h('div', 'table-wrap');
     const tab = h('table', 'matrix lf');
+    // Fixed layout: every planet column as wide as the others, whatever the length of its name.
+    tab.style.setProperty('--cols', String(planets.length));
+    const cols = h('colgroup');
+    cols.append(h('col', 'name-col'), ...planets.map(() => h('col')));
+    tab.append(cols);
     const hr = h('tr');
     hr.append(h('th', 'name', ''));
     for (const p of planets) {
@@ -705,7 +710,7 @@ function unitsTab(parent: HTMLElement, ctx: Ctx, ids: readonly number[], ships: 
     b.type = 'button';
     b.dataset.scope = type;
     b.setAttribute('aria-pressed', String(unitScope === type));
-    b.append(h('span', '', t(type === 'planet' ? 'dash.planets' : 'dash.moons')), h('i', 'mono', list.length ? ctx.fmt(value(list)) : '—'));
+    b.append(icon(ctx.o.doc, type, 14, 'seg-ico'), h('span', '', t(type === 'planet' ? 'dash.planets' : 'dash.moons')), h('i', 'mono', list.length ? ctx.fmt(value(list)) : '—'));
     b.addEventListener('click', () => {
       unitScope = type;
       ctx.redraw();

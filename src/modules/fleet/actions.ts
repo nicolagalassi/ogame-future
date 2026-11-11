@@ -14,18 +14,24 @@ import {
   expeditionFleet,
   expeditionMax,
   expeditionTarget,
+  pickedLoad,
   resolveTarget,
   shipsAfterReserve,
   type FleetProfile,
   type LastFleet,
   type FleetSettings,
   type FleetsaveProfile,
+  type ResourcePick,
   type ShipStock,
 } from '../../engines/fleet';
 import type { Resources } from '../../data/account-info';
 import { pageWindow, shipCapacity, shipsOnPlanet, type FleetDispatcher } from '../../data/fleet-dispatcher';
 
-export type FleetMode = 'moon' | 'transport' | 'deploy' | 'expedition' | 'fleetsave' | 'last' | 'plan';
+/**
+ * moon / collect / collectDeploy: the expedition collection (planet → moon, moons → main moon), with
+ * the reserves. transport / deploy: the plain game actions towards any coordinates, without reserves.
+ */
+export type FleetMode = 'moon' | 'collect' | 'collectDeploy' | 'transport' | 'deploy' | 'expedition' | 'fleetsave' | 'last' | 'plan';
 
 export interface Target {
   galaxy: number;
@@ -236,6 +242,65 @@ export function prepareLast(fd: FleetDispatcher, doc: Document, profile: FleetPr
   setTarget(fd, doc, last.target);
   setSpeedBar(fd, last.speed);
   return finish(fd, last.mission, count, 0);
+}
+
+/** What our last button selected, to tell it apart from a selection the player made by hand. */
+const ourSelection = new WeakMap<FleetDispatcher, string>();
+
+function selectionKey(fd: FleetDispatcher): string {
+  return fd.shipsToSend
+    .filter((s) => s.number > 0)
+    .map((s) => `${s.id}:${s.number}`)
+    .sort()
+    .join(',');
+}
+
+/** Ships the player picked on the game's tiles (not those our previous click put there), or null. */
+function playerSelection(fd: FleetDispatcher): Record<number, number> | null {
+  const key = selectionKey(fd);
+  if (!key || key === ourSelection.get(fd)) return null;
+  return Object.fromEntries(fd.shipsToSend.filter((s) => s.number > 0).map((s) => [s.id, s.number]));
+}
+
+function allShips(fd: FleetDispatcher): Record<number, number> {
+  return Object.fromEntries(Object.entries(shipsOnPlanet(fd)).map(([id, n]) => [Number(id), n]));
+}
+
+/**
+ * Plain Trasporto / Schiera towards any coordinates, with the resources the player picked.
+ * Ships: those the player already picked on the tiles; otherwise the cargo ships needed
+ * (transport) or every ship here (deploy). No reserve: that is what the collection is for.
+ */
+export function prepareSend(
+  fd: FleetDispatcher,
+  doc: Document,
+  settings: FleetSettings,
+  target: Target,
+  pick: ResourcePick,
+  mission: 'transport' | 'deploy',
+): PrepareResult {
+  const here = onPlanet(fd);
+  const wanted = pickedLoad(here, pick, 0, Number.MAX_SAFE_INTEGER);
+  const amount = wanted.metal + wanted.crystal + wanted.deuterium;
+  const picked = playerSelection(fd);
+  if (mission === 'transport' && !picked && amount <= 0) return { ok: false, reason: 'fleet.err.nothingPicked', ships: 0, cargo: 0 };
+  const stockAll = fd.shipsOnPlanet.map((s) => ({ id: s.id, available: Number(s.number) || 0, capacity: shipCapacity(fd, s.id) }));
+  const ships = picked ?? (mission === 'transport' ? cargoShipsFor(amount, stockAll, settings.mainShip, settings.secondShip) : allShips(fd));
+  const count = selectShips(fd, ships);
+  ourSelection.set(fd, selectionKey(fd));
+  setTarget(fd, doc, target);
+  setSpeedBar(fd, settings.transportSpeed);
+  const code = mission === 'transport' ? TRANSPORT : DEPLOY;
+  fd.mission = code;
+  let cargo = 0;
+  if (count > 0) {
+    const load = pickedLoad(here, pick, Math.ceil(Number(fd.getConsumption()) || 0), fd.getCargoCapacity());
+    fd.cargoMetal = load.metal;
+    fd.cargoCrystal = load.crystal;
+    fd.cargoDeuterium = load.deuterium;
+    cargo = load.metal + load.crystal + load.deuterium;
+  }
+  return finish(fd, code, count, cargo);
 }
 
 /** What was just sent, to offer it again later. */
