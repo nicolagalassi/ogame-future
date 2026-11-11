@@ -309,3 +309,19 @@ describe('expedition rarity', () => {
     expect(huge.classList.contains('fut-msgrar-0')).toBe(true);
   });
 });
+
+describe('card view', () => {
+  it('moves the pill into the footer and the value beside the title', () => {
+    document.body.innerHTML = '';
+    const el = msg('51', deut);
+    el.querySelector('.msgContent')!.insertAdjacentHTML('beforebegin', '<div class="msgHead">Risultato della Spedizione</div>');
+    document.body.append(el);
+    processMessages({ doc: document, store: new Store(new MemoryStore(), 'card'), playerId: OWN, locale: 'it', t });
+    expect(el.querySelector('message-footer .fut-msg-foot .fut-pill')).not.toBeNull();
+    expect(el.querySelector('.msgHead .fut-msg-top')?.textContent).toContain('MSU');
+    const line = el.querySelector('.fut-msg')!;
+    expect(line.classList.contains('fut-msg-spread')).toBe(true);
+    expect(line.querySelector('.fut-pill, .fut-msg-val')).toBeNull();
+    expect(line.querySelector('.fut-r')).not.toBeNull();
+  });
+});
