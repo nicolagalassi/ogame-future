@@ -193,11 +193,9 @@ export function summaryFor(doc: Document, m: ParsedMessage, o: SummaryContext): 
       const name = short === `msg.pill.${m.result}` ? full : short;
       const label = m.kind === 'discovery' ? `${t('msg.discovery')} · ${name}` : name;
       line.pill(label, m.result, [m.kind === 'discovery' ? t('msg.discovery') : '', full, sizeName].filter(Boolean).join(' · '));
-      // Size as game rarity: normal = common (green), big = rare (blue), huge = epic (purple).
-      if (sizeName) {
-        line.box.dataset.size = sizeName;
-        line.box.classList.add(`fut-rar-${m.size}`);
-      }
+      // Size as game rarity: normal = common (no tint), big = rare (blue), huge = epic (purple).
+      if (sizeName) line.box.dataset.size = sizeName;
+      if (m.size === 0 || m.size === 1) line.box.classList.add(`fut-rar-${m.size}`);
       line.res(m.res, 1, '+');
       line.ships(m.ships, 'found');
       line.ships(m.lost, 'lost');
@@ -329,6 +327,9 @@ export function processMessages(o: MessagesOptions): number {
         toggle();
       });
       place(msg, box);
+      // Big and huge finds tint the whole message, not only our line.
+      const rar = box.className.match(/fut-rar-([01])/);
+      if (rar) msg.classList.add('fut-msgrar', `fut-msgrar-${rar[1]}`);
       // The game's text is long and the same every time: folded for expeditions and recycling.
       if (fold && (parsed.kind === 'expedition' || parsed.kind === 'discovery' || parsed.kind === 'recycle' || parsed.kind === 'transport' || parsed.kind === 'deploy' || parsed.kind === 'return')) msg.classList.add('fut-msg-folded');
       sync();
@@ -397,7 +398,7 @@ export function watchMessages(o: MessagesOptions): () => void {
     doc.querySelectorAll('.msg .fut-msg').forEach((n) => n.remove());
     doc.querySelectorAll('.msg[data-fut-done]').forEach((m) => {
       m.removeAttribute('data-fut-done');
-      m.classList.remove('fut-msg-folded');
+      m.classList.remove('fut-msg-folded', 'fut-msgrar', 'fut-msgrar-0', 'fut-msgrar-1');
     });
     processMessages(o);
   };
