@@ -71,7 +71,7 @@ describe('renderPlanetMenu', () => {
     expect(Array.from(document.querySelectorAll('#planet-3 .fut-q')).map((d) => d.className)).toEqual(['fut-q fut-q-unknown']);
   });
 
-  it('shows the plan on a body, coloured by where its resources stand, before the queue dots', () => {
+  it('shows the plan in a column at the outer end of the rows, coloured by where its resources stand', () => {
     renderPlanetMenu({
       doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { mode: 'side', showTotals: true }, now: 1_000, locale: 'it', t, onSync: vi.fn(async () => true),
       planMarks: {
@@ -79,14 +79,17 @@ describe('renderPlanetMenu', () => {
         2: { state: 'missing', items: ['Falange liv. 7', 'Portale liv. 2'], lack: { metal: 1, crystal: 0, deuterium: 0 }, pending: { metal: 0, crystal: 0, deuterium: 0, arriveAt: 0 } },
       },
     });
-    const p3 = document.querySelector('#planet-3 a.planetlink .fut-corner')!;
-    expect(p3.firstElementChild?.className).toBe('fut-plan fut-plan-arriving');
-    expect(p3.lastElementChild?.classList.contains('fut-queue')).toBe(true);
-    expect(p3.querySelector('.fut-plan')!.getAttribute('title')).toContain('Miniera di metallo liv. 46–48');
-    const moon = document.querySelector('#planet-1 a.moonlink .fut-plan')!;
-    expect(moon.className).toBe('fut-plan fut-plan-missing');
+    const col3 = document.querySelector('#planet-3 > .fut-plancol')!;
+    expect(col3.previousElementSibling?.classList.contains('fut-nomoon')).toBe(true);
+    expect(col3.querySelector('.fut-plan')!.className).toBe('fut-plan fut-plan-arriving fut-plan-p');
+    expect(col3.querySelector('.fut-plan')!.getAttribute('title')).toContain('Miniera di metallo liv. 46–48');
+    const moon = document.querySelector('#planet-1 > .fut-plancol .fut-plan')!;
+    expect(moon.className).toBe('fut-plan fut-plan-missing fut-plan-m');
     expect(moon.textContent).toBe('2');
-    expect(document.querySelector('#planet-1 a.planetlink .fut-plan')).toBeNull();
+    expect(document.querySelectorAll('#planet-1 .fut-plan')).toHaveLength(1);
+    // Redrawn: still one column per row.
+    draw('side');
+    expect(document.querySelectorAll('.fut-plancol')).toHaveLength(0);
   });
 
   it('paints storage fill behind planet numbers only, never on moons', () => {

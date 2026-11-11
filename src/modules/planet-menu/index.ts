@@ -253,19 +253,10 @@ function planBadge(doc: Document, mark: PlanMark | undefined, o: PlanetMenuOptio
   return b;
 }
 
-/** Bottom corner of a body: the plan badge, then the queue dots. */
-function corner(doc: Document, parts: (HTMLElement | null)[]): HTMLElement | null {
-  const got = parts.filter((p): p is HTMLElement => !!p);
-  if (!got.length) return null;
-  const box = el(doc, 'span', 'fut-corner');
-  box.append(...got);
-  return box;
-}
-
 /** Removes everything Future added, so the menu can be redrawn without duplicates. */
 export function clearPlanetMenu(doc: Document): void {
   doc
-    .querySelectorAll('.fut-res, .fut-fleet, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue, .fut-corner')
+    .querySelectorAll('.fut-res, .fut-fleet, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue, .fut-plancol')
     .forEach((n) => n.remove());
   doc.querySelectorAll('.fut-name').forEach((wrap) => wrap.replaceWith(...Array.from(wrap.childNodes)));
   doc.querySelectorAll('.fut-row').forEach((n) => n.classList.remove('fut-row', 'fut-current'));
@@ -411,6 +402,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
   const view = { fleet: o.settings.showFleet === true, t: o.t };
   list.style.removeProperty('--fut-row-h');
 
+  const planned = Object.keys(o.planMarks ?? {}).length > 0;
   for (const entry of o.entries) {
     entry.element.classList.add('fut-row');
     if (entry.current) entry.element.classList.add('fut-current');
@@ -429,22 +421,35 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       if (age) link.append(age);
       // The game's wrench is hidden: the dots say what is being built, not only that something is.
       const pq = queueDots(doc, entry.planetId ? activeItems(o.queues?.bodies[String(entry.planetId)], o.now) : [], entry.construction.planet, o.now, o.t, o.locale);
-      const pc = corner(doc, [planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : undefined, o), pq]);
-      if (pc) link.append(pc);
+      if (pq) link.append(pq);
     }
 
     const moon = entry.moonLink;
+    let gap: HTMLElement | null = null;
     if (moon) {
       const moonBody = entry.moonId ? byId.get(entry.moonId) : undefined;
       moon.append(resourceColumn(doc, moonBody, o.now, o.locale, false, view));
       const age = ageBadge(doc, moonBody, o.now, o.t);
       if (age) moon.append(age);
       const mq = queueDots(doc, entry.moonId ? activeItems(o.queues?.bodies[String(entry.moonId)], o.now) : [], entry.construction.moon, o.now, o.t, o.locale);
-      const mc = corner(doc, [planBadge(doc, entry.moonId ? o.planMarks?.[String(entry.moonId)] : undefined, o), mq]);
-      if (mc) moon.append(mc);
+      if (mq) moon.append(mq);
     } else {
       // Keeps the planet columns aligned on planets without a moon.
-      link?.after(el(doc, 'span', 'fut-nomoon'));
+      gap = el(doc, 'span', 'fut-nomoon');
+      link?.after(gap);
+    }
+    // The plan, in a slim column at the row's outer end (only when something is planned somewhere).
+    if (planned) {
+      const col = el(doc, 'span', 'fut-plancol');
+      const pb = planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : undefined, o);
+      const mb = planBadge(doc, entry.moonId ? o.planMarks?.[String(entry.moonId)] : undefined, o);
+      if (pb) pb.classList.add('fut-plan-p');
+      if (mb) mb.classList.add('fut-plan-m');
+      // Planet on top, moon below: each keeps its half even when the other has nothing planned.
+      col.append(pb ?? el(doc, 'span', ''), mb ?? el(doc, 'span', ''));
+      const after = moon ?? gap;
+      if (after) after.after(col);
+      else entry.element.append(col);
     }
     entry.element.querySelectorAll<HTMLImageElement>('img.planetPic, img.icon-moon').forEach(guardSkin);
   }
