@@ -741,5 +741,11 @@
   "exp.focusAll": "Toute la période",
   "exp.noneHere": "Rien ici.",
   "exp.daysTable": "Les jours",
-  "dock.todayCount": "{n} expéditions"
+  "dock.todayCount": "{n} expéditions",
+  "marks.st.vacation": "en vacances",
+  "marks.st.banned": "banni",
+  "marks.st.inactive": "inactif (7 jours)",
+  "marks.st.longinactive": "inactif depuis 28 jours",
+  "marks.st.outlaw": "hors-la-loi",
+  "marks.st.admin": "administrateur"
 }

@@ -741,5 +741,11 @@
   "exp.focusAll": "Whole period",
   "exp.noneHere": "Nothing here.",
   "exp.daysTable": "The days",
-  "dock.todayCount": "{n} expeditions"
+  "dock.todayCount": "{n} expeditions",
+  "marks.st.vacation": "on vacation",
+  "marks.st.banned": "banned",
+  "marks.st.inactive": "inactive (7 days)",
+  "marks.st.longinactive": "inactive for 28 days",
+  "marks.st.outlaw": "outlaw",
+  "marks.st.admin": "administrator"
 }

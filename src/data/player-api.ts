@@ -27,6 +27,11 @@ export interface PlayerScores {
   scores: Partial<Record<ScoreType, { points: number; rank: number }>>;
   /** Ships counted in the military score. */
   ships: number | null;
+  /**
+   * When the planet list last changed between two readings (ms); before any change is seen, a week
+   * before the file (the API renews the list about once a week). Until then the galaxy view knows better.
+   */
+  planetsSince?: number;
   /** Planets and moons as the API lists them (missing in answers cached before 2026-11-06). */
   planets?: { id: number; name: string; coords: string; moon: { id: number; name: string; size: number } | null }[];
 }
@@ -68,6 +73,10 @@ export async function playerScores(guard: NetworkGuard, store: Store, origin: st
   if (!res.ok) return hit ?? null;
   const fresh = parsePlayerData(await res.text(), now);
   if (!fresh) return hit ?? null;
+  const key = (p: PlayerScores | undefined) => (p?.planets ?? []).map((x) => x.coords).sort().join(',');
+  // First reading: the list is at most a week old (weekly release), so a week before the file.
+  const weekBefore = (fresh.updated ?? now) - 7 * 24 * 3_600_000;
+  fresh.planetsSince = !hit?.planets ? weekBefore : key(hit) === key(fresh) ? (hit.planetsSince ?? weekBefore) : (fresh.updated ?? now);
   cache[String(id)] = fresh;
   // Keep the most recent players only.
   const ids = Object.keys(cache).sort((a, b) => (cache[b]?.at ?? 0) - (cache[a]?.at ?? 0));

@@ -314,3 +314,31 @@ describe('journal as a statement', () => {
     closeJournal(document);
   });
 });
+
+describe('"just read" panel', () => {
+  it('shows what the reports just read brought, adds a later batch, and goes away at the end of the countdown', () => {
+    const now = () => 1793891482000 + 3600_000;
+    document.body.innerHTML = '<div data-subtab-id="22" class="active"></div><div id="messages"><div class="messagesHolder"></div></div>';
+    const holder = document.querySelector('.messagesHolder')!;
+    const store = new Store(new MemoryStore(), 'fresh');
+    const o = { doc: document, store, playerId: OWN, locale: 'it', t, now };
+    holder.append(msg('1', shipwrecks));
+    processMessages(o);
+    const panel = document.getElementById('fut-expfresh')!;
+    expect(panel.nextElementSibling).toBe(holder);
+    expect(panel.textContent).toContain('1 spedizioni');
+    expect(panel.querySelectorAll('.fut-fresh-tile')).toHaveLength(4);
+    // No "today" recap any more.
+    expect(document.getElementById('fut-exprecap')).toBeNull();
+    // Nothing new: the panel stays as it is.
+    processMessages(o);
+    expect(document.getElementById('fut-expfresh')).toBe(panel);
+    // A second report read meanwhile adds up.
+    holder.append(msg('2', deut));
+    processMessages(o);
+    const merged = document.getElementById('fut-expfresh')!;
+    expect(merged.textContent).toContain('2 spedizioni');
+    merged.querySelector('.fut-fresh-timer i')!.dispatchEvent(new Event('animationend'));
+    expect(document.getElementById('fut-expfresh')).toBeNull();
+  });
+});

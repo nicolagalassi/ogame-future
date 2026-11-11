@@ -23,6 +23,7 @@ import { pageWindow } from '../../data/fleet-dispatcher';
 import type { Activity } from '../../data/galaxy';
 import { PLAYER_SCORES_KEY, playerScores, type PlayerScores, type ScoreType } from '../../data/player-api';
 import { statusNames, universePlayers, type UniversePlayers } from '../../data/universe-players';
+import { UNIVERSE_RANKS_KEY, universeRanks, type UniverseRanks } from '../../data/universe-ranks';
 import { FLAGS, flagPlayer, loadMarks, MARKS_KEY, notePlayer, planetsInRange, rememberRecent, TAGS, type Flag, type Marks, type Tag } from '../../engines/marks';
 import { ageParts, planetsOf, POSITIONS_KEY, type Positions, type Seen } from '../../engines/positions';
 import { FLAG_COLORS, FLAG_ICONS, flagButton, MARKS_CSS, TAG_COLORS, tagButton } from './picker';
@@ -61,6 +62,15 @@ let last: SideOptions | null = null;
 /** Player sheet data already fetched this page (no second request while redrawing). */
 const sheetData = new Map<number, PlayerScores | null>();
 let uni: UniversePlayers | null = null;
+/** Test helper: forget the statuses read in this page. */
+export function resetSideCache(): void {
+  uni = null;
+  ranksLoading = false;
+}
+/** One read of the ranks at a time (the list redraws often). */
+let ranksLoading = false;
+/** Which status colours a name, most telling first. */
+const STATUS_ORDER = ['banned', 'vacation', 'longinactive', 'inactive', 'outlaw', 'admin'];
 
 const SCORE_LOOK: [ScoreType, IconName, string][] = [
   ['total', 'star', '#F5B547'], ['economy', 'swap', '#7FB8FF'], ['research', 'eye', '#4FE0B0'],
@@ -155,6 +165,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .pname:hover, .pname:focus-visible { color: #4FD1E8; }
 .pnote { color: #9AA9BC; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rank { color: #9AA9BC; font: 11px Consolas, monospace; }
+.pline { display: flex; align-items: baseline; gap: 5px; min-width: 0; }
+.pline .pname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pst { flex: none; font: 11px Consolas, monospace; color: #9AA9BC; }
 .act { display: inline-flex; align-items: center; justify-content: flex-end; gap: 2px; height: 22px; padding: 0 2px; border-radius: 4px; font: 700 12px Consolas, monospace; text-decoration: none; color: #617C8D; }
 .act svg { color: #617C8D; flex: none; }
 a.act:hover { background: #1D3350; }
@@ -381,15 +394,31 @@ function playersList(o: SideOptions, side: HTMLElement, scroll: HTMLElement, vie
     chips.append(b);
   }
   side.append(chips);
+  // Ranks for the whole universe in one public file (cached an hour), statuses from players.xml
+  // (cached a day): the list is current without opening each player. Cards already read fill gaps.
+  const ranks = o.store.get<UniverseRanks | null>(UNIVERSE_RANKS_KEY, null);
+  if ((!ranks || Date.now() - ranks.at > 3_600_000) && !ranksLoading) {
+    ranksLoading = true;
+    void universeRanks({ guard: o.guard, store: o.store, origin: doc.location.origin })
+      .catch(() => null)
+      .then((r) => {
+        ranksLoading = false;
+        if (r && r.at !== ranks?.at) refreshSide();
+      });
+  }
+  if (!uni) void universePlayers({ guard: o.guard, store: o.store, origin: doc.location.origin }).catch(() => null).then((u) => { if (u) { uni = u; refreshSide(); } });
+  const cache = o.store.get<Record<string, PlayerScores>>(PLAYER_SCORES_KEY, {});
+  const rankOf = (id: number) => ranks?.ranks[String(id)]?.[0] ?? cache[String(id)]?.scores.total?.rank ?? null;
+  const byRank = (a: { id: number; name: string }, b: { id: number; name: string }) =>
+    (rankOf(a.id) ?? Infinity) - (rankOf(b.id) ?? Infinity) || a.name.localeCompare(b.name);
+  // Flag lists by rank; the recent ones stay in the order they were opened.
   const list = view.flagTab === 'recent'
     ? marks.recent
-    : Object.entries(marks.players).filter(([, p]) => p.flag === view.flagTab).map(([id, p]) => ({ id: Number(id), name: p.name })).sort((a, b) => a.name.localeCompare(b.name));
+    : Object.entries(marks.players).filter(([, p]) => p.flag === view.flagTab).map(([id, p]) => ({ id: Number(id), name: p.name })).sort(byRank);
   if (!list.length) {
     scroll.append(h(doc, 'p', 'empty', t(view.flagTab === 'recent' ? 'marks.noRecent' : 'marks.noPlayers')));
     return;
   }
-  // Ranks from the cards already read (no request for the list).
-  const cache = o.store.get<Record<string, PlayerScores>>(PLAYER_SCORES_KEY, {});
   const wrap = h(doc, 'div', 'ps');
   list.forEach((p, i) => {
     const row = h(doc, 'div', 'row');
@@ -397,9 +426,21 @@ function playersList(o: SideOptions, side: HTMLElement, scroll: HTMLElement, vie
     name.type = 'button';
     name.title = t('marks.openSheet');
     name.addEventListener('click', () => go({ player: p.id }));
-    const rank = cache[String(p.id)]?.scores.total?.rank;
+    const rank = rankOf(p.id);
     const who = h(doc, 'span', 'who2');
-    who.append(name);
+    // Status as in the galaxy: the name in the status colour, the API's letters after it.
+    const letters = uni?.players[String(p.id)]?.[1] ?? '';
+    const names = statusNames(letters);
+    const top = STATUS_ORDER.find((st) => names.includes(st));
+    const line1 = h(doc, 'span', 'pline');
+    if (top) name.classList.add(`st-${top}`);
+    line1.append(name);
+    if (letters) {
+      const tag = h(doc, 'span', `pst${top ? ` st-${top}` : ''}`, `(${letters})`);
+      tag.title = names.map((st) => t(`marks.st.${st}`)).join(', ');
+      line1.append(tag);
+    }
+    who.append(line1);
     const note = marks.players[String(p.id)]?.note;
     if (note) {
       const line = h(doc, 'span', 'pnote', note);
