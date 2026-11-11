@@ -726,5 +726,12 @@
   "fleet.collectDeployRes": "Schieramento: porta anche le risorse",
   "settings.collectDeployResHint": "Spento: lo schieramento della Raccolta manda solo le navi, le risorse restano.",
   "fleet.loadOrder": "Ordine di carico",
-  "settings.loadOrderHint": "Quale risorsa riempie per prima i cargo della Raccolta, poi la seconda e la terza (il gioco fa D → C → M)."
+  "settings.loadOrderHint": "Quale risorsa riempie per prima i cargo della Raccolta, poi la seconda e la terza (il gioco fa D → C → M).",
+  "msg.say.late": "la flotta rientra più tardi",
+  "msg.say.early": "la flotta rientra prima",
+  "msg.say.nothing": "non è stato trovato niente",
+  "msg.say.trader": "un mercante offre uno scambio",
+  "msg.say.pirate": "scontro con i pirati",
+  "msg.say.alien": "scontro con gli alieni",
+  "msg.say.blackhole": "la flotta è finita in un buco nero"
 }

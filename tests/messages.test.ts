@@ -314,28 +314,24 @@ describe('expedition rarity', () => {
 const HEAD = '<div class="msgHead"><div class="msgHeadItem"><div class="msgTitle">Risultato della Spedizione <a href="#" class="txt_link">[9:218:16]</a></div><div class="underTitle"><div class="msgSenderLabel">Da:</div><div class="msgSender">Comando della Flotta</div></div></div><div class="msgHeadItem"><div class="msgDate">11.11.2026 13:20:02</div></div><div class="msgHeadItem delActions"><gradient-button sq26=""><button class="custom_btn msgDeleteBtn"></button></gradient-button></div><br></div>';
 
 describe('card view', () => {
-  it('puts the summary in the game header; folded, only the header shows', () => {
+  it('puts the loot tiles under the game header; an outcome that needs words says what happened', () => {
     document.body.innerHTML = '';
     const el = msg('51', { ...deut, expeditionresult: 'nothing', resourcesgained: '' });
     el.querySelector('.msgContent')!.insertAdjacentHTML('beforebegin', HEAD);
     document.body.append(el);
     processMessages({ doc: document, store: new Store(new MemoryStore(), 'card'), playerId: OWN, locale: 'it', t });
-    const line = el.querySelector('.msgHead > .fut-msg.fut-msg-inhead')!;
+    const line = el.querySelector('.msgHead + .fut-msg.fut-msg-b')!;
     expect(line).not.toBeNull();
-    // Between the title and the date, as one more header item.
-    expect(line.nextElementSibling?.querySelector('.msgDate')).not.toBeNull();
-    expect(line.querySelector('.fut-pill')).not.toBeNull();
+    expect(line.querySelector('.fut-pill')?.textContent).toBe('Nientenon è stato trovato niente');
     expect(el.classList.contains('fut-msg-folded')).toBe(true);
-    // A click on the header (not on our line) opens the report too.
-    el.querySelector<HTMLElement>('.msgHead')!.click();
-    expect(el.classList.contains('fut-msg-folded')).toBe(false);
-    // A find that speaks for itself (resources) has no pill; the size word is gone too.
+    // A find that speaks for itself (resources): a tile, no outcome word, no size word.
     const res = msg('52', { ...deut, size: '0', timestamp: '1793891490' });
     res.querySelector('.msgContent')!.insertAdjacentHTML('beforebegin', HEAD);
     document.body.append(res);
     processMessages({ doc: document, store: new Store(new MemoryStore(), 'card2'), playerId: OWN, locale: 'it', t });
     expect(res.querySelector('.fut-pill')).toBeNull();
-    expect(res.querySelector('.msgHead .fut-msg-val')?.textContent).toContain('MSU');
+    expect(res.querySelector('.fut-msg-b .fut-r svg')).not.toBeNull();
+    expect(res.querySelector('.fut-msg-val')?.textContent).toContain('MSU');
     expect(res.querySelector('.fut-msg')?.textContent).not.toMatch(/enorme/);
   });
 });

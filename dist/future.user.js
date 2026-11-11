@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.26
+// @version      0.3.27
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -915,7 +915,14 @@
     "fleet.collectDeployRes": "Schieramento: porta anche le risorse",
     "settings.collectDeployResHint": "Spento: lo schieramento della Raccolta manda solo le navi, le risorse restano.",
     "fleet.loadOrder": "Ordine di carico",
-    "settings.loadOrderHint": "Quale risorsa riempie per prima i cargo della Raccolta, poi la seconda e la terza (il gioco fa D \u2192 C \u2192 M)."
+    "settings.loadOrderHint": "Quale risorsa riempie per prima i cargo della Raccolta, poi la seconda e la terza (il gioco fa D \u2192 C \u2192 M).",
+    "msg.say.late": "la flotta rientra pi\xF9 tardi",
+    "msg.say.early": "la flotta rientra prima",
+    "msg.say.nothing": "non \xE8 stato trovato niente",
+    "msg.say.trader": "un mercante offre uno scambio",
+    "msg.say.pirate": "scontro con i pirati",
+    "msg.say.alien": "scontro con gli alieni",
+    "msg.say.blackhole": "la flotta \xE8 finita in un buco nero"
   };
 
   // src/i18n/en.json
@@ -1647,7 +1654,14 @@
     "fleet.collectDeployRes": "Deploy: take resources too",
     "settings.collectDeployResHint": "Off: the Collection deploy sends only the ships, the resources stay.",
     "fleet.loadOrder": "Loading order",
-    "settings.loadOrderHint": "Which resource fills the Collection cargo first, then second and third (the game does D \u2192 C \u2192 M)."
+    "settings.loadOrderHint": "Which resource fills the Collection cargo first, then second and third (the game does D \u2192 C \u2192 M).",
+    "msg.say.late": "the fleet comes back later",
+    "msg.say.early": "the fleet comes back early",
+    "msg.say.nothing": "nothing was found",
+    "msg.say.trader": "a trader offers an exchange",
+    "msg.say.pirate": "a fight with pirates",
+    "msg.say.alien": "a fight with aliens",
+    "msg.say.blackhole": "the fleet was lost in a black hole"
   };
 
   // src/i18n/fr.json
@@ -2379,7 +2393,14 @@
     "fleet.collectDeployRes": "Stationnement : prendre aussi les ressources",
     "settings.collectDeployResHint": "D\xE9sactiv\xE9 : le stationnement de la Collecte n'envoie que les vaisseaux, les ressources restent.",
     "fleet.loadOrder": "Ordre de chargement",
-    "settings.loadOrderHint": "Quelle ressource remplit d'abord les transporteurs de la Collecte, puis la deuxi\xE8me et la troisi\xE8me (le jeu fait D \u2192 C \u2192 M)."
+    "settings.loadOrderHint": "Quelle ressource remplit d'abord les transporteurs de la Collecte, puis la deuxi\xE8me et la troisi\xE8me (le jeu fait D \u2192 C \u2192 M).",
+    "msg.say.late": "la flotte rentre plus tard",
+    "msg.say.early": "la flotte rentre plus t\xF4t",
+    "msg.say.nothing": "rien n'a \xE9t\xE9 trouv\xE9",
+    "msg.say.trader": "un marchand propose un \xE9change",
+    "msg.say.pirate": "combat contre des pirates",
+    "msg.say.alien": "combat contre des aliens",
+    "msg.say.blackhole": "la flotte a disparu dans un trou noir"
   };
 
   // src/i18n/de.json
@@ -3111,7 +3132,14 @@
     "fleet.collectDeployRes": "Stationieren: auch Rohstoffe mitnehmen",
     "settings.collectDeployResHint": "Aus: das Stationieren der Sammlung schickt nur die Schiffe, die Rohstoffe bleiben.",
     "fleet.loadOrder": "Ladereihenfolge",
-    "settings.loadOrderHint": "Welcher Rohstoff die Frachter der Sammlung zuerst f\xFCllt, dann der zweite und dritte (das Spiel macht D \u2192 K \u2192 M)."
+    "settings.loadOrderHint": "Welcher Rohstoff die Frachter der Sammlung zuerst f\xFCllt, dann der zweite und dritte (das Spiel macht D \u2192 K \u2192 M).",
+    "msg.say.late": "die Flotte kehrt sp\xE4ter zur\xFCck",
+    "msg.say.early": "die Flotte kehrt fr\xFCher zur\xFCck",
+    "msg.say.nothing": "es wurde nichts gefunden",
+    "msg.say.trader": "ein H\xE4ndler bietet einen Tausch an",
+    "msg.say.pirate": "Kampf mit Piraten",
+    "msg.say.alien": "Kampf mit Aliens",
+    "msg.say.blackhole": "die Flotte ging in einem Schwarzen Loch verloren"
   };
 
   // src/core/i18n.ts
@@ -6068,31 +6096,35 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .fut-msg:hover { background: rgba(120, 150, 180, 0.11); }
 .fut-msg:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .fut-msg-pillcell { display: flex; min-width: 0; }
-/* Card view: the summary is one more item of the game's header (title | summary | date | delete),
-   right-aligned before the date. Folded, the sender's line goes too: one line per report. */
-.msg .msgHead.fut-msghead { display: flex !important; align-items: center; gap: 12px; cursor: pointer; }
-.msg .msgHead.fut-msghead > br { display: none; }
-.msg .msgHead.fut-msghead > .msgHeadItem { flex: none; }
-.msg .msgHead.fut-msghead > .msgHeadItem:first-child { flex: 0 1 auto; min-width: 0; }
-.msg.fut-msg-folded .msgHead.fut-msghead .underTitle { display: none !important; }
-.fut-msg.fut-msg-inhead { flex: 1 1 auto; min-width: 0; display: flex; justify-content: flex-end; align-items: center; gap: 12px;
-  margin: 0; padding: 0; min-height: 0; background: none; overflow: hidden; }
-.fut-msg.fut-msg-inhead:hover { background: none; }
-.fut-msg-inhead:hover .fut-msg-body { color: var(--hi); }
-.fut-msg-inhead .fut-msg-pillcell { flex: none; }
-.fut-msg-inhead .fut-msg-pillcell:empty { display: none; }
-.fut-msg-inhead .fut-msg-body { flex: 0 1 auto; flex-wrap: nowrap; gap: 10px; min-width: 0; overflow: hidden; }
-.fut-msg-inhead .fut-pill { padding: 0; border: 0; background: none; color: var(--tone); }
-/* The title already says delivery, return, recycling: no word for it. Names only on the route (coordinates in the game's text). */
-.fut-msg-inhead.fut-msg-transport .fut-msg-pillcell, .fut-msg-inhead.fut-msg-deploy .fut-msg-pillcell,
-.fut-msg-inhead.fut-msg-return .fut-msg-pillcell, .fut-msg-inhead.fut-msg-recycle .fut-msg-pillcell { display: none; }
-.fut-msg-inhead .fut-route { flex-basis: auto; flex-wrap: nowrap; }
-.fut-msg-inhead .fut-route .fut-coords { display: none; }
-.fut-msg-inhead .fut-msg-val { flex: none; min-width: 62px; justify-content: flex-end; }
-.fut-msg-inhead .fut-msg-val b { font-size: 12px; }
-.fut-msg-inhead .fut-dash, .fut-msg-inhead .fut-depl { display: none; }
-.fut-msg-inhead .fut-msg-icon { width: 16px; height: 16px; }
-.fut-msg-inhead .fut-msg-acts a.fut-msg-link { height: 18px; padding: 0 8px; }
+/* B \xB7 Loot: each thing found is a tile, its symbol over its amount; an outcome the tiles do not show
+   gets a wide tile with its word and what happened; the value stands on the right, after a rule. */
+.fut-msg.fut-msg-b { grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: stretch; column-gap: 8px; margin: 2px 0 4px; padding: 8px 12px 10px; background: none; }
+.fut-msg.fut-msg-b:hover { background: rgba(120, 150, 180, 0.05); }
+.fut-msg-b .fut-msg-pillcell:empty { display: none; }
+.fut-msg-b .fut-msg-body { align-items: stretch; gap: 6px; }
+/* The title already says delivery, return, recycling: no outcome word for those. */
+.fut-msg-b.fut-msg-transport .fut-msg-pillcell, .fut-msg-b.fut-msg-deploy .fut-msg-pillcell,
+.fut-msg-b.fut-msg-return .fut-msg-pillcell, .fut-msg-b.fut-msg-recycle .fut-msg-pillcell { display: none; }
+.fut-msg-b .fut-route { flex-basis: 100%; margin-bottom: 2px; }
+.fut-msg-b .fut-r, .fut-msg-b .fut-u, .fut-msg-b .fut-note {
+  box-sizing: border-box; flex-direction: column; justify-content: center; gap: 3px; min-width: 64px; padding: 6px 9px 5px;
+  border-radius: 4px; background: rgba(120, 150, 180, 0.09); font-size: 12px; line-height: 15px; font-weight: 700; }
+.fut-msg-b .fut-r { color: var(--dot); }
+.fut-msg-b .fut-u { color: var(--ship); }
+.fut-msg-b .fut-r.fut-neg, .fut-msg-b .fut-u.fut-neg { color: var(--neg); }
+.fut-msg-b .fut-r .fut-res-ico { width: 20px; height: 20px; }
+.fut-msg-b .fut-msg-icon { width: 24px; height: 24px; }
+.fut-msg-b .fut-note { flex-direction: row; font-weight: 400; color: var(--txt); }
+.fut-msg-b .fut-pill { display: flex; align-items: center; gap: 10px; height: 100%; min-height: 34px; padding: 6px 12px; border: 0; border-radius: 4px;
+  background: rgba(120, 150, 180, 0.09); color: color-mix(in srgb, var(--tone) 85%, #fff); font-size: 12px; }
+.fut-msg-b .fut-say { font-size: 11px; font-weight: 400; color: var(--mute); white-space: normal; }
+.fut-msg-b .fut-msg-val { flex-direction: column; align-items: flex-end; justify-content: center; gap: 0; min-width: 76px; padding-left: 10px; border-left: 1px solid rgba(120, 150, 180, 0.14); }
+.fut-msg-b .fut-msg-val:has(.fut-dash) { display: none; }
+.fut-msg-b .fut-msg-val b { font-size: 15px; line-height: 18px; }
+.fut-msg-b .fut-msg-val small { font-size: 10px; }
+.fut-msg-b .fut-depl { align-self: center; margin-left: auto; }
+.msg.fut-msgrar .fut-msg-b .fut-r, .msg.fut-msgrar .fut-msg-b .fut-u { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rar) 55%, transparent); }
+.msg.fut-msgrar-0 .fut-msg-b .fut-msg-val b { font-size: 17px; }
 .fut-pill { --tone: #8A9BB0; display: inline-block; max-width: 100%; box-sizing: border-box; padding: 1px 8px; border-radius: 9px;
   border: 1px solid color-mix(in srgb, var(--tone) 55%, transparent); background: color-mix(in srgb, var(--tone) 9%, transparent);
   color: color-mix(in srgb, var(--tone) 78%, #fff); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -6180,8 +6212,6 @@ ${outcomeCss}
   .fut-msg-acts { grid-column: 1 / -1; grid-row: 3; }
 }
 .msg.fut-msg-folded .msgContent, .msg.fut-msg-folded .msg_content, .msg.fut-msg-folded > .content-box { display: none !important; }
-/* Card view folded: the game's buttons go too, the header alone stays (it opens the report). */
-.msg.fut-msg-folded:not(:has(> .msgFilteredHeaderRow)) message-footer, .msg.fut-msg-folded:not(:has(> .msgFilteredHeaderRow)) .msg_actions { display: none !important; }
 
 /* Spy table, above the Espionage reports: one compact line per target, as OGLight lays it out. */
 #fut-spypanel { margin: 0 0 8px; padding: 6px 8px 8px; border-radius: 4px; background: #0A0F14; font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt);
@@ -6918,13 +6948,18 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         const short = t(`msg.pill.${m.result}`);
         const name = short === `msg.pill.${m.result}` ? full : short;
         const label = m.kind === "discovery" ? `${t("msg.discovery")} \xB7 ${name}` : name;
-        if (m.kind === "discovery" || !SELF_EVIDENT.has(m.result)) line.pill(label, m.result, [m.kind === "discovery" ? t("msg.discovery") : "", full, sizeName].filter(Boolean).join(" \xB7 "));
+        if (m.kind === "discovery" || !SELF_EVIDENT.has(m.result)) {
+          const p = line.pill(label, m.result, [m.kind === "discovery" ? t("msg.discovery") : "", full, sizeName].filter(Boolean).join(" \xB7 "));
+          const sayKey = `msg.say.${m.result}`;
+          const say = m.item ?? (t(sayKey) === sayKey ? "" : t(sayKey));
+          if (say) p.append(h2(doc, "span", "fut-say", say));
+        }
         if (sizeName) line.box.dataset.size = sizeName;
         if (m.size === 0 || m.size === 1) line.box.classList.add(`fut-rar-${m.size}`);
         line.res(m.res, 1, "+");
         line.ships(m.ships, "found");
         line.ships(m.lost, "lost");
-        if (m.item) line.note(m.item, "item");
+        if (m.item && SELF_EVIDENT.has(m.result)) line.note(m.item, "item");
         if (m.lfXp) line.note(t("msg.lfXp", { n: m.lfXp.toLocaleString(locale) }), "lf");
         if (m.artefacts) line.note(t("msg.artefacts", { n: m.artefacts.toLocaleString(locale) }), "art");
         if (m.depletion > 0) line.depletion(m.depletion);
@@ -6989,23 +7024,12 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
   }
   function place(msg, box) {
     const header = msg.querySelector(":scope > .msgFilteredHeaderRow");
-    if (header) {
-      header.after(box);
-      return false;
-    }
+    if (header) return void header.after(box);
     const head = msg.querySelector(":scope .msgHead");
-    if (head && !head.closest(".messageContentWrapper")) {
-      head.classList.add("fut-msghead");
-      box.classList.add("fut-msg-inhead");
-      const date = Array.from(head.children).find((c) => c.classList.contains("msgHeadItem") && c.querySelector(".msgDate"));
-      if (date) head.insertBefore(box, date);
-      else head.append(box);
-      return true;
-    }
+    if (head && !head.closest(".messageContentWrapper")) return void head.after(box);
     const actions = msg.querySelector(".msg_actions, message-footer");
     if (actions?.parentElement) actions.before(box);
     else (msg.querySelector(".msgContent") ?? msg).after(box);
-    return false;
   }
   function processMessages(o) {
     const { doc, store, t, locale } = o;
@@ -7048,12 +7072,8 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
           e.preventDefault();
           toggle();
         });
-        if (place(msg, box)) {
-          box.parentElement?.addEventListener("click", (e) => {
-            if (box.contains(e.target) || e.target.closest('a, button, input, [role="button"]')) return;
-            toggle();
-          });
-        }
+        box.classList.add("fut-msg-b");
+        place(msg, box);
         const rar = box.className.match(/fut-rar-([01])/);
         if (rar) msg.classList.add("fut-msgrar", `fut-msgrar-${rar[1]}`);
         if (fold && (parsed.kind === "expedition" || parsed.kind === "discovery" || parsed.kind === "recycle" || parsed.kind === "transport" || parsed.kind === "deploy" || parsed.kind === "return")) msg.classList.add("fut-msg-folded");

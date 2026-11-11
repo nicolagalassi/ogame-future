@@ -49,31 +49,35 @@ export const MESSAGES_CSS = `
 .fut-msg:hover { background: rgba(120, 150, 180, 0.11); }
 .fut-msg:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .fut-msg-pillcell { display: flex; min-width: 0; }
-/* Card view: the summary is one more item of the game's header (title | summary | date | delete),
-   right-aligned before the date. Folded, the sender's line goes too: one line per report. */
-.msg .msgHead.fut-msghead { display: flex !important; align-items: center; gap: 12px; cursor: pointer; }
-.msg .msgHead.fut-msghead > br { display: none; }
-.msg .msgHead.fut-msghead > .msgHeadItem { flex: none; }
-.msg .msgHead.fut-msghead > .msgHeadItem:first-child { flex: 0 1 auto; min-width: 0; }
-.msg.fut-msg-folded .msgHead.fut-msghead .underTitle { display: none !important; }
-.fut-msg.fut-msg-inhead { flex: 1 1 auto; min-width: 0; display: flex; justify-content: flex-end; align-items: center; gap: 12px;
-  margin: 0; padding: 0; min-height: 0; background: none; overflow: hidden; }
-.fut-msg.fut-msg-inhead:hover { background: none; }
-.fut-msg-inhead:hover .fut-msg-body { color: var(--hi); }
-.fut-msg-inhead .fut-msg-pillcell { flex: none; }
-.fut-msg-inhead .fut-msg-pillcell:empty { display: none; }
-.fut-msg-inhead .fut-msg-body { flex: 0 1 auto; flex-wrap: nowrap; gap: 10px; min-width: 0; overflow: hidden; }
-.fut-msg-inhead .fut-pill { padding: 0; border: 0; background: none; color: var(--tone); }
-/* The title already says delivery, return, recycling: no word for it. Names only on the route (coordinates in the game's text). */
-.fut-msg-inhead.fut-msg-transport .fut-msg-pillcell, .fut-msg-inhead.fut-msg-deploy .fut-msg-pillcell,
-.fut-msg-inhead.fut-msg-return .fut-msg-pillcell, .fut-msg-inhead.fut-msg-recycle .fut-msg-pillcell { display: none; }
-.fut-msg-inhead .fut-route { flex-basis: auto; flex-wrap: nowrap; }
-.fut-msg-inhead .fut-route .fut-coords { display: none; }
-.fut-msg-inhead .fut-msg-val { flex: none; min-width: 62px; justify-content: flex-end; }
-.fut-msg-inhead .fut-msg-val b { font-size: 12px; }
-.fut-msg-inhead .fut-dash, .fut-msg-inhead .fut-depl { display: none; }
-.fut-msg-inhead .fut-msg-icon { width: 16px; height: 16px; }
-.fut-msg-inhead .fut-msg-acts a.fut-msg-link { height: 18px; padding: 0 8px; }
+/* B · Loot: each thing found is a tile, its symbol over its amount; an outcome the tiles do not show
+   gets a wide tile with its word and what happened; the value stands on the right, after a rule. */
+.fut-msg.fut-msg-b { grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: stretch; column-gap: 8px; margin: 2px 0 4px; padding: 8px 12px 10px; background: none; }
+.fut-msg.fut-msg-b:hover { background: rgba(120, 150, 180, 0.05); }
+.fut-msg-b .fut-msg-pillcell:empty { display: none; }
+.fut-msg-b .fut-msg-body { align-items: stretch; gap: 6px; }
+/* The title already says delivery, return, recycling: no outcome word for those. */
+.fut-msg-b.fut-msg-transport .fut-msg-pillcell, .fut-msg-b.fut-msg-deploy .fut-msg-pillcell,
+.fut-msg-b.fut-msg-return .fut-msg-pillcell, .fut-msg-b.fut-msg-recycle .fut-msg-pillcell { display: none; }
+.fut-msg-b .fut-route { flex-basis: 100%; margin-bottom: 2px; }
+.fut-msg-b .fut-r, .fut-msg-b .fut-u, .fut-msg-b .fut-note {
+  box-sizing: border-box; flex-direction: column; justify-content: center; gap: 3px; min-width: 64px; padding: 6px 9px 5px;
+  border-radius: 4px; background: rgba(120, 150, 180, 0.09); font-size: 12px; line-height: 15px; font-weight: 700; }
+.fut-msg-b .fut-r { color: var(--dot); }
+.fut-msg-b .fut-u { color: var(--ship); }
+.fut-msg-b .fut-r.fut-neg, .fut-msg-b .fut-u.fut-neg { color: var(--neg); }
+.fut-msg-b .fut-r .fut-res-ico { width: 20px; height: 20px; }
+.fut-msg-b .fut-msg-icon { width: 24px; height: 24px; }
+.fut-msg-b .fut-note { flex-direction: row; font-weight: 400; color: var(--txt); }
+.fut-msg-b .fut-pill { display: flex; align-items: center; gap: 10px; height: 100%; min-height: 34px; padding: 6px 12px; border: 0; border-radius: 4px;
+  background: rgba(120, 150, 180, 0.09); color: color-mix(in srgb, var(--tone) 85%, #fff); font-size: 12px; }
+.fut-msg-b .fut-say { font-size: 11px; font-weight: 400; color: var(--mute); white-space: normal; }
+.fut-msg-b .fut-msg-val { flex-direction: column; align-items: flex-end; justify-content: center; gap: 0; min-width: 76px; padding-left: 10px; border-left: 1px solid rgba(120, 150, 180, 0.14); }
+.fut-msg-b .fut-msg-val:has(.fut-dash) { display: none; }
+.fut-msg-b .fut-msg-val b { font-size: 15px; line-height: 18px; }
+.fut-msg-b .fut-msg-val small { font-size: 10px; }
+.fut-msg-b .fut-depl { align-self: center; margin-left: auto; }
+.msg.fut-msgrar .fut-msg-b .fut-r, .msg.fut-msgrar .fut-msg-b .fut-u { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rar) 55%, transparent); }
+.msg.fut-msgrar-0 .fut-msg-b .fut-msg-val b { font-size: 17px; }
 .fut-pill { --tone: #8A9BB0; display: inline-block; max-width: 100%; box-sizing: border-box; padding: 1px 8px; border-radius: 9px;
   border: 1px solid color-mix(in srgb, var(--tone) 55%, transparent); background: color-mix(in srgb, var(--tone) 9%, transparent);
   color: color-mix(in srgb, var(--tone) 78%, #fff); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -161,8 +165,6 @@ ${outcomeCss}
   .fut-msg-acts { grid-column: 1 / -1; grid-row: 3; }
 }
 .msg.fut-msg-folded .msgContent, .msg.fut-msg-folded .msg_content, .msg.fut-msg-folded > .content-box { display: none !important; }
-/* Card view folded: the game's buttons go too, the header alone stays (it opens the report). */
-.msg.fut-msg-folded:not(:has(> .msgFilteredHeaderRow)) message-footer, .msg.fut-msg-folded:not(:has(> .msgFilteredHeaderRow)) .msg_actions { display: none !important; }
 
 /* Spy table, above the Espionage reports: one compact line per target, as OGLight lays it out. */
 #fut-spypanel { margin: 0 0 8px; padding: 6px 8px 8px; border-radius: 4px; background: #0A0F14; font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt);

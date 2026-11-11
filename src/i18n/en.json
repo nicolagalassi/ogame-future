@@ -726,5 +726,12 @@
   "fleet.collectDeployRes": "Deploy: take resources too",
   "settings.collectDeployResHint": "Off: the Collection deploy sends only the ships, the resources stay.",
   "fleet.loadOrder": "Loading order",
-  "settings.loadOrderHint": "Which resource fills the Collection cargo first, then second and third (the game does D → C → M)."
+  "settings.loadOrderHint": "Which resource fills the Collection cargo first, then second and third (the game does D → C → M).",
+  "msg.say.late": "the fleet comes back later",
+  "msg.say.early": "the fleet comes back early",
+  "msg.say.nothing": "nothing was found",
+  "msg.say.trader": "a trader offers an exchange",
+  "msg.say.pirate": "a fight with pirates",
+  "msg.say.alien": "a fight with aliens",
+  "msg.say.blackhole": "the fleet was lost in a black hole"
 }
