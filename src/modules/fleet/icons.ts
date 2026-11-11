@@ -29,6 +29,13 @@ export const ICONS = {
   // A gem: a lighter crown over a solid point.
   resources: '<path d="M7 3.4h10l4.6 5.6H2.4z" opacity=".55"/><path d="M2.4 9h19.2L12 21.2z"/>',
   gate: '<path fill-rule="evenodd" d="M8.6 2.5c3.3 0 6 4.3 6 9.5s-2.7 9.5-6 9.5-6-4.3-6-9.5 2.7-9.5 6-9.5zm0 3.6c-1.5 0-2.8 2.6-2.8 5.9s1.3 5.9 2.8 5.9 2.8-2.6 2.8-5.9-1.3-5.9-2.8-5.9z"/><path d="M15.8 10.6h2.8V7.8l4 4.2-4 4.2v-2.8h-2.8z" opacity=".8"/>',
+  // Resource symbols, coloured by their place (metal grey, crystal blue, deuterium green).
+  // Metal: three ingots stacked, the top one in front.
+  metal: '<path d="M1.8 21 3.6 15.6h7.3L12.7 21z" opacity=".7"/><path d="M11.3 21l1.8-5.4h7.3l1.8 5.4z" opacity=".7"/><path d="M6.5 14 8.3 8.6h7.4L17.5 14z"/><path d="M8.3 8.6h7.4l-.6 1.6H8.9z" opacity=".55"/>',
+  // Crystal: a tall cut gem, the left facets darker.
+  crystal: '<path d="M12 1.8 18.6 9 12 22.2 5.4 9z"/><path d="M12 1.8 5.4 9 12 22.2 9.6 9z" opacity=".55"/><path d="M5.4 9h13.2" fill="none" stroke="currentColor" stroke-width="1" opacity=".35"/>',
+  // Deuterium: a drop, a lighter bubble inside.
+  deuterium: '<path fill-rule="evenodd" d="M12 2c4 4.8 6.8 8.7 6.8 12.4a6.8 6.8 0 0 1-13.6 0C5.2 10.7 8 6.8 12 2zm-2.3 11.2a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4z"/>',
   food: '<path d="M4.6 2.6H6v5.1h1.1V2.6h1.5v5.1h1.1V2.6h1.4V9a3 3 0 0 1-2.3 2.9v9.5H6.9v-9.5A3 3 0 0 1 4.6 9z" opacity=".75"/><path d="M17.8 2.6c-2 .8-3 3.2-3 6.5 0 2 .8 3.4 2 3.8v8.5H19V2.6z" opacity=".75"/><path d="M3.2 19.4 19.4 3.2l1.4 1.4L4.6 20.8z"/>',
 } as const;
 

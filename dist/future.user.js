@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.12
+// @version      0.3.13
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -317,8 +317,8 @@
     "fleet.btn.expedition": "Spedizione",
     "fleet.btn.fleetsave": "Fleetsave",
     "fleet.tip.moon": "Trasporta le risorse sulla luna di questo pianeta, con i cargo necessari",
-    "fleet.tip.transport": "Trasporta le risorse scelte qui sotto alla destinazione scritta, con i cargo necessari (o le navi che hai selezionato). Senza riserve",
-    "fleet.tip.deploy": "Schiera verso la destinazione scritta le navi selezionate (o tutte), con le risorse scelte qui sotto. Senza riserve",
+    "fleet.tip.transport": "Accende il trasporto: scrivi destinazione e risorse, poi CL o CP mette i cargo giusti. Di nuovo per spegnerlo",
+    "fleet.tip.deploy": "Accende lo schieramento: scegli le navi, destinazione e risorse, poi CL o CP aggiunge i cargo giusti. Di nuovo per spegnerlo",
     "fleet.tip.expedition": "Spedizione in posizione 16 di questo sistema, con la nave migliore",
     "fleet.tip.fleetsave": "Prepara il fleetsave di questo pianeta o luna",
     "fleet.ok.cargo": "Pronto: {ships} navi, {cargo} risorse. Premi Avanti e Invia flotta",
@@ -892,16 +892,25 @@
     "fleet.collectNoFav": "nessuna luna principale (Impostazioni)",
     "fleet.send.label": "Trasporto e Schiera: destinazione e risorse",
     "fleet.send.dest": "Destinazione",
-    "fleet.send.destHint": "galassia:sistema:posizione, o scegli dalla freccia tra i tuoi pianeti e lune",
-    "fleet.send.coordsPh": "g:s:p",
+    "fleet.send.destHint": "galassia, sistema, posizione (vuoti = quelli di questo corpo); si pu\xF2 incollare 1:234:5",
     "fleet.send.pick": "I tuoi pianeti e lune",
     "fleet.send.pickHint": "scrive le coordinate e il tipo del corpo scelto",
-    "fleet.send.all": "tutto",
-    "fleet.send.allHint": "Svuota i campi: tutte le risorse",
+    "fleet.send.allHint": "svuota i campi: tutte le risorse",
     "fleet.send.resHint": "vuoto = tutto, 0 = niente, si pu\xF2 scrivere 2m o 500k",
     "fleet.err.noTarget": "Scrivi la destinazione (galassia:sistema:posizione) o sceglila tra i tuoi corpi",
     "fleet.err.sameBody": "La destinazione \xE8 il corpo da cui parte la flotta",
-    "fleet.err.nothingPicked": "Nessuna risorsa da trasportare con le quantit\xE0 scelte"
+    "fleet.err.nothingPicked": "Nessuna risorsa da trasportare con le quantit\xE0 scelte",
+    "fleet.send.res": "Risorse",
+    "fleet.send.allBtn": "Tutto",
+    "fleet.send.small": "CL",
+    "fleet.send.large": "CP",
+    "fleet.send.cargoWith": "Prepara con",
+    "fleet.send.cargoHint": "seleziona i cargo che servono per le risorse scelte, imposta destinazione e missione e carica",
+    "fleet.send.onTransport": "Trasporto: scrivi destinazione e risorse, poi CL o CP",
+    "fleet.send.onDeploy": "Schiera: scegli le navi, destinazione e risorse, poi CL o CP",
+    "fleet.ok.cargoShort": "{ships} navi, {cargo} risorse caricate: mancano {missing} cargo per il resto",
+    "fleet.err.noCargoShip": "Nessun cargo di questo tipo su questo corpo",
+    "fleet.send.all": "tutto"
   };
 
   // src/i18n/en.json
@@ -1035,8 +1044,8 @@
     "fleet.btn.expedition": "Expedition",
     "fleet.btn.fleetsave": "Fleetsave",
     "fleet.tip.moon": "Transport the resources to this planet's moon with the cargo ships needed",
-    "fleet.tip.transport": "Transport the resources chosen below to the typed destination, with the cargo ships needed (or the ships you selected). No reserves",
-    "fleet.tip.deploy": "Deploy the selected ships (or all of them) to the typed destination, with the resources chosen below. No reserves",
+    "fleet.tip.transport": "Turns transport on: type destination and resources, then SC or LC adds the right cargo ships. Press again to turn it off",
+    "fleet.tip.deploy": "Turns deploy on: pick the ships, destination and resources, then SC or LC adds the right cargo ships. Press again to turn it off",
     "fleet.tip.expedition": "Expedition to position 16 of this system with the best ship",
     "fleet.tip.fleetsave": "Prepare this planet or moon's fleetsave",
     "fleet.ok.cargo": "Ready: {ships} ships, {cargo} resources. Press Next and Send fleet",
@@ -1610,16 +1619,25 @@
     "fleet.collectNoFav": "no main moon (Settings)",
     "fleet.send.label": "Transport and Deploy: destination and resources",
     "fleet.send.dest": "Destination",
-    "fleet.send.destHint": "galaxy:system:position, or pick one of your planets and moons from the arrow",
-    "fleet.send.coordsPh": "g:s:p",
+    "fleet.send.destHint": "galaxy, system, position (empty = this body's); 1:234:5 can be pasted",
     "fleet.send.pick": "Your planets and moons",
     "fleet.send.pickHint": "writes the coordinates and type of the chosen body",
-    "fleet.send.all": "all",
-    "fleet.send.allHint": "Clear the fields: all resources",
+    "fleet.send.allHint": "clear the fields: all resources",
     "fleet.send.resHint": "empty = all, 0 = none, 2m or 500k work",
     "fleet.err.noTarget": "Type the destination (galaxy:system:position) or pick one of your bodies",
     "fleet.err.sameBody": "The destination is the body the fleet leaves from",
-    "fleet.err.nothingPicked": "No resources to transport with the chosen amounts"
+    "fleet.err.nothingPicked": "No resources to transport with the chosen amounts",
+    "fleet.send.res": "Resources",
+    "fleet.send.allBtn": "All",
+    "fleet.send.small": "SC",
+    "fleet.send.large": "LC",
+    "fleet.send.cargoWith": "Prepare with",
+    "fleet.send.cargoHint": "selects the cargo ships the chosen resources need, sets destination and mission, loads",
+    "fleet.send.onTransport": "Transport: type destination and resources, then SC or LC",
+    "fleet.send.onDeploy": "Deploy: pick the ships, destination and resources, then SC or LC",
+    "fleet.ok.cargoShort": "{ships} ships, {cargo} resources loaded: {missing} more cargo ships needed for the rest",
+    "fleet.err.noCargoShip": "No cargo ship of this kind on this body",
+    "fleet.send.all": "all"
   };
 
   // src/i18n/fr.json
@@ -1753,8 +1771,8 @@
     "fleet.btn.expedition": "Exp\xE9dition",
     "fleet.btn.fleetsave": "Fleetsave",
     "fleet.tip.moon": "Transporter les ressources vers la lune de cette plan\xE8te avec les cargos n\xE9cessaires",
-    "fleet.tip.transport": "Transporter les ressources choisies ci-dessous vers la destination saisie, avec les cargos n\xE9cessaires (ou les vaisseaux s\xE9lectionn\xE9s). Sans r\xE9serves",
-    "fleet.tip.deploy": "Stationner les vaisseaux s\xE9lectionn\xE9s (ou tous) vers la destination saisie, avec les ressources choisies ci-dessous. Sans r\xE9serves",
+    "fleet.tip.transport": "Active le transport : saisissez destination et ressources, puis PT ou GT ajoute les bons transporteurs. Encore pour le d\xE9sactiver",
+    "fleet.tip.deploy": "Active le stationnement : choisissez les vaisseaux, destination et ressources, puis PT ou GT ajoute les transporteurs. Encore pour le d\xE9sactiver",
     "fleet.tip.expedition": "Exp\xE9dition en position 16 de ce syst\xE8me avec le meilleur vaisseau",
     "fleet.tip.fleetsave": "Pr\xE9parer le fleetsave de cette plan\xE8te ou lune",
     "fleet.ok.cargo": "Pr\xEAt : {ships} vaisseaux, {cargo} ressources. Appuyez sur Suivant puis Envoyer",
@@ -2328,16 +2346,25 @@
     "fleet.collectNoFav": "pas de lune principale (Param\xE8tres)",
     "fleet.send.label": "Transport et Stationner : destination et ressources",
     "fleet.send.dest": "Destination",
-    "fleet.send.destHint": "galaxie:syst\xE8me:position, ou choisissez parmi vos plan\xE8tes et lunes avec la fl\xE8che",
-    "fleet.send.coordsPh": "g:s:p",
+    "fleet.send.destHint": "galaxie, syst\xE8me, position (vides = ceux de ce corps) ; on peut coller 1:234:5",
     "fleet.send.pick": "Vos plan\xE8tes et lunes",
     "fleet.send.pickHint": "\xE9crit les coordonn\xE9es et le type du corps choisi",
-    "fleet.send.all": "tout",
-    "fleet.send.allHint": "Vider les champs : toutes les ressources",
+    "fleet.send.allHint": "vider les champs : toutes les ressources",
     "fleet.send.resHint": "vide = tout, 0 = rien, 2m ou 500k accept\xE9s",
     "fleet.err.noTarget": "Saisissez la destination (galaxie:syst\xE8me:position) ou choisissez un de vos corps",
     "fleet.err.sameBody": "La destination est le corps de d\xE9part de la flotte",
-    "fleet.err.nothingPicked": "Aucune ressource \xE0 transporter avec les quantit\xE9s choisies"
+    "fleet.err.nothingPicked": "Aucune ressource \xE0 transporter avec les quantit\xE9s choisies",
+    "fleet.send.res": "Ressources",
+    "fleet.send.allBtn": "Tout",
+    "fleet.send.small": "PT",
+    "fleet.send.large": "GT",
+    "fleet.send.cargoWith": "Pr\xE9parer avec",
+    "fleet.send.cargoHint": "s\xE9lectionne les transporteurs n\xE9cessaires aux ressources choisies, r\xE8gle destination et mission, charge",
+    "fleet.send.onTransport": "Transport : saisissez destination et ressources, puis PT ou GT",
+    "fleet.send.onDeploy": "Stationner : choisissez les vaisseaux, destination et ressources, puis PT ou GT",
+    "fleet.ok.cargoShort": "{ships} vaisseaux, {cargo} ressources charg\xE9es : il manque {missing} transporteurs pour le reste",
+    "fleet.err.noCargoShip": "Aucun transporteur de ce type sur ce corps",
+    "fleet.send.all": "tout"
   };
 
   // src/i18n/de.json
@@ -2471,8 +2498,8 @@
     "fleet.btn.expedition": "Expedition",
     "fleet.btn.fleetsave": "Fleetsave",
     "fleet.tip.moon": "Rohstoffe mit den n\xF6tigen Frachtern auf den Mond dieses Planeten bringen",
-    "fleet.tip.transport": "Die unten gew\xE4hlten Rohstoffe mit den n\xF6tigen Frachtern (oder den gew\xE4hlten Schiffen) zum eingegebenen Ziel transportieren. Ohne Reserven",
-    "fleet.tip.deploy": "Die gew\xE4hlten Schiffe (oder alle) mit den unten gew\xE4hlten Rohstoffen zum eingegebenen Ziel stationieren. Ohne Reserven",
+    "fleet.tip.transport": "Schaltet Transport ein: Ziel und Rohstoffe eingeben, dann setzt KT oder GT die passenden Frachter. Nochmal zum Ausschalten",
+    "fleet.tip.deploy": "Schaltet Stationieren ein: Schiffe, Ziel und Rohstoffe w\xE4hlen, dann erg\xE4nzt KT oder GT die Frachter. Nochmal zum Ausschalten",
     "fleet.tip.expedition": "Expedition auf Position 16 dieses Systems mit dem besten Schiff",
     "fleet.tip.fleetsave": "Fleetsave dieses Planeten oder Mondes vorbereiten",
     "fleet.ok.cargo": "Bereit: {ships} Schiffe, {cargo} Rohstoffe. Weiter und Flotte senden dr\xFCcken",
@@ -3046,16 +3073,25 @@
     "fleet.collectNoFav": "kein Hauptmond (Einstellungen)",
     "fleet.send.label": "Transport und Stationieren: Ziel und Rohstoffe",
     "fleet.send.dest": "Ziel",
-    "fleet.send.destHint": "Galaxie:System:Position, oder \xFCber den Pfeil einen eigenen Planeten oder Mond w\xE4hlen",
-    "fleet.send.coordsPh": "g:s:p",
+    "fleet.send.destHint": "Galaxie, System, Position (leer = die dieses K\xF6rpers); 1:234:5 kann eingef\xFCgt werden",
     "fleet.send.pick": "Deine Planeten und Monde",
     "fleet.send.pickHint": "tr\xE4gt Koordinaten und Typ des gew\xE4hlten K\xF6rpers ein",
-    "fleet.send.all": "alles",
     "fleet.send.allHint": "Felder leeren: alle Rohstoffe",
     "fleet.send.resHint": "leer = alles, 0 = nichts, 2m oder 500k gehen",
     "fleet.err.noTarget": "Ziel eingeben (Galaxie:System:Position) oder einen eigenen K\xF6rper w\xE4hlen",
     "fleet.err.sameBody": "Das Ziel ist der Startk\xF6rper der Flotte",
-    "fleet.err.nothingPicked": "Mit den gew\xE4hlten Mengen gibt es nichts zu transportieren"
+    "fleet.err.nothingPicked": "Mit den gew\xE4hlten Mengen gibt es nichts zu transportieren",
+    "fleet.send.res": "Rohstoffe",
+    "fleet.send.allBtn": "Alles",
+    "fleet.send.small": "KT",
+    "fleet.send.large": "GT",
+    "fleet.send.cargoWith": "Vorbereiten mit",
+    "fleet.send.cargoHint": "w\xE4hlt die f\xFCr die Rohstoffe n\xF6tigen Frachter, setzt Ziel und Auftrag und bel\xE4dt",
+    "fleet.send.onTransport": "Transport: Ziel und Rohstoffe eingeben, dann KT oder GT",
+    "fleet.send.onDeploy": "Stationieren: Schiffe, Ziel und Rohstoffe w\xE4hlen, dann KT oder GT",
+    "fleet.ok.cargoShort": "{ships} Schiffe, {cargo} Rohstoffe geladen: es fehlen {missing} Frachter f\xFCr den Rest",
+    "fleet.err.noCargoShip": "Keine Frachter dieser Art auf diesem K\xF6rper",
+    "fleet.send.all": "alles"
   };
 
   // src/core/i18n.ts
@@ -7128,6 +7164,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     resourcesOn: true,
     gateOn: true,
     ignoreFood: false,
+    sendMode: null,
     sendTarget: null,
     sendPick: { metal: null, crystal: null, deuterium: null }
   };
@@ -7145,6 +7182,14 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     room -= crystal;
     const metal = Math.min(want("metal", onPlanet2.metal), room);
     return { metal, crystal, deuterium };
+  }
+  function cargoCount(amount, othersCapacity, capacity, available, already = 0) {
+    if (capacity <= 0) return Math.min(available, already);
+    const need = Math.ceil(Math.max(0, amount - othersCapacity) / capacity);
+    return Math.min(available, Math.max(need, already));
+  }
+  function resolveSend(t, origin) {
+    return { galaxy: t.galaxy ?? origin.galaxy, system: t.system ?? origin.system, position: t.position, type: t.type };
   }
   function parseCoords(text) {
     const parts = text.trim().split(/[^\d]+/).filter(Boolean).map(Number);
@@ -7280,6 +7325,13 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
     // A gem: a lighter crown over a solid point.
     resources: '<path d="M7 3.4h10l4.6 5.6H2.4z" opacity=".55"/><path d="M2.4 9h19.2L12 21.2z"/>',
     gate: '<path fill-rule="evenodd" d="M8.6 2.5c3.3 0 6 4.3 6 9.5s-2.7 9.5-6 9.5-6-4.3-6-9.5 2.7-9.5 6-9.5zm0 3.6c-1.5 0-2.8 2.6-2.8 5.9s1.3 5.9 2.8 5.9 2.8-2.6 2.8-5.9-1.3-5.9-2.8-5.9z"/><path d="M15.8 10.6h2.8V7.8l4 4.2-4 4.2v-2.8h-2.8z" opacity=".8"/>',
+    // Resource symbols, coloured by their place (metal grey, crystal blue, deuterium green).
+    // Metal: three ingots stacked, the top one in front.
+    metal: '<path d="M1.8 21 3.6 15.6h7.3L12.7 21z" opacity=".7"/><path d="M11.3 21l1.8-5.4h7.3l1.8 5.4z" opacity=".7"/><path d="M6.5 14 8.3 8.6h7.4L17.5 14z"/><path d="M8.3 8.6h7.4l-.6 1.6H8.9z" opacity=".55"/>',
+    // Crystal: a tall cut gem, the left facets darker.
+    crystal: '<path d="M12 1.8 18.6 9 12 22.2 5.4 9z"/><path d="M12 1.8 5.4 9 12 22.2 9.6 9z" opacity=".55"/><path d="M5.4 9h13.2" fill="none" stroke="currentColor" stroke-width="1" opacity=".35"/>',
+    // Deuterium: a drop, a lighter bubble inside.
+    deuterium: '<path fill-rule="evenodd" d="M12 2c4 4.8 6.8 8.7 6.8 12.4a6.8 6.8 0 0 1-13.6 0C5.2 10.7 8 6.8 12 2zm-2.3 11.2a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4z"/>',
     food: '<path d="M4.6 2.6H6v5.1h1.1V2.6h1.5v5.1h1.1V2.6h1.4V9a3 3 0 0 1-2.3 2.9v9.5H6.9v-9.5A3 3 0 0 1 4.6 9z" opacity=".75"/><path d="M17.8 2.6c-2 .8-3 3.2-3 6.5 0 2 .8 3.4 2 3.8v8.5H19V2.6z" opacity=".75"/><path d="M3.2 19.4 19.4 3.2l1.4 1.4L4.6 20.8z"/>'
   };
   function iconSvg(name, size = 20) {
@@ -10141,18 +10193,21 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (!key || key === ourSelection.get(fd)) return null;
     return Object.fromEntries(fd.shipsToSend.filter((s) => s.number > 0).map((s) => [s.id, s.number]));
   }
-  function allShips(fd) {
-    return Object.fromEntries(Object.entries(shipsOnPlanet(fd)).map(([id, n]) => [Number(id), n]));
-  }
-  function prepareSend(fd, doc, settings, target, pick, mission) {
+  function prepareSend(fd, doc, settings, target, pick, mission, cargoShip) {
     const here = onPlanet(fd);
     const wanted = pickedLoad(here, pick, 0, Number.MAX_SAFE_INTEGER);
     const amount = wanted.metal + wanted.crystal + wanted.deuterium;
-    const picked2 = playerSelection(fd);
-    if (mission === "transport" && !picked2 && amount <= 0) return { ok: false, reason: "fleet.err.nothingPicked", ships: 0, cargo: 0 };
-    const stockAll = fd.shipsOnPlanet.map((s) => ({ id: s.id, available: Number(s.number) || 0, capacity: shipCapacity(fd, s.id) }));
-    const ships = picked2 ?? (mission === "transport" ? cargoShipsFor(amount, stockAll, settings.mainShip, settings.secondShip) : allShips(fd));
-    const count2 = selectShips(fd, ships);
+    const manual = playerSelection(fd) ?? {};
+    const already = manual[cargoShip] ?? 0;
+    delete manual[cargoShip];
+    const othersCapacity = Object.entries(manual).reduce((sum, [id, n2]) => sum + n2 * shipCapacity(fd, Number(id)), 0);
+    const available = shipsOnPlanet(fd)[String(cargoShip)] ?? 0;
+    const capacity = shipCapacity(fd, cargoShip);
+    if (!available && !Object.keys(manual).length) return { ok: false, reason: "fleet.err.noCargoShip", ships: 0, cargo: 0, missing: 0 };
+    if (mission === "transport" && amount <= 0) return { ok: false, reason: "fleet.err.nothingPicked", ships: 0, cargo: 0, missing: 0 };
+    const n = cargoCount(amount, othersCapacity, capacity, available, already);
+    const needed = capacity > 0 ? Math.ceil(Math.max(0, amount - othersCapacity) / capacity) : 0;
+    const count2 = selectShips(fd, { ...manual, [cargoShip]: n });
     ourSelection.set(fd, selectionKey(fd));
     setTarget(fd, doc, target);
     setSpeedBar(fd, settings.transportSpeed);
@@ -10166,7 +10221,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       fd.cargoDeuterium = load.deuterium;
       cargo = load.metal + load.crystal + load.deuterium;
     }
-    return finish(fd, code, count2, cargo);
+    return { ...finish(fd, code, count2, cargo), missing: Math.max(0, needed - n) };
   }
   function snapshotFleet(fd) {
     return {
@@ -10310,16 +10365,27 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-finfo { color: var(--mute); }
 .fut-finfo.err { color: var(--neg); }
 
-/* Plain Trasporto / Schiera: destination and resources, typed on page 1. */
-.fut-fsend { flex-wrap: wrap; justify-content: space-between; gap: 6px 10px; padding: 6px 0; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); }
-.fut-fdest, .fut-fres { display: inline-flex; align-items: center; gap: 4px; }
-.fut-fdest .lbl { margin-right: 4px; color: var(--mute); }
-.fut-fin { box-sizing: border-box; height: 26px; padding: 0 7px; border: 1px solid var(--line); border-radius: 5px; background: var(--field); color: var(--hi); font: 11px/1 Verdana, Arial, sans-serif; font-variant-numeric: tabular-nums; }
+/* Trasporto / Schiera on: the tile stays lit until pressed again. */
+.fut-fact[aria-pressed="true"] { border-color: var(--accent); background: #1B3142; color: var(--ico-hi); }
+.fut-fact[aria-pressed="true"] kbd { color: var(--on-accent); }
+
+/* Their panel: destination over resources, labels in one column; CL / CP on the right, as tall as both rows. */
+.fut-fsend {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px 10px;
+  padding: 8px 8px 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: #0E1724;
+}
+.fut-fsend .lbl { grid-column: 1; color: var(--mute); }
+.fut-fdest { grid-column: 2; grid-row: 1; display: inline-flex; align-items: center; gap: 3px; }
+.fut-fres { grid-column: 2; grid-row: 2; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.fut-fdest .colon { color: var(--dim); }
+.fut-fdest .fut-fpick { margin: 0 4px 0 2px; }
+.fut-fin { box-sizing: border-box; height: 26px; padding: 0 6px; border: 1px solid var(--line); border-radius: 5px; background: var(--field); color: var(--hi); font: 11px/1 Verdana, Arial, sans-serif; font-variant-numeric: tabular-nums; }
 .fut-fin::placeholder { color: var(--dim); }
 .fut-fin:focus { outline: none; border-color: var(--accent); }
 .fut-fin.bad { border-color: var(--neg); }
-.fut-fin.coords { width: 84px; }
-.fut-fin.amount { width: 80px; text-align: right; }
+.fut-fin.g, .fut-fin.p { width: 34px; text-align: center; }
+.fut-fin.s { width: 46px; text-align: center; }
+.fut-fin.amount { width: 86px; text-align: right; }
 .fut-fpick { width: 24px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--mute); }
 .fut-fpick:hover { border-color: #47607D; color: var(--hi); }
 .fut-fseg { display: inline-flex; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
@@ -10327,13 +10393,23 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fseg button + button { border-left: 1px solid var(--line); }
 .fut-fseg button:hover { color: var(--txt); }
 .fut-fseg button[aria-pressed="true"] { background: var(--tile-hi); color: var(--hi); }
-.fut-fresin { display: inline-flex; align-items: center; gap: 5px; }
-.fut-fresin .dot { width: 8px; height: 8px; border-radius: 2px; }
-.fut-fresin.metal .dot { background: #B8C2CC; }
-.fut-fresin.crystal .dot { background: #7FB8FF; }
-.fut-fresin.deuterium .dot { background: #4FE0B0; }
+.fut-fresin { display: inline-flex; align-items: center; gap: 4px; }
+.fut-fresin .sym { display: inline-flex; }
+.fut-fresin.metal .sym { color: #B8C2CC; }
+.fut-fresin.crystal .sym { color: #7FB8FF; }
+.fut-fresin.deuterium .sym { color: #4FE0B0; }
 .fut-fclear { height: 26px; padding: 0 8px; border: 1px solid var(--line); border-radius: 5px; background: none; color: var(--mute); }
 .fut-fclear:hover { border-color: #47607D; color: var(--hi); }
+.fut-fcargo { grid-column: 3; grid-row: 1 / span 2; align-self: stretch; display: flex; gap: 4px; padding-left: 10px; border-left: 1px solid var(--line-soft); }
+.fut-fcl {
+  width: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0;
+  border: 1px solid var(--tile-line); border-radius: 6px; background: var(--tile); color: var(--ico-hi);
+}
+.fut-fcl b { font-size: 13px; letter-spacing: 0.5px; }
+.fut-fcl .n { color: var(--mute); font-size: 11px; }
+.fut-fcl:hover { border-color: var(--accent); background: var(--tile-hi); }
+.fut-fcl.short .n { color: var(--warn); }
+.fut-fcl.none { color: var(--dim); background: none; border-style: dashed; }
 
 /* Fingers: bigger targets, no key letters. */
 @media (pointer: coarse) {
@@ -10347,6 +10423,11 @@ table.queues td.acts { width: 1%; text-align: right; }
   .fut-fsw { height: 40px; padding: 0 10px 0 12px; border-radius: 20px; }
   .fut-fread { flex-basis: 100%; }
   .fut-fin, .fut-fclear, .fut-fpick { height: 40px; }
+  .fut-fsend { grid-template-columns: minmax(0, 1fr); }
+  .fut-fsend .lbl { display: none; }
+  .fut-fdest, .fut-fres, .fut-fcargo { grid-column: 1; grid-row: auto; }
+  .fut-fcargo { padding-left: 0; border-left: 0; }
+  .fut-fcl { width: 64px; height: 48px; }
   .fut-fseg button { height: 38px; min-width: 44px; }
   .fut-fsecond { margin-left: 0; padding-left: 0; border-left: 0; }
 }
@@ -11015,58 +11096,78 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     menu.append(...bodyGrid(o, menu, null, (id) => run(mode, id)));
     popup(doc, anchor, menu);
   }
-  function sendTargetOf(o, t) {
-    if (!t) return null;
-    const coords = `${t.galaxy}:${t.system}:${t.position}`;
-    const b = o.bodies.find((x) => x.coords === coords);
-    return { ...t, name: b?.name };
+  function sendTargetOf(o, t, origin) {
+    if (!t || !(t.position >= 1 && t.position <= 17)) return null;
+    const r = resolveSend(t, origin);
+    const b = o.bodies.find((x) => x.coords === `${r.galaxy}:${r.system}:${r.position}`);
+    return { ...r, name: b?.name };
   }
-  function sendTargetBody(o, t) {
-    if (!t) return null;
-    const b = o.bodies.find((x) => x.coords === `${t.galaxy}:${t.system}:${t.position}`);
-    return (t.type === 3 ? b?.moonId : b?.planetId) ?? null;
-  }
-  function sendRow(o, peek) {
+  var SEND_CARGO = [202, 203];
+  function sendPanel(o, peek, onCargo) {
     const { doc, t } = o;
     const settings = loadSettings(o.store);
     const save = (part) => o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), ...part });
-    const row = el4(doc, "div", "fut-frow fut-fsend");
-    row.setAttribute("role", "group");
-    row.setAttribute("aria-label", t("fleet.send.label"));
-    const dest = el4(doc, "span", "fut-fdest");
-    const coords = el4(doc, "input", "fut-fin coords");
-    coords.type = "text";
-    coords.placeholder = t("fleet.send.coordsPh");
-    coords.setAttribute("aria-label", t("fleet.send.dest"));
+    const origin = originCoords(doc);
+    const panel = el4(doc, "div", "fut-fsend");
+    panel.setAttribute("role", "group");
+    panel.setAttribute("aria-label", t("fleet.send.label"));
     const st = settings.sendTarget;
-    coords.value = st ? `${st.galaxy}:${st.system}:${st.position}` : "";
-    isolate(coords);
     let type = st?.type ?? 1;
+    const coordIn = (label2, ph, v, cls) => {
+      const input = el4(doc, "input", `fut-fin ${cls}`);
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.placeholder = ph;
+      input.value = v ? String(v) : "";
+      input.setAttribute("aria-label", label2);
+      input.title = label2;
+      isolate(input);
+      return input;
+    };
+    const gIn = coordIn(t("fleet.galaxy"), origin ? String(origin.galaxy) : "G", st?.galaxy, "g");
+    const sIn = coordIn(t("fleet.system"), origin ? String(origin.system) : "S", st?.system, "s");
+    const pIn = coordIn(t("fleet.position"), "P", st?.position, "p");
     const typeSeg = el4(doc, "span", "fut-fseg");
     typeSeg.setAttribute("role", "group");
     typeSeg.setAttribute("aria-label", t("fleet.type"));
+    const showType = () => typeSeg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(Number(x.dataset.type) === type)));
     const store = () => {
-      const c = parseCoords(coords.value);
-      coords.classList.toggle("bad", Boolean(coords.value.trim()) && !c);
-      save({ sendTarget: c ? { galaxy: c[0], system: c[1], position: c[2], type } : null });
+      const num4 = (i) => parseAmount(i.value) || null;
+      const position = num4(pIn) ?? 0;
+      pIn.classList.toggle("bad", Boolean(pIn.value.trim()) && !(position >= 1 && position <= 17));
+      const empty = !gIn.value.trim() && !sIn.value.trim() && !pIn.value.trim();
+      save({ sendTarget: empty ? null : { galaxy: num4(gIn), system: num4(sIn), position, type } });
     };
-    const typeBtn = (v, ico, label) => {
+    const fill = (g, sys, pos) => {
+      gIn.value = String(g);
+      sIn.value = String(sys);
+      pIn.value = String(pos);
+    };
+    for (const input of [gIn, sIn, pIn]) {
+      input.addEventListener("input", () => {
+        const c = /\D/.test(input.value.trim()) ? parseCoords(input.value) : null;
+        if (c) fill(c[0], c[1], c[2]);
+        store();
+      });
+    }
+    const typeBtn = (v, ico, label2) => {
       const b = el4(doc, "button", "fut-ftype");
       b.type = "button";
-      b.title = label;
-      b.setAttribute("aria-label", label);
-      b.setAttribute("aria-pressed", String(type === v));
+      b.dataset.type = String(v);
+      b.title = label2;
+      b.setAttribute("aria-label", label2);
       b.innerHTML = iconSvg(ico, 15);
       b.addEventListener("click", (e) => {
         e.preventDefault();
         type = v;
-        typeSeg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+        showType();
         store();
       });
       return b;
     };
     typeSeg.append(typeBtn(1, "planet", t("fleet.typePlanet")), typeBtn(3, "moon", t("fleet.typeMoon")));
-    coords.addEventListener("input", store);
+    showType();
+    const dest = el4(doc, "span", "fut-fdest");
     const pick = el4(doc, "button", "fut-fpick");
     pick.type = "button";
     pick.setAttribute("aria-label", t("fleet.send.pick"));
@@ -11075,35 +11176,34 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     peek(pick, t("fleet.send.pick"), t("fleet.send.pickHint"));
     pick.addEventListener("click", (e) => {
       e.preventDefault();
-      destinationMenu(o, dest, sendTargetBody(o, loadSettings(o.store).sendTarget), (id) => {
+      destinationMenu(o, dest, null, (id) => {
         const tg = bodyTarget(o.bodies, id);
         if (!tg) return;
-        coords.value = `${tg.galaxy}:${tg.system}:${tg.position}`;
+        fill(tg.galaxy, tg.system, tg.position);
         type = tg.type === 3 ? 3 : 1;
-        typeSeg.querySelectorAll("button").forEach((x, i) => x.setAttribute("aria-pressed", String((i === 0 ? 1 : 3) === type)));
+        showType();
         store();
       });
     });
-    const destIco = el4(doc, "span", "lbl");
-    destIco.textContent = t("fleet.send.dest");
-    dest.append(destIco, coords, pick, typeSeg);
-    peek(coords, t("fleet.send.dest"), t("fleet.send.destHint"));
+    const sep = () => el4(doc, "span", "colon", ":");
+    dest.append(gIn, sep(), sIn, sep(), pIn, pick, typeSeg);
+    for (const input of [gIn, sIn, pIn]) peek(input, t("fleet.send.dest"), t("fleet.send.destHint"));
     const res = el4(doc, "span", "fut-fres");
-    const pickNow = settings.sendPick;
     const inputs = ["metal", "crystal", "deuterium"].map((k) => {
       const wrap = el4(doc, "label", `fut-fresin ${k}`);
-      const dot = el4(doc, "i", "dot");
+      const sym = el4(doc, "span", "sym");
+      sym.innerHTML = iconSvg(k, 18);
       const input = el4(doc, "input", "fut-fin amount");
       input.type = "text";
       input.inputMode = "numeric";
       input.placeholder = t("fleet.send.all");
       input.setAttribute("aria-label", t(`res.${k}`));
-      const v = pickNow[k];
+      const v = settings.sendPick[k];
       input.value = v === null ? "" : v.toLocaleString(o.locale);
       isolate(input);
-      wrap.title = `${t(`res.${k}`)}: ${t("fleet.send.resHint")}`;
-      wrap.append(dot, input);
+      wrap.append(sym, input);
       res.append(wrap);
+      peek(input, t(`res.${k}`), t("fleet.send.resHint"));
       return [k, input];
     });
     const readPick = () => {
@@ -11111,23 +11211,61 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       for (const [k, input] of inputs) out[k] = input.value.trim() ? parseAmount(input.value) : null;
       return out;
     };
-    for (const [k, input] of inputs) {
-      input.addEventListener("input", () => save({ sendPick: readPick() }));
-      peek(input, t(`res.${k}`), t("fleet.send.resHint"));
-    }
     const clear = el4(doc, "button", "fut-fclear");
     clear.type = "button";
-    clear.textContent = t("fleet.send.all");
-    clear.setAttribute("aria-label", t("fleet.send.allHint"));
-    peek(clear, t("fleet.send.all"), t("fleet.send.allHint"));
+    clear.textContent = t("fleet.send.allBtn");
+    peek(clear, t("fleet.send.allBtn"), t("fleet.send.allHint"));
+    res.append(clear);
+    const cargoBox = el4(doc, "span", "fut-fcargo");
+    const counts = /* @__PURE__ */ new Map();
+    for (const id of SEND_CARGO) {
+      const b = el4(doc, "button", "fut-fcl");
+      b.type = "button";
+      const short = t(id === 202 ? "fleet.send.small" : "fleet.send.large");
+      const full = t(`ship.${id}`);
+      b.setAttribute("aria-label", `${t("fleet.send.cargoWith")} ${full}`);
+      const n = el4(doc, "small", "n");
+      b.append(el4(doc, "b", "", short), n);
+      counts.set(id, n);
+      peek(b, `${short} \xB7 ${full}`, t("fleet.send.cargoHint"));
+      b.addEventListener("click", (e) => {
+        e.preventDefault();
+        onCargo(id);
+      });
+      cargoBox.append(b);
+    }
+    const recount = () => {
+      const fd = getDispatcher();
+      for (const [id, n] of counts) {
+        if (!fd) {
+          n.textContent = "";
+          continue;
+        }
+        const have = shipsOnPlanet(fd)[String(id)] ?? 0;
+        const cap = shipCapacity(fd, id);
+        const w = pickedLoad({ metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet }, readPick(), 0, Number.MAX_SAFE_INTEGER);
+        const need = cap > 0 ? Math.ceil((w.metal + w.crystal + w.deuterium) / cap) : 0;
+        n.textContent = have ? `\xD7${Math.min(need, have).toLocaleString(o.locale)}` : "0";
+        n.parentElement?.classList.toggle("short", need > have);
+        n.parentElement?.classList.toggle("none", !have);
+      }
+    };
+    for (const [, input] of inputs)
+      input.addEventListener("input", () => {
+        save({ sendPick: readPick() });
+        recount();
+      });
     clear.addEventListener("click", (e) => {
       e.preventDefault();
       for (const [, input] of inputs) input.value = "";
       save({ sendPick: readPick() });
+      recount();
     });
-    res.append(clear);
-    row.append(dest, res);
-    return row;
+    recount();
+    void whenDispatcherReady().then(recount);
+    const label = (text) => el4(doc, "span", "lbl", text);
+    panel.append(label(t("fleet.send.dest")), dest, label(t("fleet.send.res")), res, cargoBox);
+    return panel;
   }
   function renderFleetTools(o) {
     const { doc, t } = o;
@@ -11187,8 +11325,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         report(prepareDeploy(fd, doc, profile, settings, target), "fleet.ok.cargo");
       }),
       // Plain game actions: destination and resources from the row on page 1, read when pressed.
-      transport: () => sendPlain("transport"),
-      deploy: () => sendPlain("deploy"),
+      // Plain game actions: a switch that stays on; CL / CP below then prepare the fleet.
+      transport: () => toggleSend("transport"),
+      deploy: () => toggleSend("deploy"),
       expedition: () => withDispatcher((fd) => {
         begin("expedition");
         const r = prepareExpedition(fd, doc, profile, settings, {
@@ -11219,16 +11358,28 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         report(prepareLast(fd, doc, profile, last2), "fleet.ok.ships");
       })
     };
-    function sendPlain(mission) {
+    function toggleSend(mode) {
+      const now = loadSettings(o.store);
+      const next = now.sendMode === mode ? null : mode;
+      o.store.set(SETTINGS_KEY, { ...now, sendMode: next });
+      redraw();
+      if (next) say(t(next === "transport" ? "fleet.send.onTransport" : "fleet.send.onDeploy"));
+      doc.querySelector(".fut-fsend .fut-fin.p")?.focus();
+    }
+    function sendWith(ship) {
       withDispatcher((fd) => {
         const now = loadSettings(o.store);
-        const target = sendTargetOf(o, now.sendTarget);
+        if (!now.sendMode) return;
+        const target = sendTargetOf(o, now.sendTarget, fd.currentPlanet);
         if (!target) return say(t("fleet.err.noTarget"), true);
         const c = fd.currentPlanet;
-        if (c && c.galaxy === target.galaxy && c.system === target.system && c.position === target.position && (c.type ?? 1) === target.type)
+        if (c.galaxy === target.galaxy && c.system === target.system && c.position === target.position && (c.type ?? 1) === target.type)
           return say(t("fleet.err.sameBody"), true);
-        begin(mission);
-        report(prepareSend(fd, doc, now, target, now.sendPick, mission), "fleet.ok.cargo");
+        begin(now.sendMode);
+        const r = prepareSend(fd, doc, now, target, now.sendPick, now.sendMode, ship);
+        if (r.ok && r.missing > 0)
+          return say(t("fleet.ok.cargoShort", { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), missing: r.missing.toLocaleString(o.locale) }), true);
+        report(r, "fleet.ok.cargo");
       });
     }
     const favRun = {
@@ -11261,8 +11412,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       collect.append(el4(doc, "i", "more-mark"));
       out.peek(collect, t("fleet.btn.collect"), t("fleet.tip.collect"));
       tiles.append(
-        act2("transport", "fleet.transport", t("fleet.btn.transport"), "", t("fleet.tip.transport"), () => run.transport()),
-        act2("deploy", "fleet.deploy", t("fleet.btn.deploy"), "", t("fleet.tip.deploy"), () => run.deploy()),
+        ...["transport", "deploy"].map((m) => {
+          const b = act2(m, `fleet.${m}`, t(`fleet.btn.${m}`), "", t(`fleet.tip.${m}`), () => run[m]());
+          b.setAttribute("aria-pressed", String(settings.sendMode === m));
+          return b;
+        }),
         act2("expedition", "fleet.expedition", t("fleet.btn.expedition"), "", t("fleet.tip.expedition"), () => run.expedition()),
         act2(
           "fleetsave",
@@ -11328,7 +11482,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       top.append(tiles, edit);
       const bottom = el4(doc, "div", "fut-frow");
       bottom.append(rules, out.box);
-      bar.append(top, sendRow(o, out.peek), bottom);
+      bar.append(top);
+      if (settings.sendMode) bar.append(sendPanel(o, out.peek, sendWith));
+      bar.append(bottom);
       anchor1.before(bar);
       addInvertButtons(o);
     }

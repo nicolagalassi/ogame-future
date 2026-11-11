@@ -48,9 +48,11 @@ import {
   type FleetsaveProfile,
   type ResourcePick,
   type SendTarget,
+  pickedLoad,
+  resolveSend,
 } from '../../engines/fleet';
 import { originCoords, readShipSlots } from '../../data/fleet-page';
-import { getDispatcher, readShipsInfo, SHIPS_INFO_KEY, whenDispatcherReady, type FleetDispatcher } from '../../data/fleet-dispatcher';
+import { getDispatcher, readShipsInfo, shipCapacity as shipCapacityOf, shipsOnPlanet, SHIPS_INFO_KEY, whenDispatcherReady, type FleetDispatcher } from '../../data/fleet-dispatcher';
 import {
   prepareLast,
   snapshotFleet,
@@ -805,68 +807,95 @@ function collectMenu(
   popup(doc, anchor, menu);
 }
 
-/** The destination typed on page 1 as a game target (named when it is one of the player's bodies). */
-function sendTargetOf(o: FleetOptions, t: SendTarget | null): Target | null {
-  if (!t) return null;
-  const coords = `${t.galaxy}:${t.system}:${t.position}`;
-  const b = o.bodies.find((x) => x.coords === coords);
-  return { ...t, name: b?.name };
+/** The typed destination as a game target: empty galaxy/system = the origin's; named when it is an own body. */
+function sendTargetOf(o: FleetOptions, t: SendTarget | null, origin: { galaxy: number; system: number }): Target | null {
+  if (!t || !(t.position >= 1 && t.position <= 17)) return null;
+  const r = resolveSend(t, origin);
+  const b = o.bodies.find((x) => x.coords === `${r.galaxy}:${r.system}:${r.position}`);
+  return { ...r, name: b?.name };
 }
 
-/** The own body at the typed destination, if any. */
-function sendTargetBody(o: FleetOptions, t: SendTarget | null): number | null {
-  if (!t) return null;
-  const b = o.bodies.find((x) => x.coords === `${t.galaxy}:${t.system}:${t.position}`);
-  return (t.type === 3 ? b?.moonId : b?.planetId) ?? null;
-}
+/** Cargo ships offered by CL / CP: small and large cargo. */
+const SEND_CARGO = [202, 203] as const;
 
 /**
- * Page 1 row of the plain Trasporto / Schiera: where to (typed, or picked among the own bodies),
- * planet or moon, and the resources to bring (empty = all, 0 = none). Kept between pages.
+ * Page 1 panel of the plain Trasporto / Schiera, shown while one of the two is on: where to
+ * (galaxy, system, position; empty galaxy/system = this body's; the arrow picks an own body),
+ * planet or moon, the resources to bring (empty = all, 0 = none), and CL / CP, which prepare
+ * the fleet with as many small or large cargo ships as those resources need. Kept between pages.
  */
-function sendRow(o: FleetOptions, peek: (node: HTMLElement, name: string, detail: string) => void): HTMLElement {
+function sendPanel(
+  o: FleetOptions,
+  peek: (node: HTMLElement, name: string, detail: string) => void,
+  onCargo: (ship: number) => void,
+): HTMLElement {
   const { doc, t } = o;
   const settings = loadSettings(o.store);
   const save = (part: Partial<FleetSettings>) => o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), ...part });
-  const row = el(doc, 'div', 'fut-frow fut-fsend');
-  row.setAttribute('role', 'group');
-  row.setAttribute('aria-label', t('fleet.send.label'));
+  const origin = originCoords(doc);
+  const panel = el(doc, 'div', 'fut-fsend');
+  panel.setAttribute('role', 'group');
+  panel.setAttribute('aria-label', t('fleet.send.label'));
 
-  // Destination: one field for "g:s:p", the planet / moon switch, the list of own bodies.
-  const dest = el(doc, 'span', 'fut-fdest');
-  const coords = el(doc, 'input', 'fut-fin coords');
-  coords.type = 'text';
-  coords.placeholder = t('fleet.send.coordsPh');
-  coords.setAttribute('aria-label', t('fleet.send.dest'));
+  // Destination: galaxy, system, position; the list of own bodies; planet or moon.
   const st = settings.sendTarget;
-  coords.value = st ? `${st.galaxy}:${st.system}:${st.position}` : '';
-  isolate(coords);
   let type: 1 | 3 = st?.type ?? 1;
+  const coordIn = (label: string, ph: string, v: number | null | undefined, cls: string) => {
+    const input = el(doc, 'input', `fut-fin ${cls}`);
+    input.type = 'text';
+    input.inputMode = 'numeric';
+    input.placeholder = ph;
+    input.value = v ? String(v) : '';
+    input.setAttribute('aria-label', label);
+    input.title = label;
+    isolate(input);
+    return input;
+  };
+  const gIn = coordIn(t('fleet.galaxy'), origin ? String(origin.galaxy) : 'G', st?.galaxy, 'g');
+  const sIn = coordIn(t('fleet.system'), origin ? String(origin.system) : 'S', st?.system, 's');
+  const pIn = coordIn(t('fleet.position'), 'P', st?.position, 'p');
   const typeSeg = el(doc, 'span', 'fut-fseg');
   typeSeg.setAttribute('role', 'group');
   typeSeg.setAttribute('aria-label', t('fleet.type'));
+  const showType = () => typeSeg.querySelectorAll<HTMLElement>('button').forEach((x) => x.setAttribute('aria-pressed', String(Number(x.dataset.type) === type)));
   const store = () => {
-    const c = parseCoords(coords.value);
-    coords.classList.toggle('bad', Boolean(coords.value.trim()) && !c);
-    save({ sendTarget: c ? { galaxy: c[0], system: c[1], position: c[2], type } : null });
+    const num = (i: HTMLInputElement) => parseAmount(i.value) || null;
+    const position = num(pIn) ?? 0;
+    pIn.classList.toggle('bad', Boolean(pIn.value.trim()) && !(position >= 1 && position <= 17));
+    const empty = !gIn.value.trim() && !sIn.value.trim() && !pIn.value.trim();
+    save({ sendTarget: empty ? null : { galaxy: num(gIn), system: num(sIn), position, type } });
   };
+  const fill = (g: number, sys: number, pos: number) => {
+    gIn.value = String(g);
+    sIn.value = String(sys);
+    pIn.value = String(pos);
+  };
+  for (const input of [gIn, sIn, pIn]) {
+    input.addEventListener('input', () => {
+      // "1:234:5" pasted or typed in any field fills all three.
+      const c = /\D/.test(input.value.trim()) ? parseCoords(input.value) : null;
+      if (c) fill(c[0], c[1], c[2]);
+      store();
+    });
+  }
   const typeBtn = (v: 1 | 3, ico: IconName, label: string) => {
     const b = el(doc, 'button', 'fut-ftype');
     b.type = 'button';
+    b.dataset.type = String(v);
     b.title = label;
     b.setAttribute('aria-label', label);
-    b.setAttribute('aria-pressed', String(type === v));
     b.innerHTML = iconSvg(ico, 15);
     b.addEventListener('click', (e) => {
       e.preventDefault();
       type = v;
-      typeSeg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      showType();
       store();
     });
     return b;
   };
   typeSeg.append(typeBtn(1, 'planet', t('fleet.typePlanet')), typeBtn(3, 'moon', t('fleet.typeMoon')));
-  coords.addEventListener('input', store);
+  showType();
+  const dest = el(doc, 'span', 'fut-fdest');
   const pick = el(doc, 'button', 'fut-fpick');
   pick.type = 'button';
   pick.setAttribute('aria-label', t('fleet.send.pick'));
@@ -875,37 +904,36 @@ function sendRow(o: FleetOptions, peek: (node: HTMLElement, name: string, detail
   peek(pick, t('fleet.send.pick'), t('fleet.send.pickHint'));
   pick.addEventListener('click', (e) => {
     e.preventDefault();
-    destinationMenu(o, dest, sendTargetBody(o, loadSettings(o.store).sendTarget), (id) => {
+    destinationMenu(o, dest, null, (id) => {
       const tg = bodyTarget(o.bodies, id);
       if (!tg) return;
-      coords.value = `${tg.galaxy}:${tg.system}:${tg.position}`;
+      fill(tg.galaxy, tg.system, tg.position);
       type = tg.type === 3 ? 3 : 1;
-      typeSeg.querySelectorAll('button').forEach((x, i) => x.setAttribute('aria-pressed', String((i === 0 ? 1 : 3) === type)));
+      showType();
       store();
     });
   });
-  const destIco = el(doc, 'span', 'lbl');
-  destIco.textContent = t('fleet.send.dest');
-  dest.append(destIco, coords, pick, typeSeg);
-  peek(coords, t('fleet.send.dest'), t('fleet.send.destHint'));
+  const sep = () => el(doc, 'span', 'colon', ':');
+  dest.append(gIn, sep(), sIn, sep(), pIn, pick, typeSeg);
+  for (const input of [gIn, sIn, pIn]) peek(input, t('fleet.send.dest'), t('fleet.send.destHint'));
 
-  // Resources: empty = all of it, a number = at most that much (k / m / g understood).
+  // Resources: each with its symbol; empty = all, a number = at most that much (k / m / g understood).
   const res = el(doc, 'span', 'fut-fres');
-  const pickNow = settings.sendPick;
   const inputs = (['metal', 'crystal', 'deuterium'] as const).map((k) => {
     const wrap = el(doc, 'label', `fut-fresin ${k}`);
-    const dot = el(doc, 'i', 'dot');
+    const sym = el(doc, 'span', 'sym');
+    sym.innerHTML = iconSvg(k, 18);
     const input = el(doc, 'input', 'fut-fin amount');
     input.type = 'text';
     input.inputMode = 'numeric';
     input.placeholder = t('fleet.send.all');
     input.setAttribute('aria-label', t(`res.${k}`));
-    const v = pickNow[k];
+    const v = settings.sendPick[k];
     input.value = v === null ? '' : v.toLocaleString(o.locale);
     isolate(input);
-    wrap.title = `${t(`res.${k}`)}: ${t('fleet.send.resHint')}`;
-    wrap.append(dot, input);
+    wrap.append(sym, input);
     res.append(wrap);
+    peek(input, t(`res.${k}`), t('fleet.send.resHint'));
     return [k, input] as const;
   });
   const readPick = (): ResourcePick => {
@@ -913,23 +941,64 @@ function sendRow(o: FleetOptions, peek: (node: HTMLElement, name: string, detail
     for (const [k, input] of inputs) out[k] = input.value.trim() ? parseAmount(input.value) : null;
     return out;
   };
-  for (const [k, input] of inputs) {
-    input.addEventListener('input', () => save({ sendPick: readPick() }));
-    peek(input, t(`res.${k}`), t('fleet.send.resHint'));
-  }
   const clear = el(doc, 'button', 'fut-fclear');
   clear.type = 'button';
-  clear.textContent = t('fleet.send.all');
-  clear.setAttribute('aria-label', t('fleet.send.allHint'));
-  peek(clear, t('fleet.send.all'), t('fleet.send.allHint'));
+  clear.textContent = t('fleet.send.allBtn');
+  peek(clear, t('fleet.send.allBtn'), t('fleet.send.allHint'));
+  res.append(clear);
+
+  // CL / CP: how many of each the resources need, recounted while typing (fuel is added when preparing).
+  const cargoBox = el(doc, 'span', 'fut-fcargo');
+  const counts = new Map<number, HTMLElement>();
+  for (const id of SEND_CARGO) {
+    const b = el(doc, 'button', 'fut-fcl');
+    b.type = 'button';
+    const short = t(id === 202 ? 'fleet.send.small' : 'fleet.send.large');
+    const full = t(`ship.${id}`);
+    b.setAttribute('aria-label', `${t('fleet.send.cargoWith')} ${full}`);
+    const n = el(doc, 'small', 'n');
+    b.append(el(doc, 'b', '', short), n);
+    counts.set(id, n);
+    peek(b, `${short} · ${full}`, t('fleet.send.cargoHint'));
+    b.addEventListener('click', (e) => {
+      e.preventDefault();
+      onCargo(id);
+    });
+    cargoBox.append(b);
+  }
+  const recount = () => {
+    const fd = getDispatcher();
+    for (const [id, n] of counts) {
+      if (!fd) {
+        n.textContent = '';
+        continue;
+      }
+      const have = shipsOnPlanet(fd)[String(id)] ?? 0;
+      const cap = shipCapacityOf(fd, id);
+      const w = pickedLoad({ metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet }, readPick(), 0, Number.MAX_SAFE_INTEGER);
+      const need = cap > 0 ? Math.ceil((w.metal + w.crystal + w.deuterium) / cap) : 0;
+      n.textContent = have ? `×${Math.min(need, have).toLocaleString(o.locale)}` : '0';
+      n.parentElement?.classList.toggle('short', need > have);
+      n.parentElement?.classList.toggle('none', !have);
+    }
+  };
+  for (const [, input] of inputs)
+    input.addEventListener('input', () => {
+      save({ sendPick: readPick() });
+      recount();
+    });
   clear.addEventListener('click', (e) => {
     e.preventDefault();
     for (const [, input] of inputs) input.value = '';
     save({ sendPick: readPick() });
+    recount();
   });
-  res.append(clear);
-  row.append(dest, res);
-  return row;
+  recount();
+  void whenDispatcherReady().then(recount);
+
+  const label = (text: string) => el(doc, 'span', 'lbl', text);
+  panel.append(label(t('fleet.send.dest')), dest, label(t('fleet.send.res')), res, cargoBox);
+  return panel;
 }
 
 export function renderFleetTools(o: FleetOptions): void {
@@ -1005,8 +1074,9 @@ export function renderFleetTools(o: FleetOptions): void {
         report(prepareDeploy(fd, doc, profile, settings, target), 'fleet.ok.cargo');
       }),
     // Plain game actions: destination and resources from the row on page 1, read when pressed.
-    transport: () => sendPlain('transport'),
-    deploy: () => sendPlain('deploy'),
+    // Plain game actions: a switch that stays on; CL / CP below then prepare the fleet.
+    transport: () => toggleSend('transport'),
+    deploy: () => toggleSend('deploy'),
     expedition: () =>
       withDispatcher((fd) => {
         begin('expedition');
@@ -1041,16 +1111,28 @@ export function renderFleetTools(o: FleetOptions): void {
         report(prepareLast(fd, doc, profile, last), 'fleet.ok.ships');
       }),
   };
-  function sendPlain(mission: 'transport' | 'deploy'): void {
+  function toggleSend(mode: 'transport' | 'deploy'): void {
+    const now = loadSettings(o.store);
+    const next = now.sendMode === mode ? null : mode;
+    o.store.set(SETTINGS_KEY, { ...now, sendMode: next });
+    redraw();
+    if (next) say(t(next === 'transport' ? 'fleet.send.onTransport' : 'fleet.send.onDeploy'));
+    doc.querySelector<HTMLInputElement>('.fut-fsend .fut-fin.p')?.focus();
+  }
+  function sendWith(ship: number): void {
     withDispatcher((fd) => {
       const now = loadSettings(o.store);
-      const target = sendTargetOf(o, now.sendTarget);
+      if (!now.sendMode) return;
+      const target = sendTargetOf(o, now.sendTarget, fd.currentPlanet);
       if (!target) return say(t('fleet.err.noTarget'), true);
       const c = fd.currentPlanet;
-      if (c && c.galaxy === target.galaxy && c.system === target.system && c.position === target.position && (c.type ?? 1) === target.type)
+      if (c.galaxy === target.galaxy && c.system === target.system && c.position === target.position && (c.type ?? 1) === target.type)
         return say(t('fleet.err.sameBody'), true);
-      begin(mission);
-      report(prepareSend(fd, doc, now, target, now.sendPick, mission), 'fleet.ok.cargo');
+      begin(now.sendMode);
+      const r = prepareSend(fd, doc, now, target, now.sendPick, now.sendMode, ship);
+      if (r.ok && r.missing > 0)
+        return say(t('fleet.ok.cargoShort', { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), missing: r.missing.toLocaleString(o.locale) }), true);
+      report(r, 'fleet.ok.cargo');
     });
   }
   const favRun = {
@@ -1083,8 +1165,11 @@ export function renderFleetTools(o: FleetOptions): void {
     collect.append(el(doc, 'i', 'more-mark'));
     out.peek(collect, t('fleet.btn.collect'), t('fleet.tip.collect'));
     tiles.append(
-      act('transport', 'fleet.transport', t('fleet.btn.transport'), '', t('fleet.tip.transport'), () => run.transport()),
-      act('deploy', 'fleet.deploy', t('fleet.btn.deploy'), '', t('fleet.tip.deploy'), () => run.deploy()),
+      ...(['transport', 'deploy'] as const).map((m) => {
+        const b = act(m, `fleet.${m}`, t(`fleet.btn.${m}`), '', t(`fleet.tip.${m}`), () => run[m]());
+        b.setAttribute('aria-pressed', String(settings.sendMode === m));
+        return b;
+      }),
       act('expedition', 'fleet.expedition', t('fleet.btn.expedition'), '', t('fleet.tip.expedition'), () => run.expedition()),
       act(
         'fleetsave',
@@ -1157,7 +1242,9 @@ export function renderFleetTools(o: FleetOptions): void {
     top.append(tiles, edit);
     const bottom = el(doc, 'div', 'fut-frow');
     bottom.append(rules, out.box);
-    bar.append(top, sendRow(o, out.peek), bottom);
+    bar.append(top);
+    if (settings.sendMode) bar.append(sendPanel(o, out.peek, sendWith));
+    bar.append(bottom);
     anchor1.before(bar);
     addInvertButtons(o);
   }

@@ -73,16 +73,27 @@ export const FLEET_CSS = `
 .fut-finfo { color: var(--mute); }
 .fut-finfo.err { color: var(--neg); }
 
-/* Plain Trasporto / Schiera: destination and resources, typed on page 1. */
-.fut-fsend { flex-wrap: wrap; justify-content: space-between; gap: 6px 10px; padding: 6px 0; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); }
-.fut-fdest, .fut-fres { display: inline-flex; align-items: center; gap: 4px; }
-.fut-fdest .lbl { margin-right: 4px; color: var(--mute); }
-.fut-fin { box-sizing: border-box; height: 26px; padding: 0 7px; border: 1px solid var(--line); border-radius: 5px; background: var(--field); color: var(--hi); font: 11px/1 Verdana, Arial, sans-serif; font-variant-numeric: tabular-nums; }
+/* Trasporto / Schiera on: the tile stays lit until pressed again. */
+.fut-fact[aria-pressed="true"] { border-color: var(--accent); background: #1B3142; color: var(--ico-hi); }
+.fut-fact[aria-pressed="true"] kbd { color: var(--on-accent); }
+
+/* Their panel: destination over resources, labels in one column; CL / CP on the right, as tall as both rows. */
+.fut-fsend {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px 10px;
+  padding: 8px 8px 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: #0E1724;
+}
+.fut-fsend .lbl { grid-column: 1; color: var(--mute); }
+.fut-fdest { grid-column: 2; grid-row: 1; display: inline-flex; align-items: center; gap: 3px; }
+.fut-fres { grid-column: 2; grid-row: 2; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.fut-fdest .colon { color: var(--dim); }
+.fut-fdest .fut-fpick { margin: 0 4px 0 2px; }
+.fut-fin { box-sizing: border-box; height: 26px; padding: 0 6px; border: 1px solid var(--line); border-radius: 5px; background: var(--field); color: var(--hi); font: 11px/1 Verdana, Arial, sans-serif; font-variant-numeric: tabular-nums; }
 .fut-fin::placeholder { color: var(--dim); }
 .fut-fin:focus { outline: none; border-color: var(--accent); }
 .fut-fin.bad { border-color: var(--neg); }
-.fut-fin.coords { width: 84px; }
-.fut-fin.amount { width: 80px; text-align: right; }
+.fut-fin.g, .fut-fin.p { width: 34px; text-align: center; }
+.fut-fin.s { width: 46px; text-align: center; }
+.fut-fin.amount { width: 86px; text-align: right; }
 .fut-fpick { width: 24px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--mute); }
 .fut-fpick:hover { border-color: #47607D; color: var(--hi); }
 .fut-fseg { display: inline-flex; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
@@ -90,13 +101,23 @@ export const FLEET_CSS = `
 .fut-fseg button + button { border-left: 1px solid var(--line); }
 .fut-fseg button:hover { color: var(--txt); }
 .fut-fseg button[aria-pressed="true"] { background: var(--tile-hi); color: var(--hi); }
-.fut-fresin { display: inline-flex; align-items: center; gap: 5px; }
-.fut-fresin .dot { width: 8px; height: 8px; border-radius: 2px; }
-.fut-fresin.metal .dot { background: #B8C2CC; }
-.fut-fresin.crystal .dot { background: #7FB8FF; }
-.fut-fresin.deuterium .dot { background: #4FE0B0; }
+.fut-fresin { display: inline-flex; align-items: center; gap: 4px; }
+.fut-fresin .sym { display: inline-flex; }
+.fut-fresin.metal .sym { color: #B8C2CC; }
+.fut-fresin.crystal .sym { color: #7FB8FF; }
+.fut-fresin.deuterium .sym { color: #4FE0B0; }
 .fut-fclear { height: 26px; padding: 0 8px; border: 1px solid var(--line); border-radius: 5px; background: none; color: var(--mute); }
 .fut-fclear:hover { border-color: #47607D; color: var(--hi); }
+.fut-fcargo { grid-column: 3; grid-row: 1 / span 2; align-self: stretch; display: flex; gap: 4px; padding-left: 10px; border-left: 1px solid var(--line-soft); }
+.fut-fcl {
+  width: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0;
+  border: 1px solid var(--tile-line); border-radius: 6px; background: var(--tile); color: var(--ico-hi);
+}
+.fut-fcl b { font-size: 13px; letter-spacing: 0.5px; }
+.fut-fcl .n { color: var(--mute); font-size: 11px; }
+.fut-fcl:hover { border-color: var(--accent); background: var(--tile-hi); }
+.fut-fcl.short .n { color: var(--warn); }
+.fut-fcl.none { color: var(--dim); background: none; border-style: dashed; }
 
 /* Fingers: bigger targets, no key letters. */
 @media (pointer: coarse) {
@@ -110,6 +131,11 @@ export const FLEET_CSS = `
   .fut-fsw { height: 40px; padding: 0 10px 0 12px; border-radius: 20px; }
   .fut-fread { flex-basis: 100%; }
   .fut-fin, .fut-fclear, .fut-fpick { height: 40px; }
+  .fut-fsend { grid-template-columns: minmax(0, 1fr); }
+  .fut-fsend .lbl { display: none; }
+  .fut-fdest, .fut-fres, .fut-fcargo { grid-column: 1; grid-row: auto; }
+  .fut-fcargo { padding-left: 0; border-left: 0; }
+  .fut-fcl { width: 64px; height: 48px; }
   .fut-fseg button { height: 38px; min-width: 44px; }
   .fut-fsecond { margin-left: 0; padding-left: 0; border-left: 0; }
 }

@@ -9,6 +9,7 @@
 import {
   EMPTY_RESERVE,
   cargoLoad,
+  cargoCount,
   cargoShipsFor,
   deliveryLoad,
   expeditionFleet,
@@ -262,14 +263,11 @@ function playerSelection(fd: FleetDispatcher): Record<number, number> | null {
   return Object.fromEntries(fd.shipsToSend.filter((s) => s.number > 0).map((s) => [s.id, s.number]));
 }
 
-function allShips(fd: FleetDispatcher): Record<number, number> {
-  return Object.fromEntries(Object.entries(shipsOnPlanet(fd)).map(([id, n]) => [Number(id), n]));
-}
-
 /**
- * Plain Trasporto / Schiera towards any coordinates, with the resources the player picked.
- * Ships: those the player already picked on the tiles; otherwise the cargo ships needed
- * (transport) or every ship here (deploy). No reserve: that is what the collection is for.
+ * Plain Trasporto / Schiera towards any coordinates, with the resources the player picked and
+ * the cargo ship the player chose (CL / CP): as many of it as the resources need, after what the
+ * ships already picked by hand can carry. Ships picked by hand stay. No reserve: that is what the
+ * collection is for.
  */
 export function prepareSend(
   fd: FleetDispatcher,
@@ -278,15 +276,22 @@ export function prepareSend(
   target: Target,
   pick: ResourcePick,
   mission: 'transport' | 'deploy',
-): PrepareResult {
+  cargoShip: number,
+): PrepareResult & { missing: number } {
   const here = onPlanet(fd);
   const wanted = pickedLoad(here, pick, 0, Number.MAX_SAFE_INTEGER);
   const amount = wanted.metal + wanted.crystal + wanted.deuterium;
-  const picked = playerSelection(fd);
-  if (mission === 'transport' && !picked && amount <= 0) return { ok: false, reason: 'fleet.err.nothingPicked', ships: 0, cargo: 0 };
-  const stockAll = fd.shipsOnPlanet.map((s) => ({ id: s.id, available: Number(s.number) || 0, capacity: shipCapacity(fd, s.id) }));
-  const ships = picked ?? (mission === 'transport' ? cargoShipsFor(amount, stockAll, settings.mainShip, settings.secondShip) : allShips(fd));
-  const count = selectShips(fd, ships);
+  const manual = playerSelection(fd) ?? {};
+  const already = manual[cargoShip] ?? 0;
+  delete manual[cargoShip];
+  const othersCapacity = Object.entries(manual).reduce((sum, [id, n]) => sum + n * shipCapacity(fd, Number(id)), 0);
+  const available = shipsOnPlanet(fd)[String(cargoShip)] ?? 0;
+  const capacity = shipCapacity(fd, cargoShip);
+  if (!available && !Object.keys(manual).length) return { ok: false, reason: 'fleet.err.noCargoShip', ships: 0, cargo: 0, missing: 0 };
+  if (mission === 'transport' && amount <= 0) return { ok: false, reason: 'fleet.err.nothingPicked', ships: 0, cargo: 0, missing: 0 };
+  const n = cargoCount(amount, othersCapacity, capacity, available, already);
+  const needed = capacity > 0 ? Math.ceil(Math.max(0, amount - othersCapacity) / capacity) : 0;
+  const count = selectShips(fd, { ...manual, [cargoShip]: n });
   ourSelection.set(fd, selectionKey(fd));
   setTarget(fd, doc, target);
   setSpeedBar(fd, settings.transportSpeed);
@@ -300,7 +305,7 @@ export function prepareSend(
     fd.cargoDeuterium = load.deuterium;
     cargo = load.metal + load.crystal + load.deuterium;
   }
-  return finish(fd, code, count, cargo);
+  return { ...finish(fd, code, count, cargo), missing: Math.max(0, needed - n) };
 }
 
 /** What was just sent, to offer it again later. */
