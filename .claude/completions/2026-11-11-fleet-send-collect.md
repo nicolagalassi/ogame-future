@@ -31,3 +31,10 @@ Versione 0.3.12.
   scrive). CL / CP chiama `prepareSend(..., cargoShip)`: cargo di quel tipo per le risorse, dopo la
   capacità delle navi scelte a mano (che restano); avvisa se i cargo non bastano (`missing`).
 - `FleetSettings.sendMode`; `SendTarget.galaxy/system` possono essere null; `cargoCount`, `resolveSend`.
+
+## 0.3.14
+- Vuoto = 0 (`pickedLoad`: null = niente). Il simbolo di ogni risorsa è un pulsante: riempie il campo
+  con tutto quello che c'è sul corpo. "Tutto" → "Svuota".
+- `readMissionLink()`: dai link Trasporto / Schiera del gioco (mission 3/4 + coordinate nell'URL) la
+  pagina flotta accende T o D, scrive le coordinate e mette il fuoco sul metallo. Una volta per pagina
+  (`data-fut-mission-link`). **Da verificare in gioco** che il link della galassia porti quei parametri.

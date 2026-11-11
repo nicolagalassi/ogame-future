@@ -206,7 +206,7 @@ export interface SendTarget {
   type: 1 | 3;
 }
 
-/** Resources chosen for the plain Trasporto / Schiera: null = all there is, a number = at most that. */
+/** Resources chosen for the plain Trasporto / Schiera: at most that much; null (empty field) = none. */
 export interface ResourcePick {
   metal: number | null;
   crystal: number | null;
@@ -246,7 +246,7 @@ export function settingsFrom(stored: Partial<FleetSettings> & { reserveOn?: bool
  * No reserve: these two buttons are the plain game actions, the reserves belong to the collection.
  */
 export function pickedLoad(onPlanet: Resources, pick: ResourcePick, fuel: number, capacity: number): Resources {
-  const want = (k: keyof Resources, have: number) => Math.max(0, Math.floor(Math.min(have, pick[k] ?? have)));
+  const want = (k: keyof Resources, have: number) => Math.max(0, Math.floor(Math.min(have, pick[k] ?? 0)));
   let room = Math.max(0, Math.floor(capacity));
   const deuterium = Math.min(want('deuterium', onPlanet.deuterium - fuel), room);
   room -= deuterium;

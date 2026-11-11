@@ -706,13 +706,11 @@
   "fleet.send.destHint": "galaxy, system, position (empty = this body's); 1:234:5 can be pasted",
   "fleet.send.pick": "Your planets and moons",
   "fleet.send.pickHint": "writes the coordinates and type of the chosen body",
-  "fleet.send.allHint": "clear the fields: all resources",
-  "fleet.send.resHint": "empty = all, 0 = none, 2m or 500k work",
+  "fleet.send.resHint": "empty = none, 2m or 500k work; click the symbol = all",
   "fleet.err.noTarget": "Type the destination (galaxy:system:position) or pick one of your bodies",
   "fleet.err.sameBody": "The destination is the body the fleet leaves from",
   "fleet.err.nothingPicked": "No resources to transport with the chosen amounts",
   "fleet.send.res": "Resources",
-  "fleet.send.allBtn": "All",
   "fleet.send.small": "SC",
   "fleet.send.large": "LC",
   "fleet.send.cargoWith": "Prepare with",
@@ -721,5 +719,8 @@
   "fleet.send.onDeploy": "Deploy: pick the ships, destination and resources, then SC or LC",
   "fleet.ok.cargoShort": "{ships} ships, {cargo} resources loaded: {missing} more cargo ships needed for the rest",
   "fleet.err.noCargoShip": "No cargo ship of this kind on this body",
-  "fleet.send.all": "all"
+  "fleet.send.max": "all",
+  "fleet.send.maxHint": "click: all there is here",
+  "fleet.send.clearBtn": "Clear",
+  "fleet.send.clearHint": "clear the resource fields"
 }

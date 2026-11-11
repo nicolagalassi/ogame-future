@@ -706,13 +706,11 @@
   "fleet.send.destHint": "Galaxie, System, Position (leer = die dieses Körpers); 1:234:5 kann eingefügt werden",
   "fleet.send.pick": "Deine Planeten und Monde",
   "fleet.send.pickHint": "trägt Koordinaten und Typ des gewählten Körpers ein",
-  "fleet.send.allHint": "Felder leeren: alle Rohstoffe",
-  "fleet.send.resHint": "leer = alles, 0 = nichts, 2m oder 500k gehen",
+  "fleet.send.resHint": "leer = nichts, 2m oder 500k gehen; Klick aufs Symbol = alles",
   "fleet.err.noTarget": "Ziel eingeben (Galaxie:System:Position) oder einen eigenen Körper wählen",
   "fleet.err.sameBody": "Das Ziel ist der Startkörper der Flotte",
   "fleet.err.nothingPicked": "Mit den gewählten Mengen gibt es nichts zu transportieren",
   "fleet.send.res": "Rohstoffe",
-  "fleet.send.allBtn": "Alles",
   "fleet.send.small": "KT",
   "fleet.send.large": "GT",
   "fleet.send.cargoWith": "Vorbereiten mit",
@@ -721,5 +719,8 @@
   "fleet.send.onDeploy": "Stationieren: Schiffe, Ziel und Rohstoffe wählen, dann KT oder GT",
   "fleet.ok.cargoShort": "{ships} Schiffe, {cargo} Rohstoffe geladen: es fehlen {missing} Frachter für den Rest",
   "fleet.err.noCargoShip": "Keine Frachter dieser Art auf diesem Körper",
-  "fleet.send.all": "alles"
+  "fleet.send.max": "alles",
+  "fleet.send.maxHint": "Klick: alles, was hier ist",
+  "fleet.send.clearBtn": "Leeren",
+  "fleet.send.clearHint": "Rohstofffelder leeren"
 }

@@ -706,13 +706,11 @@
   "fleet.send.destHint": "galassia, sistema, posizione (vuoti = quelli di questo corpo); si può incollare 1:234:5",
   "fleet.send.pick": "I tuoi pianeti e lune",
   "fleet.send.pickHint": "scrive le coordinate e il tipo del corpo scelto",
-  "fleet.send.allHint": "svuota i campi: tutte le risorse",
-  "fleet.send.resHint": "vuoto = tutto, 0 = niente, si può scrivere 2m o 500k",
+  "fleet.send.resHint": "vuoto = niente, si può scrivere 2m o 500k; clic sul simbolo = tutto",
   "fleet.err.noTarget": "Scrivi la destinazione (galassia:sistema:posizione) o sceglila tra i tuoi corpi",
   "fleet.err.sameBody": "La destinazione è il corpo da cui parte la flotta",
   "fleet.err.nothingPicked": "Nessuna risorsa da trasportare con le quantità scelte",
   "fleet.send.res": "Risorse",
-  "fleet.send.allBtn": "Tutto",
   "fleet.send.small": "CL",
   "fleet.send.large": "CP",
   "fleet.send.cargoWith": "Prepara con",
@@ -721,5 +719,8 @@
   "fleet.send.onDeploy": "Schiera: scegli le navi, destinazione e risorse, poi CL o CP",
   "fleet.ok.cargoShort": "{ships} navi, {cargo} risorse caricate: mancano {missing} cargo per il resto",
   "fleet.err.noCargoShip": "Nessun cargo di questo tipo su questo corpo",
-  "fleet.send.all": "tutto"
+  "fleet.send.max": "tutto",
+  "fleet.send.maxHint": "clic: tutto quello che c'è qui",
+  "fleet.send.clearBtn": "Svuota",
+  "fleet.send.clearHint": "svuota i campi delle risorse"
 }
