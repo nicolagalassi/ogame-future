@@ -133,7 +133,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .row:hover { background: #16243A; }
 .row.active { background: rgba(79,209,232,0.12); box-shadow: inset 3px 0 0 #4FD1E8; }
 .pl .cols, .pl .row { grid-template-columns: 18px 84px minmax(0, 1fr) 46px 40px 40px 34px; }
-.ps .row { grid-template-columns: 18px minmax(0, 1fr) auto auto; min-height: 30px; }
+.ps .row { grid-template-columns: 18px minmax(0, 1fr) auto 30px auto; min-height: 30px; }
 .idx { color: #617C8D; font: 11px Consolas, monospace; text-align: right; }
 .coords { all: unset; display: inline-flex; align-items: center; gap: 3px; padding: 2px 3px; border-radius: 4px; color: #E6EDF5; font: 12px Consolas, monospace; cursor: pointer; white-space: nowrap; }
 .coords:hover { background: #1D3350; color: #8BE4F2; }
@@ -327,7 +327,7 @@ export function openSide(o: SideOptions, change: Partial<View>): void {
   if (view.player !== null) playerSheet(o, side, scroll, title, view.player, marks, positions, picker, here);
   else {
     title.append(h(doc, 'span', 'name', t('marks.title')));
-    playersList(o, side, scroll, view, marks, picker, go);
+    playersList(o, side, scroll, view, marks, picker, go, positions);
   }
   side.append(scroll);
   const foot = h(doc, 'div', 'foot');
@@ -357,7 +357,7 @@ function iconButton(doc: Document, name: IconName, label: string): HTMLButtonEle
 
 type Picker = { doc: Document; store: Store; t: T; onChange: () => void };
 
-function playersList(o: SideOptions, side: HTMLElement, scroll: HTMLElement, view: View, marks: Marks, picker: Picker, go: (v: Partial<View>) => void): void {
+function playersList(o: SideOptions, side: HTMLElement, scroll: HTMLElement, view: View, marks: Marks, picker: Picker, go: (v: Partial<View>) => void, positions: Positions): void {
   const { doc, t, locale } = o;
   const chips = h(doc, 'div', 'chips');
   const counts = Object.values(marks.players).reduce<Record<string, number>>((c, p) => ((c[p.flag] = (c[p.flag] ?? 0) + 1), c), {});
@@ -398,6 +398,10 @@ function playersList(o: SideOptions, side: HTMLElement, scroll: HTMLElement, vie
     scroll.append(h(doc, 'p', 'empty', t(view.flagTab === 'recent' ? 'marks.noRecent' : 'marks.noPlayers')));
     return;
   }
+  // When each player was last looked at in the galaxy: the newest reading among their positions.
+  const checked = new Map<number, number>();
+  for (const seen of Object.values(positions)) if (seen.player && seen.at > (checked.get(seen.player) ?? 0)) checked.set(seen.player, seen.at);
+  const now = Date.now();
   const wrap = h(doc, 'div', 'ps');
   list.forEach((p, i) => {
     const row = h(doc, 'div', 'row');
@@ -426,7 +430,10 @@ function playersList(o: SideOptions, side: HTMLElement, scroll: HTMLElement, vie
       line.title = note;
       who.append(line);
     }
-    row.append(h(doc, 'span', 'idx', String(i + 1)), who, h(doc, 'span', 'rank', rank ? `#${rank.toLocaleString(locale)}` : ''), flagButton(picker, p.id, p.name));
+    const at = checked.get(p.id);
+    const age = ageCell(doc, t, at ? ({ at } as Seen) : null, now, locale);
+    age.title = at ? t('marks.lastCheck', { time: new Date(at).toLocaleString(locale) }) : t('marks.neverChecked');
+    row.append(h(doc, 'span', 'idx', String(i + 1)), who, h(doc, 'span', 'rank', rank ? `#${rank.toLocaleString(locale)}` : ''), age, flagButton(picker, p.id, p.name));
     wrap.append(row);
   });
   scroll.append(wrap);

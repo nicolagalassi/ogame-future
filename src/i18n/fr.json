@@ -728,5 +728,7 @@
   "marks.st.inactive": "inactif (7 jours)",
   "marks.st.longinactive": "inactif depuis 28 jours",
   "marks.st.outlaw": "hors-la-loi",
-  "marks.st.admin": "administrateur"
+  "marks.st.admin": "administrateur",
+  "marks.lastCheck": "Dernier contrôle en galaxie : {time}",
+  "marks.neverChecked": "Jamais vu en galaxie"
 }

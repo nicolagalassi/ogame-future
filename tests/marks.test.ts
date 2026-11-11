@@ -85,12 +85,18 @@ describe('targets side bar', () => {
     m = flagPlayer(m, 8, 'Mid', 'danger', 1);
     store.set(MARKS_KEY, m);
     store.set(UNIVERSE_RANKS_KEY, { at: Date.now(), ranks: { 5: [18, 0], 7: [2, 0], 8: [9, 0] } });
+    // Zed's planets were read in the galaxy 3 and 2 hours ago: the newest counts. The others never.
+    store.set(POSITIONS_KEY, {
+      '1:1:1': { player: 7, name: 'a', moon: false, debris: 0, act: [null, null], at: Date.now() - 3 * 3_600_000 },
+      '1:1:2': { player: 7, name: 'b', moon: false, debris: 0, act: [null, null], at: Date.now() - 2 * 3_600_000 - 60_000 },
+    });
     const fetchImpl = vi.fn(async (_u: string, _i?: RequestInit) => new Response('<?xml version="1.0"?><players timestamp="1"><player id="7" name="Zed" status="vi"/><player id="5" name="Bob" status=""/><player id="6" name="Al" status="v"/></players>'));
     const guard = new NetworkGuard(fetchImpl, 'http://localhost:3000');
     openSide({ doc: document, store, guard, t, locale: 'it' }, { flagTab: 'danger', player: null });
     const root = () => document.getElementById(SIDE_ID)!.shadowRoot!;
     expect([...root().querySelectorAll('.ps .pname')].map((n) => n.textContent)).toEqual(['Zed', 'Mid', 'Abubu']);
     expect([...root().querySelectorAll('.ps .rank')].map((n) => n.textContent)).toEqual(['#2', '#9', '#18']);
+    expect([...root().querySelectorAll('.ps .age')].map((n) => n.textContent)).toEqual(['2h', '—', '—']);
     // The ranks file is fresh: only players.xml is asked; then Zed shows on vacation.
     await vi.waitFor(() => expect(root().querySelector('.ps .pst')?.textContent).toBe('(vi)'));
     expect(root().querySelector('.ps .pname')!.classList.contains('st-vacation')).toBe(true);
