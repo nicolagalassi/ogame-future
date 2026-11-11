@@ -722,5 +722,14 @@
   "fleet.send.max": "all",
   "fleet.send.maxHint": "click: all there is here",
   "fleet.send.clearBtn": "Clear",
-  "fleet.send.clearHint": "clear the resource fields"
+  "fleet.send.clearHint": "clear the resource fields",
+  "res.short.metal": "M",
+  "res.short.crystal": "C",
+  "res.short.deuterium": "D",
+  "fleet.collectIgnoreShips": "Transport: ignore the ships reserve",
+  "settings.collectIgnoreShipsHint": "The Collection transport (and \"To moon\") may also use the ships the reserve keeps: cargo ships come back. The resources reserve always applies.",
+  "fleet.collectDeployRes": "Deploy: take resources too",
+  "settings.collectDeployResHint": "Off: the Collection deploy sends only the ships, the resources stay.",
+  "fleet.loadOrder": "Loading order",
+  "settings.loadOrderHint": "Which resource fills the Collection cargo first, then second and third (the game does D → C → M)."
 }

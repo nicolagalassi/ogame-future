@@ -722,5 +722,14 @@
   "fleet.send.max": "tutto",
   "fleet.send.maxHint": "clic: tutto quello che c'è qui",
   "fleet.send.clearBtn": "Svuota",
-  "fleet.send.clearHint": "svuota i campi delle risorse"
+  "fleet.send.clearHint": "svuota i campi delle risorse",
+  "res.short.metal": "M",
+  "res.short.crystal": "C",
+  "res.short.deuterium": "D",
+  "fleet.collectIgnoreShips": "Trasporto: ignora la riserva navi",
+  "settings.collectIgnoreShipsHint": "Il trasporto della Raccolta (e \"Su luna\") può usare anche le navi tenute dalla riserva: i cargo tornano indietro. La riserva risorse vale sempre.",
+  "fleet.collectDeployRes": "Schieramento: porta anche le risorse",
+  "settings.collectDeployResHint": "Spento: lo schieramento della Raccolta manda solo le navi, le risorse restano.",
+  "fleet.loadOrder": "Ordine di carico",
+  "settings.loadOrderHint": "Quale risorsa riempie per prima i cargo della Raccolta, poi la seconda e la terza (il gioco fa D → C → M)."
 }
