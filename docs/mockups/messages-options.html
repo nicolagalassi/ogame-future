@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Posta: tre proposte</title>
+<style>
+/* Mockup only (not shipped): three ways to summarise the game's reports. Same reports in each. */
+:root {
+  --page: #0B1016; --card: #141C26; --card-hi: #18222E; --line: #233140; --line-soft: #1B2633;
+  --title: #6F9FC8; --txt: #C9D2DC; --mute: #8592A1; --faint: #3C4958; --hi: #F1F4F7;
+  --m: #B8C2CC; --c: #7FB8FF; --d: #4FE0B0; --dm: #B58CDB;
+  --rare: #4AA3FF; --epic: #B57BFF; --warn: #E3B341; --neg: #F07A6E; --ship: #4FE0B0;
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px 16px 48px; background: var(--page); color: var(--txt); font: 11px/1.45 Verdana, Arial, sans-serif; }
+main { max-width: 680px; margin: 0 auto; }
+h1 { margin: 0 0 6px; font: 700 18px/1.3 Verdana, Arial, sans-serif; color: var(--hi); }
+.intro { margin: 0 0 28px; color: var(--mute); max-width: 62ch; }
+section { margin: 0 0 40px; }
+h2 { margin: 0 0 4px; font: 700 14px/1.3 Verdana, Arial, sans-serif; color: var(--hi); }
+.why { margin: 0 0 12px; color: var(--mute); max-width: 64ch; }
+.why b { color: var(--txt); font-weight: 400; }
+
+/* The game's own card, simplified. */
+.msg { position: relative; margin: 0 0 4px; background: var(--card); border-radius: 3px; }
+.head { display: grid; grid-template-columns: minmax(0, 1fr) auto 26px; align-items: start; gap: 8px; padding: 6px 8px 4px 12px; }
+.head .t { color: var(--title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.head .t b { color: var(--hi); font-weight: 700; }
+.head .from { color: var(--mute); }
+.head .date { color: var(--mute); white-space: nowrap; }
+.head .del { width: 22px; height: 22px; border-radius: 3px; background: #2A3442; }
+.foot { display: flex; justify-content: space-between; align-items: center; padding: 5px 8px 6px; border-top: 1px solid var(--line-soft); }
+.foot .btns { display: flex; gap: 4px; } .foot .btns i { width: 22px; height: 22px; border-radius: 3px; background: #2A3442; display: block; }
+.foot .more { color: var(--hi); font-weight: 700; }
+.ico { display: inline-block; flex: none; vertical-align: -3px; }
+.m { color: var(--m); } .c { color: var(--c); } .d { color: var(--d); } .dm { color: var(--dm); }
+.ship { position: relative; flex: none; width: 20px; height: 20px; border-radius: 50%; object-fit: cover; background: #2A3442; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- A · Colonne ---------- */
+.a-cols { display: grid; grid-template-columns: 92px repeat(3, 74px) minmax(0, 1fr) 82px; align-items: center; column-gap: 8px; }
+.a-head { padding: 0 12px 4px; color: var(--mute); }
+.a-head span:nth-child(n+2):nth-child(-n+4), .a-head span:last-child { text-align: right; }
+.a-row { padding: 6px 12px; border-top: 1px solid var(--line-soft); }
+.a-row .cell { text-align: right; white-space: nowrap; }
+.a-row .cell.empty { color: var(--faint); }
+.a-row .what { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; min-width: 0; padding-left: 6px; }
+.a-row .what span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.a-row .msu { text-align: right; font-weight: 700; color: var(--hi); white-space: nowrap; }
+.a-row .msu small { font-weight: 400; color: var(--mute); }
+.a-row .out { color: var(--warn); }
+.a-row .out.plain { color: var(--mute); }
+.msg.rare { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rare) 65%, transparent); background: color-mix(in srgb, var(--rare) 10%, var(--card)); }
+.msg.epic { box-shadow: inset 0 0 0 1px var(--epic); background: color-mix(in srgb, var(--epic) 15%, var(--card)); }
+.msg.rare .msu { color: var(--rare); } .msg.epic .msu { color: var(--epic); }
+.route { display: inline-flex; align-items: center; gap: 5px; color: var(--txt); white-space: nowrap; }
+.route .co { color: var(--title); }
+.route .arr { color: var(--mute); }
+
+/* ---------- B · Bottino ---------- */
+.b-body { display: flex; align-items: stretch; gap: 6px; padding: 8px 12px 10px; }
+.b-tiles { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 64px; padding: 6px 8px 5px; border-radius: 4px; background: #1C2633; }
+.tile b { font-size: 12px; color: var(--hi); white-space: nowrap; }
+.tile.m b { color: var(--m); } .tile.c b { color: var(--c); } .tile.d b { color: var(--d); } .tile.dm b { color: var(--dm); }
+.tile .ship { width: 24px; height: 24px; }
+.tile.say { flex: 1; flex-direction: row; justify-content: flex-start; gap: 10px; padding: 8px 12px; text-align: left; }
+.tile.say b { font-size: 12px; }
+.tile.say span { color: var(--mute); }
+.tile.say.warn b { color: var(--warn); }
+.tile.say.neg b { color: var(--neg); }
+.b-msu { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; min-width: 76px; padding-left: 10px; border-left: 1px solid var(--line-soft); }
+.b-msu b { font-size: 15px; color: var(--hi); white-space: nowrap; }
+.b-msu small { color: var(--mute); }
+.msg.rare .tile { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rare) 55%, transparent); }
+.msg.epic .tile { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--epic) 70%, transparent); }
+.msg.rare .b-msu b { color: var(--rare); } .msg.epic .b-msu b { color: var(--epic); }
+.b-route { display: flex; align-items: center; gap: 6px; padding: 0 12px 0; }
+
+/* ---------- C · In testa ---------- */
+.c-head { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto 26px; align-items: center; gap: 10px; padding: 6px 8px 6px 12px; }
+.c-head .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--title); }
+.c-sum { display: flex; align-items: center; gap: 10px; min-width: 0; white-space: nowrap; }
+.c-sum span { display: inline-flex; align-items: center; gap: 4px; }
+.c-sum .out { color: var(--warn); }
+.c-sum .out.plain { color: var(--mute); }
+.c-val { min-width: 70px; text-align: right; font-weight: 700; color: var(--hi); white-space: nowrap; }
+.c-val small { font-weight: 400; color: var(--mute); }
+.msg.rare .c-val { color: var(--rare); } .msg.epic .c-val { color: var(--epic); }
+.c-head .date { color: var(--mute); }
+.c-note { padding: 0 12px 6px; color: var(--mute); }
+
+@media (max-width: 560px) {
+  .a-cols { grid-template-columns: 70px repeat(3, minmax(0, 1fr)) 64px; }
+  .a-head span:nth-child(5), .a-row .what { grid-column: 1 / -1; grid-row: 2; padding: 4px 0 0; }
+  .c-head { grid-template-columns: minmax(0, 1fr) auto 26px; }
+  .c-sum { grid-column: 1 / -1; grid-row: 2; flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>Posta: tre proposte</h1>
+  <p class="intro">Stessi sette rapporti, tre modi di riassumerli. Lo spazio del gioco (titolo, data, pulsanti) resta com'è; cambia solo cosa mette Future e dove. Il colore blu o viola resta per le spedizioni grandi ed enormi.</p>
+
+  <section id="A">
+    <h2>A · Colonne</h2>
+    <p class="why">Ogni risorsa ha sempre la stessa colonna, in tutti i messaggi: scorrendo la lista i numeri sono uno sotto l'altro, come in un foglio di calcolo. <b>Per chi legge molte spedizioni di fila e vuole confrontarle.</b> L'esito compare solo quando non si vede già.</p>
+    <div class="a-cols a-head"><span>Esito</span><span>Metallo</span><span>Cristallo</span><span>Deuterio</span><span style="padding-left:6px">Navi e altro</span><span>MSU</span></div>
+    <div id="optA"></div>
+  </section>
+
+  <section id="B">
+    <h2>B · Bottino</h2>
+    <p class="why">Ogni cosa trovata è una tessera con il simbolo e il numero, come lo schermo di bottino di un gioco; quando non c'è nulla da mostrare, una frase dice cosa è successo. <b>Più leggibile a colpo d'occhio, più alto.</b></p>
+    <div id="optB"></div>
+  </section>
+
+  <section id="C">
+    <h2>C · In testa</h2>
+    <p class="why">Niente riga in più: il riassunto entra nella riga del titolo e il testo del gioco resta chiuso. Ogni rapporto è alto una riga. <b>La lista più corta possibile</b>; il dettaglio si apre col clic come oggi.</p>
+    <div id="optC"></div>
+  </section>
+</main>
+
+<script>
+const RES = {
+  metal: '<path d="M1.8 21 3.6 15.6h7.3L12.7 21z" opacity=".7"/><path d="M11.3 21l1.8-5.4h7.3l1.8 5.4z" opacity=".7"/><path d="M6.5 14 8.3 8.6h7.4L17.5 14z"/><path d="M8.3 8.6h7.4l-.6 1.6H8.9z" opacity=".55"/>',
+  crystal: '<path d="M12 1.8 18.6 9 12 22.2 5.4 9z"/><path d="M12 1.8 5.4 9 12 22.2 9.6 9z" opacity=".55"/>',
+  deuterium: '<path fill-rule="evenodd" d="M12 2c4 4.8 6.8 8.7 6.8 12.4a6.8 6.8 0 0 1-13.6 0C5.2 10.7 8 6.8 12 2zm-2.3 11.2a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4z"/>',
+  darkMatter: '<circle cx="12" cy="12" r="10" opacity=".3"/><circle cx="12" cy="12" r="5.6"/>',
+};
+const CLS = { metal: 'm', crystal: 'c', deuterium: 'd', darkMatter: 'dm' };
+const SHIPS = {
+  202: 'https://gf2.geo.gfsrv.net/cdnd9/60555c3c87b9eb3b5ddf76780b5712.jpg', 203: 'https://gf1.geo.gfsrv.net/cdn34/fdbcc505474e3e108d10a3ed4a19f4.jpg',
+  204: 'https://gf2.geo.gfsrv.net/cdnd2/9ed5c1b6aea28fa51f84cdb8cb1e7e.jpg', 205: 'https://gf1.geo.gfsrv.net/cdnf1/8266a2cbae5ad630c5fedbdf270f3e.jpg',
+  210: 'https://gf3.geo.gfsrv.net/cdnb5/347821e80cafc52aec04f27c3a2a4d.jpg', 219: 'https://gf3.geo.gfsrv.net/cdne2/b8d8d18f2baf674acedb7504c7cc83.jpg',
+};
+const NAMES = { 202: 'Cargo leggero', 203: 'Cargo pesante', 204: 'Caccia leggero', 205: 'Caccia pesante', 210: 'Sonda spia', 219: 'Pathfinder' };
+const ico = (k, s = 14) => `<svg class="ico ${CLS[k]}" viewBox="0 0 24 24" width="${s}" height="${s}" fill="currentColor" aria-hidden="true">${RES[k]}</svg>`;
+const moon = '<svg class="ico" viewBox="0 0 24 24" width="10" height="10" fill="currentColor" style="color:#8592A1"><path d="M14.6 2.6A9.6 9.6 0 1 0 21.4 16 8 8 0 0 1 14.6 2.6z"/></svg>';
+const ship = (id, s) => `<img class="ship" src="${SHIPS[id]}" alt="${NAMES[id]}" title="${NAMES[id]}" ${s ? `style="width:${s}px;height:${s}px"` : ''} onerror="this.removeAttribute('src')">`;
+
+// The same seven reports for every option.
+const R = [
+  { title: 'Risultato della Spedizione', at: '[7:363:16]', date: '11.11.2026 10:35:26', res: { metal: '+43,0M' }, msu: '43,0M' },
+  { title: 'Risultato della Spedizione', at: '[6:427:16]', date: '11.11.2026 10:35:13', rar: 'rare', ships: [[204, '+3.508'], [205, '+692'], [210, '+1.003'], [202, '+126']], msu: '93,7M' },
+  { title: 'Risultato della Spedizione', at: '[5:185:16]', date: '11.11.2026 10:34:58', rar: 'epic', res: { crystal: '+62,5M', deuterium: '+20,1M' }, msu: '154M' },
+  { title: 'Risultato della Spedizione', at: '[4:264:16]', date: '11.11.2026 10:34:40', out: 'Ritardo', say: 'la flotta rientra più tardi', tone: 'warn' },
+  { title: 'Risultato della Spedizione', at: '[4:264:16]', date: '11.11.2026 10:34:12', out: 'Oggetto', say: 'Booster di metallo d\'oro', tone: 'plain' },
+  { title: 'Pianeta raggiunto', at: '', date: '11.11.2026 12:24:35', from: ['G4 427', '6:427:5'], to: ['BEL BUG', '9:218:4'], res: { metal: '23,7M', crystal: '50,2M', deuterium: '78,7M' }, msu: '335M', kind: 'Consegna' },
+  { title: 'Ritorno di una flotta', at: '', date: '11.11.2026 13:08:31', from: ['BEL BUG', '9:218:4'], to: ['G3 401', '4:401:10'], empty: true, kind: 'Rientro' },
+];
+const head = (r) => `<div class="head"><div><div class="t">${r.title} <b>${r.at}</b></div><div class="from">Da: Comando della Flotta</div></div><span class="date">${r.date}</span><i class="del"></i></div>`;
+const foot = '<div class="foot"><span class="btns"><i></i><i></i></span><span class="more">Più dettagli</span></div>';
+const route = (r) => `<span class="route">${moon}${r.from[0]} <span class="co">[${r.from[1]}]</span><span class="arr">→</span>${moon}${r.to[0]} <span class="co">[${r.to[1]}]</span></span>`;
+const card = (r, inner) => `<article class="msg ${r.rar ?? ''}">${inner}</article>`;
+
+// A · Columns
+document.getElementById('optA').innerHTML = R.map((r) => {
+  const cell = (k) => r.res?.[k] ? `<span class="cell num ${CLS[k]}">${r.res[k]}</span>` : '<span class="cell empty">·</span>';
+  const what = r.ships ? r.ships.map(([id, n]) => `<span>${ship(id)}<span class="num" style="color:var(--ship)">${n}</span></span>`).join('')
+    : r.from ? route(r) : r.say ? `<span style="color:var(--mute)">${r.say}</span>` : '';
+  const out = r.out ? `<span class="out ${r.tone === 'plain' ? 'plain' : ''}">${r.out}</span>` : r.kind ? `<span class="out plain">${r.kind}</span>` : '<span></span>';
+  const msu = r.msu ? `<span class="msu num">${r.msu} <small>MSU</small></span>` : '<span class="msu" style="color:var(--faint)">·</span>';
+  return card(r, head(r) + `<div class="a-cols a-row">${out}${cell('metal')}${cell('crystal')}${cell('deuterium')}<span class="what">${what}${r.empty ? '<span style="color:var(--mute)">vuota</span>' : ''}</span>${msu}</div>` + foot);
+}).join('');
+
+// B · Loot tiles
+document.getElementById('optB').innerHTML = R.map((r) => {
+  let tiles = '';
+  for (const k of ['metal', 'crystal', 'deuterium']) if (r.res?.[k]) tiles += `<div class="tile ${CLS[k]}">${ico(k, 20)}<b class="num">${r.res[k]}</b></div>`;
+  for (const [id, n] of r.ships ?? []) tiles += `<div class="tile">${ship(id, 24)}<b class="num" style="color:var(--ship)">${n}</b></div>`;
+  if (r.say) tiles += `<div class="tile say ${r.tone}"><b>${r.out}</b><span>${r.say}</span></div>`;
+  if (r.empty) tiles += `<div class="tile say"><b style="color:var(--mute)">Stiva vuota</b></div>`;
+  const msu = r.msu ? `<div class="b-msu"><b class="num">${r.msu}</b><small>MSU</small></div>` : '';
+  const top = r.from ? `<div class="b-route">${route(r)}</div>` : '';
+  return card(r, head(r) + top + `<div class="b-body"><div class="b-tiles">${tiles}</div>${msu}</div>` + foot);
+}).join('');
+
+// C · In the title row
+document.getElementById('optC').innerHTML = R.map((r) => {
+  let sum = '';
+  if (r.out) sum += `<span class="out ${r.tone === 'plain' ? 'plain' : ''}">${r.out}${r.tone === 'plain' ? ': ' + r.say : ''}</span>`;
+  if (r.from) sum += `<span>${r.from[0]} → ${r.to[0]}</span>`;
+  for (const k of ['metal', 'crystal', 'deuterium']) if (r.res?.[k]) sum += `<span class="num">${ico(k, 13)}${r.res[k]}</span>`;
+  for (const [id, n] of r.ships ?? []) sum += `<span class="num" style="color:var(--ship)">${ship(id, 16)}${n}</span>`;
+  if (r.empty) sum += '<span style="color:var(--mute)">vuota</span>';
+  const t = r.from ? r.title : `Spedizione <b style="color:var(--hi)">${r.at}</b>`;
+  return card(r, `<div class="c-head"><span class="t">${t}</span><span class="c-sum">${sum}</span><span class="c-val num">${r.msu ? `${r.msu} <small>MSU</small>` : ''}</span><span class="date">${r.date.slice(11, 16)}</span><i class="del" style="width:22px;height:22px;border-radius:3px;background:#2A3442"></i></div>`);
+}).join('');
+</script>
+</body>
+</html>
