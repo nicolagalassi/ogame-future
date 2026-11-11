@@ -126,6 +126,23 @@ export function pendingFor(list: Shipment[], target: number, seenAt: number): Re
   return out;
 }
 
+export type PlanState = 'ready' | 'arriving' | 'arrived' | 'missing' | 'unknown';
+
+/**
+ * Where a body's plan stands: its resources are there (`ready`), will be once what was sent lands
+ * (`arriving`), have landed but the body was not read since (`arrived`), still lack something
+ * (`missing`, even with part on the way), or the body's stock is not known (`unknown`).
+ */
+export function planStatus(items: PlanItem[], have: Res | null, pending: Res & { arriveAt: number }, now: number): { state: PlanState; lack: Cost | null } {
+  if (!have) return { state: 'unknown', lack: null };
+  const total = planTotal(items);
+  const now0 = missing(total, have);
+  if (!now0.metal && !now0.crystal && !now0.deuterium) return { state: 'ready', lack: null };
+  const lack = missing(total, { metal: have.metal + pending.metal, crystal: have.crystal + pending.crystal, deuterium: have.deuterium + pending.deuterium });
+  if (lack.metal || lack.crystal || lack.deuterium) return { state: 'missing', lack };
+  return { state: pending.arriveAt > now ? 'arriving' : 'arrived', lack: null };
+}
+
 /** Drops shipments already counted in the body's resources, or towards bodies with no plan. */
 export function prunePending(list: Shipment[], plan: Plan, seenAtOf: (target: number) => number): Shipment[] {
   return list.filter((s) => (plan[String(s.target)]?.length ?? 0) > 0 && s.arriveAt > seenAtOf(s.target));

@@ -129,9 +129,20 @@ ${L} .fut-age-old { color: #EF7676; }
 
 /* What is being built: one dot per queue kind (OGLight colours) where the game's wrench was; details in the tooltip. */
 ${L} .smallplanet .constructionIcon { display: none !important; }
-${L} .fut-queue { position: absolute; left: 2px; bottom: 2px; z-index: 2; display: flex; gap: 2px; padding: 2px; border-radius: 6px; background: rgba(5,10,18,0.85); }
+${L} .fut-corner { position: absolute; left: 2px; bottom: 2px; z-index: 2; display: flex; align-items: center; gap: 2px; }
+${L} a.moonlink .fut-corner { bottom: auto; top: 1px; }
+${L} .fut-queue { display: flex; gap: 2px; padding: 2px; border-radius: 6px; background: rgba(5,10,18,0.85); }
+/* The plan on this body, coloured by where its resources stand. */
+${L} .fut-plan { display: inline-flex; align-items: center; gap: 1px; padding: 0 3px 0 2px; border-radius: 6px; background: rgba(5,10,18,0.88);
+  font: 700 10px/12px Arial, sans-serif; cursor: help; }
+${L} .fut-plan svg { display: block; }
+${L} .fut-plan-missing { color: #EF7676; }
+${L} .fut-plan-arriving { color: #4FD1E8; }
+${L} .fut-plan-arrived { color: #E3BB28; }
+${L} .fut-plan-ready { color: #38C56E; }
+${L} .fut-plan-unknown { color: #8592A1; }
 ${L} .fut-q { display: block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-${L} a.moonlink .fut-queue { left: 2px; bottom: auto; top: 1px; padding: 1px 2px; }
+${L} a.moonlink .fut-queue { padding: 1px 2px; }
 ${L} a.moonlink .fut-q { width: 5px; height: 5px; }
 ${L} .fut-q-building { color: #FF8200; }
 ${L} .fut-q-research { color: #32FB2F; }

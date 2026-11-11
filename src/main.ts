@@ -33,7 +33,7 @@ import { mountTouchBar, registerActions, switchBodyUrl } from './modules/shortcu
 import { nextBody } from './engines/fleet';
 import { watchTechPages } from './modules/tech';
 import { accountResources, openPlanner } from './modules/tech/planner-view';
-import { accountGap, PLAN_KEY, pendingFor, planCount, pruneByQueues, SENT_KEY, type Plan, type Shipment } from './engines/planner';
+import { accountGap, PLAN_KEY, pendingFor, planCount, planStatus, pruneByQueues, SENT_KEY, type Plan, type Shipment } from './engines/planner';
 import { estimateResources } from './engines/resources';
 import { daySeries, entriesIn, JOURNAL_KEY, periodRange, periodStats, type Journal } from './engines/expeditions';
 import { isMessagesPage, ownPlayerId } from './data/messages';
@@ -41,7 +41,7 @@ import { watchMessages } from './modules/messages';
 import { openJournal } from './modules/messages/journal-view';
 import { isHighscorePage, watchHighscore } from './modules/highscore';
 import { bellButton, clockOffset, startReminders, watchEventList } from './modules/reminders';
-import { renderPlanetMenu, watchPlanetBar, type MenuMode, type MenuSettings } from './modules/planet-menu';
+import { renderPlanetMenu, watchPlanetBar, type MenuMode, type MenuSettings, type PlanMark } from './modules/planet-menu';
 import { TECH_ICONS_KEY, type TechIcon } from './data/tech-icons';
 
 async function bootstrap(): Promise<void> {
@@ -136,6 +136,34 @@ async function bootstrap(): Promise<void> {
     showTotals: store.get<boolean>('planetMenu.totals', true),
     showFleet: store.get<boolean>('planetMenu.fleet', false),
     totalView: store.get<string>('planetMenu.totalView', 'msu') === 'sum' ? 'sum' : 'msu',
+  };
+  /** Per planned body: what is planned and where its resources stand (shown in the planet list). */
+  const planMarks = (): Record<string, PlanMark> => {
+    const plan = store.get<Plan>(PLAN_KEY, {});
+    const sent = store.get<Shipment[]>(SENT_KEY, []);
+    const now = Date.now();
+    const here = currentBodyId(document);
+    const onScreen = readCurrentResources(document);
+    const out: Record<string, PlanMark> = {};
+    for (const [key, items] of Object.entries(plan)) {
+      if (!items.length) continue;
+      const id = Number(key);
+      const body = snapshot?.bodies.find((b) => b.id === id);
+      const have = here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
+      const pending = pendingFor(sent, id, here === id ? now : (body?.resourcesAt ?? 0));
+      const { state, lack } = planStatus(items, have, pending, now);
+      // Consecutive levels of one technology read as one line.
+      const lines: { name: string; from?: number; to?: number; amount?: number }[] = [];
+      for (const i of items) {
+        const last = lines[lines.length - 1];
+        if (last && last.name === i.name && i.level !== undefined && last.to !== undefined && i.level === last.to + 1) last.to = i.level;
+        else lines.push({ name: i.name, from: i.level, to: i.level, amount: i.amount });
+      }
+      const label = (l: (typeof lines)[number]) =>
+        l.amount !== undefined ? `${l.name} ×${l.amount.toLocaleString(locale)}` : `${l.name} ${l.from === l.to ? t('plan.level', { level: l.from ?? 0 }) : t('plan.levels', { from: l.from ?? 0, to: l.to ?? 0 })}`;
+      out[key] = { state, lack, pending, items: lines.map(label) };
+    }
+    return out;
   };
   /** What the whole account still misses for the plan, in MSU (resources on the way count as there). */
   const planGap = (): number | null => {
@@ -243,6 +271,7 @@ async function bootstrap(): Promise<void> {
         }),
       planCount: planCount(store.get<Plan>(PLAN_KEY, {})),
       planGap: planGap(),
+      planMarks: planMarks(),
       onOpenPlanner: () => {
         const id = currentBodyId(document);
         const resources = readCurrentResources(document);
