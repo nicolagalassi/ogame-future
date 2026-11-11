@@ -47,6 +47,10 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
   sync e impostazioni a lato.
 - Flotta: i pulsanti preparano tutto in fleet1; fleetsave come PrOGect (galassia/sistema vuoti =
   quelli del pianeta di partenza); la riserva non vale per le spedizioni; "ignora cibo".
+- Flotta (2026-11-11): Trasporto (T) e Schiera (D) sono le azioni semplici, senza riserve, verso la
+  destinazione scritta in fleet1 con le risorse scelte lì. La vecchia coppia trasporto/schieramento
+  verso la luna principale (con le riserve) è la "Raccolta spedizioni", funzione secondaria (C, V).
+  Icone della barra piene, niente neon.
 - Regole per corpo (2026-11-06): navi, risorse, portale (lune) sono regole separate, ognuna con
   un interruttore globale (barra flotta; il portale anche nel dialogo del salto); cibo = "ignora
   cibo". Il fleetsave ha navi + risorse sue e ignora gli interruttori. "Copia su…" copia solo le

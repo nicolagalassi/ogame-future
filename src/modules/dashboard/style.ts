@@ -83,6 +83,13 @@ td.guess { font-style: italic; opacity: 0.7; }
 .unit-ico { width: 28px; height: 28px; border-radius: 4px; object-fit: cover; display: block; margin: 0 auto; background: #16202E; }
 .unit-ico-none { display: flex; align-items: center; justify-content: center; color: #8A9BB0; font-size: 10px; }
 
+/* Lifeforms: same width for every planet, whatever its name; long names wrap on two lines at most. */
+.matrix.lf { table-layout: fixed; min-width: calc(230px + var(--cols, 1) * 52px); }
+.matrix.lf col.name-col { width: 230px; }
+.matrix.lf th.col { min-width: 0; max-width: none; }
+.matrix.lf .col-name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; text-align: right; overflow-wrap: anywhere; hyphens: none; }
+.matrix.lf td.tech { max-width: none; }
+
 /* Research: one tile per technology, its picture over its level. */
 .levels { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px; }
 .lv { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px 2px 4px; border: 1px solid var(--line-soft); border-radius: 6px; background: var(--surface); min-width: 0; }
@@ -93,12 +100,15 @@ td.guess { font-style: italic; opacity: 0.7; }
 
 /* Planets | moons switch on the ships and defence pages. */
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
-.seg button { display: inline-flex; align-items: baseline; gap: 8px; height: 28px; padding: 0 12px; border: 0; background: var(--bg); color: var(--muted); font: 12px Arial, sans-serif; cursor: pointer; }
+.seg button { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border: 0; background: var(--bg); color: var(--muted); font: 12px Arial, sans-serif; cursor: pointer; }
 .seg button + button { border-left: 1px solid var(--line); }
 .seg button i { font-style: normal; font-size: 11px; color: var(--muted); }
 .seg button:hover { color: var(--text); }
 .seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
 .seg button[aria-pressed="true"] i { color: var(--accent); font-weight: 400; }
+.seg button i { margin-left: 2px; }
+.seg .seg-ico { flex: none; color: var(--muted); }
+.seg button[aria-pressed="true"] .seg-ico { color: var(--text); }
 
 /* Body picker: the same two columns as the fleet bar's destination list. */
 .bpick { position: relative; }

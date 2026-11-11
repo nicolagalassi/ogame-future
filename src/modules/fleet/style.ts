@@ -3,8 +3,9 @@ export const FLEET_CSS = `
 /* The fleet bar speaks the inbox's language: Verdana 11px, tabular numbers, one set of tokens. */
 .fut-fbar, .fut-fmenu {
   --hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1; --line: #24344B; --line-soft: #1A2738;
-  --tile: #0D1522; --tile-hi: #12283A; --accent: #4FD1E8; --on-accent: #CFF5FC; --ok: #4FE0B0; --neg: #F07A6E; --warn: #E3B341;
-  --track: #3A4A60; --knob-on: #06222A; --on-line: #1F5A68;
+  --tile: #152234; --tile-hi: #1C2D44; --tile-line: #2A3B53; --ico: #C2CCD8; --ico-hi: #F1F4F7;
+  --accent: #6FB6C8; --on-accent: #DCEAF0; --ok: #4FE0B0; --neg: #F07A6E; --warn: #E3B341;
+  --track: #3A4A60; --knob-on: #0B1A22; --on-line: #35576A; --on-bg: #17293A; --field: #0D1522;
 }
 .fut-fbar {
   display: flex; flex-direction: column; gap: 8px; margin: 6px 10px; padding: 8px;
@@ -17,33 +18,33 @@ export const FLEET_CSS = `
 /* Two rows: what to send (and the editors), then what to keep back (and the readout). */
 .fut-frow { display: flex; align-items: center; gap: 8px; min-width: 0; }
 
-/* Actions: a hotbar of icons, the key in the corner. Dashed = still to set up. */
-.fut-facts { display: flex; flex-wrap: wrap; gap: 4px; }
+/* Actions: a hotbar of filled icons on solid tiles, the key in the corner. Dashed = still to set up.
+   Silver on slate, no neon: colour is left to what the game's own page says. */
+.fut-facts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .fut-fact {
   position: relative; flex: none; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 40px; padding: 0;
-  border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--accent);
+  border: 1px solid var(--tile-line); border-radius: 6px; background: var(--tile); color: var(--ico);
 }
-.fut-fact:hover { border-color: var(--accent); background: var(--tile-hi); color: var(--on-accent); }
+.fut-fact:hover { border-color: #47607D; background: var(--tile-hi); color: var(--ico-hi); }
 .fut-fact:active { transform: translateY(1px); }
 .fut-fact .ico { display: inline-flex; }
 /* The key sits in the corner: the icon steps aside for it. */
 .fut-fact:has(kbd) .ico { margin: 5px 6px 0 0; }
 .fut-fact kbd { position: absolute; top: 2px; right: 3px; color: var(--dim); font: 11px/11px Verdana, Arial, sans-serif; }
 .fut-fact:hover kbd { color: var(--mute); }
-.fut-fact.dim { border-style: dashed; color: var(--dim); }
-.fut-fsplit { display: inline-flex; }
-.fut-fsplit .fut-fact { border-radius: 5px 0 0 5px; }
-.fut-fcaret {
-  width: 24px; height: 40px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
-  border: 1px solid var(--line); border-left: 0; border-radius: 0 5px 5px 0; background: var(--tile); color: var(--mute);
-}
-.fut-fcaret:hover { border-color: var(--accent); box-shadow: -1px 0 0 var(--accent); background: var(--tile-hi); color: var(--hi); }
+.fut-fact.dim { border-style: dashed; background: none; color: var(--dim); }
+/* Secondary tools (moon, expedition collection): set apart and quieter. */
+.fut-fsecond { display: inline-flex; gap: 4px; margin-left: 6px; padding-left: 10px; border-left: 1px solid var(--line); }
+.fut-fsecond .fut-fact { background: none; border-color: var(--line); color: var(--mute); }
+.fut-fsecond .fut-fact:hover { background: var(--tile); border-color: #47607D; color: var(--ico-hi); }
+/* "Opens a list" mark, in the corner where the others have their key. */
+.fut-fact .more-mark { position: absolute; right: 3px; bottom: 3px; width: 0; height: 0; border-left: 5px solid transparent; border-bottom: 5px solid currentColor; opacity: 0.7; }
 
 /* On the game's ship tiles: inverts that ship's selection. */
 #fleet1 #technologies li[data-technology] { position: relative; }
 .fut-finv { position: absolute; top: 2px; left: 2px; z-index: 3; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; padding: 0;
   border: 1px solid #24344B; border-radius: 4px; background: rgba(8, 13, 20, 0.85); color: #C9D2DC; cursor: pointer; opacity: 0.75; }
-.fut-finv:hover, .fut-finv:focus-visible { opacity: 1; border-color: #4FD1E8; color: #4FD1E8; }
+.fut-finv:hover, .fut-finv:focus-visible { opacity: 1; border-color: #47607D; color: #F1F4F7; }
 @media (pointer: coarse) { .fut-finv { width: 26px; height: 26px; opacity: 1; } }
 
 /* Editors, pushed to the far end of the first row. */
@@ -58,7 +59,7 @@ export const FLEET_CSS = `
 .fut-fsw .track { position: relative; flex: none; width: 20px; height: 12px; border-radius: 6px; background: var(--track); transition: background-color 120ms ease-out; }
 .fut-fsw .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 8px; height: 8px; border-radius: 50%; background: var(--txt); transition: transform 120ms ease-out; }
 .fut-fsw:hover { border-color: var(--line); color: var(--txt); }
-.fut-fsw[aria-checked="true"] { border-color: var(--on-line); background: rgba(79, 209, 232, 0.08); color: var(--on-accent); }
+.fut-fsw[aria-checked="true"] { border-color: var(--on-line); background: var(--on-bg); color: var(--on-accent); }
 .fut-fsw[aria-checked="true"] .track { background: var(--accent); }
 .fut-fsw[aria-checked="true"] .track::after { transform: translateX(8px); background: var(--knob-on); }
 
@@ -72,6 +73,31 @@ export const FLEET_CSS = `
 .fut-finfo { color: var(--mute); }
 .fut-finfo.err { color: var(--neg); }
 
+/* Plain Trasporto / Schiera: destination and resources, typed on page 1. */
+.fut-fsend { flex-wrap: wrap; justify-content: space-between; gap: 6px 10px; padding: 6px 0; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); }
+.fut-fdest, .fut-fres { display: inline-flex; align-items: center; gap: 4px; }
+.fut-fdest .lbl { margin-right: 4px; color: var(--mute); }
+.fut-fin { box-sizing: border-box; height: 26px; padding: 0 7px; border: 1px solid var(--line); border-radius: 5px; background: var(--field); color: var(--hi); font: 11px/1 Verdana, Arial, sans-serif; font-variant-numeric: tabular-nums; }
+.fut-fin::placeholder { color: var(--dim); }
+.fut-fin:focus { outline: none; border-color: var(--accent); }
+.fut-fin.bad { border-color: var(--neg); }
+.fut-fin.coords { width: 84px; }
+.fut-fin.amount { width: 80px; text-align: right; }
+.fut-fpick { width: 24px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--mute); }
+.fut-fpick:hover { border-color: #47607D; color: var(--hi); }
+.fut-fseg { display: inline-flex; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+.fut-fseg button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 30px; height: 24px; padding: 0 7px; border: 0; background: none; color: var(--dim); }
+.fut-fseg button + button { border-left: 1px solid var(--line); }
+.fut-fseg button:hover { color: var(--txt); }
+.fut-fseg button[aria-pressed="true"] { background: var(--tile-hi); color: var(--hi); }
+.fut-fresin { display: inline-flex; align-items: center; gap: 5px; }
+.fut-fresin .dot { width: 8px; height: 8px; border-radius: 2px; }
+.fut-fresin.metal .dot { background: #B8C2CC; }
+.fut-fresin.crystal .dot { background: #7FB8FF; }
+.fut-fresin.deuterium .dot { background: #4FE0B0; }
+.fut-fclear { height: 26px; padding: 0 8px; border: 1px solid var(--line); border-radius: 5px; background: none; color: var(--mute); }
+.fut-fclear:hover { border-color: #47607D; color: var(--hi); }
+
 /* Fingers: bigger targets, no key letters. */
 @media (pointer: coarse) {
   .fut-fact { width: 48px; height: 46px; }
@@ -83,6 +109,9 @@ export const FLEET_CSS = `
   .fut-frules { flex-wrap: wrap; gap: 6px; }
   .fut-fsw { height: 40px; padding: 0 10px 0 12px; border-radius: 20px; }
   .fut-fread { flex-basis: 100%; }
+  .fut-fin, .fut-fclear, .fut-fpick { height: 40px; }
+  .fut-fseg button { height: 38px; min-width: 44px; }
+  .fut-fsecond { margin-left: 0; padding-left: 0; border-left: 0; }
 }
 
 /* Destination list of Trasporto / Schiera. */
@@ -100,6 +129,21 @@ export const FLEET_CSS = `
 .fut-fmenu .fut-fbtn:hover { border-color: var(--accent); background: var(--tile-hi); color: var(--hi); }
 .fut-fmenu .fut-fbtn.on { border-color: var(--warn); color: var(--warn); }
 .fut-fmenu .fut-fbtn:disabled { background: none; color: var(--dim); opacity: 0.5; cursor: default; border-color: transparent; }
+.fut-fmenu .fut-fbtn.moon svg { color: var(--mute); }
+/* Collection menu: the two sends to the favourite on top, then "once towards…". */
+.fut-fcollect { min-width: 280px; }
+.fut-fmhead, .fut-fmsub { grid-column: 1 / -1; margin: 4px 4px 2px; color: var(--mute); }
+.fut-fmhead { color: var(--hi); font-weight: 700; }
+.fut-fmsub { margin-top: 8px; }
+.fut-fmenu .fut-fmain { grid-column: 1 / -1; min-height: 40px; gap: 10px; }
+.fut-fmain .ico { display: inline-flex; color: var(--ico); }
+.fut-fmain .txt { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.fut-fmain .txt b { color: var(--hi); font-weight: 700; }
+.fut-fmain .txt span { color: var(--mute); }
+.fut-fmain kbd { margin-left: auto; color: var(--dim); font: 11px Verdana, Arial, sans-serif; }
+.fut-fmain.dim { opacity: 0.7; }
+.fut-fcollect .fut-fseg { grid-column: 1 / -1; margin: 0 4px 4px; }
+.fut-fcollect .fut-fseg button { flex: 1; font: inherit; cursor: pointer; }
 @media (pointer: coarse) { .fut-fmenu { grid-template-columns: minmax(0, 1fr) 48px; max-height: 60vh; } .fut-fmenu .fut-fbtn { min-height: 44px; } }
 @media (prefers-reduced-motion: reduce) { .fut-fact:active { transform: none; } .fut-fsw .track, .fut-fsw .track::after { transition: none; } }
 `;
