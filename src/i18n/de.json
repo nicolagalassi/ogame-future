@@ -726,5 +726,12 @@
   "fleet.collectDeployRes": "Stationieren: auch Rohstoffe mitnehmen",
   "settings.collectDeployResHint": "Aus: das Stationieren der Sammlung schickt nur die Schiffe, die Rohstoffe bleiben.",
   "fleet.loadOrder": "Ladereihenfolge",
-  "settings.loadOrderHint": "Welcher Rohstoff die Frachter der Sammlung zuerst füllt, dann der zweite und dritte (das Spiel macht D → K → M)."
+  "settings.loadOrderHint": "Welcher Rohstoff die Frachter der Sammlung zuerst füllt, dann der zweite und dritte (das Spiel macht D → K → M).",
+  "msg.say.late": "die Flotte kehrt später zurück",
+  "msg.say.early": "die Flotte kehrt früher zurück",
+  "msg.say.nothing": "es wurde nichts gefunden",
+  "msg.say.trader": "ein Händler bietet einen Tausch an",
+  "msg.say.pirate": "Kampf mit Piraten",
+  "msg.say.alien": "Kampf mit Aliens",
+  "msg.say.blackhole": "die Flotte ging in einem Schwarzen Loch verloren"
 }

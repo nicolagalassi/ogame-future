@@ -28,3 +28,6 @@
 
 ## 0.3.26 — C sul markup vero
 - Markup di Nicola: `.msgHead` > `.msgHeadItem` (titolo + `.underTitle` col mittente) | `.msgHeadItem` (`.msgDate`) | `.msgHeadItem.delActions` | `br`. Il riepilogo è un elemento in più, prima della data (`place`); l intestazione diventa flex. Chiuso: `.underTitle` nascosto, una riga per rapporto. Niente più sovrapposizione col cestino; tolti trattino e tacche di esaurimento nell intestazione. Test col markup vero (`HEAD`).
+
+## 0.3.27 — proposta B ("Bottino") per tutta la posta
+- Tolta la C (riepilogo nell intestazione). Il riepilogo torna sotto `.msgHead` (o sotto la riga della vista a lista) con classe `fut-msg-b`: tessere per risorse, navi e note (simbolo sopra, numero sotto), valore a destra dopo una riga verticale, grande. Esiti non evidenti: tessera larga con la parola e una frase (`msg.say.*`; per gli oggetti il nome dell oggetto). Trasporti/rientri: percorso sopra, nessuna parola d esito. Raro/epico: bordo colorato sulle tessere e valore colorato. Chiuso: solo il testo del gioco è nascosto, pulsanti visibili.

@@ -726,5 +726,12 @@
   "fleet.collectDeployRes": "Stationnement : prendre aussi les ressources",
   "settings.collectDeployResHint": "Désactivé : le stationnement de la Collecte n'envoie que les vaisseaux, les ressources restent.",
   "fleet.loadOrder": "Ordre de chargement",
-  "settings.loadOrderHint": "Quelle ressource remplit d'abord les transporteurs de la Collecte, puis la deuxième et la troisième (le jeu fait D → C → M)."
+  "settings.loadOrderHint": "Quelle ressource remplit d'abord les transporteurs de la Collecte, puis la deuxième et la troisième (le jeu fait D → C → M).",
+  "msg.say.late": "la flotte rentre plus tard",
+  "msg.say.early": "la flotte rentre plus tôt",
+  "msg.say.nothing": "rien n'a été trouvé",
+  "msg.say.trader": "un marchand propose un échange",
+  "msg.say.pirate": "combat contre des pirates",
+  "msg.say.alien": "combat contre des aliens",
+  "msg.say.blackhole": "la flotte a disparu dans un trou noir"
 }

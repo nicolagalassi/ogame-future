@@ -193,14 +193,20 @@ export function summaryFor(doc: Document, m: ParsedMessage, o: SummaryContext): 
       const label = m.kind === 'discovery' ? `${t('msg.discovery')} · ${name}` : name;
       // The pill only where the line does not already say it: resources, ships, dark matter, artefacts
       // and lifeform XP show themselves; delay, early return, nothing, item, trader, pirates… need the word.
-      if (m.kind === 'discovery' || !SELF_EVIDENT.has(m.result)) line.pill(label, m.result, [m.kind === 'discovery' ? t('msg.discovery') : '', full, sizeName].filter(Boolean).join(' · '));
+      if (m.kind === 'discovery' || !SELF_EVIDENT.has(m.result)) {
+        const p = line.pill(label, m.result, [m.kind === 'discovery' ? t('msg.discovery') : '', full, sizeName].filter(Boolean).join(' · '));
+        // What happened, in a few words, beside the outcome (the item's own name for an item).
+        const sayKey = `msg.say.${m.result}`;
+        const say = m.item ?? (t(sayKey) === sayKey ? '' : t(sayKey));
+        if (say) p.append(h(doc, 'span', 'fut-say', say));
+      }
       // Size as game rarity: normal = common (no tint), big = rare (blue), huge = epic (purple).
       if (sizeName) line.box.dataset.size = sizeName;
       if (m.size === 0 || m.size === 1) line.box.classList.add(`fut-rar-${m.size}`);
       line.res(m.res, 1, '+');
       line.ships(m.ships, 'found');
       line.ships(m.lost, 'lost');
-      if (m.item) line.note(m.item, 'item');
+      if (m.item && SELF_EVIDENT.has(m.result)) line.note(m.item, 'item');
       if (m.lfXp) line.note(t('msg.lfXp', { n: m.lfXp.toLocaleString(locale) }), 'lf');
       if (m.artefacts) line.note(t('msg.artefacts', { n: m.artefacts.toLocaleString(locale) }), 'art');
       if (m.depletion > 0) line.depletion(m.depletion);
@@ -266,32 +272,18 @@ export function summaryFor(doc: Document, m: ParsedMessage, o: SummaryContext): 
   }
 }
 
-/**
- * Where the summary goes. Card view: INSIDE the game's header, on the sender's line, right-aligned
- * (outcome, what was carried, the value): with the report folded the card is just its header.
- * List view (13.x): under the header row, whose body the game keeps hidden until opened.
- * Returns true when the summary sits in the card's header.
- */
-function place(msg: Element, box: HTMLElement): boolean {
+/** Where the summary goes: right under the report's header, in both of the game's views. */
+function place(msg: Element, box: HTMLElement): void {
+  // List view (13.x, "collapsible" reports): the body stays hidden until opened, so the
+  // summary goes under the game's header row to be seen with the report closed.
   const header = msg.querySelector(':scope > .msgFilteredHeaderRow');
-  if (header) {
-    header.after(box);
-    return false;
-  }
-  const head = msg.querySelector<HTMLElement>(':scope .msgHead');
-  if (head && !head.closest('.messageContentWrapper')) {
-    head.classList.add('fut-msghead');
-    box.classList.add('fut-msg-inhead');
-    // One more item of the game's header (.msgHeadItem: title | ours | date | delete), before the date.
-    const date = Array.from(head.children).find((c) => c.classList.contains('msgHeadItem') && c.querySelector('.msgDate'));
-    if (date) head.insertBefore(box, date);
-    else head.append(box);
-    return true;
-  }
+  if (header) return void header.after(box);
+  // Card view: under the title and sender, above the game's text.
+  const head = msg.querySelector(':scope .msgHead');
+  if (head && !head.closest('.messageContentWrapper')) return void head.after(box);
   const actions = msg.querySelector('.msg_actions, message-footer');
   if (actions?.parentElement) actions.before(box);
   else (msg.querySelector('.msgContent') ?? msg).after(box);
-  return false;
 }
 
 /** Reads and summarises every report on the page not done yet. Returns new journal entries. */
@@ -340,13 +332,9 @@ export function processMessages(o: MessagesOptions): number {
         e.preventDefault();
         toggle();
       });
-      if (place(msg, box)) {
-        // The whole header opens and closes the report, not only our part of it (the game's own links and buttons keep theirs).
-        box.parentElement?.addEventListener('click', (e) => {
-          if (box.contains(e.target as Node) || (e.target as Element).closest('a, button, input, [role="button"]')) return;
-          toggle();
-        });
-      }
+      // Loot tiles: each thing found with its symbol over its amount, the value on the right.
+      box.classList.add('fut-msg-b');
+      place(msg, box);
       // Big and huge finds tint the whole message, not only our line.
       const rar = box.className.match(/fut-rar-([01])/);
       if (rar) msg.classList.add('fut-msgrar', `fut-msgrar-${rar[1]}`);
