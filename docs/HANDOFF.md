@@ -53,7 +53,8 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
   destinazione e missione e carica. Navi scelte a mano restano. Senza riserve.
   Campo risorsa vuoto = 0; clic sul simbolo M/C/D = tutto quello che c'è; "Svuota" azzera. Aperta dai
   link Trasporto / Schiera del gioco (galassia: `mission=3|4&galaxy&system&position&type` nell'URL),
-  la pagina flotta accende quella modalità con le coordinate e mette il cursore sul metallo (una volta per pagina). La vecchia coppia trasporto/schieramento
+  la pagina flotta accende quella modalità con le coordinate e mette il cursore sul metallo (una volta per pagina).
+  Modalità, coordinate e risorse valgono solo per la pagina aperta: refresh o cambio corpo ripartono puliti. La vecchia coppia trasporto/schieramento
   verso la luna principale (con le riserve) è la "Raccolta spedizioni", funzione secondaria (C, V).
   Icone della barra piene, niente neon.
 - Regole per corpo (2026-11-06): navi, risorse, portale (lune) sono regole separate, ognuna con

@@ -38,3 +38,6 @@ Versione 0.3.12.
 - `readMissionLink()`: dai link Trasporto / Schiera del gioco (mission 3/4 + coordinate nell'URL) la
   pagina flotta accende T o D, scrive le coordinate e mette il fuoco sul metallo. Una volta per pagina
   (`data-fut-mission-link`). **Da verificare in gioco** che il link della galassia porti quei parametri.
+
+## 0.3.15
+- Modalità T/D, coordinate e risorse si azzerano a ogni nuova pagina (refresh, cambio corpo); restano tra i ridisegni della stessa pagina (`data-fut-send-page`).

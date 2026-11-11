@@ -643,3 +643,23 @@ describe('fleet page opened from the galaxy', () => {
     delete (window as unknown as { fleetDispatcher?: unknown }).fleetDispatcher;
   });
 });
+
+describe('plain Trasporto / Schiera on a new page', () => {
+  it('starts clean after a reload or on another body, keeps everything across redraws', async () => {
+    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    const doc = fleetPage();
+    const store = new Store(new MemoryStore(), 'fresh');
+    store.set('fleet.settings', { sendMode: 'transport', sendTarget: { galaxy: 1, system: 2, position: 3, type: 1 }, sendPick: { metal: 5, crystal: null, deuterium: null } });
+    const o = { doc, store, bodyId: 1, bodies: [{ planetId: 1, moonId: null, name: 'Casa', coords: '5:185:8' }], t: (k: string) => k, locale: 'it', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch' };
+    // Same page, redrawn: kept.
+    doc.documentElement.dataset.futSendPage = '1';
+    renderFleetTools(o);
+    expect(doc.querySelector('.fut-fsend')).not.toBeNull();
+    // New page: clean.
+    delete doc.documentElement.dataset.futSendPage;
+    renderFleetTools(o);
+    const saved = store.get<typeof DEFAULT_SETTINGS>('fleet.settings', DEFAULT_SETTINGS);
+    expect([saved.sendMode, saved.sendTarget, saved.sendPick]).toEqual([null, null, { metal: null, crystal: null, deuterium: null }]);
+    expect(doc.querySelector('.fut-fsend')).toBeNull();
+  });
+});
