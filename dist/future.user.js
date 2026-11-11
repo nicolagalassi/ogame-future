@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.42
+// @version      0.3.43
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -8177,7 +8177,7 @@ input.field { width: 190px; }
   }
 
   // src/modules/planet-menu/style.ts
-  var MENU_WIDTH = 242;
+  var MENU_WIDTH = 247;
   var NATIVE_WIDTH = 137;
   var L = "#planetbarcomponent #planetList.fut-menu";
   var MOON_W = 68;
@@ -8300,11 +8300,12 @@ ${L} .smallplanet .constructionIcon { display: none !important; }
 ${L} .fut-queue { position: absolute; left: 2px; bottom: 2px; z-index: 2; display: flex; gap: 2px; padding: 2px; border-radius: 6px; background: rgba(5,10,18,0.85); }
 /* The plan: a slim column at the outer end of each row, right of the moon; one tile per planned body
    (planet on top, moon below), coloured by where its resources stand. */
-${L} .fut-plancol { flex-shrink: 0; display: flex; flex-direction: column; width: 15px; border-left: 1px solid #1A2638; background: #0D1522; }
+${L} .fut-plancol { flex-shrink: 0; display: flex; flex-direction: column; width: 20px; border-left: 1px solid #1A2638; background: #0D1522; }
 ${L} .fut-plancol > span { flex: 1; min-height: 0; }
-${L} .fut-plan { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-  font: 700 10px/10px Arial, sans-serif; cursor: help; background: color-mix(in srgb, currentColor 16%, #0D1522); }
 ${L} .fut-plancol > :last-child { border-top: 1px solid #1A2638; }
+${L} .fut-plan { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  font: 700 12px/12px Arial, sans-serif; cursor: pointer; background: color-mix(in srgb, currentColor 18%, #0D1522); outline: none; }
+${L} .fut-plan:hover, ${L} .fut-plan:focus-visible { background: color-mix(in srgb, currentColor 32%, #0D1522); }
 ${L} .fut-plan svg { display: block; }
 ${L}.fut-mode-compact .fut-plancol { display: none; }
 ${L} .fut-plan-missing { color: #EF7676; }
@@ -8403,6 +8404,29 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 #planetbarcomponent:not(.fut-wide) .fut-totals .fut-trow { grid-template-columns: 13px minmax(0, 1fr) minmax(0, 1fr); gap: 3px; }
 #planetbarcomponent:not(.fut-wide) .fut-totals .fut-tlabel { display: none; }
 #planetbarcomponent:not(.fut-wide) .fut-totals .fut-tnum { font-size: 11px; }
+
+/* The plan's hover card, in the game's tooltip style (dark blue gradient, thin frame, centred title). */
+.fut-plan-tip { position: fixed; z-index: 100000; min-width: 170px; max-width: 260px; padding: 10px 12px; box-sizing: border-box;
+  border: 1px solid #2C3E57; border-radius: 6px; background: linear-gradient(180deg, #1C2A3A 0%, #0F1923 100%);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6); color: #C9D4E2; font: 11px/1.45 Verdana, Arial, sans-serif; pointer-events: none; }
+.fut-plan-tip .fut-pt-head { display: flex; flex-direction: column; align-items: center; margin-bottom: 6px; }
+.fut-plan-tip .fut-pt-head b { color: #fff; font-size: 13px; }
+.fut-plan-tip .fut-pt-head span { color: #8592A1; font-size: 10px; }
+.fut-plan-tip .fut-pt-title { display: flex; align-items: center; gap: 5px; padding: 4px 0 3px; border-top: 1px solid #2C3E57; color: #9AA9BC; font-weight: 700; }
+.fut-plan-tip .fut-pt-items { margin: 0 0 6px; padding: 0; list-style: none; }
+.fut-plan-tip .fut-pt-items li { padding: 1px 0 1px 8px; color: #6F9FC8; position: relative; }
+.fut-plan-tip .fut-pt-items li::before { content: ""; position: absolute; left: 0; top: 7px; width: 3px; height: 3px; border-radius: 50%; background: #4A6683; }
+.fut-plan-tip .fut-pt-status { padding-top: 5px; border-top: 1px solid #2C3E57; }
+.fut-plan-tip .fut-pt-say { font-weight: 700; }
+.fut-plan-tip.fut-plan-missing .fut-pt-say { color: #EF7676; }
+.fut-plan-tip.fut-plan-arriving .fut-pt-say, .fut-plan-tip .fut-pt-sent { color: #4FD1E8 !important; }
+.fut-plan-tip.fut-plan-arrived .fut-pt-say { color: #E3BB28; }
+.fut-plan-tip.fut-plan-ready .fut-pt-say { color: #38C56E; }
+.fut-plan-tip.fut-plan-unknown .fut-pt-say { color: #8592A1; }
+.fut-plan-tip .fut-pt-sent { margin-top: 4px; }
+.fut-plan-tip .fut-pt-res { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 2px; font: 700 11px Consolas, monospace; }
+.fut-plan-tip .fut-pt-res span { display: inline-flex; align-items: center; gap: 3px; }
+.fut-plan-tip .fut-pt-metal { color: #B8C2CC; } .fut-plan-tip .fut-pt-crystal { color: #7FB8FF; } .fut-plan-tip .fut-pt-deuterium { color: #4FE0B0; }
 `;
 
   // src/modules/planet-menu/index.ts
@@ -8532,30 +8556,87 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     }
     return box;
   }
-  function planBadge(doc, mark, o) {
+  var PLAN_ICON = '<path d="M3 4h4v4H3zM3 10h4v4H3zM3 16h4v4H3z"/><path d="M9 4.8h12v2.4H9zM9 10.8h12v2.4H9zM9 16.8h12v2.4H9z" opacity=".7"/>';
+  var TIP_ID = "fut-plan-tip";
+  function planBadge(doc, mark, o, where) {
     if (!mark) return null;
     const b = el3(doc, "span", `fut-plan fut-plan-${mark.state}`);
-    b.innerHTML = '<svg viewBox="0 0 24 24" width="9" height="9" aria-hidden="true" fill="currentColor"><path d="M3 4h4v4H3zM3 10h4v4H3zM3 16h4v4H3z"/><path d="M9 4.8h12v2.4H9zM9 10.8h12v2.4H9zM9 16.8h12v2.4H9z" opacity=".7"/></svg>';
+    b.innerHTML = `<svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" fill="currentColor">${PLAN_ICON}</svg>`;
     b.append(doc.createTextNode(String(mark.items.length)));
-    const f = (n) => formatUnits(n, o.locale);
-    const res = (r) => `${f(r.metal)} \xB7 ${f(r.crystal)} \xB7 ${f(r.deuterium)}`;
-    const time = (ms) => new Date(ms).toLocaleTimeString(o.locale, { hour: "2-digit", minute: "2-digit" });
-    const lines = [o.t("plan.title"), ...mark.items.map((i) => `\u2022 ${i}`), ""];
-    if (mark.state === "ready") lines.push(o.t("plan.readyHere"));
-    else if (mark.state === "unknown") lines.push(o.t("plan.unknownHere"));
-    else if (mark.state === "arriving") lines.push(`${o.t("plan.sentArriving", { time: time(mark.pending.arriveAt) })}: ${res(mark.pending)}`);
-    else if (mark.state === "arrived") lines.push(`${o.t("plan.sentArrived")}: ${res(mark.pending)}`);
-    else {
-      lines.push(`${o.t("plan.missingHere")}: ${res(mark.lack ?? { metal: 0, crystal: 0, deuterium: 0 })}`);
-      if (mark.pending.metal + mark.pending.crystal + mark.pending.deuterium > 0) {
-        lines.push(`${mark.pending.arriveAt > o.now ? o.t("plan.sentArriving", { time: time(mark.pending.arriveAt) }) : o.t("plan.sentArrived")}: ${res(mark.pending)}`);
+    b.tabIndex = 0;
+    b.setAttribute("role", "button");
+    b.setAttribute("aria-label", `${o.t("plan.title")}: ${where.name} [${where.coords}] \xB7 ${mark.items.join(", ")}`);
+    const show2 = () => showPlanTip(doc, b, mark, o, where);
+    const hide = () => doc.getElementById(TIP_ID)?.remove();
+    b.addEventListener("mouseenter", show2);
+    b.addEventListener("focus", show2);
+    b.addEventListener("mouseleave", hide);
+    b.addEventListener("blur", hide);
+    b.addEventListener("click", () => {
+      hide();
+      o.onOpenPlanner?.();
+    });
+    b.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        hide();
+        o.onOpenPlanner?.();
       }
-    }
-    b.title = lines.join("\n");
+    });
     return b;
   }
+  function showPlanTip(doc, anchor, mark, o, where) {
+    doc.getElementById(TIP_ID)?.remove();
+    const tip = el3(doc, "div", `fut-plan-tip fut-plan-${mark.state}`);
+    tip.id = TIP_ID;
+    tip.setAttribute("role", "tooltip");
+    const head = el3(doc, "div", "fut-pt-head");
+    head.append(el3(doc, "b", "", where.name), el3(doc, "span", "", `[${where.coords}]${where.moon ? ` \xB7 ${o.t("planetMenu.moon")}` : ""}`));
+    const title = el3(doc, "div", "fut-pt-title");
+    title.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="currentColor">${PLAN_ICON}</svg>`;
+    title.append(doc.createTextNode(o.t("plan.title")));
+    const list = el3(doc, "ul", "fut-pt-items");
+    for (const i of mark.items) list.append(el3(doc, "li", "", i));
+    const time = (ms) => new Date(ms).toLocaleTimeString(o.locale, { hour: "2-digit", minute: "2-digit" });
+    const resRow = (r) => {
+      const row = el3(doc, "div", "fut-pt-res");
+      for (const k of ["metal", "crystal", "deuterium"]) {
+        if (!r[k]) continue;
+        const c = el3(doc, "span", `fut-pt-${k}`);
+        c.innerHTML = resIconSvg(k, 12);
+        c.append(doc.createTextNode(formatUnits(r[k], o.locale)));
+        row.append(c);
+      }
+      return row;
+    };
+    const status = el3(doc, "div", "fut-pt-status");
+    const say = (text) => status.append(el3(doc, "div", "fut-pt-say", text));
+    const sent = mark.pending.metal + mark.pending.crystal + mark.pending.deuterium > 0;
+    const sentText = mark.pending.arriveAt > o.now ? o.t("plan.sentArriving", { time: time(mark.pending.arriveAt) }) : o.t("plan.sentArrived");
+    if (mark.state === "ready") say(o.t("plan.readyHere"));
+    else if (mark.state === "unknown") say(o.t("plan.unknownHere"));
+    else if (mark.state === "missing") {
+      say(o.t("plan.missingHere"));
+      status.append(resRow(mark.lack ?? { metal: 0, crystal: 0, deuterium: 0 }));
+    }
+    if (mark.state !== "ready" && mark.state !== "unknown" && sent) {
+      const line = el3(doc, "div", "fut-pt-say fut-pt-sent", sentText);
+      status.append(line, resRow(mark.pending));
+    }
+    tip.append(head, title, list, status);
+    doc.body.append(tip);
+    const box = anchor.getBoundingClientRect();
+    const view2 = doc.defaultView;
+    const w = tip.offsetWidth;
+    const hgt = tip.offsetHeight;
+    const vw = view2?.innerWidth ?? 1200;
+    const vh = view2?.innerHeight ?? 800;
+    const left = box.right + 10 + w > vw ? box.left - 10 - w : box.right + 10;
+    tip.style.left = `${Math.max(4, left)}px`;
+    tip.style.top = `${Math.max(4, Math.min(box.top + box.height / 2 - hgt / 2, vh - hgt - 4))}px`;
+  }
   function clearPlanetMenu(doc) {
-    doc.querySelectorAll(".fut-res, .fut-fleet, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue, .fut-plancol").forEach((n) => n.remove());
+    doc.querySelectorAll(".fut-res, .fut-fleet, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue, .fut-plancol, #fut-plan-tip").forEach((n) => n.remove());
     doc.querySelectorAll(".fut-name").forEach((wrap) => wrap.replaceWith(...Array.from(wrap.childNodes)));
     doc.querySelectorAll(".fut-row").forEach((n) => n.classList.remove("fut-row", "fut-current"));
   }
@@ -8697,8 +8778,9 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
       }
       if (planned) {
         const col = el3(doc, "span", "fut-plancol");
-        const pb = planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : void 0, o);
-        const mb = planBadge(doc, entry.moonId ? o.planMarks?.[String(entry.moonId)] : void 0, o);
+        const pb = planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : void 0, o, { name: entry.name, coords: entry.coords, moon: false });
+        const moonName = entry.moonLink?.querySelector("img")?.getAttribute("alt") || entry.name;
+        const mb = planBadge(doc, entry.moonId ? o.planMarks?.[String(entry.moonId)] : void 0, o, { name: moonName, coords: entry.coords, moon: true });
         if (pb) pb.classList.add("fut-plan-p");
         if (mb) mb.classList.add("fut-plan-m");
         col.append(pb ?? el3(doc, "span", ""), mb ?? el3(doc, "span", ""));

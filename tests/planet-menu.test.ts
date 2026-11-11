@@ -82,7 +82,13 @@ describe('renderPlanetMenu', () => {
     const col3 = document.querySelector('#planet-3 > .fut-plancol')!;
     expect(col3.previousElementSibling?.classList.contains('fut-nomoon')).toBe(true);
     expect(col3.querySelector('.fut-plan')!.className).toBe('fut-plan fut-plan-arriving fut-plan-p');
-    expect(col3.querySelector('.fut-plan')!.getAttribute('title')).toContain('Miniera di metallo liv. 46–48');
+    // Hover: a card in the game's style with the body, what is planned and the arrival.
+    col3.querySelector('.fut-plan')!.dispatchEvent(new MouseEvent('mouseenter'));
+    const tip = document.getElementById('fut-plan-tip')!;
+    expect(tip.querySelector('.fut-pt-items li')?.textContent).toBe('Miniera di metallo liv. 46–48');
+    expect(tip.querySelector('.fut-pt-sent')).not.toBeNull();
+    col3.querySelector('.fut-plan')!.dispatchEvent(new MouseEvent('mouseleave'));
+    expect(document.getElementById('fut-plan-tip')).toBeNull();
     const moon = document.querySelector('#planet-1 > .fut-plancol .fut-plan')!;
     expect(moon.className).toBe('fut-plan fut-plan-missing fut-plan-m');
     expect(moon.textContent).toBe('2');

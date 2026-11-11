@@ -11,3 +11,8 @@
 - Il segnalino nell'angolo dell'immagine era troppo piccolo: ora c'è una colonnina di 15px all'estremità destra
   della riga, fuori dalla luna (`.fut-plancol`), metà alta = pianeta, metà bassa = luna, colorata per stato.
   Presente solo se qualcosa è in piano; nascosta in vista compatta. `MENU_WIDTH` 228 → 242 per farle posto.
+
+## 0.3.43
+- Tooltip nativo sostituito da una scheda al passaggio del mouse in stile gioco (`#fut-plan-tip`): nome del corpo e coordinate,
+  voci in piano, stato colorato, quantità con le icone risorse e orario d'arrivo. Clic / Invio sul tasto apre il piano.
+- Colonnina 15 → 20px, numero 12px, icona 11px; `MENU_WIDTH` 242 → 247.
