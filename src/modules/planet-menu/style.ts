@@ -82,9 +82,11 @@ ${L} .fut-c, .fut-totals .fut-c .fut-tname { color: ${RES_COLORS.crystal}; }
 ${L} .fut-d, .fut-totals .fut-d .fut-tname { color: ${RES_COLORS.deuterium}; }
 ${L} .fut-full { color: #F5B547 !important; font-weight: 700; }
 ${L} .fut-missing { color: #8A9BB0; }
-/* Fleet pill: what the ships here are worth, under the resources. */
-${L} .fut-fleet { margin: 1px 0 0 auto; padding: 0 4px; border-radius: 6px; background: rgba(255, 122, 122, 0.16); color: #FFA0A0; line-height: 11px; max-width: 100%; }
-${L} .fut-fleet.fut-none { visibility: hidden; }
+/* Fleet: what the ships are worth (planet, then moon), a third line under name and coordinates. */
+${L} .fut-fleet { display: flex; align-items: center; gap: 5px; min-width: 0; margin-top: 1px; font: 10px/11px monospace; color: #F2A3A3; white-space: nowrap; overflow: hidden; }
+${L} .fut-fleet-m { display: inline-flex; align-items: center; gap: 2px; color: #D8A0A0; }
+${L} .fut-fleet-m svg { flex: none; opacity: 0.8; }
+${L}.fut-mode-compact .fut-fleet-m { display: none; }
 .fut-totals .fut-fleetrow .fut-tname { color: #FFA0A0; }
 
 /* Moon: its own tile on the right of the same row. */
@@ -155,42 +157,44 @@ ${L}.fut-mode-compact a.moonlink { width: 22px !important; padding: 0 !important
 ${L}.fut-mode-compact a.moonlink .fut-res, ${L}.fut-mode-compact a.moonlink .fut-age { display: none; }
 ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: static !important; width: 16px !important; height: 16px !important; }
 
-/* Toolbar: replaces the colony counter. Two lines that open their window, then sync and settings stacked. */
+/* Toolbar: replaces the colony counter. Two tiles side by side (production → Dashboard, plan → Piano),
+   name on top and number below; sync and settings stacked on the right. */
 #planetbarcomponent .fut-toolbar {
-  box-sizing: border-box; display: grid !important; height: auto !important; padding: 0 !important; grid-template-columns: minmax(0, 1fr) 26px; margin: 0 0 3px;
-  border: 1px solid #1F2C40; border-radius: 7px; background: #0B121D; overflow: hidden;
+  box-sizing: border-box; display: grid !important; height: auto !important; padding: 0 !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 26px; margin: 0 0 3px;
+  border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden;
 }
 #planetbarcomponent .fut-toolbar .fut-cell {
-  box-sizing: border-box !important; grid-column: 1; height: 26px !important; width: auto !important; box-shadow: none !important; border-radius: 0 !important; font: inherit;
-  display: flex; align-items: center; gap: 6px; min-width: 0; padding: 0 8px; margin: 0;
+  box-sizing: border-box !important; height: 40px !important; width: auto !important; box-shadow: none !important; border-radius: 0 !important; font: inherit;
+  display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 3px; min-width: 0; padding: 0 8px; margin: 0;
   border: 0 !important; border-right: 1px solid #1F2C40 !important; background: none !important; color: inherit; text-align: left; cursor: pointer;
 }
-#planetbarcomponent .fut-toolbar .fut-cell + .fut-cell { border-top: 1px solid #1F2C40 !important; }
-#planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) { background: #111D2D !important; }
+#planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) { background: #16243A !important; }
 #planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) .fut-cell-k { color: #E6EDF5; }
 #planetbarcomponent .fut-toolbar .fut-cell:focus-visible, #planetbarcomponent .fut-tool:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -2px; }
 #planetbarcomponent .fut-toolbar .fut-cell:disabled { cursor: default; }
-#planetbarcomponent .fut-cell-i { flex: none; display: inline-flex; color: #4FD1E8; }
-#planetbarcomponent .fut-cell-k { flex: none; font: 12px/14px Arial, sans-serif; color: #C9D4E2; white-space: nowrap; }
-#planetbarcomponent .fut-cell-v { flex: 1; min-width: 0; font: 700 12px/14px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#planetbarcomponent .fut-cell-v small { font: 11px/14px Arial, sans-serif; color: #9AA9BC; }
+#planetbarcomponent .fut-cell-t { display: flex; align-items: center; gap: 5px; min-width: 0; }
+#planetbarcomponent .fut-cell-i { flex: none; display: inline-flex; color: #8A9BB0; }
+#planetbarcomponent .fut-cell-k { min-width: 0; font: 11px/12px Arial, sans-serif; color: #9AA9BC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#planetbarcomponent .fut-cell-v { min-width: 0; font: 700 13px/14px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#planetbarcomponent .fut-cell-v small { font: 10px/14px Arial, sans-serif; color: #8A9BB0; font-weight: 400; }
 #planetbarcomponent .fut-cell-v.fut-warn { color: #F5B547; } #planetbarcomponent .fut-cell-v.fut-ok { color: #4FE0B0; }
-#planetbarcomponent .fut-side { display: flex; flex-direction: column; grid-column: 2; grid-row: 1 / span 2; }
+#planetbarcomponent .fut-side { display: flex; flex-direction: column; grid-column: 3; grid-row: 1; }
 #planetbarcomponent .fut-tool {
   position: relative; flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; padding: 0;
   border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; color: #8A9BB0; cursor: pointer; height: auto !important; min-height: 0 !important;
 }
 #planetbarcomponent .fut-tool + .fut-tool { border-top: 1px solid #1F2C40 !important; }
 #planetbarcomponent .fut-tool svg { width: 13px; height: 13px; }
-#planetbarcomponent .fut-tool:hover { background: #111D2D !important; color: #E6EDF5; }
+#planetbarcomponent .fut-tool:hover { background: #16243A !important; color: #E6EDF5; }
 #planetbarcomponent .fut-tool:disabled { opacity: 0.35; cursor: default; background: none; }
 #planetbarcomponent .fut-tool[aria-expanded="true"] { background: #12283A !important; color: #4FD1E8; }
 #planetbarcomponent .fut-tool.fut-stale { color: #F5B547; }
 #planetbarcomponent .fut-tool.fut-failed { color: #E5534B; }
 #planetbarcomponent .fut-tool.fut-busy svg { animation: fut-spin 1s linear infinite; }
 /* Game width: no room for the names, the icon and the tooltip say what the number is. */
-#planetbarcomponent:not(.fut-wide) .fut-toolbar .fut-cell { padding: 0 5px; gap: 4px; }
+#planetbarcomponent:not(.fut-wide) .fut-toolbar .fut-cell { padding: 0 5px; }
 #planetbarcomponent:not(.fut-wide) .fut-cell-k, #planetbarcomponent:not(.fut-wide) .fut-cell-v small { display: none; }
+#planetbarcomponent:not(.fut-wide) .fut-cell-v { font-size: 11px; }
 @keyframes fut-spin { to { transform: rotate(360deg); } }
 
 
