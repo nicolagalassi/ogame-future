@@ -54,9 +54,9 @@ const CSS = `
 #ranks tr.fut-hs-top .highscoreNameFieldWrapper { height: 40px !important; }
 #ranks tr.fut-hs-top .highscoreNameAndTitleHolder > :not(.highscoreNameHolder) { font-size: 11px !important; line-height: 1.2; }
 /* The flag of Future's targets, in the column of the game's "i", before it. */
-#ranks td.fut-hs-act { white-space: nowrap; text-align: right; }
-#ranks td.fut-hs-act > .fut-mk-flag, #ranks td.fut-hs-act > .sendmsg_content { display: inline-flex !important; align-items: center; float: none !important; width: auto !important; vertical-align: middle; }
-#ranks td.fut-hs-act > .fut-mk-flag { margin: 0 3px 0 0; }
+/* The game's "i" is left exactly as it is (its box has its own sizing): the flag sits in room made on the left. */
+#ranks td.fut-hs-act { position: relative; padding-left: 22px !important; }
+#ranks td.fut-hs-act > .fut-mk-flag { position: absolute; left: 2px; top: 50%; transform: translateY(-50%); margin: 0; }
 #fut-hs-top { position: fixed; right: 18px; bottom: 44px; z-index: 1000; display: none; width: 34px; height: 34px; padding: 0; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--fut-line); border-radius: 6px; background: var(--fut-btn); color: var(--fut-txt); }
 #fut-hs-top.on { display: flex; } #fut-hs-top:hover, #fut-hs-top:focus-visible { border-color: var(--fut-link); color: var(--fut-hi); }
 #fut-hs-top svg { transform: rotate(180deg); }`;
