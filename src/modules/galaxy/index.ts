@@ -9,7 +9,7 @@
  */
 import { loadMarks, MARKS_KEY, type Marks } from '../../engines/marks';
 import { POSITIONS_KEY, recordSystem, type Positions } from '../../engines/positions';
-import { ensureMarksStyle, flagButton, TAG_COLORS, tagButton } from '../marks/picker';
+import { ensureMarksStyle, flagButton } from '../marks/picker';
 import type { NetworkGuard } from '../../core/guard';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
@@ -130,7 +130,7 @@ function remember(o: GalaxyOptions): void {
     if (!marks.players[pid] && !recent.has(Number(pid))) continue;
     for (const p of card.planets ?? []) listed.add(p.coords);
   }
-  const keep = (id: number, coords: string) => (id ? !!marks.players[String(id)] || recent.has(id) || !!marks.planets[coords] : listed.has(coords));
+  const keep = (id: number, coords: string) => (id ? !!marks.players[String(id)] || recent.has(id) : listed.has(coords));
   const rows = s.rows.filter((r) => !(r.planetId && o.ownPlanetIds.has(r.planetId))).map((r) => ({ ...r, debris: r.debris ? debrisTotal(r.debris) : 0 }));
   const next = recordSystem(o.store.get<Positions>(POSITIONS_KEY, {}), s.galaxy, s.system, rows, keep, Date.now());
   if (next) o.store.set(POSITIONS_KEY, next);
@@ -156,20 +156,9 @@ function decorate(o: GalaxyOptions, content: Element): void {
     const coords = coordsOf(s, r);
     const own = r.planetId !== null && o.ownPlanetIds.has(r.planetId);
     const inactive = !r.statuses.includes('vacation') && (r.statuses.includes('inactive') || r.statuses.includes('longinactive'));
-    const tag = marks.planets[coords]?.tag;
     r.row.classList.toggle('fut-g-own', own);
     r.row.classList.toggle('fut-g-inactive', inactive && !own);
-    r.row.classList.toggle('fut-g-tagged', !!tag);
     r.row.classList.toggle('fut-g-hl', coords === highlight);
-    const rowStyle = (r.row as HTMLElement).style;
-    if (tag) rowStyle.setProperty('--fut-tag', TAG_COLORS[tag]);
-    else rowStyle.removeProperty('--fut-tag');
-
-    // Planet colour on occupied positions that are not the player's own (replaces the old target mark).
-    const nameCell = r.row.querySelector('.cellPlanetName');
-    if (nameCell && r.planetId && !own && !nameCell.querySelector('.fut-mk-tag'))
-      nameCell.append(tagButton(picker, coords, { planet: r.planetName, player: r.playerName, playerId: r.playerId, statuses: r.statuses, moon: !!r.moonId }));
-    else if (nameCell && (own || !r.planetId)) nameCell.querySelector('.fut-mk-tag')?.remove();
 
     // Rank badge (hover: scores card) and the player's flag.
     const playerCell = r.row.querySelector('.cellPlayerName');

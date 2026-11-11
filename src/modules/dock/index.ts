@@ -1,7 +1,7 @@
 /**
  * Future's dock: a small panel in the free space under the game's left menu, as OGLight does with
  * its own. Two cards that say something before they are opened: the expedition journal (today and
- * the last 7 days) and the targets (how many players per flag, how many coloured planets).
+ * the last 7 days) and the targets (how many players per flag).
  *
  * COMPLIANCE: page only. It is appended after the game's menu, which is neither moved, resized
  * nor covered (AGENTS.md §1.7: Merchant, Recruit Officers and Shop stay where they are). No
@@ -9,8 +9,8 @@
  */
 import { icon, type IconName } from '../../core/icons';
 import { formatUnits } from '../../core/format';
-import { FLAGS, TAGS, type Flag, type Marks, type Tag } from '../../engines/marks';
-import { FLAG_COLORS, FLAG_ICONS, TAG_COLORS } from '../marks/picker';
+import { FLAGS, type Flag, type Marks } from '../../engines/marks';
+import { FLAG_COLORS, FLAG_ICONS } from '../marks/picker';
 
 export const DOCK_ID = 'fut-dock';
 const STYLE_ID = 'fut-dock-style';
@@ -27,7 +27,7 @@ export interface DockOptions {
   marks: Marks;
   onOpenJournal: () => void;
   /** Opens or closes the targets side bar; with a view, opens it there. */
-  onOpenTargets: (view?: { tab: 'players' | 'planets'; flagTab?: Flag }) => void;
+  onOpenTargets: (view?: { flagTab?: Flag }) => void;
 }
 
 const CSS = `
@@ -66,13 +66,11 @@ const CSS = `
 #${DOCK_ID} .line .v.pos { color: #4FE0B0; } #${DOCK_ID} .line .v.neg { color: #F5B547; } #${DOCK_ID} .line .v.none { color: #617C8D; font-weight: 400; }
 #${DOCK_ID} .cols { display: grid; grid-template-columns: minmax(0, 1fr) auto 52px; gap: 6px; padding: 3px 8px 0; color: #617C8D; font-size: 11px; }
 #${DOCK_ID} .cols span:last-child { text-align: right; }
-/* Targets: one chip per flag in use, then the coloured planets. */
+/* Targets: one chip per flag in use. */
 #${DOCK_ID} .flags { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 6px; }
 #${DOCK_ID} .flag { display: flex; align-items: center; justify-content: center; gap: 4px; height: 26px; padding: 0; border: 1px solid #1F2C40; border-radius: 5px; background: #0A111C; }
 #${DOCK_ID} .flag:hover { border-color: currentColor; }
 #${DOCK_ID} .flag i { font: normal 12px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; }
-#${DOCK_ID} .tags { display: inline-flex; gap: 2px; }
-#${DOCK_ID} .tags i { width: 6px; height: 6px; border-radius: 50%; }
 #${DOCK_ID} .hint { margin: 0; padding: 8px; color: #9AA9BC; font-size: 11px; line-height: 1.4; }
 `;
 
@@ -144,35 +142,22 @@ export function renderDock(o: DockOptions): void {
   line.append(el(doc, 'span', 'k', t('dock.week')), el(doc, 'span', 'c', week.count ? String(week.count) : ''), el(doc, 'span', `v ${week.count ? (week.net >= 0 ? 'pos' : 'neg') : 'none'}`, week.count ? signed(week.net) : '—'));
   journal.append(line);
 
-  // Targets: flagged players per flag, coloured planets; each opens the side bar on its own list.
+  // Targets: flagged players per flag; each opens the side bar on its own list.
   const players = Object.values(o.marks.players);
-  const planets = Object.values(o.marks.planets);
   const targets = el(doc, 'section', 'card');
-  targets.append(head('target', t('bar.targets'), t('bar.targetsHint'), () => o.onOpenTargets(), String(players.length + planets.length || '')));
-  if (!players.length && !planets.length) targets.append(el(doc, 'p', 'hint', t('dock.targetsEmpty')));
+  targets.append(head('target', t('bar.targets'), t('bar.targetsHint'), () => o.onOpenTargets(), String(players.length || '')));
+  if (!players.length) targets.append(el(doc, 'p', 'hint', t('dock.targetsEmpty')));
   const flags = el(doc, 'div', 'flags');
   for (const f of FLAGS) {
     const n = players.filter((p) => p.flag === f).length;
     if (!n) continue;
-    const b = button('flag', `${t(`mark.flag.${f}`)}: ${n}`, () => o.onOpenTargets({ tab: 'players', flagTab: f }));
+    const b = button('flag', `${t(`mark.flag.${f}`)}: ${n}`, () => o.onOpenTargets({ flagTab: f }));
     b.style.color = FLAG_COLORS[f];
     b.setAttribute('aria-label', `${t(`mark.flag.${f}`)}: ${n}`);
     b.append(icon(doc, FLAG_ICONS[f], 13), el(doc, 'i', '', String(n)));
     flags.append(b);
   }
   if (flags.childElementCount) targets.append(flags);
-  if (planets.length) {
-    const line = button('line', t('dock.planetsHint'), () => o.onOpenTargets({ tab: 'planets' }));
-    const dots = el(doc, 'span', 'tags');
-    for (const tag of TAGS) {
-      if (!planets.some((p) => p.tag === (tag as Tag))) continue;
-      const dot = el(doc, 'i');
-      dot.style.background = TAG_COLORS[tag];
-      dots.append(dot);
-    }
-    line.append(el(doc, 'span', 'k', t('marks.tab.planets')), dots, el(doc, 'span', 'v', String(planets.length)));
-    targets.append(line);
-  }
 
   dock.append(journal, targets);
   if (menu) menu.append(dock);

@@ -133,7 +133,6 @@ describe('renderPlanetMenu', () => {
     const onOpenTargets = vi.fn();
     const marks = loadMarks({
       players: { 1: { flag: 'farm', name: 'A', at: 0 }, 2: { flag: 'farm', name: 'B', at: 0 }, 3: { flag: 'danger', name: 'C', at: 0 } },
-      planets: { '1:2:3': { tag: 'red', planet: 'P', player: 'A', playerId: 1, statuses: [], moon: false, at: 0 } },
     });
     const days = Array.from({ length: 7 }, (_, i) => ({ start: i, count: i === 6 ? 25 : 0, net: i === 6 ? 4e7 : 0 }));
     const o = { doc: document, t, locale: 'it', journal: { today: { count: 25, net: 4e7 }, week: { count: 0, net: 0 }, days }, marks, onOpenJournal, onOpenTargets };
@@ -145,13 +144,13 @@ describe('renderPlanetMenu', () => {
     expect(dock.querySelector('.jtoday .v')!.textContent).toBe('+40,0MMSU');
     expect(dock.querySelectorAll('.days i')).toHaveLength(7);
     expect(dock.querySelector('.days i:last-child')!.classList.contains('today')).toBe(true);
-    expect([...dock.querySelectorAll('.line .v')].map((v) => v.textContent)).toEqual(['—', '1']);
-    expect(dock.querySelector('.head .n')!.textContent).toBe('4');
+    expect([...dock.querySelectorAll('.line .v')].map((v) => v.textContent)).toEqual(['—']);
+    expect(dock.querySelector('.head .n')!.textContent).toBe('3');
     expect([...dock.querySelectorAll('.flag')].map((f) => f.getAttribute('aria-label'))).toEqual(['Frigo: 2', 'Pericolo: 1']);
     dock.querySelector<HTMLButtonElement>('.jtoday')!.click();
     expect(onOpenJournal).toHaveBeenCalledOnce();
     dock.querySelector<HTMLButtonElement>('.flag')!.click();
-    expect(onOpenTargets).toHaveBeenLastCalledWith({ tab: 'players', flagTab: 'farm' });
+    expect(onOpenTargets).toHaveBeenLastCalledWith({ flagTab: 'farm' });
     dock.querySelectorAll<HTMLButtonElement>('.head')[1]!.click();
     expect(onOpenTargets).toHaveBeenLastCalledWith();
     links.remove();

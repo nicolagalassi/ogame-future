@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { EMPTY_MARKS, flagPlayer, loadMarks, MARKS_KEY, migrateOld, planetsInRange, rememberRecent, RECENT_MAX, tagPlanet, type Marks } from '../src/engines/marks';
-import { flagButton, tagButton } from '../src/modules/marks/picker';
+import { EMPTY_MARKS, flagPlayer, loadMarks, MARKS_KEY, migrateOld, rememberRecent, RECENT_MAX } from '../src/engines/marks';
+import { flagButton } from '../src/modules/marks/picker';
 import { closeSide, isSideOpen, nextInSide, openSide, resetSideCache, restoreSide, SIDE_ID, toggleSide } from '../src/modules/marks/side';
 import { POSITIONS_KEY } from '../src/engines/positions';
 import { parsePlayerData } from '../src/data/player-api';
@@ -12,15 +12,14 @@ import { NetworkGuard } from '../src/core/guard';
 import { translator } from '../src/core/i18n';
 
 const t = translator('it');
-const info = (player = 'Bob', playerId: number | null = 5, statuses: string[] = []) => ({ planet: 'P', player, playerId, statuses, moon: false });
 afterEach(() => { document.body.innerHTML = ''; });
 
 describe('marks', () => {
-  it('flags players and colours planets, remembering the last choice', () => {
+  it('flags players, remembering the last choice; old coloured planets are not loaded', () => {
     let m = flagPlayer(EMPTY_MARKS, 5, 'Bob', 'farm', 1);
-    m = tagPlanet(m, '1:2:3', 'green', info(), 1);
     expect(m.players['5']).toEqual({ flag: 'farm', name: 'Bob', at: 1 });
-    expect([m.lastFlag, m.lastTag]).toEqual(['farm', 'green']);
+    expect(m.lastFlag).toBe('farm');
+    expect(Object.keys(loadMarks({ players: {}, planets: { '1:2:3': {} } } as never))).toEqual(['players', 'recent', 'lastFlag']);
     m = flagPlayer(m, 5, 'Bob', null, 2);
     expect(m.players['5']).toBeUndefined();
     expect(m.lastFlag).toBe('farm');
@@ -34,20 +33,8 @@ describe('marks', () => {
     expect(m.recent[0]).toEqual({ id: 10, name: 'p10' });
   });
 
-  it('lists coloured planets in a coordinate range with filters', () => {
-    let m: Marks = EMPTY_MARKS;
-    m = tagPlanet(m, '1:300:4', 'red', info(), 1);
-    m = tagPlanet(m, '1:120:8', 'blue', info('V', 6, ['vacation']), 1);
-    m = tagPlanet(m, '2:5:1', 'red', info(), 1);
-    m = tagPlanet(m, '1:120:2', 'red', info(), 1);
-    expect(planetsInRange(m, '1:1', '1:499').map(([c]) => c)).toEqual(['1:120:2', '1:120:8', '1:300:4']);
-    expect(planetsInRange(m, '2:10', '1:200', { tags: ['red'] }).map(([c]) => c)).toEqual(['1:300:4', '2:5:1']);
-    expect(planetsInRange(m, '1:1', '1:499', { hide: ['vacation'] }).map(([c]) => c)).toEqual(['1:120:2', '1:300:4']);
-  });
-
-  it('moves the old galaxy targets and rivals once', () => {
+  it('moves the old rivals once (the old galaxy targets are dropped)', () => {
     const moved = migrateOld(EMPTY_MARKS, { targets: [{ coords: '1:2:3', planet: 'A', player: 'Bob', at: 9 }], rivals: [{ id: 7, name: 'Riv', at: 8 }] })!;
-    expect(moved.planets['1:2:3']).toMatchObject({ tag: 'red', planet: 'A', player: 'Bob' });
     expect(moved.players['7']).toMatchObject({ flag: 'watch', name: 'Riv' });
     expect(migrateOld(EMPTY_MARKS, { targets: [], rivals: [] })).toBeNull();
   });
@@ -66,12 +53,13 @@ describe('mark pickers', () => {
     expect(document.getElementById('fut-mk-pop')).toBeNull();
     expect(loadMarks(store.get(MARKS_KEY, null)).players['5']?.flag).toBe('farm');
     expect(b.classList.contains('on')).toBe(true);
-    const c = tagButton({ doc: document, store, t }, '1:2:3', info());
+    // Shift+click repeats the last flag (farm), again clears it.
+    const c = flagButton({ doc: document, store, t }, 6, 'Al');
     document.body.append(c);
     c.dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true }));
-    expect(loadMarks(store.get(MARKS_KEY, null)).planets['1:2:3']?.tag).toBe('red');
+    expect(loadMarks(store.get(MARKS_KEY, null)).players['6']?.flag).toBe('farm');
     c.dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true }));
-    expect(loadMarks(store.get(MARKS_KEY, null)).planets['1:2:3']).toBeUndefined();
+    expect(loadMarks(store.get(MARKS_KEY, null)).players['6']).toBeUndefined();
   });
 });
 
@@ -99,7 +87,7 @@ describe('targets side bar', () => {
     store.set(UNIVERSE_RANKS_KEY, { at: Date.now(), ranks: { 5: [18, 0], 7: [2, 0], 8: [9, 0] } });
     const fetchImpl = vi.fn(async (_u: string, _i?: RequestInit) => new Response('<?xml version="1.0"?><players timestamp="1"><player id="7" name="Zed" status="vi"/><player id="5" name="Bob" status=""/><player id="6" name="Al" status="v"/></players>'));
     const guard = new NetworkGuard(fetchImpl, 'http://localhost:3000');
-    openSide({ doc: document, store, guard, t, locale: 'it' }, { tab: 'players', flagTab: 'danger', player: null });
+    openSide({ doc: document, store, guard, t, locale: 'it' }, { flagTab: 'danger', player: null });
     const root = () => document.getElementById(SIDE_ID)!.shadowRoot!;
     expect([...root().querySelectorAll('.ps .pname')].map((n) => n.textContent)).toEqual(['Zed', 'Mid', 'Abubu']);
     expect([...root().querySelectorAll('.ps .rank')].map((n) => n.textContent)).toEqual(['#2', '#9', '#18']);
@@ -110,24 +98,18 @@ describe('targets side bar', () => {
     resetSideCache();
   });
 
-  it('lists flagged players and coloured planets, statuses from the public API', async () => {
+  it('lists flagged players, no planets tab, and stays open across pages', async () => {
     const store = new Store(new MemoryStore(), 'x');
-    let m = flagPlayer(EMPTY_MARKS, 5, 'Bob', 'watch', 1);
-    m = tagPlanet(m, '1:300:4', 'red', info('Bob', 5), 1);
-    m = tagPlanet(m, '1:301:4', 'red', info('Al', 6), 1);
-    store.set(MARKS_KEY, m);
+    store.set(MARKS_KEY, flagPlayer(EMPTY_MARKS, 5, 'Bob', 'watch', 1));
     const fetchImpl = vi.fn(async (_u: string, _i?: RequestInit) => new Response('<?xml version="1.0"?><players timestamp="1"><player id="5" name="Bob" status=""/><player id="6" name="Al" status="v"/></players>'));
     const guard = new NetworkGuard(fetchImpl, 'http://localhost:3000');
     const o = { doc: document, store, guard, t, locale: 'it'};
     toggleSide(o);
     const root = () => document.getElementById(SIDE_ID)!.shadowRoot!;
     expect(root().querySelector('.row .pname')?.textContent).toBe('Bob');
-    root().querySelectorAll<HTMLButtonElement>('.seg button')[1]!.click();
-    expect(root().querySelectorAll('.tg .row')).toHaveLength(2);
-    // Al is on vacation today: hidden by the default filter once players.xml is read.
-    await vi.waitFor(() => expect(root().querySelectorAll('.tg .row')).toHaveLength(1));
+    expect(root().querySelector('.seg, .tg')).toBeNull();
+    await vi.waitFor(() => expect(fetchImpl).toHaveBeenCalled());
     expect(fetchImpl.mock.calls[0]![1]?.credentials).toBe('omit');
-    expect(root().querySelector<HTMLElement>('[data-coords]')?.dataset.coords).toBe('1:300:4');
     // Left open: it comes back on the next page; the button closes it.
     document.body.innerHTML = '';
     restoreSide(o);

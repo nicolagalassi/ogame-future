@@ -3,8 +3,8 @@
  * moon, the debris and the activity, with the time of the reading. The public API lists a player's
  * planets only once a week; this memory adds the colonies seen since and drops the ones gone.
  *
- * Kept only for the positions the player cares about (marked or lately opened players, coloured
- * planets) and for the ones already kept, so that an emptied position is noticed.
+ * Kept only for the positions the player cares about (marked or lately opened players, and the
+ * positions the API still gives them) and for the ones already kept, so that an emptied position is noticed.
  * Pure functions over Future's own data: no DOM, no network.
  */
 import type { Activity } from '../data/galaxy';

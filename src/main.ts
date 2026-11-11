@@ -193,7 +193,7 @@ async function bootstrap(): Promise<void> {
           store.set(POSITIONS_KEY, out.positions);
           const days = convertOglightStats(json.stats ?? {}, store.get<Journal>(JOURNAL_KEY, {}));
           store.set(JOURNAL_KEY, days.journal);
-          return t('settings.oglightDone', { players: out.players, planets: out.planets, seen: out.seen, exp: days.expeditions.toLocaleString(locale), raids: days.raids.toLocaleString(locale), days: days.days });
+          return t('settings.oglightDone', { players: out.players, seen: out.seen, exp: days.expeditions.toLocaleString(locale), raids: days.raids.toLocaleString(locale), days: days.days });
         },
       },
       notes: [menuCtx.colonies, snapshot ? t('toolbar.lastSync', { time: new Date(snapshot.fetchedAt).toLocaleString(locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) }) : ''].filter(Boolean),
@@ -372,7 +372,7 @@ async function bootstrap(): Promise<void> {
   // Galaxy view: system summary, marks, debris in MSU, targets and the scores card.
   if (isGalaxyPage(document)) {
     const ownPlanetIds = new Set(readPlanetList(document).flatMap((e) => (e.planetId ? [e.planetId] : [])));
-    watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onSystem: refreshSide, onPlayer: (id) => openSide(side, { tab: 'players', player: id }) });
+    watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onSystem: refreshSide, onPlayer: (id) => openSide(side, { player: id }) });
     // Touch bar: the game's own galaxy arrows (the keyboard already moves them).
     const arrow = (key: string) => () => document.querySelector<HTMLElement>(`#galaxycomponent .galaxy_icons[onclick*="'${key}'"]`)?.click();
     registerActions(document, store, t, { 'galaxy.left': arrow('ArrowLeft'), 'galaxy.right': arrow('ArrowRight'), 'galaxy.down': arrow('ArrowDown'), 'galaxy.up': arrow('ArrowUp') });

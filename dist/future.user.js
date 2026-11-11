@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.33
+// @version      0.3.34
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -635,20 +635,11 @@
     "mark.flag.danger": "Pericolo",
     "mark.flag.friend": "Amico",
     "mark.flag.trade": "Commercio",
-    "mark.tag.red": "Rosso",
-    "mark.tag.orange": "Arancio",
-    "mark.tag.yellow": "Giallo",
-    "mark.tag.green": "Verde",
-    "mark.tag.blue": "Blu",
-    "mark.tag.violet": "Viola",
     "mark.none": "Togli",
     "mark.change": "clic per cambiare, Maiusc+clic per l'ultimo usato",
     "mark.flagAdd": "Segna il giocatore (Maiusc+clic: l'ultima bandierina)",
-    "mark.tagAdd": "Colora il pianeta (Maiusc+clic: l'ultimo colore)",
     "marks.title": "Bersagli",
     "marks.sub": "{players} giocatori \xB7 {planets} pianeti",
-    "marks.tab.players": "Giocatori",
-    "marks.tab.planets": "Pianeti",
     "marks.recent": "Recenti",
     "marks.noRecent": "Nessun giocatore aperto di recente.",
     "marks.noPlayers": "Nessun giocatore con questa bandierina. Mettila dalla galassia, dalla classifica o dalla tabella spiate.",
@@ -660,14 +651,6 @@
     "marks.rank": "Classifica",
     "marks.ships": "Navi",
     "marks.planets": "Pianeti {n} \xB7 lune {moons}",
-    "marks.from": "Da",
-    "marks.to": "a",
-    "marks.hide.vacation": "Nascondi vacanza",
-    "marks.hide.banned": "Nascondi bannati",
-    "marks.hide.inactive": "Nascondi inattivi",
-    "marks.noneInRange": "Nessun pianeta colorato in questo intervallo con questi filtri.",
-    "marks.noPlanets": "Nessun pianeta colorato. In galassia usa il pallino a destra del nome del pianeta.",
-    "marks.planetsHint": "{n} pianeti \xB7 le coordinate mostrano il sistema in galassia",
     "marks.keyNext": "prossima posizione",
     "marks.footData": "galassia + API pubblica",
     "marks.fleetPlanet": "Flotta verso il pianeta {coords} (attivit\xE0 del pianeta)",
@@ -683,7 +666,6 @@
     "marks.col.planet": "Pian.",
     "marks.col.moon": "Luna",
     "marks.col.seen": "Visto",
-    "marks.col.who": "Pianeta \xB7 giocatore",
     "shortcut.nextTarget": "Bersagli: prossima posizione",
     "plan.lacksHere": "qui mancano {n}",
     "plan.clearAll": "Svuota piano",
@@ -699,10 +681,10 @@
     "plan.removeAll": "Togli da tutti i {n} corpi",
     "plan.readyHere": "Qui le risorse bastano",
     "bar.targets": "Bersagli",
-    "bar.targetsHint": "Barra laterale dei bersagli (giocatori segnati e pianeti colorati) \xB7 M: prossima posizione",
+    "bar.targetsHint": "Barra laterale dei bersagli (giocatori segnati) \xB7 M: prossima posizione",
     "settings.oglight": "Da OGLight",
     "settings.oglightImport": "Importa export",
-    "settings.oglightDone": "Da OGLight: {players} giocatori, {planets} pianeti colorati, {seen} posizioni, {exp} spedizioni e {raids} raid su {days} giorni. Ricarica la pagina.",
+    "settings.oglightDone": "Da OGLight: {players} giocatori, {seen} posizioni, {exp} spedizioni e {raids} raid su {days} giorni. Ricarica la pagina.",
     "settings.backupImportHint": "Un backup di Future o il file \xABExport data\xBB di OGLight (dello stesso universo)",
     "exp.raids": "Raid (importati da OGLight)",
     "exp.raidCount": "Raid",
@@ -843,7 +825,6 @@
     "dock.week": "7 giorni",
     "dock.journalHint": "{n} spedizioni lette dalla posta; guadagno netto in MSU. Clic: apre il diario.",
     "dock.targetsEmpty": "Nessun bersaglio: segna giocatori e pianeti dalla galassia.",
-    "dock.planetsHint": "Pianeti colorati: apre la lista nella barra dei bersagli",
     "dash.scrapPick": "Clic: tutte, di nuovo clic: nessuna",
     "plan.byBody": "Per pianeta",
     "plan.byTech": "Per tecnologia",
@@ -1388,20 +1369,11 @@
     "mark.flag.danger": "Danger",
     "mark.flag.friend": "Friend",
     "mark.flag.trade": "Trade",
-    "mark.tag.red": "Red",
-    "mark.tag.orange": "Orange",
-    "mark.tag.yellow": "Yellow",
-    "mark.tag.green": "Green",
-    "mark.tag.blue": "Blue",
-    "mark.tag.violet": "Violet",
     "mark.none": "Remove",
     "mark.change": "click to change, Shift+click for the last one used",
     "mark.flagAdd": "Flag the player (Shift+click: last flag)",
-    "mark.tagAdd": "Colour the planet (Shift+click: last colour)",
     "marks.title": "Targets",
     "marks.sub": "{players} players \xB7 {planets} planets",
-    "marks.tab.players": "Players",
-    "marks.tab.planets": "Planets",
     "marks.recent": "Recent",
     "marks.noRecent": "No player opened lately.",
     "marks.noPlayers": "No player with this flag. Set it from the galaxy, the highscore or the spy table.",
@@ -1413,14 +1385,6 @@
     "marks.rank": "Highscore",
     "marks.ships": "Ships",
     "marks.planets": "Planets {n} \xB7 moons {moons}",
-    "marks.from": "From",
-    "marks.to": "to",
-    "marks.hide.vacation": "Hide vacation",
-    "marks.hide.banned": "Hide banned",
-    "marks.hide.inactive": "Hide inactive",
-    "marks.noneInRange": "No coloured planet in this range with these filters.",
-    "marks.noPlanets": "No coloured planet. In the galaxy view use the dot to the right of the planet name.",
-    "marks.planetsHint": "{n} planets \xB7 coordinates show the system in the galaxy",
     "marks.keyNext": "next position",
     "marks.footData": "galaxy + public API",
     "marks.fleetPlanet": "Fleet to planet {coords} (planet activity)",
@@ -1436,7 +1400,6 @@
     "marks.col.planet": "Plan.",
     "marks.col.moon": "Moon",
     "marks.col.seen": "Seen",
-    "marks.col.who": "Planet \xB7 player",
     "shortcut.nextTarget": "Targets: next position",
     "plan.lacksHere": "{n} missing here",
     "plan.clearAll": "Clear plan",
@@ -1452,10 +1415,10 @@
     "plan.removeAll": "Remove from all {n} bodies",
     "plan.readyHere": "Enough resources here",
     "bar.targets": "Targets",
-    "bar.targetsHint": "Targets side bar (flagged players and coloured planets) \xB7 M: next position",
+    "bar.targetsHint": "Targets side bar (flagged players) \xB7 M: next position",
     "settings.oglight": "From OGLight",
     "settings.oglightImport": "Import export",
-    "settings.oglightDone": "From OGLight: {players} players, {planets} coloured planets, {seen} positions, {exp} expeditions and {raids} raids over {days} days. Reload the page.",
+    "settings.oglightDone": "From OGLight: {players} players, {seen} positions, {exp} expeditions and {raids} raids over {days} days. Reload the page.",
     "settings.backupImportHint": "A Future backup or OGLight's \u201CExport data\u201D file (same universe)",
     "exp.raids": "Raids (imported from OGLight)",
     "exp.raidCount": "Raids",
@@ -1596,7 +1559,6 @@
     "dock.week": "7 days",
     "dock.journalHint": "{n} expeditions read from the inbox; net gain in MSU. Click: opens the journal.",
     "dock.targetsEmpty": "No targets yet: mark players and planets in the galaxy.",
-    "dock.planetsHint": "Coloured planets: opens their list in the targets bar",
     "dash.scrapPick": "Click: all of them, click again: none",
     "plan.byBody": "By planet",
     "plan.byTech": "By technology",
@@ -2141,20 +2103,11 @@
     "mark.flag.danger": "Danger",
     "mark.flag.friend": "Ami",
     "mark.flag.trade": "Commerce",
-    "mark.tag.red": "Rouge",
-    "mark.tag.orange": "Orange",
-    "mark.tag.yellow": "Jaune",
-    "mark.tag.green": "Vert",
-    "mark.tag.blue": "Bleu",
-    "mark.tag.violet": "Violet",
     "mark.none": "Retirer",
     "mark.change": "clic pour changer, Maj+clic pour le dernier utilis\xE9",
     "mark.flagAdd": "Marquer le joueur (Maj+clic : dernier drapeau)",
-    "mark.tagAdd": "Colorer la plan\xE8te (Maj+clic : derni\xE8re couleur)",
     "marks.title": "Cibles",
     "marks.sub": "{players} joueurs \xB7 {planets} plan\xE8tes",
-    "marks.tab.players": "Joueurs",
-    "marks.tab.planets": "Plan\xE8tes",
     "marks.recent": "R\xE9cents",
     "marks.noRecent": "Aucun joueur ouvert r\xE9cemment.",
     "marks.noPlayers": "Aucun joueur avec ce drapeau. Ajoutez-le depuis la galaxie, le classement ou le tableau d'espionnage.",
@@ -2166,14 +2119,6 @@
     "marks.rank": "Classement",
     "marks.ships": "Vaisseaux",
     "marks.planets": "Plan\xE8tes {n} \xB7 lunes {moons}",
-    "marks.from": "De",
-    "marks.to": "\xE0",
-    "marks.hide.vacation": "Masquer vacances",
-    "marks.hide.banned": "Masquer bannis",
-    "marks.hide.inactive": "Masquer inactifs",
-    "marks.noneInRange": "Aucune plan\xE8te color\xE9e dans cette zone avec ces filtres.",
-    "marks.noPlanets": "Aucune plan\xE8te color\xE9e. Dans la galaxie, utilisez le point \xE0 droite du nom de la plan\xE8te.",
-    "marks.planetsHint": "{n} plan\xE8tes \xB7 les coordonn\xE9es affichent le syst\xE8me en galaxie",
     "marks.keyNext": "position suivante",
     "marks.footData": "galaxie + API publique",
     "marks.fleetPlanet": "Flotte vers la plan\xE8te {coords} (activit\xE9 de la plan\xE8te)",
@@ -2189,7 +2134,6 @@
     "marks.col.planet": "Plan.",
     "marks.col.moon": "Lune",
     "marks.col.seen": "Vu",
-    "marks.col.who": "Plan\xE8te \xB7 joueur",
     "shortcut.nextTarget": "Cibles : position suivante",
     "plan.lacksHere": "il manque {n} ici",
     "plan.clearAll": "Vider le plan",
@@ -2205,10 +2149,10 @@
     "plan.removeAll": "Retirer des {n} corps",
     "plan.readyHere": "Ressources suffisantes ici",
     "bar.targets": "Cibles",
-    "bar.targetsHint": "Barre lat\xE9rale des cibles (joueurs marqu\xE9s et plan\xE8tes color\xE9es) \xB7 M : position suivante",
+    "bar.targetsHint": "Barre lat\xE9rale des cibles (joueurs marqu\xE9s) \xB7 M : position suivante",
     "settings.oglight": "Depuis OGLight",
     "settings.oglightImport": "Importer l'export",
-    "settings.oglightDone": "Depuis OGLight : {players} joueurs, {planets} plan\xE8tes color\xE9es, {seen} positions, {exp} exp\xE9ditions et {raids} raids sur {days} jours. Rechargez la page.",
+    "settings.oglightDone": "Depuis OGLight : {players} joueurs, {seen} positions, {exp} exp\xE9ditions et {raids} raids sur {days} jours. Rechargez la page.",
     "settings.backupImportHint": "Une sauvegarde Future ou le fichier \xAB Export data \xBB d'OGLight (m\xEAme univers)",
     "exp.raids": "Raids (import\xE9s d'OGLight)",
     "exp.raidCount": "Raids",
@@ -2349,7 +2293,6 @@
     "dock.week": "7 jours",
     "dock.journalHint": "{n} exp\xE9ditions lues dans la messagerie ; gain net en MSU. Clic : ouvre le journal.",
     "dock.targetsEmpty": "Aucune cible : marquez joueurs et plan\xE8tes dans la galaxie.",
-    "dock.planetsHint": "Plan\xE8tes color\xE9es : ouvre leur liste dans la barre des cibles",
     "dash.scrapPick": "Clic : tous, nouveau clic : aucun",
     "plan.byBody": "Par plan\xE8te",
     "plan.byTech": "Par technologie",
@@ -2894,20 +2837,11 @@
     "mark.flag.danger": "Gefahr",
     "mark.flag.friend": "Freund",
     "mark.flag.trade": "Handel",
-    "mark.tag.red": "Rot",
-    "mark.tag.orange": "Orange",
-    "mark.tag.yellow": "Gelb",
-    "mark.tag.green": "Gr\xFCn",
-    "mark.tag.blue": "Blau",
-    "mark.tag.violet": "Violett",
     "mark.none": "Entfernen",
     "mark.change": "Klick zum \xC4ndern, Umschalt+Klick f\xFCr die zuletzt benutzte",
     "mark.flagAdd": "Spieler markieren (Umschalt+Klick: letzte Flagge)",
-    "mark.tagAdd": "Planet f\xE4rben (Umschalt+Klick: letzte Farbe)",
     "marks.title": "Ziele",
     "marks.sub": "{players} Spieler \xB7 {planets} Planeten",
-    "marks.tab.players": "Spieler",
-    "marks.tab.planets": "Planeten",
     "marks.recent": "Zuletzt",
     "marks.noRecent": "Zuletzt kein Spieler ge\xF6ffnet.",
     "marks.noPlayers": "Kein Spieler mit dieser Flagge. Setze sie in der Galaxie, der Rangliste oder der Spionagetabelle.",
@@ -2919,14 +2853,6 @@
     "marks.rank": "Rangliste",
     "marks.ships": "Schiffe",
     "marks.planets": "Planeten {n} \xB7 Monde {moons}",
-    "marks.from": "Von",
-    "marks.to": "bis",
-    "marks.hide.vacation": "Urlaub ausblenden",
-    "marks.hide.banned": "Gesperrte ausblenden",
-    "marks.hide.inactive": "Inaktive ausblenden",
-    "marks.noneInRange": "Kein gef\xE4rbter Planet in diesem Bereich mit diesen Filtern.",
-    "marks.noPlanets": "Kein gef\xE4rbter Planet. Nutze in der Galaxie den Punkt rechts vom Planetennamen.",
-    "marks.planetsHint": "{n} Planeten \xB7 Koordinaten zeigen das System in der Galaxie",
     "marks.keyNext": "n\xE4chste Position",
     "marks.footData": "Galaxie + \xF6ffentliche API",
     "marks.fleetPlanet": "Flotte zum Planeten {coords} (Aktivit\xE4t des Planeten)",
@@ -2942,7 +2868,6 @@
     "marks.col.planet": "Plan.",
     "marks.col.moon": "Mond",
     "marks.col.seen": "Gesehen",
-    "marks.col.who": "Planet \xB7 Spieler",
     "shortcut.nextTarget": "Ziele: n\xE4chste Position",
     "plan.lacksHere": "hier fehlen {n}",
     "plan.clearAll": "Plan leeren",
@@ -2958,10 +2883,10 @@
     "plan.removeAll": "Von allen {n} K\xF6rpern entfernen",
     "plan.readyHere": "Hier reichen die Ressourcen",
     "bar.targets": "Ziele",
-    "bar.targetsHint": "Seitenleiste der Ziele (markierte Spieler und farbige Planeten) \xB7 M: n\xE4chste Position",
+    "bar.targetsHint": "Seitenleiste der Ziele (markierte Spieler) \xB7 M: n\xE4chste Position",
     "settings.oglight": "Aus OGLight",
     "settings.oglightImport": "Export importieren",
-    "settings.oglightDone": "Aus OGLight: {players} Spieler, {planets} farbige Planeten, {seen} Positionen, {exp} Expeditionen und {raids} Raids an {days} Tagen. Seite neu laden.",
+    "settings.oglightDone": "Aus OGLight: {players} Spieler, {seen} Positionen, {exp} Expeditionen und {raids} Raids an {days} Tagen. Seite neu laden.",
     "settings.backupImportHint": "Ein Future-Backup oder die \u201EExport data\u201C-Datei von OGLight (gleiches Universum)",
     "exp.raids": "Raids (aus OGLight importiert)",
     "exp.raidCount": "Raids",
@@ -3102,7 +3027,6 @@
     "dock.week": "7 Tage",
     "dock.journalHint": "{n} Expeditionen aus dem Postfach; Nettogewinn in MSU. Klick: \xF6ffnet das Tagebuch.",
     "dock.targetsEmpty": "Noch keine Ziele: markiere Spieler und Planeten in der Galaxie.",
-    "dock.planetsHint": "Farbige Planeten: \xF6ffnet ihre Liste in der Zielleiste",
     "dash.scrapPick": "Klick: alle, erneut klicken: keine",
     "plan.byBody": "Nach Planet",
     "plan.byTech": "Nach Technologie",
@@ -3478,11 +3402,14 @@
 
   // src/engines/marks.ts
   var FLAGS = ["watch", "target", "farm", "danger", "friend", "trade"];
-  var TAGS = ["red", "orange", "yellow", "green", "blue", "violet"];
   var MARKS_KEY = "marks";
   var RECENT_MAX = 30;
-  var EMPTY_MARKS = { players: {}, planets: {}, recent: [], lastFlag: "watch", lastTag: "red" };
-  var loadMarks = (stored) => ({ ...EMPTY_MARKS, ...stored ?? {}, players: { ...stored?.players ?? {} }, planets: { ...stored?.planets ?? {} }, recent: [...stored?.recent ?? []] });
+  var EMPTY_MARKS = { players: {}, recent: [], lastFlag: "watch" };
+  var loadMarks = (stored) => ({
+    players: { ...stored?.players ?? {} },
+    recent: [...stored?.recent ?? []],
+    lastFlag: stored?.lastFlag ?? EMPTY_MARKS.lastFlag
+  });
   function flagPlayer(m, id, name, flag, now) {
     const players = { ...m.players };
     if (flag) players[String(id)] = { ...players[String(id)], flag, name: name || players[String(id)]?.name || "", at: now };
@@ -3498,33 +3425,14 @@
     else delete next.note;
     return { ...m, players: { ...m.players, [String(id)]: next } };
   }
-  function tagPlanet(m, coords, tag, info, now) {
-    const planets = { ...m.planets };
-    if (tag) planets[coords] = { ...info, tag, at: now };
-    else delete planets[coords];
-    return { ...m, planets, lastTag: tag ?? m.lastTag };
-  }
   function rememberRecent(m, id, name) {
     return { ...m, recent: [{ id, name }, ...m.recent.filter((r) => r.id !== id)].slice(0, RECENT_MAX) };
   }
-  var coordsValue = (c) => {
-    const [g, s, p] = c.split(":").map(Number);
-    return (g ?? 0) * 1e6 + (s ?? 0) * 1e3 + (p ?? 0);
-  };
-  function planetsInRange(m, from, to, filter = {}) {
-    const lo = Math.min(coordsValue(`${from}:0`), coordsValue(`${to}:0`));
-    const hi = Math.max(coordsValue(`${from}:999`), coordsValue(`${to}:999`));
-    return Object.entries(m.planets).filter(([c, p]) => {
-      const v = coordsValue(c);
-      return v >= lo && v <= hi && (!filter.tags || filter.tags.includes(p.tag)) && !p.statuses.some((s) => filter.hide?.includes(s));
-    }).sort((a, b) => coordsValue(a[0]) - coordsValue(b[0]));
-  }
   function migrateOld(m, old) {
-    if (!old.targets.length && !old.rivals.length) return null;
+    if (!old.rivals.length) return null;
     let next = m;
-    for (const x of old.targets) if (!next.planets[x.coords]) next = tagPlanet(next, x.coords, "red", { planet: x.planet, player: x.player, playerId: null, statuses: [], moon: false }, x.at);
     for (const r of old.rivals) if (!next.players[String(r.id)]) next = flagPlayer(next, r.id, r.name, "watch", r.at);
-    return { ...next, lastFlag: m.lastFlag, lastTag: m.lastTag };
+    return { ...next, lastFlag: m.lastFlag };
   }
 
   // src/engines/positions.ts
@@ -3554,7 +3462,7 @@
     if (keys.length > MAX) for (const k of keys.sort((a, b) => all2[a].at - all2[b].at).slice(0, keys.length - MAX)) delete all2[k];
     return all2;
   }
-  var coordsValue2 = (c) => c.split(":").reduce((s, n) => s * 1e3 + Number(n), 0);
+  var coordsValue = (c) => c.split(":").reduce((s, n) => s * 1e3 + Number(n), 0);
   function planetsOf(id, api, db) {
     const out = /* @__PURE__ */ new Map();
     const apiAt = api?.updated ?? api?.at ?? 0;
@@ -3567,7 +3475,7 @@
     for (const [coords, seen] of Object.entries(db)) {
       if (seen.player === id && !out.has(coords)) out.set(coords, { coords, name: seen.name, moon: seen.moon, seen, fresh: true });
     }
-    return [...out.values()].sort((a, b) => coordsValue2(a.coords) - coordsValue2(b.coords));
+    return [...out.values()].sort((a, b) => coordsValue(a.coords) - coordsValue(b.coords));
   }
   function ageParts(ms) {
     const min = Math.max(0, Math.floor(ms / 6e4));
@@ -3623,22 +3531,18 @@
   // src/modules/marks/picker.ts
   var FLAG_ICONS = { watch: "eye", target: "target", farm: "farm", danger: "warn", friend: "user", trade: "swap" };
   var FLAG_COLORS = { watch: "#4FD1E8", target: "#FF7A7A", farm: "#7BC47F", danger: "#F5B547", friend: "#7FB8FF", trade: "#B58CDB" };
-  var TAG_COLORS = { red: "#E5484D", orange: "#F08A3C", yellow: "#E3C52B", green: "#46B35E", blue: "#3E8EDE", violet: "#9A6BD8" };
   var POP_ID = "fut-mk-pop";
   var MARKS_CSS = `
 .fut-mk { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin: 0 2px; padding: 0;
   border: 1px solid #2E4356; border-radius: 4px; background: #0D1522; color: #7A8CA3; cursor: pointer; vertical-align: middle; }
 .fut-mk:hover, .fut-mk:focus-visible { border-color: #617C8D; color: #C9D4E2; outline: none; }
 .fut-mk.on { border-color: currentColor; background: #0D1522; }
-.fut-mk-dot { width: 9px; height: 9px; border-radius: 50%; border: 1px solid #4A5B72; }
-.fut-mk.on .fut-mk-dot { border-color: transparent; }
 #fut-mk-pop { position: fixed; z-index: 1000003; display: flex; gap: 3px; padding: 5px; border: 1px solid #2E4356; border-radius: 8px;
   background: #111B2A; box-shadow: 0 8px 22px rgba(0,0,0,0.55); font: 11px Verdana, Arial, sans-serif; }
 #fut-mk-pop button { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; padding: 0; border: 1px solid #1F2C40;
   border-radius: 6px; background: #0A111C; color: #8A9BB0; cursor: pointer; }
 #fut-mk-pop button:hover, #fut-mk-pop button:focus-visible { border-color: currentColor; outline: none; }
-#fut-mk-pop button[aria-pressed="true"] { background: #12283A; border-color: currentColor; }
-#fut-mk-pop .fut-mk-dot { width: 12px; height: 12px; }`;
+#fut-mk-pop button[aria-pressed="true"] { background: #12283A; border-color: currentColor; }`;
   function ensureMarksStyle(doc) {
     if (doc.getElementById("fut-mk-style")) return;
     const style = doc.createElement("style");
@@ -3680,15 +3584,6 @@
     b.title = flag ? `${t(`mark.flag.${flag}`)} \xB7 ${t("mark.change")}` : t("mark.flagAdd");
     b.setAttribute("aria-label", `${b.title}: ${name}`);
   }
-  function paintTag(b, tag, t, coords) {
-    const dot = b.ownerDocument.createElement("span");
-    dot.className = "fut-mk-dot";
-    if (tag) dot.style.background = TAG_COLORS[tag];
-    b.replaceChildren(dot);
-    b.classList.toggle("on", !!tag);
-    b.title = tag ? `${t(`mark.tag.${tag}`)} \xB7 ${t("mark.change")}` : t("mark.tagAdd");
-    b.setAttribute("aria-label", `${b.title}: [${coords}]`);
-  }
   var all = (root, sel) => [...root.querySelectorAll(sel)];
   function everyRoot(doc) {
     return [doc, ...[...doc.querySelectorAll('[id^="fut-"]')].map((h6) => h6.shadowRoot).filter((r) => !!r)];
@@ -3725,50 +3620,6 @@
         it.addEventListener("click", () => {
           closePop(doc);
           set(flag);
-          b.focus();
-        });
-        return it;
-      });
-      openPop(doc, b, items);
-    });
-    return b;
-  }
-  function tagButton(o, coords, info) {
-    const { doc, store, t } = o;
-    const b = doc.createElement("button");
-    b.type = "button";
-    b.className = "fut-mk fut-mk-tag";
-    b.dataset.futTag = coords;
-    b.setAttribute("aria-haspopup", "menu");
-    paintTag(b, readMarks(store).planets[coords]?.tag, t, coords);
-    const set = (tag) => {
-      store.set(MARKS_KEY, tagPlanet(readMarks(store), coords, tag, info, Date.now()));
-      for (const root of everyRoot(doc)) for (const x of all(root, `[data-fut-tag="${coords}"]`)) paintTag(x, tag ?? void 0, t, coords);
-      o.onChange?.();
-    };
-    b.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const m = readMarks(store);
-      const current3 = m.planets[coords]?.tag;
-      if (e.shiftKey) return set(current3 === m.lastTag ? null : m.lastTag);
-      const items = [...TAGS, null].map((tag) => {
-        const it = doc.createElement("button");
-        it.type = "button";
-        it.setAttribute("role", "menuitemradio");
-        it.setAttribute("aria-pressed", String((current3 ?? null) === tag));
-        it.title = tag ? t(`mark.tag.${tag}`) : t("mark.none");
-        it.setAttribute("aria-label", it.title);
-        if (tag) {
-          const dot = doc.createElement("span");
-          dot.className = "fut-mk-dot";
-          dot.style.background = TAG_COLORS[tag];
-          dot.style.borderColor = "transparent";
-          it.append(dot);
-        } else it.append(icon(doc, "close", 13));
-        it.addEventListener("click", () => {
-          closePop(doc);
-          set(tag);
           b.focus();
         });
         return it;
@@ -4002,8 +3853,6 @@
 #galaxyContent .ctContentRow .cellPlanetName { justify-content: flex-start !important; padding: 0 5px; box-sizing: border-box; }
 #galaxyContent .galaxyRow.fut-g-inactive .galaxyCell { box-shadow: inset 0 0 0 100px rgba(155,227,109,0.06); }
 #galaxyContent .galaxyRow.fut-g-own .galaxyCell { box-shadow: inset 0 0 0 100px rgba(79,209,232,0.07); }
-#galaxyContent .galaxyRow.fut-g-tagged .galaxyCell { box-shadow: inset 0 0 40px color-mix(in srgb, var(--fut-tag) 22%, transparent); }
-#galaxyContent .galaxyRow.fut-g-tagged .cellPlanetName { box-shadow: inset 3px 0 0 var(--fut-tag), inset 0 0 40px color-mix(in srgb, var(--fut-tag) 22%, transparent); }
 
 /* The position the side bar (or the link) asked for: the planet menu's cyan frame. */
 /* On the cells, not the row: a frame on the row showed between the cells as odd blue brackets. */
@@ -4012,8 +3861,6 @@
 
 #galaxyContent .cellPlanetName { position: relative; }
 /* Planet colour: at the right of the name, faint until the row is pointed at or the planet has one. */
-#galaxyContent .cellPlanetName .fut-mk-tag { position: absolute; right: 3px; top: 50%; transform: translateY(-50%); margin: 0; opacity: 0; transition: opacity 120ms ease-out; }
-#galaxyContent .galaxyRow:hover .fut-mk-tag, #galaxyContent .fut-mk-tag:focus-visible, #galaxyContent .fut-mk-tag.on { opacity: 1; }
 .fut-g-rank:focus-visible { outline: 2px solid #4FD1E8; outline-offset: 1px; }
 
 /* Player column, as OGLight lays it out: status first, the name with all the room left, rank and
@@ -4203,10 +4050,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .chip:hover { border-color: #2C5A73; }
 .chip[aria-pressed="true"] { border-color: currentColor; background: #12283A; color: #E6EDF5; font-weight: 700; }
 .chip .n { font: 12px Consolas, monospace; color: #9AA9BC; }
-.seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #1F2C40; border-radius: 7px; overflow: hidden; flex: none; }
-.seg button { height: 28px; border: 0; background: #0B121D; color: #9AA9BC; cursor: pointer; }
-.seg button + button { border-left: 1px solid #1F2C40; }
-.seg button[aria-pressed="true"] { background: #12283A; color: #E6EDF5; font-weight: 700; box-shadow: inset 0 -2px 0 #4FD1E8; }
 
 /* Scores: what the number is, the number, the rank. Three per line. */
 .scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden; flex: none; }
@@ -4228,12 +4071,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .note:focus-within { border-color: #4FD1E8; }
 .note.off { color: #9AA9BC; }
 
-.range { display: flex; align-items: center; gap: 4px; color: #9AA9BC; }
-.range input { width: 76px; height: 26px; padding: 0 5px; border: 1px solid #1F2C40; border-radius: 5px; background: #0A111C; color: #E6EDF5; font: 12px Consolas, monospace; }
 
 /* Lists: one card, a hairline between rows, the cyan bar on the system on screen. */
 .scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: #2A3B55 #0B121D; scrollbar-width: thin; }
-.pl, .tg, .ps { border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden; }
+.pl, .ps { border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden; }
 .cols, .row { display: grid; align-items: center; gap: 6px; min-height: 28px; padding: 0 6px; }
 .cols { min-height: 22px; color: #9AA9BC; font-size: 11px; background: #0B121D; border-bottom: 1px solid #1F2C40; }
 .row + .row { border-top: 1px solid #16202F; }
@@ -4241,7 +4082,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .row:hover { background: #16243A; }
 .row.active { background: rgba(79,209,232,0.12); box-shadow: inset 3px 0 0 #4FD1E8; }
 .pl .cols, .pl .row { grid-template-columns: 18px 84px minmax(0, 1fr) 46px 40px 40px 34px; }
-.tg .cols, .tg .row { grid-template-columns: 18px 76px minmax(0, 1fr) 40px 34px 22px; }
 .ps .row { grid-template-columns: 18px minmax(0, 1fr) auto auto; min-height: 30px; }
 .idx { color: #617C8D; font: 11px Consolas, monospace; text-align: right; }
 .coords { all: unset; display: inline-flex; align-items: center; gap: 3px; padding: 2px 3px; border-radius: 4px; color: #E6EDF5; font: 12px Consolas, monospace; cursor: pointer; white-space: nowrap; }
@@ -4280,9 +4120,8 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
 /* Narrow screens: the planet's name and the row number give their room to the numbers. */
 @container (max-width: 350px) {
   .pl .cols, .pl .row { grid-template-columns: 84px minmax(0, 1fr) 40px 40px 34px; }
-  .tg .cols, .tg .row { grid-template-columns: 76px minmax(0, 1fr) 40px 34px 22px; }
-  .pl .idx, .tg .idx, .pl .pn { display: none; }
-  .pl .cols > :first-child, .tg .cols > :first-child, .pl .cols > :nth-child(3) { display: none; }
+  .pl .idx, .pl .pn { display: none; }
+  .pl .cols > :first-child, .pl .cols > :nth-child(3) { display: none; }
   .scores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .actions a span { display: none; }
 }
@@ -4302,7 +4141,8 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     return `/game/index.php?page=ingame&component=fleetdispatch&galaxy=${g}&system=${s}&position=${p}&type=${type}`;
   };
   var readView = (o) => {
-    return { open: false, tab: "players", flagTab: "watch", player: null, from: "", to: "", tags: [...TAGS], hide: ["vacation", "banned"], ...o.store.get(VIEW_KEY, {}) };
+    const saved = o.store.get(VIEW_KEY, {});
+    return { open: saved.open ?? false, flagTab: saved.flagTab ?? "watch", player: saved.player ?? null };
   };
   var readMarks2 = (store) => loadMarks(store.get(MARKS_KEY, null));
   function shownSystem(doc) {
@@ -4407,17 +4247,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     if (view2.player !== null) playerSheet(o, side, scroll, title, view2.player, marks, positions, picker, here);
     else {
       title.append(h(doc, "span", "name", t("marks.title")));
-      const seg = h(doc, "div", "seg");
-      for (const id of ["players", "planets"]) {
-        const b = h(doc, "button", "", t(`marks.tab.${id}`));
-        b.type = "button";
-        b.setAttribute("aria-pressed", String(view2.tab === id));
-        b.addEventListener("click", () => go({ tab: id }));
-        seg.append(b);
-      }
-      side.append(seg);
-      if (view2.tab === "players") playersList(o, side, scroll, view2, marks, picker, go);
-      else taggedList(o, side, scroll, view2, marks, positions, picker, go, here);
+      playersList(o, side, scroll, view2, marks, picker, go);
     }
     side.append(scroll);
     const foot = h(doc, "div", "foot");
@@ -4660,89 +4490,6 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     scroll.append(wrap);
     scroll.append(h(doc, "p", "foot", t("marks.planets", { n: lines.length, moons: lines.filter((l) => l.moon).length }) + " \xB7 " + t("galaxy.apiAge", { time: new Date(data.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) })));
   }
-  function taggedList(o, side, scroll, view2, marks, positions, picker, go, here) {
-    const { doc, t, locale } = o;
-    const range = h(doc, "div", "range");
-    const input = (value, label, placeholder) => {
-      const i = h(doc, "input");
-      i.value = value;
-      i.placeholder = placeholder;
-      i.inputMode = "numeric";
-      i.setAttribute("aria-label", label);
-      return i;
-    };
-    const from = input(view2.from, t("marks.from"), "1:1");
-    const to = input(view2.to, t("marks.to"), "9:499");
-    const apply = () => {
-      const ok = (v) => !v.trim() || /^\d{1,2}:\d{1,3}$/.test(v.trim());
-      if (ok(from.value) && ok(to.value)) go({ from: from.value.trim(), to: to.value.trim() });
-    };
-    for (const i of [from, to]) i.addEventListener("change", apply);
-    range.append(h(doc, "span", "", t("marks.from")), from, h(doc, "span", "", t("marks.to")), to);
-    side.append(range);
-    const chips = h(doc, "div", "chips");
-    for (const tag of TAGS) {
-      const b = h(doc, "button", "chip");
-      b.type = "button";
-      const on = view2.tags.includes(tag);
-      b.title = t(`mark.tag.${tag}`);
-      b.setAttribute("aria-label", b.title);
-      b.setAttribute("aria-pressed", String(on));
-      b.style.color = TAG_COLORS[tag];
-      const dot = h(doc, "span", "fut-mk-dot");
-      dot.style.background = TAG_COLORS[tag];
-      dot.style.borderColor = "transparent";
-      b.append(dot);
-      b.addEventListener("click", () => go({ tags: on ? view2.tags.filter((x) => x !== tag) : [...view2.tags, tag] }));
-      chips.append(b);
-    }
-    side.append(chips);
-    const hides = h(doc, "div", "chips");
-    for (const st of ["vacation", "banned", "inactive"]) {
-      const b = h(doc, "button", "chip", t(`marks.hide.${st}`));
-      b.type = "button";
-      const on = view2.hide.includes(st);
-      b.setAttribute("aria-pressed", String(on));
-      b.addEventListener("click", () => go({ hide: on ? view2.hide.filter((x) => x !== st) : [...view2.hide, st] }));
-      hides.append(b);
-    }
-    side.append(hides);
-    const statusOf = (playerId, saved) => {
-      const row = playerId ? uni?.players[String(playerId)] : void 0;
-      return row ? statusNames(row[1]) : saved;
-    };
-    const withStatus = { ...marks, planets: Object.fromEntries(Object.entries(marks.planets).map(([c, p]) => [c, { ...p, statuses: statusOf(p.playerId, p.statuses) }])) };
-    const hide = view2.hide.flatMap((s) => s === "inactive" ? ["inactive", "longinactive"] : [s]);
-    const list = planetsInRange(withStatus, view2.from || "1:0", view2.to || "99:999", { tags: view2.tags, hide });
-    if (!uni) void universePlayers({ guard: o.guard, store: o.store, origin: doc.location.origin }).catch(() => null).then((u) => {
-      if (u) {
-        uni = u;
-        refreshSide();
-      }
-    });
-    if (!list.length) {
-      scroll.append(h(doc, "p", "empty", t(Object.keys(marks.planets).length ? "marks.noneInRange" : "marks.noPlanets")));
-      return;
-    }
-    const now = Date.now();
-    const wrap = h(doc, "div", "tg");
-    const cols = h(doc, "div", "cols");
-    cols.append(h(doc, "span", ""), h(doc, "span", "", t("marks.col.coords")), h(doc, "span", "", t("marks.col.who")), h(doc, "span", "cell-r", t("marks.col.planet")), h(doc, "span", "cell-r", t("marks.col.seen")), h(doc, "span", ""));
-    wrap.append(cols);
-    list.forEach(([coords, p], i) => {
-      const system = coords.split(":").slice(0, 2).join(":");
-      const seenRaw = positions[coords];
-      const seen = seenRaw && (!p.playerId || seenRaw.player === p.playerId) ? seenRaw : null;
-      const row = h(doc, "div", `row${system === here ? " active" : ""}`);
-      const txt = h(doc, "span", "txt", p.planet || "?");
-      txt.append(h(doc, "span", `who${p.statuses[0] ? ` st-${p.statuses[0]}` : ""}`, p.player ? ` \xB7 ${p.player}` : ""));
-      txt.title = `${p.planet} \xB7 ${p.player}`;
-      row.append(h(doc, "span", "idx", String(i + 1)), coordsButton(doc, t, coords), txt, activityCell(doc, t, coords, 1, seen?.act[0] ?? null, seen, now), ageCell(doc, t, seen, now, locale), tagButton(picker, coords, p));
-      wrap.append(row);
-    });
-    scroll.append(wrap);
-    scroll.append(h(doc, "p", "foot", t("marks.planetsHint", { n: list.length })));
-  }
 
   // src/modules/galaxy/index.ts
   var TARGETS_KEY = "galaxy.targets";
@@ -4825,7 +4572,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       if (!marks.players[pid] && !recent.has(Number(pid))) continue;
       for (const p of card.planets ?? []) listed.add(p.coords);
     }
-    const keep = (id, coords) => id ? !!marks.players[String(id)] || recent.has(id) || !!marks.planets[coords] : listed.has(coords);
+    const keep = (id, coords) => id ? !!marks.players[String(id)] || recent.has(id) : listed.has(coords);
     const rows = s.rows.filter((r) => !(r.planetId && o.ownPlanetIds.has(r.planetId))).map((r) => ({ ...r, debris: r.debris ? debrisTotal(r.debris) : 0 }));
     const next = recordSystem(o.store.get(POSITIONS_KEY, {}), s.galaxy, s.system, rows, keep, Date.now());
     if (next) o.store.set(POSITIONS_KEY, next);
@@ -4847,18 +4594,9 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       const coords = coordsOf(s, r);
       const own = r.planetId !== null && o.ownPlanetIds.has(r.planetId);
       const inactive = !r.statuses.includes("vacation") && (r.statuses.includes("inactive") || r.statuses.includes("longinactive"));
-      const tag = marks.planets[coords]?.tag;
       r.row.classList.toggle("fut-g-own", own);
       r.row.classList.toggle("fut-g-inactive", inactive && !own);
-      r.row.classList.toggle("fut-g-tagged", !!tag);
       r.row.classList.toggle("fut-g-hl", coords === highlight);
-      const rowStyle = r.row.style;
-      if (tag) rowStyle.setProperty("--fut-tag", TAG_COLORS[tag]);
-      else rowStyle.removeProperty("--fut-tag");
-      const nameCell = r.row.querySelector(".cellPlanetName");
-      if (nameCell && r.planetId && !own && !nameCell.querySelector(".fut-mk-tag"))
-        nameCell.append(tagButton(picker, coords, { planet: r.planetName, player: r.playerName, playerId: r.playerId, statuses: r.statuses, moon: !!r.moonId }));
-      else if (nameCell && (own || !r.planetId)) nameCell.querySelector(".fut-mk-tag")?.remove();
       const playerCell = r.row.querySelector(".cellPlayerName");
       const nameEl = playerCell?.querySelector(".playerName");
       if (nameEl && r.playerId && !own && o.onPlayer && !nameEl.dataset.futPlayer) {
@@ -4997,13 +4735,11 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
 #${DOCK_ID} .line .v.pos { color: #4FE0B0; } #${DOCK_ID} .line .v.neg { color: #F5B547; } #${DOCK_ID} .line .v.none { color: #617C8D; font-weight: 400; }
 #${DOCK_ID} .cols { display: grid; grid-template-columns: minmax(0, 1fr) auto 52px; gap: 6px; padding: 3px 8px 0; color: #617C8D; font-size: 11px; }
 #${DOCK_ID} .cols span:last-child { text-align: right; }
-/* Targets: one chip per flag in use, then the coloured planets. */
+/* Targets: one chip per flag in use. */
 #${DOCK_ID} .flags { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 6px; }
 #${DOCK_ID} .flag { display: flex; align-items: center; justify-content: center; gap: 4px; height: 26px; padding: 0; border: 1px solid #1F2C40; border-radius: 5px; background: #0A111C; }
 #${DOCK_ID} .flag:hover { border-color: currentColor; }
 #${DOCK_ID} .flag i { font: normal 12px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; }
-#${DOCK_ID} .tags { display: inline-flex; gap: 2px; }
-#${DOCK_ID} .tags i { width: 6px; height: 6px; border-radius: 50%; }
 #${DOCK_ID} .hint { margin: 0; padding: 8px; color: #9AA9BC; font-size: 11px; line-height: 1.4; }
 `;
   function el2(doc, tag, cls = "", text) {
@@ -5070,33 +4806,20 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     line.append(el2(doc, "span", "k", t("dock.week")), el2(doc, "span", "c", week.count ? String(week.count) : ""), el2(doc, "span", `v ${week.count ? week.net >= 0 ? "pos" : "neg" : "none"}`, week.count ? signed(week.net) : "\u2014"));
     journal.append(line);
     const players = Object.values(o.marks.players);
-    const planets = Object.values(o.marks.planets);
     const targets = el2(doc, "section", "card");
-    targets.append(head("target", t("bar.targets"), t("bar.targetsHint"), () => o.onOpenTargets(), String(players.length + planets.length || "")));
-    if (!players.length && !planets.length) targets.append(el2(doc, "p", "hint", t("dock.targetsEmpty")));
+    targets.append(head("target", t("bar.targets"), t("bar.targetsHint"), () => o.onOpenTargets(), String(players.length || "")));
+    if (!players.length) targets.append(el2(doc, "p", "hint", t("dock.targetsEmpty")));
     const flags = el2(doc, "div", "flags");
     for (const f of FLAGS) {
       const n = players.filter((p) => p.flag === f).length;
       if (!n) continue;
-      const b = button3("flag", `${t(`mark.flag.${f}`)}: ${n}`, () => o.onOpenTargets({ tab: "players", flagTab: f }));
+      const b = button3("flag", `${t(`mark.flag.${f}`)}: ${n}`, () => o.onOpenTargets({ flagTab: f }));
       b.style.color = FLAG_COLORS[f];
       b.setAttribute("aria-label", `${t(`mark.flag.${f}`)}: ${n}`);
       b.append(icon(doc, FLAG_ICONS[f], 13), el2(doc, "i", "", String(n)));
       flags.append(b);
     }
     if (flags.childElementCount) targets.append(flags);
-    if (planets.length) {
-      const line2 = button3("line", t("dock.planetsHint"), () => o.onOpenTargets({ tab: "planets" }));
-      const dots = el2(doc, "span", "tags");
-      for (const tag of TAGS) {
-        if (!planets.some((p) => p.tag === tag)) continue;
-        const dot = el2(doc, "i");
-        dot.style.background = TAG_COLORS[tag];
-        dots.append(dot);
-      }
-      line2.append(el2(doc, "span", "k", t("marks.tab.planets")), dots, el2(doc, "span", "v", String(planets.length)));
-      targets.append(line2);
-    }
     dock.append(journal, targets);
     if (menu) menu.append(dock);
     else home.append(dock);
@@ -5561,17 +5284,14 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
 
   // src/engines/oglight-import.ts
   var PINS = { friend: "friend", rush: "target", danger: "danger", skull: "target", fridge: "farm", star: "watch", trade: "trade", money: "trade", ptre: "watch" };
-  var TAGS2 = { red: "red", pink: "red", orange: "orange", brown: "orange", yellow: "yellow", lime: "green", green: "green", blue: "blue", dblue: "blue", violet: "violet", magenta: "violet" };
   function isOglightDb(x) {
     return !!x && typeof x === "object" && typeof x.dataFormat === "number" && typeof x.udb === "object" && typeof x.pdb === "object";
   }
-  var STATUS = { v: "vacation", b: "banned", I: "longinactive", i: "inactive", o: "outlaw", a: "admin" };
   var coordsOk = (c) => /^\d+:\d+:\d+$/.test(c);
   var act = (v) => v === "*" ? "*" : Number(v) > 0 && Number(v) < 60 ? Number(v) : null;
   function convertOglight(db, marks, positions, now) {
     let m = marks;
     let players = 0;
-    let planets = 0;
     const udb = db.udb ?? {};
     const pdb = db.pdb ?? {};
     for (const [id, p] of Object.entries(udb)) {
@@ -5580,26 +5300,18 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       m = flagPlayer(m, Number(id), p.name ?? "", flag, now);
       players++;
     }
-    for (const [coords, x] of Object.entries(db.tdb ?? {})) {
-      const tag = x.tag ? TAGS2[x.tag] : void 0;
-      if (!tag || !coordsOk(coords) || m.planets[coords]) continue;
-      const owner = pdb[coords]?.uid;
-      const who = owner ? udb[String(owner)] : void 0;
-      m = tagPlanet(m, coords, tag, { planet: "", player: who?.name ?? "", playerId: owner && owner > 0 ? owner : null, statuses: who?.status && STATUS[who.status] ? [STATUS[who.status]] : [], moon: (pdb[coords]?.mid ?? -1) > 0 }, now);
-      planets++;
-    }
     const recent = [...m.recent];
     for (const id of db.lastPinnedList ?? []) if (!recent.some((r) => r.id === Number(id))) recent.push({ id: Number(id), name: udb[String(id)]?.name ?? "" });
-    m = { ...m, recent: recent.slice(0, RECENT_MAX), lastFlag: marks.lastFlag, lastTag: marks.lastTag };
+    m = { ...m, recent: recent.slice(0, RECENT_MAX), lastFlag: marks.lastFlag };
     const next = { ...positions };
     let seen = 0;
     for (const [coords, x] of Object.entries(pdb)) {
       const uid = Number(x.uid);
-      if (!coordsOk(coords) || !(uid > 0) || next[coords] || !(m.players[String(uid)] || m.planets[coords] || m.recent.some((r) => r.id === uid))) continue;
+      if (!coordsOk(coords) || !(uid > 0) || next[coords] || !(m.players[String(uid)] || m.recent.some((r) => r.id === uid))) continue;
       next[coords] = { player: uid, name: "", moon: (x.mid ?? -1) > 0, debris: Math.round(Number(x.debris) || 0), act: [act(x.acti?.[0]), act(x.acti?.[1])], at: Number(x.acti?.[2]) || Number(x.api) || 0 };
       seen++;
     }
-    return { marks: m, positions: next, players, planets, seen };
+    return { marks: m, positions: next, players, seen };
   }
   var OUTCOMES = ["resource", "darkmatter", "ship", "nothing", "trader", "item", "blackhole", "early", "late", "pirate", "alien", "artefact", "lifeform"];
   function gains(g = {}) {
@@ -13883,7 +13595,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           store.set(POSITIONS_KEY, out.positions);
           const days = convertOglightStats(json2.stats ?? {}, store.get(JOURNAL_KEY, {}));
           store.set(JOURNAL_KEY, days.journal);
-          return t("settings.oglightDone", { players: out.players, planets: out.planets, seen: out.seen, exp: days.expeditions.toLocaleString(locale), raids: days.raids.toLocaleString(locale), days: days.days });
+          return t("settings.oglightDone", { players: out.players, seen: out.seen, exp: days.expeditions.toLocaleString(locale), raids: days.raids.toLocaleString(locale), days: days.days });
         }
       },
       notes: [menuCtx.colonies, snapshot ? t("toolbar.lastSync", { time: new Date(snapshot.fetchedAt).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) }) : ""].filter(Boolean),
@@ -14043,7 +13755,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     }
     if (isGalaxyPage(document)) {
       const ownPlanetIds = new Set(readPlanetList(document).flatMap((e) => e.planetId ? [e.planetId] : []));
-      watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onSystem: refreshSide, onPlayer: (id) => openSide(side, { tab: "players", player: id }) });
+      watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onSystem: refreshSide, onPlayer: (id) => openSide(side, { player: id }) });
       const arrow = (key) => () => document.querySelector(`#galaxycomponent .galaxy_icons[onclick*="'${key}'"]`)?.click();
       registerActions(document, store, t, { "galaxy.left": arrow("ArrowLeft"), "galaxy.right": arrow("ArrowRight"), "galaxy.down": arrow("ArrowDown"), "galaxy.up": arrow("ArrowUp") });
     }
