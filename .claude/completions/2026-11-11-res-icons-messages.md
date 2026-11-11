@@ -9,3 +9,6 @@
   tutte nella seconda.
 - Rapporti di spionaggio: niente più riepilogo sul messaggio, c'è già la tabella spiate. Resta il
   riepilogo del controspionaggio (chi ti ha spiato). Chiavi `msg.abbr.*` tolte.
+
+## 0.3.21 — rarità spedizioni
+- Normale: nessun colore (RARITY[2] ora grigio, anche nei chip del riepilogo e del Diario). Grande (blu) ed enorme (viola) colorano tutto il messaggio del gioco (`.msg.fut-msgrar-N`: sfondo tinto, bordo pieno tutto intorno; pannelli interni trasparenti). Test in `messages.test.ts`.

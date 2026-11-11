@@ -23,8 +23,8 @@ export const OUTCOME_COLORS: Record<string, string> = {
  * Pills: tinted outline by default; a bigger find fills the pill (size 1 tinted, size 0 solid),
  * so the brighter the pill, the bigger the find.
  */
-/** Expedition size as game rarity, by size index (0 huge, 1 big, 2 normal): epic, rare, common. */
-export const RARITY = ['#B57BFF', '#4AA3FF', '#6BD66B'];
+/** Expedition size as game rarity, by size index (0 huge, 1 big, 2 normal): epic purple, rare blue, common grey. */
+export const RARITY = ['#B57BFF', '#4AA3FF', '#8A9BB0'];
 
 const outcomeCss = Object.entries(OUTCOME_COLORS)
   .map(([k, c]) => `.fut-out-${k} { --tone: ${c}; }`)
@@ -52,14 +52,17 @@ export const MESSAGES_CSS = `
 .fut-pill { --tone: #8A9BB0; display: inline-block; max-width: 100%; box-sizing: border-box; padding: 1px 8px; border-radius: 9px;
   border: 1px solid color-mix(in srgb, var(--tone) 55%, transparent); background: color-mix(in srgb, var(--tone) 9%, transparent);
   color: color-mix(in srgb, var(--tone) 78%, #fff); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-/* Expedition size as game rarity, on the whole row: an edge, a tint, the value in the colour, the word for big and huge. */
-${RARITY.map((c, i) => `.fut-rar-${i} { --rar: ${c}; }`).join(' ')}
-.fut-msg[class*="fut-rar-"] { box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rar) 30%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--rar) 30%, transparent); background: color-mix(in srgb, var(--rar) 7%, transparent); }
-.fut-msg[class*="fut-rar-"]:hover { background: color-mix(in srgb, var(--rar) 12%, transparent); }
+/* Expedition size as game rarity. Normal finds keep the game's look; big (rare, blue) and huge (epic,
+   purple) tint the WHOLE message, the game's own box included, with a visible edge all round. */
+${RARITY.map((c, i) => `.fut-rar-${i}, .fut-msgrar-${i} { --rar: ${c}; }`).join(' ')}
 .fut-msg[class*="fut-rar-"] .fut-msg-val b { color: var(--rar); }
-.fut-msg.fut-rar-1 { background: color-mix(in srgb, var(--rar) 12%, transparent); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rar) 60%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--rar) 60%, transparent); }
-.fut-msg.fut-rar-0 { background: color-mix(in srgb, var(--rar) 19%, transparent); box-shadow: inset 0 1px 0 var(--rar), inset 0 -1px 0 var(--rar); }
 .fut-msg.fut-rar-0 .fut-msg-val b { font-size: 14px; }
+.msg.fut-msgrar { border-radius: 4px; background: color-mix(in srgb, var(--rar) 13%, #141C26) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rar) 70%, transparent) !important; }
+.msg.fut-msgrar-0 { background: color-mix(in srgb, var(--rar) 18%, #141C26) !important; box-shadow: inset 0 0 0 1px var(--rar), 0 0 0 1px color-mix(in srgb, var(--rar) 35%, transparent) !important; }
+/* Inside, the game's own panels let the tint through; the summary has no band of its own. */
+.msg.fut-msgrar .msgHead, .msg.fut-msgrar .msgContent, .msg.fut-msgrar .msgFilteredHeaderRow, .msg.fut-msgrar .messageContentWrapper,
+.msg.fut-msgrar message-footer, .msg.fut-msgrar .msg_actions, .msg.fut-msgrar .fut-msg { background: transparent !important; box-shadow: none !important; }
+.msg.fut-msgrar .fut-msg:hover { background: color-mix(in srgb, var(--rar) 8%, transparent) !important; }
 .fut-rar-tag { margin-right: 4px; color: var(--rar); font-weight: 700; }
 ${outcomeCss}
 .fut-msg-body { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; min-width: 0; }

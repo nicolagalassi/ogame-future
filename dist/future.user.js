@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.20
+// @version      0.3.21
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -6051,7 +6051,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     lifeform: "#E07BC8",
     unknown: "#5B6B80"
   };
-  var RARITY = ["#B57BFF", "#4AA3FF", "#6BD66B"];
+  var RARITY = ["#B57BFF", "#4AA3FF", "#8A9BB0"];
   var outcomeCss = Object.entries(OUTCOME_COLORS).map(([k, c]) => `.fut-out-${k} { --tone: ${c}; }`).join("\n");
   var MESSAGES_CSS = `
 /* One set of tokens for the summaries, the "just read" panel and the spy table. Text tokens keep
@@ -6071,14 +6071,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .fut-pill { --tone: #8A9BB0; display: inline-block; max-width: 100%; box-sizing: border-box; padding: 1px 8px; border-radius: 9px;
   border: 1px solid color-mix(in srgb, var(--tone) 55%, transparent); background: color-mix(in srgb, var(--tone) 9%, transparent);
   color: color-mix(in srgb, var(--tone) 78%, #fff); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-/* Expedition size as game rarity, on the whole row: an edge, a tint, the value in the colour, the word for big and huge. */
-${RARITY.map((c, i) => `.fut-rar-${i} { --rar: ${c}; }`).join(" ")}
-.fut-msg[class*="fut-rar-"] { box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rar) 30%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--rar) 30%, transparent); background: color-mix(in srgb, var(--rar) 7%, transparent); }
-.fut-msg[class*="fut-rar-"]:hover { background: color-mix(in srgb, var(--rar) 12%, transparent); }
+/* Expedition size as game rarity. Normal finds keep the game's look; big (rare, blue) and huge (epic,
+   purple) tint the WHOLE message, the game's own box included, with a visible edge all round. */
+${RARITY.map((c, i) => `.fut-rar-${i}, .fut-msgrar-${i} { --rar: ${c}; }`).join(" ")}
 .fut-msg[class*="fut-rar-"] .fut-msg-val b { color: var(--rar); }
-.fut-msg.fut-rar-1 { background: color-mix(in srgb, var(--rar) 12%, transparent); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rar) 60%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--rar) 60%, transparent); }
-.fut-msg.fut-rar-0 { background: color-mix(in srgb, var(--rar) 19%, transparent); box-shadow: inset 0 1px 0 var(--rar), inset 0 -1px 0 var(--rar); }
 .fut-msg.fut-rar-0 .fut-msg-val b { font-size: 14px; }
+.msg.fut-msgrar { border-radius: 4px; background: color-mix(in srgb, var(--rar) 13%, #141C26) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rar) 70%, transparent) !important; }
+.msg.fut-msgrar-0 { background: color-mix(in srgb, var(--rar) 18%, #141C26) !important; box-shadow: inset 0 0 0 1px var(--rar), 0 0 0 1px color-mix(in srgb, var(--rar) 35%, transparent) !important; }
+/* Inside, the game's own panels let the tint through; the summary has no band of its own. */
+.msg.fut-msgrar .msgHead, .msg.fut-msgrar .msgContent, .msg.fut-msgrar .msgFilteredHeaderRow, .msg.fut-msgrar .messageContentWrapper,
+.msg.fut-msgrar message-footer, .msg.fut-msgrar .msg_actions, .msg.fut-msgrar .fut-msg { background: transparent !important; box-shadow: none !important; }
+.msg.fut-msgrar .fut-msg:hover { background: color-mix(in srgb, var(--rar) 8%, transparent) !important; }
 .fut-rar-tag { margin-right: 4px; color: var(--rar); font-weight: 700; }
 ${outcomeCss}
 .fut-msg-body { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; min-width: 0; }
@@ -6894,10 +6897,8 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
         const name = short === `msg.pill.${m.result}` ? full : short;
         const label = m.kind === "discovery" ? `${t("msg.discovery")} \xB7 ${name}` : name;
         line.pill(label, m.result, [m.kind === "discovery" ? t("msg.discovery") : "", full, sizeName].filter(Boolean).join(" \xB7 "));
-        if (sizeName) {
-          line.box.dataset.size = sizeName;
-          line.box.classList.add(`fut-rar-${m.size}`);
-        }
+        if (sizeName) line.box.dataset.size = sizeName;
+        if (m.size === 0 || m.size === 1) line.box.classList.add(`fut-rar-${m.size}`);
         line.res(m.res, 1, "+");
         line.ships(m.ships, "found");
         line.ships(m.lost, "lost");
@@ -7016,6 +7017,8 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
           toggle();
         });
         place(msg, box);
+        const rar = box.className.match(/fut-rar-([01])/);
+        if (rar) msg.classList.add("fut-msgrar", `fut-msgrar-${rar[1]}`);
         if (fold && (parsed.kind === "expedition" || parsed.kind === "discovery" || parsed.kind === "recycle" || parsed.kind === "transport" || parsed.kind === "deploy" || parsed.kind === "return")) msg.classList.add("fut-msg-folded");
         sync();
       }
@@ -7074,7 +7077,7 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
       doc.querySelectorAll(".msg .fut-msg").forEach((n) => n.remove());
       doc.querySelectorAll(".msg[data-fut-done]").forEach((m) => {
         m.removeAttribute("data-fut-done");
-        m.classList.remove("fut-msg-folded");
+        m.classList.remove("fut-msg-folded", "fut-msgrar", "fut-msgrar-0", "fut-msgrar-1");
       });
       processMessages(o);
     };

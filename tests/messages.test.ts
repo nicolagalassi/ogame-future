@@ -295,3 +295,17 @@ describe('reports shared by the alliance', () => {
     expect(store.get<Record<string, { shared?: boolean }>>(SPY_BOARD_KEY, {})['1:476:7']?.shared).toBe(true);
   });
 });
+
+describe('expedition rarity', () => {
+  it('tints the whole message for big and huge finds, not for normal ones', () => {
+    document.body.innerHTML = '';
+    const normal = msg('41', { ...deut, size: '2' });
+    const big = msg('42', { ...deut, size: '1', timestamp: '1793891472' });
+    const huge = msg('43', { ...deut, size: '0', timestamp: '1793891473' });
+    document.body.append(normal, big, huge);
+    processMessages({ doc: document, store: new Store(new MemoryStore(), 'rar'), playerId: OWN, locale: 'it', t });
+    expect(normal.classList.contains('fut-msgrar')).toBe(false);
+    expect(big.classList.contains('fut-msgrar-1')).toBe(true);
+    expect(huge.classList.contains('fut-msgrar-0')).toBe(true);
+  });
+});
