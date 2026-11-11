@@ -97,7 +97,7 @@ describe('targets side bar', () => {
     m = flagPlayer(m, 8, 'Mid', 'danger', 1);
     store.set(MARKS_KEY, m);
     store.set(UNIVERSE_RANKS_KEY, { at: Date.now(), ranks: { 5: [18, 0], 7: [2, 0], 8: [9, 0] } });
-    const fetchImpl = vi.fn(async () => new Response('<?xml version="1.0"?><players timestamp="1"><player id="7" name="Zed" status="vi"/><player id="5" name="Bob" status=""/><player id="6" name="Al" status="v"/></players>'));
+    const fetchImpl = vi.fn(async (_u: string, _i?: RequestInit) => new Response('<?xml version="1.0"?><players timestamp="1"><player id="7" name="Zed" status="vi"/><player id="5" name="Bob" status=""/><player id="6" name="Al" status="v"/></players>'));
     const guard = new NetworkGuard(fetchImpl, 'http://localhost:3000');
     openSide({ doc: document, store, guard, t, locale: 'it' }, { tab: 'players', flagTab: 'danger', player: null });
     const root = () => document.getElementById(SIDE_ID)!.shadowRoot!;
