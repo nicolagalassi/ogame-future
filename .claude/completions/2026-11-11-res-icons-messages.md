@@ -15,3 +15,7 @@
 
 ## 0.3.22 — riepilogo distribuito sul messaggio (vista a schede)
 - `spread()`: la pillola va nel piede del gioco (al centro, tra i pulsanti), il valore MSU accanto al titolo (più piccolo, con "grande/enorme"); la riga di Future tiene risorse e navi, al centro e più grandi (13px, icone 18/24px). Vista a lista invariata (il piede è nascosto finché non si apre). Test "card view".
+
+## 0.3.23
+- Niente più parola "grande/enorme" accanto al valore (resta il colore del messaggio).
+- Pillola solo dove serve: niente per risorse, navi, materia oscura, artefatti, esperienza forme di vita (`SELF_EVIDENT`); resta per ritardo, anticipo, niente, oggetto (col nome nella riga), mercante, pirati, alieni, buco nero, scoperte. Il trattino del valore (niente trovato) non sale accanto al titolo.

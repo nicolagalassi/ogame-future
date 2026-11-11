@@ -62,7 +62,6 @@ export const MESSAGES_CSS = `
 .fut-msg-top b { font-size: 12px; color: var(--hi); }
 .fut-msg-top b.fut-neg { color: var(--neg); }
 .fut-msg-top small { font-size: 10px; color: var(--mute); }
-.fut-msg-top .fut-rar-tag { font-size: 11px; }
 .msg.fut-msgrar .fut-msg-top b { color: var(--rar); }
 .msg.fut-msgrar-0 .fut-msg-top b { font-size: 13px; }
 .fut-msg-foot { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; font: 11px/16px Verdana, Arial, Helvetica, sans-serif; }
@@ -80,7 +79,6 @@ ${RARITY.map((c, i) => `.fut-rar-${i}, .fut-msgrar-${i} { --rar: ${c}; }`).join(
 .msg.fut-msgrar .msgHead, .msg.fut-msgrar .msgContent, .msg.fut-msgrar .msgFilteredHeaderRow, .msg.fut-msgrar .messageContentWrapper,
 .msg.fut-msgrar message-footer, .msg.fut-msgrar .msg_actions, .msg.fut-msgrar .fut-msg { background: transparent !important; box-shadow: none !important; }
 .msg.fut-msgrar .fut-msg:hover { background: color-mix(in srgb, var(--rar) 8%, transparent) !important; }
-.fut-rar-tag { margin-right: 4px; color: var(--rar); font-weight: 700; }
 ${outcomeCss}
 .fut-msg-body { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; min-width: 0; }
 /* Resources: the shared symbol (core/res-icons) in the resource's colour; its shape is the cue, not only the colour. */
