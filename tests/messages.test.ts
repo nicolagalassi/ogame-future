@@ -219,64 +219,6 @@ describe('inbox page', () => {
   });
 });
 
-describe("today's recap on the Expeditions tab", () => {
-  it('follows the reports as they are read, and only on that tab', () => {
-    const now = () => 1793891482000 + 3600_000;
-    document.body.innerHTML = '<div data-subtab-id="22" class="active"></div><div id="messages"><div class="messagesHolder"></div></div>';
-    const holder = document.querySelector('.messagesHolder')!;
-    holder.append(msg('1', shipwrecks));
-    const store = new Store(new MemoryStore(), 'test');
-    let opened = 0;
-    const o = { doc: document, store, playerId: OWN, locale: 'it', t, now, onOpenJournal: () => opened++ };
-    processMessages(o);
-    const first = document.getElementById('fut-exprecap')!;
-    // Recap, then the "just read" panel of these reports, then the reports.
-    expect(first.nextElementSibling?.id).toBe('fut-expfresh');
-    expect(first.nextElementSibling?.nextElementSibling).toBe(holder);
-    expect(first.textContent).toContain('1 spedizioni');
-    // A report read later changes the recap at once.
-    holder.append(msg('2', deut));
-    processMessages(o);
-    const second = document.getElementById('fut-exprecap')!;
-    expect(second.textContent).toContain('2 spedizioni');
-    expect(second.textContent).not.toBe(first.textContent);
-    second.click();
-    expect(opened).toBe(1);
-    // Another tab: no recap.
-    document.querySelector('[data-subtab-id="22"]')!.classList.remove('active');
-    processMessages(o);
-    expect(document.getElementById('fut-exprecap')).toBeNull();
-  });
-});
-
-describe('"just read" panel under the recap', () => {
-  it('shows what the reports just read brought, adds a later batch, and goes away at the end of the countdown', () => {
-    const now = () => 1793891482000 + 3600_000;
-    document.body.innerHTML = '<div data-subtab-id="22" class="active"></div><div id="messages"><div class="messagesHolder"></div></div>';
-    const holder = document.querySelector('.messagesHolder')!;
-    const store = new Store(new MemoryStore(), 'test');
-    const o = { doc: document, store, playerId: OWN, locale: 'it', t, now };
-    holder.append(msg('1', shipwrecks));
-    processMessages(o);
-    const recap = document.getElementById('fut-exprecap')!;
-    const panel = document.getElementById('fut-expfresh')!;
-    expect(recap.nextElementSibling).toBe(panel);
-    expect(panel.textContent).toContain('1 spedizioni');
-    expect(panel.querySelectorAll('.fut-fresh-tile')).toHaveLength(4);
-    // Nothing new: the panel stays as it is.
-    processMessages(o);
-    expect(document.getElementById('fut-expfresh')).toBe(panel);
-    // A second report read meanwhile adds up, and the recap stays above the panel.
-    holder.append(msg('2', deut));
-    processMessages(o);
-    const merged = document.getElementById('fut-expfresh')!;
-    expect(merged.textContent).toContain('2 spedizioni');
-    expect(document.getElementById('fut-exprecap')!.nextElementSibling).toBe(merged);
-    merged.querySelector('.fut-fresh-timer i')!.dispatchEvent(new Event('animationend'));
-    expect(document.getElementById('fut-expfresh')).toBeNull();
-  });
-});
-
 describe('reports shared by the alliance', () => {
   it('are marked when read from Communication › shared espionage reports', async () => {
     const { SPY_BOARD_KEY } = await import('../src/engines/raids');

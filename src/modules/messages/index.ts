@@ -11,11 +11,10 @@ import { formatUnits } from '../../core/format';
 import { readMessage, type ExpeditionMessage, type ParsedMessage, type Res, type SpyMessage } from '../../data/messages';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { SHIP_ICONS } from '../../data/ship-icons';
-import { JOURNAL_KEY, record, recordCombat, trim, unitsValue, msu, type Journal, type JournalEntry } from '../../engines/expeditions';
+import { JOURNAL_KEY, record, recordCombat, trim, unitsValue, msu, type Journal } from '../../engines/expeditions';
 import { rememberSpies, SPY_BOARD_KEY, type SpyBoard, type Universe } from '../../engines/raids';
 import { MESSAGES_CSS } from './style';
 import { mountSpyPanel, universeOf, type SpyContext } from './spy-table';
-import { mountExpeditionRecap, showFreshExpeditions } from './exp-recap';
 import { SERVER_DATA_KEY, type ServerData } from '../../data/server-data';
 import { converterLink, SIM_KEY, simTool, type SimTool } from '../../engines/sim-links';
 
@@ -32,8 +31,6 @@ export interface MessagesOptions {
   now?: () => number;
   /** Called when new expeditions entered the journal. */
   onJournal?: (added: number) => void;
-  /** Opens the expedition journal, from today's recap on the Expeditions tab. */
-  onOpenJournal?: () => void;
   /** The spy table's data (bases, research, server); none = no table. */
   spy?: SpyContext;
 }
@@ -77,7 +74,7 @@ export interface SummaryContext {
 }
 
 /**
- * The summary line's grammar, shared by every report kind and by today's recap:
+ * The summary line's grammar, shared by every report kind:
  * [pill: outcome] [body: what it holds] [value: MSU, right-aligned] [actions].
  * The value sits in the same place on every report, so the eye reads it down the list.
  */
@@ -299,8 +296,6 @@ export function processMessages(o: MessagesOptions): number {
   const spies: SpyMessage[] = [];
   let journal: Journal | null = null;
   let added = 0;
-  /** What entered the journal in this pass, for the "just read" panel. */
-  const fresh: JournalEntry[] = [];
   for (const msg of Array.from(doc.querySelectorAll('.msg[data-msg-id]'))) {
     if (msg.hasAttribute('data-fut-done') || msg.closest('#fut-journal')) continue;
     msg.setAttribute('data-fut-done', '');
@@ -350,16 +345,13 @@ export function processMessages(o: MessagesOptions): number {
       const r = recordCombat(journal, parsed.id, parsed.at, parsed.lost, parsed.coords);
       journal = r.journal;
       added += r.added;
-      if (r.added) fresh.push(journal[parsed.id]!);
     }
   }
   if (expeditions.length) {
     journal ??= store.get<Journal>(JOURNAL_KEY, {});
-    const before = journal;
     const r = record(journal, expeditions);
     journal = r.journal;
     added += r.added;
-    for (const e of expeditions) if (!before[e.id]) fresh.push(journal[e.id]!);
   }
   // Spy board: newest report per target, kept locally for the spy table (no network).
   if (spies.length) {
@@ -371,9 +363,6 @@ export function processMessages(o: MessagesOptions): number {
     store.set(JOURNAL_KEY, trim(journal, o.now?.() ?? Date.now()));
     o.onJournal?.(added);
   }
-  const recap = { doc, store, t, locale, now: o.now, onOpen: o.onOpenJournal };
-  mountExpeditionRecap(recap);
-  if (fresh.length) showFreshExpeditions(recap, fresh);
   return added;
 }
 

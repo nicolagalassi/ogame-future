@@ -36,3 +36,6 @@
 - Bug: senza tessera d esito la griglia scalava di una colonna e le tessere finivano sotto il valore (molte navi). Colonne fisse (`grid-column` per pillcell/body/val/acts).
 - Colonna del valore: tacche di esaurimento in alto, numero, "MSU" sotto (`depletion()` ora va nel valore, chiamata dopo `value()`).
 - Navi: tessere più piccole (52px, immagine 22px), vanno a capo su più righe; le risorse restano a tessere grandi (al massimo tre).
+
+## 0.3.29
+- Tolto il riepilogo "Oggi" e il riquadro "appena lette" in cima alla scheda Spedizioni della posta (`exp-recap.ts` eliminato, CSS `.fut-recap`/`.fut-fresh` tolti, test relativi rimossi). Il Diario resta nella barra laterale e nella sua finestra.

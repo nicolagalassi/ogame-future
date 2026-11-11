@@ -346,7 +346,6 @@ async function bootstrap(): Promise<void> {
       doc: document, store, playerId: ownPlayerId(document), locale, t,
       // "Diario oggi" in the toolbar follows the reports as they are read.
       onJournal: () => draw(),
-      onOpenJournal: () => openJournal({ doc: document, store, now: Date.now(), locale, t }),
       spy: {
         bases: (snapshot?.bodies ?? []).map((b) => ({ id: b.id, name: b.name, coords: b.coords, moon: b.type === 'moon' })),
         researches: snapshot?.researches ?? {},
