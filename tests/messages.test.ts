@@ -162,9 +162,17 @@ describe('inbox page, list view', () => {
     const store = new Store(new MemoryStore(), 'test');
     processMessages({ doc: document, store, playerId: OWN, locale: 'it', t });
     expect(Object.keys(store.get('spy.board', {}))).toEqual(['1:476:7']);
-    const box = el.querySelector<HTMLElement>('.fut-msg-spy')!;
+    // The spy table above the list says it all: no summary on the spy report itself.
+    expect(el.querySelector('.fut-msg')).toBeNull();
+    // Another report in the list view: the summary goes under the header row and opens it.
+    const exp = msg('31', deut);
+    exp.querySelector('.msgContent')!.remove();
+    exp.insertAdjacentHTML('beforeend', '<div class="msgFilteredHeaderRow"><div class="msgFilteredHeaderCell">exp</div></div><div class="messageContentWrapper"></div>');
+    exp.querySelector<HTMLElement>('.msgFilteredHeaderCell')!.addEventListener('click', () => opened++);
+    document.body.append(exp);
+    processMessages({ doc: document, store, playerId: OWN, locale: 'it', t });
+    const box = exp.querySelector<HTMLElement>('.fut-msg')!;
     expect(box.previousElementSibling?.className).toBe('msgFilteredHeaderRow');
-    expect(box.textContent).toContain('264M');
     box.click();
     expect(opened).toBe(1);
   });
@@ -195,8 +203,8 @@ describe('inbox page', () => {
     expect(line.getAttribute('aria-expanded')).toBe('false');
     line.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
     expect(first.classList.contains('fut-msg-folded')).toBe(false);
-    // The resource badge carries the initial, not only the colour.
-    expect(Array.from(document.querySelectorAll<HTMLElement>('.fut-r')).every((r) => /^(M|C|D|Ci|MO)$/.test(r.dataset.k ?? ''))).toBe(true);
+    // Each resource carries its symbol (the shared one), not only the colour.
+    expect(document.querySelectorAll('.fut-r svg.fut-res-ico').length).toBe(document.querySelectorAll('.fut-r').length);
     // Processing again does nothing new.
     expect(processMessages({ doc: document, store, playerId: OWN, locale: 'it', t })).toBe(0);
     expect(Object.keys(store.get(JOURNAL_KEY, {}))).toEqual(['1', '2']);
