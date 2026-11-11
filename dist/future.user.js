@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.34
+// @version      0.3.35
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -13234,14 +13234,23 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
 #ranks .fut-hs-gap { display: block; font-size: 11px; line-height: 1.2; font-variant-numeric: tabular-nums; }
 #ranks .fut-hs-gap.up { color: var(--fut-up); } #ranks .fut-hs-gap.down { color: var(--fut-down); }
 #ranks .fut-hs-age { margin-left: 4px; color: var(--fut-mute); font-weight: 400; }
-#ranks .highscoreNameHolder .fut-mk-flag { margin-left: 4px; }
-/* Compact rows, as OGLight does; the top three keep the game's roomy ones. */
-#ranks tr:not(.fut-hs-top) .highscoreNameFieldWrapper { height: 36px !important; align-items: center; }
-#ranks tr:not(.fut-hs-top) .highscoreNameFieldWrapper profile-picture { zoom: .7; }
-#ranks tr:not(.fut-hs-top) .highscoreNameAndTitleHolder { flex-direction: row !important; align-items: center; gap: 6px; width: calc(100% - 36px) !important; }
-#ranks tr:not(.fut-hs-top) .highscoreNameHolder .fut-mk-flag { margin-left: 6px; }
-#ranks tr:not(.fut-hs-top) td { padding-top: 2px; padding-bottom: 2px; line-height: 1.25; }
-#ranks tr:not(.fut-hs-top) .honorScore { line-height: 1; }
+/* A cleaner table, as OGLight's: no cell borders, one hairline between rows, the game's row colours
+   (own, alliance) kept but quieter, every row compact with a small picture. */
+#ranks tbody tr > td { border: 0 !important; border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important; box-shadow: inset 0 0 0 9999px rgba(6, 10, 16, 0.45); padding-top: 2px !important; padding-bottom: 2px !important; line-height: 1.25; vertical-align: middle; }
+#ranks tbody tr.myrank > td { box-shadow: inset 0 0 0 9999px rgba(6, 10, 16, 0.15); }
+#ranks tbody tr:hover > td { box-shadow: inset 0 0 0 9999px rgba(6, 10, 16, 0.25); }
+#ranks .highscoreNameFieldWrapper { height: 34px !important; align-items: center; }
+#ranks .highscoreNameFieldWrapper profile-picture { zoom: .6; }
+#ranks .highscoreNameAndTitleHolder { width: calc(100% - 30px) !important; justify-content: center; }
+#ranks tr:not(.fut-hs-top) .highscoreNameAndTitleHolder { flex-direction: row !important; align-items: center; gap: 6px; }
+/* Name and honour points on one line; the top three keep their title under it, smaller. */
+#ranks .highscoreNameHolder { display: flex !important; align-items: baseline; gap: 6px; min-width: 0; }
+#ranks .honorScore { line-height: 1; font-size: 10px; opacity: 0.75; }
+#ranks tr.fut-hs-top .highscoreNameFieldWrapper { height: 40px !important; }
+#ranks tr.fut-hs-top .highscoreNameAndTitleHolder > :not(.highscoreNameHolder) { font-size: 11px !important; line-height: 1.2; }
+/* The flag of Future's targets, in the column of the game's "i", before it. */
+#ranks .fut-hs-act { white-space: nowrap; }
+#ranks .fut-hs-act .fut-mk-flag { margin: 0 4px 0 0; vertical-align: middle; }
 #fut-hs-top { position: fixed; right: 18px; bottom: 44px; z-index: 1000; display: none; width: 34px; height: 34px; padding: 0; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--fut-line); border-radius: 6px; background: var(--fut-btn); color: var(--fut-txt); }
 #fut-hs-top.on { display: flex; } #fut-hs-top:hover, #fut-hs-top:focus-visible { border-color: var(--fut-link); color: var(--fut-hi); }
 #fut-hs-top svg { transform: rotate(180deg); }`;
@@ -13284,8 +13293,17 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         g.title = t("hs.sincePtre", { n: made.toLocaleString(locale), time: since });
         scoreCell.append(g);
       }
-      const nameHolder = r.row.querySelector(".highscoreNameHolder");
-      if (nameHolder && !r.mine && !nameHolder.querySelector(".fut-mk-flag")) nameHolder.append(flagButton({ doc, store, t }, r.playerId, r.name));
+      const nameCell = r.row.querySelector("td.name");
+      const next = nameCell?.nextElementSibling;
+      const actCell = next && !next.classList.contains("score") ? next : null;
+      const home = actCell ?? r.row.querySelector(".highscoreNameHolder");
+      if (home && !r.mine && !r.row.querySelector(".fut-mk-flag")) {
+        const flag = flagButton({ doc, store, t }, r.playerId, r.name);
+        if (actCell) {
+          actCell.classList.add("fut-hs-act");
+          actCell.prepend(flag);
+        } else home.append(flag);
+      }
     }
   }
   function watchHighscore(o) {
