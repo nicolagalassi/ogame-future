@@ -728,5 +728,7 @@
   "marks.st.inactive": "inactive (7 days)",
   "marks.st.longinactive": "inactive for 28 days",
   "marks.st.outlaw": "outlaw",
-  "marks.st.admin": "administrator"
+  "marks.st.admin": "administrator",
+  "marks.lastCheck": "Last checked in the galaxy: {time}",
+  "marks.neverChecked": "Never seen in the galaxy"
 }

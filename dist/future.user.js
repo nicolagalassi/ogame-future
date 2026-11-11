@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.39
+// @version      0.3.40
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -917,7 +917,9 @@
     "marks.st.inactive": "inattivo (7 giorni)",
     "marks.st.longinactive": "inattivo da 28 giorni",
     "marks.st.outlaw": "fuorilegge",
-    "marks.st.admin": "amministratore"
+    "marks.st.admin": "amministratore",
+    "marks.lastCheck": "Ultimo controllo in galassia: {time}",
+    "marks.neverChecked": "Mai visto in galassia"
   };
 
   // src/i18n/en.json
@@ -1651,7 +1653,9 @@
     "marks.st.inactive": "inactive (7 days)",
     "marks.st.longinactive": "inactive for 28 days",
     "marks.st.outlaw": "outlaw",
-    "marks.st.admin": "administrator"
+    "marks.st.admin": "administrator",
+    "marks.lastCheck": "Last checked in the galaxy: {time}",
+    "marks.neverChecked": "Never seen in the galaxy"
   };
 
   // src/i18n/fr.json
@@ -2385,7 +2389,9 @@
     "marks.st.inactive": "inactif (7 jours)",
     "marks.st.longinactive": "inactif depuis 28 jours",
     "marks.st.outlaw": "hors-la-loi",
-    "marks.st.admin": "administrateur"
+    "marks.st.admin": "administrateur",
+    "marks.lastCheck": "Dernier contr\xF4le en galaxie : {time}",
+    "marks.neverChecked": "Jamais vu en galaxie"
   };
 
   // src/i18n/de.json
@@ -3119,7 +3125,9 @@
     "marks.st.inactive": "inaktiv (7 Tage)",
     "marks.st.longinactive": "seit 28 Tagen inaktiv",
     "marks.st.outlaw": "Outlaw",
-    "marks.st.admin": "Administrator"
+    "marks.st.admin": "Administrator",
+    "marks.lastCheck": "Zuletzt in der Galaxie gepr\xFCft: {time}",
+    "marks.neverChecked": "Noch nie in der Galaxie gesehen"
   };
 
   // src/core/i18n.ts
@@ -4104,7 +4112,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .row:hover { background: #16243A; }
 .row.active { background: rgba(79,209,232,0.12); box-shadow: inset 3px 0 0 #4FD1E8; }
 .pl .cols, .pl .row { grid-template-columns: 18px 84px minmax(0, 1fr) 46px 40px 40px 34px; }
-.ps .row { grid-template-columns: 18px minmax(0, 1fr) auto auto; min-height: 30px; }
+.ps .row { grid-template-columns: 18px minmax(0, 1fr) auto 30px auto; min-height: 30px; }
 .idx { color: #617C8D; font: 11px Consolas, monospace; text-align: right; }
 .coords { all: unset; display: inline-flex; align-items: center; gap: 3px; padding: 2px 3px; border-radius: 4px; color: #E6EDF5; font: 12px Consolas, monospace; cursor: pointer; white-space: nowrap; }
 .coords:hover { background: #1D3350; color: #8BE4F2; }
@@ -4269,7 +4277,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     if (view2.player !== null) playerSheet(o, side, scroll, title, view2.player, marks, positions, picker, here);
     else {
       title.append(h(doc, "span", "name", t("marks.title")));
-      playersList(o, side, scroll, view2, marks, picker, go);
+      playersList(o, side, scroll, view2, marks, picker, go, positions);
     }
     side.append(scroll);
     const foot = h(doc, "div", "foot");
@@ -4293,7 +4301,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     b.append(icon(doc, name, 16));
     return b;
   }
-  function playersList(o, side, scroll, view2, marks, picker, go) {
+  function playersList(o, side, scroll, view2, marks, picker, go, positions) {
     const { doc, t, locale } = o;
     const chips = h(doc, "div", "chips");
     const counts = Object.values(marks.players).reduce((c, p) => (c[p.flag] = (c[p.flag] ?? 0) + 1, c), {});
@@ -4331,6 +4339,9 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       scroll.append(h(doc, "p", "empty", t(view2.flagTab === "recent" ? "marks.noRecent" : "marks.noPlayers")));
       return;
     }
+    const checked = /* @__PURE__ */ new Map();
+    for (const seen of Object.values(positions)) if (seen.player && seen.at > (checked.get(seen.player) ?? 0)) checked.set(seen.player, seen.at);
+    const now = Date.now();
     const wrap = h(doc, "div", "ps");
     list.forEach((p, i) => {
       const row = h(doc, "div", "row");
@@ -4358,7 +4369,10 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
         line.title = note;
         who.append(line);
       }
-      row.append(h(doc, "span", "idx", String(i + 1)), who, h(doc, "span", "rank", rank ? `#${rank.toLocaleString(locale)}` : ""), flagButton(picker, p.id, p.name));
+      const at = checked.get(p.id);
+      const age = ageCell(doc, t, at ? { at } : null, now, locale);
+      age.title = at ? t("marks.lastCheck", { time: new Date(at).toLocaleString(locale) }) : t("marks.neverChecked");
+      row.append(h(doc, "span", "idx", String(i + 1)), who, h(doc, "span", "rank", rank ? `#${rank.toLocaleString(locale)}` : ""), age, flagButton(picker, p.id, p.name));
       wrap.append(row);
     });
     scroll.append(wrap);
