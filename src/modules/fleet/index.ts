@@ -1048,6 +1048,12 @@ export function renderFleetTools(o: FleetOptions): void {
   const navigate = o.navigate ?? ((url: string) => doc.location.assign(url));
   // Opened from the galaxy's Trasporto / Schiera: that mode on, its target typed, the panel open.
   // Only fills our fields (no request, nothing selected); once per page so a redraw keeps the player's edits.
+  // Trasporto / Schiera, its destination and resources belong to this page only: a new page (refresh,
+  // another planet or moon) starts clean. Kept across redraws of the same page.
+  if (!doc.documentElement.dataset.futSendPage) {
+    doc.documentElement.dataset.futSendPage = '1';
+    o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), sendMode: null, sendTarget: null, sendPick: { metal: null, crystal: null, deuterium: null } });
+  }
   const link = readMissionLink(href);
   let focusRes = false;
   if (link && !doc.documentElement.dataset.futMissionLink) {

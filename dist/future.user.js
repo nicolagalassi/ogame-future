@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.14
+// @version      0.3.15
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -11310,6 +11310,10 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     doc.querySelectorAll(".fut-fbar").forEach((n) => n.remove());
     const href = o.href ?? doc.location?.href ?? "";
     const navigate = o.navigate ?? ((url) => doc.location.assign(url));
+    if (!doc.documentElement.dataset.futSendPage) {
+      doc.documentElement.dataset.futSendPage = "1";
+      o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), sendMode: null, sendTarget: null, sendPick: { metal: null, crystal: null, deuterium: null } });
+    }
     const link = readMissionLink(href);
     let focusRes = false;
     if (link && !doc.documentElement.dataset.futMissionLink) {
