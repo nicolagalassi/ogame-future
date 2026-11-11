@@ -35,7 +35,7 @@ import { watchTechPages } from './modules/tech';
 import { accountResources, openPlanner } from './modules/tech/planner-view';
 import { accountGap, PLAN_KEY, pendingFor, planCount, pruneByQueues, SENT_KEY, type Plan, type Shipment } from './engines/planner';
 import { estimateResources } from './engines/resources';
-import { entriesIn, JOURNAL_KEY, periodRange, periodStats, type Journal } from './engines/expeditions';
+import { daySeries, entriesIn, JOURNAL_KEY, periodRange, periodStats, type Journal } from './engines/expeditions';
 import { isMessagesPage, ownPlayerId } from './data/messages';
 import { watchMessages } from './modules/messages';
 import { openJournal } from './modules/messages/journal-view';
@@ -320,7 +320,11 @@ async function bootstrap(): Promise<void> {
       doc: document,
       t,
       locale,
-      journal: { today: stats('today'), week: stats('week') },
+      journal: {
+        today: stats('today'),
+        week: stats('week'),
+        days: daySeries(Object.values(journal), Date.now(), 7).map((b) => ({ start: b.start, count: b.stats.count, net: b.stats.netMsu })),
+      },
       marks: loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null)),
       onOpenJournal: () => openJournal({ doc: document, store, now: Date.now(), locale, t }),
       onOpenTargets: (view) => (view ? openSide(side, view) : toggleSide(side)),

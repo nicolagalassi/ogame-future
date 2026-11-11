@@ -19,8 +19,11 @@ export interface DockOptions {
   doc: Document;
   t: (key: string, vars?: Record<string, string | number>) => string;
   locale: string;
-  /** Expeditions read today and in the last 7 days: how many, and the net value in MSU. */
-  journal: { today: { count: number; net: number }; week: { count: number; net: number } };
+  /**
+   * Expeditions read today and in the last 7 days: how many, and the net value in MSU; `days` are
+   * the last 7 days one by one (oldest first, today last) for the small columns.
+   */
+  journal: { today: { count: number; net: number }; week: { count: number; net: number }; days?: { start: number; count: number; net: number }[] };
   marks: Marks;
   onOpenJournal: () => void;
   /** Opens or closes the targets side bar; with a view, opens it there. */
@@ -42,7 +45,19 @@ const CSS = `
 #${DOCK_ID} .head svg { flex: none; color: #4FD1E8; }
 #${DOCK_ID} .head .n { color: #9AA9BC; font: 12px Consolas, "JetBrains Mono", monospace; }
 #${DOCK_ID} .head:hover, #${DOCK_ID} .line:hover { background: #16243A; }
-/* Journal: one line per period. */
+/* Journal: today's net gain large, the last 7 days as small columns (today lit), then the week. */
+#${DOCK_ID} .jtoday { display: flex; flex-direction: column; gap: 1px; width: 100%; padding: 7px 8px 6px; border: 0; background: none; }
+#${DOCK_ID} .jtoday:hover { background: #16243A; }
+#${DOCK_ID} .jtoday .k { color: #9AA9BC; font-size: 11px; }
+#${DOCK_ID} .jtoday .v { font: 700 18px/22px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; }
+#${DOCK_ID} .jtoday .v.neg { color: #FF8A7A; } #${DOCK_ID} .jtoday .v.none { color: #617C8D; font-weight: 400; }
+#${DOCK_ID} .jtoday .v small { margin-left: 4px; font: 11px Arial, Helvetica, sans-serif; color: #9AA9BC; }
+#${DOCK_ID} .jtoday .c { color: #9AA9BC; font-size: 11px; }
+#${DOCK_ID} .days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: end; gap: 3px; height: 30px; margin-top: 6px; }
+#${DOCK_ID} .days i { display: block; min-height: 2px; border-radius: 2px 2px 0 0; background: #2C5366; }
+#${DOCK_ID} .days i.zero { background: #1F2C40; }
+#${DOCK_ID} .days i.today { background: #4FD1E8; }
+/* One line per period. */
 #${DOCK_ID} .line { display: grid; grid-template-columns: minmax(0, 1fr) auto 52px; align-items: baseline; gap: 6px; width: 100%; min-height: 24px; padding: 3px 8px; border: 0; background: none; }
 #${DOCK_ID} .line + .line { border-top: 1px solid #16202F; }
 #${DOCK_ID} .line .k { color: #9AA9BC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -104,15 +119,30 @@ export function renderDock(o: DockOptions): void {
   // Journal: expeditions read from the inbox, today and over the last 7 days.
   const journal = el(doc, 'section', 'card');
   journal.append(head('chart', t('dock.journal'), t('exp.title'), o.onOpenJournal));
-  const cols = el(doc, 'div', 'cols');
-  cols.append(el(doc, 'span'), el(doc, 'span', '', t('dock.count')), el(doc, 'span', '', 'MSU'));
-  journal.append(cols);
-  for (const [key, s] of [['dock.today', o.journal.today], ['dock.week', o.journal.week]] as const) {
-    const line = button('line', t('dock.journalHint', { n: s.count }), o.onOpenJournal);
-    const net = s.count ? `${s.net >= 0 ? '+' : '−'}${fmt(Math.abs(s.net))}` : '—';
-    line.append(el(doc, 'span', 'k', t(key)), el(doc, 'span', 'c', s.count ? String(s.count) : ''), el(doc, 'span', `v ${s.count ? (s.net >= 0 ? 'pos' : 'neg') : 'none'}`, net));
-    journal.append(line);
+  const signed = (n: number) => `${n >= 0 ? '+' : '−'}${fmt(Math.abs(n))}`;
+  const today = o.journal.today;
+  const block = button('jtoday', t('dock.journalHint', { n: today.count }), o.onOpenJournal);
+  const big = el(doc, 'span', `v${today.count ? (today.net < 0 ? ' neg' : '') : ' none'}`, today.count ? signed(today.net) : '—');
+  if (today.count) big.append(el(doc, 'small', '', 'MSU'));
+  block.append(el(doc, 'span', 'k', t('dock.today')), big, el(doc, 'span', 'c', t('dock.todayCount', { n: today.count })));
+  const days = o.journal.days ?? [];
+  if (days.length) {
+    const cols = el(doc, 'span', 'days');
+    cols.setAttribute('aria-hidden', 'true');
+    const top = Math.max(1, ...days.map((d) => d.net));
+    days.forEach((d, i) => {
+      const bar = el(doc, 'i', d.net > 0 ? (i === days.length - 1 ? 'today' : '') : 'zero');
+      bar.style.height = `${Math.max(0, (d.net / top) * 100)}%`;
+      bar.title = `${new Date(d.start).toLocaleDateString(o.locale, { weekday: 'short', day: '2-digit', month: '2-digit' })} · ${d.count} · ${d.count ? signed(d.net) : '—'} MSU`;
+      cols.append(bar);
+    });
+    block.append(cols);
   }
+  journal.append(block);
+  const week = o.journal.week;
+  const line = button('line', t('dock.journalHint', { n: week.count }), o.onOpenJournal);
+  line.append(el(doc, 'span', 'k', t('dock.week')), el(doc, 'span', 'c', week.count ? String(week.count) : ''), el(doc, 'span', `v ${week.count ? (week.net >= 0 ? 'pos' : 'neg') : 'none'}`, week.count ? signed(week.net) : '—'));
+  journal.append(line);
 
   // Targets: flagged players per flag, coloured planets; each opens the side bar on its own list.
   const players = Object.values(o.marks.players);

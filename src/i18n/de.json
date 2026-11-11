@@ -733,5 +733,13 @@
   "msg.say.trader": "ein Händler bietet einen Tausch an",
   "msg.say.pirate": "Kampf mit Piraten",
   "msg.say.alien": "Kampf mit Aliens",
-  "msg.say.blackhole": "die Flotte ging in einem Schwarzen Loch verloren"
+  "msg.say.blackhole": "die Flotte ging in einem Schwarzen Loch verloren",
+  "exp.heroCount": "Expeditionen",
+  "exp.heroAvg": "pro Expedition",
+  "exp.heroLost": "Schiffe verloren",
+  "exp.byHour": "Stunde für Stunde",
+  "exp.focusAll": "Ganzer Zeitraum",
+  "exp.noneHere": "Nichts hier.",
+  "exp.daysTable": "Die Tage",
+  "dock.todayCount": "{n} Expeditionen"
 }

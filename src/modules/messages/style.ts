@@ -268,5 +268,55 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
 .opt { min-height: 24px; display: flex; gap: 6px; align-items: center; color: var(--text-2); font-size: 12px; cursor: pointer; }
 .acts { display: flex; gap: 6px; }
 @media (max-width: 560px) { .kpi .value { font-size: 15px; } }
+/* Expeditions as a statement: net gain first, where it came from, then the columns. */
+.gi { display: inline-flex; flex: none; }
+.hero { display: flex; flex-direction: column; gap: 12px; padding: 16px 18px; }
+.hero-top { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 28px; }
+.hero-net { display: flex; flex-direction: column; gap: 4px; }
+.hero-k { color: var(--muted); font-size: 12px; }
+.hero-v { font: 700 36px/1 var(--mono); color: var(--text); letter-spacing: -0.5px; }
+.hero-v.neg { color: var(--bad); }
+.hero-v small { margin-left: 6px; font: 400 14px Arial, sans-serif; color: var(--muted); letter-spacing: 0; }
+.hero-sub { margin: 0 0 3px; color: var(--muted); font-size: 12px; }
+.hero-sub b { color: var(--text-2); font: 400 12px var(--mono); }
+.hero-sub b.neg { color: var(--bad); }
+.mix { display: flex; gap: 2px; height: 12px; border-radius: 3px; overflow: hidden; }
+.mix i { display: block; height: 100%; min-width: 3px; }
+.mix-keys { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 12px; }
+.mix-key { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); }
+.mix-key b { font: 700 12px var(--mono); color: var(--text); }
+.mix-key.m .gi { color: var(--m); } .mix-key.c .gi { color: var(--c); } .mix-key.d .gi { color: var(--d); } .mix-key.dm .gi { color: var(--dm); } .mix-key.sh .gi { color: #4FE0B0; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.card-head h3 { margin: 0; }
+/* The columns: one per hour or day, stacked by where the value came from; a click shows its detail. */
+.chart { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 8px; align-items: stretch; height: 190px; }
+.chart.dense { gap: 3px; height: 160px; }
+.col { display: flex; flex-direction: column; align-items: stretch; gap: 4px; min-width: 0; padding: 0; border: 0; background: none; cursor: pointer; font: inherit; color: inherit; }
+.col .tot { min-height: 15px; text-align: center; font: 700 11px var(--mono); color: var(--text); white-space: nowrap; overflow: hidden; }
+.col .area { flex: 1; display: flex; align-items: flex-end; min-height: 0; border-bottom: 1px solid var(--line); }
+.col .stack { display: flex; flex-direction: column-reverse; width: 100%; min-height: 0; border-radius: 3px 3px 0 0; overflow: hidden; }
+.col .stack i { display: block; flex: none; }
+.col.empty .area { border-bottom-color: var(--line-soft); }
+.col .lbl { min-height: 14px; text-align: center; color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; }
+.col:hover .stack { filter: brightness(1.15); }
+.col:hover .lbl, .col:focus-visible .lbl { color: var(--text); }
+.col:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+.col.on .stack { box-shadow: 0 0 0 2px var(--accent); }
+.col.on .lbl { color: var(--accent); font-weight: 700; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.outs { display: grid; grid-template-columns: max-content minmax(40px, 1fr) auto 48px; align-items: center; gap: 5px 10px; font-size: 12px; }
+.outs .track { height: 8px; border-radius: 2px; background: var(--line-soft); overflow: hidden; }
+.outs .track i { display: block; height: 100%; border-radius: 2px; }
+.outs .o-n { text-align: right; font-family: var(--mono); color: var(--text); }
+.outs .o-p { text-align: right; font-family: var(--mono); color: var(--muted); font-size: 11px; }
+.sizes .sz { color: var(--rar); font-size: 12px; } .sizes .sz b { font-family: var(--mono); }
+.sizes { gap: 16px; padding-top: 10px; border-top: 1px solid var(--line-soft); }
+th .gi { vertical-align: -2px; }
+th .gi:has(svg) { color: var(--muted); }
+td.hi { color: var(--text); }
+tr.on td { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+td.spark-cell { width: 90px; }
+.spark { display: block; height: 7px; border-radius: 2px; background: var(--accent); opacity: 0.55; }
+@media (max-width: 640px) { .two { grid-template-columns: 1fr; } .hero-v { font-size: 28px; } .chart:not(.dense) .tot { font-size: 10px; } }
 `;
 

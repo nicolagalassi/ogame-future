@@ -733,5 +733,13 @@
   "msg.say.trader": "a trader offers an exchange",
   "msg.say.pirate": "a fight with pirates",
   "msg.say.alien": "a fight with aliens",
-  "msg.say.blackhole": "the fleet was lost in a black hole"
+  "msg.say.blackhole": "the fleet was lost in a black hole",
+  "exp.heroCount": "expeditions",
+  "exp.heroAvg": "per expedition",
+  "exp.heroLost": "ships lost",
+  "exp.byHour": "Hour by hour",
+  "exp.focusAll": "Whole period",
+  "exp.noneHere": "Nothing here.",
+  "exp.daysTable": "The days",
+  "dock.todayCount": "{n} expeditions"
 }

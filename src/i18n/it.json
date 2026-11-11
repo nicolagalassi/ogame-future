@@ -733,5 +733,13 @@
   "msg.say.trader": "un mercante offre uno scambio",
   "msg.say.pirate": "scontro con i pirati",
   "msg.say.alien": "scontro con gli alieni",
-  "msg.say.blackhole": "la flotta è finita in un buco nero"
+  "msg.say.blackhole": "la flotta è finita in un buco nero",
+  "exp.heroCount": "spedizioni",
+  "exp.heroAvg": "a spedizione",
+  "exp.heroLost": "navi perse",
+  "exp.byHour": "Ora per ora",
+  "exp.focusAll": "Tutto il periodo",
+  "exp.noneHere": "Niente qui.",
+  "exp.daysTable": "I giorni",
+  "dock.todayCount": "{n} spedizioni"
 }

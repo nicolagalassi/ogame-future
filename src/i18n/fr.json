@@ -733,5 +733,13 @@
   "msg.say.trader": "un marchand propose un échange",
   "msg.say.pirate": "combat contre des pirates",
   "msg.say.alien": "combat contre des aliens",
-  "msg.say.blackhole": "la flotte a disparu dans un trou noir"
+  "msg.say.blackhole": "la flotte a disparu dans un trou noir",
+  "exp.heroCount": "expéditions",
+  "exp.heroAvg": "par expédition",
+  "exp.heroLost": "vaisseaux perdus",
+  "exp.byHour": "Heure par heure",
+  "exp.focusAll": "Toute la période",
+  "exp.noneHere": "Rien ici.",
+  "exp.daysTable": "Les jours",
+  "dock.todayCount": "{n} expéditions"
 }
