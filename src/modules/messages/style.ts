@@ -49,27 +49,30 @@ export const MESSAGES_CSS = `
 .fut-msg:hover { background: rgba(120, 150, 180, 0.11); }
 .fut-msg:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .fut-msg-pillcell { display: flex; min-width: 0; }
-/* Card view: the summary lives in the game's header, on the sender's line, right-aligned (outcome,
-   what was carried, value). Folded, the card is just that header; a click on it opens the rest. */
-.msg .msgHead.fut-msghead { position: relative !important; cursor: pointer; }
-.fut-msg.fut-msg-inhead { position: absolute; right: 8px; bottom: 3px; left: 46%; display: flex; justify-content: flex-end; align-items: center; gap: 12px;
+/* Card view: the summary is one more item of the game's header (title | summary | date | delete),
+   right-aligned before the date. Folded, the sender's line goes too: one line per report. */
+.msg .msgHead.fut-msghead { display: flex !important; align-items: center; gap: 12px; cursor: pointer; }
+.msg .msgHead.fut-msghead > br { display: none; }
+.msg .msgHead.fut-msghead > .msgHeadItem { flex: none; }
+.msg .msgHead.fut-msghead > .msgHeadItem:first-child { flex: 0 1 auto; min-width: 0; }
+.msg.fut-msg-folded .msgHead.fut-msghead .underTitle { display: none !important; }
+.fut-msg.fut-msg-inhead { flex: 1 1 auto; min-width: 0; display: flex; justify-content: flex-end; align-items: center; gap: 12px;
   margin: 0; padding: 0; min-height: 0; background: none; overflow: hidden; }
 .fut-msg.fut-msg-inhead:hover { background: none; }
 .fut-msg-inhead:hover .fut-msg-body { color: var(--hi); }
 .fut-msg-inhead .fut-msg-pillcell { flex: none; }
 .fut-msg-inhead .fut-msg-pillcell:empty { display: none; }
-.fut-msg-inhead .fut-msg-body { flex: 0 1 auto; flex-wrap: nowrap; gap: 10px; overflow: hidden; }
+.fut-msg-inhead .fut-msg-body { flex: 0 1 auto; flex-wrap: nowrap; gap: 10px; min-width: 0; overflow: hidden; }
 .fut-msg-inhead .fut-pill { padding: 0; border: 0; background: none; color: var(--tone); }
 /* The title already says delivery, return, recycling: no word for it. Names only on the route (coordinates in the game's text). */
 .fut-msg-inhead.fut-msg-transport .fut-msg-pillcell, .fut-msg-inhead.fut-msg-deploy .fut-msg-pillcell,
 .fut-msg-inhead.fut-msg-return .fut-msg-pillcell, .fut-msg-inhead.fut-msg-recycle .fut-msg-pillcell { display: none; }
 .fut-msg-inhead .fut-route { flex-basis: auto; flex-wrap: nowrap; }
 .fut-msg-inhead .fut-route .fut-coords { display: none; }
-.fut-msg-inhead .fut-msg-val { flex: none; min-width: 64px; }
+.fut-msg-inhead .fut-msg-val { flex: none; min-width: 62px; justify-content: flex-end; }
 .fut-msg-inhead .fut-msg-val b { font-size: 12px; }
-.fut-msg-inhead .fut-dash { display: none; }
+.fut-msg-inhead .fut-dash, .fut-msg-inhead .fut-depl { display: none; }
 .fut-msg-inhead .fut-msg-icon { width: 16px; height: 16px; }
-.fut-msg-inhead .fut-depl { margin-left: 0; }
 .fut-msg-inhead .fut-msg-acts a.fut-msg-link { height: 18px; padding: 0 8px; }
 .fut-pill { --tone: #8A9BB0; display: inline-block; max-width: 100%; box-sizing: border-box; padding: 1px 8px; border-radius: 9px;
   border: 1px solid color-mix(in srgb, var(--tone) 55%, transparent); background: color-mix(in srgb, var(--tone) 9%, transparent);

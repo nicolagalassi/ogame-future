@@ -25,3 +25,6 @@
 - Tolto `spread()` (pillola nel piede, valore accanto al titolo). Vista a lista invariata.
 - Proposte in `docs/mockups/messages-options.html`.
 - Da verificare sul markup vero: che la riga del mittente sia l ultima di `.msgHead` (il riepilogo è ancorato in basso a destra).
+
+## 0.3.26 — C sul markup vero
+- Markup di Nicola: `.msgHead` > `.msgHeadItem` (titolo + `.underTitle` col mittente) | `.msgHeadItem` (`.msgDate`) | `.msgHeadItem.delActions` | `br`. Il riepilogo è un elemento in più, prima della data (`place`); l intestazione diventa flex. Chiuso: `.underTitle` nascosto, una riga per rapporto. Niente più sovrapposizione col cestino; tolti trattino e tacche di esaurimento nell intestazione. Test col markup vero (`HEAD`).
