@@ -282,7 +282,10 @@ function place(msg: Element, box: HTMLElement): boolean {
   if (head && !head.closest('.messageContentWrapper')) {
     head.classList.add('fut-msghead');
     box.classList.add('fut-msg-inhead');
-    head.append(box);
+    // One more item of the game's header (.msgHeadItem: title | ours | date | delete), before the date.
+    const date = Array.from(head.children).find((c) => c.classList.contains('msgHeadItem') && c.querySelector('.msgDate'));
+    if (date) head.insertBefore(box, date);
+    else head.append(box);
     return true;
   }
   const actions = msg.querySelector('.msg_actions, message-footer');
