@@ -103,7 +103,8 @@ describe('renderPlanetMenu', () => {
     const cells = Array.from(document.querySelectorAll<HTMLButtonElement>('.fut-toolbar .fut-cell'));
     expect(cells.map((c) => c.querySelector('.fut-cell-k')!.textContent)).toEqual(['Produzione', 'Piano · 50']);
     expect(cells[0]!.querySelector('.fut-cell-v')!.textContent).toMatch(/^\+.* MSU\/g$/);
-    expect(cells[1]!.querySelector('.fut-cell-v')!.textContent).toBe('mancano 1,2G');
+    expect(cells[1]!.querySelector('.fut-cell-v')!.textContent).toBe('−1,2G');
+    expect(cells[1]!.title).toContain('mancano 1,2G');
     cells[0]!.click();
     cells[1]!.click();
     expect(onOpenDashboard).toHaveBeenCalledTimes(1);

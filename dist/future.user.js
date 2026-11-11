@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.16
+// @version      0.3.17
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -8165,9 +8165,11 @@ ${L} .fut-c, .fut-totals .fut-c .fut-tname { color: ${RES_COLORS.crystal}; }
 ${L} .fut-d, .fut-totals .fut-d .fut-tname { color: ${RES_COLORS.deuterium}; }
 ${L} .fut-full { color: #F5B547 !important; font-weight: 700; }
 ${L} .fut-missing { color: #8A9BB0; }
-/* Fleet pill: what the ships here are worth, under the resources. */
-${L} .fut-fleet { margin: 1px 0 0 auto; padding: 0 4px; border-radius: 6px; background: rgba(255, 122, 122, 0.16); color: #FFA0A0; line-height: 11px; max-width: 100%; }
-${L} .fut-fleet.fut-none { visibility: hidden; }
+/* Fleet: what the ships are worth (planet, then moon), a third line under name and coordinates. */
+${L} .fut-fleet { display: flex; align-items: center; gap: 5px; min-width: 0; margin-top: 1px; font: 10px/11px monospace; color: #F2A3A3; white-space: nowrap; overflow: hidden; }
+${L} .fut-fleet-m { display: inline-flex; align-items: center; gap: 2px; color: #D8A0A0; }
+${L} .fut-fleet-m svg { flex: none; opacity: 0.8; }
+${L}.fut-mode-compact .fut-fleet-m { display: none; }
 .fut-totals .fut-fleetrow .fut-tname { color: #FFA0A0; }
 
 /* Moon: its own tile on the right of the same row. */
@@ -8238,42 +8240,44 @@ ${L}.fut-mode-compact a.moonlink { width: 22px !important; padding: 0 !important
 ${L}.fut-mode-compact a.moonlink .fut-res, ${L}.fut-mode-compact a.moonlink .fut-age { display: none; }
 ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: static !important; width: 16px !important; height: 16px !important; }
 
-/* Toolbar: replaces the colony counter. Two lines that open their window, then sync and settings stacked. */
+/* Toolbar: replaces the colony counter. Two tiles side by side (production \u2192 Dashboard, plan \u2192 Piano),
+   name on top and number below; sync and settings stacked on the right. */
 #planetbarcomponent .fut-toolbar {
-  box-sizing: border-box; display: grid !important; height: auto !important; padding: 0 !important; grid-template-columns: minmax(0, 1fr) 26px; margin: 0 0 3px;
-  border: 1px solid #1F2C40; border-radius: 7px; background: #0B121D; overflow: hidden;
+  box-sizing: border-box; display: grid !important; height: auto !important; padding: 0 !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 26px; margin: 0 0 3px;
+  border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden;
 }
 #planetbarcomponent .fut-toolbar .fut-cell {
-  box-sizing: border-box !important; grid-column: 1; height: 26px !important; width: auto !important; box-shadow: none !important; border-radius: 0 !important; font: inherit;
-  display: flex; align-items: center; gap: 6px; min-width: 0; padding: 0 8px; margin: 0;
+  box-sizing: border-box !important; height: 40px !important; width: auto !important; box-shadow: none !important; border-radius: 0 !important; font: inherit;
+  display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 3px; min-width: 0; padding: 0 8px; margin: 0;
   border: 0 !important; border-right: 1px solid #1F2C40 !important; background: none !important; color: inherit; text-align: left; cursor: pointer;
 }
-#planetbarcomponent .fut-toolbar .fut-cell + .fut-cell { border-top: 1px solid #1F2C40 !important; }
-#planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) { background: #111D2D !important; }
+#planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) { background: #16243A !important; }
 #planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) .fut-cell-k { color: #E6EDF5; }
 #planetbarcomponent .fut-toolbar .fut-cell:focus-visible, #planetbarcomponent .fut-tool:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -2px; }
 #planetbarcomponent .fut-toolbar .fut-cell:disabled { cursor: default; }
-#planetbarcomponent .fut-cell-i { flex: none; display: inline-flex; color: #4FD1E8; }
-#planetbarcomponent .fut-cell-k { flex: none; font: 12px/14px Arial, sans-serif; color: #C9D4E2; white-space: nowrap; }
-#planetbarcomponent .fut-cell-v { flex: 1; min-width: 0; font: 700 12px/14px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#planetbarcomponent .fut-cell-v small { font: 11px/14px Arial, sans-serif; color: #9AA9BC; }
+#planetbarcomponent .fut-cell-t { display: flex; align-items: center; gap: 5px; min-width: 0; }
+#planetbarcomponent .fut-cell-i { flex: none; display: inline-flex; color: #8A9BB0; }
+#planetbarcomponent .fut-cell-k { min-width: 0; font: 11px/12px Arial, sans-serif; color: #9AA9BC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#planetbarcomponent .fut-cell-v { min-width: 0; font: 700 13px/14px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#planetbarcomponent .fut-cell-v small { font: 10px/14px Arial, sans-serif; color: #8A9BB0; font-weight: 400; }
 #planetbarcomponent .fut-cell-v.fut-warn { color: #F5B547; } #planetbarcomponent .fut-cell-v.fut-ok { color: #4FE0B0; }
-#planetbarcomponent .fut-side { display: flex; flex-direction: column; grid-column: 2; grid-row: 1 / span 2; }
+#planetbarcomponent .fut-side { display: flex; flex-direction: column; grid-column: 3; grid-row: 1; }
 #planetbarcomponent .fut-tool {
   position: relative; flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; padding: 0;
   border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; color: #8A9BB0; cursor: pointer; height: auto !important; min-height: 0 !important;
 }
 #planetbarcomponent .fut-tool + .fut-tool { border-top: 1px solid #1F2C40 !important; }
 #planetbarcomponent .fut-tool svg { width: 13px; height: 13px; }
-#planetbarcomponent .fut-tool:hover { background: #111D2D !important; color: #E6EDF5; }
+#planetbarcomponent .fut-tool:hover { background: #16243A !important; color: #E6EDF5; }
 #planetbarcomponent .fut-tool:disabled { opacity: 0.35; cursor: default; background: none; }
 #planetbarcomponent .fut-tool[aria-expanded="true"] { background: #12283A !important; color: #4FD1E8; }
 #planetbarcomponent .fut-tool.fut-stale { color: #F5B547; }
 #planetbarcomponent .fut-tool.fut-failed { color: #E5534B; }
 #planetbarcomponent .fut-tool.fut-busy svg { animation: fut-spin 1s linear infinite; }
 /* Game width: no room for the names, the icon and the tooltip say what the number is. */
-#planetbarcomponent:not(.fut-wide) .fut-toolbar .fut-cell { padding: 0 5px; gap: 4px; }
+#planetbarcomponent:not(.fut-wide) .fut-toolbar .fut-cell { padding: 0 5px; }
 #planetbarcomponent:not(.fut-wide) .fut-cell-k, #planetbarcomponent:not(.fut-wide) .fut-cell-v small { display: none; }
+#planetbarcomponent:not(.fut-wide) .fut-cell-v { font-size: 11px; }
 @keyframes fut-spin { to { transform: rotate(360deg); } }
 
 
@@ -8351,13 +8355,22 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     cell("metal", "fut-m");
     cell("crystal", "fut-c");
     cell("deuterium", "fut-d");
-    if (view2.fleet) {
-      const value = fleetValue(body);
-      const pill = el3(doc, "span", `fut-cell fut-fleet${value ? "" : " fut-none"}`, value ? formatUnits(value, locale) : "");
-      if (value) pill.title = view2.t("planetMenu.fleetHint");
-      box.append(pill);
-    }
     return box;
+  }
+  function fleetLine(doc, planet, moon, locale, t) {
+    const p = planet ? fleetValue(planet) : 0;
+    const m = moon ? fleetValue(moon) : 0;
+    if (!p && !m) return null;
+    const line = el3(doc, "span", "fut-fleet");
+    line.title = t("planetMenu.fleetHint");
+    if (p) line.append(el3(doc, "span", "fut-fleet-p", formatUnits(p, locale)));
+    if (m) {
+      const moonPart = el3(doc, "span", "fut-fleet-m");
+      moonPart.innerHTML = '<svg viewBox="0 0 24 24" width="8" height="8" aria-hidden="true" fill="currentColor"><path d="M14.6 2.6A9.6 9.6 0 1 0 21.4 16 8 8 0 0 1 14.6 2.6z"/></svg>';
+      moonPart.append(formatUnits(m, locale));
+      line.append(moonPart);
+    }
+    return line;
   }
   function guardSkin(img) {
     if (img.dataset.futSkin) return;
@@ -8440,35 +8453,35 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     if (colonies) bar.title = colonies;
     const fmt = (n) => formatUnits(n, o.locale);
     const msu4 = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
-    const cell = (glyph2, label, value, note, unit, cls, title, onClick) => {
+    const cell = (glyph2, label, value, unit, cls, title, onClick) => {
       const b = el3(doc, "button", "fut-cell");
       b.type = "button";
       b.title = title;
+      const top = el3(doc, "span", "fut-cell-t");
       const ico = el3(doc, "span", "fut-cell-i");
-      ico.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="currentColor" stroke="currentColor">${ICONS2[glyph2]}</svg>`;
+      ico.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="currentColor" stroke="currentColor">${ICONS2[glyph2]}</svg>`;
+      top.append(ico, el3(doc, "span", "fut-cell-k", label));
       const v = el3(doc, "span", `fut-cell-v ${cls}`.trim());
-      if (note) v.append(el3(doc, "small", "", note), " ");
       v.append(value);
       if (unit) v.append(" ", el3(doc, "small", "", unit));
-      b.append(ico, el3(doc, "span", "fut-cell-k", label), v);
+      b.append(top, v);
       if (onClick) b.addEventListener("click", onClick);
       else b.disabled = true;
       bar.append(b);
     };
     const perDay = o.snapshot ? msu4(totals(o.snapshot, o.now).perHour) * 24 : null;
-    cell("dashboard", t("bar.prod"), perDay === null ? "\u2014" : `+${fmt(perDay)}`, "", perDay === null ? "" : t("bar.msuDay"), "", `${t("dash.title")}${perDay === null ? "" : ` \xB7 ${t("bar.dashHint")}`}`, o.onOpenDashboard);
+    cell("dashboard", t("bar.prod"), perDay === null ? "\u2014" : `+${fmt(perDay)}`, perDay === null ? "" : t("bar.msuDay"), "", `${t("dash.title")}${perDay === null ? "" : ` \xB7 ${t("bar.dashHint")}`}`, o.onOpenDashboard);
     const count2 = o.planCount ?? 0;
     const gap = o.planGap;
     const known = count2 > 0 && gap !== null && gap !== void 0;
-    const planValue = !count2 ? "\u2014" : !known ? "?" : gap > 0 ? fmt(gap) : t("bar.ready");
+    const planValue = !count2 ? "\u2014" : !known ? "?" : gap > 0 ? `\u2212${fmt(gap)}` : t("bar.ready");
     cell(
       "planner",
       count2 ? t("bar.plan", { n: count2 > 99 ? "99+" : count2 }) : t("bar.planEmpty"),
       planValue,
-      known && gap > 0 ? t("bar.missing") : "",
       "",
       !known ? "" : gap > 0 ? "fut-warn" : "fut-ok",
-      `${t("plan.title")}${count2 && gap ? ` \xB7 ${t("bar.planHint")}` : ""}`,
+      `${t("plan.title")}${known && gap > 0 ? ` \xB7 ${t("bar.missing")} ${fmt(gap)}` : ""}${count2 && gap ? ` \xB7 ${t("bar.planHint")}` : ""}`,
       o.onOpenPlanner
     );
     const side = el3(doc, "div", "fut-side");
@@ -8526,7 +8539,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     list.classList.toggle("fut-mode-side", mode === "side");
     const byId = new Map((o.snapshot?.bodies ?? []).map((b) => [b.id, b]));
     const view2 = { fleet: o.settings.showFleet === true, t: o.t };
-    list.style.setProperty("--fut-row-h", view2.fleet ? "52px" : "40px");
+    list.style.removeProperty("--fut-row-h");
     for (const entry of o.entries) {
       entry.element.classList.add("fut-row");
       if (entry.current) entry.element.classList.add("fut-current");
@@ -8535,6 +8548,10 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
         const wrap = el3(doc, "span", "fut-name");
         link.querySelectorAll(".planet-name, .planet-koords").forEach((n) => wrap.append(n));
         const planetBody = entry.planetId ? byId.get(entry.planetId) : void 0;
+        if (view2.fleet) {
+          const line = fleetLine(doc, planetBody, entry.moonId ? byId.get(entry.moonId) : void 0, o.locale, o.t);
+          if (line) wrap.append(line);
+        }
         link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true, view2));
         const age = ageBadge(doc, planetBody, o.now, o.t);
         if (age) link.append(age);

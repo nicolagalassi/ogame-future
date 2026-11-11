@@ -109,13 +109,27 @@ function resourceColumn(doc: Document, body: OwnBody | undefined, now: number, l
   cell('metal', 'fut-m');
   cell('crystal', 'fut-c');
   cell('deuterium', 'fut-d');
-  if (view.fleet) {
-    const value = fleetValue(body);
-    const pill = el(doc, 'span', `fut-cell fut-fleet${value ? '' : ' fut-none'}`, value ? formatUnits(value, locale) : '');
-    if (value) pill.title = view.t('planetMenu.fleetHint');
-    box.append(pill);
-  }
   return box;
+}
+
+/**
+ * What the ships are worth, planet and moon, as a third line under name and coordinates: the row
+ * keeps its height (the old pill under the resources made every row taller).
+ */
+function fleetLine(doc: Document, planet: OwnBody | undefined, moon: OwnBody | undefined, locale: string, t: PlanetMenuOptions['t']): HTMLElement | null {
+  const p = planet ? fleetValue(planet) : 0;
+  const m = moon ? fleetValue(moon) : 0;
+  if (!p && !m) return null;
+  const line = el(doc, 'span', 'fut-fleet');
+  line.title = t('planetMenu.fleetHint');
+  if (p) line.append(el(doc, 'span', 'fut-fleet-p', formatUnits(p, locale)));
+  if (m) {
+    const moonPart = el(doc, 'span', 'fut-fleet-m');
+    moonPart.innerHTML = '<svg viewBox="0 0 24 24" width="8" height="8" aria-hidden="true" fill="currentColor"><path d="M14.6 2.6A9.6 9.6 0 1 0 21.4 16 8 8 0 0 1 14.6 2.6z"/></svg>';
+    moonPart.append(formatUnits(m, locale));
+    line.append(moonPart);
+  }
+  return line;
 }
 
 /**
@@ -237,38 +251,39 @@ function toolbar(o: PlanetMenuOptions, colonies: string, roomy: boolean): HTMLEl
   const fmt = (n: number) => formatUnits(n, o.locale);
   const msu = (r: { metal: number; crystal: number; deuterium: number }) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
 
-  /** One line: icon and name on the left; on the right the number, with the word that says what it is. */
-  const cell = (glyph: keyof typeof ICONS, label: string, value: string, note: string, unit: string, cls: string, title: string, onClick?: () => void) => {
+  /** One tile: icon and name on top, the number below with its unit. Two tiles side by side. */
+  const cell = (glyph: keyof typeof ICONS, label: string, value: string, unit: string, cls: string, title: string, onClick?: () => void) => {
     const b = el(doc, 'button', 'fut-cell');
     b.type = 'button';
     b.title = title;
+    const top = el(doc, 'span', 'fut-cell-t');
     const ico = el(doc, 'span', 'fut-cell-i');
-    ico.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="currentColor" stroke="currentColor">${ICONS[glyph]}</svg>`;
+    ico.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="currentColor" stroke="currentColor">${ICONS[glyph]}</svg>`;
+    top.append(ico, el(doc, 'span', 'fut-cell-k', label));
     const v = el(doc, 'span', `fut-cell-v ${cls}`.trim());
-    if (note) v.append(el(doc, 'small', '', note), ' ');
     v.append(value);
     if (unit) v.append(' ', el(doc, 'small', '', unit));
-    b.append(ico, el(doc, 'span', 'fut-cell-k', label), v);
+    b.append(top, v);
     if (onClick) b.addEventListener('click', onClick);
     else b.disabled = true;
     bar.append(b);
   };
 
   const perDay = o.snapshot ? msu(totals(o.snapshot, o.now).perHour) * 24 : null;
-  cell('dashboard', t('bar.prod'), perDay === null ? '—' : `+${fmt(perDay)}`, '', perDay === null ? '' : t('bar.msuDay'), '', `${t('dash.title')}${perDay === null ? '' : ` · ${t('bar.dashHint')}`}`, o.onOpenDashboard);
+  cell('dashboard', t('bar.prod'), perDay === null ? '—' : `+${fmt(perDay)}`, perDay === null ? '' : t('bar.msuDay'), '', `${t('dash.title')}${perDay === null ? '' : ` · ${t('bar.dashHint')}`}`, o.onOpenDashboard);
 
   const count = o.planCount ?? 0;
   const gap = o.planGap;
   const known = count > 0 && gap !== null && gap !== undefined;
-  const planValue = !count ? '—' : !known ? '?' : gap > 0 ? fmt(gap) : t('bar.ready');
+  // What is still missing, as a negative amount: "−1,2G".
+  const planValue = !count ? '—' : !known ? '?' : gap > 0 ? `−${fmt(gap)}` : t('bar.ready');
   cell(
     'planner',
     count ? t('bar.plan', { n: count > 99 ? '99+' : count }) : t('bar.planEmpty'),
     planValue,
-    known && gap > 0 ? t('bar.missing') : '',
     '',
     !known ? '' : gap > 0 ? 'fut-warn' : 'fut-ok',
-    `${t('plan.title')}${count && gap ? ` · ${t('bar.planHint')}` : ''}`,
+    `${t('plan.title')}${known && gap > 0 ? ` · ${t('bar.missing')} ${fmt(gap)}` : ''}${count && gap ? ` · ${t('bar.planHint')}` : ''}`,
     o.onOpenPlanner,
   );
 
@@ -344,8 +359,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
 
   const byId = new Map((o.snapshot?.bodies ?? []).map((b) => [b.id, b]));
   const view = { fleet: o.settings.showFleet === true, t: o.t };
-  // The fleet pill is a fourth line under the three resources: the rows grow by it.
-  list.style.setProperty('--fut-row-h', view.fleet ? '52px' : '40px');
+  list.style.removeProperty('--fut-row-h');
 
   for (const entry of o.entries) {
     entry.element.classList.add('fut-row');
@@ -356,6 +370,10 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       const wrap = el(doc, 'span', 'fut-name');
       link.querySelectorAll('.planet-name, .planet-koords').forEach((n) => wrap.append(n));
       const planetBody = entry.planetId ? byId.get(entry.planetId) : undefined;
+      if (view.fleet) {
+        const line = fleetLine(doc, planetBody, entry.moonId ? byId.get(entry.moonId) : undefined, o.locale, o.t);
+        if (line) wrap.append(line);
+      }
       link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true, view));
       const age = ageBadge(doc, planetBody, o.now, o.t);
       if (age) link.append(age);
