@@ -11,6 +11,7 @@ import { SNAPSHOT_KEY, hydrateAccountOncePerSession, syncAccountOnUserClick, typ
 import { currentBodyId, readCurrentResources, readPlanetList } from './data/planet-list';
 import { applyPageResources, mergeNewerResources } from './engines/resources';
 import { VISITED_KEY, markVisited, type Visits } from './data/visits';
+import { FLIGHTS_KEY, flyingTotal, watchFlights, type Flights } from './data/flights';
 import { SCORE_KEY, watchScore, type Score } from './data/score';
 import { HISTORY_KEY, recordDay, type History } from './engines/history';
 import { loadServerDataOnPageLoad } from './data/server-data';
@@ -249,6 +250,7 @@ async function bootstrap(): Promise<void> {
       snapshot,
       queues,
       visits: store.get<Visits>(VISITED_KEY, {}),
+      flying: flyingTotal(store.get<Flights | null>(FLIGHTS_KEY, null), Date.now()),
       settings,
       now: Date.now(),
       locale,
@@ -373,6 +375,11 @@ async function bootstrap(): Promise<void> {
   const reminders = { doc: document, store, t, locale, offset: clockOffset(document, Date.now()) };
   startReminders(reminders);
   watchEventList(reminders);
+  // Cargo of the fleets in flight, from the event list the game shows: counted in the account totals.
+  watchFlights(document, reminders.offset, (list) => {
+    store.set(FLIGHTS_KEY, { readAt: Date.now(), list } satisfies Flights);
+    draw();
+  });
 
   // Highscore: gap to the player, days to catch up, rival star.
   if (isHighscorePage(document)) watchHighscore({ doc: document, store, locale, t, guard });

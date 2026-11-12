@@ -38,6 +38,8 @@ export interface PlanetMenuOptions {
   queues?: QueueSnapshot | null;
   /** When the player last opened each body (data/visits): the age badges count from here. */
   visits?: Record<string, number>;
+  /** Cargo of the player's fleets in flight (data/flights), added to the totals. */
+  flying?: { metal: number; crystal: number; deuterium: number };
   settings: MenuSettings;
   now: number;
   locale: string;
@@ -526,7 +528,11 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
 
   if (o.snapshot && o.settings.showTotals) {
     // A small table: what the whole account holds now and makes in a day; MSU sums the three.
-    const { stock, perHour } = totals(o.snapshot, o.now);
+    const base = totals(o.snapshot, o.now);
+    const perHour = base.perHour;
+    // Resources travelling in the player's fleets are still the player's: counted in the stock.
+    const fly = o.flying ?? { metal: 0, crystal: 0, deuterium: 0 };
+    const stock = { metal: base.stock.metal + fly.metal, crystal: base.stock.crystal + fly.crystal, deuterium: base.stock.deuterium + fly.deuterium };
     const msu = (r: { metal: number; crystal: number; deuterium: number }) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
     const box = el(doc, 'div', 'fut-totals');
     box.setAttribute('role', 'table');
@@ -555,6 +561,12 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
     const plain = (r: { metal: number; crystal: number; deuterium: number }) => r.metal + r.crystal + r.deuterium;
     if (o.settings.totalView === 'sum') line(o.t('totals.sum'), plain(stock), plain(perHour), 'fut-msu', 'total');
     else line('MSU', msu(stock), msu(perHour), 'fut-msu', 'total');
+    const flyTotal = o.settings.totalView === 'sum' ? plain(fly) : msu(fly);
+    if (flyTotal > 0) {
+      row('fut-flyrow', [o.t('totals.flying'), formatUnits(flyTotal, o.locale), ''], 'transport');
+      const r = box.lastElementChild as HTMLElement;
+      r.title = o.t('totals.flyingHint', { metal: formatUnits(fly.metal, o.locale), crystal: formatUnits(fly.crystal, o.locale), deuterium: formatUnits(fly.deuterium, o.locale) });
+    }
     if (view.fleet) row('fut-fleetrow', [o.t('planetMenu.fleet'), formatUnits(o.snapshot.bodies.reduce((sum, b) => sum + fleetValue(b), 0), o.locale), ''], 'fleetValue');
     list.after(box);
   }

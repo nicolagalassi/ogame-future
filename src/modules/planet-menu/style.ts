@@ -88,6 +88,7 @@ ${L} .fut-fleet-m { display: inline-flex; align-items: center; gap: 2px; color: 
 ${L} .fut-fleet-m svg { flex: none; opacity: 0.8; }
 ${L}.fut-mode-compact .fut-fleet-m { display: none; }
 .fut-totals .fut-fleetrow .fut-tname { color: #FFA0A0; }
+.fut-totals .fut-flyrow, .fut-totals .fut-flyrow .fut-tname { color: #8A9BB0; font-size: 0.92em; }
 
 /* Moon: its own tile on the right of the same row. */
 ${L} a.moonlink {

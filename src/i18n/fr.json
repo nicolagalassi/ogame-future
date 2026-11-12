@@ -634,6 +634,8 @@
   "bar.missing": "manque",
   "totals.stock": "En stock",
   "totals.day": "Par jour",
+  "totals.flying": "dont en vol",
+  "totals.flyingHint": "Cargaison de vos flottes en vol (déjà comprise dans les lignes ci-dessus) : métal {metal}, cristal {crystal}, deutérium {deuterium}. Lue dans la liste des événements du jeu : ouvrez-la pour la mettre à jour.",
   "dock.journal": "Journal",
   "dock.count": "exp.",
   "dock.today": "Aujourd'hui",
