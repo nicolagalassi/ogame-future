@@ -102,6 +102,8 @@ const MODAL_ID = 'fut-fleet-modal';
 export const FLEETSAVE_MISSIONS = [3, 4, 6, 8, 15, 5, 1];
 const pageState = new WeakMap<Document, { active: RepeatState | null; o: FleetOptions }>();
 const REPEATABLE: FleetMode[] = ['moon', 'collect', 'collectDeploy', 'expedition', 'fleetsave', 'plan'];
+/** Rounds that offer "Salta" (nothing worth moving here: on to the next body). */
+const SKIPPABLE: FleetMode[] = ['moon', 'collect', 'collectDeploy'];
 
 function el<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, className = '', text?: string) {
   const node = doc.createElement(tag);
@@ -1108,9 +1110,36 @@ export function renderFleetTools(o: FleetOptions): void {
     // answer lands it rewrites the target, so we prepare only once it is back.
     void whenTargetIdle(fd).then(() => fn(fd));
   };
+  // The "Salta" tile, drawn in the page 1 bar; shown while a skippable round is on.
+  let drawSkip = () => {};
+  let skipTile: HTMLButtonElement | null = null;
   const begin = (mode: FleetMode, dest: number | null = null) => {
     const prev = state.active;
     state.active = REPEATABLE.includes(mode) ? { mode, first: prev && prev.mode === mode ? prev.first : o.bodyId, dest } : null;
+    drawSkip();
+  };
+  /** The body "Salta" opens: the next of the round, past the bodies marked to skip; null = none. */
+  const skipTarget = (): number | null => {
+    const a = state.active;
+    if (!a || !SKIPPABLE.includes(a.mode)) return null;
+    return nextInRound(a, o.bodyId, o.bodies, loadSettings(o.store).skipBodies);
+  };
+  // "Salta": nothing to move from here, open the next body of the round with the same action prepared.
+  // COMPLIANCE: a normal page change with cp on the player's own click or key (the same as the planet
+  // list or I / O); nothing is sent, and the next page only gets the form prepared (see ./repeat.ts).
+  const skip = () => {
+    const a = state.active;
+    const next = skipTarget();
+    if (!a || next === null) return say(t('fleet.err.noSkip'), true);
+    navigate(repeatUrl(href, next, a));
+  };
+  /** After a collection that found nothing to move: say so and point at "Salta". */
+  const reportRound = (r: PrepareResult) => {
+    report(r, 'fleet.ok.cargo');
+    const next = r.ok ? null : skipTarget();
+    if (next === null) return;
+    say(`${t(r.reason ?? 'fleet.err.noShips')} · ${t('fleet.skipOffer', { body: shortLabel(o, next) })}`, true);
+    skipTile?.focus();
   };
 
   const run: Record<FleetMode, (dest?: number | null) => void> = {
@@ -1120,21 +1149,21 @@ export function renderFleetTools(o: FleetOptions): void {
         const target = here?.moonId ? bodyTarget(o.bodies, here.moonId) : null;
         if (!target) return say(t('fleet.err.noMoon'), true);
         begin('moon');
-        report(prepareTransport(fd, doc, profile, settings, target), 'fleet.ok.cargo');
+        reportRound(prepareTransport(fd, doc, profile, settings, target));
       }),
     collect: (dest) =>
       withDispatcher((fd) => {
         const target = dest ? bodyTarget(o.bodies, dest) : null;
         if (!dest || !target) return say(t('fleet.err.noDest'), true);
         begin('collect', dest);
-        report(prepareTransport(fd, doc, profile, settings, target), 'fleet.ok.cargo');
+        reportRound(prepareTransport(fd, doc, profile, settings, target));
       }),
     collectDeploy: (dest) =>
       withDispatcher((fd) => {
         const target = dest ? bodyTarget(o.bodies, dest) : null;
         if (!dest || !target) return say(t('fleet.err.noDest'), true);
         begin('collectDeploy', dest);
-        report(prepareDeploy(fd, doc, profile, settings, target), 'fleet.ok.cargo');
+        reportRound(prepareDeploy(fd, doc, profile, settings, target));
       }),
     // Plain game actions: destination and resources from the row on page 1, read when pressed.
     // Plain game actions: a switch that stays on; CL / CP below then prepare the fleet.
@@ -1252,6 +1281,16 @@ export function renderFleetTools(o: FleetOptions): void {
     if (here?.moonId) secondary.append(act('moon', 'fleet.moon', t('fleet.btn.moon'), to(here.moonId), t('fleet.tip.moon'), () => run.moon()));
     secondary.append(collect);
     tiles.append(secondary);
+    // "Salta → next body", only while a collection round is on.
+    const skipSlot = el(doc, 'span', 'fut-fsecond fut-fskip');
+    drawSkip = () => {
+      const next = skipTarget();
+      skipTile = next === null ? null : act('skip', 'fleet.skip', t('fleet.btn.skip'), to(next), t('fleet.tip.skip'), skip);
+      skipSlot.replaceChildren(...(skipTile ? [skipTile] : []));
+      skipSlot.hidden = !skipTile;
+    };
+    drawSkip();
+    tiles.append(skipSlot);
     // Same actions on their keys and in the touch bar, like OGLight (one key = one prepared fleet, never a send).
     registerActions(doc, o.store, t, {
       ...(here?.moonId ? { 'fleet.moon': () => run.moon() } : {}),
@@ -1262,6 +1301,7 @@ export function renderFleetTools(o: FleetOptions): void {
       'fleet.expedition': () => run.expedition(),
       'fleet.fleetsave': () => run.fleetsave(),
       'fleet.last': () => run.last(),
+      'fleet.skip': skip,
     });
 
     // Rules: what the actions keep back, one switch each.
@@ -1285,6 +1325,16 @@ export function renderFleetTools(o: FleetOptions): void {
       sw('food', t('fleet.foodShort'), t('fleet.foodHint'), 'ignoreFood', () => applyFood(o.store)),
       sw('repeat', t('fleet.repeatShort'), t('fleet.repeatHint'), 'repeat'),
     );
+    // This body only: the round (Ripeti, Salta) passes over it.
+    const skipped = settings.skipBodies.includes(o.bodyId);
+    const skipSw = ruleSwitch(doc, 'skip', t('fleet.rule.skip'), skipped, () => {
+      const now = loadSettings(o.store);
+      const others = now.skipBodies.filter((id) => id !== o.bodyId);
+      o.store.set(SETTINGS_KEY, { ...now, skipBodies: skipped ? others : [...others, o.bodyId] });
+      redraw();
+    });
+    out.peek(skipSw, `${t('fleet.rule.skip')}: ${skipped ? t('fleet.on') : t('fleet.off')}.`, t('fleet.rule.skipHint'));
+    rules.append(skipSw);
 
     // The editors: this body's rules, and Future's general fleet settings.
     const edit = el(doc, 'span', 'fut-fedit');
@@ -1361,13 +1411,13 @@ export function renderFleetTools(o: FleetOptions): void {
         const done = need.metal + need.crystal + need.deuterium <= 0;
         current.o.store.set(DELIVERY_KEY, done ? null : { ...d, need });
         if (done) return false;
-        const nextBody = nextInRound(current.active, current.o.bodyId, current.o.bodies);
+        const nextBody = nextInRound(current.active, current.o.bodyId, current.o.bodies, loadSettings(current.o.store).skipBodies);
         if (nextBody === null) return false;
         navigate(repeatUrl(href, nextBody, current.active));
         return true;
       }
       if (!current?.active || !loadSettings(current.o.store).repeat) return false;
-      const next = nextInRound(current.active, current.o.bodyId, current.o.bodies);
+      const next = nextInRound(current.active, current.o.bodyId, current.o.bodies, loadSettings(current.o.store).skipBodies);
       if (next === null) return false;
       navigate(repeatUrl(href, next, current.active));
       return true;

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.43
+// @version      0.3.44
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -306,6 +306,8 @@
     "fleet.repeat": "Dopo l'invio passa al pianeta o luna successivo, gi\xE0 pronto",
     "fleet.repeatHint": "Vale per Luna, Trasporto, Schiera, Spedizione e Fleetsave. L'invio resta sempre un tuo click; il giro si ferma quando torna al primo.",
     "fleet.repeatShort": "Ripeti",
+    "fleet.rule.skip": "Salta nel giro",
+    "fleet.rule.skipHint": "Solo questo pianeta o luna: Ripeti e Salta passano oltre, come se non ci fosse.",
     "fleet.on": "s\xEC",
     "fleet.off": "no",
     "fleet.repeatNext": "Inviata. Passo a {body}\u2026",
@@ -326,6 +328,8 @@
     "fleet.ok.expedition": "Spedizione pronta: {ships} navi per {target} di carico. Premi Avanti e Invia flotta",
     "fleet.err.noShips": "Nessuna nave disponibile oltre la riserva",
     "fleet.err.noResources": "Nessuna risorsa da trasportare oltre la riserva",
+    "fleet.err.noSkip": "Nessun giro di raccolta in corso da far avanzare",
+    "fleet.skipOffer": "premi Salta per passare a {body}",
     "fleet.err.noExpSlots": "Nessuno slot spedizione libero",
     "fleet.err.noMoon": "Questo pianeta non ha una luna",
     "fleet.err.noDest": "Scegli prima la destinazione",
@@ -861,6 +865,8 @@
     "fleet.btn.collect": "Raccolta spedizioni",
     "fleet.btn.collectTransport": "Raccolta: trasporto",
     "fleet.btn.collectDeploy": "Raccolta: schieramento",
+    "fleet.btn.skip": "Salta",
+    "fleet.tip.skip": "Qui non c'\xE8 niente da portare: apre il prossimo pianeta o luna del giro con la stessa azione gi\xE0 pronta. Da qui non parte nulla.",
     "fleet.tip.collect": "Per chi fa spedizioni da pi\xF9 lune: porta navi e risorse in eccesso alla luna principale, rispettando le riserve",
     "fleet.collect.transport": "1 \xB7 Trasporto",
     "fleet.collect.deploy": "2 \xB7 Schieramento",
@@ -1042,6 +1048,8 @@
     "fleet.repeat": "After sending, open the next planet or moon already prepared",
     "fleet.repeatHint": "Works for Moon, Transport, Deploy, Expedition and Fleetsave. Sending is always your click; the round stops when it gets back to the first.",
     "fleet.repeatShort": "Repeat",
+    "fleet.rule.skip": "Skip in the round",
+    "fleet.rule.skipHint": "This planet or moon only: Repeat and Skip pass over it, as if it were not there.",
     "fleet.on": "on",
     "fleet.off": "off",
     "fleet.repeatNext": "Sent. Moving to {body}\u2026",
@@ -1062,6 +1070,8 @@
     "fleet.ok.expedition": "Expedition ready: {ships} ships for {target} cargo. Press Next and Send fleet",
     "fleet.err.noShips": "No ships available beyond the reserve",
     "fleet.err.noResources": "No resources to move beyond the reserve",
+    "fleet.err.noSkip": "No collection round going on to move forward",
+    "fleet.skipOffer": "press Skip to move on to {body}",
     "fleet.err.noExpSlots": "No free expedition slot",
     "fleet.err.noMoon": "This planet has no moon",
     "fleet.err.noDest": "Pick a destination first",
@@ -1597,6 +1607,8 @@
     "fleet.btn.collect": "Expedition collection",
     "fleet.btn.collectTransport": "Collection: transport",
     "fleet.btn.collectDeploy": "Collection: deploy",
+    "fleet.btn.skip": "Skip",
+    "fleet.tip.skip": "Nothing to move here: opens the next planet or moon of the round with the same action ready. Nothing leaves from here.",
     "fleet.tip.collect": "For expeditions from several moons: brings the spare ships and resources to the main moon, keeping the reserves",
     "fleet.collect.transport": "1 \xB7 Transport",
     "fleet.collect.deploy": "2 \xB7 Deploy",
@@ -1778,6 +1790,8 @@
     "fleet.repeat": "Apr\xE8s l'envoi, ouvrir la plan\xE8te ou lune suivante d\xE9j\xE0 pr\xEAte",
     "fleet.repeatHint": "Pour Lune, Transport, Stationner, Exp\xE9dition et Fleetsave. L'envoi reste votre clic ; le tour s'arr\xEAte au retour au premier.",
     "fleet.repeatShort": "R\xE9p\xE9ter",
+    "fleet.rule.skip": "Passer dans le tour",
+    "fleet.rule.skipHint": "Cette plan\xE8te ou lune seulement : R\xE9p\xE9ter et Passer la sautent, comme si elle n'existait pas.",
     "fleet.on": "oui",
     "fleet.off": "non",
     "fleet.repeatNext": "Envoy\xE9e. Passage \xE0 {body}\u2026",
@@ -1798,6 +1812,8 @@
     "fleet.ok.expedition": "Exp\xE9dition pr\xEAte : {ships} vaisseaux pour {target} de fret. Suivant puis Envoyer",
     "fleet.err.noShips": "Aucun vaisseau disponible au-del\xE0 de la r\xE9serve",
     "fleet.err.noResources": "Aucune ressource \xE0 transporter au-del\xE0 de la r\xE9serve",
+    "fleet.err.noSkip": "Aucun tour de collecte en cours \xE0 faire avancer",
+    "fleet.skipOffer": "appuyez sur Passer pour aller \xE0 {body}",
     "fleet.err.noExpSlots": "Aucun emplacement d'exp\xE9dition libre",
     "fleet.err.noMoon": "Cette plan\xE8te n'a pas de lune",
     "fleet.err.noDest": "Choisissez d'abord la destination",
@@ -2333,6 +2349,8 @@
     "fleet.btn.collect": "Collecte des exp\xE9ditions",
     "fleet.btn.collectTransport": "Collecte : transport",
     "fleet.btn.collectDeploy": "Collecte : stationnement",
+    "fleet.btn.skip": "Passer",
+    "fleet.tip.skip": "Rien \xE0 d\xE9placer ici : ouvre la plan\xE8te ou la lune suivante du tour avec la m\xEAme action pr\xEAte. Rien ne part d'ici.",
     "fleet.tip.collect": "Pour les exp\xE9ditions depuis plusieurs lunes : am\xE8ne vaisseaux et ressources en trop sur la lune principale, en gardant les r\xE9serves",
     "fleet.collect.transport": "1 \xB7 Transport",
     "fleet.collect.deploy": "2 \xB7 Stationnement",
@@ -2514,6 +2532,8 @@
     "fleet.repeat": "Nach dem Senden den n\xE4chsten Planeten oder Mond vorbereitet \xF6ffnen",
     "fleet.repeatHint": "F\xFCr Mond, Transport, Stationieren, Expedition und Fleetsave. Senden bleibt dein Klick; die Runde endet beim ersten.",
     "fleet.repeatShort": "Wiederholen",
+    "fleet.rule.skip": "In der Runde \xFCberspringen",
+    "fleet.rule.skipHint": "Nur dieser Planet oder Mond: Wiederholen und \xDCberspringen lassen ihn aus, als g\xE4be es ihn nicht.",
     "fleet.on": "an",
     "fleet.off": "aus",
     "fleet.repeatNext": "Gesendet. Weiter zu {body}\u2026",
@@ -2534,6 +2554,8 @@
     "fleet.ok.expedition": "Expedition bereit: {ships} Schiffe f\xFCr {target} Ladung. Weiter und Senden",
     "fleet.err.noShips": "Keine Schiffe \xFCber die Reserve hinaus",
     "fleet.err.noResources": "Keine Rohstoffe \xFCber die Reserve hinaus",
+    "fleet.err.noSkip": "Keine laufende Sammelrunde zum Weiterschalten",
+    "fleet.skipOffer": "\xDCberspringen dr\xFCcken, um zu {body} zu wechseln",
     "fleet.err.noExpSlots": "Kein freier Expeditionsslot",
     "fleet.err.noMoon": "Dieser Planet hat keinen Mond",
     "fleet.err.noDest": "Zuerst ein Ziel w\xE4hlen",
@@ -3069,6 +3091,8 @@
     "fleet.btn.collect": "Expeditionssammlung",
     "fleet.btn.collectTransport": "Sammlung: Transport",
     "fleet.btn.collectDeploy": "Sammlung: Stationieren",
+    "fleet.btn.skip": "\xDCberspringen",
+    "fleet.tip.skip": "Hier gibt es nichts zu bewegen: \xF6ffnet den n\xE4chsten Planeten oder Mond der Runde mit derselben Aktion vorbereitet. Von hier startet nichts.",
     "fleet.tip.collect": "F\xFCr Expeditionen von mehreren Monden: bringt \xFCbersch\xFCssige Schiffe und Rohstoffe zum Hauptmond, Reserven bleiben",
     "fleet.collect.transport": "1 \xB7 Transport",
     "fleet.collect.deploy": "2 \xB7 Stationieren",
@@ -7226,7 +7250,8 @@ td.spark-cell { width: 90px; }
     loadOrder: ["deuterium", "crystal", "metal"],
     sendMode: null,
     sendTarget: null,
-    sendPick: { metal: null, crystal: null, deuterium: null }
+    sendPick: { metal: null, crystal: null, deuterium: null },
+    skipBodies: []
   };
   function settingsFrom(stored) {
     const { reserveOn, ...rest } = stored;
@@ -7367,7 +7392,7 @@ td.spark-cell { width: 90px; }
     for (let k = 1; k < ids.length; k++) {
       const step = opts.backwards ? -k : k;
       const id = ids[((i + step) % ids.length + ids.length) % ids.length];
-      if (id !== opts.skip) return id;
+      if (id !== opts.skip && !opts.skipIds?.includes(id)) return id;
     }
     return null;
   }
@@ -7392,6 +7417,8 @@ td.spark-cell { width: 90px; }
     cargo: '<path d="M2.8 13h5l1.6 2.6h5.2l1.6-2.6h5v8.2H2.8z"/><path d="M10.4 2.6h3.2v5.2h3L12 12.6 7.4 7.8h3z" opacity=".75"/>',
     repeat: `<path d="M4 11.5V9.8A3.6 3.6 0 0 1 7.6 6.2H16" ${LINE} stroke-width="2.4"/><path d="M15.2 2.4 21 6.2l-5.8 3.8z"/><path d="M20 12.5v1.7a3.6 3.6 0 0 1-3.6 3.6H8" ${LINE} stroke-width="2.4"/><path d="M8.8 14 3 17.8l5.8 3.8z"/>`,
     settings: '<path fill-rule="evenodd" d="M12 4.6a7.4 7.4 0 1 1 0 14.8 7.4 7.4 0 0 1 0-14.8zm0 4.3a3.1 3.1 0 1 0 0 6.2 3.1 3.1 0 0 0 0-6.2z"/>' + [0, 45, 90, 135, 180, 225, 270, 315].map((a) => `<rect x="10.4" y="1.4" width="3.2" height="4.2" rx=".8" transform="rotate(${a} 12 12)"/>`).join(""),
+    // Skip ahead: two arrowheads into a bar.
+    skip: '<path d="M2.5 5.2 10.6 12l-8.1 6.8z" opacity=".55"/><path d="M10 5.2 18.1 12 10 18.8z"/><path d="M18.6 5h2.6v14h-2.6z"/>',
     last: '<path fill-rule="evenodd" d="M12 2.5a9.5 9.5 0 1 1 0 19 9.5 9.5 0 0 1 0-19zM11 6.5v6.4l4.4 2.6.9-1.5-3.5-2V6.5z"/>',
     rules: '<rect x="3" y="6" width="18" height="2.4" rx="1.2" opacity=".5"/><circle cx="15.5" cy="7.2" r="3.2"/><rect x="3" y="15.6" width="18" height="2.4" rx="1.2" opacity=".5"/><circle cx="8.5" cy="16.8" r="3.2"/>',
     caret: '<path d="M6.5 9.5h11L12 15.6z"/>',
@@ -7424,6 +7451,7 @@ td.spark-cell { width: 90px; }
     { id: "fleet.collectDeploy", key: "v", label: "fleet.btn.collectDeploy", group: "fleet", glyph: { fleet: "collect" } },
     { id: "fleet.expedition", key: "x", label: "fleet.btn.expedition", group: "fleet", glyph: { fleet: "expedition" } },
     { id: "fleet.fleetsave", key: "e", label: "fleet.btn.fleetsave", group: "fleet", glyph: { fleet: "fleetsave" } },
+    { id: "fleet.skip", key: "n", label: "fleet.btn.skip", group: "fleet", glyph: { fleet: "skip" } },
     { id: "fleet.last", key: "p", label: "fleet.btn.last", group: "fleet", glyph: { fleet: "last" } },
     { id: "galaxy.left", key: "ArrowLeft", label: "shortcut.galaxyLeft", group: "galaxy", glyph: { core: "back" }, fixed: true, touchOnly: true },
     { id: "galaxy.right", key: "ArrowRight", label: "shortcut.galaxyRight", group: "galaxy", glyph: { core: "next" }, fixed: true, touchOnly: true },
@@ -10519,9 +10547,10 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (state.dest) u.searchParams.set("futdest", String(state.dest));
     return u.toString();
   }
-  function nextInRound(state, bodyId, list) {
+  function nextInRound(state, bodyId, list, skipIds = []) {
     const next = nextBody(list, bodyId, {
       skip: state.mode === "collect" || state.mode === "collectDeploy" || state.mode === "plan" ? state.dest : null,
+      skipIds: skipIds.filter((id) => id !== state.first),
       onlyWithMoon: state.mode === "moon"
     });
     return next === null || next === state.first ? null : next;
@@ -10596,6 +10625,7 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fsecond { display: inline-flex; gap: 4px; margin-left: 6px; padding-left: 10px; border-left: 1px solid var(--line); }
 .fut-fsecond .fut-fact { background: none; border-color: var(--line); color: var(--mute); }
 .fut-fsecond .fut-fact:hover { background: var(--tile); border-color: #47607D; color: var(--ico-hi); }
+.fut-fskip[hidden] { display: none; }
 /* "Opens a list" mark, in the corner where the others have their key. */
 .fut-fact .more-mark { position: absolute; right: 3px; bottom: 3px; width: 0; height: 0; border-left: 5px solid transparent; border-bottom: 5px solid currentColor; opacity: 0.7; }
 
@@ -10794,6 +10824,7 @@ input[type="checkbox"] { accent-color: var(--accent); }
   var FLEETSAVE_MISSIONS = [3, 4, 6, 8, 15, 5, 1];
   var pageState = /* @__PURE__ */ new WeakMap();
   var REPEATABLE = ["moon", "collect", "collectDeploy", "expedition", "fleetsave", "plan"];
+  var SKIPPABLE = ["moon", "collect", "collectDeploy"];
   function el4(doc, tag, className = "", text) {
     const node = doc.createElement(tag);
     if (className) node.className = className;
@@ -11616,9 +11647,31 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       if (fd.currentPage !== "fleet1") return say(t("fleet.err.page1"), true);
       void whenTargetIdle(fd).then(() => fn(fd));
     };
+    let drawSkip = () => {
+    };
+    let skipTile = null;
     const begin = (mode, dest = null) => {
       const prev = state.active;
       state.active = REPEATABLE.includes(mode) ? { mode, first: prev && prev.mode === mode ? prev.first : o.bodyId, dest } : null;
+      drawSkip();
+    };
+    const skipTarget = () => {
+      const a = state.active;
+      if (!a || !SKIPPABLE.includes(a.mode)) return null;
+      return nextInRound(a, o.bodyId, o.bodies, loadSettings(o.store).skipBodies);
+    };
+    const skip = () => {
+      const a = state.active;
+      const next = skipTarget();
+      if (!a || next === null) return say(t("fleet.err.noSkip"), true);
+      navigate(repeatUrl(href, next, a));
+    };
+    const reportRound = (r) => {
+      report(r, "fleet.ok.cargo");
+      const next = r.ok ? null : skipTarget();
+      if (next === null) return;
+      say(`${t(r.reason ?? "fleet.err.noShips")} \xB7 ${t("fleet.skipOffer", { body: shortLabel(o, next) })}`, true);
+      skipTile?.focus();
     };
     const run = {
       moon: () => withDispatcher((fd) => {
@@ -11626,19 +11679,19 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         const target = here?.moonId ? bodyTarget(o.bodies, here.moonId) : null;
         if (!target) return say(t("fleet.err.noMoon"), true);
         begin("moon");
-        report(prepareTransport(fd, doc, profile, settings, target), "fleet.ok.cargo");
+        reportRound(prepareTransport(fd, doc, profile, settings, target));
       }),
       collect: (dest) => withDispatcher((fd) => {
         const target = dest ? bodyTarget(o.bodies, dest) : null;
         if (!dest || !target) return say(t("fleet.err.noDest"), true);
         begin("collect", dest);
-        report(prepareTransport(fd, doc, profile, settings, target), "fleet.ok.cargo");
+        reportRound(prepareTransport(fd, doc, profile, settings, target));
       }),
       collectDeploy: (dest) => withDispatcher((fd) => {
         const target = dest ? bodyTarget(o.bodies, dest) : null;
         if (!dest || !target) return say(t("fleet.err.noDest"), true);
         begin("collectDeploy", dest);
-        report(prepareDeploy(fd, doc, profile, settings, target), "fleet.ok.cargo");
+        reportRound(prepareDeploy(fd, doc, profile, settings, target));
       }),
       // Plain game actions: destination and resources from the row on page 1, read when pressed.
       // Plain game actions: a switch that stays on; CL / CP below then prepare the fleet.
@@ -11751,6 +11804,15 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       if (here?.moonId) secondary.append(act2("moon", "fleet.moon", t("fleet.btn.moon"), to(here.moonId), t("fleet.tip.moon"), () => run.moon()));
       secondary.append(collect);
       tiles.append(secondary);
+      const skipSlot = el4(doc, "span", "fut-fsecond fut-fskip");
+      drawSkip = () => {
+        const next = skipTarget();
+        skipTile = next === null ? null : act2("skip", "fleet.skip", t("fleet.btn.skip"), to(next), t("fleet.tip.skip"), skip);
+        skipSlot.replaceChildren(...skipTile ? [skipTile] : []);
+        skipSlot.hidden = !skipTile;
+      };
+      drawSkip();
+      tiles.append(skipSlot);
       registerActions(doc, o.store, t, {
         ...here?.moonId ? { "fleet.moon": () => run.moon() } : {},
         "fleet.transport": () => run.transport(),
@@ -11759,7 +11821,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         "fleet.collectDeploy": favRun.collectDeploy,
         "fleet.expedition": () => run.expedition(),
         "fleet.fleetsave": () => run.fleetsave(),
-        "fleet.last": () => run.last()
+        "fleet.last": () => run.last(),
+        "fleet.skip": skip
       });
       const rules = el4(doc, "div", "fut-frules");
       rules.setAttribute("role", "group");
@@ -11780,6 +11843,15 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         sw("food", t("fleet.foodShort"), t("fleet.foodHint"), "ignoreFood", () => applyFood(o.store)),
         sw("repeat", t("fleet.repeatShort"), t("fleet.repeatHint"), "repeat")
       );
+      const skipped = settings.skipBodies.includes(o.bodyId);
+      const skipSw = ruleSwitch(doc, "skip", t("fleet.rule.skip"), skipped, () => {
+        const now = loadSettings(o.store);
+        const others = now.skipBodies.filter((id) => id !== o.bodyId);
+        o.store.set(SETTINGS_KEY, { ...now, skipBodies: skipped ? others : [...others, o.bodyId] });
+        redraw();
+      });
+      out.peek(skipSw, `${t("fleet.rule.skip")}: ${skipped ? t("fleet.on") : t("fleet.off")}.`, t("fleet.rule.skipHint"));
+      rules.append(skipSw);
       const edit = el4(doc, "span", "fut-fedit");
       const tool = (ico, label, hint, onClick, cls = "") => {
         const b = el4(doc, "button", `fut-ftool ${cls}`.trim());
@@ -11845,13 +11917,13 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           const done = need.metal + need.crystal + need.deuterium <= 0;
           current3.o.store.set(DELIVERY_KEY, done ? null : { ...d, need });
           if (done) return false;
-          const nextBody2 = nextInRound(current3.active, current3.o.bodyId, current3.o.bodies);
+          const nextBody2 = nextInRound(current3.active, current3.o.bodyId, current3.o.bodies, loadSettings(current3.o.store).skipBodies);
           if (nextBody2 === null) return false;
           navigate(repeatUrl(href, nextBody2, current3.active));
           return true;
         }
         if (!current3?.active || !loadSettings(current3.o.store).repeat) return false;
-        const next = nextInRound(current3.active, current3.o.bodyId, current3.o.bodies);
+        const next = nextInRound(current3.active, current3.o.bodyId, current3.o.bodies, loadSettings(current3.o.store).skipBodies);
         if (next === null) return false;
         navigate(repeatUrl(href, next, current3.active));
         return true;
