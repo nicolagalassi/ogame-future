@@ -1092,6 +1092,14 @@ export function renderFleetTools(o: FleetOptions): void {
   // Which button prepared the fleet on this page, for "Ripeti". Kept per document so a
   // redraw (after changing a setting) does not forget it.
   const incoming = readRepeatParams(href);
+  // Opened by "Ripeti": until the fleet is prepared here, Invio / Avanti spammed after the previous
+  // send must not reach the game with an empty or half-filled form. Released as soon as the
+  // preparation is done (or failed), at the latest after a few seconds.
+  let releaseHold = () => {};
+  if (incoming && fleet1 && !doc.documentElement.dataset.futAutoRun && !doc.documentElement.dataset.futHold) {
+    doc.documentElement.dataset.futHold = '1';
+    releaseHold = holdContinue(doc);
+  }
   const state = pageState.get(doc) ?? { active: incoming, o };
   state.o = o;
   pageState.set(doc, state);
@@ -1104,11 +1112,19 @@ export function renderFleetTools(o: FleetOptions): void {
       : say(t(r.reason ?? 'fleet.err.noShips'), true);
   const withDispatcher = (fn: (fd: FleetDispatcher) => void) => {
     const fd = getDispatcher();
-    if (!fd) return say(t('fleet.err.notReady'), true);
-    if (fd.currentPage !== 'fleet1') return say(t('fleet.err.page1'), true);
+    if (!fd || fd.currentPage !== 'fleet1') {
+      releaseHold();
+      return say(t(fd ? 'fleet.err.page1' : 'fleet.err.notReady'), true);
+    }
     // The game checks the target on its own (e.g. right after the page loads): when that
     // answer lands it rewrites the target, so we prepare only once it is back.
-    void whenTargetIdle(fd).then(() => fn(fd));
+    void whenTargetIdle(fd).then(() => {
+      try {
+        fn(fd);
+      } finally {
+        releaseHold();
+      }
+    });
   };
   // The "Salta" tile, drawn in the page 1 bar; shown while a skippable round is on.
   let drawSkip = () => {};
@@ -1436,6 +1452,39 @@ export function renderFleetTools(o: FleetOptions): void {
       else doc.defaultView?.addEventListener('load', () => setTimeout(go, 0), { once: true });
     }
   });
+}
+
+/**
+ * Swallows Invio and clicks on the game's Avanti / Invia flotta until the returned function is called
+ * (or `maxMs` has passed). It only holds back the player's own input for a moment: no game action.
+ */
+export function holdContinue(doc: Document, maxMs = 8000): () => void {
+  const win = doc.defaultView;
+  if (!win) return () => {};
+  const keys = (e: KeyboardEvent) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+  };
+  const clicks = (e: MouseEvent) => {
+    const t = e.target as Element | null;
+    if (!t?.closest?.('#continueToFleet2, #sendFleet')) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+  };
+  const types = ['keydown', 'keypress', 'keyup'] as const;
+  types.forEach((type) => win.addEventListener(type, keys, true));
+  win.addEventListener('click', clicks, true);
+  let done = false;
+  const release = () => {
+    if (done) return;
+    done = true;
+    types.forEach((type) => win.removeEventListener(type, keys, true));
+    win.removeEventListener('click', clicks, true);
+    delete doc.documentElement.dataset.futHold;
+  };
+  win.setTimeout(release, maxMs);
+  return release;
 }
 
 /**
