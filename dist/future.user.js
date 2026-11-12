@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.48
+// @version      0.3.49
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -11648,6 +11648,12 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const anchor2 = fleet2?.querySelector("#buttonz") ?? null;
     if (fleet2) enableOriginAutofill(doc);
     const incoming = readRepeatParams(href);
+    let releaseHold = () => {
+    };
+    if (incoming && fleet1 && !doc.documentElement.dataset.futAutoRun && !doc.documentElement.dataset.futHold) {
+      doc.documentElement.dataset.futHold = "1";
+      releaseHold = holdContinue(doc);
+    }
     const state = pageState.get(doc) ?? { active: incoming, o };
     state.o = o;
     pageState.set(doc, state);
@@ -11656,9 +11662,17 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const report = (r, okKey, vars = {}) => r.ok ? say(t(okKey, { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), ...vars })) : say(t(r.reason ?? "fleet.err.noShips"), true);
     const withDispatcher = (fn) => {
       const fd = getDispatcher();
-      if (!fd) return say(t("fleet.err.notReady"), true);
-      if (fd.currentPage !== "fleet1") return say(t("fleet.err.page1"), true);
-      void whenTargetIdle(fd).then(() => fn(fd));
+      if (!fd || fd.currentPage !== "fleet1") {
+        releaseHold();
+        return say(t(fd ? "fleet.err.page1" : "fleet.err.notReady"), true);
+      }
+      void whenTargetIdle(fd).then(() => {
+        try {
+          fn(fd);
+        } finally {
+          releaseHold();
+        }
+      });
     };
     let drawSkip = () => {
     };
@@ -11951,6 +11965,35 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         else doc.defaultView?.addEventListener("load", () => setTimeout(go, 0), { once: true });
       }
     });
+  }
+  function holdContinue(doc, maxMs = 8e3) {
+    const win = doc.defaultView;
+    if (!win) return () => {
+    };
+    const keys = (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    };
+    const clicks = (e) => {
+      const t = e.target;
+      if (!t?.closest?.("#continueToFleet2, #sendFleet")) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    };
+    const types = ["keydown", "keypress", "keyup"];
+    types.forEach((type) => win.addEventListener(type, keys, true));
+    win.addEventListener("click", clicks, true);
+    let done = false;
+    const release = () => {
+      if (done) return;
+      done = true;
+      types.forEach((type) => win.removeEventListener(type, keys, true));
+      win.removeEventListener("click", clicks, true);
+      delete doc.documentElement.dataset.futHold;
+    };
+    win.setTimeout(release, maxMs);
+    return release;
   }
   function recordShipment(o, fd) {
     if (fd.mission !== 3 && fd.mission !== 4) return;

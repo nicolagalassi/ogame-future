@@ -825,3 +825,25 @@ describe('skip in the collection round', () => {
     expect(doc.querySelector<HTMLElement>('.fut-fskip')!.hidden).toBe(true);
   });
 });
+
+describe('page opened by Ripeti', () => {
+  it('holds Invio and Avanti until the fleet is prepared, then lets them through', async () => {
+    const { holdContinue } = await import('../src/modules/fleet/index');
+    document.body.innerHTML = '<button id="continueToFleet2"></button>';
+    const seen: string[] = [];
+    const onKey = (e: KeyboardEvent) => seen.push(e.key);
+    const onClick = () => seen.push('click');
+    document.addEventListener('keydown', onKey);
+    document.getElementById('continueToFleet2')!.addEventListener('click', onClick);
+    const release = holdContinue(document);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'q', bubbles: true }));
+    document.getElementById('continueToFleet2')!.click();
+    expect(seen).toEqual(['q']);
+    release();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    document.getElementById('continueToFleet2')!.click();
+    expect(seen).toEqual(['q', 'Enter', 'click']);
+    document.removeEventListener('keydown', onKey);
+  });
+});
