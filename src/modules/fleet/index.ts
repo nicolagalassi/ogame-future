@@ -100,7 +100,8 @@ const STYLE_ID = 'fut-fleet-style';
 const MODAL_ID = 'fut-fleet-modal';
 /** Missions offered for fleetsave, in the game's order codes. */
 export const FLEETSAVE_MISSIONS = [3, 4, 6, 8, 15, 5, 1];
-const pageState = new WeakMap<Document, { active: RepeatState | null; o: FleetOptions }>();
+/** Per page: the round in progress, the options, and the speed (%) Future's last preparation set here. */
+const pageState = new WeakMap<Document, { active: RepeatState | null; o: FleetOptions; prepared?: number }>();
 const REPEATABLE: FleetMode[] = ['moon', 'collect', 'collectDeploy', 'expedition', 'fleetsave', 'plan'];
 /** Rounds that offer "Salta" (nothing worth moving here: on to the next body). */
 const SKIPPABLE: FleetMode[] = ['moon', 'collect', 'collectDeploy'];
@@ -1121,6 +1122,7 @@ export function renderFleetTools(o: FleetOptions): void {
     void whenTargetIdle(fd).then(() => {
       try {
         fn(fd);
+        state.prepared = Math.round(fd.speedPercent * 10);
       } finally {
         releaseHold();
       }
@@ -1131,9 +1133,12 @@ export function renderFleetTools(o: FleetOptions): void {
   let skipTile: HTMLButtonElement | null = null;
   const begin = (mode: FleetMode, dest: number | null = null) => {
     const prev = state.active;
-    state.active = REPEATABLE.includes(mode) ? { mode, first: prev && prev.mode === mode ? prev.first : o.bodyId, dest } : null;
+    const same = prev && prev.mode === mode;
+    state.active = REPEATABLE.includes(mode) ? { mode, first: same ? prev.first : o.bodyId, dest, ...(same && prev.speed ? { speed: prev.speed } : {}) } : null;
     drawSkip();
   };
+  /** Fleetsave round: the speed the player chose for the rest of it, if any (in place of the preset, only for this round). */
+  const roundSpeed = (): number | undefined => state.active?.speed;
   /** The body "Salta" opens: the next of the round, past the bodies marked to skip; null = none. */
   const skipTarget = (): number | null => {
     const a = state.active;
@@ -1199,7 +1204,7 @@ export function renderFleetTools(o: FleetOptions): void {
       withDispatcher((fd) => {
         if (!profile.save) return say(t('fleet.err.noFleetsave'), true);
         begin('fleetsave');
-        report(prepareFleetsave(fd, doc, profile, profile.save), 'fleet.ok.cargo');
+        report(prepareFleetsave(fd, doc, profile, roundSpeed() ? { ...profile.save, speed: roundSpeed()! } : profile.save), 'fleet.ok.cargo');
       }),
     plan: (dest) =>
       withDispatcher((fd) => {
@@ -1392,9 +1397,49 @@ export function renderFleetTools(o: FleetOptions): void {
     });
     out2.peek(load, t('fleet.resMinusReserve'), t('fleet.tip.cargo'));
     const row = el(doc, 'div', 'fut-frow');
-    row.append(load, out2.box);
+    const ask = el(doc, 'span', 'fut-fask');
+    ask.hidden = true;
+    row.append(load, out2.box, ask);
     bar.append(row);
     anchor2.before(bar);
+    // Speed changed by hand during a fleetsave round (only fleetsave, Nicola): offer it for the next
+    // bodies of this round only.
+    // The answer lives in the round's URL (futspeed), the preset in the settings stays as it is.
+    // COMPLIANCE: a question in our bar; nothing is sent, the next pages are prepared as before.
+    const offerSpeed = () => {
+      const box = doc.querySelector<HTMLElement>('.fut-fask');
+      const fd = getDispatcher();
+      const a = state.active;
+      if (!box) return;
+      const pct = fd ? Math.round(fd.speedPercent * 10) : 0;
+      const current = a?.speed ?? state.prepared;
+      const next = a ? nextInRound(a, o.bodyId, o.bodies, loadSettings(o.store).skipBodies) : null;
+      if (!fd || !a || a.mode !== 'fleetsave' || !loadSettings(o.store).repeat || current === undefined || pct === current || next === null) {
+        box.hidden = true;
+        return;
+      }
+      const yes = el(doc, 'button', 'fut-fask-b yes', t('fleet.speedAsk.yes'));
+      const no = el(doc, 'button', 'fut-fask-b', t('fleet.speedAsk.no'));
+      yes.type = no.type = 'button';
+      yes.addEventListener('click', (e) => {
+        e.preventDefault();
+        state.active = { ...a, speed: pct };
+        box.hidden = true;
+        out2.say(t('fleet.speedAsk.done', { pct }));
+      });
+      no.addEventListener('click', (e) => {
+        e.preventDefault();
+        box.hidden = true;
+      });
+      box.replaceChildren(el(doc, 'span', 'fut-fask-q', t('fleet.speedAsk.q', { pct })), yes, no);
+      box.title = t('fleet.speedAsk.hint', { pct: current });
+      box.hidden = false;
+    };
+    const speedBar = doc.getElementById('speedPercentage');
+    if (speedBar && !speedBar.dataset.futAsk) {
+      speedBar.dataset.futAsk = '1';
+      speedBar.addEventListener('click', () => setTimeout(offerSpeed, 0));
+    }
   }
   // Touch bar on both pages (Avanti / Invia), even when no action is on a key here.
   registerActions(doc, o.store, t, {});

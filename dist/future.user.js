@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.55
+// @version      0.3.56
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -306,6 +306,11 @@
     "fleet.repeat": "Dopo l'invio passa al pianeta o luna successivo, gi\xE0 pronto",
     "fleet.repeatHint": "Vale per Luna, Trasporto, Schiera, Spedizione e Fleetsave. L'invio resta sempre un tuo click; il giro si ferma quando torna al primo.",
     "fleet.repeatShort": "Ripeti",
+    "fleet.speedAsk.q": "Velocit\xE0 {pct}% anche per i prossimi fleetsave del giro?",
+    "fleet.speedAsk.yes": "S\xEC",
+    "fleet.speedAsk.no": "No",
+    "fleet.speedAsk.done": "I prossimi fleetsave del giro partiranno al {pct}%. Il preset generale non cambia.",
+    "fleet.speedAsk.hint": "Il giro finora usa il {pct}%. Vale solo per questo giro: il preset nelle impostazioni resta com'\xE8.",
     "fleet.rule.skip": "Salta nel giro",
     "fleet.rule.skipHint": "Solo questo pianeta o luna: Ripeti e Salta passano oltre, come se non ci fosse.",
     "fleet.on": "s\xEC",
@@ -1058,6 +1063,11 @@
     "fleet.repeat": "After sending, open the next planet or moon already prepared",
     "fleet.repeatHint": "Works for Moon, Transport, Deploy, Expedition and Fleetsave. Sending is always your click; the round stops when it gets back to the first.",
     "fleet.repeatShort": "Repeat",
+    "fleet.speedAsk.q": "Use {pct}% speed for the next fleetsaves of the round too?",
+    "fleet.speedAsk.yes": "Yes",
+    "fleet.speedAsk.no": "No",
+    "fleet.speedAsk.done": "The next fleetsaves of the round will fly at {pct}%. The general preset does not change.",
+    "fleet.speedAsk.hint": "The round uses {pct}% so far. Only for this round: the preset in the settings stays as it is.",
     "fleet.rule.skip": "Skip in the round",
     "fleet.rule.skipHint": "This planet or moon only: Repeat and Skip pass over it, as if it were not there.",
     "fleet.on": "on",
@@ -1810,6 +1820,11 @@
     "fleet.repeat": "Apr\xE8s l'envoi, ouvrir la plan\xE8te ou lune suivante d\xE9j\xE0 pr\xEAte",
     "fleet.repeatHint": "Pour Lune, Transport, Stationner, Exp\xE9dition et Fleetsave. L'envoi reste votre clic ; le tour s'arr\xEAte au retour au premier.",
     "fleet.repeatShort": "R\xE9p\xE9ter",
+    "fleet.speedAsk.q": "Vitesse {pct}% aussi pour les fleetsaves suivants de la tourn\xE9e ?",
+    "fleet.speedAsk.yes": "Oui",
+    "fleet.speedAsk.no": "Non",
+    "fleet.speedAsk.done": "Les fleetsaves suivants de la tourn\xE9e partiront \xE0 {pct}%. Le pr\xE9r\xE9glage g\xE9n\xE9ral ne change pas.",
+    "fleet.speedAsk.hint": "La tourn\xE9e utilise {pct}% jusqu'ici. Seulement pour cette tourn\xE9e : le pr\xE9r\xE9glage des param\xE8tres reste tel quel.",
     "fleet.rule.skip": "Passer dans le tour",
     "fleet.rule.skipHint": "Cette plan\xE8te ou lune seulement : R\xE9p\xE9ter et Passer la sautent, comme si elle n'existait pas.",
     "fleet.on": "oui",
@@ -2562,6 +2577,11 @@
     "fleet.repeat": "Nach dem Senden den n\xE4chsten Planeten oder Mond vorbereitet \xF6ffnen",
     "fleet.repeatHint": "F\xFCr Mond, Transport, Stationieren, Expedition und Fleetsave. Senden bleibt dein Klick; die Runde endet beim ersten.",
     "fleet.repeatShort": "Wiederholen",
+    "fleet.speedAsk.q": "Geschwindigkeit {pct}% auch f\xFCr die n\xE4chsten Fleetsaves der Runde?",
+    "fleet.speedAsk.yes": "Ja",
+    "fleet.speedAsk.no": "Nein",
+    "fleet.speedAsk.done": "Die n\xE4chsten Fleetsaves der Runde fliegen mit {pct}%. Die allgemeine Vorgabe bleibt.",
+    "fleet.speedAsk.hint": "Die Runde nutzt bisher {pct}%. Nur f\xFCr diese Runde: die Vorgabe in den Einstellungen bleibt unver\xE4ndert.",
     "fleet.rule.skip": "In der Runde \xFCberspringen",
     "fleet.rule.skipHint": "Nur dieser Planet oder Mond: Wiederholen und \xDCberspringen lassen ihn aus, als g\xE4be es ihn nicht.",
     "fleet.on": "an",
@@ -10704,7 +10724,10 @@ table.queues td.acts { width: 1%; text-align: right; }
     const first = Number(p.get("futfirst"));
     if (!mode || !Number.isFinite(first) || first <= 0) return null;
     const dest = Number(p.get("futdest"));
-    return { mode, first, dest: Number.isFinite(dest) && dest > 0 ? dest : null };
+    const speed = Number(p.get("futspeed"));
+    const state = { mode, first, dest: Number.isFinite(dest) && dest > 0 ? dest : null };
+    if (Number.isInteger(speed) && speed >= 10 && speed <= 100) state.speed = speed;
+    return state;
   }
   function repeatUrl(base, cp, state) {
     const u = new URL(base);
@@ -10715,6 +10738,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     u.searchParams.set("futmode", state.mode);
     u.searchParams.set("futfirst", String(state.first));
     if (state.dest) u.searchParams.set("futdest", String(state.dest));
+    if (state.speed) u.searchParams.set("futspeed", String(state.speed));
     return u.toString();
   }
   function nextInRound(state, bodyId, list, skipIds = []) {
@@ -10831,6 +10855,14 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fread { flex: 1; min-width: 0; height: 30px; display: flex; align-items: center; }
 .fut-fread span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
 .fut-fread .tip { color: var(--mute); }
+/* Speed changed during a round: "also for the next ones?", with its two answers. */
+.fut-fask { flex: none; display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 4px 0 10px; border: 1px solid #6B5A1E; border-radius: 8px; background: rgba(245,181,71,0.08); }
+.fut-fask[hidden] { display: none; }
+.fut-fask-q { color: #F5D9A0; white-space: nowrap; }
+.fut-fask-b { height: 22px; padding: 0 10px; border: 1px solid #2A3B55; border-radius: 5px; background: #0D1522; color: #C9D4E2; font: 12px Arial, Helvetica, sans-serif; cursor: pointer; }
+.fut-fask-b.yes { border-color: #F5B547; color: #F5B547; font-weight: 700; }
+.fut-fask-b:hover { color: #fff; border-color: #4FD1E8; }
+.fut-fask-b:focus-visible { outline: 1px solid #4FD1E8; outline-offset: 1px; }
 .fut-fread .tip b { color: var(--hi); }
 .fut-fread .tip:empty { display: none; }
 .fut-fread .tip:not(:empty) + .fut-finfo { display: none; }
@@ -11831,6 +11863,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       void whenTargetIdle(fd).then(() => {
         try {
           fn(fd);
+          state.prepared = Math.round(fd.speedPercent * 10);
         } finally {
           releaseHold();
         }
@@ -11841,9 +11874,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     let skipTile = null;
     const begin = (mode, dest = null) => {
       const prev = state.active;
-      state.active = REPEATABLE.includes(mode) ? { mode, first: prev && prev.mode === mode ? prev.first : o.bodyId, dest } : null;
+      const same = prev && prev.mode === mode;
+      state.active = REPEATABLE.includes(mode) ? { mode, first: same ? prev.first : o.bodyId, dest, ...same && prev.speed ? { speed: prev.speed } : {} } : null;
       drawSkip();
     };
+    const roundSpeed = () => state.active?.speed;
     const skipTarget = () => {
       const a = state.active;
       if (!a || !SKIPPABLE.includes(a.mode)) return null;
@@ -11898,7 +11933,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       fleetsave: () => withDispatcher((fd) => {
         if (!profile.save) return say(t("fleet.err.noFleetsave"), true);
         begin("fleetsave");
-        report(prepareFleetsave(fd, doc, profile, profile.save), "fleet.ok.cargo");
+        report(prepareFleetsave(fd, doc, profile, roundSpeed() ? { ...profile.save, speed: roundSpeed() } : profile.save), "fleet.ok.cargo");
       }),
       plan: (dest) => withDispatcher((fd) => {
         const delivery = o.store.get(DELIVERY_KEY, null);
@@ -12078,9 +12113,45 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       });
       out2.peek(load, t("fleet.resMinusReserve"), t("fleet.tip.cargo"));
       const row = el4(doc, "div", "fut-frow");
-      row.append(load, out2.box);
+      const ask = el4(doc, "span", "fut-fask");
+      ask.hidden = true;
+      row.append(load, out2.box, ask);
       bar.append(row);
       anchor2.before(bar);
+      const offerSpeed = () => {
+        const box = doc.querySelector(".fut-fask");
+        const fd = getDispatcher();
+        const a = state.active;
+        if (!box) return;
+        const pct = fd ? Math.round(fd.speedPercent * 10) : 0;
+        const current3 = a?.speed ?? state.prepared;
+        const next = a ? nextInRound(a, o.bodyId, o.bodies, loadSettings(o.store).skipBodies) : null;
+        if (!fd || !a || a.mode !== "fleetsave" || !loadSettings(o.store).repeat || current3 === void 0 || pct === current3 || next === null) {
+          box.hidden = true;
+          return;
+        }
+        const yes = el4(doc, "button", "fut-fask-b yes", t("fleet.speedAsk.yes"));
+        const no = el4(doc, "button", "fut-fask-b", t("fleet.speedAsk.no"));
+        yes.type = no.type = "button";
+        yes.addEventListener("click", (e) => {
+          e.preventDefault();
+          state.active = { ...a, speed: pct };
+          box.hidden = true;
+          out2.say(t("fleet.speedAsk.done", { pct }));
+        });
+        no.addEventListener("click", (e) => {
+          e.preventDefault();
+          box.hidden = true;
+        });
+        box.replaceChildren(el4(doc, "span", "fut-fask-q", t("fleet.speedAsk.q", { pct })), yes, no);
+        box.title = t("fleet.speedAsk.hint", { pct: current3 });
+        box.hidden = false;
+      };
+      const speedBar = doc.getElementById("speedPercentage");
+      if (speedBar && !speedBar.dataset.futAsk) {
+        speedBar.dataset.futAsk = "1";
+        speedBar.addEventListener("click", () => setTimeout(offerSpeed, 0));
+      }
     }
     registerActions(doc, o.store, t, {});
     void whenDispatcherReady().then((fd) => {
