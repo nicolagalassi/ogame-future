@@ -48,6 +48,10 @@ export interface TechDetails {
   durationMs: number | null;
   /** Ships and defences: the game's amount field. */
   amountInput: HTMLInputElement | null;
+  /** Extra energy the level shown needs, as the game says (mines, some lifeform buildings). */
+  energyNeed: number | null;
+  /** Solar satellite: energy the satellites give now, how many there are, one more gives. */
+  energyProduction: { total: number; count: number; next: number | null } | null;
 }
 
 /** The value of a cost entry: data-value when present, otherwise the tooltip or text. */
@@ -56,6 +60,17 @@ function costValue(root: HTMLElement, cls: string): number | undefined {
   if (!el) return undefined;
   const v = num(el.getAttribute('data-value')) ?? num(el.getAttribute('data-tooltip-title') ?? el.getAttribute('title')) ?? num(el.textContent);
   return v ?? undefined;
+}
+
+function readEnergyProduction(root: HTMLElement): TechDetails['energyProduction'] {
+  const value = root.querySelector<HTMLElement>('.information li.energy_production .value');
+  const total = num(value?.getAttribute('data-value'));
+  if (!value || total === null) return null;
+  return {
+    total,
+    count: num(root.querySelector('.information .amount')?.getAttribute('data-value')) ?? 0,
+    next: num(value.querySelector('.bonus')?.getAttribute('data-value')),
+  };
 }
 
 export function readTechDetails(doc: Document): TechDetails | null {
@@ -86,5 +101,7 @@ export function readTechDetails(doc: Document): TechDetails | null {
     population,
     durationMs,
     amountInput: root.querySelector<HTMLInputElement>('#build_amount'),
+    energyNeed: num(root.querySelector('.information li.additional_energy_consumption .value')?.getAttribute('data-value')),
+    energyProduction: readEnergyProduction(root),
   };
 }

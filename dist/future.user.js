@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.50
+// @version      0.3.55
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -864,6 +864,14 @@
     "marks.writeShort": "Scrivi",
     "tech.population": "Popolazione richiesta per il livello {level}",
     "tech.populationShort": "non basta su questo pianeta",
+    "tech.satShort": "sat.",
+    "tech.satNeed": "Servono {n} satelliti solari ({energy} energia) per costruire questi livelli senza andare sotto zero",
+    "tech.satDeficit": "Servono {n} satelliti solari ({energy} energia) per riportare l'energia in positivo",
+    "tech.satBalance": "energia ora {energy}",
+    "tech.satPer": "1 satellite = {energy} su questo pianeta",
+    "tech.satPerGuess": "1 satellite \u2248 {energy} (stima: apri il Satellite Solare su questo pianeta per il valore esatto)",
+    "tech.satFill": "clic: scrive il numero nella quantit\xE0",
+    "tech.satGo": "clic: apre il Satellite Solare nelle Risorse con il numero gi\xE0 scritto",
     "fleet.btn.collect": "Raccolta spedizioni",
     "fleet.btn.collectTransport": "Raccolta: trasporto",
     "fleet.btn.collectDeploy": "Raccolta: schieramento",
@@ -1608,6 +1616,14 @@
     "marks.writeShort": "Write",
     "tech.population": "Population needed for level {level}",
     "tech.populationShort": "not enough on this planet",
+    "tech.satShort": "sat.",
+    "tech.satNeed": "{n} solar satellites ({energy} energy) needed to build these levels without going below zero",
+    "tech.satDeficit": "{n} solar satellites ({energy} energy) needed to bring energy back above zero",
+    "tech.satBalance": "energy now {energy}",
+    "tech.satPer": "1 satellite = {energy} on this planet",
+    "tech.satPerGuess": "1 satellite \u2248 {energy} (estimate: open the Solar Satellite on this planet for the exact value)",
+    "tech.satFill": "click: types the number in the amount",
+    "tech.satGo": "click: opens the Solar Satellite in Resources with the number already typed in",
     "fleet.btn.collect": "Expedition collection",
     "fleet.btn.collectTransport": "Collection: transport",
     "fleet.btn.collectDeploy": "Collection: deploy",
@@ -2352,6 +2368,14 @@
     "marks.writeShort": "\xC9crire",
     "tech.population": "Population requise pour le niveau {level}",
     "tech.populationShort": "insuffisante sur cette plan\xE8te",
+    "tech.satShort": "sat.",
+    "tech.satNeed": "Il faut {n} satellites solaires ({energy} \xE9nergie) pour construire ces niveaux sans passer sous z\xE9ro",
+    "tech.satDeficit": "Il faut {n} satellites solaires ({energy} \xE9nergie) pour repasser l'\xE9nergie au-dessus de z\xE9ro",
+    "tech.satBalance": "\xE9nergie actuelle {energy}",
+    "tech.satPer": "1 satellite = {energy} sur cette plan\xE8te",
+    "tech.satPerGuess": "1 satellite \u2248 {energy} (estimation : ouvrez le Satellite solaire sur cette plan\xE8te pour la valeur exacte)",
+    "tech.satFill": "clic : saisit le nombre dans la quantit\xE9",
+    "tech.satGo": "clic : ouvre le Satellite solaire dans Ressources avec le nombre d\xE9j\xE0 saisi",
     "fleet.btn.collect": "Collecte des exp\xE9ditions",
     "fleet.btn.collectTransport": "Collecte : transport",
     "fleet.btn.collectDeploy": "Collecte : stationnement",
@@ -3096,6 +3120,14 @@
     "marks.writeShort": "Schreiben",
     "tech.population": "Ben\xF6tigte Bev\xF6lkerung f\xFCr Stufe {level}",
     "tech.populationShort": "reicht auf diesem Planeten nicht",
+    "tech.satShort": "Sat.",
+    "tech.satNeed": "{n} Solarsatelliten ({energy} Energie) n\xF6tig, um diese Stufen ohne Minus zu bauen",
+    "tech.satDeficit": "{n} Solarsatelliten ({energy} Energie) n\xF6tig, um die Energie wieder ins Plus zu bringen",
+    "tech.satBalance": "Energie jetzt {energy}",
+    "tech.satPer": "1 Satellit = {energy} auf diesem Planeten",
+    "tech.satPerGuess": "1 Satellit \u2248 {energy} (Sch\xE4tzung: Solarsatellit auf diesem Planeten \xF6ffnen f\xFCr den genauen Wert)",
+    "tech.satFill": "Klick: tr\xE4gt die Zahl als Menge ein",
+    "tech.satGo": "Klick: \xF6ffnet den Solarsatelliten unter Rohstoffe mit bereits eingetragener Zahl",
     "fleet.btn.collect": "Expeditionssammlung",
     "fleet.btn.collectTransport": "Sammlung: Transport",
     "fleet.btn.collectDeploy": "Sammlung: Stationieren",
@@ -3287,6 +3319,20 @@
     const crystal = raw("resources_crystal");
     const deuterium = raw("resources_deuterium");
     return metal == null || crystal == null || deuterium == null ? null : { metal, crystal, deuterium };
+  }
+  function readCurrentEnergy(doc) {
+    const el6 = doc.getElementById("resources_energy");
+    const value = el6?.getAttribute("data-raw") ?? el6?.textContent?.replace(/[^\d-]/g, "");
+    const n = Number(value);
+    return value != null && value !== "" && Number.isFinite(n) ? n : null;
+  }
+  function currentMaxTemperature(doc) {
+    if (doc.querySelector('meta[name="ogame-planet-type"]')?.getAttribute("content") === "moon") return null;
+    const id = currentBodyId(doc);
+    const link = id ? doc.querySelector(`#planet-${id} .planetlink`) : null;
+    const tip = link?.getAttribute("data-tooltip-title") ?? link?.getAttribute("title") ?? "";
+    const temps = Array.from(tip.matchAll(/(-?\d+)\s*°\s*C/g), (m) => Number(m[1]));
+    return temps.length >= 2 ? Math.max(...temps.slice(0, 2)) : null;
   }
   function currentBodyId(doc) {
     const id = Number(doc.querySelector('meta[name="ogame-planet-id"]')?.getAttribute("content"));
@@ -10218,6 +10264,16 @@ table.queues td.acts { width: 1%; text-align: right; }
     const v = num4(el6.getAttribute("data-value")) ?? num4(el6.getAttribute("data-tooltip-title") ?? el6.getAttribute("title")) ?? num4(el6.textContent);
     return v ?? void 0;
   }
+  function readEnergyProduction(root) {
+    const value = root.querySelector(".information li.energy_production .value");
+    const total = num4(value?.getAttribute("data-value"));
+    if (!value || total === null) return null;
+    return {
+      total,
+      count: num4(root.querySelector(".information .amount")?.getAttribute("data-value")) ?? 0,
+      next: num4(value.querySelector(".bonus")?.getAttribute("data-value"))
+    };
+  }
   function readTechDetails(doc) {
     const root = doc.querySelector("#technologydetails");
     if (!root) return null;
@@ -10245,7 +10301,9 @@ table.queues td.acts { width: 1%; text-align: right; }
       shown: shown2,
       population,
       durationMs,
-      amountInput: root.querySelector("#build_amount")
+      amountInput: root.querySelector("#build_amount"),
+      energyNeed: num4(root.querySelector(".information li.additional_energy_consumption .value")?.getAttribute("data-value")),
+      energyProduction: readEnergyProduction(root)
     };
   }
 
@@ -12282,6 +12340,36 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     win.initJumpgate = wrapped;
   }
 
+  // src/engines/energy.ts
+  var satelliteBase = (maxTemp) => Math.max(0, Math.floor((maxTemp + 140) / 6));
+  var MINE_FACTOR = { 1: 10, 2: 10, 3: 20 };
+  var mineConsumption = (id, level2) => {
+    const k = MINE_FACTOR[id];
+    if (k === void 0) return null;
+    return level2 > 0 ? Math.ceil(k * level2 * Math.pow(1.1, level2)) : 0;
+  };
+  function extraConsumption(id, from, to, gameFirst) {
+    if (to <= from) return gameFirst;
+    const atTo = mineConsumption(id, to);
+    const atFrom = mineConsumption(id, from);
+    return atTo === null || atFrom === null ? null : gameFirst + atTo - atFrom;
+  }
+  function perSatellite(book, bodyId, maxTemp) {
+    const own = book[String(bodyId)];
+    if (own && own.perUnit > 0) return { value: own.perUnit, exact: true };
+    if (maxTemp === null) return null;
+    const base = satelliteBase(maxTemp);
+    if (base <= 0) return null;
+    const ref = Object.values(book).filter((e) => e.perUnit > 0 && e.maxTemp !== null && satelliteBase(e.maxTemp) > 0).sort((a, b) => b.at - a.at)[0];
+    const ratio = ref ? ref.perUnit / satelliteBase(ref.maxTemp) : 1;
+    return { value: base * ratio, exact: false };
+  }
+  function satellitesFor(balance, need, perUnit) {
+    const energy = need - balance;
+    if (energy <= 0 || perUnit <= 0) return null;
+    return { count: Math.ceil(energy / perUnit), energy };
+  }
+
   // src/modules/tech/style.ts
   var TECH_CSS = `
 /* The game's own cost list and detail lines give way to the panel (their data is in it). */
@@ -12291,41 +12379,71 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 #technologydetails.fut-tp-on .build-it_wrap .build-it_premium { transform: scale(0.72); transform-origin: right bottom; }
 #technologydetails.fut-tp-on .content .information .level { color: #4FD1E8; font-weight: 700; }
 /* Units: shipyard choice on one line under the title, amount field over the build button. */
-#technologydetails.fut-tp-unit .content .shipyardSelection { position: absolute; top: 28px; left: 6px; right: 158px; height: 16px;
-  display: flex; align-items: center; gap: 4px; margin: 0; padding: 0; font-size: 10px; line-height: 16px; white-space: nowrap; overflow: hidden; }
-#technologydetails.fut-tp-unit .content .shipyardSelection input { margin: 0 2px 0 6px; width: 11px; height: 11px; }
-#technologydetails.fut-tp-unit .content .shipyardSelection label { float: none; margin: 0; padding: 0; width: auto; }
+/* Shipyard choice: a two-way switch (the game's radios stay, hidden but focusable; the labels are the buttons). */
+#technologydetails.fut-tp-unit .content .shipyardSelection { position: absolute; top: 26px; left: 6px; right: 158px; width: auto; height: 20px;
+  display: flex; align-items: stretch; gap: 0; margin: 0; padding: 0; white-space: nowrap; overflow: hidden; }
+#technologydetails.fut-tp-unit .content .shipyardSelection input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
+#technologydetails.fut-tp-unit .content .shipyardSelection label { float: none; display: flex; align-items: center; margin: 0; padding: 0 10px; width: auto;
+  border: 1px solid #2A3B55; background: rgba(9,15,24,0.82); color: #8A9BB0; font: 11px/18px Arial, Helvetica, sans-serif; cursor: pointer; }
+#technologydetails.fut-tp-unit .content .shipyardSelection label::before, #technologydetails.fut-tp-unit .content .shipyardSelection label::after { display: none !important; }
+#technologydetails.fut-tp-unit .content .shipyardSelection label:first-of-type { border-radius: 10px 0 0 10px; }
+#technologydetails.fut-tp-unit .content .shipyardSelection label:last-of-type { border-radius: 0 10px 10px 0; }
+#technologydetails.fut-tp-unit .content .shipyardSelection label + input + label { border-left: 0; }
+#technologydetails.fut-tp-unit .content .shipyardSelection label:hover { color: #E6EDF5; }
+#technologydetails.fut-tp-unit .content .shipyardSelection input:checked + label { background: #12283A; color: #E6EDF5; font-weight: 700; box-shadow: inset 0 -2px 0 #4FD1E8; }
+#technologydetails.fut-tp-unit .content .shipyardSelection input:focus-visible + label { outline: 1px solid #4FD1E8; outline-offset: -1px; }
 #technologydetails.fut-tp-unit .content .build_amount { position: absolute; top: 104px; right: 6px; width: 146px; height: 28px; margin: 0; padding: 0;
   display: flex; align-items: center; gap: 4px; }
 #technologydetails.fut-tp-unit .content .build_amount label { display: none; }
-#technologydetails.fut-tp-unit .content .build_amount input, #technologydetails.fut-tp-unit #build_amount { position: static; float: none; flex: 1; min-width: 0; width: auto; height: 26px; margin: 0; padding: 0 4px; box-sizing: border-box; font-size: 13px; }
+#technologydetails.fut-tp-unit .content .build_amount input, #technologydetails.fut-tp-unit #build_amount { position: static; float: none; flex: 1; min-width: 0; width: auto; height: 26px; margin: 0; padding: 0 6px; box-sizing: border-box;
+  border: 1px solid #2A3B55; border-radius: 5px; background: rgba(9,15,24,0.92) none; color: #E6EDF5; font: 700 13px Consolas, "JetBrains Mono", "DejaVu Sans Mono", monospace; text-align: right; box-shadow: none; }
+#technologydetails.fut-tp-unit #build_amount:focus { outline: none; border-color: #4FD1E8; }
 #technologydetails.fut-tp-unit .content .build_amount .maximum { position: static; float: none; flex: none; width: auto; height: 26px; margin: 0; padding: 0 6px;
   background: #16202E none !important; border: 1px solid #2A3B55; border-radius: 5px; color: #C9D4E2; font-size: 11px; cursor: pointer; }
 #technologydetails.fut-tp-unit .content .build_amount .maximum::before, #technologydetails.fut-tp-unit .content .build_amount .maximum::after { display: none !important; }
 #technologydetails.fut-tp-unit .content .build_amount .maximum:hover { border-color: #4FD1E8; color: #fff; }
 #technologydetails.fut-tp-unit .fut-tp { right: 158px; }
-#technologydetails.fut-tp-unit:has(.shipyardSelection) .fut-tp { top: 48px; }
-.fut-tp { position: absolute; top: 24px; left: 6px; right: 138px; bottom: 6px; display: flex; flex-direction: column; gap: 5px;
-  font: 11px/14px Arial, Helvetica, sans-serif; color: #E6EDF5; text-align: left; }
-.fut-tp-grid { display: grid; gap: 2px; align-content: start; }
-.fut-tp-h:first-child { background: none; }
-.fut-tp-h { padding: 2px 6px; border-radius: 4px; background: #16202E; color: #8A9BB0; font-size: 10px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fut-tp-k { padding: 2px 6px 2px 0; color: #8A9BB0; white-space: nowrap; }
-.fut-tp-k.fut-m { color: #B8C2CC; } .fut-tp-k.fut-c { color: #7FB8FF; } .fut-tp-k.fut-d { color: #4FE0B0; } .fut-tp-k.fut-e { color: #F5D547; }
-.fut-tp-v { padding: 2px 6px; border-radius: 4px; background: rgba(17,27,42,0.85); text-align: right;
-  font-family: "JetBrains Mono", Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fut-tp-sum { color: #4FD1E8; }
-.fut-tp-short { color: #FF7A7A; }
-.fut-tp-ok { color: #4FE0B0; text-align: center; display: flex; align-items: center; justify-content: center; }
-.fut-tp-msu { color: #C9D4E2; font-size: 10px; }
+#technologydetails.fut-tp-unit:has(.shipyardSelection) .fut-tp { top: 52px; }
+.fut-tp, .fut-tp-tools {
+  /* Future's window tokens (core/sheet.ts), here outside the Shadow DOM. */
+  --line: #1F2C40; --line-soft: #16202F; --text: #E6EDF5; --text-2: #C9D4E2; --muted: #8A9BB0;
+  --accent: #4FD1E8; --ok: #4FE0B0; --bad: #FF7A7A; --energy: #F5D547;
+  --m: ${RES_COLORS.metal}; --c: ${RES_COLORS.crystal}; --d: ${RES_COLORS.deuterium};
+  --mono: Consolas, "JetBrains Mono", "DejaVu Sans Mono", monospace;
+}
+.fut-tp { position: absolute; top: 24px; left: 6px; right: 138px; bottom: 6px; display: flex; flex-direction: column; gap: 6px;
+  font: 11px/14px Arial, Helvetica, sans-serif; color: var(--text); text-align: left; }
+/* The ledger: no boxes per cell, hairlines between rows, numbers right-aligned in one mono face. */
+.fut-tp-grid { display: grid; align-content: start; border-radius: 6px; background: rgba(9,15,24,0.82); padding: 2px 0; }
+.fut-tp-grid > span { min-width: 0; padding: 3px 8px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fut-tp-h { color: var(--muted); font: 11px/14px Arial, Helvetica, sans-serif; text-align: right; }
+.fut-tp-h:first-child { text-align: left; }
+.fut-tp-k { display: flex; align-items: center; gap: 5px; font: 700 12px/16px Arial, Helvetica, sans-serif; color: var(--text-2); }
+.fut-tp-k svg { flex: none; }
+.fut-tp-k > span { overflow: hidden; text-overflow: ellipsis; }
+.fut-tp-k.fut-m { color: var(--m); } .fut-tp-k.fut-c { color: var(--c); } .fut-tp-k.fut-d { color: var(--d); } .fut-tp-k.fut-e { color: var(--energy); }
+.fut-tp-v { font: 700 13px/16px var(--mono); font-variant-numeric: tabular-nums; color: var(--text); text-align: right; }
+.fut-tp-sum { color: var(--accent); }
+.fut-tp-short { color: var(--bad); }
+.fut-tp-ok { color: var(--ok); display: flex; align-items: center; justify-content: flex-end; }
+/* The total row closes the ledger: a firmer rule above, no rule below. */
+.fut-tp-grid > .fut-tp-total { border-top: 1px solid var(--line); border-bottom: 0; }
+.fut-tp-k.fut-tp-msu { color: var(--muted); }
+/* What is missing: a column band, red when something lacks, green when nothing does. */
+.fut-tp-miss { background: rgba(255,122,122,0.08); }
+.fut-tp-miss.fut-tp-none { background: rgba(79,224,176,0.06); }
+.fut-tp-h.fut-tp-miss { color: var(--bad); } .fut-tp-h.fut-tp-none { color: var(--ok); }
 .fut-tp-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: auto; }
-.fut-tp-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border: 1px solid #1F2C40; border-radius: 10px;
-  background: #0E1724; color: #C9D4E2; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
-.fut-tp-chip svg { flex: none; color: #8A9BB0; }
-.fut-tp-energy svg { color: #F5D547; } .fut-tp-start svg { color: #4FD1E8; }
-.fut-tp-disc { color: #8A9BB0; }
+.fut-tp-chip { display: inline-flex; align-items: center; gap: 5px; height: 20px; box-sizing: border-box; padding: 0 8px; border: 1px solid var(--line); border-radius: 10px;
+  background: rgba(9,15,24,0.82); color: var(--text-2); font: 12px/18px Arial, Helvetica, sans-serif; font-variant-numeric: tabular-nums; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.fut-tp-chip svg { flex: none; color: var(--muted); }
+.fut-tp-energy svg { color: var(--energy); } .fut-tp-start svg { color: var(--accent); }
+.fut-tp-disc { color: var(--muted); }
 .fut-tp-pop svg { color: #E58CDB; }
-.fut-tp-lack { border-color: #FF7A7A; color: #FF7A7A; } .fut-tp-lack svg { color: #FF7A7A; }
+.fut-tp-lack { border-color: var(--bad); color: var(--bad); } .fut-tp-lack svg { color: var(--bad); }
+.fut-tp-sat { border-color: #6B5A1E; color: var(--energy); cursor: pointer; } .fut-tp-sat svg { color: var(--energy); }
+.fut-tp-sat:hover { border-color: var(--energy); background: #1E1A0C; }
+.fut-tp-sat-link { display: inline-flex; max-width: 100%; text-decoration: none; }
 /* Tools over the picture, like OGLight. */
 .fut-tp-tools { position: absolute; top: 4px; left: 4px; right: 4px; display: flex; gap: 4px; z-index: 2; }
 #technologydetails .fut-tp-btn { flex: 1; height: 24px; display: flex; align-items: center; justify-content: center; padding: 0;
@@ -12333,9 +12451,10 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 #technologydetails .fut-tp-btn:hover:not(:disabled) { border-color: #4FD1E8; color: #fff; }
 #technologydetails .fut-tp-btn:disabled { opacity: 0.4; cursor: default; }
 #technologydetails .fut-tp-plan.on { border-color: #2E7D5B; background: rgba(16,41,31,0.92); color: #4FE0B0; }
-.fut-tp-amount { flex: 3; min-width: 0; height: 24px; box-sizing: border-box; padding: 0 6px; border: 1px solid #2A3B55; border-radius: 5px;
-  background: rgba(10,17,28,0.92); color: #E6EDF5; font: 12px "JetBrains Mono", Consolas, monospace; text-align: right; }
-.fut-tp-amount:focus { outline: none; border-color: #4FD1E8; }
+/* Our amount (for the plan) over the picture: same dark field as the game's one, beating the game's input skin. */
+#technologydetails .fut-tp-tools .fut-tp-amount { flex: 3; min-width: 0; height: 24px; box-sizing: border-box; margin: 0; padding: 0 6px; border: 1px solid #2A3B55; border-radius: 5px;
+  background: rgba(9,15,24,0.92) none; color: var(--text); font: 700 13px var(--mono); text-align: right; box-shadow: none; }
+#technologydetails .fut-tp-tools .fut-tp-amount:focus { outline: none; border-color: #4FD1E8; }
 `;
   var PLANNER_CSS = `
 :host { --panel-w: 820px; }
@@ -12434,6 +12553,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     return parts.join(" ");
   }
   var loadPlan = (store) => store.get(PLAN_KEY, {});
+  var SAT_KEY = "satEnergy";
+  var SATELLITE = 212;
   function startLevel(details, listLevel, built) {
     const candidates = [details.panelLevel ?? 0, (details.panelLevel ?? 0) + 1, (listLevel ?? 0) + 1, (built ?? 0) + 1];
     const match = matchShownLevel(details.id, candidates, details.shown);
@@ -12461,14 +12582,22 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     time: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
     energy: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>',
     start: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v5h5"/></svg>',
+    sat: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="9" y="9" width="6" height="6" rx="1"/><path d="M2 9h5v6H2zM17 9h5v6h-5zM7 12h2M15 12h2M12 9V5"/></svg>',
     pop: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.6 3-5.5 6-5.5s5.4 1.9 6 5.5"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.8M18.5 15c1.5.9 2.3 2.6 2.6 5"/></svg>'
+  };
+  var ROW_ICON = {
+    metal: resIconSvg("metal", 12),
+    crystal: resIconSvg("crystal", 12),
+    deuterium: resIconSvg("deuterium", 12),
+    energy: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>'
   };
   function grid(o, view2, have) {
     const { doc, t, locale } = o;
     const g = el5(doc, "div", "fut-tp-grid");
-    g.style.gridTemplateColumns = `auto repeat(${view2.cols.length}, minmax(0, 1fr))`;
+    g.style.gridTemplateColumns = `minmax(0, auto) repeat(${view2.cols.length}, minmax(0, 1fr))`;
+    const band = (col) => col.short ? msu3(col.cost) > 0 ? " fut-tp-miss" : " fut-tp-miss fut-tp-none" : "";
     g.append(el5(doc, "span", "fut-tp-h"));
-    for (const h6 of view2.heads) g.append(el5(doc, "span", "fut-tp-h", h6));
+    view2.heads.forEach((h6, i) => g.append(el5(doc, "span", `fut-tp-h${band(view2.cols[i])}`, h6)));
     const rows = RES.filter(([key]) => view2.cols.some((c) => !c.short && c.cost[key] > 0));
     const cell = (value, cls) => {
       const c = el5(doc, "span", `fut-tp-v ${cls}`, value ? formatUnits(value, locale) : "\u2014");
@@ -12476,19 +12605,22 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       return c;
     };
     for (const [key, cls] of rows) {
-      g.append(el5(doc, "span", `fut-tp-k fut-${cls}`, t(`tech.res.${key}`)));
+      const k = el5(doc, "span", `fut-tp-k fut-${cls}`);
+      k.innerHTML = ROW_ICON[key];
+      k.append(el5(doc, "span", "", t(`tech.res.${key}`)));
+      g.append(k);
       for (const col of view2.cols) {
         if (!col.short) g.append(cell(col.cost[key], col.cls ?? ""));
-        else if (key === "energy") g.append(el5(doc, "span", "fut-tp-v"));
-        else if (col.cost[key] > 0) g.append(cell(-col.cost[key], "fut-tp-short"));
-        else g.append(okCell(doc, have, "fut-tp-v fut-tp-ok"));
+        else if (key === "energy") g.append(el5(doc, "span", `fut-tp-v${band(col)}`));
+        else if (col.cost[key] > 0) g.append(cell(-col.cost[key], `fut-tp-short${band(col)}`));
+        else g.append(okCell(doc, have, `fut-tp-v fut-tp-ok${band(col)}`));
       }
     }
-    g.append(el5(doc, "span", "fut-tp-k fut-tp-msu", "MSU"));
+    g.append(el5(doc, "span", "fut-tp-k fut-tp-msu fut-tp-total", "MSU"));
     for (const col of view2.cols) {
       const v = msu3(col.cost);
-      if (col.short) g.append(v > 0 ? cell(-v, "fut-tp-short fut-tp-msu") : okCell(doc, have, "fut-tp-v fut-tp-ok fut-tp-msu"));
-      else g.append(cell(v, `${col.cls ?? ""} fut-tp-msu`));
+      if (col.short) g.append(v > 0 ? cell(-v, `fut-tp-short fut-tp-msu fut-tp-total${band(col)}`) : okCell(doc, have, `fut-tp-v fut-tp-ok fut-tp-msu fut-tp-total${band(col)}`));
+      else g.append(cell(v, `${col.cls ?? ""} fut-tp-msu fut-tp-total`));
     }
     return g;
   }
@@ -12519,6 +12651,61 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     }
     return out;
   }
+  function learnSatellite(o, details) {
+    const p = details.energyProduction;
+    if (details.id !== SATELLITE || !p) return;
+    const perUnit = p.count > 0 ? p.total / p.count : p.next ?? 0;
+    if (perUnit <= 0) return;
+    const book = o.store.get(SAT_KEY, {});
+    book[String(o.bodyId)] = { perUnit, maxTemp: o.maxTemp, at: Date.now() };
+    o.store.set(SAT_KEY, book);
+  }
+  var SAT_PARAM = "futSat";
+  function fillAmount(input, n) {
+    input.value = String(n);
+    for (const type of ["input", "change", "keyup"]) input.dispatchEvent(new Event(type, { bubbles: true }));
+  }
+  var askedSatellites;
+  function takeAskedSatellites(doc) {
+    if (askedSatellites === void 0) {
+      const n2 = Number(new URL(doc.location?.href ?? "http://x/").searchParams.get(SAT_PARAM));
+      askedSatellites = Number.isInteger(n2) && n2 > 0 ? n2 : null;
+    }
+    const n = askedSatellites;
+    askedSatellites = null;
+    return n;
+  }
+  function satelliteChip(o, need, amountInput) {
+    const { doc, t, locale } = o;
+    const balance = o.energy();
+    if (balance === null) return null;
+    const per = perSatellite(o.store.get(SAT_KEY, {}), o.bodyId, o.maxTemp);
+    if (!per) return null;
+    const sat = satellitesFor(balance, need, per.value);
+    if (!sat) return null;
+    const perText = per.value.toLocaleString(locale, { maximumFractionDigits: 1 });
+    const title = [
+      t(need > 0 ? "tech.satNeed" : "tech.satDeficit", { n: groupInt(sat.count, locale), energy: groupInt(Math.round(sat.energy), locale) }),
+      t("tech.satBalance", { energy: groupInt(Math.round(balance), locale) }),
+      t(per.exact ? "tech.satPer" : "tech.satPerGuess", { energy: perText })
+    ].join(" \xB7 ");
+    const c = chip(doc, ICON.sat, `${per.exact ? "" : "\u2248"}${groupInt(sat.count, locale)} ${t("tech.satShort")} \xB7 ${groupInt(Math.round(sat.energy), locale)}`, `${title} \xB7 ${t(amountInput ? "tech.satFill" : "tech.satGo")}`, "fut-tp-sat");
+    if (amountInput) {
+      c.addEventListener("click", () => fillAmount(amountInput, sat.count));
+      return c;
+    }
+    const a = el5(doc, "a", "fut-tp-sat-link");
+    a.href = `index.php?page=ingame&component=supplies&openTech=${SATELLITE}&${SAT_PARAM}=${sat.count}`;
+    a.append(c);
+    a.addEventListener("click", (e) => {
+      const tile2 = doc.querySelector(`#technologies li[data-technology="${SATELLITE}"] .icon`);
+      if (!tile2) return;
+      e.preventDefault();
+      askedSatellites = sat.count;
+      tile2.click();
+    });
+    return a;
+  }
   function renderTechPanel(o, details) {
     const { doc, t, locale } = o;
     const kind = techKind(details.id);
@@ -12531,6 +12718,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     const levelLabel = details.root.querySelector(".information .level");
     const levelText = levelLabel?.textContent ?? "";
     const chips = gameChips(doc, details);
+    learnSatellite(o, details);
     if (isLevelled(details.id)) {
       const start = startLevel(details, entry?.level, entry?.built);
       let to = start.level;
@@ -12602,6 +12790,11 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           row.append(chip(doc, ICON.pop, text, `${t("tech.population", { level: start.level })}: ${p.value.toLocaleString(locale)}${p.enough ? "" : ` \xB7 ${t("tech.populationShort")}`}`, p.enough ? "fut-tp-pop" : "fut-tp-pop fut-tp-lack"));
         }
         row.append(...chips);
+        if (details.energyNeed !== null) {
+          const need = extraConsumption(details.id, start.level, to, details.energyNeed);
+          const sat = need === null ? null : satelliteChip(o, need, null);
+          if (sat) row.append(sat);
+        }
         if (start.discount > 5e-4) row.append(chip(doc, "", t("tech.discountShort", { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), t("tech.discount", { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), "fut-tp-disc"));
         box.replaceChildren(grid(o, view2, have !== null), row);
       };
@@ -12640,6 +12833,10 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         const row = el5(doc, "div", "fut-tp-chips");
         if (details.durationMs) row.append(chip(doc, ICON.time, `${formatDuration(details.durationMs)} \xB7 \u03A3 ${formatDuration(details.durationMs * n)}`, t("tech.time")));
         row.append(...chips);
+        if (details.id === SATELLITE) {
+          const sat = satelliteChip(o, 0, details.amountInput);
+          if (sat) row.append(sat);
+        }
         box.replaceChildren(grid(o, view2, have !== null), row);
       };
       amount.addEventListener("input", () => {
@@ -12658,6 +12855,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       if (input) {
         for (const type of ["input", "change", "keyup"]) input.addEventListener(type, follow);
         input.parentElement?.querySelector(".maximum")?.addEventListener("click", follow);
+        const asked = details.id === SATELLITE ? takeAskedSatellites(doc) : null;
+        if (asked) fillAmount(input, asked);
       }
     }
     details.root.classList.add("fut-tp-on");
@@ -14150,7 +14349,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       watchJumpgate(document, store, currentId, t);
     }
     if (currentId) {
-      watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), onPlanChange: () => draw() });
+      watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), energy: () => readCurrentEnergy(document), maxTemp: currentMaxTemperature(document), onPlanChange: () => draw() });
     }
     const side = { doc: document, store, guard, t, locale };
     drawDock = () => {

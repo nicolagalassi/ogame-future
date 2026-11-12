@@ -118,7 +118,7 @@ describe('planner', () => {
   });
 });
 
-function techPage(opts: { id: number; built: number; target?: number; shown: Record<string, number>; amount?: boolean; panelLevel?: number }) {
+function techPage(opts: { id: number; built: number; target?: number; shown: Record<string, number>; amount?: boolean; panelLevel?: number; info?: string; count?: number }) {
   const costs = Object.entries(opts.shown)
     .map(([k, v]) => `<li class="resource ${k} icon sufficient tooltip" data-value="${v}">${v}</li>`)
     .join('');
@@ -136,8 +136,8 @@ function techPage(opts: { id: number; built: number; target?: number; shown: Rec
     <div id="technologydetails" data-technology-id="${opts.id}">
       <div class="sprite sprite_large"></div>
       <div class="content"><h3>Miniera di metallo</h3>
-        <div class="information"><span class="level" data-value="${opts.panelLevel ?? opts.built + 1}">Livello ${opts.built}</span>
-          <ul class="narrow"><li class="build_duration"><strong>Durata:</strong><time class="value" datetime="PT2H">2h</time></li></ul>
+        <div class="information"><span class="level" data-value="${opts.panelLevel ?? opts.built + 1}">Livello ${opts.built}</span>${opts.count !== undefined ? `<span class="amount" data-value="${opts.count}">Numero: ${opts.count}</span>` : ''}
+          <ul class="narrow"><li class="build_duration"><strong>Durata:</strong><time class="value" datetime="PT2H">2h</time></li>${opts.info ?? ''}</ul>
         </div>
         <div class="costs"><p>Necessario:</p><ul class="ipiHintable">${costs}</ul></div>
         ${opts.amount ? '<div class="build_amount"><input id="build_amount" value="1"><button class="maximum">max</button></div>' : ''}
@@ -149,7 +149,7 @@ describe('tech panel', () => {
   const setup = (html: string) => {
     const store = new Store(new MemoryStore(), 'test');
     const readRes = () => ({ metal: 5000000, crystal: 1000000, deuterium: 0 });
-    return { store, o: { doc: document, store, bodyId: 10, t, locale: 'it', have: readRes } };
+    return { store, o: { doc: document, store, bodyId: 10, t, locale: 'it', have: readRes, energy: (): number | null => null, maxTemp: null as number | null } };
   };
 
   it('reads the list and the details panel', () => {
@@ -455,5 +455,49 @@ describe('plan status per body', () => {
     expect(planStatus(items, { metal: 0, crystal: 50, deuterium: 0 }, { ...none, metal: 100, arriveAt: 3 }, 5).state).toBe('arrived');
     expect(planStatus(items, { metal: 0, crystal: 50, deuterium: 0 }, { ...none, metal: 40, arriveAt: 9 }, 5)).toEqual({ state: 'missing', lack: { metal: 60, crystal: 0, deuterium: 0, energy: 0 } });
     expect(planStatus(items, null, none, 5).state).toBe('unknown');
+  });
+
+});
+
+describe('solar satellites on the tech panel', () => {
+  const setup = (html: string) => {
+    void html;
+    const store = new Store(new MemoryStore(), 'test');
+    const readRes = () => ({ metal: 5000000, crystal: 1000000, deuterium: 0 });
+    return { store, o: { doc: document, store, bodyId: 10, t, locale: 'it', have: readRes, energy: (): number | null => null, maxTemp: null as number | null } };
+  };
+  const btn = (i: number) => document.querySelectorAll<HTMLButtonElement>('.fut-tp-tools .fut-tp-btn')[i]!;
+
+  it('counts the solar satellites a mine range needs, after learning them on the satellite panel', () => {
+    // Satellite panel: 3884 satellites give 213985 energy on this planet (as in game).
+    const satHtml = techPage({ id: 212, built: 0, shown: { crystal: 2000, deuterium: 500 }, amount: true, count: 3884,
+      info: '<li class="energy_production"><strong>Produzione:</strong><span class="value" data-value="213985">213.985 <span class="bonus" data-value="55">(+55)</span></span></li>' });
+    const { store, o } = setup(satHtml);
+    document.getElementById('technologydetails_content')!.innerHTML = satHtml;
+    const short = { ...o, energy: () => -1000, maxTemp: 67 };
+    renderTechPanel(short, readTechDetails(document)!);
+    // 1000 missing / 55.09 per satellite → 19.
+    expect(document.querySelector('.fut-tp-sat')!.textContent).toBe('19 sat. · 1.000');
+    expect(store.get<Record<string, { perUnit: number }>>('satEnergy', {})['10']!.perUnit).toBeCloseTo(213985 / 3884);
+    // Click: 19 typed in the game's amount field (and ours follows).
+    (document.querySelector('.fut-tp-sat') as HTMLElement).click();
+    expect(document.querySelector<HTMLInputElement>('#build_amount')!.value).toBe('19');
+
+    // Metal mine 41 → 42 needs 2589 more energy; the planet has 500 left.
+    const raw = rawCost(1, 42);
+    const mine = techPage({ id: 1, built: 41, shown: { metal: raw.metal, crystal: raw.crystal },
+      info: '<li class="additional_energy_consumption"><strong>Energia necessaria:</strong><span class="value" data-value="2589">2.589</span></li>' });
+    document.getElementById('technologydetails_content')!.innerHTML = mine;
+    renderTechPanel({ ...o, energy: () => 500, maxTemp: 67 }, readTechDetails(document)!);
+    expect(document.querySelector('.fut-tp-sat')!.textContent).toBe(`${Math.ceil(2089 / (213985 / 3884))} sat. · 2.089`);
+    // From a mine, the chip links to the shipyard with the satellite open and the count to type in.
+    expect(document.querySelector('.fut-tp-sat-link')!.getAttribute('href')).toBe(`index.php?page=ingame&component=supplies&openTech=212&futSat=${Math.ceil(2089 / (213985 / 3884))}`);
+    // Up to 43: the formula adds level 43's own consumption (2903).
+    btn(2).click();
+    expect(document.querySelector('.fut-tp-sat')!.textContent).toBe(`${Math.ceil((2589 + 2903 - 500) / (213985 / 3884))} sat. · 4.992`);
+    // Enough energy: no chip.
+    document.getElementById('technologydetails_content')!.innerHTML = mine;
+    renderTechPanel({ ...o, energy: () => 9000, maxTemp: 67 }, readTechDetails(document)!);
+    expect(document.querySelector('.fut-tp-sat')).toBeNull();
   });
 });
