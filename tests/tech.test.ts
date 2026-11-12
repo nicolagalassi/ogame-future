@@ -36,6 +36,8 @@ describe('tech costs', () => {
     // Metal mine 30: 7.67M metal, 1.92M crystal.
     expect(rawCost(1, 30)).toEqual({ metal: 7670042, crystal: 1917510, deuterium: 0, energy: 0 });
     // Astrophysics uses 1.75.
+    // Interstellar Anomaly Scanner (Orion): level 11 as the game shows it.
+    expect(rawCost(45, 11)).toEqual({ metal: 5189, crystal: 2594, deuterium: 864, energy: 0 });
     expect(rawCost(124, 2)).toEqual({ metal: 7000, crystal: 14000, deuterium: 7000, energy: 0 });
     // Graviton needs energy only, ×3 per level.
     expect(rawCost(199, 2).energy).toBe(900000);
