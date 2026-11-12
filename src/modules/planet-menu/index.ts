@@ -36,6 +36,8 @@ export interface PlanetMenuOptions {
   snapshot: AccountSnapshot | null;
   /** Production queues per body (null when never read). */
   queues?: QueueSnapshot | null;
+  /** When the player last opened each body (data/visits): the age badges count from here. */
+  visits?: Record<string, number>;
   settings: MenuSettings;
   now: number;
   locale: string;
@@ -176,11 +178,13 @@ export function dataAge(resourcesAt: number, now: number): { text: string; cls: 
   return { text, cls };
 }
 
-function ageBadge(doc: Document, body: OwnBody | undefined, now: number, t: PlanetMenuOptions['t']): HTMLElement | null {
-  if (!body || !body.resourcesAt) return null;
-  const { text, cls } = dataAge(body.resourcesAt, now);
+/** Time since the player last opened the body (not since a sync); no badge before the first visit. */
+function ageBadge(doc: Document, id: number | null, visits: Record<string, number> | undefined, now: number, t: PlanetMenuOptions['t']): HTMLElement | null {
+  const at = id ? visits?.[String(id)] : undefined;
+  if (!at) return null;
+  const { text, cls } = dataAge(at, now);
   const badge = el(doc, 'span', `fut-age ${cls}`, text);
-  badge.dataset.at = String(body.resourcesAt);
+  badge.dataset.at = String(at);
   badge.title = t('planetMenu.age');
   return badge;
 }
@@ -478,7 +482,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
         if (line) wrap.append(line);
       }
       link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true, view));
-      const age = ageBadge(doc, planetBody, o.now, o.t);
+      const age = ageBadge(doc, entry.planetId, o.visits, o.now, o.t);
       if (age) link.append(age);
       // The game's wrench is hidden: the dots say what is being built, not only that something is.
       const pq = queueDots(doc, entry.planetId ? activeItems(o.queues?.bodies[String(entry.planetId)], o.now) : [], entry.construction.planet, o.now, o.t, o.locale);
@@ -490,7 +494,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
     if (moon) {
       const moonBody = entry.moonId ? byId.get(entry.moonId) : undefined;
       moon.append(resourceColumn(doc, moonBody, o.now, o.locale, false, view));
-      const age = ageBadge(doc, moonBody, o.now, o.t);
+      const age = ageBadge(doc, entry.moonId, o.visits, o.now, o.t);
       if (age) moon.append(age);
       const mq = queueDots(doc, entry.moonId ? activeItems(o.queues?.bodies[String(entry.moonId)], o.now) : [], entry.construction.moon, o.now, o.t, o.locale);
       if (mq) moon.append(mq);
