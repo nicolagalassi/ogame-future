@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.57
+// @version      0.3.58
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -5073,6 +5073,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     42: [2e4, 4e4, 2e4, 2, 0, 2, 0, 2],
     43: [2e6, 4e6, 2e6, 2, 0, 2, 0, 2],
     44: [2e4, 2e4, 1e3, 2, 0, 2, 0, 2],
+    45: [90, 45, 15, 1.5, 0, 2, 0, 2],
     106: [200, 1e3, 200, 2, 0, 2, 0, 2],
     108: [0, 400, 600, 2, 0, 2, 0, 2],
     109: [800, 200, 0, 2, 0, 2, 0, 2],
@@ -9114,6 +9115,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     42: "Sensor Phalanx",
     43: "Jump Gate",
     44: "Missile Silo",
+    45: "Interstellar Anomaly Scanner",
     106: "Espionage",
     108: "Computer",
     109: "Weapons",
@@ -9196,6 +9198,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     42: "Falange di sensori",
     43: "Portale iperspaziale",
     44: "Silos missilistico",
+    45: "Scanner di anomalie interstellari",
     106: "Spionaggio",
     108: "Computer",
     109: "Armi",
