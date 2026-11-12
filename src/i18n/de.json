@@ -634,6 +634,8 @@
   "bar.missing": "fehlen",
   "totals.stock": "Auf Lager",
   "totals.day": "Pro Tag",
+  "totals.flying": "davon unterwegs",
+  "totals.flyingHint": "Ladung deiner Flotten unterwegs (schon in den Zeilen oben enthalten): Metall {metal}, Kristall {crystal}, Deuterium {deuterium}. Aus der Ereignisliste des Spiels gelesen: öffne sie zum Aktualisieren.",
   "dock.journal": "Tagebuch",
   "dock.count": "Exp.",
   "dock.today": "Heute",

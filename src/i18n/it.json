@@ -634,6 +634,8 @@
   "bar.missing": "mancano",
   "totals.stock": "In cassa",
   "totals.day": "Al giorno",
+  "totals.flying": "di cui in volo",
+  "totals.flyingHint": "Carico delle tue flotte in volo (già compreso nelle righe sopra): metallo {metal}, cristallo {crystal}, deuterio {deuterium}. Letto dalla lista eventi del gioco: aprila per aggiornarlo.",
   "dock.journal": "Diario",
   "dock.count": "sped.",
   "dock.today": "Oggi",

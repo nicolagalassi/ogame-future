@@ -33,6 +33,17 @@ describe('readPlanetList', () => {
 });
 
 describe('renderPlanetMenu', () => {
+  it('the totals count the cargo in flight, with a line that says how much', () => {
+    const go = (flying?: { metal: number; crystal: number; deuterium: number }) => {
+      document.body.innerHTML = PLANET_LIST_HTML;
+      renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, flying, settings: { mode: 'side', showTotals: true, totalView: 'sum' }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true) });
+      return document.querySelector('.fut-totals')!;
+    };
+    expect(go().querySelector('.fut-flyrow')).toBeNull();
+    const box = go({ metal: 3_000_000_000, crystal: 0, deuterium: 0 });
+    expect(box.querySelector('.fut-flyrow')?.textContent).toContain('3,0G');
+  });
+
   it('timers count from the last visit of each body, not from the data read by a sync', async () => {
     const { markVisited } = await import('../src/data/visits');
     let visits = markVisited({}, 1, 60_000);

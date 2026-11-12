@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.49
+// @version      0.3.50
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -823,6 +823,8 @@
     "bar.missing": "mancano",
     "totals.stock": "In cassa",
     "totals.day": "Al giorno",
+    "totals.flying": "di cui in volo",
+    "totals.flyingHint": "Carico delle tue flotte in volo (gi\xE0 compreso nelle righe sopra): metallo {metal}, cristallo {crystal}, deuterio {deuterium}. Letto dalla lista eventi del gioco: aprila per aggiornarlo.",
     "dock.journal": "Diario",
     "dock.count": "sped.",
     "dock.today": "Oggi",
@@ -1565,6 +1567,8 @@
     "bar.missing": "missing",
     "totals.stock": "In stock",
     "totals.day": "Per day",
+    "totals.flying": "of which in flight",
+    "totals.flyingHint": "Cargo of your fleets in flight (already included in the lines above): metal {metal}, crystal {crystal}, deuterium {deuterium}. Read from the game's event list: open it to update.",
     "dock.journal": "Journal",
     "dock.count": "exp.",
     "dock.today": "Today",
@@ -2307,6 +2311,8 @@
     "bar.missing": "manque",
     "totals.stock": "En stock",
     "totals.day": "Par jour",
+    "totals.flying": "dont en vol",
+    "totals.flyingHint": "Cargaison de vos flottes en vol (d\xE9j\xE0 comprise dans les lignes ci-dessus) : m\xE9tal {metal}, cristal {crystal}, deut\xE9rium {deuterium}. Lue dans la liste des \xE9v\xE9nements du jeu : ouvrez-la pour la mettre \xE0 jour.",
     "dock.journal": "Journal",
     "dock.count": "exp.",
     "dock.today": "Aujourd'hui",
@@ -3049,6 +3055,8 @@
     "bar.missing": "fehlen",
     "totals.stock": "Auf Lager",
     "totals.day": "Pro Tag",
+    "totals.flying": "davon unterwegs",
+    "totals.flyingHint": "Ladung deiner Flotten unterwegs (schon in den Zeilen oben enthalten): Metall {metal}, Kristall {crystal}, Deuterium {deuterium}. Aus der Ereignisliste des Spiels gelesen: \xF6ffne sie zum Aktualisieren.",
     "dock.journal": "Tagebuch",
     "dock.count": "Exp.",
     "dock.today": "Heute",
@@ -3353,6 +3361,92 @@
     return (visits[key] ?? 0) >= now ? visits : { ...visits, [key]: now };
   }
 
+  // src/data/flights.ts
+  var FLIGHTS_KEY = "fleet.inFlight";
+  var ZERO = { metal: 0, crystal: 0, deuterium: 0 };
+  var num2 = (text) => Number((text ?? "").replace(/\D/g, "")) || 0;
+  function parseFleetTooltip(html, doc) {
+    const box = doc.createElement("template");
+    box.innerHTML = html;
+    const sections = [];
+    for (const tr of box.content.querySelectorAll("tr")) {
+      if (tr.querySelector("th")) {
+        sections.push([]);
+        continue;
+      }
+      const value = tr.querySelector("td.value");
+      if (!value) continue;
+      if (!sections.length) sections.push([]);
+      sections[sections.length - 1].push({ label: (tr.querySelector("td")?.textContent ?? "").trim(), value: num2(value.textContent) });
+    }
+    const filled = sections.filter((s) => s.length);
+    const cargoPart = filled.length > 1 ? filled[filled.length - 1] : [];
+    const shipPart = filled[0] ?? [];
+    return {
+      ships: shipPart.map((s) => `${s.label}${s.value}`).join(","),
+      cargo: cargoPart.length >= 3 ? { metal: cargoPart[0].value, crystal: cargoPart[1].value, deuterium: cargoPart[2].value } : { ...ZERO }
+    };
+  }
+  function readEventFlights(doc, offset) {
+    const table = doc.getElementById("eventContent");
+    if (!table || !table.querySelector("tr")) return null;
+    const groups = /* @__PURE__ */ new Map();
+    for (const row of table.querySelectorAll("tr.eventFleet")) {
+      if (!row.querySelector("td.countDown.friendly, td.countDown .friendly")) continue;
+      const arrival = Number(row.dataset.arrivalTime) * 1e3 - offset;
+      if (!(arrival > 0)) continue;
+      const mission = Number(row.dataset.missionType) || 0;
+      const back = row.dataset.returnFlight === "true";
+      const tip = row.querySelector("td.icon_movement .tooltip, td.icon_movement_reserve .tooltip, td.icon_movement [data-tooltip-title], td.icon_movement_reserve [data-tooltip-title]");
+      const html = tip?.getAttribute("data-tooltip-title") ?? tip?.getAttribute("title") ?? "";
+      const { ships, cargo } = parseFleetTooltip(html, doc);
+      const coords = [row.querySelector("td.coordsOrigin")?.textContent, row.querySelector("td.destCoords")?.textContent].map((c) => (c ?? "").replace(/\s+/g, ""));
+      const key = `${mission}|${coords.sort().join(">")}|${ships}`;
+      const g = groups.get(key) ?? { mission, cargo: { ...ZERO }, outbound: 0, latest: 0 };
+      g.cargo = { metal: Math.max(g.cargo.metal, cargo.metal), crystal: Math.max(g.cargo.crystal, cargo.crystal), deuterium: Math.max(g.cargo.deuterium, cargo.deuterium) };
+      if (!back) g.outbound = Math.max(g.outbound, arrival);
+      g.latest = Math.max(g.latest, arrival);
+      groups.set(key, g);
+    }
+    return [...groups].map(([key, g]) => ({
+      key,
+      cargo: g.cargo,
+      // Transport and deploy leave the cargo at the destination; the others bring it back home.
+      until: (g.mission === 3 || g.mission === 4) && g.outbound ? g.outbound : g.latest
+    }));
+  }
+  function flyingTotal(flights, now) {
+    const out = { ...ZERO };
+    for (const f of flights?.list ?? []) {
+      if (f.until <= now) continue;
+      out.metal += f.cargo.metal;
+      out.crystal += f.cargo.crystal;
+      out.deuterium += f.cargo.deuterium;
+    }
+    return out;
+  }
+  function watchFlights(doc, offset, onRead) {
+    let last2 = "";
+    const read = () => {
+      const list = readEventFlights(doc, offset);
+      if (!list) return;
+      const sig = JSON.stringify(list);
+      if (sig === last2) return;
+      last2 = sig;
+      onRead(list);
+    };
+    read();
+    let queued2 = false;
+    new MutationObserver(() => {
+      if (queued2) return;
+      queued2 = true;
+      setTimeout(() => {
+        queued2 = false;
+        read();
+      }, 100);
+    }).observe(doc.body, { childList: true, subtree: true });
+  }
+
   // src/data/score.ts
   var SCORE_KEY = "account.score";
   function readScore(doc, now) {
@@ -3415,17 +3509,17 @@
   function parseServerData(xml, now) {
     const doc = new DOMParser().parseFromString(xml, "text/html");
     const root = doc.querySelector("serverdata");
-    const num4 = (tag) => Number(root?.querySelector(tag)?.textContent?.trim());
-    const galaxies = num4("galaxies"), systems = num4("systems");
+    const num5 = (tag) => Number(root?.querySelector(tag)?.textContent?.trim());
+    const galaxies = num5("galaxies"), systems = num5("systems");
     if (!root || !galaxies || !systems) return null;
     return {
       at: now,
       galaxies,
       systems,
-      donutGalaxy: num4("donutGalaxy") === 1,
-      donutSystem: num4("donutSystem") === 1,
-      speedFleetWar: num4("speedFleetWar") || 1,
-      speedFleetPeaceful: num4("speedFleetPeaceful") || 1
+      donutGalaxy: num5("donutGalaxy") === 1,
+      donutSystem: num5("donutSystem") === 1,
+      speedFleetWar: num5("speedFleetWar") || 1,
+      speedFleetPeaceful: num5("speedFleetPeaceful") || 1
     };
   }
   async function loadServerDataOnPageLoad(deps) {
@@ -5191,7 +5285,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
   var DAY = 864e5;
   var KEEP_MS = 550 * DAY;
   var MAX_ENTRIES = 25e3;
-  var ZERO = () => ({ metal: 0, crystal: 0, deuterium: 0, darkMatter: 0 });
+  var ZERO2 = () => ({ metal: 0, crystal: 0, deuterium: 0, darkMatter: 0 });
   function record2(journal, messages) {
     let added = 0;
     let next = journal;
@@ -5229,7 +5323,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     return entries.length === Object.keys(journal).length ? journal : Object.fromEntries(entries);
   }
   function unitsValue(units) {
-    const out = ZERO();
+    const out = ZERO2();
     for (const [id, n] of Object.entries(units)) {
       const c = rawCost(Number(id), 1);
       out.metal += c.metal * n;
@@ -5244,11 +5338,11 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       count: 0,
       discoveries: 0,
       outcomes: {},
-      res: ZERO(),
+      res: ZERO2(),
       shipsFound: {},
-      shipsValue: ZERO(),
+      shipsValue: ZERO2(),
       lost: {},
-      lostValue: ZERO(),
+      lostValue: ZERO2(),
       lfXp: 0,
       artefacts: 0,
       items: [],
@@ -5335,7 +5429,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     return { metal: s.res.metal, crystal: s.res.crystal * 1.5, deuterium: s.res.deuterium * 3, ships: msu(s.shipsValue) };
   }
   function raidStats(entries) {
-    const s = { count: 0, res: ZERO(), lost: {}, lostValue: ZERO(), netMsu: 0 };
+    const s = { count: 0, res: ZERO2(), lost: {}, lostValue: ZERO2(), netMsu: 0 };
     for (const e of entries) {
       if (e.kind !== "raid") continue;
       s.count += e.summary?.count ?? 1;
@@ -5539,16 +5633,16 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
   function parseSpeciesBonuses(json2, at) {
     const data = (json2 ?? {}).data;
     if (!data?.expedition || typeof data.expedition !== "object") return null;
-    const num4 = (v) => Number.isFinite(Number(v)) ? Number(v) : 0;
-    const value = num4(data.expedition.ResultBooster?.totalBonus?.ResultBooster);
+    const num5 = (v) => Number.isFinite(Number(v)) ? Number(v) : 0;
+    const value = num5(data.expedition.ResultBooster?.totalBonus?.ResultBooster);
     const ships = {};
     for (const [id, b] of Object.entries(data.ships ?? {})) {
       if (Number(id) < 200 || Number(id) > 299) continue;
       const tb = b?.totalBonus ?? {};
-      ships[id] = { weapon: num4(tb.weapon), shield: num4(tb.shield), armor: num4(tb.armor), cargo: num4(tb.cargo), speed: num4(tb.speed), fuel: num4(tb.fuel) };
+      ships[id] = { weapon: num5(tb.weapon), shield: num5(tb.shield), armor: num5(tb.armor), cargo: num5(tb.cargo), speed: num5(tb.speed), fuel: num5(tb.fuel) };
     }
     const classBooster = {};
-    for (const cls of [1, 2, 3]) classBooster[cls] = num4(data.characterclasses?.[String(600 + cls)]?.totalBonus?.characterClass);
+    for (const cls of [1, 2, 3]) classBooster[cls] = num5(data.characterclasses?.[String(600 + cls)]?.totalBonus?.characterClass);
     return { expedition: value > 0 ? value : 0, ships, classBooster, at };
   }
   var sessionKey2 = (store) => `${store.namespace}:lf.hydrated`;
@@ -5735,24 +5829,24 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     const n = Number.parseInt(value ?? "", 10);
     return Number.isFinite(n) ? n : 0;
   };
-  var num2 = (value) => {
+  var num3 = (value) => {
     const n = Number(value);
     return Number.isFinite(n) ? n : 0;
   };
   function readRes(raw) {
     return {
-      metal: num2(raw.metal),
-      crystal: num2(raw.crystal),
-      deuterium: num2(raw.deuterium ?? raw.deut),
-      food: num2(raw.food),
-      darkMatter: num2(raw.darkMatter ?? raw.darkmatter)
+      metal: num3(raw.metal),
+      crystal: num3(raw.crystal),
+      deuterium: num3(raw.deuterium ?? raw.deut),
+      food: num3(raw.food),
+      darkMatter: num3(raw.darkMatter ?? raw.darkmatter)
     };
   }
   function readUnits(raw) {
     const out = {};
     for (const [key, value] of Object.entries(raw)) {
       const id = Math.abs(Number(key));
-      const amount = typeof value === "object" && value ? num2(value.amount) : num2(value);
+      const amount = typeof value === "object" && value ? num3(value.amount) : num3(value);
       if (id > 0 && amount) out[id] = (out[id] ?? 0) + amount;
     }
     return out;
@@ -5913,7 +6007,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     const attacker = sides.has("attacker");
     const winner = result.winner === "none" ? "draw" : result.winner && sides.has(result.winner) ? "won" : result.winner ? "lost" : "unknown";
     const pick = (list, key) => {
-      const of = (r) => num2(list?.find((x) => x.resource === r)?.[key]);
+      const of = (r) => num3(list?.find((x) => x.resource === r)?.[key]);
       return { metal: of("metal"), crystal: of("crystal"), deuterium: of("deuterium") };
     };
     let loot = { metal: 0, crystal: 0, deuterium: 0 };
@@ -5927,7 +6021,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
         for (const tech of f.technologies ?? []) if (tech.technologyId && tech.destroyedTotal) lost[tech.technologyId] = (lost[tech.technologyId] ?? 0) + tech.destroyedTotal;
       }
     if (!attacker && defender.owner?.id === own) {
-      for (const r of result.repairedTechnologies ?? []) if (r.technologyId && lost[r.technologyId]) lost[r.technologyId] = Math.max(0, lost[r.technologyId] - num2(r.amount));
+      for (const r of result.repairedTechnologies ?? []) if (r.technologyId && lost[r.technologyId]) lost[r.technologyId] = Math.max(0, lost[r.technologyId] - num3(r.amount));
     }
     return { kind: "combat", id, at, coords: d.rawCoords || null, attacker, winner, loot, lost, debris: pick(result.debris?.resources, "remaining"), apiKey: d.rawHashcode ?? "" };
   }
@@ -7232,9 +7326,9 @@ td.spark-cell { width: 90px; }
     const m = raw.match(/^([\d.,]+)([kmg])?$/);
     if (!m) return 0;
     const unit = m[2] === "k" ? 1e3 : m[2] === "m" ? 1e6 : m[2] === "g" ? 1e9 : 1;
-    let num4 = m[1];
-    num4 = unit === 1 ? num4.replace(/[.,]/g, "") : num4.replace(",", ".");
-    const value = Number(num4) * unit;
+    let num5 = m[1];
+    num5 = unit === 1 ? num5.replace(/[.,]/g, "") : num5.replace(",", ".");
+    const value = Number(num5) * unit;
     return Number.isFinite(value) ? Math.floor(value) : 0;
   }
   var SETTINGS_KEY = "fleet.settings";
@@ -8291,6 +8385,7 @@ ${L} .fut-fleet-m { display: inline-flex; align-items: center; gap: 2px; color: 
 ${L} .fut-fleet-m svg { flex: none; opacity: 0.8; }
 ${L}.fut-mode-compact .fut-fleet-m { display: none; }
 .fut-totals .fut-fleetrow .fut-tname { color: #FFA0A0; }
+.fut-totals .fut-flyrow, .fut-totals .fut-flyrow .fut-tname { color: #8A9BB0; font-size: 0.92em; }
 
 /* Moon: its own tile on the right of the same row. */
 ${L} a.moonlink {
@@ -8830,7 +8925,10 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     const colonies = (doc.getElementById("countColonies")?.textContent ?? "").replace(/\s+/g, " ").trim();
     list.before(toolbar(o, colonies, roomy));
     if (o.snapshot && o.settings.showTotals) {
-      const { stock: stock2, perHour } = totals(o.snapshot, o.now);
+      const base = totals(o.snapshot, o.now);
+      const perHour = base.perHour;
+      const fly = o.flying ?? { metal: 0, crystal: 0, deuterium: 0 };
+      const stock2 = { metal: base.stock.metal + fly.metal, crystal: base.stock.crystal + fly.crystal, deuterium: base.stock.deuterium + fly.deuterium };
       const msu4 = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
       const box = el3(doc, "div", "fut-totals");
       box.setAttribute("role", "table");
@@ -8858,6 +8956,12 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
       const plain = (r) => r.metal + r.crystal + r.deuterium;
       if (o.settings.totalView === "sum") line(o.t("totals.sum"), plain(stock2), plain(perHour), "fut-msu", "total");
       else line("MSU", msu4(stock2), msu4(perHour), "fut-msu", "total");
+      const flyTotal = o.settings.totalView === "sum" ? plain(fly) : msu4(fly);
+      if (flyTotal > 0) {
+        row("fut-flyrow", [o.t("totals.flying"), formatUnits(flyTotal, o.locale), ""], "transport");
+        const r = box.lastElementChild;
+        r.title = o.t("totals.flyingHint", { metal: formatUnits(fly.metal, o.locale), crystal: formatUnits(fly.crystal, o.locale), deuterium: formatUnits(fly.deuterium, o.locale) });
+      }
       if (view2.fleet) row("fut-fleetrow", [o.t("planetMenu.fleet"), formatUnits(o.snapshot.bodies.reduce((sum, b) => sum + fleetValue(b), 0), o.locale), ""], "fleetValue");
       list.after(box);
     }
@@ -10091,7 +10195,7 @@ table.queues td.acts { width: 1%; text-align: right; }
   }
 
   // src/data/tech-details.ts
-  var num3 = (value) => {
+  var num4 = (value) => {
     if (value == null) return null;
     const n = Number(String(value).replace(/[^\d.-]/g, ""));
     return Number.isFinite(n) && String(value).trim() !== "" ? n : null;
@@ -10099,9 +10203,9 @@ table.queues td.acts { width: 1%; text-align: right; }
   function readTechList(doc) {
     return Array.from(doc.querySelectorAll("#technologies .technology[data-technology]")).flatMap((el6) => {
       const id = Number(el6.getAttribute("data-technology"));
-      const built = num3(el6.querySelector(".level")?.getAttribute("data-value"));
+      const built = num4(el6.querySelector(".level")?.getAttribute("data-value"));
       if (!id || built === null) return [];
-      const target = num3(el6.querySelector(".targetlevel")?.getAttribute("data-value"));
+      const target = num4(el6.querySelector(".targetlevel")?.getAttribute("data-value"));
       return [{ id, name: el6.getAttribute("aria-label") ?? el6.getAttribute("title") ?? String(id), built, level: Math.max(built, target ?? 0) }];
     });
   }
@@ -10111,7 +10215,7 @@ table.queues td.acts { width: 1%; text-align: right; }
   function costValue(root, cls) {
     const el6 = root.querySelector(`.costs .${cls}`);
     if (!el6) return void 0;
-    const v = num3(el6.getAttribute("data-value")) ?? num3(el6.getAttribute("data-tooltip-title") ?? el6.getAttribute("title")) ?? num3(el6.textContent);
+    const v = num4(el6.getAttribute("data-value")) ?? num4(el6.getAttribute("data-tooltip-title") ?? el6.getAttribute("title")) ?? num4(el6.textContent);
     return v ?? void 0;
   }
   function readTechDetails(doc) {
@@ -10137,7 +10241,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       root,
       id,
       name: root.querySelector("h3")?.textContent?.trim() ?? String(id),
-      panelLevel: num3(root.querySelector(".information .level")?.getAttribute("data-value")),
+      panelLevel: num4(root.querySelector(".information .level")?.getAttribute("data-value")),
       shown: shown2,
       population,
       durationMs,
@@ -11447,11 +11551,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     typeSeg.setAttribute("aria-label", t("fleet.type"));
     const showType = () => typeSeg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(Number(x.dataset.type) === type)));
     const store = () => {
-      const num4 = (i) => parseAmount(i.value) || null;
-      const position = num4(pIn) ?? 0;
+      const num5 = (i) => parseAmount(i.value) || null;
+      const position = num5(pIn) ?? 0;
       pIn.classList.toggle("bad", Boolean(pIn.value.trim()) && !(position >= 1 && position <= 17));
       const empty = !gIn.value.trim() && !sIn.value.trim() && !pIn.value.trim();
-      save({ sendTarget: empty ? null : { galaxy: num4(gIn), system: num4(sIn), position, type } });
+      save({ sendTarget: empty ? null : { galaxy: num5(gIn), system: num5(sIn), position, type } });
     };
     const fill = (g, sys, pos) => {
       gIn.value = String(g);
@@ -13966,6 +14070,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         snapshot,
         queues,
         visits: store.get(VISITED_KEY, {}),
+        flying: flyingTotal(store.get(FLIGHTS_KEY, null), Date.now()),
         settings,
         now: Date.now(),
         locale,
@@ -14076,6 +14181,10 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     const reminders = { doc: document, store, t, locale, offset: clockOffset(document, Date.now()) };
     startReminders(reminders);
     watchEventList(reminders);
+    watchFlights(document, reminders.offset, (list2) => {
+      store.set(FLIGHTS_KEY, { readAt: Date.now(), list: list2 });
+      draw();
+    });
     if (isHighscorePage(document)) watchHighscore({ doc: document, store, locale, t, guard });
     if (isMessagesPage(document))
       refreshInbox = watchMessages({
