@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.47
+// @version      0.3.48
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -10567,7 +10567,9 @@ table.queues td.acts { width: 1%; text-align: right; }
     const original = fd.submitFleet2;
     if (!original || original.futHooked) return;
     const win = pageWindow();
+    let leaving = false;
     const wrapped = function(force) {
+      if (leaving) return void 0;
       const $ = win.$;
       if (!$) return original.call(fd, force);
       const post = $.post;
@@ -10580,7 +10582,10 @@ table.queues td.acts { width: 1%; text-align: right; }
           } catch {
             ok = false;
           }
-          if (ok && onSent()) return void 0;
+          if (ok && onSent()) {
+            leaving = true;
+            return void 0;
+          }
           return cb.call(this, response);
         });
       };

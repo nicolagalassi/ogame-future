@@ -358,16 +358,21 @@ describe('repeat', () => {
     const fd = fakeDispatcher() as unknown as FleetDispatcher & { submitFleet2: () => void; sendFleetUrl: string };
     fd.sendFleetUrl = 'send';
     fd.submitFleet2 = () => (window as unknown as { $: { post: (u: string, p: unknown, cb: (r: string) => void) => void } }).$.post('send', {}, () => calls.push('game callback'));
-    let takeOver = true;
+    let takeOver = false;
     hookSend(fd, () => takeOver);
     fd.submitFleet2();
-    expect(calls).toEqual(['post send']);
-    takeOver = false;
-    fd.submitFleet2();
+    expect(calls).toEqual(['post send', 'game callback']);
     reply = '{"success":false}';
     takeOver = true;
     fd.submitFleet2();
-    expect(calls).toEqual(['post send', 'post send', 'game callback', 'post send', 'game callback']);
+    expect(calls).toEqual(['post send', 'game callback', 'post send', 'game callback']);
+    reply = '{"success":true}';
+    fd.submitFleet2();
+    expect(calls).toEqual(['post send', 'game callback', 'post send', 'game callback', 'post send']);
+    // The page is leaving for the next body: Invio pressed again meanwhile sends nothing more from here.
+    fd.submitFleet2();
+    fd.submitFleet2();
+    expect(calls).toHaveLength(5);
   });
 });
 
