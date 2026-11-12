@@ -66,6 +66,27 @@ export function readCurrentResources(doc: Document): { metal: number; crystal: n
   return metal == null || crystal == null || deuterium == null ? null : { metal, crystal, deuterium };
 }
 
+/** Energy balance of the body on screen (production − consumption), signed, from the resource bar. */
+export function readCurrentEnergy(doc: Document): number | null {
+  const el = doc.getElementById('resources_energy');
+  const value = el?.getAttribute('data-raw') ?? el?.textContent?.replace(/[^\d-]/g, '');
+  const n = Number(value);
+  return value != null && value !== '' && Number.isFinite(n) ? n : null;
+}
+
+/**
+ * Max temperature of the planet on screen, from its tooltip in the game's planet list
+ * ("da 27°C a 67°C"): the second value. Null on a moon or when the list does not say.
+ */
+export function currentMaxTemperature(doc: Document): number | null {
+  if (doc.querySelector('meta[name="ogame-planet-type"]')?.getAttribute('content') === 'moon') return null;
+  const id = currentBodyId(doc);
+  const link = id ? doc.querySelector<HTMLElement>(`#planet-${id} .planetlink`) : null;
+  const tip = link?.getAttribute('data-tooltip-title') ?? link?.getAttribute('title') ?? '';
+  const temps = Array.from(tip.matchAll(/(-?\d+)\s*°\s*C/g), (m) => Number(m[1]));
+  return temps.length >= 2 ? Math.max(...temps.slice(0, 2)) : null;
+}
+
 export function currentBodyId(doc: Document): number | null {
   const id = Number(doc.querySelector('meta[name="ogame-planet-id"]')?.getAttribute('content'));
   return Number.isFinite(id) && id > 0 ? id : null;
