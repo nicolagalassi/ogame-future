@@ -392,8 +392,8 @@ const EXPEDITION_TABLE = [
 ];
 
 /**
- * Most resources one expedition can bring back. Without the top score we assume the last
- * row (top player over 100M points), which is where almost every running universe is.
+ * Most resources one expedition can bring back, by the points of the universe's first player
+ * (public highscore, read on the fleet page). Without it we assume the last row (over 100M points).
  */
 export function expeditionMax(o: {
   topScore?: number;
