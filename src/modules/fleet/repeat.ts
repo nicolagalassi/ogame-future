@@ -69,7 +69,12 @@ export function hookSend(fd: FleetDispatcher & { submitFleet2?: (force?: boolean
   const original = fd.submitFleet2;
   if (!original || (original as { futHooked?: boolean }).futHooked) return;
   const win = pageWindow() as unknown as { $?: { post: PostFn } };
+  // Once we have taken over the page change after a send, this page is leaving: further presses of
+  // Invio (spammed while the next page loads) must not send again from here, with what is left on the
+  // planet. Only blocks the game's own send; it never sends anything.
+  let leaving = false;
   const wrapped = function (this: unknown, force?: boolean) {
+    if (leaving) return undefined;
     const $ = win.$;
     if (!$) return original.call(fd, force);
     const post = $.post;
@@ -82,7 +87,10 @@ export function hookSend(fd: FleetDispatcher & { submitFleet2?: (force?: boolean
         } catch {
           ok = false;
         }
-        if (ok && onSent()) return undefined;
+        if (ok && onSent()) {
+          leaving = true;
+          return undefined;
+        }
         return cb.call(this, response);
       });
     };
