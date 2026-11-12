@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.45
+// @version      0.3.46
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -209,7 +209,7 @@
     "settings.totals": "Totali risorse",
     "settings.on": "S\xEC",
     "settings.off": "No",
-    "planetMenu.age": "Minuti dall'ultimo aggiornamento dei dati (apri il pianeta per aggiornarli)",
+    "planetMenu.age": "Minuti dall'ultima volta che hai aperto questo pianeta o luna (la sincronizzazione non lo azzera)",
     "dash.title": "Dashboard",
     "dash.close": "Chiudi",
     "dash.noData": "nessun dato: premi Sincronizza",
@@ -951,7 +951,7 @@
     "settings.totals": "Resource totals",
     "settings.on": "On",
     "settings.off": "Off",
-    "planetMenu.age": "Minutes since the data was last updated (open the planet to refresh)",
+    "planetMenu.age": "Minutes since you last opened this planet or moon (a sync does not reset it)",
     "dash.title": "Dashboard",
     "dash.close": "Close",
     "dash.noData": "no data: press Sync",
@@ -1693,7 +1693,7 @@
     "settings.totals": "Totaux des ressources",
     "settings.on": "Oui",
     "settings.off": "Non",
-    "planetMenu.age": "Minutes depuis la derni\xE8re mise \xE0 jour (ouvrez la plan\xE8te pour actualiser)",
+    "planetMenu.age": "Minutes depuis votre derni\xE8re visite de cette plan\xE8te ou lune (la synchronisation ne la remet pas \xE0 z\xE9ro)",
     "dash.title": "Tableau de bord",
     "dash.close": "Fermer",
     "dash.noData": "aucune donn\xE9e : appuyez sur Synchroniser",
@@ -2435,7 +2435,7 @@
     "settings.totals": "Rohstoffsummen",
     "settings.on": "An",
     "settings.off": "Aus",
-    "planetMenu.age": "Minuten seit der letzten Aktualisierung (Planeten \xF6ffnen zum Aktualisieren)",
+    "planetMenu.age": "Minuten seit du diesen Planeten oder Mond zuletzt ge\xF6ffnet hast (eine Synchronisierung setzt das nicht zur\xFCck)",
     "dash.title": "Dashboard",
     "dash.close": "Schlie\xDFen",
     "dash.noData": "keine Daten: Synchronisieren dr\xFCcken",
@@ -3344,6 +3344,13 @@
       }
     }
     return { stock: stock2, perHour };
+  }
+
+  // src/data/visits.ts
+  var VISITED_KEY = "bodies.visitedAt";
+  function markVisited(visits, bodyId, now) {
+    const key = String(bodyId);
+    return (visits[key] ?? 0) >= now ? visits : { ...visits, [key]: now };
   }
 
   // src/data/score.ts
@@ -8547,11 +8554,12 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     const text = minutes < 60 ? String(minutes) : minutes < 1440 ? `${Math.floor(minutes / 60)}h` : `${Math.floor(minutes / 1440)}d`;
     return { text, cls };
   }
-  function ageBadge(doc, body, now, t) {
-    if (!body || !body.resourcesAt) return null;
-    const { text, cls } = dataAge(body.resourcesAt, now);
+  function ageBadge(doc, id, visits, now, t) {
+    const at = id ? visits?.[String(id)] : void 0;
+    if (!at) return null;
+    const { text, cls } = dataAge(at, now);
     const badge = el3(doc, "span", `fut-age ${cls}`, text);
-    badge.dataset.at = String(body.resourcesAt);
+    badge.dataset.at = String(at);
     badge.title = t("planetMenu.age");
     return badge;
   }
@@ -8786,7 +8794,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
           if (line) wrap.append(line);
         }
         link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true, view2));
-        const age = ageBadge(doc, planetBody, o.now, o.t);
+        const age = ageBadge(doc, entry.planetId, o.visits, o.now, o.t);
         if (age) link.append(age);
         const pq = queueDots(doc, entry.planetId ? activeItems(o.queues?.bodies[String(entry.planetId)], o.now) : [], entry.construction.planet, o.now, o.t, o.locale);
         if (pq) link.append(pq);
@@ -8796,7 +8804,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
       if (moon) {
         const moonBody = entry.moonId ? byId.get(entry.moonId) : void 0;
         moon.append(resourceColumn(doc, moonBody, o.now, o.locale, false, view2));
-        const age = ageBadge(doc, moonBody, o.now, o.t);
+        const age = ageBadge(doc, entry.moonId, o.visits, o.now, o.t);
         if (age) moon.append(age);
         const mq = queueDots(doc, entry.moonId ? activeItems(o.queues?.bodies[String(entry.moonId)], o.now) : [], entry.construction.moon, o.now, o.t, o.locale);
         if (mq) moon.append(mq);
@@ -13781,6 +13789,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     const bodyId = currentBodyId(document);
     const onPage = readCurrentResources(document);
     if (snapshot && bodyId && onPage && applyPageResources(snapshot, bodyId, onPage, Date.now())) saver.markDirty();
+    if (bodyId) store.set(VISITED_KEY, markVisited(store.get(VISITED_KEY, {}), bodyId, Date.now()));
     if (queues) {
       const pruned = pruneByQueues(store.get(PLAN_KEY, {}), queues.bodies);
       if (pruned.changed) store.set(PLAN_KEY, pruned.plan);
@@ -13908,6 +13917,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         entries: readPlanetList(document),
         snapshot,
         queues,
+        visits: store.get(VISITED_KEY, {}),
         settings,
         now: Date.now(),
         locale,

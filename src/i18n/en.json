@@ -20,7 +20,7 @@
   "settings.totals": "Resource totals",
   "settings.on": "On",
   "settings.off": "Off",
-  "planetMenu.age": "Minutes since the data was last updated (open the planet to refresh)",
+  "planetMenu.age": "Minutes since you last opened this planet or moon (a sync does not reset it)",
   "dash.title": "Dashboard",
   "dash.close": "Close",
   "dash.noData": "no data: press Sync",

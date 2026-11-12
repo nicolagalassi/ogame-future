@@ -10,6 +10,7 @@ import { detectLocale, translator } from './core/i18n';
 import { SNAPSHOT_KEY, hydrateAccountOncePerSession, syncAccountOnUserClick, type AccountSnapshot } from './data/account-info';
 import { currentBodyId, readCurrentResources, readPlanetList } from './data/planet-list';
 import { applyPageResources, mergeNewerResources } from './engines/resources';
+import { VISITED_KEY, markVisited, type Visits } from './data/visits';
 import { SCORE_KEY, watchScore, type Score } from './data/score';
 import { HISTORY_KEY, recordDay, type History } from './engines/history';
 import { loadServerDataOnPageLoad } from './data/server-data';
@@ -100,6 +101,8 @@ async function bootstrap(): Promise<void> {
   const bodyId = currentBodyId(document);
   const onPage = readCurrentResources(document);
   if (snapshot && bodyId && onPage && applyPageResources(snapshot, bodyId, onPage, Date.now())) saver.markDirty();
+  // The planet menu's timers: only a page the player opened on a body restarts that body's timer, never a sync.
+  if (bodyId) store.set(VISITED_KEY, markVisited(store.get<Visits>(VISITED_KEY, {}), bodyId, Date.now()));
 
   // Planned levels already in the construction queues leave the plan, on every page.
   if (queues) {
@@ -245,6 +248,7 @@ async function bootstrap(): Promise<void> {
       entries: readPlanetList(document),
       snapshot,
       queues,
+      visits: store.get<Visits>(VISITED_KEY, {}),
       settings,
       now: Date.now(),
       locale,

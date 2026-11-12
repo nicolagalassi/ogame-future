@@ -20,7 +20,7 @@
   "settings.totals": "Rohstoffsummen",
   "settings.on": "An",
   "settings.off": "Aus",
-  "planetMenu.age": "Minuten seit der letzten Aktualisierung (Planeten öffnen zum Aktualisieren)",
+  "planetMenu.age": "Minuten seit du diesen Planeten oder Mond zuletzt geöffnet hast (eine Synchronisierung setzt das nicht zurück)",
   "dash.title": "Dashboard",
   "dash.close": "Schließen",
   "dash.noData": "keine Daten: Synchronisieren drücken",

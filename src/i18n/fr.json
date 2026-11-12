@@ -20,7 +20,7 @@
   "settings.totals": "Totaux des ressources",
   "settings.on": "Oui",
   "settings.off": "Non",
-  "planetMenu.age": "Minutes depuis la dernière mise à jour (ouvrez la planète pour actualiser)",
+  "planetMenu.age": "Minutes depuis votre dernière visite de cette planète ou lune (la synchronisation ne la remet pas à zéro)",
   "dash.title": "Tableau de bord",
   "dash.close": "Fermer",
   "dash.noData": "aucune donnée : appuyez sur Synchroniser",

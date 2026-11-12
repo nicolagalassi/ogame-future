@@ -33,6 +33,16 @@ describe('readPlanetList', () => {
 });
 
 describe('renderPlanetMenu', () => {
+  it('timers count from the last visit of each body, not from the data read by a sync', async () => {
+    const { markVisited } = await import('../src/data/visits');
+    let visits = markVisited({}, 1, 60_000);
+    expect(markVisited(visits, 1, 30_000)).toBe(visits);
+    visits = markVisited(visits, 2, 50 * 60_000);
+    // The snapshot's resourcesAt (sync time) is ignored; body 3 was never opened: no timer.
+    renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, visits, settings: { mode: 'side', showTotals: true }, now: 61 * 60_000, locale: 'it', t, onSync: vi.fn(async () => true) });
+    expect([...document.querySelectorAll('.fut-age')].map((b) => b.textContent)).toEqual(['1h', '11']);
+  });
+
   it('a redraw (e.g. after adding to the plan) leaves one fleet line per planet, inside the name column', () => {
     const snapshot = { ...SNAPSHOT, bodies: SNAPSHOT.bodies.map((b) => ({ ...b, levels: { 203: 10 } })) };
     const once = () => renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot, settings: { mode: 'side', showTotals: true, showFleet: true }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true) });
