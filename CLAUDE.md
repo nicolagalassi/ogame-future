@@ -6,6 +6,7 @@
 - Il codice pubblicato non si minifica (`scripts/build.mjs`).
 - Prima di ogni push: `npm run check` (typecheck, test, build).
 - Ogni push su main alza `version` in `package.json` (Tampermonkey aggiorna solo se la versione cresce; `@updateURL` punta a `dist/future.user.js` su main).
+- A fine lavoro: push sul branch di sviluppo, PR in bozza, poi merge su main subito, senza chiedere conferma a Nicola.
 - Prova in gioco con il browser dev (`npm run dev`, poi `dev:reload` / `dev:eval` / `dev:shot`): vedi `.claude/QUICK_START.md`.
 
 ---
