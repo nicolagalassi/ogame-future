@@ -634,6 +634,8 @@
   "bar.missing": "missing",
   "totals.stock": "In stock",
   "totals.day": "Per day",
+  "totals.flying": "of which in flight",
+  "totals.flyingHint": "Cargo of your fleets in flight (already included in the lines above): metal {metal}, crystal {crystal}, deuterium {deuterium}. Read from the game's event list: open it to update.",
   "dock.journal": "Journal",
   "dock.count": "exp.",
   "dock.today": "Today",
