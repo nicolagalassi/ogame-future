@@ -12,6 +12,7 @@
  */
 import { rememberTechIcons } from '../../data/tech-icons';
 import { icon } from '../../core/icons';
+import { resIconSvg } from '../../core/res-icons';
 import type { Store } from '../../core/storage';
 import { formatUnits, groupInt, groupWhileTyping } from '../../core/format';
 import { levelsOf, readTechDetails, readTechList, type TechDetails } from '../../data/tech-details';
@@ -26,6 +27,7 @@ import {
   techKind,
   type Cost,
 } from '../../engines/tech';
+import { extraConsumption, perSatellite, satellitesFor, type SatelliteBook } from '../../engines/energy';
 import { addToPlan, inPlan, PLAN_KEY, prune, removeFromPlan, startBuild, type Plan, type PlanItem } from '../../engines/planner';
 import { TECH_CSS } from './style';
 
@@ -39,6 +41,10 @@ export interface TechOptions {
   locale: string;
   /** Resources on this body now (the game's resource bar). */
   have: () => { metal: number; crystal: number; deuterium: number } | null;
+  /** Energy balance of this body now (the game's resource bar), signed. */
+  energy: () => number | null;
+  /** Max temperature of this planet (planet list), null on a moon. */
+  maxTemp: number | null;
   /** Called after the plan changes (planet menu badge). */
   onPlanChange?: () => void;
 }
@@ -85,6 +91,10 @@ export function formatDuration(ms: number): string {
 
 export const loadPlan = (store: Store): Plan => store.get<Plan>(PLAN_KEY, {});
 
+/** Energy of one solar satellite per planet, read on the game's satellite panel. */
+export const SAT_KEY = 'satEnergy';
+const SATELLITE = 212;
+
 /** Levelled tech: where the panel starts and the bonus the game applied. */
 function startLevel(details: TechDetails, listLevel: number | undefined, built: number | undefined): { level: number; discount: number } {
   const candidates = [details.panelLevel ?? 0, (details.panelLevel ?? 0) + 1, (listLevel ?? 0) + 1, (built ?? 0) + 1];
@@ -116,6 +126,7 @@ const ICON = {
   time: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
   energy: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>',
   start: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v5h5"/></svg>',
+  sat: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="9" y="9" width="6" height="6" rx="1"/><path d="M2 9h5v6H2zM17 9h5v6h-5zM7 12h2M15 12h2M12 9V5"/></svg>',
   pop: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.6 3-5.5 6-5.5s5.4 1.9 6 5.5"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.8M18.5 15c1.5.9 2.3 2.6 2.6 5"/></svg>',
 };
 
@@ -126,13 +137,26 @@ interface View {
   cols: { cost: Cost; cls?: string; short?: boolean }[];
 }
 
-/** The cost grid: one row per resource (+ MSU), one column per view (level, range, missing). */
+/** Resource symbol before each row name: the same drawing as the planet menu and the inbox. */
+const ROW_ICON: Record<(typeof RES)[number][0], string> = {
+  metal: resIconSvg('metal', 12),
+  crystal: resIconSvg('crystal', 12),
+  deuterium: resIconSvg('deuterium', 12),
+  energy: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>',
+};
+
+/**
+ * The cost grid, a ledger: one row per resource and a total row (MSU), one column per view
+ * (level, range, missing). Words in Arial, numbers in the mono face of the planet menu; the
+ * missing column is a tinted band, red where something lacks.
+ */
 function grid(o: TechOptions, view: View, have: boolean): HTMLElement {
   const { doc, t, locale } = o;
   const g = el(doc, 'div', 'fut-tp-grid');
-  g.style.gridTemplateColumns = `auto repeat(${view.cols.length}, minmax(0, 1fr))`;
+  g.style.gridTemplateColumns = `minmax(0, auto) repeat(${view.cols.length}, minmax(0, 1fr))`;
+  const band = (col: View['cols'][number]) => (col.short ? (msu(col.cost) > 0 ? ' fut-tp-miss' : ' fut-tp-miss fut-tp-none') : '');
   g.append(el(doc, 'span', 'fut-tp-h'));
-  for (const h of view.heads) g.append(el(doc, 'span', 'fut-tp-h', h));
+  view.heads.forEach((h, i) => g.append(el(doc, 'span', `fut-tp-h${band(view.cols[i]!)}`, h)));
   const rows = RES.filter(([key]) => view.cols.some((c) => !c.short && c.cost[key] > 0));
   const cell = (value: number, cls: string) => {
     const c = el(doc, 'span', `fut-tp-v ${cls}`, value ? formatUnits(value, locale) : '—');
@@ -140,19 +164,22 @@ function grid(o: TechOptions, view: View, have: boolean): HTMLElement {
     return c;
   };
   for (const [key, cls] of rows) {
-    g.append(el(doc, 'span', `fut-tp-k fut-${cls}`, t(`tech.res.${key}`)));
+    const k = el(doc, 'span', `fut-tp-k fut-${cls}`);
+    k.innerHTML = ROW_ICON[key];
+    k.append(el(doc, 'span', '', t(`tech.res.${key}`)));
+    g.append(k);
     for (const col of view.cols) {
       if (!col.short) g.append(cell(col.cost[key], col.cls ?? ''));
-      else if (key === 'energy') g.append(el(doc, 'span', 'fut-tp-v'));
-      else if (col.cost[key] > 0) g.append(cell(-col.cost[key], 'fut-tp-short'));
-      else g.append(okCell(doc, have, 'fut-tp-v fut-tp-ok'));
+      else if (key === 'energy') g.append(el(doc, 'span', `fut-tp-v${band(col)}`));
+      else if (col.cost[key] > 0) g.append(cell(-col.cost[key], `fut-tp-short${band(col)}`));
+      else g.append(okCell(doc, have, `fut-tp-v fut-tp-ok${band(col)}`));
     }
   }
-  g.append(el(doc, 'span', 'fut-tp-k fut-tp-msu', 'MSU'));
+  g.append(el(doc, 'span', 'fut-tp-k fut-tp-msu fut-tp-total', 'MSU'));
   for (const col of view.cols) {
     const v = msu(col.cost);
-    if (col.short) g.append(v > 0 ? cell(-v, 'fut-tp-short fut-tp-msu') : okCell(doc, have, 'fut-tp-v fut-tp-ok fut-tp-msu'));
-    else g.append(cell(v, `${col.cls ?? ''} fut-tp-msu`));
+    if (col.short) g.append(v > 0 ? cell(-v, `fut-tp-short fut-tp-msu fut-tp-total${band(col)}`) : okCell(doc, have, `fut-tp-v fut-tp-ok fut-tp-msu fut-tp-total${band(col)}`));
+    else g.append(cell(v, `${col.cls ?? ''} fut-tp-msu fut-tp-total`));
   }
   return g;
 }
@@ -191,6 +218,85 @@ function gameChips(doc: Document, details: TechDetails): HTMLElement[] {
   return out;
 }
 
+/**
+ * The satellite panel says what the satellites give on this planet: kept, so the mine panels
+ * of this planet (and, as an estimate, of the others) can count satellites.
+ */
+function learnSatellite(o: TechOptions, details: TechDetails): void {
+  const p = details.energyProduction;
+  if (details.id !== SATELLITE || !p) return;
+  const perUnit = p.count > 0 ? p.total / p.count : (p.next ?? 0);
+  if (perUnit <= 0) return;
+  const book = o.store.get<SatelliteBook>(SAT_KEY, {});
+  book[String(o.bodyId)] = { perUnit, maxTemp: o.maxTemp, at: Date.now() };
+  o.store.set(SAT_KEY, book);
+}
+
+/** URL parameter the mine chip's link carries: the satellites to type in on the shipyard. */
+const SAT_PARAM = 'futSat';
+
+/**
+ * Types `n` in the game's amount field, as the player would: the game's own checks (max) and
+ * our panel follow it. COMPLIANCE: only fills the form; building stays the player's click on
+ * "Costruisci" (AGENTS.md §1.1).
+ */
+function fillAmount(input: HTMLInputElement, n: number): void {
+  input.value = String(n);
+  for (const type of ['input', 'change', 'keyup']) input.dispatchEvent(new Event(type, { bubbles: true }));
+}
+
+/** Satellites asked by the link of a mine chip, on the shipyard page it opened. Read once per page. */
+let askedSatellites: number | null | undefined;
+function takeAskedSatellites(doc: Document): number | null {
+  if (askedSatellites === undefined) {
+    const n = Number(new URL(doc.location?.href ?? 'http://x/').searchParams.get(SAT_PARAM));
+    askedSatellites = Number.isInteger(n) && n > 0 ? n : null;
+  }
+  const n = askedSatellites;
+  askedSatellites = null;
+  return n;
+}
+
+/**
+ * "N sat · energy": satellites that bring the balance back to zero after `need` more energy.
+ * A click types N in the satellite's amount field: on the satellite panel directly; from a mine
+ * it opens the satellite on the resources page (the game's own tile when it is on this page,
+ * else a plain link to that page) and types N there.
+ * Null when none are needed.
+ */
+function satelliteChip(o: TechOptions, need: number, amountInput: HTMLInputElement | null): HTMLElement | null {
+  const { doc, t, locale } = o;
+  const balance = o.energy();
+  if (balance === null) return null;
+  const per = perSatellite(o.store.get<SatelliteBook>(SAT_KEY, {}), o.bodyId, o.maxTemp);
+  if (!per) return null;
+  const sat = satellitesFor(balance, need, per.value);
+  if (!sat) return null;
+  const perText = per.value.toLocaleString(locale, { maximumFractionDigits: 1 });
+  const title = [
+    t(need > 0 ? 'tech.satNeed' : 'tech.satDeficit', { n: groupInt(sat.count, locale), energy: groupInt(Math.round(sat.energy), locale) }),
+    t('tech.satBalance', { energy: groupInt(Math.round(balance), locale) }),
+    t(per.exact ? 'tech.satPer' : 'tech.satPerGuess', { energy: perText }),
+  ].join(' · ');
+  const c = chip(doc, ICON.sat, `${per.exact ? '' : '≈'}${groupInt(sat.count, locale)} ${t('tech.satShort')} · ${groupInt(Math.round(sat.energy), locale)}`, `${title} · ${t(amountInput ? 'tech.satFill' : 'tech.satGo')}`, 'fut-tp-sat');
+  if (amountInput) {
+    c.addEventListener('click', () => fillAmount(amountInput, sat.count));
+    return c;
+  }
+  const a = el(doc, 'a', 'fut-tp-sat-link');
+  a.href = `index.php?page=ingame&component=supplies&openTech=${SATELLITE}&${SAT_PARAM}=${sat.count}`;
+  a.append(c);
+  // Same page: the game's satellite tile opens its panel, no page load.
+  a.addEventListener('click', (e) => {
+    const tile = doc.querySelector<HTMLElement>(`#technologies li[data-technology="${SATELLITE}"] .icon`);
+    if (!tile) return;
+    e.preventDefault();
+    askedSatellites = sat.count;
+    tile.click();
+  });
+  return a;
+}
+
 export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLElement | null {
   const { doc, t, locale } = o;
   const kind = techKind(details.id);
@@ -203,6 +309,7 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
   const levelLabel = details.root.querySelector<HTMLElement>('.information .level');
   const levelText = levelLabel?.textContent ?? '';
   const chips = gameChips(doc, details);
+  learnSatellite(o, details);
 
   if (isLevelled(details.id)) {
     const start = startLevel(details, entry?.level, entry?.built);
@@ -285,6 +392,12 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
         row.append(chip(doc, ICON.pop, text, `${t('tech.population', { level: start.level })}: ${p.value.toLocaleString(locale)}${p.enough ? '' : ` · ${t('tech.populationShort')}`}`, p.enough ? 'fut-tp-pop' : 'fut-tp-pop fut-tp-lack'));
       }
       row.append(...chips);
+      // Energy the levels picked need beyond what the planet has left: as solar satellites.
+      if (details.energyNeed !== null) {
+        const need = extraConsumption(details.id, start.level, to, details.energyNeed);
+        const sat = need === null ? null : satelliteChip(o, need, null);
+        if (sat) row.append(sat);
+      }
       if (start.discount > 0.0005) row.append(chip(doc, '', t('tech.discountShort', { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), t('tech.discount', { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), 'fut-tp-disc'));
       box.replaceChildren(grid(o, view, have !== null), row);
     };
@@ -326,6 +439,11 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
       const row = el(doc, 'div', 'fut-tp-chips');
       if (details.durationMs) row.append(chip(doc, ICON.time, `${formatDuration(details.durationMs)} · Σ ${formatDuration(details.durationMs * n)}`, t('tech.time')));
       row.append(...chips);
+      // Solar satellite on a planet short of energy: how many bring it back above zero.
+      if (details.id === SATELLITE) {
+        const sat = satelliteChip(o, 0, details.amountInput);
+        if (sat) row.append(sat);
+      }
       box.replaceChildren(grid(o, view, have !== null), row);
     };
     amount.addEventListener('input', () => {
@@ -347,6 +465,9 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
     if (input) {
       for (const type of ['input', 'change', 'keyup']) input.addEventListener(type, follow);
       input.parentElement?.querySelector('.maximum')?.addEventListener('click', follow);
+      // Arrived from a mine's satellite chip: the satellites it counted, typed in once.
+      const asked = details.id === SATELLITE ? takeAskedSatellites(doc) : null;
+      if (asked) fillAmount(input, asked);
     }
   }
 
