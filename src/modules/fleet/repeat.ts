@@ -20,6 +20,11 @@ export interface RepeatState {
   first: number;
   /** Destination of transport/deploy, kept across the round. */
   dest: number | null;
+  /**
+   * Fleetsave only: speed (10–100 %) the player chose during this round for the bodies still to
+   * come, in place of the preset. Lives only in the round's URL: the general settings are not touched.
+   */
+  speed?: number;
 }
 
 /** Reads ?futmode=…&futfirst=…&futdest=… from the URL. */
@@ -29,7 +34,10 @@ export function readRepeatParams(url: string): RepeatState | null {
   const first = Number(p.get('futfirst'));
   if (!mode || !Number.isFinite(first) || first <= 0) return null;
   const dest = Number(p.get('futdest'));
-  return { mode, first, dest: Number.isFinite(dest) && dest > 0 ? dest : null };
+  const speed = Number(p.get('futspeed'));
+  const state: RepeatState = { mode, first, dest: Number.isFinite(dest) && dest > 0 ? dest : null };
+  if (Number.isInteger(speed) && speed >= 10 && speed <= 100) state.speed = speed;
+  return state;
 }
 
 export function repeatUrl(base: string, cp: number, state: RepeatState): string {
@@ -41,6 +49,7 @@ export function repeatUrl(base: string, cp: number, state: RepeatState): string 
   u.searchParams.set('futmode', state.mode);
   u.searchParams.set('futfirst', String(state.first));
   if (state.dest) u.searchParams.set('futdest', String(state.dest));
+  if (state.speed) u.searchParams.set('futspeed', String(state.speed));
   return u.toString();
 }
 
