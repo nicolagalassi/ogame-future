@@ -68,6 +68,7 @@ import {
   type PrepareResult,
   type Target,
 } from './actions';
+import { UNIVERSE_RANKS_KEY, type UniverseRanks } from '../../data/universe-ranks';
 import { hookSend, nextInRound, readRepeatParams, repeatUrl, type RepeatState } from './repeat';
 import { FLEET_CSS, MODAL_CSS } from './style';
 import { keyLabel, keymap, registerActions } from '../shortcuts';
@@ -525,6 +526,13 @@ function summary(o: FleetOptions, stored: Required<FleetProfile>, settings: Flee
   if (settings.ignoreFood) parts.push(t('fleet.foodShort'));
   const text = parts.length ? `${t('fleet.reserve')}: ${parts.join(' · ')}` : t('fleet.noReserve');
   return off.length ? `${text} · ${t('fleet.rule.offList', { list: off.join(', ') })}` : text;
+}
+
+/** Points of the universe's first player, from the cached public highscore; undefined when not known yet. */
+function topScore(store: Store): number | undefined {
+  const ranks = store.get<UniverseRanks | null>(UNIVERSE_RANKS_KEY, null);
+  const best = ranks ? Math.max(0, ...Object.values(ranks.ranks).map(([, points]) => points)) : 0;
+  return best > 0 ? best : undefined;
 }
 
 function universeSpeed(doc: Document): number {
@@ -1195,6 +1203,7 @@ export function renderFleetTools(o: FleetOptions): void {
         begin('expedition');
         const r = prepareExpedition(fd, doc, profile, settings, {
           economySpeed: universeSpeed(doc),
+          topScore: topScore(o.store),
           lfBooster: o.store.get<LfBonuses | null>(LF_BONUS_KEY, null)?.expedition ?? 0,
           itemBoost: expeditionItemBoost(o.store.get<ActiveItems | null>(ITEMS_KEY, null)),
         });

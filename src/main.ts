@@ -29,6 +29,7 @@ import { TECH_NAMES_KEY, learnTechNames, type TechNames } from './data/tech-name
 import { readTechList } from './data/tech-details';
 import { LF_SLOTS_KEY, readLfSlots, rememberLfSlots, type LfSlots } from './data/lf-slots';
 import { isFleetDispatch } from './data/fleet-page';
+import { universeRanks } from './data/universe-ranks';
 import { renderFleetTools } from './modules/fleet';
 import { watchJumpgate } from './modules/fleet/jumpgate';
 import { mountTouchBar, registerActions, switchBodyUrl } from './modules/shortcuts';
@@ -87,6 +88,9 @@ async function bootstrap(): Promise<void> {
       hydrateLfOncePerSession({ guard, store, session: window.sessionStorage }),
       // Universe size and fleet speeds: public API, at most once a week.
       loadServerDataOnPageLoad({ guard, store, origin: location.origin }),
+      // Top score of the universe for the expedition size (the game's table changes below 100M points):
+      // only on the fleet page, public API, cached an hour.
+      isFleetDispatch(document) ? universeRanks({ guard, store, origin: location.origin }) : Promise.resolve(null),
     ]);
     if (lf.status === 'rejected') console.warn(`[${t('app.name')}]`, lf.reason);
     if (account.status === 'fulfilled') snapshot = account.value;
