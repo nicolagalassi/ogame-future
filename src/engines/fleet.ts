@@ -202,6 +202,8 @@ export interface FleetSettings {
   /** The destination typed or picked on page 1, and the resources to bring. */
   sendTarget: SendTarget | null;
   sendPick: ResourcePick;
+  /** Bodies (planet or moon ids) the round passes over: "Ripeti" and "Salta" never open them. */
+  skipBodies: number[];
 }
 
 /** Destination of the plain Trasporto / Schiera: planet (1) or moon (3). Empty galaxy/system = the origin's. */
@@ -240,6 +242,7 @@ export const DEFAULT_SETTINGS: FleetSettings = {
   sendMode: null,
   sendTarget: null,
   sendPick: { metal: null, crystal: null, deuterium: null },
+  skipBodies: [],
 };
 
 /** Stored settings with the defaults; the old single "reserves" switch becomes the ships and resources ones. */
@@ -470,12 +473,13 @@ export interface BodyRef {
 /**
  * The body after `current` in the planet list. From a planet: the next planet.
  * From a moon: the next planet that has a moon, on its moon. `skip` (e.g. the transport
- * destination) is jumped over; `onlyWithMoon` keeps planets that have a moon (planet → moon).
+ * destination) is jumped over, and so is every id in `skipIds` (bodies the player marked to skip);
+ * `onlyWithMoon` keeps planets that have a moon (planet → moon).
  */
 export function nextBody(
   list: BodyRef[],
   current: number,
-  opts: { skip?: number | null; onlyWithMoon?: boolean; backwards?: boolean } = {},
+  opts: { skip?: number | null; skipIds?: readonly number[]; onlyWithMoon?: boolean; backwards?: boolean } = {},
 ): number | null {
   const isMoon = list.some((b) => b.moonId === current);
   const ids = list
@@ -486,7 +490,7 @@ export function nextBody(
   for (let k = 1; k < ids.length; k++) {
     const step = opts.backwards ? -k : k;
     const id = ids[(((i + step) % ids.length) + ids.length) % ids.length]!;
-    if (id !== opts.skip) return id;
+    if (id !== opts.skip && !opts.skipIds?.includes(id)) return id;
   }
   return null;
 }

@@ -25,6 +25,8 @@ export const ICONS = {
   repeat: `<path d="M4 11.5V9.8A3.6 3.6 0 0 1 7.6 6.2H16" ${LINE} stroke-width="2.4"/><path d="M15.2 2.4 21 6.2l-5.8 3.8z"/><path d="M20 12.5v1.7a3.6 3.6 0 0 1-3.6 3.6H8" ${LINE} stroke-width="2.4"/><path d="M8.8 14 3 17.8l5.8 3.8z"/>`,
   settings: '<path fill-rule="evenodd" d="M12 4.6a7.4 7.4 0 1 1 0 14.8 7.4 7.4 0 0 1 0-14.8zm0 4.3a3.1 3.1 0 1 0 0 6.2 3.1 3.1 0 0 0 0-6.2z"/>' +
     [0, 45, 90, 135, 180, 225, 270, 315].map((a) => `<rect x="10.4" y="1.4" width="3.2" height="4.2" rx=".8" transform="rotate(${a} 12 12)"/>`).join(''),
+  // Skip ahead: two arrowheads into a bar.
+  skip: '<path d="M2.5 5.2 10.6 12l-8.1 6.8z" opacity=".55"/><path d="M10 5.2 18.1 12 10 18.8z"/><path d="M18.6 5h2.6v14h-2.6z"/>',
   last: '<path fill-rule="evenodd" d="M12 2.5a9.5 9.5 0 1 1 0 19 9.5 9.5 0 0 1 0-19zM11 6.5v6.4l4.4 2.6.9-1.5-3.5-2V6.5z"/>',
   rules: '<rect x="3" y="6" width="18" height="2.4" rx="1.2" opacity=".5"/><circle cx="15.5" cy="7.2" r="3.2"/><rect x="3" y="15.6" width="18" height="2.4" rx="1.2" opacity=".5"/><circle cx="8.5" cy="16.8" r="3.2"/>',
   caret: '<path d="M6.5 9.5h11L12 15.6z"/>',

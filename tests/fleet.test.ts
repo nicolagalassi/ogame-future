@@ -330,6 +330,22 @@ describe('repeat', () => {
     expect(nextInRound({ mode: 'moon', first: 2, dest: null }, 2, list)).toBe(1);
   });
 
+  it('passes over the bodies marked to skip, never over the first one', () => {
+    const four = [
+      { planetId: 1, moonId: 11 },
+      { planetId: 2, moonId: 12 },
+      { planetId: 3, moonId: 13 },
+      { planetId: 4, moonId: 14 },
+    ];
+    expect(nextInRound({ mode: 'collect', first: 11, dest: 14 }, 11, four, [12])).toBe(13);
+    expect(nextInRound({ mode: 'collect', first: 11, dest: 14 }, 13, four, [12])).toBeNull();
+    expect(nextInRound({ mode: 'collect', first: 11, dest: 14 }, 11, four, [12, 13])).toBeNull();
+    // Started on a body marked to skip: the round still ends there.
+    expect(nextInRound({ mode: 'expedition', first: 2, dest: null }, 4, four, [2, 3])).toBe(1);
+    expect(nextInRound({ mode: 'expedition', first: 2, dest: null }, 1, four, [2, 3])).toBeNull();
+    expect(nextBody(four, 1, { skipIds: [2, 3] })).toBe(4);
+  });
+
   it('hooks the game send and takes over only on success', () => {
     const calls: string[] = [];
     let reply = '{"success":true}';
@@ -758,5 +774,49 @@ describe('thousands in number fields', () => {
     const values = [...root.querySelectorAll<HTMLInputElement>('.fut-ffield input')].map((i) => i.value).filter(Boolean);
     expect(values).toContain('50.000');
     expect(values).toContain('700.000.000');
+  });
+});
+
+describe('skip in the collection round', () => {
+  it('shows Salta towards the next body not marked to skip; the switch marks this body; Salta navigates', async () => {
+    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    // A document of its own: the round state is kept per document, as per page in the game.
+    const page = fleetPage();
+    const doc = document.implementation.createHTMLDocument();
+    doc.head.innerHTML = page.head.innerHTML;
+    doc.body.innerHTML = page.body.innerHTML;
+    const store = new Store(new MemoryStore(), 'skip');
+    store.set('fleet.settings', { skipBodies: [12] });
+    const bodies = [
+      { planetId: 1, moonId: 11, name: 'Casa', coords: '5:185:8' },
+      { planetId: 2, moonId: 12, name: 'Colonia', coords: '5:186:8' },
+      { planetId: 3, moonId: 13, name: 'Terza', coords: '5:187:8' },
+      { planetId: 4, moonId: 14, name: 'Quarta', coords: '5:188:8' },
+    ];
+    const went: string[] = [];
+    const href = 'https://x/game/index.php?page=ingame&component=fleetdispatch&cp=11&futmode=collect&futfirst=11&futdest=14';
+    const o = { doc, store, bodyId: 11, bodies, t: (k: string, v?: Record<string, string | number>) => (v ? `${k}:${Object.values(v).join('|')}` : k), locale: 'it', href, navigate: (u: string) => went.push(u) };
+    renderFleetTools(o);
+    const tileEl = doc.querySelector<HTMLButtonElement>('.fut-fskip .fut-fact')!;
+    expect(tileEl.getAttribute('aria-label')).toBe('fleet.btn.skip → Terza ☾');
+    tileEl.click();
+    expect(went[0]).toContain('cp=13');
+    expect(went[0]).toContain('futmode=collect');
+    // The switch on this body adds it to the list, pressing again takes it off.
+    const sw = () => [...doc.querySelectorAll<HTMLButtonElement>('.fut-fsw')].find((b) => b.title === 'fleet.rule.skip')!;
+    expect(sw().getAttribute('aria-checked')).toBe('false');
+    sw().click();
+    expect(store.get<{ skipBodies: number[] }>('fleet.settings', { skipBodies: [] }).skipBodies).toEqual([12, 11]);
+    sw().click();
+    expect(store.get<{ skipBodies: number[] }>('fleet.settings', { skipBodies: [] }).skipBodies).toEqual([12]);
+  });
+
+  it('no Salta outside a collection round', async () => {
+    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    const doc = fleetPage();
+    const store = new Store(new MemoryStore(), 'skip2');
+    const bodies = [{ planetId: 1, moonId: null, name: 'Casa', coords: '5:185:8' }, { planetId: 2, moonId: null, name: 'Colonia', coords: '5:186:8' }];
+    renderFleetTools({ doc, store, bodyId: 1, bodies, t: (k: string) => k, locale: 'it', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch' });
+    expect(doc.querySelector<HTMLElement>('.fut-fskip')!.hidden).toBe(true);
   });
 });

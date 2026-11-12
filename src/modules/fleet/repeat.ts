@@ -44,10 +44,15 @@ export function repeatUrl(base: string, cp: number, state: RepeatState): string 
   return u.toString();
 }
 
-/** Where the round goes after a successful send from `bodyId`: a body id, or null when done. */
-export function nextInRound(state: RepeatState, bodyId: number, list: BodyRef[]): number | null {
+/**
+ * Where the round goes after `bodyId` (after a send, or when the player presses "Salta"): a body id,
+ * or null when done. `skipIds` are the bodies the player marked to skip; the first body of the round
+ * is never skipped, so the round still knows where it ends.
+ */
+export function nextInRound(state: RepeatState, bodyId: number, list: BodyRef[], skipIds: readonly number[] = []): number | null {
   const next = nextBody(list, bodyId, {
     skip: state.mode === 'collect' || state.mode === 'collectDeploy' || state.mode === 'plan' ? state.dest : null,
+    skipIds: skipIds.filter((id) => id !== state.first),
     onlyWithMoon: state.mode === 'moon',
   });
   return next === null || next === state.first ? null : next;

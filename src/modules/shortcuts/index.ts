@@ -37,6 +37,7 @@ export const ACTIONS: ActionDef[] = [
   { id: 'fleet.collectDeploy', key: 'v', label: 'fleet.btn.collectDeploy', group: 'fleet', glyph: { fleet: 'collect' } },
   { id: 'fleet.expedition', key: 'x', label: 'fleet.btn.expedition', group: 'fleet', glyph: { fleet: 'expedition' } },
   { id: 'fleet.fleetsave', key: 'e', label: 'fleet.btn.fleetsave', group: 'fleet', glyph: { fleet: 'fleetsave' } },
+  { id: 'fleet.skip', key: 'n', label: 'fleet.btn.skip', group: 'fleet', glyph: { fleet: 'skip' } },
   { id: 'fleet.last', key: 'p', label: 'fleet.btn.last', group: 'fleet', glyph: { fleet: 'last' } },
   { id: 'galaxy.left', key: 'ArrowLeft', label: 'shortcut.galaxyLeft', group: 'galaxy', glyph: { core: 'back' }, fixed: true, touchOnly: true },
   { id: 'galaxy.right', key: 'ArrowRight', label: 'shortcut.galaxyRight', group: 'galaxy', glyph: { core: 'next' }, fixed: true, touchOnly: true },
