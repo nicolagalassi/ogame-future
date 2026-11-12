@@ -178,13 +178,13 @@ export function dataAge(resourcesAt: number, now: number): { text: string; cls: 
   return { text, cls };
 }
 
-/** Time since the player last opened the body (not since a sync); no badge before the first visit. */
+/** Time since the player last opened the body (not since a sync); a body never opened shows 60, as stale. */
 function ageBadge(doc: Document, id: number | null, visits: Record<string, number> | undefined, now: number, t: PlanetMenuOptions['t']): HTMLElement | null {
-  const at = id ? visits?.[String(id)] : undefined;
-  if (!at) return null;
-  const { text, cls } = dataAge(at, now);
+  if (!id) return null;
+  const at = visits?.[String(id)];
+  const { text, cls } = at ? dataAge(at, now) : { text: '60', cls: 'fut-age-old' };
   const badge = el(doc, 'span', `fut-age ${cls}`, text);
-  badge.dataset.at = String(at);
+  if (at) badge.dataset.at = String(at);
   badge.title = t('planetMenu.age');
   return badge;
 }
@@ -197,7 +197,7 @@ let ageTimer: ReturnType<typeof setInterval> | null = null;
 function startAgeClock(doc: Document): void {
   if (ageTimer !== null) return;
   ageTimer = setInterval(() => {
-    doc.querySelectorAll<HTMLElement>('.fut-age').forEach((badge) => {
+    doc.querySelectorAll<HTMLElement>('.fut-age[data-at]').forEach((badge) => {
       const { text, cls } = dataAge(Number(badge.dataset.at), Date.now());
       badge.textContent = text;
       badge.className = `fut-age ${cls}`;

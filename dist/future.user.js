@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.46
+// @version      0.3.47
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -8555,11 +8555,11 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     return { text, cls };
   }
   function ageBadge(doc, id, visits, now, t) {
-    const at = id ? visits?.[String(id)] : void 0;
-    if (!at) return null;
-    const { text, cls } = dataAge(at, now);
+    if (!id) return null;
+    const at = visits?.[String(id)];
+    const { text, cls } = at ? dataAge(at, now) : { text: "60", cls: "fut-age-old" };
     const badge = el3(doc, "span", `fut-age ${cls}`, text);
-    badge.dataset.at = String(at);
+    if (at) badge.dataset.at = String(at);
     badge.title = t("planetMenu.age");
     return badge;
   }
@@ -8567,7 +8567,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
   function startAgeClock(doc) {
     if (ageTimer !== null) return;
     ageTimer = setInterval(() => {
-      doc.querySelectorAll(".fut-age").forEach((badge) => {
+      doc.querySelectorAll(".fut-age[data-at]").forEach((badge) => {
         const { text, cls } = dataAge(Number(badge.dataset.at), Date.now());
         badge.textContent = text;
         badge.className = `fut-age ${cls}`;

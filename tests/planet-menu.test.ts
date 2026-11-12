@@ -38,9 +38,9 @@ describe('renderPlanetMenu', () => {
     let visits = markVisited({}, 1, 60_000);
     expect(markVisited(visits, 1, 30_000)).toBe(visits);
     visits = markVisited(visits, 2, 50 * 60_000);
-    // The snapshot's resourcesAt (sync time) is ignored; body 3 was never opened: no timer.
+    // The snapshot's resourcesAt (sync time) is ignored; body 3 was never opened: 60, as stale.
     renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, visits, settings: { mode: 'side', showTotals: true }, now: 61 * 60_000, locale: 'it', t, onSync: vi.fn(async () => true) });
-    expect([...document.querySelectorAll('.fut-age')].map((b) => b.textContent)).toEqual(['1h', '11']);
+    expect([...document.querySelectorAll('.fut-age')].map((b) => b.textContent)).toEqual(['1h', '11', '60']);
   });
 
   it('a redraw (e.g. after adding to the plan) leaves one fleet line per planet, inside the name column', () => {
