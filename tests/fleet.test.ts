@@ -321,6 +321,11 @@ describe('repeat', () => {
     expect(url).toContain('cp=2');
     expect(readRepeatParams(url)).toEqual({ mode: 'collect', first: 1, dest: 12 });
     expect(readRepeatParams('https://x.test/game/index.php?page=ingame')).toBeNull();
+    // A speed chosen during the round travels with it, only in the URL.
+    const fast = repeatUrl('https://s1-it.ogame.gameforge.com/game/index.php?page=ingame', 2, { mode: 'fleetsave', first: 1, dest: null, speed: 50 });
+    expect(new URL(fast).searchParams.get('futspeed')).toBe('50');
+    expect(readRepeatParams(fast)).toEqual({ mode: 'fleetsave', first: 1, dest: null, speed: 50 });
+    expect(readRepeatParams(fast.replace('futspeed=50', 'futspeed=7'))).toEqual({ mode: 'fleetsave', first: 1, dest: null });
   });
 
   it('goes round the bodies and stops at the first one', () => {
