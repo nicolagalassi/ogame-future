@@ -8,7 +8,7 @@ import { downloadBackup, importBackup } from './core/backup';
 import { IdleSaver } from './core/idle-saver';
 import { detectLocale, translator } from './core/i18n';
 import { SNAPSHOT_KEY, hydrateAccountOncePerSession, syncAccountOnUserClick, type AccountSnapshot } from './data/account-info';
-import { currentBodyId, readCurrentResources, readPlanetList } from './data/planet-list';
+import { currentBodyId, currentMaxTemperature, readCurrentEnergy, readCurrentResources, readPlanetList } from './data/planet-list';
 import { applyPageResources, mergeNewerResources } from './engines/resources';
 import { VISITED_KEY, markVisited, type Visits } from './data/visits';
 import { FLIGHTS_KEY, flyingTotal, watchFlights, type Flights } from './data/flights';
@@ -339,7 +339,7 @@ async function bootstrap(): Promise<void> {
 
   // Building, research, shipyard and defence pages: cost panel and construction plan.
   if (currentId) {
-    watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), onPlanChange: () => draw() });
+    watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), energy: () => readCurrentEnergy(document), maxTemp: currentMaxTemperature(document), onPlanChange: () => draw() });
   }
 
   // Targets side bar: stays open across pages as the player left it; M = next position of its list.
