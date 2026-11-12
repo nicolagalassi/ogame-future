@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.56
+// @version      0.3.57
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -11375,6 +11375,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const text = parts.length ? `${t("fleet.reserve")}: ${parts.join(" \xB7 ")}` : t("fleet.noReserve");
     return off.length ? `${text} \xB7 ${t("fleet.rule.offList", { list: off.join(", ") })}` : text;
   }
+  function topScore(store) {
+    const ranks = store.get(UNIVERSE_RANKS_KEY, null);
+    const best = ranks ? Math.max(0, ...Object.values(ranks.ranks).map(([, points]) => points)) : 0;
+    return best > 0 ? best : void 0;
+  }
   function universeSpeed(doc) {
     const n = Number(doc.querySelector('meta[name="ogame-universe-speed"]')?.getAttribute("content"));
     return Number.isFinite(n) && n > 0 ? n : 1;
@@ -11925,6 +11930,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         begin("expedition");
         const r = prepareExpedition(fd, doc, profile, settings, {
           economySpeed: universeSpeed(doc),
+          topScore: topScore(o.store),
           lfBooster: o.store.get(LF_BONUS_KEY, null)?.expedition ?? 0,
           itemBoost: expeditionItemBoost(o.store.get(ITEMS_KEY, null))
         });
@@ -14198,7 +14204,10 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         // Lifeform bonuses for the expedition size: once per session, like accountInfo.
         hydrateLfOncePerSession({ guard, store, session: window.sessionStorage }),
         // Universe size and fleet speeds: public API, at most once a week.
-        loadServerDataOnPageLoad({ guard, store, origin: location.origin })
+        loadServerDataOnPageLoad({ guard, store, origin: location.origin }),
+        // Top score of the universe for the expedition size (the game's table changes below 100M points):
+        // only on the fleet page, public API, cached an hour.
+        isFleetDispatch(document) ? universeRanks({ guard, store, origin: location.origin }) : Promise.resolve(null)
       ]);
       if (lf.status === "rejected") console.warn(`[${t("app.name")}]`, lf.reason);
       if (account.status === "fulfilled") snapshot = account.value;
