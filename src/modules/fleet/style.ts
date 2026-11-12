@@ -68,6 +68,14 @@ export const FLEET_CSS = `
 .fut-fread { flex: 1; min-width: 0; height: 30px; display: flex; align-items: center; }
 .fut-fread span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
 .fut-fread .tip { color: var(--mute); }
+/* Speed changed during a round: "also for the next ones?", with its two answers. */
+.fut-fask { flex: none; display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 4px 0 10px; border: 1px solid #6B5A1E; border-radius: 8px; background: rgba(245,181,71,0.08); }
+.fut-fask[hidden] { display: none; }
+.fut-fask-q { color: #F5D9A0; white-space: nowrap; }
+.fut-fask-b { height: 22px; padding: 0 10px; border: 1px solid #2A3B55; border-radius: 5px; background: #0D1522; color: #C9D4E2; font: 12px Arial, Helvetica, sans-serif; cursor: pointer; }
+.fut-fask-b.yes { border-color: #F5B547; color: #F5B547; font-weight: 700; }
+.fut-fask-b:hover { color: #fff; border-color: #4FD1E8; }
+.fut-fask-b:focus-visible { outline: 1px solid #4FD1E8; outline-offset: 1px; }
 .fut-fread .tip b { color: var(--hi); }
 .fut-fread .tip:empty { display: none; }
 .fut-fread .tip:not(:empty) + .fut-finfo { display: none; }
