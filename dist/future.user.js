@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.67
+// @version      0.3.68
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -8970,10 +8970,9 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     if (img.complete && img.naturalWidth === 0 && img.getAttribute("src")) fail();
   }
   function dataAge(resourcesAt, now) {
-    const minutes = Math.max(0, Math.floor((now - resourcesAt) / 6e4));
+    const minutes = Math.min(60, Math.max(0, Math.floor((now - resourcesAt) / 6e4)));
     const cls = minutes < 15 ? "fut-age-fresh" : minutes <= 30 ? "fut-age-warm" : "fut-age-old";
-    const text = minutes < 60 ? String(minutes) : minutes < 1440 ? `${Math.floor(minutes / 60)}h` : `${Math.floor(minutes / 1440)}d`;
-    return { text, cls };
+    return { text: String(minutes), cls };
   }
   function ageBadge(doc, id, visits, now, t) {
     if (!id) return null;
