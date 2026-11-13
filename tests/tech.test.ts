@@ -10,6 +10,7 @@ import {
   rawCost,
   scaleDuration,
   techKind,
+  researchNetwork,
 } from '../src/engines/tech';
 import { addToPlan, holdQueued, inPlan, lessReserved, planCount, planMissing, planTotal, prune, queueKindOf, queuedLevel, releaseQueued, removeFromPlan, reservedFor, withQueued, type Plan, type Queued } from '../src/engines/planner';
 import { readTechDetails, readTechList } from '../src/data/tech-details';
@@ -581,5 +582,26 @@ describe('levels queued in the game', () => {
     expect(tiles[0]!.querySelectorAll('.qchip')).toHaveLength(1);
     expect(root.activeElement?.classList.contains('bring-all')).toBe(true);
     closePlanner(document);
+  });
+});
+
+describe('research network', () => {
+  it('this lab plus the best labs the network links, only those reaching the requirement', () => {
+    // Plasma needs lab 4: the lab 3 does not join; IRN 3 links the three best of the rest.
+    expect(researchNetwork(18, [17, 3, 16, 12, 15], 3, 4)).toEqual({ total: 18 + 17 + 16 + 15, linked: [17, 16, 15], hereOk: true });
+    expect(researchNetwork(18, [17, 16], 0).total).toBe(18);
+    expect(researchNetwork(5, [17], 5, 12).hereOk).toBe(false);
+  });
+
+  it('shows the total on a research panel', () => {
+    const raw = rawCost(122, 11);
+    const html = techPage({ id: 122, built: 10, shown: { metal: raw.metal, crystal: raw.crystal, deuterium: raw.deuterium } });
+    document.getElementById('technologydetails_content')!.innerHTML = html;
+    const store = new Store(new MemoryStore(), 'lab');
+    const o = { doc: document, store, bodyId: 10, t, locale: 'it', have: () => null, energy: (): number | null => null, maxTemp: null, labs: () => ({ here: 18, others: [17, 16, 2], irn: 2 }) };
+    const box = renderTechPanel(o, readTechDetails(document)!)!;
+    const lab = box.querySelector('.fut-tp-lab')!;
+    expect(lab.textContent).toBe('Rete 51 · 3 lab');
+    expect(lab.getAttribute('title')).toContain('51 = qui 18 + 17 + 16');
   });
 });

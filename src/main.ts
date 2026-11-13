@@ -2,6 +2,7 @@
  * Future bootstrap. Runs once per game page.
  * Network calls are allowed only until bootstrap ends (see core/guard.ts).
  */
+import { IRN, LAB } from './engines/tech';
 import { NetworkGuard } from './core/guard';
 import { GMStore, Store, serverNamespace } from './core/storage';
 import { downloadBackup, importBackup } from './core/backup';
@@ -351,7 +352,15 @@ async function bootstrap(): Promise<void> {
 
   // Building, research, shipyard and defence pages: cost panel and construction plan.
   if (currentId) {
-    watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), energy: () => readCurrentEnergy(document), maxTemp: currentMaxTemperature(document), onPlanChange: () => draw() });
+    watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), energy: () => readCurrentEnergy(document), maxTemp: currentMaxTemperature(document), onPlanChange: () => draw(),
+      // Research network: lab levels from the last sync (no network call here).
+      labs: () => {
+        const planets = (snapshot?.bodies ?? []).filter((b) => b.type === 'planet');
+        const here = planets.find((b) => b.id === currentId);
+        if (!snapshot || !here) return null;
+        const lab = (b: { levels: Record<string, number> }) => b.levels[String(LAB)] ?? 0;
+        return { here: lab(here), others: planets.filter((b) => b !== here).map(lab), irn: snapshot.researches[String(IRN)] ?? 0 };
+      } });
   }
 
   // Targets side bar: stays open across pages as the player left it; M = next position of its list.

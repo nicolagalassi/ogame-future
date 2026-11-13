@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.61
+// @version      0.3.62
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -19,6 +19,325 @@
 
 "use strict";
 (() => {
+  // src/data/tech-table.ts
+  var TECH_TABLE = {
+    1: [60, 15, 0, 1.5, 0, 2, 0, 2],
+    2: [48, 24, 0, 1.6, 0, 2, 0, 2],
+    3: [225, 75, 0, 1.5, 0, 2, 0, 2],
+    4: [75, 30, 0, 1.5, 0, 2, 0, 2],
+    12: [900, 360, 180, 1.8, 0, 2, 0, 2],
+    14: [400, 120, 200, 2, 0, 2, 0, 2],
+    15: [1e6, 5e5, 1e5, 2, 0, 2, 0, 2],
+    21: [400, 200, 100, 2, 0, 2, 0, 2],
+    22: [1e3, 0, 0, 2, 0, 2, 0, 2],
+    23: [1e3, 500, 0, 2, 0, 2, 0, 2],
+    24: [1e3, 1e3, 0, 2, 0, 2, 0, 2],
+    31: [200, 400, 200, 2, 0, 2, 0, 2],
+    33: [0, 5e4, 1e5, 2, 1e3, 2, 0, 2],
+    34: [2e4, 4e4, 0, 2, 0, 2, 0, 2],
+    36: [200, 0, 50, 5, 50, 2.5, 0, 2],
+    41: [2e4, 4e4, 2e4, 2, 0, 2, 0, 2],
+    42: [2e4, 4e4, 2e4, 2, 0, 2, 0, 2],
+    43: [2e6, 4e6, 2e6, 2, 0, 2, 0, 2],
+    44: [2e4, 2e4, 1e3, 2, 0, 2, 0, 2],
+    45: [90, 45, 15, 1.5, 0, 2, 0, 2],
+    106: [200, 1e3, 200, 2, 0, 2, 0, 2],
+    108: [0, 400, 600, 2, 0, 2, 0, 2],
+    109: [800, 200, 0, 2, 0, 2, 0, 2],
+    110: [200, 600, 0, 2, 0, 2, 0, 2],
+    111: [1e3, 0, 0, 2, 0, 2, 0, 2],
+    113: [0, 800, 400, 2, 0, 2, 0, 2],
+    114: [0, 4e3, 2e3, 2, 0, 2, 0, 2],
+    115: [400, 0, 600, 2, 0, 2, 0, 2],
+    117: [2e3, 4e3, 600, 2, 0, 2, 0, 2],
+    118: [1e4, 2e4, 6e3, 2, 0, 2, 0, 2],
+    120: [200, 100, 0, 2, 0, 2, 0, 2],
+    121: [1e3, 300, 100, 2, 0, 2, 0, 2],
+    122: [2e3, 4e3, 1e3, 2, 0, 2, 0, 2],
+    123: [24e4, 4e5, 16e4, 2, 0, 2, 0, 2],
+    124: [4e3, 8e3, 4e3, 1.75, 0, 2, 0, 2],
+    199: [0, 0, 0, 3, 3e5, 3, 0, 2],
+    202: [2e3, 2e3, 0, 2, 0, 2, 0, 2],
+    203: [6e3, 6e3, 0, 2, 0, 2, 0, 2],
+    204: [3e3, 1e3, 0, 2, 0, 2, 0, 2],
+    205: [6e3, 4e3, 0, 2, 0, 2, 0, 2],
+    206: [2e4, 7e3, 2e3, 2, 0, 2, 0, 2],
+    207: [45e3, 15e3, 0, 2, 0, 2, 0, 2],
+    208: [1e4, 2e4, 1e4, 2, 0, 2, 0, 2],
+    209: [1e4, 6e3, 2e3, 2, 0, 2, 0, 2],
+    210: [0, 1e3, 0, 2, 0, 2, 0, 2],
+    211: [5e4, 25e3, 15e3, 2, 0, 2, 0, 2],
+    212: [0, 2e3, 500, 2, 0, 2, 0, 2],
+    213: [6e4, 5e4, 15e3, 2, 0, 2, 0, 2],
+    214: [5e6, 4e6, 1e6, 2, 0, 2, 0, 2],
+    215: [3e4, 4e4, 15e3, 2, 0, 2, 0, 2],
+    217: [2e3, 2e3, 1e3, 2, 0, 2, 0, 2],
+    218: [85e3, 55e3, 2e4, 2, 0, 2, 0, 2],
+    219: [8e3, 15e3, 8e3, 2, 0, 2, 0, 2],
+    401: [2e3, 0, 0, 2, 0, 2, 0, 2],
+    402: [1500, 500, 0, 2, 0, 2, 0, 2],
+    403: [6e3, 2e3, 0, 2, 0, 2, 0, 2],
+    404: [2e4, 15e3, 2e3, 2, 0, 2, 0, 2],
+    405: [5e3, 3e3, 0, 2, 0, 2, 0, 2],
+    406: [5e4, 5e4, 3e4, 2, 0, 2, 0, 2],
+    407: [1e4, 1e4, 0, 2, 0, 2, 0, 2],
+    408: [5e4, 5e4, 0, 2, 0, 2, 0, 2],
+    502: [8e3, 0, 2e3, 2, 0, 2, 0, 2],
+    503: [12e3, 2500, 1e4, 2, 0, 2, 0, 2],
+    11101: [7, 2, 0, 1.2, 0, 2, 40, 1.21],
+    11102: [5, 2, 0, 1.23, 8, 1.02, 40, 1.25],
+    11103: [2e4, 25e3, 1e4, 1.3, 10, 1.08, 16e3, 1.25],
+    11104: [5e3, 3200, 1500, 1.7, 15, 1.25, 16e3, 1.6],
+    11105: [5e4, 4e4, 5e4, 1.7, 30, 1.25, 64e3, 1.7],
+    11106: [9e3, 6e3, 3e3, 1.5, 40, 1.1, 2e3, 1.3],
+    11107: [25e3, 13e3, 7e3, 1.09, 0, 2, 12e3, 1.17],
+    11108: [5e4, 25e3, 15e3, 1.5, 80, 1.1, 28e3, 1.2],
+    11109: [75e3, 2e4, 25e3, 1.09, 50, 1.02, 4e4, 1.2],
+    11110: [15e4, 3e4, 15e3, 1.12, 60, 1.03, 52e3, 1.2],
+    11111: [8e4, 35e3, 6e4, 1.5, 90, 1.05, 9e4, 1.3],
+    11112: [25e4, 125e3, 125e3, 1.15, 100, 1.02, 95e3, 1.2],
+    11201: [5e3, 2500, 500, 1.3, 0, 2, 1e3, 1.2],
+    11202: [7e3, 1e4, 5e3, 1.5, 0, 2, 2e3, 1.3],
+    11203: [15e3, 1e4, 5e3, 1.3, 0, 2, 2500, 1.3],
+    11204: [2e4, 15e3, 7500, 1.3, 0, 2, 3500, 1.3],
+    11205: [25e3, 2e4, 1e4, 1.3, 0, 2, 4500, 1.2],
+    11206: [35e3, 25e3, 15e3, 1.5, 0, 2, 5e3, 1.3],
+    11207: [7e4, 4e4, 2e4, 1.3, 0, 2, 8e3, 1.3],
+    11208: [8e4, 5e4, 2e4, 1.5, 0, 2, 6e3, 1.3],
+    11209: [32e4, 24e4, 1e5, 1.5, 0, 2, 6500, 1.4],
+    11210: [32e4, 24e4, 1e5, 1.5, 0, 2, 7e3, 1.4],
+    11211: [12e4, 3e4, 25e3, 1.5, 0, 2, 7500, 1.3],
+    11212: [1e5, 4e4, 3e4, 1.3, 0, 2, 1e4, 1.3],
+    11213: [2e5, 1e5, 1e5, 1.3, 0, 2, 8500, 1.3],
+    11214: [16e4, 12e4, 5e4, 1.5, 0, 2, 9e3, 1.4],
+    11215: [16e4, 12e4, 5e4, 1.5, 0, 2, 9500, 1.4],
+    11216: [32e4, 24e4, 1e5, 1.5, 0, 2, 1e4, 1.4],
+    11217: [3e5, 18e4, 12e4, 1.5, 0, 2, 11e3, 1.3],
+    11218: [5e5, 3e5, 2e5, 1.2, 0, 2, 13e3, 1.3],
+    12101: [9, 3, 0, 1.2, 0, 2, 40, 1.21],
+    12102: [7, 2, 0, 1.2, 10, 1.03, 40, 1.21],
+    12103: [4e4, 1e4, 15e3, 1.3, 15, 1.1, 16e3, 1.25],
+    12104: [5e3, 3800, 1e3, 1.7, 20, 1.35, 16e3, 1.6],
+    12105: [5e4, 4e4, 5e4, 1.65, 60, 1.3, 64e3, 1.7],
+    12106: [1e4, 8e3, 1e3, 1.4, 40, 1.1, 2e3, 1.3],
+    12107: [2e4, 15e3, 1e4, 1.2, 0, 2, 16e3, 1.25],
+    12108: [5e4, 35e3, 15e3, 1.5, 80, 1.3, 4e4, 1.4],
+    12109: [85e3, 44e3, 25e3, 1.4, 90, 1.1, 4e4, 1.2],
+    12110: [12e4, 5e4, 2e4, 1.4, 90, 1.1, 52e3, 1.2],
+    12111: [25e4, 15e4, 1e5, 1.8, 120, 1.3, 9e4, 1.3],
+    12112: [25e4, 125e3, 125e3, 1.5, 100, 1.1, 95e3, 1.3],
+    12201: [1e4, 6e3, 1e3, 1.5, 0, 2, 1e3, 1.3],
+    12202: [7500, 12500, 5e3, 1.5, 0, 2, 2e3, 1.3],
+    12203: [15e3, 1e4, 5e3, 1.5, 0, 2, 2500, 1.3],
+    12204: [2e4, 15e3, 7500, 1.3, 0, 2, 3500, 1.4],
+    12205: [25e3, 2e4, 1e4, 1.5, 0, 2, 4500, 1.3],
+    12206: [5e4, 5e4, 2e4, 1.5, 0, 2, 5e3, 1.3],
+    12207: [7e4, 4e4, 2e4, 1.5, 0, 2, 5500, 1.3],
+    12208: [16e4, 12e4, 5e4, 1.5, 0, 2, 6e3, 1.4],
+    12209: [75e3, 55e3, 25e3, 1.5, 0, 2, 6500, 1.3],
+    12210: [85e3, 4e4, 35e3, 1.5, 0, 2, 7e3, 1.3],
+    12211: [12e4, 3e4, 25e3, 1.5, 0, 2, 7500, 1.3],
+    12212: [1e5, 4e4, 3e4, 1.5, 0, 2, 8e3, 1.3],
+    12213: [2e5, 1e5, 1e5, 1.2, 0, 2, 8500, 1.3],
+    12214: [22e4, 11e4, 11e4, 1.3, 0, 2, 9e3, 1.3],
+    12215: [24e4, 12e4, 12e4, 1.3, 0, 2, 9500, 1.3],
+    12216: [25e4, 25e4, 25e4, 1.4, 0, 2, 1e4, 1.4],
+    12217: [5e5, 3e5, 2e5, 1.5, 0, 2, 13e3, 1.3],
+    12218: [3e5, 18e4, 12e4, 1.7, 0, 2, 11e3, 1.4],
+    13101: [6, 2, 0, 1.21, 0, 2, 40, 1.22],
+    13102: [5, 2, 0, 1.18, 8, 1.02, 48, 1.2],
+    13103: [3e4, 2e4, 1e4, 1.3, 13, 1.08, 16e3, 1.25],
+    13104: [5e3, 3800, 1e3, 1.8, 10, 1.2, 16e3, 1.6],
+    13105: [5e4, 4e4, 5e4, 1.8, 40, 1.2, 64e3, 1.7],
+    13106: [7500, 7e3, 1e3, 1.3, 0, 2, 2e3, 1.3],
+    13107: [35e3, 15e3, 1e4, 1.5, 40, 1.05, 16e3, 1.4],
+    13108: [5e4, 2e4, 3e4, 1.07, 40, 1.01, 12e3, 1.17],
+    13109: [1e5, 1e4, 3e3, 1.14, 80, 1.04, 4e4, 1.3],
+    13110: [1e5, 4e4, 2e4, 1.5, 60, 1.1, 52e3, 1.2],
+    13111: [55e3, 5e4, 3e4, 1.5, 70, 1.05, 5e4, 1.3],
+    13112: [25e4, 125e3, 125e3, 1.4, 100, 1.05, 95e3, 1.4],
+    13201: [1e4, 6e3, 1e3, 1.5, 0, 2, 1e3, 1.3],
+    13202: [7500, 12500, 5e3, 1.3, 0, 2, 2e3, 1.3],
+    13203: [15e3, 1e4, 5e3, 1.5, 0, 2, 2500, 1.4],
+    13204: [2e4, 15e3, 7500, 1.3, 0, 2, 3500, 1.3],
+    13205: [16e4, 12e4, 5e4, 1.5, 0, 2, 4500, 1.4],
+    13206: [5e4, 5e4, 2e4, 1.5, 0, 2, 5e3, 1.3],
+    13207: [7e4, 4e4, 2e4, 1.3, 0, 2, 5500, 1.3],
+    13208: [16e4, 12e4, 5e4, 1.5, 0, 2, 6e3, 1.4],
+    13209: [16e4, 12e4, 5e4, 1.5, 0, 2, 6500, 1.4],
+    13210: [85e3, 4e4, 35e3, 1.2, 0, 2, 7e3, 1.3],
+    13211: [12e4, 3e4, 25e3, 1.3, 0, 2, 7500, 1.3],
+    13212: [16e4, 12e4, 5e4, 1.5, 0, 2, 8e3, 1.4],
+    13213: [2e5, 1e5, 1e5, 1.5, 0, 2, 8500, 1.3],
+    13214: [16e4, 12e4, 5e4, 1.5, 0, 2, 9e3, 1.4],
+    13215: [32e4, 24e4, 1e5, 1.5, 0, 2, 9500, 1.4],
+    13216: [32e4, 24e4, 1e5, 1.5, 0, 2, 1e4, 1.4],
+    13217: [5e5, 3e5, 2e5, 1.5, 0, 2, 13e3, 1.3],
+    13218: [3e5, 18e4, 12e4, 1.7, 0, 2, 11e3, 1.4],
+    14101: [4, 3, 0, 1.21, 0, 2, 40, 1.22],
+    14102: [6, 3, 0, 1.2, 9, 1.02, 40, 1.22],
+    14103: [2e4, 15e3, 15e3, 1.3, 10, 1.08, 16e3, 1.25],
+    14104: [7500, 5e3, 800, 1.8, 15, 1.3, 16e3, 1.7],
+    14105: [6e4, 3e4, 5e4, 1.8, 30, 1.3, 64e3, 1.8],
+    14106: [8500, 5e3, 3e3, 1.25, 0, 2, 2e3, 1.35],
+    14107: [15e3, 15e3, 5e3, 1.2, 0, 2, 12e3, 1.2],
+    14108: [75e3, 25e3, 3e4, 1.05, 30, 1.03, 16e3, 1.18],
+    14109: [87500, 25e3, 3e4, 1.2, 40, 1.02, 4e4, 1.2],
+    14110: [15e4, 3e4, 3e4, 1.4, 140, 1.05, 52e3, 1.8],
+    14111: [75e3, 5e4, 55e3, 1.2, 90, 1.04, 9e4, 1.3],
+    14112: [5e5, 25e4, 25e4, 1.4, 100, 1.05, 95e3, 1.3],
+    14201: [1e4, 6e3, 1e3, 1.5, 0, 2, 1e3, 1.4],
+    14202: [7500, 12500, 5e3, 1.5, 0, 2, 2e3, 1.3],
+    14203: [15e3, 1e4, 5e3, 1.5, 0, 2, 2500, 1.4],
+    14204: [2e4, 15e3, 7500, 1.5, 0, 2, 3500, 1.4],
+    14205: [25e3, 2e4, 1e4, 1.5, 0, 2, 4500, 1.4],
+    14206: [5e4, 5e4, 2e4, 1.3, 0, 2, 5e3, 1.4],
+    14207: [7e4, 4e4, 2e4, 1.5, 0, 2, 5500, 1.3],
+    14208: [8e4, 5e4, 2e4, 1.2, 0, 2, 6e3, 1.2],
+    14209: [32e4, 24e4, 1e5, 1.5, 0, 2, 6500, 1.4],
+    14210: [85e3, 4e4, 35e3, 1.2, 0, 2, 7e3, 1.2],
+    14211: [12e4, 3e4, 25e3, 1.5, 0, 2, 7500, 1.4],
+    14212: [1e5, 4e4, 3e4, 1.5, 0, 2, 8e3, 1.3],
+    14213: [2e5, 1e5, 1e5, 1.5, 0, 2, 8500, 1.3],
+    14214: [16e4, 12e4, 5e4, 1.5, 0, 2, 9e3, 1.4],
+    14215: [24e4, 12e4, 12e4, 1.5, 0, 2, 9500, 1.4],
+    14216: [32e4, 24e4, 1e5, 1.5, 0, 2, 1e4, 1.4],
+    14217: [5e5, 3e5, 2e5, 1.5, 0, 2, 13e3, 1.3],
+    14218: [3e5, 18e4, 12e4, 1.7, 0, 2, 11e3, 1.4]
+  };
+
+  // src/engines/tech.ts
+  var ZERO_COST = { metal: 0, crystal: 0, deuterium: 0, energy: 0 };
+  function techKind(id) {
+    if (!TECH_TABLE[id]) return null;
+    if (id < 100) return "building";
+    if (id < 200) return "research";
+    if (id < 600) return "unit";
+    const group = Math.floor(id % 1e3 / 100);
+    return group === 1 ? "lfBuilding" : "lfResearch";
+  }
+  var isLevelled = (id) => {
+    const kind = techKind(id);
+    return kind !== null && kind !== "unit";
+  };
+  function rawCost(id, level2) {
+    const row = TECH_TABLE[id];
+    const kind = techKind(id);
+    if (!row || !kind) return { ...ZERO_COST };
+    const [m, c, d, factor, energy, energyFactor] = row;
+    if (kind === "unit") return { metal: m, crystal: c, deuterium: d, energy: 0 };
+    const k = Math.pow(factor, level2 - 1);
+    if (kind === "lfBuilding" || kind === "lfResearch") {
+      return { metal: Math.floor(m * k * level2), crystal: Math.floor(c * k * level2), deuterium: Math.floor(d * k * level2), energy: 0 };
+    }
+    return {
+      metal: Math.floor(m * k),
+      crystal: Math.floor(c * k),
+      deuterium: Math.floor(d * k),
+      energy: Math.floor(energy * Math.pow(energyFactor, level2 - 1))
+    };
+  }
+  var KEYS = ["metal", "crystal", "deuterium", "energy"];
+  function main(cost) {
+    let best = null;
+    for (const key of KEYS) if (cost[key] > 0 && (best === null || cost[key] > cost[best])) best = key;
+    return best;
+  }
+  function discountFrom(id, level2, shown2) {
+    const raw = rawCost(id, level2);
+    const key = main(raw);
+    if (!key) return null;
+    const value = shown2[key];
+    if (value === void 0 || !(value > 0)) return null;
+    const ratio = value / raw[key];
+    if (ratio > 1.001 || ratio < 0.2) return null;
+    return Math.max(0, 1 - ratio);
+  }
+  function matchShownLevel(id, candidates, shown2) {
+    let best = null;
+    for (const level2 of new Set(candidates.filter((l) => l >= 1))) {
+      const discount = discountFrom(id, level2, shown2);
+      if (discount === null) continue;
+      if (!best || discount < best.discount) best = { level: level2, discount };
+    }
+    return best;
+  }
+  function levelCost(id, level2, discount = 0) {
+    const raw = rawCost(id, level2);
+    const keep = 1 - discount;
+    return {
+      metal: Math.floor(raw.metal * keep),
+      crystal: Math.floor(raw.crystal * keep),
+      deuterium: Math.floor(raw.deuterium * keep),
+      energy: Math.floor(raw.energy * keep)
+    };
+  }
+  function addCost(a, b) {
+    return { metal: a.metal + b.metal, crystal: a.crystal + b.crystal, deuterium: a.deuterium + b.deuterium, energy: Math.max(a.energy, b.energy) };
+  }
+  function scaleCost(a, n) {
+    return { metal: a.metal * n, crystal: a.crystal * n, deuterium: a.deuterium * n, energy: a.energy };
+  }
+  function rangeCost(id, from, to, discount = 0) {
+    let total = { ...ZERO_COST };
+    for (let level2 = from; level2 <= to; level2++) total = addCost(total, levelCost(id, level2, discount));
+    return total;
+  }
+  function durationWeight(id, level2) {
+    const row = TECH_TABLE[id];
+    const kind = techKind(id);
+    if (!row || !kind) return 0;
+    if (kind === "unit") return 1;
+    if (kind === "lfBuilding" || kind === "lfResearch") return level2 * Math.pow(row[7], level2);
+    const raw = rawCost(id, level2);
+    const sum = raw.metal + raw.crystal;
+    if (kind === "research") return sum;
+    const flat = id === 15 || id === 41 || id === 42 || id === 43;
+    return sum / (flat ? 1 : Math.max(4 - level2 / 2, 1));
+  }
+  function scaleDuration(id, shownLevel, shownMs, level2) {
+    const base = durationWeight(id, shownLevel);
+    return base > 0 ? shownMs * durationWeight(id, level2) / base : 0;
+  }
+  function missing(cost, have) {
+    return {
+      metal: Math.max(0, Math.ceil(cost.metal - have.metal)),
+      crystal: Math.max(0, Math.ceil(cost.crystal - have.crystal)),
+      deuterium: Math.max(0, Math.ceil(cost.deuterium - have.deuterium)),
+      energy: 0
+    };
+  }
+  function isoDurationMs(value) {
+    const m = /^P(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$/.exec(value.trim());
+    if (!m) return null;
+    const [w = 0, d = 0, h6 = 0, min = 0, s = 0] = m.slice(1).map((x) => Number(x ?? 0));
+    return ((((w * 7 + d) * 24 + h6) * 60 + min) * 60 + s) * 1e3;
+  }
+  var LAB = 31;
+  var IRN = 123;
+  var LAB_NEEDED = {
+    106: 3,
+    108: 1,
+    109: 4,
+    110: 6,
+    111: 2,
+    113: 1,
+    114: 7,
+    115: 1,
+    117: 2,
+    118: 7,
+    120: 1,
+    121: 4,
+    122: 4,
+    123: 10,
+    124: 3,
+    199: 12
+  };
+  function researchNetwork(here, others, irn, need = 1) {
+    const linked = others.filter((l) => l >= need && l > 0).sort((a, b) => b - a).slice(0, Math.max(0, irn));
+    return { total: here + linked.reduce((a, b) => a + b, 0), linked, hereOk: here >= need };
+  }
+
   // src/core/guard.ts
   var PTRE_RANKS = "https://ptre.chez.gg/scripts/api_get_ranks.php";
   var GuardError = class extends Error {
@@ -956,7 +1275,11 @@
     "settings.expStyleHint": "Con un altro tool che decora i messaggi (OGame Tracker, OGLight, \u2026) Future si fa da parte e registra soltanto, come OGLight. Il diario registra sempre.",
     "settings.expStyle.auto": "Automatico",
     "settings.expStyle.always": "Sempre Future",
-    "settings.expStyle.never": "Solo registra"
+    "settings.expStyle.never": "Solo registra",
+    "tech.labShort": "Rete {total} \xB7 {n} lab",
+    "tech.labNet": "Laboratori al lavoro su questa ricerca: {total} = qui {here} + {linked} (Rete di ricerca intergalattica liv. {irn})",
+    "tech.labNeed": "contano i laboratori dal liv. {need}",
+    "tech.labHereShort": "il laboratorio di questo pianeta \xE8 sotto il liv. {need}: qui non si pu\xF2 avviare"
   };
 
   // src/i18n/en.json
@@ -1729,7 +2052,11 @@
     "settings.expStyleHint": "With another tool decorating the reports (OGame Tracker, OGLight, \u2026) Future steps aside and only records, as OGLight does. The journal always records.",
     "settings.expStyle.auto": "Automatic",
     "settings.expStyle.always": "Always Future",
-    "settings.expStyle.never": "Record only"
+    "settings.expStyle.never": "Record only",
+    "tech.labShort": "Network {total} \xB7 {n} labs",
+    "tech.labNet": "Labs working on this research: {total} = here {here} + {linked} (Intergalactic Research Network level {irn})",
+    "tech.labNeed": "labs from level {need} count",
+    "tech.labHereShort": "this planet's lab is below level {need}: it cannot start here"
   };
 
   // src/i18n/fr.json
@@ -2502,7 +2829,11 @@
     "settings.expStyleHint": "Si un autre outil d\xE9core les rapports (OGame Tracker, OGLight, \u2026), Future s'efface et enregistre seulement, comme OGLight. Le journal enregistre toujours.",
     "settings.expStyle.auto": "Automatique",
     "settings.expStyle.always": "Toujours Future",
-    "settings.expStyle.never": "Enregistrer seulement"
+    "settings.expStyle.never": "Enregistrer seulement",
+    "tech.labShort": "R\xE9seau {total} \xB7 {n} labos",
+    "tech.labNet": "Laboratoires sur cette recherche : {total} = ici {here} + {linked} (R\xE9seau de recherche intergalactique niv. {irn})",
+    "tech.labNeed": "comptent les labos d\xE8s le niv. {need}",
+    "tech.labHereShort": "le labo de cette plan\xE8te est sous le niv. {need} : impossible de la lancer ici"
   };
 
   // src/i18n/de.json
@@ -3275,7 +3606,11 @@
     "settings.expStyleHint": "Schm\xFCckt ein anderes Tool die Berichte (OGame Tracker, OGLight, \u2026), tritt Future zur\xFCck und zeichnet nur auf, wie OGLight. Das Journal zeichnet immer auf.",
     "settings.expStyle.auto": "Automatisch",
     "settings.expStyle.always": "Immer Future",
-    "settings.expStyle.never": "Nur aufzeichnen"
+    "settings.expStyle.never": "Nur aufzeichnen",
+    "tech.labShort": "Netz {total} \xB7 {n} Labore",
+    "tech.labNet": "Labore an dieser Forschung: {total} = hier {here} + {linked} (Intergalaktisches Forschungsnetzwerk Stufe {irn})",
+    "tech.labNeed": "es z\xE4hlen Labore ab Stufe {need}",
+    "tech.labHereShort": "das Labor dieses Planeten ist unter Stufe {need}: hier nicht startbar"
   };
 
   // src/core/i18n.ts
@@ -3424,11 +3759,11 @@
   }
 
   // src/engines/resources.ts
-  var KEYS = ["metal", "crystal", "deuterium"];
+  var KEYS2 = ["metal", "crystal", "deuterium"];
   function estimateResources(body, now) {
     const seconds = Math.max(0, (now - body.resourcesAt) / 1e3);
     const out = { metal: 0, crystal: 0, deuterium: 0 };
-    for (const key of KEYS) {
+    for (const key of KEYS2) {
       const start = body.resources[key];
       const grown = body.type === "planet" ? start + body.production[key] * seconds / 3600 : start;
       const cap = effectiveStorage(body)[key];
@@ -3442,7 +3777,7 @@
   var STORAGE_BUILDING = { metal: "22", crystal: "23", deuterium: "24" };
   function effectiveStorage(body) {
     const out = { metal: 0, crystal: 0, deuterium: 0 };
-    for (const k of KEYS) {
+    for (const k of KEYS2) {
       const level2 = body.levels[STORAGE_BUILDING[k]] ?? body.levels[`${k}Storage`];
       out[k] = body.storage[k] > 0 ? body.storage[k] : level2 !== void 0 ? storageCapacity(level2) : 0;
     }
@@ -3450,7 +3785,7 @@
   }
   function storageFill(body, amount) {
     const cap = effectiveStorage(body);
-    if (KEYS.every((k) => cap[k] <= 0)) return null;
+    if (KEYS2.every((k) => cap[k] <= 0)) return null;
     const fill = (k) => cap[k] > 0 ? Math.min(1, amount[k] / cap[k]) : 0;
     return { metal: fill("metal"), crystal: fill("crystal"), deuterium: fill("deuterium") };
   }
@@ -3476,7 +3811,7 @@
     const perHour = { metal: 0, crystal: 0, deuterium: 0 };
     for (const body of snapshot.bodies) {
       const r = estimateResources(body, now);
-      for (const k of KEYS) {
+      for (const k of KEYS2) {
         stock2[k] += r[k];
         if (body.type === "planet") perHour[k] += body.production[k];
       }
@@ -5114,301 +5449,6 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     dock.append(journal, targets);
     if (menu) menu.append(dock);
     else home.append(dock);
-  }
-
-  // src/data/tech-table.ts
-  var TECH_TABLE = {
-    1: [60, 15, 0, 1.5, 0, 2, 0, 2],
-    2: [48, 24, 0, 1.6, 0, 2, 0, 2],
-    3: [225, 75, 0, 1.5, 0, 2, 0, 2],
-    4: [75, 30, 0, 1.5, 0, 2, 0, 2],
-    12: [900, 360, 180, 1.8, 0, 2, 0, 2],
-    14: [400, 120, 200, 2, 0, 2, 0, 2],
-    15: [1e6, 5e5, 1e5, 2, 0, 2, 0, 2],
-    21: [400, 200, 100, 2, 0, 2, 0, 2],
-    22: [1e3, 0, 0, 2, 0, 2, 0, 2],
-    23: [1e3, 500, 0, 2, 0, 2, 0, 2],
-    24: [1e3, 1e3, 0, 2, 0, 2, 0, 2],
-    31: [200, 400, 200, 2, 0, 2, 0, 2],
-    33: [0, 5e4, 1e5, 2, 1e3, 2, 0, 2],
-    34: [2e4, 4e4, 0, 2, 0, 2, 0, 2],
-    36: [200, 0, 50, 5, 50, 2.5, 0, 2],
-    41: [2e4, 4e4, 2e4, 2, 0, 2, 0, 2],
-    42: [2e4, 4e4, 2e4, 2, 0, 2, 0, 2],
-    43: [2e6, 4e6, 2e6, 2, 0, 2, 0, 2],
-    44: [2e4, 2e4, 1e3, 2, 0, 2, 0, 2],
-    45: [90, 45, 15, 1.5, 0, 2, 0, 2],
-    106: [200, 1e3, 200, 2, 0, 2, 0, 2],
-    108: [0, 400, 600, 2, 0, 2, 0, 2],
-    109: [800, 200, 0, 2, 0, 2, 0, 2],
-    110: [200, 600, 0, 2, 0, 2, 0, 2],
-    111: [1e3, 0, 0, 2, 0, 2, 0, 2],
-    113: [0, 800, 400, 2, 0, 2, 0, 2],
-    114: [0, 4e3, 2e3, 2, 0, 2, 0, 2],
-    115: [400, 0, 600, 2, 0, 2, 0, 2],
-    117: [2e3, 4e3, 600, 2, 0, 2, 0, 2],
-    118: [1e4, 2e4, 6e3, 2, 0, 2, 0, 2],
-    120: [200, 100, 0, 2, 0, 2, 0, 2],
-    121: [1e3, 300, 100, 2, 0, 2, 0, 2],
-    122: [2e3, 4e3, 1e3, 2, 0, 2, 0, 2],
-    123: [24e4, 4e5, 16e4, 2, 0, 2, 0, 2],
-    124: [4e3, 8e3, 4e3, 1.75, 0, 2, 0, 2],
-    199: [0, 0, 0, 3, 3e5, 3, 0, 2],
-    202: [2e3, 2e3, 0, 2, 0, 2, 0, 2],
-    203: [6e3, 6e3, 0, 2, 0, 2, 0, 2],
-    204: [3e3, 1e3, 0, 2, 0, 2, 0, 2],
-    205: [6e3, 4e3, 0, 2, 0, 2, 0, 2],
-    206: [2e4, 7e3, 2e3, 2, 0, 2, 0, 2],
-    207: [45e3, 15e3, 0, 2, 0, 2, 0, 2],
-    208: [1e4, 2e4, 1e4, 2, 0, 2, 0, 2],
-    209: [1e4, 6e3, 2e3, 2, 0, 2, 0, 2],
-    210: [0, 1e3, 0, 2, 0, 2, 0, 2],
-    211: [5e4, 25e3, 15e3, 2, 0, 2, 0, 2],
-    212: [0, 2e3, 500, 2, 0, 2, 0, 2],
-    213: [6e4, 5e4, 15e3, 2, 0, 2, 0, 2],
-    214: [5e6, 4e6, 1e6, 2, 0, 2, 0, 2],
-    215: [3e4, 4e4, 15e3, 2, 0, 2, 0, 2],
-    217: [2e3, 2e3, 1e3, 2, 0, 2, 0, 2],
-    218: [85e3, 55e3, 2e4, 2, 0, 2, 0, 2],
-    219: [8e3, 15e3, 8e3, 2, 0, 2, 0, 2],
-    401: [2e3, 0, 0, 2, 0, 2, 0, 2],
-    402: [1500, 500, 0, 2, 0, 2, 0, 2],
-    403: [6e3, 2e3, 0, 2, 0, 2, 0, 2],
-    404: [2e4, 15e3, 2e3, 2, 0, 2, 0, 2],
-    405: [5e3, 3e3, 0, 2, 0, 2, 0, 2],
-    406: [5e4, 5e4, 3e4, 2, 0, 2, 0, 2],
-    407: [1e4, 1e4, 0, 2, 0, 2, 0, 2],
-    408: [5e4, 5e4, 0, 2, 0, 2, 0, 2],
-    502: [8e3, 0, 2e3, 2, 0, 2, 0, 2],
-    503: [12e3, 2500, 1e4, 2, 0, 2, 0, 2],
-    11101: [7, 2, 0, 1.2, 0, 2, 40, 1.21],
-    11102: [5, 2, 0, 1.23, 8, 1.02, 40, 1.25],
-    11103: [2e4, 25e3, 1e4, 1.3, 10, 1.08, 16e3, 1.25],
-    11104: [5e3, 3200, 1500, 1.7, 15, 1.25, 16e3, 1.6],
-    11105: [5e4, 4e4, 5e4, 1.7, 30, 1.25, 64e3, 1.7],
-    11106: [9e3, 6e3, 3e3, 1.5, 40, 1.1, 2e3, 1.3],
-    11107: [25e3, 13e3, 7e3, 1.09, 0, 2, 12e3, 1.17],
-    11108: [5e4, 25e3, 15e3, 1.5, 80, 1.1, 28e3, 1.2],
-    11109: [75e3, 2e4, 25e3, 1.09, 50, 1.02, 4e4, 1.2],
-    11110: [15e4, 3e4, 15e3, 1.12, 60, 1.03, 52e3, 1.2],
-    11111: [8e4, 35e3, 6e4, 1.5, 90, 1.05, 9e4, 1.3],
-    11112: [25e4, 125e3, 125e3, 1.15, 100, 1.02, 95e3, 1.2],
-    11201: [5e3, 2500, 500, 1.3, 0, 2, 1e3, 1.2],
-    11202: [7e3, 1e4, 5e3, 1.5, 0, 2, 2e3, 1.3],
-    11203: [15e3, 1e4, 5e3, 1.3, 0, 2, 2500, 1.3],
-    11204: [2e4, 15e3, 7500, 1.3, 0, 2, 3500, 1.3],
-    11205: [25e3, 2e4, 1e4, 1.3, 0, 2, 4500, 1.2],
-    11206: [35e3, 25e3, 15e3, 1.5, 0, 2, 5e3, 1.3],
-    11207: [7e4, 4e4, 2e4, 1.3, 0, 2, 8e3, 1.3],
-    11208: [8e4, 5e4, 2e4, 1.5, 0, 2, 6e3, 1.3],
-    11209: [32e4, 24e4, 1e5, 1.5, 0, 2, 6500, 1.4],
-    11210: [32e4, 24e4, 1e5, 1.5, 0, 2, 7e3, 1.4],
-    11211: [12e4, 3e4, 25e3, 1.5, 0, 2, 7500, 1.3],
-    11212: [1e5, 4e4, 3e4, 1.3, 0, 2, 1e4, 1.3],
-    11213: [2e5, 1e5, 1e5, 1.3, 0, 2, 8500, 1.3],
-    11214: [16e4, 12e4, 5e4, 1.5, 0, 2, 9e3, 1.4],
-    11215: [16e4, 12e4, 5e4, 1.5, 0, 2, 9500, 1.4],
-    11216: [32e4, 24e4, 1e5, 1.5, 0, 2, 1e4, 1.4],
-    11217: [3e5, 18e4, 12e4, 1.5, 0, 2, 11e3, 1.3],
-    11218: [5e5, 3e5, 2e5, 1.2, 0, 2, 13e3, 1.3],
-    12101: [9, 3, 0, 1.2, 0, 2, 40, 1.21],
-    12102: [7, 2, 0, 1.2, 10, 1.03, 40, 1.21],
-    12103: [4e4, 1e4, 15e3, 1.3, 15, 1.1, 16e3, 1.25],
-    12104: [5e3, 3800, 1e3, 1.7, 20, 1.35, 16e3, 1.6],
-    12105: [5e4, 4e4, 5e4, 1.65, 60, 1.3, 64e3, 1.7],
-    12106: [1e4, 8e3, 1e3, 1.4, 40, 1.1, 2e3, 1.3],
-    12107: [2e4, 15e3, 1e4, 1.2, 0, 2, 16e3, 1.25],
-    12108: [5e4, 35e3, 15e3, 1.5, 80, 1.3, 4e4, 1.4],
-    12109: [85e3, 44e3, 25e3, 1.4, 90, 1.1, 4e4, 1.2],
-    12110: [12e4, 5e4, 2e4, 1.4, 90, 1.1, 52e3, 1.2],
-    12111: [25e4, 15e4, 1e5, 1.8, 120, 1.3, 9e4, 1.3],
-    12112: [25e4, 125e3, 125e3, 1.5, 100, 1.1, 95e3, 1.3],
-    12201: [1e4, 6e3, 1e3, 1.5, 0, 2, 1e3, 1.3],
-    12202: [7500, 12500, 5e3, 1.5, 0, 2, 2e3, 1.3],
-    12203: [15e3, 1e4, 5e3, 1.5, 0, 2, 2500, 1.3],
-    12204: [2e4, 15e3, 7500, 1.3, 0, 2, 3500, 1.4],
-    12205: [25e3, 2e4, 1e4, 1.5, 0, 2, 4500, 1.3],
-    12206: [5e4, 5e4, 2e4, 1.5, 0, 2, 5e3, 1.3],
-    12207: [7e4, 4e4, 2e4, 1.5, 0, 2, 5500, 1.3],
-    12208: [16e4, 12e4, 5e4, 1.5, 0, 2, 6e3, 1.4],
-    12209: [75e3, 55e3, 25e3, 1.5, 0, 2, 6500, 1.3],
-    12210: [85e3, 4e4, 35e3, 1.5, 0, 2, 7e3, 1.3],
-    12211: [12e4, 3e4, 25e3, 1.5, 0, 2, 7500, 1.3],
-    12212: [1e5, 4e4, 3e4, 1.5, 0, 2, 8e3, 1.3],
-    12213: [2e5, 1e5, 1e5, 1.2, 0, 2, 8500, 1.3],
-    12214: [22e4, 11e4, 11e4, 1.3, 0, 2, 9e3, 1.3],
-    12215: [24e4, 12e4, 12e4, 1.3, 0, 2, 9500, 1.3],
-    12216: [25e4, 25e4, 25e4, 1.4, 0, 2, 1e4, 1.4],
-    12217: [5e5, 3e5, 2e5, 1.5, 0, 2, 13e3, 1.3],
-    12218: [3e5, 18e4, 12e4, 1.7, 0, 2, 11e3, 1.4],
-    13101: [6, 2, 0, 1.21, 0, 2, 40, 1.22],
-    13102: [5, 2, 0, 1.18, 8, 1.02, 48, 1.2],
-    13103: [3e4, 2e4, 1e4, 1.3, 13, 1.08, 16e3, 1.25],
-    13104: [5e3, 3800, 1e3, 1.8, 10, 1.2, 16e3, 1.6],
-    13105: [5e4, 4e4, 5e4, 1.8, 40, 1.2, 64e3, 1.7],
-    13106: [7500, 7e3, 1e3, 1.3, 0, 2, 2e3, 1.3],
-    13107: [35e3, 15e3, 1e4, 1.5, 40, 1.05, 16e3, 1.4],
-    13108: [5e4, 2e4, 3e4, 1.07, 40, 1.01, 12e3, 1.17],
-    13109: [1e5, 1e4, 3e3, 1.14, 80, 1.04, 4e4, 1.3],
-    13110: [1e5, 4e4, 2e4, 1.5, 60, 1.1, 52e3, 1.2],
-    13111: [55e3, 5e4, 3e4, 1.5, 70, 1.05, 5e4, 1.3],
-    13112: [25e4, 125e3, 125e3, 1.4, 100, 1.05, 95e3, 1.4],
-    13201: [1e4, 6e3, 1e3, 1.5, 0, 2, 1e3, 1.3],
-    13202: [7500, 12500, 5e3, 1.3, 0, 2, 2e3, 1.3],
-    13203: [15e3, 1e4, 5e3, 1.5, 0, 2, 2500, 1.4],
-    13204: [2e4, 15e3, 7500, 1.3, 0, 2, 3500, 1.3],
-    13205: [16e4, 12e4, 5e4, 1.5, 0, 2, 4500, 1.4],
-    13206: [5e4, 5e4, 2e4, 1.5, 0, 2, 5e3, 1.3],
-    13207: [7e4, 4e4, 2e4, 1.3, 0, 2, 5500, 1.3],
-    13208: [16e4, 12e4, 5e4, 1.5, 0, 2, 6e3, 1.4],
-    13209: [16e4, 12e4, 5e4, 1.5, 0, 2, 6500, 1.4],
-    13210: [85e3, 4e4, 35e3, 1.2, 0, 2, 7e3, 1.3],
-    13211: [12e4, 3e4, 25e3, 1.3, 0, 2, 7500, 1.3],
-    13212: [16e4, 12e4, 5e4, 1.5, 0, 2, 8e3, 1.4],
-    13213: [2e5, 1e5, 1e5, 1.5, 0, 2, 8500, 1.3],
-    13214: [16e4, 12e4, 5e4, 1.5, 0, 2, 9e3, 1.4],
-    13215: [32e4, 24e4, 1e5, 1.5, 0, 2, 9500, 1.4],
-    13216: [32e4, 24e4, 1e5, 1.5, 0, 2, 1e4, 1.4],
-    13217: [5e5, 3e5, 2e5, 1.5, 0, 2, 13e3, 1.3],
-    13218: [3e5, 18e4, 12e4, 1.7, 0, 2, 11e3, 1.4],
-    14101: [4, 3, 0, 1.21, 0, 2, 40, 1.22],
-    14102: [6, 3, 0, 1.2, 9, 1.02, 40, 1.22],
-    14103: [2e4, 15e3, 15e3, 1.3, 10, 1.08, 16e3, 1.25],
-    14104: [7500, 5e3, 800, 1.8, 15, 1.3, 16e3, 1.7],
-    14105: [6e4, 3e4, 5e4, 1.8, 30, 1.3, 64e3, 1.8],
-    14106: [8500, 5e3, 3e3, 1.25, 0, 2, 2e3, 1.35],
-    14107: [15e3, 15e3, 5e3, 1.2, 0, 2, 12e3, 1.2],
-    14108: [75e3, 25e3, 3e4, 1.05, 30, 1.03, 16e3, 1.18],
-    14109: [87500, 25e3, 3e4, 1.2, 40, 1.02, 4e4, 1.2],
-    14110: [15e4, 3e4, 3e4, 1.4, 140, 1.05, 52e3, 1.8],
-    14111: [75e3, 5e4, 55e3, 1.2, 90, 1.04, 9e4, 1.3],
-    14112: [5e5, 25e4, 25e4, 1.4, 100, 1.05, 95e3, 1.3],
-    14201: [1e4, 6e3, 1e3, 1.5, 0, 2, 1e3, 1.4],
-    14202: [7500, 12500, 5e3, 1.5, 0, 2, 2e3, 1.3],
-    14203: [15e3, 1e4, 5e3, 1.5, 0, 2, 2500, 1.4],
-    14204: [2e4, 15e3, 7500, 1.5, 0, 2, 3500, 1.4],
-    14205: [25e3, 2e4, 1e4, 1.5, 0, 2, 4500, 1.4],
-    14206: [5e4, 5e4, 2e4, 1.3, 0, 2, 5e3, 1.4],
-    14207: [7e4, 4e4, 2e4, 1.5, 0, 2, 5500, 1.3],
-    14208: [8e4, 5e4, 2e4, 1.2, 0, 2, 6e3, 1.2],
-    14209: [32e4, 24e4, 1e5, 1.5, 0, 2, 6500, 1.4],
-    14210: [85e3, 4e4, 35e3, 1.2, 0, 2, 7e3, 1.2],
-    14211: [12e4, 3e4, 25e3, 1.5, 0, 2, 7500, 1.4],
-    14212: [1e5, 4e4, 3e4, 1.5, 0, 2, 8e3, 1.3],
-    14213: [2e5, 1e5, 1e5, 1.5, 0, 2, 8500, 1.3],
-    14214: [16e4, 12e4, 5e4, 1.5, 0, 2, 9e3, 1.4],
-    14215: [24e4, 12e4, 12e4, 1.5, 0, 2, 9500, 1.4],
-    14216: [32e4, 24e4, 1e5, 1.5, 0, 2, 1e4, 1.4],
-    14217: [5e5, 3e5, 2e5, 1.5, 0, 2, 13e3, 1.3],
-    14218: [3e5, 18e4, 12e4, 1.7, 0, 2, 11e3, 1.4]
-  };
-
-  // src/engines/tech.ts
-  var ZERO_COST = { metal: 0, crystal: 0, deuterium: 0, energy: 0 };
-  function techKind(id) {
-    if (!TECH_TABLE[id]) return null;
-    if (id < 100) return "building";
-    if (id < 200) return "research";
-    if (id < 600) return "unit";
-    const group = Math.floor(id % 1e3 / 100);
-    return group === 1 ? "lfBuilding" : "lfResearch";
-  }
-  var isLevelled = (id) => {
-    const kind = techKind(id);
-    return kind !== null && kind !== "unit";
-  };
-  function rawCost(id, level2) {
-    const row = TECH_TABLE[id];
-    const kind = techKind(id);
-    if (!row || !kind) return { ...ZERO_COST };
-    const [m, c, d, factor, energy, energyFactor] = row;
-    if (kind === "unit") return { metal: m, crystal: c, deuterium: d, energy: 0 };
-    const k = Math.pow(factor, level2 - 1);
-    if (kind === "lfBuilding" || kind === "lfResearch") {
-      return { metal: Math.floor(m * k * level2), crystal: Math.floor(c * k * level2), deuterium: Math.floor(d * k * level2), energy: 0 };
-    }
-    return {
-      metal: Math.floor(m * k),
-      crystal: Math.floor(c * k),
-      deuterium: Math.floor(d * k),
-      energy: Math.floor(energy * Math.pow(energyFactor, level2 - 1))
-    };
-  }
-  var KEYS2 = ["metal", "crystal", "deuterium", "energy"];
-  function main(cost) {
-    let best = null;
-    for (const key of KEYS2) if (cost[key] > 0 && (best === null || cost[key] > cost[best])) best = key;
-    return best;
-  }
-  function discountFrom(id, level2, shown2) {
-    const raw = rawCost(id, level2);
-    const key = main(raw);
-    if (!key) return null;
-    const value = shown2[key];
-    if (value === void 0 || !(value > 0)) return null;
-    const ratio = value / raw[key];
-    if (ratio > 1.001 || ratio < 0.2) return null;
-    return Math.max(0, 1 - ratio);
-  }
-  function matchShownLevel(id, candidates, shown2) {
-    let best = null;
-    for (const level2 of new Set(candidates.filter((l) => l >= 1))) {
-      const discount = discountFrom(id, level2, shown2);
-      if (discount === null) continue;
-      if (!best || discount < best.discount) best = { level: level2, discount };
-    }
-    return best;
-  }
-  function levelCost(id, level2, discount = 0) {
-    const raw = rawCost(id, level2);
-    const keep = 1 - discount;
-    return {
-      metal: Math.floor(raw.metal * keep),
-      crystal: Math.floor(raw.crystal * keep),
-      deuterium: Math.floor(raw.deuterium * keep),
-      energy: Math.floor(raw.energy * keep)
-    };
-  }
-  function addCost(a, b) {
-    return { metal: a.metal + b.metal, crystal: a.crystal + b.crystal, deuterium: a.deuterium + b.deuterium, energy: Math.max(a.energy, b.energy) };
-  }
-  function scaleCost(a, n) {
-    return { metal: a.metal * n, crystal: a.crystal * n, deuterium: a.deuterium * n, energy: a.energy };
-  }
-  function rangeCost(id, from, to, discount = 0) {
-    let total = { ...ZERO_COST };
-    for (let level2 = from; level2 <= to; level2++) total = addCost(total, levelCost(id, level2, discount));
-    return total;
-  }
-  function durationWeight(id, level2) {
-    const row = TECH_TABLE[id];
-    const kind = techKind(id);
-    if (!row || !kind) return 0;
-    if (kind === "unit") return 1;
-    if (kind === "lfBuilding" || kind === "lfResearch") return level2 * Math.pow(row[7], level2);
-    const raw = rawCost(id, level2);
-    const sum = raw.metal + raw.crystal;
-    if (kind === "research") return sum;
-    const flat = id === 15 || id === 41 || id === 42 || id === 43;
-    return sum / (flat ? 1 : Math.max(4 - level2 / 2, 1));
-  }
-  function scaleDuration(id, shownLevel, shownMs, level2) {
-    const base = durationWeight(id, shownLevel);
-    return base > 0 ? shownMs * durationWeight(id, level2) / base : 0;
-  }
-  function missing(cost, have) {
-    return {
-      metal: Math.max(0, Math.ceil(cost.metal - have.metal)),
-      crystal: Math.max(0, Math.ceil(cost.crystal - have.crystal)),
-      deuterium: Math.max(0, Math.ceil(cost.deuterium - have.deuterium)),
-      energy: 0
-    };
-  }
-  function isoDurationMs(value) {
-    const m = /^P(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$/.exec(value.trim());
-    if (!m) return null;
-    const [w = 0, d = 0, h6 = 0, min = 0, s = 0] = m.slice(1).map((x) => Number(x ?? 0));
-    return ((((w * 7 + d) * 24 + h6) * 60 + min) * 60 + s) * 1e3;
   }
 
   // src/engines/expeditions.ts
@@ -12734,6 +12774,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 .fut-tp-lack { border-color: var(--bad); color: var(--bad); } .fut-tp-lack svg { color: var(--bad); }
 .fut-tp-sat { border-color: #6B5A1E; color: var(--energy); cursor: pointer; } .fut-tp-sat svg { color: var(--energy); }
 .fut-tp-sat:hover { border-color: var(--energy); background: #1E1A0C; }
+.fut-tp-lab { border-color: #35576A; color: var(--text, #C9D2DC); }
 .fut-tp-sat-link { display: inline-flex; max-width: 100%; text-decoration: none; }
 /* Tools over the picture, like OGLight. */
 .fut-tp-tools { position: absolute; top: 4px; left: 4px; right: 4px; display: flex; gap: 4px; z-index: 2; }
@@ -12893,6 +12934,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     energy: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>',
     start: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v5h5"/></svg>',
     sat: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="9" y="9" width="6" height="6" rx="1"/><path d="M2 9h5v6H2zM17 9h5v6h-5zM7 12h2M15 12h2M12 9V5"/></svg>',
+    lab: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5.5 9.5A1.6 1.6 0 0 0 5.9 21h12.2a1.6 1.6 0 0 0 1.4-2.5L14 9V3"/><path d="M7.5 15h9"/></svg>',
     pop: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.6 3-5.5 6-5.5s5.4 1.9 6 5.5"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.8M18.5 15c1.5.9 2.3 2.6 2.6 5"/></svg>'
   };
   var ROW_ICON = {
@@ -12984,6 +13026,19 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     const n = askedSatellites;
     askedSatellites = null;
     return n;
+  }
+  function labChip(o, id) {
+    if (techKind(id) !== "research") return null;
+    const labs = o.labs?.();
+    if (!labs) return null;
+    const need = LAB_NEEDED[id] ?? 1;
+    const net = researchNetwork(labs.here, labs.others, labs.irn, need);
+    const title = [
+      o.t("tech.labNet", { total: net.total, here: labs.here, linked: net.linked.length ? net.linked.join(" + ") : "\u2014", irn: labs.irn }),
+      o.t("tech.labNeed", { need }),
+      ...net.hereOk ? [] : [o.t("tech.labHereShort", { need })]
+    ].join(" \xB7 ");
+    return chip(o.doc, ICON.lab, o.t("tech.labShort", { total: net.total, n: net.linked.length + 1 }), title, net.hereOk ? "fut-tp-lab" : "fut-tp-lab fut-tp-lack");
   }
   function satelliteChip(o, need, amountInput) {
     const { doc, t, locale } = o;
@@ -13105,6 +13160,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           const sat = need === null ? null : satelliteChip(o, need, null);
           if (sat) row.append(sat);
         }
+        const net = labChip(o, details.id);
+        if (net) row.append(net);
         if (start.discount > 5e-4) row.append(chip(doc, "", t("tech.discountShort", { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), t("tech.discount", { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), "fut-tp-disc"));
         box.replaceChildren(grid(o, view2, have !== null), row);
       };
@@ -14752,7 +14809,25 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       watchJumpgate(document, store, currentId, t);
     }
     if (currentId) {
-      watchTechPages({ doc: document, store, bodyId: currentId, t, locale, have: () => readCurrentResources(document), energy: () => readCurrentEnergy(document), maxTemp: currentMaxTemperature(document), onPlanChange: () => draw() });
+      watchTechPages({
+        doc: document,
+        store,
+        bodyId: currentId,
+        t,
+        locale,
+        have: () => readCurrentResources(document),
+        energy: () => readCurrentEnergy(document),
+        maxTemp: currentMaxTemperature(document),
+        onPlanChange: () => draw(),
+        // Research network: lab levels from the last sync (no network call here).
+        labs: () => {
+          const planets = (snapshot?.bodies ?? []).filter((b) => b.type === "planet");
+          const here = planets.find((b) => b.id === currentId);
+          if (!snapshot || !here) return null;
+          const lab = (b) => b.levels[String(LAB)] ?? 0;
+          return { here: lab(here), others: planets.filter((b) => b !== here).map(lab), irn: snapshot.researches[String(IRN)] ?? 0 };
+        }
+      });
     }
     const side = { doc: document, store, guard, t, locale };
     drawDock = () => {
