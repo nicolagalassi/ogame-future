@@ -62,6 +62,7 @@ import {
   prepareExpedition,
   prepareFleetsave,
   prepareSend,
+  aimSend,
   prepareTransport,
   clearOurSelection,
   type FleetMode,
@@ -852,10 +853,14 @@ function sendPanel(
   o: FleetOptions,
   peek: (node: HTMLElement, name: string, detail: string) => void,
   onCargo: (ship: number) => void,
+  onTarget: () => void,
 ): HTMLElement {
   const { doc, t } = o;
   const settings = loadSettings(o.store);
-  const save = (part: Partial<FleetSettings>) => o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), ...part });
+  const save = (part: Partial<FleetSettings>) => {
+    o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), ...part });
+    if ('sendTarget' in part) onTarget();
+  };
   const origin = originCoords(doc);
   const panel = el(doc, 'div', 'fut-fsend');
   panel.setAttribute('role', 'group');
@@ -1254,6 +1259,17 @@ export function renderFleetTools(o: FleetOptions): void {
     if (next) say(t(next === 'transport' ? 'fleet.send.onTransport' : 'fleet.send.onDeploy'));
     doc.querySelector<HTMLInputElement>('.fut-fsend .fut-fin.p')?.focus();
   }
+  /** The panel's destination and mission on the game's form, for ships picked by hand; quiet, nothing selected. */
+  function aim(): void {
+    const fd = getDispatcher();
+    if (!fd || fd.currentPage !== 'fleet1') return;
+    void whenTargetIdle(fd).then(() => {
+      const now = loadSettings(o.store);
+      if (!now.sendMode) return;
+      const target = sendTargetOf(o, now.sendTarget, fd.currentPlanet);
+      if (target) aimSend(fd, doc, target, now.sendMode);
+    });
+  }
   function sendWith(ship: number): void {
     withDispatcher((fd) => {
       const now = loadSettings(o.store);
@@ -1429,7 +1445,10 @@ export function renderFleetTools(o: FleetOptions): void {
     const bottom = el(doc, 'div', 'fut-frow');
     bottom.append(rules, out.box);
     bar.append(top);
-    if (settings.sendMode) bar.append(sendPanel(o, out.peek, sendWith));
+    if (settings.sendMode) {
+      bar.append(sendPanel(o, out.peek, sendWith, aim));
+      aim();
+    }
     if (focusRes) doc.querySelector<HTMLInputElement>('.fut-fsend .fut-fresin.metal input')?.focus();
     bar.append(bottom);
     anchor1.before(bar);

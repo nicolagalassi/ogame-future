@@ -333,6 +333,15 @@ export function prepareSend(
   return { ...finish(fd, code, count, cargo), missing: Math.max(0, needed - n) };
 }
 
+/**
+ * Plain Trasporto / Schiera with ships picked by hand: the game's form takes the panel's
+ * destination and mission, so "Avanti" opens page 2 on it. Ships and resources stay as they are.
+ */
+export function aimSend(fd: FleetDispatcher, doc: Document, target: Target, mission: 'transport' | 'deploy'): void {
+  setTarget(fd, doc, target);
+  fd.mission = mission === 'transport' ? TRANSPORT : DEPLOY;
+}
+
 /** What was just sent, to offer it again later. */
 export function snapshotFleet(fd: FleetDispatcher): LastFleet {
   return {
