@@ -160,6 +160,10 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     dopo mostrano quel livello (partito) o niente di quel tipo (finito o annullato), o quando la pagina tecnologie
     mostra il livello costruito; anche a mano con la × nella riga «in coda». **Da verificare in gioco**:
     `data-status="active"` e i nomi della productionqueue con il Comandante.
+18. **Nave principale sulla nave** (2026-11-13, 0.3.60): in fleet1 ogni nave da carico (`CARGO_SHIPS`, sonde
+    comprese) ha in alto a destra un tasto cargo (in alto a sinistra c'è già il gioco). Clic = diventa la nave
+    principale (impostazione salvata, la vecchia principale diventa seconda se serve) e l'azione in corso
+    (luna, raccolta, piano) si prepara di nuovo con quella. Come OGLight.
 14. **Grafica** (2026-11-06): tutte le finestre (`WINDOW_SHEET`) riprendono il menu pianeti: riquadri #111B2A
     con bordo #1F2C40, schede a segmenti, numeri monospazio, ciano per la selezione. Pila z-index sopra il
     footer del gioco (999999): barra laterale 1000000, finestre 1000001, popup 1000002-3.

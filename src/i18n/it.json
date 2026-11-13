@@ -760,5 +760,7 @@
   "plan.colCost": "costo",
   "plan.queued": "in coda",
   "plan.queuedHint": "In coda nel gioco, non ancora pagato: le sue risorse restano da parte e non contano per il piano né per i trasporti",
-  "plan.unhold": "Non tenere più da parte (già partito o annullato)"
+  "plan.unhold": "Non tenere più da parte (già partito o annullato)",
+  "fleet.mainShipIs": "Nave principale dei trasporti automatici",
+  "fleet.mainShipPick": "Usa questa nave per i trasporti automatici (luna, raccolta, piano)"
 }
