@@ -110,8 +110,22 @@ export function openJournal(o: JournalOptions): void {
       h('b', '', s.count.toLocaleString(locale)), ` ${t('exp.heroCount')} · `,
       h('b', '', s.count ? fmt(s.netMsu / s.count) : '—'), ` ${t('exp.heroAvg')}`,
     );
-    if (msu(s.lostValue)) sub.append(' · ', `${t('exp.heroLost')} `, h('b', 'neg', `−${fmt(msu(s.lostValue))}`));
-    top.append(net, sub);
+    net.append(sub);
+    // The total split in two: what the resources brought, what the fleet brought (found − lost).
+    const part = (label: string, value: number, note?: HTMLElement) => {
+      const p = h('div', 'hero-part');
+      const v = h('b', `hero-pv${value < 0 ? ' neg' : ''}`, sign(value));
+      v.append(h('small', '', 'MSU'));
+      p.append(h('span', 'hero-k', label), v);
+      if (note) p.append(note);
+      return p;
+    };
+    const resMsu = msu(s.res);
+    const fleetMsu = msu(s.shipsValue) - msu(s.lostValue);
+    const lostNote = h('span', 'hero-note');
+    lostNote.append(`${t('exp.heroFound')} `, h('b', '', fmt(msu(s.shipsValue))));
+    if (msu(s.lostValue)) lostNote.append(` · ${t('exp.heroLostShort')} `, h('b', 'neg', `−${fmt(msu(s.lostValue))}`));
+    top.append(net, part(t('exp.heroRes'), resMsu), part(t('exp.heroFleet'), fleetMsu, lostNote));
     const mix = valueMix(s);
     const mixTotal = mix.metal + mix.crystal + mix.deuterium + mix.ships;
     const bar = h('div', 'mix');
