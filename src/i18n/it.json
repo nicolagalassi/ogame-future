@@ -189,7 +189,7 @@
   "tech.added": "Aggiunto ✓",
   "plan.title": "Piano di costruzione",
   "plan.titleCount": "Piano di costruzione ({n})",
-  "plan.sub": "Per pianeta: un tasto porta lì tutto quello che manca. In rosso quello che manca su quel pianeta.",
+  "plan.sub": "Un tasto per pianeta porta lì quello che manca. Le costruzioni in coda nel gioco tengono da parte le loro risorse.",
   "plan.moonOf": "Luna di {name}",
   "plan.clear": "Svuota",
   "plan.colItem": "Cosa",
@@ -751,5 +751,14 @@
   "marks.st.outlaw": "fuorilegge",
   "marks.st.admin": "amministratore",
   "marks.lastCheck": "Ultimo controllo in galassia: {time}",
-  "marks.neverChecked": "Mai visto in galassia"
+  "marks.neverChecked": "Mai visto in galassia",
+  "plan.sec.missing": "Da rifornire",
+  "plan.sec.arriving": "In arrivo",
+  "plan.sec.unknown": "Risorse non note",
+  "plan.sec.ready": "Pronti",
+  "plan.colMissing": "mancano (metallo · cristallo · deuterio)",
+  "plan.colCost": "costo",
+  "plan.queued": "in coda",
+  "plan.queuedHint": "In coda nel gioco, non ancora pagato: le sue risorse restano da parte e non contano per il piano né per i trasporti",
+  "plan.unhold": "Non tenere più da parte (già partito o annullato)"
 }

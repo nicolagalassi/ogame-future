@@ -291,6 +291,16 @@ describe('fleet actions on the game dispatcher', () => {
     expect(fd.selected).toEqual({ 203: 23 });
   });
 
+  it('plan deliveries ignore the ships reserve but keep what queued builds here need', () => {
+    const fd = fakeDispatcher();
+    const all = { reserve: { ships: { '203': 100, '202': 50 }, resources: { metal: 0, crystal: 0, deuterium: 0 } }, save: null };
+    // 150,000 metal here, 100,000 held for a level queued on this planet: 50,000 can leave.
+    const r = prepareDelivery(fd, fleetPage(), all, DEFAULT_SETTINGS, { galaxy: 1, system: 2, position: 3, type: 1 }, { metal: 200_000, crystal: 0, deuterium: 0 }, { metal: 100_000, crystal: 0, deuterium: 0 });
+    expect(r.ok).toBe(true);
+    expect(fd.selected).toEqual({ 203: 25 });
+    expect(fd.cargoMetal).toBe(50_000);
+  });
+
   it('ignore food hides it from the game and gives it back', () => {
     const store = new Store(new MemoryStore(), 'x');
     const fd = fakeDispatcher() as FleetDispatcher & { foodOnPlanet?: number; cargoFood?: number };

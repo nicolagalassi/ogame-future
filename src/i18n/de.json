@@ -189,7 +189,7 @@
   "tech.added": "Hinzugefügt ✓",
   "plan.title": "Bauplan",
   "plan.titleCount": "Bauplan ({n})",
-  "plan.sub": "Nach Planet: ein Knopf bringt alles Fehlende dorthin. Rot ist, was auf dem Planeten fehlt.",
+  "plan.sub": "Ein Knopf pro Planet bringt, was dort fehlt. Bauten in der Warteschlange halten ihre Ressourcen zurück.",
   "plan.moonOf": "Mond von {name}",
   "plan.clear": "Leeren",
   "plan.colItem": "Was",
@@ -751,5 +751,14 @@
   "marks.st.outlaw": "Outlaw",
   "marks.st.admin": "Administrator",
   "marks.lastCheck": "Zuletzt in der Galaxie geprüft: {time}",
-  "marks.neverChecked": "Noch nie in der Galaxie gesehen"
+  "marks.neverChecked": "Noch nie in der Galaxie gesehen",
+  "plan.sec.missing": "Zu beliefern",
+  "plan.sec.arriving": "Unterwegs",
+  "plan.sec.unknown": "Ressourcen unbekannt",
+  "plan.sec.ready": "Bereit",
+  "plan.colMissing": "fehlt (Metall · Kristall · Deuterium)",
+  "plan.colCost": "Kosten",
+  "plan.queued": "in Warteschlange",
+  "plan.queuedHint": "Im Spiel in der Warteschlange, noch nicht bezahlt: seine Ressourcen werden zurückgehalten und zählen weder für den Plan noch für Transporte",
+  "plan.unhold": "Nicht mehr zurückhalten (schon gestartet oder abgebrochen)"
 }

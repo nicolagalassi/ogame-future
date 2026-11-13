@@ -18,7 +18,7 @@ import type { Cost } from '../../engines/tech';
 import { PLANNER_CSS } from './style';
 import { DELIVERY_KEY, nextBody, type Delivery } from '../../engines/fleet';
 import { repeatUrl } from '../fleet/repeat';
-import { pendingFor, prunePending, SENT_KEY, type PlanItem, type Shipment } from '../../engines/planner';
+import { dropQueued, lessReserved, pendingFor, planStatus, prunePending, QUEUED_KEY, reservedFor, SENT_KEY, withQueued, type PlanItem, type PlanState, type Queued, type Shipment } from '../../engines/planner';
 
 type Res = { metal: number; crystal: number; deuterium: number };
 const RES = [['metal', 'm'], ['crystal', 'c'], ['deuterium', 'd']] as const;
@@ -45,6 +45,8 @@ export interface PlannerOptions {
   locale: string;
   t: T;
   onChange?: () => void;
+  /** The body whose badge opened the plan: shown first, highlighted, its send button focused. */
+  focus?: number;
   /** Current page URL and page change, for "Porta qui le risorse" (a normal navigation). */
   href?: string;
   navigate?: (url: string) => void;
@@ -108,6 +110,12 @@ export function openPlanner(o: PlannerOptions): void {
   const timeOf = (ms: number) => new Date(ms).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
   const icons = o.store.get<Record<string, TechIcon>>(TECH_ICONS_KEY, {});
   let confirmClear = false;
+  /** The focused body is scrolled to and its button focused once, on opening. */
+  let focusPending = o.focus !== undefined;
+  if (o.focus !== undefined) {
+    view = 'body';
+    opened.add(o.focus);
+  }
 
   const labels = new Map<number, string>();
   for (const e of o.entries) {
@@ -146,10 +154,16 @@ export function openPlanner(o: PlannerOptions): void {
       o.onChange?.();
       draw();
     };
+    const queued = o.store.get<Queued>(QUEUED_KEY, {});
     const pendingOf = (id: number) => pendingFor(sent, id, seenAt(id));
+    /** What a body holds that is free: levels queued in the game keep theirs until they start. */
+    const freeOf = (id: number): Res | null => {
+      const r = stock(id);
+      return r ? lessReserved(r, reservedFor(queued, id)) : null;
+    };
     // What a body holds, what was sent to it counted as there.
     const haveOf = (id: number): Res | null => {
-      const r = stock(id);
+      const r = freeOf(id);
       if (!r) return null;
       const p = pendingOf(id);
       return { metal: r.metal + p.metal, crystal: r.crystal + p.crystal, deuterium: r.deuterium + p.deuterium };
@@ -159,7 +173,8 @@ export function openPlanner(o: PlannerOptions): void {
       return { metal: s.metal + p.metal, crystal: s.crystal + p.crystal, deuterium: s.deuterium + p.deuterium };
     }, { metal: 0, crystal: 0, deuterium: 0 });
     const account = accountResources(o.snapshot?.bodies ?? [], stock, inFlight);
-    const { total, missing } = accountGap(plan, account);
+    // Queued levels: their resources are still counted in the account, so their cost is too.
+    const { total, missing } = accountGap(withQueued(plan, queued), account);
     const groups = groupByTech(plan, haveOf);
 
     const head = h('div', 'head');
@@ -230,10 +245,36 @@ export function openPlanner(o: PlannerOptions): void {
     const list = h('div', 'groups');
     if (view === 'tech') for (const g of groups) list.append(groupTile(g, plan, haveOf, pendingOf, save));
     else {
-      const ids = Object.keys(plan).map(Number).sort((a, b) => (order.get(a) ?? 1e9) - (order.get(b) ?? 1e9));
-      for (const id of ids) list.append(bodyTile(id, plan, haveOf, pendingOf, save));
+      // Grouped by where each body stands, so what still needs a transport comes first; the body
+      // whose badge opened the window leads its group, and its group leads the list.
+      const ids = Object.keys(plan).map(Number).sort((a, b) => (a === o.focus ? -1 : b === o.focus ? 1 : 0) || (order.get(a) ?? 1e9) - (order.get(b) ?? 1e9));
+      const stateOf = (id: number): PlanState => planStatus(plan[String(id)] ?? [], freeOf(id), pendingOf(id), o.now).state;
+      const sections: { key: string; states: PlanState[]; numbers: 'gap' | 'cost' }[] = [
+        { key: 'missing', states: ['missing'], numbers: 'gap' },
+        { key: 'arriving', states: ['arriving', 'arrived'], numbers: 'cost' },
+        { key: 'unknown', states: ['unknown'], numbers: 'cost' },
+        { key: 'ready', states: ['ready'], numbers: 'cost' },
+      ];
+      const states = new Map(ids.map((id) => [id, stateOf(id)]));
+      const focusState = o.focus !== undefined ? states.get(o.focus) : undefined;
+      if (focusState) sections.sort((a, b) => Number(b.states.includes(focusState)) - Number(a.states.includes(focusState)));
+      for (const sec of sections) {
+        const here = ids.filter((id) => sec.states.includes(states.get(id)!));
+        if (!here.length) continue;
+        const bar = h('div', `sec sec-${sec.key}`);
+        bar.append(h('span', 'sec-name', `${t(`plan.sec.${sec.key}`)} · ${here.length}`), h('span', 'sec-col', t(sec.numbers === 'gap' ? 'plan.colMissing' : 'plan.colCost')));
+        list.append(bar);
+        for (const id of here) list.append(bodyTile(id, plan, haveOf, pendingOf, save, sec.numbers, queued));
+      }
     }
     panel.replaceChildren(head, kpis, seg, list);
+    if (focusPending) {
+      focusPending = false;
+      const tile = list.querySelector<HTMLElement>(`.group.body[data-body="${o.focus}"]`);
+      tile?.scrollIntoView?.({ block: 'nearest' });
+      // The send button takes the focus: Enter prepares the transport.
+      (tile?.querySelector<HTMLElement>('.bring-all') ?? tile)?.focus?.();
+    }
   };
 
   /** Opens the fleet page on a source body with a transport of `need` towards `target` prepared (the player sends it). */
@@ -256,8 +297,9 @@ export function openPlanner(o: PlannerOptions): void {
    * One planet or moon: what its plan costs and one button that carries there everything it lacks.
    * A click on its rows picks them: the button then carries only what those rows need.
    */
-  const bodyTile = (bodyId: number, plan: Plan, haveOf: (id: number) => Res | null, pendingOf: (id: number) => Res & { arriveAt: number }, save: (p: Plan) => void) => {
+  const bodyTile = (bodyId: number, plan: Plan, haveOf: (id: number) => Res | null, pendingOf: (id: number) => Res & { arriveAt: number }, save: (p: Plan) => void, numbers: 'gap' | 'cost', queued: Queued) => {
     const items = plan[String(bodyId)] ?? [];
+    const waiting = queued[String(bodyId)] ?? [];
     const have = haveOf(bodyId);
     const chosen = picked.get(bodyId) ?? new Set<number>();
     // Consecutive levels of one technology read as one row ("liv. 46–48").
@@ -289,8 +331,9 @@ export function openPlanner(o: PlannerOptions): void {
       r.amount !== undefined ? `×${fmt(r.amount)}` : r.from === r.to ? String(r.from ?? 0) : `${r.from ?? 0}–${r.to ?? 0}`;
 
     // One line per planet: who, what (a picture and a level per planned thing), what it costs, the button.
-    const tile = h('div', 'group body');
+    const tile = h('div', `group body${bodyId === o.focus ? ' focus' : ''}`);
     tile.dataset.body = String(bodyId);
+    tile.tabIndex = -1;
     const top = h('div', 'ghead');
     const name = h('div', 'gname');
     const label = h('span', 'gtitle');
@@ -309,7 +352,9 @@ export function openPlanner(o: PlannerOptions): void {
       chip.addEventListener('click', () => toggle(r, on));
       chips.append(chip);
     }
-    const many = rows.length > 1;
+    // Levels queued in the game: not in the plan any more, but their resources are held back here.
+    for (const q of waiting) chips.append(queuedChip(q));
+    const many = rows.length + waiting.length > 1;
     const open = many && opened.has(bodyId);
     if (many) {
       const caret = h('button', 'ib');
@@ -327,7 +372,9 @@ export function openPlanner(o: PlannerOptions): void {
       });
       chips.append(caret);
     }
-    top.append(name, chips, ...triple(total, gapAll));
+    // "To supply": what is missing, the amount the button carries. Otherwise: what it costs.
+    if (numbers === 'gap' && gapAll) top.append(name, chips, ...triple(gapAll, gapAll));
+    else top.append(name, chips, ...triple(total, gapAll));
     const acts = h('div', 'acts');
     const p = pendingOf(bodyId);
     const onWay = p.metal + p.crystal + p.deuterium > 0;
@@ -383,9 +430,38 @@ export function openPlanner(o: PlannerOptions): void {
         row.append(a);
         list.append(row);
       }
+      waiting.forEach((q, index) => {
+        const row = h('div', 'grow queued');
+        const label = h('span', 'gbody');
+        label.append(techIconEl(doc, icons[String(q.id)], 20), h('span', '', q.name), h('span', 'lv', what({ from: q.level, to: q.level })), h('span', 'qtag', t('plan.queued')));
+        label.title = t('plan.queuedHint');
+        row.append(label, h('span'), ...triple(q.cost));
+        const a = h('div', 'acts');
+        const x = h('button', 'x');
+        x.type = 'button';
+        x.append(icon(doc, 'close', 13));
+        x.title = t('plan.unhold');
+        x.setAttribute('aria-label', `${t('plan.unhold')}: ${q.name}`);
+        x.addEventListener('click', () => {
+          o.store.set(QUEUED_KEY, dropQueued(o.store.get<Queued>(QUEUED_KEY, {}), bodyId, index));
+          o.onChange?.();
+          draw();
+        });
+        a.append(x);
+        row.append(a);
+        list.append(row);
+      });
       tile.append(list);
     }
     return tile;
+  };
+
+  /** A level waiting in the game's queue: dashed, not pickable, its cost in the tooltip. */
+  const queuedChip = (q: PlanItem & { level: number }) => {
+    const chip = h('span', 'pchip qchip');
+    chip.title = `${q.name} · ${t('plan.level', { level: q.level })} · ${t('plan.queued')} — ${t('plan.queuedHint')} (${fmt(q.cost.metal)} / ${fmt(q.cost.crystal)} / ${fmt(q.cost.deuterium)})`;
+    chip.append(techIconEl(doc, icons[String(q.id)], 20), h('span', '', String(q.level)));
+    return chip;
   };
 
   const groupTile = (g: TechGroup, plan: Plan, haveOf: (id: number) => Res | null, pendingOf: (id: number) => Res & { arriveAt: number }, save: (p: Plan) => void) => {
