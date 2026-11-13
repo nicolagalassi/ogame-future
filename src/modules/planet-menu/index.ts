@@ -50,8 +50,8 @@ export interface PlanetMenuOptions {
   onSync: () => Promise<boolean>;
   /** Opens the account dashboard (Future's own panel, no game action). */
   onOpenDashboard?: () => void;
-  /** Opens the construction plan; `planCount` items are planned in total. */
-  onOpenPlanner?: () => void;
+  /** Opens the construction plan (on `focus`, the body whose badge was clicked); `planCount` items are planned in total. */
+  onOpenPlanner?: (focus?: number) => void;
   planCount?: number;
   /** What the plan still misses in MSU (null when no stock is known for its bodies). */
   planGap?: number | null;
@@ -240,7 +240,7 @@ function queueDots(doc: Document, items: QueueItem[], building: HTMLAnchorElemen
 const PLAN_ICON = '<path d="M3 4h4v4H3zM3 10h4v4H3zM3 16h4v4H3z"/><path d="M9 4.8h12v2.4H9zM9 10.8h12v2.4H9zM9 16.8h12v2.4H9z" opacity=".7"/>';
 const TIP_ID = 'fut-plan-tip';
 
-function planBadge(doc: Document, mark: PlanMark | undefined, o: PlanetMenuOptions, where: { name: string; coords: string; moon: boolean }): HTMLElement | null {
+function planBadge(doc: Document, mark: PlanMark | undefined, o: PlanetMenuOptions, where: { id: number | null; name: string; coords: string; moon: boolean }): HTMLElement | null {
   if (!mark) return null;
   const b = el(doc, 'span', `fut-plan fut-plan-${mark.state}`);
   b.innerHTML = `<svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" fill="currentColor">${PLAN_ICON}</svg>`;
@@ -256,13 +256,13 @@ function planBadge(doc: Document, mark: PlanMark | undefined, o: PlanetMenuOptio
   b.addEventListener('blur', hide);
   b.addEventListener('click', () => {
     hide();
-    o.onOpenPlanner?.();
+    o.onOpenPlanner?.(where.id ?? undefined);
   });
   b.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       hide();
-      o.onOpenPlanner?.();
+      o.onOpenPlanner?.(where.id ?? undefined);
     }
   });
   return b;
@@ -392,7 +392,7 @@ function toolbar(o: PlanetMenuOptions, colonies: string, roomy: boolean): HTMLEl
     '',
     !known ? '' : gap > 0 ? 'fut-warn' : 'fut-ok',
     `${t('plan.title')}${known && gap > 0 ? ` · ${t('bar.missing')} ${fmt(gap)}` : ''}${count && gap ? ` · ${t('bar.planHint')}` : ''}`,
-    o.onOpenPlanner,
+    () => o.onOpenPlanner?.(),
   );
 
   const side = el(doc, 'div', 'fut-side');
@@ -508,9 +508,9 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
     // The plan, in a slim column at the row's outer end (only when something is planned somewhere).
     if (planned) {
       const col = el(doc, 'span', 'fut-plancol');
-      const pb = planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : undefined, o, { name: entry.name, coords: entry.coords, moon: false });
+      const pb = planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : undefined, o, { id: entry.planetId, name: entry.name, coords: entry.coords, moon: false });
       const moonName = entry.moonLink?.querySelector('img')?.getAttribute('alt') || entry.name;
-      const mb = planBadge(doc, entry.moonId ? o.planMarks?.[String(entry.moonId)] : undefined, o, { name: moonName, coords: entry.coords, moon: true });
+      const mb = planBadge(doc, entry.moonId ? o.planMarks?.[String(entry.moonId)] : undefined, o, { id: entry.moonId, name: moonName, coords: entry.coords, moon: true });
       if (pb) pb.classList.add('fut-plan-p');
       if (mb) mb.classList.add('fut-plan-m');
       // Planet on top, moon below: each keeps its half even when the other has nothing planned.

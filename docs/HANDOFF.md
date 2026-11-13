@@ -149,6 +149,17 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     sprite del gioco lette dagli stili calcolati quando si apre una pagina tecnologie (`data/tech-icons.ts`,
     nessuna richiesta). Galassia: colonna giocatore come OGLight (stato prima del nome, rank e bandierina a
     destra, colonna più larga del nome pianeta), via il pulsante Bersagli.
+17. **Piano: coda e invio** (2026-11-13, 0.3.59): il trasporto del piano ignora la riserva navi (resta la
+    riserva risorse). Clic sul badge del piano nel menu pianeti = finestra Piano per pianeta con quel corpo in
+    cima, evidenziato, aperto, con «Porta tutto» a fuoco (Invio prepara). Vista per pianeta divisa in sezioni:
+    Da rifornire (i numeri sono quello che manca = quello che porta il tasto), In arrivo, Risorse non note,
+    Pronti (i numeri sono il costo). **Coda del gioco** (`plan.queued`, `releaseQueued` in `engines/planner.ts`):
+    «Sviluppa» premuto mentre qualcosa dello stesso tipo è già in costruzione (pagina: `data-status="active"`,
+    oppure le code lette al caricamento) mette il livello in coda e le sue risorse restano da parte: non contano
+    per il piano, per i badge, né per il pianeta di partenza di un trasporto. Si liberano quando le code lette
+    dopo mostrano quel livello (partito) o niente di quel tipo (finito o annullato), o quando la pagina tecnologie
+    mostra il livello costruito; anche a mano con la × nella riga «in coda». **Da verificare in gioco**:
+    `data-status="active"` e i nomi della productionqueue con il Comandante.
 14. **Grafica** (2026-11-06): tutte le finestre (`WINDOW_SHEET`) riprendono il menu pianeti: riquadri #111B2A
     con bordo #1F2C40, schede a segmenti, numeri monospazio, ciano per la selezione. Pila z-index sopra il
     footer del gioco (999999): barra laterale 1000000, finestre 1000001, popup 1000002-3.

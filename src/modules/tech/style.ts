@@ -144,5 +144,24 @@ button.gbody { align-items: center; padding: 2px 6px 2px 2px; border: 1px solid 
 button.gbody:hover { border-color: var(--line); color: var(--text); }
 .grow.pick.on { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
 .grow.pick.on button.gbody { color: var(--text); font-weight: 700; }
+/* Planet view sections: to supply, arriving, unknown, ready. The caption says what the numbers are. */
+.sec { display: grid; grid-template-columns: minmax(130px, 1fr) minmax(0, 1.1fr) 62px 62px 62px 158px; gap: 8px; align-items: center; padding: 5px 6px 4px 10px; background: var(--bg); color: var(--muted); font: 700 11px Arial, sans-serif; }
+.group.body + .sec { border-top: 1px solid var(--line); }
+.sec-name { grid-column: 1 / span 2; color: var(--text-2); }
+.sec-missing .sec-name { color: var(--warn); }
+.sec-ready .sec-name { color: var(--ok); }
+.sec-arriving .sec-name { color: var(--accent); }
+.sec-col { grid-column: 3 / span 3; text-align: right; font-weight: 400; }
+/* The body whose badge opened the window. */
+.group.body.focus { box-shadow: inset 3px 0 0 var(--accent); background: var(--accent-soft); }
+.group.body.focus .gtitle { color: var(--accent); }
+.group.body:focus { outline: none; }
+.bring-all:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* Levels queued in the game, resources held back. */
+.pchip.qchip { border-style: dashed; background: none; color: var(--muted); cursor: default; }
+.pchip.qchip:hover { border-color: var(--line); color: var(--muted); }
+.grow.queued .gbody { align-items: center; padding-left: 2px; color: var(--muted); white-space: nowrap; }
+.grow.queued .gbody > span { white-space: nowrap; }
+.qtag { padding: 0 5px; border: 1px dashed var(--line); border-radius: 4px; color: var(--muted); font-size: 10px; white-space: nowrap; }
 @media (max-width: 640px) { .kpis { grid-template-columns: 1fr; } }
 `;

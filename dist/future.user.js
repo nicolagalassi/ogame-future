@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.58
+// @version      0.3.59
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -378,7 +378,7 @@
     "tech.added": "Aggiunto \u2713",
     "plan.title": "Piano di costruzione",
     "plan.titleCount": "Piano di costruzione ({n})",
-    "plan.sub": "Per pianeta: un tasto porta l\xEC tutto quello che manca. In rosso quello che manca su quel pianeta.",
+    "plan.sub": "Un tasto per pianeta porta l\xEC quello che manca. Le costruzioni in coda nel gioco tengono da parte le loro risorse.",
     "plan.moonOf": "Luna di {name}",
     "plan.clear": "Svuota",
     "plan.colItem": "Cosa",
@@ -940,7 +940,16 @@
     "marks.st.outlaw": "fuorilegge",
     "marks.st.admin": "amministratore",
     "marks.lastCheck": "Ultimo controllo in galassia: {time}",
-    "marks.neverChecked": "Mai visto in galassia"
+    "marks.neverChecked": "Mai visto in galassia",
+    "plan.sec.missing": "Da rifornire",
+    "plan.sec.arriving": "In arrivo",
+    "plan.sec.unknown": "Risorse non note",
+    "plan.sec.ready": "Pronti",
+    "plan.colMissing": "mancano (metallo \xB7 cristallo \xB7 deuterio)",
+    "plan.colCost": "costo",
+    "plan.queued": "in coda",
+    "plan.queuedHint": "In coda nel gioco, non ancora pagato: le sue risorse restano da parte e non contano per il piano n\xE9 per i trasporti",
+    "plan.unhold": "Non tenere pi\xF9 da parte (gi\xE0 partito o annullato)"
   };
 
   // src/i18n/en.json
@@ -1135,7 +1144,7 @@
     "tech.added": "Added \u2713",
     "plan.title": "Construction plan",
     "plan.titleCount": "Construction plan ({n})",
-    "plan.sub": "By planet: one button brings there everything it lacks. Red is what that planet lacks.",
+    "plan.sub": "One button per planet brings what it lacks. Builds queued in the game keep their resources aside.",
     "plan.moonOf": "Moon of {name}",
     "plan.clear": "Clear",
     "plan.colItem": "What",
@@ -1697,7 +1706,16 @@
     "marks.st.outlaw": "outlaw",
     "marks.st.admin": "administrator",
     "marks.lastCheck": "Last checked in the galaxy: {time}",
-    "marks.neverChecked": "Never seen in the galaxy"
+    "marks.neverChecked": "Never seen in the galaxy",
+    "plan.sec.missing": "To supply",
+    "plan.sec.arriving": "On the way",
+    "plan.sec.unknown": "Resources unknown",
+    "plan.sec.ready": "Ready",
+    "plan.colMissing": "missing (metal \xB7 crystal \xB7 deuterium)",
+    "plan.colCost": "cost",
+    "plan.queued": "queued",
+    "plan.queuedHint": "Queued in the game, not paid yet: its resources are held back and count neither for the plan nor for transports",
+    "plan.unhold": "Stop holding back (already started or cancelled)"
   };
 
   // src/i18n/fr.json
@@ -1892,7 +1910,7 @@
     "tech.added": "Ajout\xE9 \u2713",
     "plan.title": "Plan de construction",
     "plan.titleCount": "Plan de construction ({n})",
-    "plan.sub": "Par plan\xE8te : un bouton y apporte tout ce qui manque. En rouge ce qui manque sur cette plan\xE8te.",
+    "plan.sub": "Un bouton par plan\xE8te y apporte ce qui manque. Les constructions en file gardent leurs ressources de c\xF4t\xE9.",
     "plan.moonOf": "Lune de {name}",
     "plan.clear": "Vider",
     "plan.colItem": "Quoi",
@@ -2454,7 +2472,16 @@
     "marks.st.outlaw": "hors-la-loi",
     "marks.st.admin": "administrateur",
     "marks.lastCheck": "Dernier contr\xF4le en galaxie : {time}",
-    "marks.neverChecked": "Jamais vu en galaxie"
+    "marks.neverChecked": "Jamais vu en galaxie",
+    "plan.sec.missing": "\xC0 approvisionner",
+    "plan.sec.arriving": "En route",
+    "plan.sec.unknown": "Ressources inconnues",
+    "plan.sec.ready": "Pr\xEAts",
+    "plan.colMissing": "manque (m\xE9tal \xB7 cristal \xB7 deut\xE9rium)",
+    "plan.colCost": "co\xFBt",
+    "plan.queued": "en file",
+    "plan.queuedHint": "En file d'attente dans le jeu, pas encore pay\xE9 : ses ressources sont mises de c\xF4t\xE9 et ne comptent ni pour le plan ni pour les transports",
+    "plan.unhold": "Ne plus mettre de c\xF4t\xE9 (d\xE9j\xE0 lanc\xE9 ou annul\xE9)"
   };
 
   // src/i18n/de.json
@@ -2649,7 +2676,7 @@
     "tech.added": "Hinzugef\xFCgt \u2713",
     "plan.title": "Bauplan",
     "plan.titleCount": "Bauplan ({n})",
-    "plan.sub": "Nach Planet: ein Knopf bringt alles Fehlende dorthin. Rot ist, was auf dem Planeten fehlt.",
+    "plan.sub": "Ein Knopf pro Planet bringt, was dort fehlt. Bauten in der Warteschlange halten ihre Ressourcen zur\xFCck.",
     "plan.moonOf": "Mond von {name}",
     "plan.clear": "Leeren",
     "plan.colItem": "Was",
@@ -3211,7 +3238,16 @@
     "marks.st.outlaw": "Outlaw",
     "marks.st.admin": "Administrator",
     "marks.lastCheck": "Zuletzt in der Galaxie gepr\xFCft: {time}",
-    "marks.neverChecked": "Noch nie in der Galaxie gesehen"
+    "marks.neverChecked": "Noch nie in der Galaxie gesehen",
+    "plan.sec.missing": "Zu beliefern",
+    "plan.sec.arriving": "Unterwegs",
+    "plan.sec.unknown": "Ressourcen unbekannt",
+    "plan.sec.ready": "Bereit",
+    "plan.colMissing": "fehlt (Metall \xB7 Kristall \xB7 Deuterium)",
+    "plan.colCost": "Kosten",
+    "plan.queued": "in Warteschlange",
+    "plan.queuedHint": "Im Spiel in der Warteschlange, noch nicht bezahlt: seine Ressourcen werden zur\xFCckgehalten und z\xE4hlen weder f\xFCr den Plan noch f\xFCr Transporte",
+    "plan.unhold": "Nicht mehr zur\xFCckhalten (schon gestartet oder abgebrochen)"
   };
 
   // src/core/i18n.ts
@@ -8772,13 +8808,13 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     b.addEventListener("blur", hide);
     b.addEventListener("click", () => {
       hide();
-      o.onOpenPlanner?.();
+      o.onOpenPlanner?.(where.id ?? void 0);
     });
     b.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         hide();
-        o.onOpenPlanner?.();
+        o.onOpenPlanner?.(where.id ?? void 0);
       }
     });
     return b;
@@ -8884,7 +8920,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
       "",
       !known ? "" : gap > 0 ? "fut-warn" : "fut-ok",
       `${t("plan.title")}${known && gap > 0 ? ` \xB7 ${t("bar.missing")} ${fmt(gap)}` : ""}${count2 && gap ? ` \xB7 ${t("bar.planHint")}` : ""}`,
-      o.onOpenPlanner
+      () => o.onOpenPlanner?.()
     );
     const side = el3(doc, "div", "fut-side");
     const lastSync = o.snapshot ? t("toolbar.lastSync", { time: formatTime(o.snapshot.fetchedAt, o.locale) }) : "";
@@ -8976,9 +9012,9 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
       }
       if (planned) {
         const col = el3(doc, "span", "fut-plancol");
-        const pb = planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : void 0, o, { name: entry.name, coords: entry.coords, moon: false });
+        const pb = planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : void 0, o, { id: entry.planetId, name: entry.name, coords: entry.coords, moon: false });
         const moonName = entry.moonLink?.querySelector("img")?.getAttribute("alt") || entry.name;
-        const mb = planBadge(doc, entry.moonId ? o.planMarks?.[String(entry.moonId)] : void 0, o, { name: moonName, coords: entry.coords, moon: true });
+        const mb = planBadge(doc, entry.moonId ? o.planMarks?.[String(entry.moonId)] : void 0, o, { id: entry.moonId, name: moonName, coords: entry.coords, moon: true });
         if (pb) pb.classList.add("fut-plan-p");
         if (mb) mb.classList.add("fut-plan-m");
         col.append(pb ?? el3(doc, "span", ""), mb ?? el3(doc, "span", ""));
@@ -10451,6 +10487,7 @@ table.queues td.acts { width: 1%; text-align: right; }
   function startBuild(plan, bodyId, id, o) {
     const key = String(bodyId);
     let changed = false;
+    const removed = [];
     const next = {};
     for (const [k, list] of Object.entries(plan)) {
       let left = o.amount ?? 0;
@@ -10462,6 +10499,7 @@ table.queues td.acts { width: 1%; text-align: right; }
         }
         if (item.level !== void 0 && o.level !== void 0 && item.level <= o.level) {
           changed = true;
+          if (item.level === o.level) removed.push(item);
           continue;
         }
         if (item.amount !== void 0 && left > 0 && k === key) {
@@ -10480,7 +10518,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       }
       if (kept.length) next[k] = kept;
     }
-    return { plan: changed ? next : plan, changed };
+    return { plan: changed ? next : plan, changed, removed };
   }
   function groupByTech(plan, haveOf) {
     const groups = /* @__PURE__ */ new Map();
@@ -10512,6 +10550,68 @@ table.queues td.acts { width: 1%; text-align: right; }
   function accountGap(plan, account) {
     const total = Object.values(plan).reduce((sum, items) => addCost(sum, planTotal(items)), { ...ZERO_COST });
     return { total, missing: account ? missing(total, account) : null };
+  }
+  var QUEUED_KEY = "plan.queued";
+  function queueKindOf(id) {
+    if (id < 100) return "building";
+    if (id < 200) return "research";
+    if (id < 1e3) return null;
+    return Math.floor(id % 1e3 / 100) === 1 ? "lfbuilding" : "lfresearch";
+  }
+  function reservedFor(queued2, bodyId) {
+    const out = { metal: 0, crystal: 0, deuterium: 0 };
+    for (const q of queued2[String(bodyId)] ?? []) {
+      out.metal += q.cost.metal;
+      out.crystal += q.cost.crystal;
+      out.deuterium += q.cost.deuterium;
+    }
+    return out;
+  }
+  function lessReserved(have, hold) {
+    return { metal: have.metal - hold.metal, crystal: have.crystal - hold.crystal, deuterium: have.deuterium - hold.deuterium };
+  }
+  function queuedLevel(queued2, bodyId, id) {
+    const list = isResearch(id) ? Object.values(queued2).flat() : queued2[String(bodyId)] ?? [];
+    return list.reduce((top, q) => q.id === id ? Math.max(top, q.level) : top, 0);
+  }
+  function holdQueued(queued2, bodyId, item) {
+    const key = String(bodyId);
+    const list = (queued2[key] ?? []).filter((q) => !(q.id === item.id && q.level === item.level));
+    return { ...queued2, [key]: [...list, item].sort((a, b) => a.queuedAt - b.queuedAt) };
+  }
+  function dropQueued(queued2, bodyId, index) {
+    const key = String(bodyId);
+    const list = (queued2[key] ?? []).filter((_, i) => i !== index);
+    const next = { ...queued2 };
+    if (list.length) next[key] = list;
+    else delete next[key];
+    return next;
+  }
+  function releaseQueued(queued2, o) {
+    let changed = false;
+    const next = {};
+    const running = (key, kind, at) => {
+      const lists = kind === "research" ? Object.values(o.queues?.bodies ?? {}) : [o.queues?.bodies[key] ?? []];
+      return lists.flat().filter((r) => r.kind === kind && r.end > at);
+    };
+    for (const [key, list] of Object.entries(queued2)) {
+      const kept = list.filter((q) => {
+        const built = o.built && (o.built.bodyId === Number(key) || isResearch(q.id)) ? o.built.levels[q.id] : void 0;
+        if (built !== void 0 && built >= q.level) return changed = true, false;
+        const snap = o.queues;
+        if (!snap || snap.at <= q.queuedAt) return true;
+        const now = running(key, q.kind, snap.at);
+        if (!now.length || now.some((r) => norm(r.name) === norm(q.name) && r.level >= q.level)) return changed = true, false;
+        return true;
+      });
+      if (kept.length) next[key] = kept;
+    }
+    return { queued: changed ? next : queued2, changed };
+  }
+  function withQueued(plan, queued2) {
+    const out = { ...plan };
+    for (const [key, list] of Object.entries(queued2)) if (list.length) out[key] = [...out[key] ?? [], ...list];
+    return out;
   }
 
   // src/modules/fleet/actions.ts
@@ -10620,7 +10720,9 @@ table.queues td.acts { width: 1%; text-align: right; }
     const cargo = count2 > 0 ? loadCargo(fd, profile) : 0;
     return finish(fd, save.mission, count2, cargo);
   }
-  function prepareDelivery(fd, doc, profile, settings, target, need) {
+  function prepareDelivery(fd, doc, base, settings, target, need, hold = { metal: 0, crystal: 0, deuterium: 0 }) {
+    const r = base.reserve.resources;
+    const profile = { ...base, reserve: { ships: {}, resources: { ...r, metal: r.metal + hold.metal, crystal: r.crystal + hold.crystal, deuterium: r.deuterium + hold.deuterium } } };
     const free = deliveryLoad(onPlanet(fd), profile.reserve, 0, Number.MAX_SAFE_INTEGER, need);
     const amount = free.metal + free.crystal + free.deuterium;
     if (amount <= 0) return { ok: false, reason: "fleet.err.noResources", ships: 0, cargo: 0 };
@@ -11949,7 +12051,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         const target = dest ? bodyTarget(o.bodies, dest) : null;
         if (!delivery || !dest || delivery.target !== dest || !target) return say(t("fleet.err.noDelivery"), true);
         begin("plan", dest);
-        const r = prepareDelivery(fd, doc, profile, settings, target, delivery.need);
+        const r = prepareDelivery(fd, doc, profile, settings, target, delivery.need, reservedFor(o.store.get(QUEUED_KEY, {}), o.bodyId));
         const left = delivery.need.metal + delivery.need.crystal + delivery.need.deuterium;
         report(r, "fleet.ok.delivery", { left: left.toLocaleString(o.locale) });
       }),
@@ -12593,6 +12695,25 @@ button.gbody { align-items: center; padding: 2px 6px 2px 2px; border: 1px solid 
 button.gbody:hover { border-color: var(--line); color: var(--text); }
 .grow.pick.on { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
 .grow.pick.on button.gbody { color: var(--text); font-weight: 700; }
+/* Planet view sections: to supply, arriving, unknown, ready. The caption says what the numbers are. */
+.sec { display: grid; grid-template-columns: minmax(130px, 1fr) minmax(0, 1.1fr) 62px 62px 62px 158px; gap: 8px; align-items: center; padding: 5px 6px 4px 10px; background: var(--bg); color: var(--muted); font: 700 11px Arial, sans-serif; }
+.group.body + .sec { border-top: 1px solid var(--line); }
+.sec-name { grid-column: 1 / span 2; color: var(--text-2); }
+.sec-missing .sec-name { color: var(--warn); }
+.sec-ready .sec-name { color: var(--ok); }
+.sec-arriving .sec-name { color: var(--accent); }
+.sec-col { grid-column: 3 / span 3; text-align: right; font-weight: 400; }
+/* The body whose badge opened the window. */
+.group.body.focus { box-shadow: inset 3px 0 0 var(--accent); background: var(--accent-soft); }
+.group.body.focus .gtitle { color: var(--accent); }
+.group.body:focus { outline: none; }
+.bring-all:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* Levels queued in the game, resources held back. */
+.pchip.qchip { border-style: dashed; background: none; color: var(--muted); cursor: default; }
+.pchip.qchip:hover { border-color: var(--line); color: var(--muted); }
+.grow.queued .gbody { align-items: center; padding-left: 2px; color: var(--muted); white-space: nowrap; }
+.grow.queued .gbody > span { white-space: nowrap; }
+.qtag { padding: 0 5px; border: 1px dashed var(--line); border-radius: 4px; color: var(--muted); font-size: 10px; white-space: nowrap; }
 @media (max-width: 640px) { .kpis { grid-template-columns: 1fr; } }
 `;
 
@@ -12955,13 +13076,26 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     style.textContent = TECH_CSS;
     doc.head.append(style);
   }
+  function queueBusy(doc, store, bodyId, kind, now) {
+    if (doc.querySelector('#technologies .technology[data-status="active"]')) return true;
+    const snap = store.get(QUEUES_KEY, null);
+    if (!snap) return false;
+    const lists = kind === "research" ? Object.values(snap.bodies) : [snap.bodies[String(bodyId)] ?? []];
+    return lists.flat().some((q) => q.kind === kind && q.end > now);
+  }
   function watchTechPages(o) {
     const { doc } = o;
     if (!doc.querySelector("#technologies")) return;
-    const levels = levelsOf(readTechList(doc));
+    const list = readTechList(doc);
+    const levels = levelsOf(list);
     const pruned = prune(loadPlan(o.store), o.bodyId, levels);
     if (pruned.changed) {
       o.store.set(PLAN_KEY, pruned.plan);
+      o.onPlanChange?.();
+    }
+    const released = releaseQueued(o.store.get(QUEUED_KEY, {}), { built: { bodyId: o.bodyId, levels: Object.fromEntries(list.map((e) => [e.id, e.built])) } });
+    if (released.changed) {
+      o.store.set(QUEUED_KEY, released.queued);
       o.onPlanChange?.();
     }
     injectStyle(doc);
@@ -12975,11 +13109,19 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         if (!id) return;
         const entry = readTechList(doc).find((x) => x.id === id);
         const amountInput = doc.querySelector("#technologydetails #build_amount");
-        const change = isLevelled(id) ? startBuild(loadPlan(o.store), o.bodyId, id, { level: (entry?.level ?? 0) + 1 }) : startBuild(loadPlan(o.store), o.bodyId, id, { amount: Math.max(1, Math.floor(Number(amountInput?.value) || 1)) });
-        if (change.changed) {
-          o.store.set(PLAN_KEY, change.plan);
-          o.onPlanChange?.();
+        const queued2 = o.store.get(QUEUED_KEY, {});
+        const kind = isLevelled(id) ? queueKindOf(id) : null;
+        const level2 = Math.max(entry?.level ?? 0, queuedLevel(queued2, o.bodyId, id)) + 1;
+        const change = isLevelled(id) ? startBuild(loadPlan(o.store), o.bodyId, id, { level: level2 }) : startBuild(loadPlan(o.store), o.bodyId, id, { amount: Math.max(1, Math.floor(Number(amountInput?.value) || 1)) });
+        if (change.changed) o.store.set(PLAN_KEY, change.plan);
+        if (kind && queueBusy(doc, o.store, o.bodyId, kind, Date.now())) {
+          const planned = change.removed.find((x) => x.level === level2);
+          const details = readTechDetails(doc);
+          const discount = details && details.id === id ? startLevel(details, entry?.level, entry?.built).discount : 0;
+          const item = { id, level: level2, kind, name: planned?.name ?? entry?.name ?? String(id), cost: planned?.cost ?? levelCost(id, level2, discount), added: planned?.added ?? Date.now(), queuedAt: Date.now() };
+          o.store.set(QUEUED_KEY, holdQueued(queued2, o.bodyId, item));
         }
+        if (change.changed || kind) o.onPlanChange?.();
       },
       true
     );
@@ -13051,6 +13193,11 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     const timeOf = (ms) => new Date(ms).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
     const icons = o.store.get(TECH_ICONS_KEY, {});
     let confirmClear = false;
+    let focusPending = o.focus !== void 0;
+    if (o.focus !== void 0) {
+      view = "body";
+      opened.add(o.focus);
+    }
     const labels = /* @__PURE__ */ new Map();
     for (const e of o.entries) {
       if (e.planetId) labels.set(e.planetId, `${e.name} [${e.coords}]`);
@@ -13082,9 +13229,14 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         o.onChange?.();
         draw();
       };
+      const queued2 = o.store.get(QUEUED_KEY, {});
       const pendingOf = (id) => pendingFor(sent, id, seenAt(id));
-      const haveOf = (id) => {
+      const freeOf = (id) => {
         const r = stock2(id);
+        return r ? lessReserved(r, reservedFor(queued2, id)) : null;
+      };
+      const haveOf = (id) => {
+        const r = freeOf(id);
         if (!r) return null;
         const p = pendingOf(id);
         return { metal: r.metal + p.metal, crystal: r.crystal + p.crystal, deuterium: r.deuterium + p.deuterium };
@@ -13094,7 +13246,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         return { metal: s.metal + p.metal, crystal: s.crystal + p.crystal, deuterium: s.deuterium + p.deuterium };
       }, { metal: 0, crystal: 0, deuterium: 0 });
       const account = accountResources(o.snapshot?.bodies ?? [], stock2, inFlight);
-      const { total, missing: missing2 } = accountGap(plan, account);
+      const { total, missing: missing2 } = accountGap(withQueued(plan, queued2), account);
       const groups = groupByTech(plan, haveOf);
       const head = h4("div", "head");
       const titles = h4("div", "titles");
@@ -13161,10 +13313,33 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       const list = h4("div", "groups");
       if (view === "tech") for (const g of groups) list.append(groupTile(g, plan, haveOf, pendingOf, save));
       else {
-        const ids = Object.keys(plan).map(Number).sort((a, b) => (order.get(a) ?? 1e9) - (order.get(b) ?? 1e9));
-        for (const id of ids) list.append(bodyTile(id, plan, haveOf, pendingOf, save));
+        const ids = Object.keys(plan).map(Number).sort((a, b) => (a === o.focus ? -1 : b === o.focus ? 1 : 0) || (order.get(a) ?? 1e9) - (order.get(b) ?? 1e9));
+        const stateOf = (id) => planStatus(plan[String(id)] ?? [], freeOf(id), pendingOf(id), o.now).state;
+        const sections = [
+          { key: "missing", states: ["missing"], numbers: "gap" },
+          { key: "arriving", states: ["arriving", "arrived"], numbers: "cost" },
+          { key: "unknown", states: ["unknown"], numbers: "cost" },
+          { key: "ready", states: ["ready"], numbers: "cost" }
+        ];
+        const states = new Map(ids.map((id) => [id, stateOf(id)]));
+        const focusState = o.focus !== void 0 ? states.get(o.focus) : void 0;
+        if (focusState) sections.sort((a, b) => Number(b.states.includes(focusState)) - Number(a.states.includes(focusState)));
+        for (const sec of sections) {
+          const here = ids.filter((id) => sec.states.includes(states.get(id)));
+          if (!here.length) continue;
+          const bar = h4("div", `sec sec-${sec.key}`);
+          bar.append(h4("span", "sec-name", `${t(`plan.sec.${sec.key}`)} \xB7 ${here.length}`), h4("span", "sec-col", t(sec.numbers === "gap" ? "plan.colMissing" : "plan.colCost")));
+          list.append(bar);
+          for (const id of here) list.append(bodyTile(id, plan, haveOf, pendingOf, save, sec.numbers, queued2));
+        }
       }
       panel.replaceChildren(head, kpis, seg, list);
+      if (focusPending) {
+        focusPending = false;
+        const tile2 = list.querySelector(`.group.body[data-body="${o.focus}"]`);
+        tile2?.scrollIntoView?.({ block: "nearest" });
+        (tile2?.querySelector(".bring-all") ?? tile2)?.focus?.();
+      }
     };
     const bringTo = (target, need) => {
       const here = o.current?.id ?? null;
@@ -13180,8 +13355,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       mark.title = `${p.arriveAt > o.now ? t("plan.sentArriving", { time: timeOf(p.arriveAt) }) : t("plan.sentArrived")}: ${fmt(p.metal)} \xB7 ${fmt(p.crystal)} \xB7 ${fmt(p.deuterium)}`;
       return mark;
     };
-    const bodyTile = (bodyId, plan, haveOf, pendingOf, save) => {
+    const bodyTile = (bodyId, plan, haveOf, pendingOf, save, numbers, queued2) => {
       const items = plan[String(bodyId)] ?? [];
+      const waiting = queued2[String(bodyId)] ?? [];
       const have = haveOf(bodyId);
       const chosen = picked.get(bodyId) ?? /* @__PURE__ */ new Set();
       const rows = [];
@@ -13207,8 +13383,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       };
       const isOn = (r) => r.indexes.every((i) => chosen.has(i));
       const brief = (r) => r.amount !== void 0 ? `\xD7${fmt(r.amount)}` : r.from === r.to ? String(r.from ?? 0) : `${r.from ?? 0}\u2013${r.to ?? 0}`;
-      const tile2 = h4("div", "group body");
+      const tile2 = h4("div", `group body${bodyId === o.focus ? " focus" : ""}`);
       tile2.dataset.body = String(bodyId);
+      tile2.tabIndex = -1;
       const top = h4("div", "ghead");
       const name = h4("div", "gname");
       const label = h4("span", "gtitle");
@@ -13227,7 +13404,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         chip2.addEventListener("click", () => toggle(r, on));
         chips.append(chip2);
       }
-      const many = rows.length > 1;
+      for (const q of waiting) chips.append(queuedChip(q));
+      const many = rows.length + waiting.length > 1;
       const open = many && opened.has(bodyId);
       if (many) {
         const caret = h4("button", "ib");
@@ -13245,7 +13423,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         });
         chips.append(caret);
       }
-      top.append(name, chips, ...triple(total, gapAll));
+      if (numbers === "gap" && gapAll) top.append(name, chips, ...triple(gapAll, gapAll));
+      else top.append(name, chips, ...triple(total, gapAll));
       const acts = h4("div", "acts");
       const p = pendingOf(bodyId);
       const onWay = p.metal + p.crystal + p.deuterium > 0;
@@ -13299,9 +13478,36 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           row.append(a);
           list.append(row);
         }
+        waiting.forEach((q, index) => {
+          const row = h4("div", "grow queued");
+          const label2 = h4("span", "gbody");
+          label2.append(techIconEl(doc, icons[String(q.id)], 20), h4("span", "", q.name), h4("span", "lv", what({ from: q.level, to: q.level })), h4("span", "qtag", t("plan.queued")));
+          label2.title = t("plan.queuedHint");
+          row.append(label2, h4("span"), ...triple(q.cost));
+          const a = h4("div", "acts");
+          const x = h4("button", "x");
+          x.type = "button";
+          x.append(icon(doc, "close", 13));
+          x.title = t("plan.unhold");
+          x.setAttribute("aria-label", `${t("plan.unhold")}: ${q.name}`);
+          x.addEventListener("click", () => {
+            o.store.set(QUEUED_KEY, dropQueued(o.store.get(QUEUED_KEY, {}), bodyId, index));
+            o.onChange?.();
+            draw();
+          });
+          a.append(x);
+          row.append(a);
+          list.append(row);
+        });
         tile2.append(list);
       }
       return tile2;
+    };
+    const queuedChip = (q) => {
+      const chip2 = h4("span", "pchip qchip");
+      chip2.title = `${q.name} \xB7 ${t("plan.level", { level: q.level })} \xB7 ${t("plan.queued")} \u2014 ${t("plan.queuedHint")} (${fmt(q.cost.metal)} / ${fmt(q.cost.crystal)} / ${fmt(q.cost.deuterium)})`;
+      chip2.append(techIconEl(doc, icons[String(q.id)], 20), h4("span", "", String(q.level)));
+      return chip2;
     };
     const groupTile = (g, plan, haveOf, pendingOf, save) => {
       const tile2 = h4("div", "group");
@@ -14227,6 +14433,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     if (queues) {
       const pruned = pruneByQueues(store.get(PLAN_KEY, {}), queues.bodies);
       if (pruned.changed) store.set(PLAN_KEY, pruned.plan);
+      const released = releaseQueued(store.get(QUEUED_KEY, {}), { queues });
+      if (released.changed) store.set(QUEUED_KEY, released.queued);
     }
     const items = readActiveItems(document);
     if (items) store.set(ITEMS_KEY, items);
@@ -14252,6 +14460,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     const planMarks = () => {
       const plan = store.get(PLAN_KEY, {});
       const sent = store.get(SENT_KEY, []);
+      const queued2 = store.get(QUEUED_KEY, {});
       const now = Date.now();
       const here = currentBodyId(document);
       const onScreen = readCurrentResources(document);
@@ -14260,7 +14469,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         if (!items2.length) continue;
         const id = Number(key);
         const body = snapshot?.bodies.find((b) => b.id === id);
-        const have = here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
+        const stock2 = here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
+        const have = stock2 ? lessReserved(stock2, reservedFor(queued2, id)) : null;
         const pending = pendingFor(sent, id, here === id ? now : body?.resourcesAt ?? 0);
         const { state, lack } = planStatus(items2, have, pending, now);
         const lines = [];
@@ -14292,7 +14502,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         inFlight.crystal += p.crystal;
         inFlight.deuterium += p.deuterium;
       }
-      const gap = accountGap(plan, accountResources(snapshot?.bodies ?? [], stock2, inFlight)).missing;
+      const gap = accountGap(withQueued(plan, store.get(QUEUED_KEY, {})), accountResources(snapshot?.bodies ?? [], stock2, inFlight)).missing;
       return gap ? gap.metal + gap.crystal * 1.5 + gap.deuterium * 3 : null;
     };
     let refreshInbox = null;
@@ -14379,7 +14589,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         planCount: planCount(store.get(PLAN_KEY, {})),
         planGap: planGap(),
         planMarks: planMarks(),
-        onOpenPlanner: () => {
+        onOpenPlanner: (focus) => {
           const id = currentBodyId(document);
           const resources = readCurrentResources(document);
           openPlanner({
@@ -14392,6 +14602,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
             locale,
             t,
             onChange: () => draw(),
+            focus,
             href: location.href,
             navigate: (url) => location.assign(url)
           });

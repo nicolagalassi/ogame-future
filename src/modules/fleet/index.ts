@@ -21,7 +21,7 @@
 import { icon } from '../../core/icons';
 import { groupInt, groupWhileTyping } from '../../core/format';
 import { WINDOW_SHEET } from '../../core/sheet';
-import { PLAN_KEY, SENT_KEY, type Plan, type Shipment } from '../../engines/planner';
+import { PLAN_KEY, QUEUED_KEY, reservedFor, SENT_KEY, type Plan, type Queued, type Shipment } from '../../engines/planner';
 import { expeditionItemBoost, ITEMS_KEY, LF_BONUS_KEY, type ActiveItems, type LfBonuses } from '../../data/bonuses';
 import type { Store } from '../../core/storage';
 import {
@@ -1221,7 +1221,7 @@ export function renderFleetTools(o: FleetOptions): void {
         const target = dest ? bodyTarget(o.bodies, dest) : null;
         if (!delivery || !dest || delivery.target !== dest || !target) return say(t('fleet.err.noDelivery'), true);
         begin('plan', dest);
-        const r = prepareDelivery(fd, doc, profile, settings, target, delivery.need);
+        const r = prepareDelivery(fd, doc, profile, settings, target, delivery.need, reservedFor(o.store.get<Queued>(QUEUED_KEY, {}), o.bodyId));
         const left = delivery.need.metal + delivery.need.crystal + delivery.need.deuterium;
         report(r, 'fleet.ok.delivery', { left: left.toLocaleString(o.locale) });
       }),

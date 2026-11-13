@@ -172,9 +172,10 @@ export function pruneByQueues(plan: Plan, queues: Record<string, { name: string;
 }
 
 /** The player started building: the planned level (or units) leaves the plan. */
-export function startBuild(plan: Plan, bodyId: number, id: number, o: { level?: number; amount?: number }): { plan: Plan; changed: boolean } {
+export function startBuild(plan: Plan, bodyId: number, id: number, o: { level?: number; amount?: number }): { plan: Plan; changed: boolean; removed: PlanItem[] } {
   const key = String(bodyId);
   let changed = false;
+  const removed: PlanItem[] = [];
   const next: Plan = {};
   for (const [k, list] of Object.entries(plan)) {
     let left = o.amount ?? 0;
@@ -186,6 +187,7 @@ export function startBuild(plan: Plan, bodyId: number, id: number, o: { level?: 
       }
       if (item.level !== undefined && o.level !== undefined && item.level <= o.level) {
         changed = true;
+        if (item.level === o.level) removed.push(item);
         continue;
       }
       if (item.amount !== undefined && left > 0 && k === key) {
@@ -204,7 +206,7 @@ export function startBuild(plan: Plan, bodyId: number, id: number, o: { level?: 
     }
     if (kept.length) next[k] = kept;
   }
-  return { plan: changed ? next : plan, changed };
+  return { plan: changed ? next : plan, changed, removed };
 }
 
 /* ------------------------------------------------------------------ */
@@ -270,4 +272,117 @@ export function groupByTech(plan: Plan, haveOf: (bodyId: number) => Res | null):
 export function accountGap(plan: Plan, account: Res | null): { total: Cost; missing: Cost | null } {
   const total = Object.values(plan).reduce((sum, items) => addCost(sum, planTotal(items)), { ...ZERO_COST });
   return { total, missing: account ? missing(total, account) : null };
+}
+
+/* ------------------------------------------------------------------ */
+/* Builds queued in the game but not started yet                       */
+/* ------------------------------------------------------------------ */
+
+/**
+ * With a build already running, "Sviluppa" puts the next level in the game's queue: the game takes
+ * its resources only when it starts. Until then those resources sit on the body but are already
+ * spoken for, so the plan (and the transports it prepares) must not count them as free.
+ * Stored locally only (AGENTS.md §1.9); read from what the player's own pages show, no network.
+ */
+export const QUEUED_KEY = 'plan.queued';
+
+export type QueueKind = 'building' | 'research' | 'lfbuilding' | 'lfresearch';
+
+export interface QueuedItem extends PlanItem {
+  level: number;
+  kind: QueueKind;
+  /** When the player queued it. */
+  queuedAt: number;
+}
+
+/** Queued levels per body id. */
+export type Queued = Record<string, QueuedItem[]>;
+
+/** The game queue a levelled technology goes into (ships and defences: null, they are paid when ordered). */
+export function queueKindOf(id: number): QueueKind | null {
+  if (id < 100) return 'building';
+  if (id < 200) return 'research';
+  if (id < 1000) return null;
+  return Math.floor((id % 1000) / 100) === 1 ? 'lfbuilding' : 'lfresearch';
+}
+
+/** Resources held back on a body for its queued levels. */
+export function reservedFor(queued: Queued, bodyId: number): Res {
+  const out = { metal: 0, crystal: 0, deuterium: 0 };
+  for (const q of queued[String(bodyId)] ?? []) {
+    out.metal += q.cost.metal;
+    out.crystal += q.cost.crystal;
+    out.deuterium += q.cost.deuterium;
+  }
+  return out;
+}
+
+/** What is free on a body once its queued levels are set aside (may go below 0: then it lacks that much). */
+export function lessReserved(have: Res, hold: Res): Res {
+  return { metal: have.metal - hold.metal, crystal: have.crystal - hold.crystal, deuterium: have.deuterium - hold.deuterium };
+}
+
+/** Highest level of a technology already queued on a body (0 when none). */
+export function queuedLevel(queued: Queued, bodyId: number, id: number): number {
+  const list = isResearch(id) ? Object.values(queued).flat() : (queued[String(bodyId)] ?? []);
+  return list.reduce((top, q) => (q.id === id ? Math.max(top, q.level) : top), 0);
+}
+
+/** Adds a queued level (the same level again replaces it). */
+export function holdQueued(queued: Queued, bodyId: number, item: QueuedItem): Queued {
+  const key = String(bodyId);
+  const list = (queued[key] ?? []).filter((q) => !(q.id === item.id && q.level === item.level));
+  return { ...queued, [key]: [...list, item].sort((a, b) => a.queuedAt - b.queuedAt) };
+}
+
+export function dropQueued(queued: Queued, bodyId: number, index: number): Queued {
+  const key = String(bodyId);
+  const list = (queued[key] ?? []).filter((_, i) => i !== index);
+  const next = { ...queued };
+  if (list.length) next[key] = list;
+  else delete next[key];
+  return next;
+}
+
+/** The game's running builds (productionqueue), as stored by `data/queues`. */
+export interface RunningQueues {
+  at: number;
+  bodies: Record<string, { kind: string; name: string; level: number; end: number }[]>;
+}
+
+/**
+ * Lets go of queued levels whose resources the game has taken, or that are gone:
+ * - the game's queues, read after the level was queued, run that level (or a higher one): started;
+ * - nothing of its kind runs there any more: it was built, or the player cancelled it
+ *   (a queued level only waits while something of its kind is running);
+ * - the levels seen on a technology page (`built`, not the target) reach it: built.
+ * Research runs once for the whole account: its queue is looked up on every body.
+ */
+export function releaseQueued(queued: Queued, o: { queues?: RunningQueues | null; built?: { bodyId: number; levels: Record<number, number> } }): { queued: Queued; changed: boolean } {
+  let changed = false;
+  const next: Queued = {};
+  const running = (key: string, kind: QueueKind, at: number) => {
+    const lists = kind === 'research' ? Object.values(o.queues?.bodies ?? {}) : [o.queues?.bodies[key] ?? []];
+    return lists.flat().filter((r) => r.kind === kind && r.end > at);
+  };
+  for (const [key, list] of Object.entries(queued)) {
+    const kept = list.filter((q) => {
+      const built = o.built && (o.built.bodyId === Number(key) || isResearch(q.id)) ? o.built.levels[q.id] : undefined;
+      if (built !== undefined && built >= q.level) return (changed = true), false;
+      const snap = o.queues;
+      if (!snap || snap.at <= q.queuedAt) return true;
+      const now = running(key, q.kind, snap.at);
+      if (!now.length || now.some((r) => norm(r.name) === norm(q.name) && r.level >= q.level)) return (changed = true), false;
+      return true;
+    });
+    if (kept.length) next[key] = kept;
+  }
+  return { queued: changed ? next : queued, changed };
+}
+
+/** Plan and queue together, for totals over the account (queued resources are still on the bodies). */
+export function withQueued(plan: Plan, queued: Queued): Plan {
+  const out: Plan = { ...plan };
+  for (const [key, list] of Object.entries(queued)) if (list.length) out[key] = [...(out[key] ?? []), ...list];
+  return out;
 }

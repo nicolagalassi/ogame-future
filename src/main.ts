@@ -36,7 +36,7 @@ import { mountTouchBar, registerActions, switchBodyUrl } from './modules/shortcu
 import { nextBody } from './engines/fleet';
 import { watchTechPages } from './modules/tech';
 import { accountResources, openPlanner } from './modules/tech/planner-view';
-import { accountGap, PLAN_KEY, pendingFor, planCount, planStatus, pruneByQueues, SENT_KEY, type Plan, type Shipment } from './engines/planner';
+import { accountGap, lessReserved, PLAN_KEY, pendingFor, planCount, planStatus, pruneByQueues, QUEUED_KEY, releaseQueued, reservedFor, SENT_KEY, withQueued, type Plan, type Queued, type Shipment } from './engines/planner';
 import { estimateResources } from './engines/resources';
 import { daySeries, entriesIn, JOURNAL_KEY, periodRange, periodStats, type Journal } from './engines/expeditions';
 import { isMessagesPage, ownPlayerId } from './data/messages';
@@ -113,6 +113,9 @@ async function bootstrap(): Promise<void> {
   if (queues) {
     const pruned = pruneByQueues(store.get<Plan>(PLAN_KEY, {}), queues.bodies);
     if (pruned.changed) store.set(PLAN_KEY, pruned.plan);
+    // Queued levels the game has started (resources taken), built or dropped are no longer held back.
+    const released = releaseQueued(store.get<Queued>(QUEUED_KEY, {}), { queues });
+    if (released.changed) store.set(QUEUED_KEY, released.queued);
   }
 
   // Active items are listed on the overview's buff bar only: keep the last list seen.
@@ -149,6 +152,7 @@ async function bootstrap(): Promise<void> {
   const planMarks = (): Record<string, PlanMark> => {
     const plan = store.get<Plan>(PLAN_KEY, {});
     const sent = store.get<Shipment[]>(SENT_KEY, []);
+    const queued = store.get<Queued>(QUEUED_KEY, {});
     const now = Date.now();
     const here = currentBodyId(document);
     const onScreen = readCurrentResources(document);
@@ -157,7 +161,9 @@ async function bootstrap(): Promise<void> {
       if (!items.length) continue;
       const id = Number(key);
       const body = snapshot?.bodies.find((b) => b.id === id);
-      const have = here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
+      const stock = here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
+      // Resources waiting for levels queued in the game are not free for the plan.
+      const have = stock ? lessReserved(stock, reservedFor(queued, id)) : null;
       const pending = pendingFor(sent, id, here === id ? now : (body?.resourcesAt ?? 0));
       const { state, lack } = planStatus(items, have, pending, now);
       // Consecutive levels of one technology read as one line.
@@ -192,7 +198,8 @@ async function bootstrap(): Promise<void> {
       inFlight.crystal += p.crystal;
       inFlight.deuterium += p.deuterium;
     }
-    const gap = accountGap(plan, accountResources(snapshot?.bodies ?? [], stock, inFlight)).missing;
+    // Queued levels still have their resources on the bodies: they count on the cost side too.
+    const gap = accountGap(withQueued(plan, store.get<Queued>(QUEUED_KEY, {})), accountResources(snapshot?.bodies ?? [], stock, inFlight)).missing;
     return gap ? gap.metal + gap.crystal * 1.5 + gap.deuterium * 3 : null;
   };
   /** Redraws the inbox panels after a choice in the settings (set once the inbox is watched). */
@@ -282,7 +289,7 @@ async function bootstrap(): Promise<void> {
       planCount: planCount(store.get<Plan>(PLAN_KEY, {})),
       planGap: planGap(),
       planMarks: planMarks(),
-      onOpenPlanner: () => {
+      onOpenPlanner: (focus?: number) => {
         const id = currentBodyId(document);
         const resources = readCurrentResources(document);
         openPlanner({
@@ -295,6 +302,7 @@ async function bootstrap(): Promise<void> {
           locale,
           t,
           onChange: () => draw(),
+          focus,
           href: location.href,
           navigate: (url) => location.assign(url),
         });
