@@ -175,6 +175,8 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     di ogni ricerca un chip «Rete X · N lab» = laboratorio di questo pianeta + i migliori laboratori di altri pianeti
     fino al livello della Rete (123), contando solo quelli al livello di laboratorio richiesto dalla ricerca. Livelli dal
     last sync (accountInfo), nessuna chiamata. Rosso se il laboratorio di qui è sotto il requisito.
+21. **Diario, riquadro in alto** (2026-11-13, 0.3.63): guadagno netto in grande, accanto Risorse (MSU) e Flotta
+    (MSU navi trovate − perse, con «trovate · perse» sotto).
 14. **Grafica** (2026-11-06): tutte le finestre (`WINDOW_SHEET`) riprendono il menu pianeti: riquadri #111B2A
     con bordo #1F2C40, schede a segmenti, numeri monospazio, ciano per la selezione. Pila z-index sopra il
     footer del gioco (999999): barra laterale 1000000, finestre 1000001, popup 1000002-3.
