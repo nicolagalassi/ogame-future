@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.64
+// @version      0.3.65
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -5592,9 +5592,10 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       else if (!e.combat && !e.debris) s.count += n;
       if (e.summary) for (const [k, v] of Object.entries(e.summary.outcomes)) s.outcomes[k] = (s.outcomes[k] ?? 0) + (v ?? 0);
       else if (!e.combat && !e.debris) s.outcomes[e.result] = (s.outcomes[e.result] ?? 0) + 1;
-      s.res.metal += e.res.metal;
-      s.res.crystal += e.res.crystal;
-      s.res.deuterium += e.res.deuterium;
+      const res = !e.summary && e.result === "ship" ? { metal: 0, crystal: 0, deuterium: 0 } : e.res;
+      s.res.metal += res.metal;
+      s.res.crystal += res.crystal;
+      s.res.deuterium += res.deuterium;
       s.res.darkMatter += e.res.darkMatter;
       if (e.debris) s.debris += msu(e.res);
       for (const [id, n2] of Object.entries(e.ships)) s.shipsFound[Number(id)] = (s.shipsFound[Number(id)] ?? 0) + n2;
@@ -6140,7 +6141,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
         result,
         size: !sized ? -1 : sizeRaw in SIZES ? SIZES[sizeRaw] : /^[0-2]$/.test(sizeRaw) ? Number(sizeRaw) : -1,
         depletion: int2(d.rawDepletion),
-        res: readRes(json(d.rawResourcesgained, {})),
+        // An expedition has one outcome: a ship find brings ships only. Its report can also carry the
+        // ships' value as resources, which counted them twice (OGLight with ship value at 0% showed it).
+        res: result === "ship" ? readRes({}) : readRes(json(d.rawResourcesgained, {})),
         ships: readUnits(json(d.rawTechnologiesgained, {})),
         lost: readUnits(json(d.rawShipslost, {})),
         item: first && typeof first === "object" ? String(first.name ?? "") || null : null,

@@ -204,7 +204,9 @@ export function readMessage(msg: Element, ownPlayerId: number): ParsedMessage | 
       result,
       size: !sized ? -1 : sizeRaw in SIZES ? SIZES[sizeRaw]! : /^[0-2]$/.test(sizeRaw) ? Number(sizeRaw) : -1,
       depletion: int(d.rawDepletion),
-      res: readRes(json(d.rawResourcesgained, {})),
+      // An expedition has one outcome: a ship find brings ships only. Its report can also carry the
+      // ships' value as resources, which counted them twice (OGLight with ship value at 0% showed it).
+      res: result === 'ship' ? readRes({}) : readRes(json(d.rawResourcesgained, {})),
       ships: readUnits(json(d.rawTechnologiesgained, {})),
       lost: readUnits(json(d.rawShipslost, {})),
       item: first && typeof first === 'object' ? String((first as { name?: unknown }).name ?? '') || null : null,
