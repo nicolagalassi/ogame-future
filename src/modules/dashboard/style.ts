@@ -99,15 +99,17 @@ td.guess { font-style: italic; opacity: 0.7; }
 .move .pic { border-radius: 5px; }
 .head-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
 .head-toggle:hover, .head-toggle:focus-visible { color: #4FD1E8; }
-.head-toggle svg { transition: transform 0.15s; }
-.head-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
-.moves-open { grid-column: 1 / -1; order: 3; }
 .needs { margin: 0 0 8px; padding: 8px 10px; border: 1px solid #1F2C40; border-radius: 7px; background: #0D1522; color: #B4C2D3; font-size: 12px; }
 .needs p { margin: 4px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .needs .chip { display: inline-flex; align-items: center; height: 22px; text-decoration: none; }
 .move-text .guess { color: #E3BB28; font-style: normal; }
-.moves-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
-.moves-list .move:nth-child(2) { border-top: 0; }
+.move-text .ok { color: #38C56E; font-style: normal; }
+.move.done { opacity: 0.55; }
+.pls { display: flex; flex-wrap: wrap; gap: 4px; margin: 3px 0 2px; }
+.pl { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border: 1px solid #1F2C40; border-radius: 5px; background: #0A111C; color: #B4C2D3; font-size: 11px; text-decoration: none; white-space: nowrap; }
+.pl:hover, .pl:focus-visible { border-color: #4FD1E8; color: #E6EDF5; }
+.pl.guess { border-color: #5C4A12; }
+.pl.done { color: #5F7189; text-decoration: line-through; border-style: dashed; }
 
 /* Planets | moons switch on the ships and defence pages. */
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
@@ -151,9 +153,7 @@ table.scrap .unit-label[aria-pressed="true"] { border-color: var(--accent); back
 @media (max-width: 900px) {
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cols { grid-template-columns: 1fr; }
-  .moves-list { grid-template-columns: 1fr; }
-  .moves-list .move:nth-child(2) { border-top: 1px solid #1A2638; }
-}
+    }
 .charts { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 12px; }
 .chart { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
 .chart figcaption { margin-bottom: 6px; color: var(--text); font-weight: 700; font-size: 13px; }
