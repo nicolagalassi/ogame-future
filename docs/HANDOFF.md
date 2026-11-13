@@ -171,6 +171,10 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     salvato (`msg.foreignAt`, 3 giorni): le pagine dopo partono già in silenzio; se dopo 4 s nessun report ha l'altro
     tool, il nostro stile torna. Impostazioni → Posta → Riepilogo spedizioni: Automatico / Sempre Future / Solo
     registra. **Da verificare** sul markup vero di OGame Tracker (scritto senza poterlo vedere).
+20. **Rete di ricerca** (2026-11-13, 0.3.62, `researchNetwork` / `LAB_NEEDED` in `engines/tech.ts`): nel pannello
+    di ogni ricerca un chip «Rete X · N lab» = laboratorio di questo pianeta + i migliori laboratori di altri pianeti
+    fino al livello della Rete (123), contando solo quelli al livello di laboratorio richiesto dalla ricerca. Livelli dal
+    last sync (accountInfo), nessuna chiamata. Rosso se il laboratorio di qui è sotto il requisito.
 14. **Grafica** (2026-11-06): tutte le finestre (`WINDOW_SHEET`) riprendono il menu pianeti: riquadri #111B2A
     con bordo #1F2C40, schede a segmenti, numeri monospazio, ciano per la selezione. Pila z-index sopra il
     footer del gioco (999999): barra laterale 1000000, finestre 1000001, popup 1000002-3.

@@ -767,5 +767,9 @@
   "settings.expStyleHint": "With another tool decorating the reports (OGame Tracker, OGLight, …) Future steps aside and only records, as OGLight does. The journal always records.",
   "settings.expStyle.auto": "Automatic",
   "settings.expStyle.always": "Always Future",
-  "settings.expStyle.never": "Record only"
+  "settings.expStyle.never": "Record only",
+  "tech.labShort": "Network {total} · {n} labs",
+  "tech.labNet": "Labs working on this research: {total} = here {here} + {linked} (Intergalactic Research Network level {irn})",
+  "tech.labNeed": "labs from level {need} count",
+  "tech.labHereShort": "this planet's lab is below level {need}: it cannot start here"
 }
