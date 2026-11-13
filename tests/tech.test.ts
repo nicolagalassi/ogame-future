@@ -11,7 +11,7 @@ import {
   scaleDuration,
   techKind,
 } from '../src/engines/tech';
-import { addToPlan, inPlan, planCount, planMissing, planTotal, prune, removeFromPlan, type Plan } from '../src/engines/planner';
+import { addToPlan, holdQueued, inPlan, lessReserved, planCount, planMissing, planTotal, prune, queueKindOf, queuedLevel, releaseQueued, removeFromPlan, reservedFor, withQueued, type Plan, type Queued } from '../src/engines/planner';
 import { readTechDetails, readTechList } from '../src/data/tech-details';
 import { renderTechPanel, watchTechPages, formatDuration } from '../src/modules/tech';
 import { openPlanner, closePlanner } from '../src/modules/tech/planner-view';
@@ -501,5 +501,85 @@ describe('solar satellites on the tech panel', () => {
     document.getElementById('technologydetails_content')!.innerHTML = mine;
     renderTechPanel({ ...o, energy: () => 9000, maxTemp: 67 }, readTechDetails(document)!);
     expect(document.querySelector('.fut-tp-sat')).toBeNull();
+  });
+});
+
+describe('levels queued in the game', () => {
+  const c = (metal: number) => ({ metal, crystal: 0, deuterium: 0, energy: 0 });
+  const q = (id: number, level: number, metal: number, queuedAt = 100) => ({ id, level, name: 'Miniera di metallo', cost: c(metal), added: 1, kind: queueKindOf(id)!, queuedAt });
+
+  it('knows the queue of each technology', () => {
+    expect(queueKindOf(1)).toBe('building');
+    expect(queueKindOf(120)).toBe('research');
+    expect(queueKindOf(203)).toBeNull();
+    expect(queueKindOf(11101)).toBe('lfbuilding');
+    expect(queueKindOf(11201)).toBe('lfresearch');
+  });
+
+  it('holds their resources on the body until they start', () => {
+    let queued: Queued = holdQueued({}, 10, q(1, 32, 300));
+    queued = holdQueued(queued, 10, q(1, 33, 400));
+    expect(reservedFor(queued, 10)).toEqual({ metal: 700, crystal: 0, deuterium: 0 });
+    expect(reservedFor(queued, 20).metal).toBe(0);
+    expect(queuedLevel(queued, 10, 1)).toBe(33);
+    expect(lessReserved({ metal: 500, crystal: 0, deuterium: 0 }, reservedFor(queued, 10)).metal).toBe(-200);
+    expect(withQueued({}, queued)['10']).toHaveLength(2);
+    // Started: the game's queues run that level.
+    const running = (name: string, level: number) => ({ at: 200, bodies: { '10': [{ kind: 'building', name, level, end: 999 }] } });
+    expect(releaseQueued(queued, { queues: running('Miniera di metallo', 32) }).queued['10']!.map((x) => x.level)).toEqual([33]);
+    // Something else of its kind runs: still waiting.
+    expect(releaseQueued(queued, { queues: running('Fabbrica dei robot', 10) }).changed).toBe(false);
+    // Nothing of its kind runs: built or cancelled.
+    expect(releaseQueued(queued, { queues: { at: 200, bodies: { '10': [] } } }).queued).toEqual({});
+    // Queues read before it was queued say nothing.
+    expect(releaseQueued(queued, { queues: { at: 50, bodies: { '10': [] } } }).changed).toBe(false);
+    // Built levels seen on the technology page.
+    expect(releaseQueued(queued, { built: { bodyId: 10, levels: { 1: 33 } } }).queued).toEqual({});
+    expect(releaseQueued(queued, { built: { bodyId: 20, levels: { 1: 33 } } }).changed).toBe(false);
+  });
+
+  it('a build clicked while another runs is held back, with its plan cost', () => {
+    const raw = rawCost(1, 32);
+    techPage({ id: 1, built: 30, target: 31, shown: { metal: raw.metal, crystal: raw.crystal } });
+    document.querySelector('#technologies .technology')!.setAttribute('data-status', 'active');
+    const btn = document.createElement('button');
+    btn.className = 'upgrade';
+    btn.setAttribute('data-technology', '1');
+    document.querySelector('#technologies .technology')!.append(btn);
+    const store = new Store(new MemoryStore(), 'test');
+    store.set('planner', addToPlan({}, 10, [{ id: 1, level: 32, name: 'Miniera di metallo', cost: c(777), added: 1 }]));
+    watchTechPages({ doc: document, store, bodyId: 10, t, locale: 'it', have: () => null, energy: () => null, maxTemp: null });
+    btn.click();
+    expect(store.get<Plan>('planner', {})).toEqual({});
+    expect(store.get<Queued>('plan.queued', {})['10']).toMatchObject([{ id: 1, level: 32, cost: { metal: 777 } }]);
+    // A second click queues the next level, at its own cost.
+    btn.click();
+    expect(store.get<Queued>('plan.queued', {})['10']!.map((x) => [x.level, x.cost.metal])).toEqual([[32, 777], [33, rawCost(1, 33).metal]]);
+  });
+
+  it('the plan window counts them as spoken for, and opens on the body asked for', () => {
+    document.body.innerHTML = '';
+    const store = new Store(new MemoryStore(), 'test');
+    store.set('planner', addToPlan(addToPlan({}, 10, [{ id: 1, level: 34, name: 'Miniera', cost: c(100), added: 1 }]), 20, [{ id: 1, level: 20, name: 'Miniera', cost: c(10), added: 2 }]));
+    store.set('plan.queued', holdQueued({}, 10, q(1, 33, 500)));
+    const body = (id: number, metal: number) => ({ id, type: 'planet', name: '', coords: '', siblingId: null, production: { metal: 0, crystal: 0, deuterium: 0 }, resources: { metal, crystal: 0, deuterium: 0 }, storage: { metal: 0, crystal: 0, deuterium: 0 }, resourcesAt: 0, levels: {} });
+    openPlanner({
+      doc: document, store, now: 0, locale: 'it', t, focus: 10,
+      snapshot: { fetchedAt: 0, researches: {}, bodies: [body(10, 550), body(20, 1000)] } as never,
+      entries: [{ planetId: 20, moonId: null, name: 'Due', coords: '1:2:4' } as never, { planetId: 10, moonId: null, name: 'Casa', coords: '1:2:3' } as never],
+      current: null,
+      href: 'https://s1-it.ogame.gameforge.com/game/index.php?page=ingame',
+      navigate: () => {},
+    });
+    const root = document.getElementById('fut-planner')!.shadowRoot!;
+    // 550 here, 500 held for the queued level: 50 free, the plan's 100 lacks 50.
+    const tiles = [...root.querySelectorAll<HTMLElement>('.group.body')];
+    expect(tiles.map((x) => x.dataset.body)).toEqual(['10', '20']);
+    expect(tiles[0]!.classList.contains('focus')).toBe(true);
+    expect([...root.querySelectorAll('.sec-name')].map((x) => x.textContent)).toEqual(['Da rifornire · 1', 'Pronti · 1']);
+    expect(tiles[0]!.querySelector('.ghead .num.m')!.textContent).toBe('50');
+    expect(tiles[0]!.querySelectorAll('.qchip')).toHaveLength(1);
+    expect(root.activeElement?.classList.contains('bring-all')).toBe(true);
+    closePlanner(document);
   });
 });
