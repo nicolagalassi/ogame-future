@@ -296,7 +296,7 @@
   "exp.dm": "Antimatière",
   "exp.shipsFound": "Vaisseaux trouvés",
   "exp.lost": "Vaisseaux perdus",
-  "exp.net": "Gain net",
+  "exp.net": "Total (ressources + flotte)",
   "exp.average": "Moyenne par expédition",
   "exp.lfXp": "Expérience FV",
   "exp.outcomes": "Résultats",
@@ -775,5 +775,6 @@
   "exp.heroRes": "Ressources",
   "exp.heroFleet": "Flotte",
   "exp.heroFound": "trouvés",
-  "exp.heroLostShort": "perdus"
+  "exp.heroLostShort": "perdus",
+  "exp.heroDebris": "dont débris en 16"
 }
