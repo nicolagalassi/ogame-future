@@ -177,6 +177,11 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     last sync (accountInfo), nessuna chiamata. Rosso se il laboratorio di qui è sotto il requisito.
 21. **Diario, riquadro in alto** (2026-11-13, 0.3.63): guadagno netto in grande, accanto Risorse (MSU) e Flotta
     (MSU navi trovate − perse, con «trovate · perse» sotto).
+22. **Diario vs OGLight** (2026-11-13, 0.3.64): stessa formula MSU (1 / 1,5 / 3); il totale di Future include il valore
+    delle navi trovate (a costo base), la colonna MSU di OGLight solo le risorse → confrontare con «Risorse».
+    Detriti raccolti in pos. 16 (report di riciclaggio, pathfinder in spedizione) ora entrano nelle risorse delle
+    spedizioni, come OGLight, senza contare come spedizione (`recordDebris`, `debris: true`). Report uguali con id
+    diversi contano una volta (`signature` / `dedupe`, pulizia anche dei diari vecchi).
 14. **Grafica** (2026-11-06): tutte le finestre (`WINDOW_SHEET`) riprendono il menu pianeti: riquadri #111B2A
     con bordo #1F2C40, schede a segmenti, numeri monospazio, ciano per la selezione. Pila z-index sopra il
     footer del gioco (999999): barra laterale 1000000, finestre 1000001, popup 1000002-3.

@@ -296,7 +296,7 @@
   "exp.dm": "Dark Matter",
   "exp.shipsFound": "Ships found",
   "exp.lost": "Ships lost",
-  "exp.net": "Net gain",
+  "exp.net": "Total (resources + fleet)",
   "exp.average": "Average per expedition",
   "exp.lfXp": "LF experience",
   "exp.outcomes": "Outcomes",
@@ -775,5 +775,6 @@
   "exp.heroRes": "Resources",
   "exp.heroFleet": "Fleet",
   "exp.heroFound": "found",
-  "exp.heroLostShort": "lost"
+  "exp.heroLostShort": "lost",
+  "exp.heroDebris": "of which debris at 16"
 }

@@ -8,7 +8,7 @@ import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import type { Outcome } from '../../data/messages';
-import { byDay, daySeries, entriesIn, hourSeries, JOURNAL_KEY, msu, periodRange, periodStats, raidStats, valueMix, type Bucket, type Journal, type Period, type PeriodStats } from '../../engines/expeditions';
+import { byDay, dedupe, daySeries, entriesIn, hourSeries, JOURNAL_KEY, msu, periodRange, periodStats, raidStats, valueMix, type Bucket, type Journal, type Period, type PeriodStats } from '../../engines/expeditions';
 import { resIconSvg } from '../../core/res-icons';
 import { iconSvg } from '../fleet/icons';
 import { FOLD_KEY, shipIcon, shipName, type T } from './index';
@@ -125,7 +125,9 @@ export function openJournal(o: JournalOptions): void {
     const lostNote = h('span', 'hero-note');
     lostNote.append(`${t('exp.heroFound')} `, h('b', '', fmt(msu(s.shipsValue))));
     if (msu(s.lostValue)) lostNote.append(` · ${t('exp.heroLostShort')} `, h('b', 'neg', `−${fmt(msu(s.lostValue))}`));
-    top.append(net, part(t('exp.heroRes'), resMsu), part(t('exp.heroFleet'), fleetMsu, lostNote));
+    const debrisNote = s.debris ? h('span', 'hero-note') : undefined;
+    debrisNote?.append(`${t('exp.heroDebris')} `, h('b', '', fmt(s.debris)));
+    top.append(net, part(t('exp.heroRes'), resMsu, debrisNote), part(t('exp.heroFleet'), fleetMsu, lostNote));
     const mix = valueMix(s);
     const mixTotal = mix.metal + mix.crystal + mix.deuterium + mix.ships;
     const bar = h('div', 'mix');
@@ -307,7 +309,10 @@ export function openJournal(o: JournalOptions): void {
   };
 
   const draw = () => {
-    const journal = store.get<Journal>(JOURNAL_KEY, {});
+    // Reports recorded twice under different ids by older versions: counted once, and cleaned up.
+    const clean = dedupe(store.get<Journal>(JOURNAL_KEY, {}));
+    if (clean.removed) store.set(JOURNAL_KEY, clean.journal);
+    const journal = clean.journal;
     const inPeriod = entriesIn(journal, periodRange(period, o.now));
     const hasRaids = Object.values(journal).some((e) => e.kind === 'raid');
     if (kind === 'raid' && !hasRaids) kind = 'expedition';

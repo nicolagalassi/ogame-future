@@ -296,7 +296,7 @@
   "exp.dm": "Materia oscura",
   "exp.shipsFound": "Navi trovate",
   "exp.lost": "Navi perse",
-  "exp.net": "Guadagno netto",
+  "exp.net": "Totale (risorse + flotta)",
   "exp.average": "Media a spedizione",
   "exp.lfXp": "Esperienza FV",
   "exp.outcomes": "Esiti",
@@ -775,5 +775,6 @@
   "exp.heroRes": "Risorse",
   "exp.heroFleet": "Flotta",
   "exp.heroFound": "trovate",
-  "exp.heroLostShort": "perse"
+  "exp.heroLostShort": "perse",
+  "exp.heroDebris": "di cui detriti pos. 16"
 }

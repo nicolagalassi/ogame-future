@@ -296,7 +296,7 @@
   "exp.dm": "Dunkle Materie",
   "exp.shipsFound": "Gefundene Schiffe",
   "exp.lost": "Verlorene Schiffe",
-  "exp.net": "Nettogewinn",
+  "exp.net": "Gesamt (Ressourcen + Flotte)",
   "exp.average": "Schnitt pro Expedition",
   "exp.lfXp": "LF-Erfahrung",
   "exp.outcomes": "Ergebnisse",
@@ -775,5 +775,6 @@
   "exp.heroRes": "Ressourcen",
   "exp.heroFleet": "Flotte",
   "exp.heroFound": "gefunden",
-  "exp.heroLostShort": "verloren"
+  "exp.heroLostShort": "verloren",
+  "exp.heroDebris": "davon Trümmer auf 16"
 }
