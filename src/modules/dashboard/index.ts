@@ -16,7 +16,7 @@ import { formatUnits } from '../../core/format';
 import { accountAlerts, bodyRows, msu, summarize } from '../../engines/account';
 import { activeItems, QUEUE_KINDS, queueLabel, type QueueItem, type QueueSnapshot } from '../../data/queues';
 import { remaining } from '../planet-menu';
-import { amortizationPlan, DEFAULT_RATES, lfBuildingsMissing, lfSlotsMissing, type AmortStep, type Rates } from '../../engines/roi';
+import { amortizationPlan, DEFAULT_RATES, INVEST_KINDS, lfBuildingsMissing, lfSlotsMissing, type AmortStep, type InvestKind, type Rates } from '../../engines/roi';
 import type { LfLevels } from '../../data/lf-production';
 import { changeOver, type History, type HistoryDay } from '../../engines/history';
 import type { Reminder } from '../../engines/reminders';
@@ -596,6 +596,9 @@ function historyTab(parent: HTMLElement, ctx: Ctx): void {
 const RATES_KEY = 'dash.rates';
 let sessionRates: Rates = DEFAULT_RATES;
 const loadRates = (o: DashboardOptions): Rates => o.store?.get<Rates>(RATES_KEY, DEFAULT_RATES) ?? sessionRates;
+const EXCLUDE_KEY = 'dash.investExclude';
+let sessionExclude: InvestKind[] = [];
+const loadExclude = (o: DashboardOptions): InvestKind[] => o.store?.get<InvestKind[]>(EXCLUDE_KEY, []) ?? sessionExclude;
 
 /** InfoCompte's amortizations: mines, plasma and a new colony, best payback first, each step applied before the next. */
 function buildOrder(ctx: Ctx, steps: number): AmortStep[] {
@@ -604,7 +607,7 @@ function buildOrder(ctx: Ctx, steps: number): AmortStep[] {
   const planets = o.entries
     .filter((e) => e.planetId)
     .map((e) => ({ id: e.planetId!, name: e.name, coords: e.coords, maxTemp: maxTemperatureOf(e.planetLink) }));
-  return amortizationPlan({ snapshot: o.snapshot, planets, speed, rates: loadRates(o), steps, lfSlots: o.lfSlots, lfLevels: o.lfLevels ?? undefined, lfLocked: o.lfLocked });
+  return amortizationPlan({ snapshot: o.snapshot, planets, speed, rates: loadRates(o), steps, lfSlots: o.lfSlots, lfLevels: o.lfLevels ?? undefined, lfLocked: o.lfLocked, exclude: loadExclude(o) });
 }
 
 /**
@@ -773,6 +776,25 @@ function investmentsTab(parent: HTMLElement, ctx: Ctx): void {
     label.append(input);
   });
   bar.append(label);
+  // What the list offers, as InfoCompte's settings: a switched-off kind is never proposed.
+  const kinds = h('div', 'seg');
+  kinds.setAttribute('role', 'group');
+  kinds.setAttribute('aria-label', t('dash.investKinds'));
+  const excluded = loadExclude(o);
+  for (const k of INVEST_KINDS) {
+    const b = h('button', '', t(`dash.invest.${k}`));
+    b.type = 'button';
+    b.setAttribute('aria-pressed', String(!excluded.includes(k)));
+    b.addEventListener('click', () => {
+      const now = loadExclude(o);
+      const next = now.includes(k) ? now.filter((x) => x !== k) : [...now, k];
+      if (o.store) o.store.set(EXCLUDE_KEY, next);
+      else sessionExclude = next;
+      ctx.redraw();
+    });
+    kinds.append(b);
+  }
+  bar.append(kinds);
   s.append(bar);
   const missing = missingData(ctx);
   if (missing) s.append(missing);
