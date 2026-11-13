@@ -83,6 +83,12 @@ describe('dashboard panel', () => {
     shadow().querySelector<HTMLButtonElement>('.head-toggle')!.click();
     expect(shadow().querySelector('.tab[aria-pressed="true"]')?.getAttribute('data-tab')).toBe('investments');
     expect(shadow().querySelectorAll('.field.rate')).toHaveLength(3);
+    // Switching a kind off keeps it off.
+    const kind = () => shadow().querySelector<HTMLButtonElement>('.seg[role="group"] button')!;
+    expect(kind().getAttribute('aria-pressed')).toBe('true');
+    kind().click();
+    expect(kind().getAttribute('aria-pressed')).toBe('false');
+    kind().click();
     expect(shadow().querySelectorAll('.move').length).toBeGreaterThan(0);
     expect(shadow().textContent).not.toMatch(/NaN|undefined|Infinity/);
     goTo('summary');

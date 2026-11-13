@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.73
+// @version      0.3.74
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -589,6 +589,14 @@
     "dash.stepDone": "fatto",
     "dash.planetsCount": "{count} pianeti",
     "dash.doneCount": "{done} su {count} fatti",
+    "dash.investKinds": "Cosa proporre",
+    "dash.invest.metal": "Metallo",
+    "dash.invest.crystal": "Cristallo",
+    "dash.invest.deuterium": "Deuterio",
+    "dash.invest.lfBuilding": "Edifici FV",
+    "dash.invest.lfResearch": "Ricerche FV",
+    "dash.invest.plasma": "Plasma",
+    "dash.invest.astro": "Astrofisica",
     "dash.movesNone": "Servono i livelli delle miniere: premi Sincronizza.",
     "dash.movesHint": "Come gli ammortamenti di InfoCompte: miniere, plasma e nuova colonia (astrofisica + attrezzatura media di un pianeta) per giorni di ritorno ai tassi scelti; ogni passo conta i precedenti. Non conta energia n\xE9 sconti delle forme di vita.",
     "dash.colQueue": "In corso",
@@ -1385,6 +1393,14 @@
     "dash.stepDone": "done",
     "dash.planetsCount": "{count} planets",
     "dash.doneCount": "{done} of {count} done",
+    "dash.investKinds": "What to suggest",
+    "dash.invest.metal": "Metal",
+    "dash.invest.crystal": "Crystal",
+    "dash.invest.deuterium": "Deuterium",
+    "dash.invest.lfBuilding": "LF buildings",
+    "dash.invest.lfResearch": "LF research",
+    "dash.invest.plasma": "Plasma",
+    "dash.invest.astro": "Astrophysics",
     "dash.movesNone": "Mine levels needed: press Sync.",
     "dash.movesHint": "As InfoCompte's amortizations: mines, plasma and a new colony (astrophysics + a planet's average equipment) by payback days at your trade rates; each step counts the ones before. Energy and lifeform discounts not counted.",
     "dash.colQueue": "Running",
@@ -2181,6 +2197,14 @@
     "dash.stepDone": "fait",
     "dash.planetsCount": "{count} plan\xE8tes",
     "dash.doneCount": "{done} sur {count} faits",
+    "dash.investKinds": "Que proposer",
+    "dash.invest.metal": "M\xE9tal",
+    "dash.invest.crystal": "Cristal",
+    "dash.invest.deuterium": "Deut\xE9rium",
+    "dash.invest.lfBuilding": "B\xE2timents FDV",
+    "dash.invest.lfResearch": "Recherches FDV",
+    "dash.invest.plasma": "Plasma",
+    "dash.invest.astro": "Astrophysique",
     "dash.movesNone": "Niveaux des mines requis : Synchroniser.",
     "dash.movesHint": "Comme les amortissements d'InfoCompte : mines, plasma et nouvelle colonie (astrophysique + \xE9quipement moyen d'une plan\xE8te) par jours d'amortissement \xE0 vos taux ; chaque \xE9tape compte les pr\xE9c\xE9dentes. Sans \xE9nergie ni r\xE9ductions formes de vie.",
     "dash.colQueue": "En cours",
@@ -2977,6 +3001,14 @@
     "dash.stepDone": "erledigt",
     "dash.planetsCount": "{count} Planeten",
     "dash.doneCount": "{done} von {count} erledigt",
+    "dash.investKinds": "Was vorschlagen",
+    "dash.invest.metal": "Metall",
+    "dash.invest.crystal": "Kristall",
+    "dash.invest.deuterium": "Deuterium",
+    "dash.invest.lfBuilding": "LF-Geb\xE4ude",
+    "dash.invest.lfResearch": "LF-Forschung",
+    "dash.invest.plasma": "Plasma",
+    "dash.invest.astro": "Astrophysik",
     "dash.movesNone": "Minenstufen n\xF6tig: Synchronisieren.",
     "dash.movesHint": "Wie die Amortisation von InfoCompte: Minen, Plasma und neue Kolonie (Astrophysik + durchschnittliche Ausstattung eines Planeten) nach Amortisationstagen zu deinen Kursen; jeder Schritt z\xE4hlt die vorherigen. Ohne Energie und Lebensform-Rabatte.",
     "dash.colQueue": "L\xE4uft",
@@ -9697,12 +9729,13 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     }
     return { ...total, energy: 0 };
   }
+  var INVEST_KINDS = ["metal", "crystal", "deuterium", "lfBuilding", "lfResearch", "plasma", "astro"];
   function open(locked, planetId, id, level2) {
     if (level2 > 0) return true;
     const seen = locked[String(planetId)]?.[techKind(id) === "lfBuilding" ? "b" : "r"];
     return seen !== void 0 && !seen.includes(id);
   }
-  function amortizationPlan({ snapshot, planets, speed, rates = DEFAULT_RATES, steps = 20, lfSlots = {}, lfLevels = {}, lfLocked = {} }) {
+  function amortizationPlan({ snapshot, planets, speed, rates = DEFAULT_RATES, steps = 20, lfSlots = {}, lfLevels = {}, lfLocked = {}, exclude = [] }) {
     if (!snapshot) return [];
     const byId = new Map(snapshot.bodies.map((b) => [b.id, b]));
     const state = [];
@@ -9763,6 +9796,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     for (let i = 0; i < steps; i++) {
       let best = null;
       const consider = (s) => {
+        if (exclude.includes(s.kind === "mine" ? s.mine : s.kind)) return;
         const d = days(s.cost, s.gain, rates);
         if (Number.isFinite(d) && (!best || d < best.days)) best = { ...s, days: d };
       };
@@ -10534,11 +10568,14 @@ table.queues td.acts { width: 1%; text-align: right; }
   var RATES_KEY = "dash.rates";
   var sessionRates = DEFAULT_RATES;
   var loadRates = (o) => o.store?.get(RATES_KEY, DEFAULT_RATES) ?? sessionRates;
+  var EXCLUDE_KEY = "dash.investExclude";
+  var sessionExclude = [];
+  var loadExclude = (o) => o.store?.get(EXCLUDE_KEY, []) ?? sessionExclude;
   function buildOrder(ctx, steps) {
     const { o } = ctx;
     const speed = Number(o.doc.querySelector('meta[name="ogame-universe-speed"]')?.getAttribute("content")) || 1;
     const planets = o.entries.filter((e) => e.planetId).map((e) => ({ id: e.planetId, name: e.name, coords: e.coords, maxTemp: maxTemperatureOf(e.planetLink) }));
-    return amortizationPlan({ snapshot: o.snapshot, planets, speed, rates: loadRates(o), steps, lfSlots: o.lfSlots, lfLevels: o.lfLevels ?? void 0, lfLocked: o.lfLocked });
+    return amortizationPlan({ snapshot: o.snapshot, planets, speed, rates: loadRates(o), steps, lfSlots: o.lfSlots, lfLevels: o.lfLevels ?? void 0, lfLocked: o.lfLocked, exclude: loadExclude(o) });
   }
   function missingData(ctx) {
     const { o } = ctx;
@@ -10683,6 +10720,24 @@ table.queues td.acts { width: 1%; text-align: right; }
       label.append(input);
     });
     bar.append(label);
+    const kinds = h3("div", "seg");
+    kinds.setAttribute("role", "group");
+    kinds.setAttribute("aria-label", t("dash.investKinds"));
+    const excluded = loadExclude(o);
+    for (const k of INVEST_KINDS) {
+      const b = h3("button", "", t(`dash.invest.${k}`));
+      b.type = "button";
+      b.setAttribute("aria-pressed", String(!excluded.includes(k)));
+      b.addEventListener("click", () => {
+        const now = loadExclude(o);
+        const next = now.includes(k) ? now.filter((x) => x !== k) : [...now, k];
+        if (o.store) o.store.set(EXCLUDE_KEY, next);
+        else sessionExclude = next;
+        ctx.redraw();
+      });
+      kinds.append(b);
+    }
+    bar.append(kinds);
     s.append(bar);
     const missing2 = missingData(ctx);
     if (missing2) s.append(missing2);
