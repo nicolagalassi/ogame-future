@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { activeItems, loadQueuesOnPageLoad, parseProductionQueue, QUEUES_KEY } from '../src/data/queues';
 import { amortizationPlan, DEFAULT_RATES, inMetal, mineBase } from '../src/engines/roi';
+import { readLfLevels } from '../src/data/lf-production';
 import { bodyRows } from '../src/engines/account';
 import { readPlanetList } from '../src/data/planet-list';
 import { renderPlanetMenu } from '../src/modules/planet-menu';
@@ -93,6 +94,44 @@ describe('amortizations (InfoCompte)', () => {
     // Plasma 1 costs 2.000 / 4.000 / 4.000: it pays back long before a level 31 metal mine.
     expect(steps[0]).toMatchObject({ kind: 'plasma', from: 0, to: 1 });
     expect(steps[1]).toMatchObject({ kind: 'plasma', from: 1, to: 2 });
+  });
+
+  const rocktal = (levels: Record<string, number>, researches: Record<string, number> = { '122': 30, '124': 9 }) =>
+    ({ ...SNAPSHOT, researches, bodies: [body({ id: 1, type: 'planet', coords: '1:2:8', species: 2, production: { metal: 30 + mineBase('metal', 30, 8, 20, 1), crystal: 15 + mineBase('crystal', 26, 8, 20, 1), deuterium: mineBase('deuterium', 20, 8, 20, 1) }, levels: { '1': 30, '2': 26, '3': 20, ...levels } })] });
+  const planets = [{ id: 1, name: 'Casa', coords: '1:2:8', maxTemp: 20 }];
+
+  it('counts the lifeform buildings that raise production, and the Rock\'tal discount on mines', () => {
+    const first = (lfLocked = {}) => amortizationPlan({ snapshot: rocktal({ '12106': 0 }), planets, speed: 1, steps: 1, lfLocked })[0];
+    // Magma forge (12106): +2% metal per level, cheap at level 1, comes first once the buildings page shows it open.
+    expect(first({ '1': { b: [] } })).toMatchObject({ kind: 'lfBuilding', id: 12106, from: 0, to: 1, planetId: 1 });
+    // Level 0 on a page never opened, or locked by its requirements: not offered.
+    expect(first()?.id).not.toBe(12106);
+    expect(first({ '1': { b: [12106] } })?.id).not.toBe(12106);
+    expect(amortizationPlan({ snapshot: rocktal({ '12106': 3 }), planets, speed: 1, steps: 1 })[0]).toMatchObject({ id: 12106, from: 3 });
+    const metal = (d: Record<string, number>) => amortizationPlan({ snapshot: rocktal(d), planets, speed: 1, steps: 40 }).find((s) => s.kind === 'mine' && s.id === 1)!;
+    // 12111 level 20 = 10% off the mines.
+    expect(metal({ '12111': 20 }).cost.metal).toBe(Math.floor(metal({}).cost.metal * 0.9));
+  });
+
+  it('counts active lifeform research for the whole account, strengthened by its boosters', () => {
+    // Everything else expensive (astrophysics 30, plasma 30, lifeform buildings 60): the research comes first.
+    const plan = (levels: Record<string, number>, lfLevels = {}) =>
+      amortizationPlan({ snapshot: rocktal({ '1': 45, '2': 40, '3': 40, '12106': 60, '12109': 60, '12110': 60, ...levels }, { '122': 30, '124': 30 }), planets, speed: 1, steps: 1, lfSlots: { '1': [12205] }, lfLevels })[0]!;
+    const plain = plan({ '12205': 10 });
+    expect(plain).toMatchObject({ kind: 'lfResearch', id: 12205, from: 10, to: 11, guessed: false });
+    expect(plain.gain.metal).toBeCloseTo(0.0008 * mineBase('metal', 45, 8, 20, 1), 3);
+    // Rock'tal at level 100 (+10%): the same level gives 10% more.
+    expect(plan({ '12205': 10 }, { '2': 0.1 }).gain.metal).toBeCloseTo(plain.gain.metal * 1.1, 3);
+  });
+
+  it('reads the species bonus on the lifeform settings page', () => {
+    history.replaceState(null, '', '/game/index.php?page=ingame&component=lfsettings');
+    document.body.innerHTML = `
+      <div class="lifeform-item"><span class="lifeform-item-icon lifeform2"></span><div class="lifeform-item-wrapper"><p>…</p><p>Con questa forma di vita hai raggiunto il livello massimo.</p><p>Bonus Tecnologia Forme di vita: 10%</p></div></div>
+      <div class="lifeform-item"><span class="lifeform-item-icon lifeform3"></span><div class="lifeform-item-wrapper"><p>…</p><p>Livello 45</p><p>Bonus Tecnologia Forme di vita: 4,5%</p></div></div>`;
+    expect(readLfLevels(document)).toEqual({ '2': 0.1, '3': 0.045 });
+    history.replaceState(null, '', '/');
+    expect(readLfLevels(document)).toBeNull();
   });
 });
 
