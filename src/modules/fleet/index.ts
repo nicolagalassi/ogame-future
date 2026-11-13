@@ -218,6 +218,14 @@ function bodyTarget(bodies: FleetBody[], id: number): Target | null {
   return null;
 }
 
+/** The other body at the same coordinates: the moon of a planet, the planet of a moon; null when there is none. */
+function twinTarget(bodies: FleetBody[], id: number): SendTarget | null {
+  const b = bodies.find((x) => x.planetId === id || x.moonId === id);
+  const twin = b ? (b.moonId === id ? b.planetId : b.moonId) : null;
+  const t = twin ? bodyTarget(bodies, twin) : null;
+  return t ? { galaxy: t.galaxy, system: t.system, position: t.position, type: b?.moonId === twin ? 3 : 1 } : null;
+}
+
 function isMoon(bodies: FleetBody[], id: number): boolean {
   return bodies.some((b) => b.moonId === id);
 }
@@ -1236,7 +1244,9 @@ export function renderFleetTools(o: FleetOptions): void {
   function toggleSend(mode: 'transport' | 'deploy'): void {
     const now = loadSettings(o.store);
     const next = now.sendMode === mode ? null : mode;
-    o.store.set(SETTINGS_KEY, { ...now, sendMode: next });
+    // Nothing typed yet: the destination starts on this body's twin (its moon from the planet, its planet from the moon).
+    const sendTarget = next && !now.sendTarget ? twinTarget(o.bodies, o.bodyId) : now.sendTarget;
+    o.store.set(SETTINGS_KEY, { ...now, sendMode: next, sendTarget });
     // Switching to another kind of send: what another button of ours selected goes (a selection made by hand stays).
     const fd = getDispatcher();
     if (fd && next) clearOurSelection(fd);

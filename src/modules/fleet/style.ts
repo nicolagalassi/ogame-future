@@ -107,7 +107,7 @@ export const FLEET_CSS = `
 .fut-fin.bad { border-color: var(--neg); }
 .fut-fin.g, .fut-fin.p { width: 34px; text-align: center; }
 .fut-fin.s { width: 46px; text-align: center; }
-.fut-fin.amount { width: 74px; text-align: right; }
+.fut-fin.amount { width: calc(13ch + 14px); text-align: right; }
 .fut-fpick { width: 24px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--mute); }
 .fut-fpick:hover { border-color: #47607D; color: var(--hi); }
 .fut-fseg { display: inline-flex; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }

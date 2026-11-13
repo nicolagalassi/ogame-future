@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.68
+// @version      0.3.69
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -11221,7 +11221,7 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fin.bad { border-color: var(--neg); }
 .fut-fin.g, .fut-fin.p { width: 34px; text-align: center; }
 .fut-fin.s { width: 46px; text-align: center; }
-.fut-fin.amount { width: 74px; text-align: right; }
+.fut-fin.amount { width: calc(13ch + 14px); text-align: right; }
 .fut-fpick { width: 24px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--mute); }
 .fut-fpick:hover { border-color: #47607D; color: var(--hi); }
 .fut-fseg { display: inline-flex; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
@@ -11454,6 +11454,12 @@ input[type="checkbox"] { accent-color: var(--accent); }
       if (b.moonId === id) return { galaxy: c[0], system: c[1], position: c[2], type: 3, name: b.name };
     }
     return null;
+  }
+  function twinTarget(bodies, id) {
+    const b = bodies.find((x) => x.planetId === id || x.moonId === id);
+    const twin = b ? b.moonId === id ? b.planetId : b.moonId : null;
+    const t = twin ? bodyTarget(bodies, twin) : null;
+    return t ? { galaxy: t.galaxy, system: t.system, position: t.position, type: b?.moonId === twin ? 3 : 1 } : null;
   }
   function isMoon(bodies, id) {
     return bodies.some((b) => b.moonId === id);
@@ -12292,7 +12298,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     function toggleSend(mode) {
       const now = loadSettings(o.store);
       const next = now.sendMode === mode ? null : mode;
-      o.store.set(SETTINGS_KEY, { ...now, sendMode: next });
+      const sendTarget = next && !now.sendTarget ? twinTarget(o.bodies, o.bodyId) : now.sendTarget;
+      o.store.set(SETTINGS_KEY, { ...now, sendMode: next, sendTarget });
       const fd = getDispatcher();
       if (fd && next) clearOurSelection(fd);
       redraw();
