@@ -77,6 +77,24 @@ describe('dashboard panel', () => {
     expect(isDashboardOpen(document)).toBe(false);
   });
 
+  it('the investments card opens across the summary with more steps and the trade rates', () => {
+    open();
+    const toggle = () => shadow().querySelector<HTMLButtonElement>('.head-toggle')!;
+    const steps = () => shadow().querySelectorAll('.card .move').length;
+    expect(toggle().getAttribute('aria-expanded')).toBe('false');
+    expect(steps()).toBeLessThanOrEqual(5);
+    const closed = steps();
+    toggle().click();
+    expect(toggle().getAttribute('aria-expanded')).toBe('true');
+    expect(shadow().querySelector('.moves-open')).not.toBeNull();
+    expect(shadow().querySelectorAll('.moves-open .field.rate')).toHaveLength(3);
+    expect(steps()).toBeGreaterThan(closed);
+    expect(shadow().textContent).not.toMatch(/NaN|undefined|Infinity/);
+    toggle().click();
+    expect(shadow().querySelector('.moves-open')).toBeNull();
+    closeDashboard(document);
+  });
+
   it('re-opening does not duplicate the panel', () => {
     open();
     open();

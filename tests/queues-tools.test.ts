@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { activeItems, loadQueuesOnPageLoad, parseProductionQueue, QUEUES_KEY } from '../src/data/queues';
-import { bestUpgrades, mineCost, mineGainRatio } from '../src/engines/roi';
+import { amortizationPlan, DEFAULT_RATES, inMetal, mineBase } from '../src/engines/roi';
 import { bodyRows } from '../src/engines/account';
 import { readPlanetList } from '../src/data/planet-list';
 import { renderPlanetMenu } from '../src/modules/planet-menu';
@@ -59,18 +59,40 @@ describe('production queue', () => {
   });
 });
 
-describe('mine advisor', () => {
-  it('uses the OGame cost and production formulas', () => {
-    expect(mineCost('metal', 0)).toEqual({ metal: 60, crystal: 15, deuterium: 0 });
-    expect(mineCost('crystal', 1)).toEqual({ metal: 76, crystal: 38, deuterium: 0 });
-    expect(mineGainRatio(10)).toBeCloseTo(0.21, 5);
+describe('amortizations (InfoCompte)', () => {
+  it('uses the mine formula with position, temperature and speed', () => {
+    expect(mineBase('metal', 10, 8, 0, 1)).toBe(1050);
+    expect(mineBase('crystal', 10, 1, 0, 1)).toBe(726);
+    expect(mineBase('deuterium', 10, 15, 0, 1)).toBe(373);
+    expect(mineBase('metal', 10, 8, 0, 4)).toBe(4201);
+    expect(inMetal({ metal: 3, crystal: 2, deuterium: 1 }, DEFAULT_RATES)).toBe(9);
   });
 
-  it('ranks upgrades by days to pay back', () => {
-    const snap = { ...SNAPSHOT, bodies: [body({ id: 1, type: 'planet', production: { metal: 100_000, crystal: 1, deuterium: 1 }, levels: { '1': 30, '2': 30, '3': 30 } })] };
-    const [first] = bestUpgrades(snap, readPlanetList(document));
-    expect(first?.mine).toBe('metal');
-    expect(first?.days).toBeGreaterThan(0);
+  const plan = (production: { metal: number; crystal: number; deuterium: number }, researches: Record<string, number> = {}) =>
+    amortizationPlan({
+      snapshot: { ...SNAPSHOT, researches, bodies: [body({ id: 1, type: 'planet', coords: '1:2:8', production, levels: { '1': 30, '2': 26, '3': 20 } })] },
+      planets: [{ id: 1, name: 'Casa', coords: '1:2:8', maxTemp: 20 }],
+      speed: 1,
+      steps: 6,
+    });
+
+  const real = () => ({ metal: 30 + mineBase('metal', 30, 8, 20, 1) * 3, crystal: 15 + mineBase('crystal', 26, 8, 20, 1), deuterium: mineBase('deuterium', 20, 8, 20, 1) });
+
+  it('gives a build order: each step is applied before the next one is chosen', () => {
+    const steps = plan(real(), { '122': 20, '124': 9 });
+    expect(steps.length).toBe(6);
+    // From astrophysics 9 the next slot is at 11, then 13.
+    expect(steps.filter((s) => s.kind === 'astro').map((s) => [s.from, s.to]).slice(0, 2)).toEqual([[9, 11], [11, 13]]);
+    const deut = steps.filter((s) => s.kind === 'mine' && s.mine === 'deuterium');
+    for (let i = 1; i < deut.length; i++) expect(deut[i]!.from).toBe(deut[i - 1]!.to);
+    for (let i = 1; i < steps.length; i++) expect(steps[i]!.days).toBeGreaterThan(0);
+  });
+
+  it('weighs plasma against the mines', () => {
+    const steps = plan(real(), { '122': 0, '124': 30 });
+    // Plasma 1 costs 2.000 / 4.000 / 4.000: it pays back long before a level 31 metal mine.
+    expect(steps[0]).toMatchObject({ kind: 'plasma', from: 0, to: 1 });
+    expect(steps[1]).toMatchObject({ kind: 'plasma', from: 1, to: 2 });
   });
 });
 
