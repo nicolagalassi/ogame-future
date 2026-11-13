@@ -762,5 +762,10 @@
   "plan.queuedHint": "Im Spiel in der Warteschlange, noch nicht bezahlt: seine Ressourcen werden zurückgehalten und zählen weder für den Plan noch für Transporte",
   "plan.unhold": "Nicht mehr zurückhalten (schon gestartet oder abgebrochen)",
   "fleet.mainShipIs": "Hauptschiff für automatische Transporte",
-  "fleet.mainShipPick": "Dieses Schiff für automatische Transporte nutzen (Mond, Sammeln, Plan)"
+  "fleet.mainShipPick": "Dieses Schiff für automatische Transporte nutzen (Mond, Sammeln, Plan)",
+  "settings.expStyle": "Expeditionsübersicht",
+  "settings.expStyleHint": "Schmückt ein anderes Tool die Berichte (OGame Tracker, OGLight, …), tritt Future zurück und zeichnet nur auf, wie OGLight. Das Journal zeichnet immer auf.",
+  "settings.expStyle.auto": "Automatisch",
+  "settings.expStyle.always": "Immer Future",
+  "settings.expStyle.never": "Nur aufzeichnen"
 }
