@@ -181,9 +181,11 @@ export function periodStats(entries: JournalEntry[]): PeriodStats {
     else if (!e.combat && !e.debris) s.count += n;
     if (e.summary) for (const [k, v] of Object.entries(e.summary.outcomes)) s.outcomes[k as Outcome] = (s.outcomes[k as Outcome] ?? 0) + (v ?? 0);
     else if (!e.combat && !e.debris) s.outcomes[e.result] = (s.outcomes[e.result] ?? 0) + 1;
-    s.res.metal += e.res.metal;
-    s.res.crystal += e.res.crystal;
-    s.res.deuterium += e.res.deuterium;
+    // Ship finds saved by older versions may hold the ships' value as resources too: ships only.
+    const res = !e.summary && e.result === 'ship' ? { metal: 0, crystal: 0, deuterium: 0 } : e.res;
+    s.res.metal += res.metal;
+    s.res.crystal += res.crystal;
+    s.res.deuterium += res.deuterium;
     s.res.darkMatter += e.res.darkMatter;
     if (e.debris) s.debris += msu(e.res);
     for (const [id, n] of Object.entries(e.ships)) s.shipsFound[Number(id)] = (s.shipsFound[Number(id)] ?? 0) + n;

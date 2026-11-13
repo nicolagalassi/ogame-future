@@ -151,6 +151,17 @@ describe('expedition journal', () => {
     expect(s.debris).toBe(500 + 3000);
   });
 
+  it('a ship find counts its ships only, even if its report also lists resources', () => {
+    const shipFind = { ...shipwrecks, resourcesgained: '{"metal":500000,"crystal":300000,"deuterium":0}' };
+    const m = readMessage(msg('77', shipFind), OWN)!;
+    expect(m).toMatchObject({ result: 'ship', res: { metal: 0, crystal: 0, deuterium: 0 } });
+    // Saved by an older version with resources: the stats leave them out.
+    const old = { ...entry('o', day(5)), result: 'ship' as const, ships: { 202: 10 } };
+    const s = periodStats([old]);
+    expect(s.res.metal).toBe(0);
+    expect(s.shipsValue.metal).toBe(20000);
+  });
+
   it('picks periods and days', () => {
     const now = day(10, 18);
     let j: Journal = {};
