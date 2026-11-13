@@ -310,6 +310,15 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
 .hero-sub { margin: 0 0 3px; color: var(--muted); font-size: 12px; }
 .hero-sub b { color: var(--text-2); font: 400 12px var(--mono); }
 .hero-sub b.neg { color: var(--bad); }
+/* Total, then its two parts: resources and fleet. */
+.hero-top { align-items: flex-start; }
+.hero-part { display: flex; flex-direction: column; gap: 4px; padding-left: 20px; border-left: 1px solid var(--line); }
+.hero-pv { font: 700 24px/1.2 var(--mono); color: var(--text); }
+.hero-pv.neg { color: var(--bad); }
+.hero-pv small { margin-left: 5px; font: 400 12px Arial, sans-serif; color: var(--muted); }
+.hero-note { color: var(--muted); font-size: 11px; }
+.hero-note b { color: var(--text-2); font: 400 11px var(--mono); }
+.hero-note b.neg { color: var(--bad); }
 .mix { display: flex; gap: 2px; height: 12px; border-radius: 3px; overflow: hidden; }
 .mix i { display: block; height: 100%; min-width: 3px; }
 .mix-keys { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 12px; }

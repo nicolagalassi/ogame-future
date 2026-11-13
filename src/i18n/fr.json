@@ -771,5 +771,9 @@
   "tech.labShort": "Réseau {total} · {n} labos",
   "tech.labNet": "Laboratoires sur cette recherche : {total} = ici {here} + {linked} (Réseau de recherche intergalactique niv. {irn})",
   "tech.labNeed": "comptent les labos dès le niv. {need}",
-  "tech.labHereShort": "le labo de cette planète est sous le niv. {need} : impossible de la lancer ici"
+  "tech.labHereShort": "le labo de cette planète est sous le niv. {need} : impossible de la lancer ici",
+  "exp.heroRes": "Ressources",
+  "exp.heroFleet": "Flotte",
+  "exp.heroFound": "trouvés",
+  "exp.heroLostShort": "perdus"
 }

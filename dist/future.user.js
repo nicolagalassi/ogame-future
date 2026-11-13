@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.62
+// @version      0.3.63
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1279,7 +1279,11 @@
     "tech.labShort": "Rete {total} \xB7 {n} lab",
     "tech.labNet": "Laboratori al lavoro su questa ricerca: {total} = qui {here} + {linked} (Rete di ricerca intergalattica liv. {irn})",
     "tech.labNeed": "contano i laboratori dal liv. {need}",
-    "tech.labHereShort": "il laboratorio di questo pianeta \xE8 sotto il liv. {need}: qui non si pu\xF2 avviare"
+    "tech.labHereShort": "il laboratorio di questo pianeta \xE8 sotto il liv. {need}: qui non si pu\xF2 avviare",
+    "exp.heroRes": "Risorse",
+    "exp.heroFleet": "Flotta",
+    "exp.heroFound": "trovate",
+    "exp.heroLostShort": "perse"
   };
 
   // src/i18n/en.json
@@ -2056,7 +2060,11 @@
     "tech.labShort": "Network {total} \xB7 {n} labs",
     "tech.labNet": "Labs working on this research: {total} = here {here} + {linked} (Intergalactic Research Network level {irn})",
     "tech.labNeed": "labs from level {need} count",
-    "tech.labHereShort": "this planet's lab is below level {need}: it cannot start here"
+    "tech.labHereShort": "this planet's lab is below level {need}: it cannot start here",
+    "exp.heroRes": "Resources",
+    "exp.heroFleet": "Fleet",
+    "exp.heroFound": "found",
+    "exp.heroLostShort": "lost"
   };
 
   // src/i18n/fr.json
@@ -2833,7 +2841,11 @@
     "tech.labShort": "R\xE9seau {total} \xB7 {n} labos",
     "tech.labNet": "Laboratoires sur cette recherche : {total} = ici {here} + {linked} (R\xE9seau de recherche intergalactique niv. {irn})",
     "tech.labNeed": "comptent les labos d\xE8s le niv. {need}",
-    "tech.labHereShort": "le labo de cette plan\xE8te est sous le niv. {need} : impossible de la lancer ici"
+    "tech.labHereShort": "le labo de cette plan\xE8te est sous le niv. {need} : impossible de la lancer ici",
+    "exp.heroRes": "Ressources",
+    "exp.heroFleet": "Flotte",
+    "exp.heroFound": "trouv\xE9s",
+    "exp.heroLostShort": "perdus"
   };
 
   // src/i18n/de.json
@@ -3610,7 +3622,11 @@
     "tech.labShort": "Netz {total} \xB7 {n} Labore",
     "tech.labNet": "Labore an dieser Forschung: {total} = hier {here} + {linked} (Intergalaktisches Forschungsnetzwerk Stufe {irn})",
     "tech.labNeed": "es z\xE4hlen Labore ab Stufe {need}",
-    "tech.labHereShort": "das Labor dieses Planeten ist unter Stufe {need}: hier nicht startbar"
+    "tech.labHereShort": "das Labor dieses Planeten ist unter Stufe {need}: hier nicht startbar",
+    "exp.heroRes": "Ressourcen",
+    "exp.heroFleet": "Flotte",
+    "exp.heroFound": "gefunden",
+    "exp.heroLostShort": "verloren"
   };
 
   // src/core/i18n.ts
@@ -6612,6 +6628,15 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
 .hero-sub { margin: 0 0 3px; color: var(--muted); font-size: 12px; }
 .hero-sub b { color: var(--text-2); font: 400 12px var(--mono); }
 .hero-sub b.neg { color: var(--bad); }
+/* Total, then its two parts: resources and fleet. */
+.hero-top { align-items: flex-start; }
+.hero-part { display: flex; flex-direction: column; gap: 4px; padding-left: 20px; border-left: 1px solid var(--line); }
+.hero-pv { font: 700 24px/1.2 var(--mono); color: var(--text); }
+.hero-pv.neg { color: var(--bad); }
+.hero-pv small { margin-left: 5px; font: 400 12px Arial, sans-serif; color: var(--muted); }
+.hero-note { color: var(--muted); font-size: 11px; }
+.hero-note b { color: var(--text-2); font: 400 11px var(--mono); }
+.hero-note b.neg { color: var(--bad); }
 .mix { display: flex; gap: 2px; height: 12px; border-radius: 3px; overflow: hidden; }
 .mix i { display: block; height: 100%; min-width: 3px; }
 .mix-keys { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 12px; }
@@ -13854,8 +13879,21 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         h5("b", "", s.count ? fmt(s.netMsu / s.count) : "\u2014"),
         ` ${t("exp.heroAvg")}`
       );
-      if (msu(s.lostValue)) sub.append(" \xB7 ", `${t("exp.heroLost")} `, h5("b", "neg", `\u2212${fmt(msu(s.lostValue))}`));
-      top.append(net, sub);
+      net.append(sub);
+      const part = (label2, value, note) => {
+        const p = h5("div", "hero-part");
+        const v = h5("b", `hero-pv${value < 0 ? " neg" : ""}`, sign(value));
+        v.append(h5("small", "", "MSU"));
+        p.append(h5("span", "hero-k", label2), v);
+        if (note) p.append(note);
+        return p;
+      };
+      const resMsu = msu(s.res);
+      const fleetMsu = msu(s.shipsValue) - msu(s.lostValue);
+      const lostNote = h5("span", "hero-note");
+      lostNote.append(`${t("exp.heroFound")} `, h5("b", "", fmt(msu(s.shipsValue))));
+      if (msu(s.lostValue)) lostNote.append(` \xB7 ${t("exp.heroLostShort")} `, h5("b", "neg", `\u2212${fmt(msu(s.lostValue))}`));
+      top.append(net, part(t("exp.heroRes"), resMsu), part(t("exp.heroFleet"), fleetMsu, lostNote));
       const mix = valueMix(s);
       const mixTotal = mix.metal + mix.crystal + mix.deuterium + mix.ships;
       const bar = h5("div", "mix");

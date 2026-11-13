@@ -771,5 +771,9 @@
   "tech.labShort": "Netz {total} · {n} Labore",
   "tech.labNet": "Labore an dieser Forschung: {total} = hier {here} + {linked} (Intergalaktisches Forschungsnetzwerk Stufe {irn})",
   "tech.labNeed": "es zählen Labore ab Stufe {need}",
-  "tech.labHereShort": "das Labor dieses Planeten ist unter Stufe {need}: hier nicht startbar"
+  "tech.labHereShort": "das Labor dieses Planeten ist unter Stufe {need}: hier nicht startbar",
+  "exp.heroRes": "Ressourcen",
+  "exp.heroFleet": "Flotte",
+  "exp.heroFound": "gefunden",
+  "exp.heroLostShort": "verloren"
 }
