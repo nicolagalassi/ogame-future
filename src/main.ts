@@ -30,6 +30,9 @@ import { TECH_NAMES_KEY, learnTechNames, type TechNames } from './data/tech-name
 import { readTechList } from './data/tech-details';
 import { LF_LOCKED_KEY, LF_SLOTS_KEY, readLfLocked, readLfSlots, rememberLfSlots, type LfLocked, type LfSlots } from './data/lf-slots';
 import { LF_LEVELS_KEY, readLfLevels, type LfLevels } from './data/lf-production';
+
+/** Planet id → technology id → level last seen on the game's page (in construction counted). */
+const SEEN_LEVELS_KEY = 'tech.seen';
 import { isFleetDispatch } from './data/fleet-page';
 import { universeRanks } from './data/universe-ranks';
 import { renderFleetTools } from './modules/fleet';
@@ -134,6 +137,14 @@ async function bootstrap(): Promise<void> {
   const seenSlots = readLfSlots(document, techList);
   if (seenSlots && bodyId && rememberLfSlots(lfSlots, bodyId, seenSlots)) store.set(LF_SLOTS_KEY, lfSlots);
   // How much each species' level adds to its technologies, from the lifeform settings page.
+  // Levels on the technology page opened (built or in construction): the investments tab strikes what is done.
+  if (bodyId && techList.length) {
+    const seen = store.get<Record<string, Record<string, number>>>(SEEN_LEVELS_KEY, {});
+    const mine = { ...seen[String(bodyId)] };
+    let changed = false;
+    for (const e of techList) if (mine[String(e.id)] !== e.level) { mine[String(e.id)] = e.level; changed = true; }
+    if (changed) store.set(SEEN_LEVELS_KEY, { ...seen, [String(bodyId)]: mine });
+  }
   // Lifeform buildings / research locked by their requirements on this planet, from the same pages.
   const seenLocked = readLfLocked(document);
   if (seenLocked && bodyId) {
@@ -295,6 +306,7 @@ async function bootstrap(): Promise<void> {
           lfSlots,
           lfLevels: store.get<LfLevels | null>(LF_LEVELS_KEY, null),
           lfLocked: store.get<LfLocked>(LF_LOCKED_KEY, {}),
+          seenLevels: store.get<Record<string, Record<string, number>>>(SEEN_LEVELS_KEY, {}),
           icons: store.get<Record<string, TechIcon>>(TECH_ICONS_KEY, {}),
           store,
           now: Date.now(),
