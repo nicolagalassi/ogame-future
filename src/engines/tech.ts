@@ -164,3 +164,24 @@ export function isoDurationMs(value: string): number | null {
   const [w = 0, d = 0, h = 0, min = 0, s = 0] = m.slice(1).map((x) => Number(x ?? 0));
   return ((((w * 7 + d) * 24 + h) * 60 + min) * 60 + s) * 1000;
 }
+
+/* ------------------------------------------------------------------ */
+/* Intergalactic Research Network                                       */
+/* ------------------------------------------------------------------ */
+
+export const LAB = 31;
+export const IRN = 123;
+
+/** Research lab level each research needs (the game's requirements); a lab below it does not join the network. */
+export const LAB_NEEDED: Record<number, number> = {
+  106: 3, 108: 1, 109: 4, 110: 6, 111: 2, 113: 1, 114: 7, 115: 1, 117: 2, 118: 7, 120: 1, 121: 4, 122: 4, 123: 10, 124: 3, 199: 12,
+};
+
+/**
+ * Lab levels that work on a research started here: this planet's lab plus, through the network, the
+ * best labs of up to `irn` other planets, each only if it reaches the level the research needs.
+ */
+export function researchNetwork(here: number, others: number[], irn: number, need = 1): { total: number; linked: number[]; hereOk: boolean } {
+  const linked = others.filter((l) => l >= need && l > 0).sort((a, b) => b - a).slice(0, Math.max(0, irn));
+  return { total: here + linked.reduce((a, b) => a + b, 0), linked, hereOk: here >= need };
+}

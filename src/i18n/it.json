@@ -767,5 +767,9 @@
   "settings.expStyleHint": "Con un altro tool che decora i messaggi (OGame Tracker, OGLight, …) Future si fa da parte e registra soltanto, come OGLight. Il diario registra sempre.",
   "settings.expStyle.auto": "Automatico",
   "settings.expStyle.always": "Sempre Future",
-  "settings.expStyle.never": "Solo registra"
+  "settings.expStyle.never": "Solo registra",
+  "tech.labShort": "Rete {total} · {n} lab",
+  "tech.labNet": "Laboratori al lavoro su questa ricerca: {total} = qui {here} + {linked} (Rete di ricerca intergalattica liv. {irn})",
+  "tech.labNeed": "contano i laboratori dal liv. {need}",
+  "tech.labHereShort": "il laboratorio di questo pianeta è sotto il liv. {need}: qui non si può avviare"
 }

@@ -767,5 +767,9 @@
   "settings.expStyleHint": "Schmückt ein anderes Tool die Berichte (OGame Tracker, OGLight, …), tritt Future zurück und zeichnet nur auf, wie OGLight. Das Journal zeichnet immer auf.",
   "settings.expStyle.auto": "Automatisch",
   "settings.expStyle.always": "Immer Future",
-  "settings.expStyle.never": "Nur aufzeichnen"
+  "settings.expStyle.never": "Nur aufzeichnen",
+  "tech.labShort": "Netz {total} · {n} Labore",
+  "tech.labNet": "Labore an dieser Forschung: {total} = hier {here} + {linked} (Intergalaktisches Forschungsnetzwerk Stufe {irn})",
+  "tech.labNeed": "es zählen Labore ab Stufe {need}",
+  "tech.labHereShort": "das Labor dieses Planeten ist unter Stufe {need}: hier nicht startbar"
 }
