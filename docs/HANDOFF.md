@@ -188,6 +188,10 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     **Causa vera (0.3.66)**: le 4 spedizioni in più erano report **condivisi in alleanza** (Comunicazione →
     Condivisi, `data-subtab-id="11"`), non del giocatore. Su quella scheda nessun report entra nel diario
     (spedizioni, scoperte, detriti, combattimenti) e quelli già salvati con lo stesso id vengono tolti.
+    **0.3.67, markup vero (s269-it)**: Comunicazione ha le schede 10 Circolari, 14 Informazioni, 12 combattimenti
+    condivisi, 11 spionaggi condivisi, **13 spedizioni condivise**; ogni report condiviso ha in `.msgHead
+    .delActions` «Condiviso da <span class="… player">Nome</span>». Si riconosce da quello (`sharedBy`) o dalle
+    schede 11/12/13.
 14. **Grafica** (2026-11-06): tutte le finestre (`WINDOW_SHEET`) riprendono il menu pianeti: riquadri #111B2A
     con bordo #1F2C40, schede a segmenti, numeri monospazio, ciano per la selezione. Pila z-index sopra il
     footer del gioco (999999): barra laterale 1000000, finestre 1000001, popup 1000002-3.
