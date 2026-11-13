@@ -189,7 +189,7 @@
   "tech.added": "Ajouté ✓",
   "plan.title": "Plan de construction",
   "plan.titleCount": "Plan de construction ({n})",
-  "plan.sub": "Par planète : un bouton y apporte tout ce qui manque. En rouge ce qui manque sur cette planète.",
+  "plan.sub": "Un bouton par planète y apporte ce qui manque. Les constructions en file gardent leurs ressources de côté.",
   "plan.moonOf": "Lune de {name}",
   "plan.clear": "Vider",
   "plan.colItem": "Quoi",
@@ -751,5 +751,14 @@
   "marks.st.outlaw": "hors-la-loi",
   "marks.st.admin": "administrateur",
   "marks.lastCheck": "Dernier contrôle en galaxie : {time}",
-  "marks.neverChecked": "Jamais vu en galaxie"
+  "marks.neverChecked": "Jamais vu en galaxie",
+  "plan.sec.missing": "À approvisionner",
+  "plan.sec.arriving": "En route",
+  "plan.sec.unknown": "Ressources inconnues",
+  "plan.sec.ready": "Prêts",
+  "plan.colMissing": "manque (métal · cristal · deutérium)",
+  "plan.colCost": "coût",
+  "plan.queued": "en file",
+  "plan.queuedHint": "En file d'attente dans le jeu, pas encore payé : ses ressources sont mises de côté et ne comptent ni pour le plan ni pour les transports",
+  "plan.unhold": "Ne plus mettre de côté (déjà lancé ou annulé)"
 }

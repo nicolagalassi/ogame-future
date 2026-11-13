@@ -191,17 +191,22 @@ export function prepareFleetsave(fd: FleetDispatcher, doc: Document, base: Fleet
 }
 
 /**
- * Planner delivery: brings what is still missing to the planned body, from this one. Ships
- * and resources respect the ships and resources rules; the main cargo ship goes first, the second covers the rest.
+ * Planner delivery: brings what is still missing to the planned body, from this one. The ships
+ * reserve does not apply (Nicola: a transport for the plan may use every cargo ship); the resources
+ * rule does, and so do the resources held for this body's own levels queued in the game (`hold`).
+ * The main cargo ship goes first, the second covers the rest.
  */
 export function prepareDelivery(
   fd: FleetDispatcher,
   doc: Document,
-  profile: FleetProfile,
+  base: FleetProfile,
   settings: FleetSettings,
   target: Target,
   need: Resources,
+  hold: Resources = { metal: 0, crystal: 0, deuterium: 0 },
 ): PrepareResult {
+  const r = base.reserve.resources;
+  const profile: FleetProfile = { ...base, reserve: { ships: {}, resources: { ...r, metal: r.metal + hold.metal, crystal: r.crystal + hold.crystal, deuterium: r.deuterium + hold.deuterium } } };
   const free = deliveryLoad(onPlanet(fd), profile.reserve, 0, Number.MAX_SAFE_INTEGER, need);
   const amount = free.metal + free.crystal + free.deuterium;
   if (amount <= 0) return { ok: false, reason: 'fleet.err.noResources', ships: 0, cargo: 0 };

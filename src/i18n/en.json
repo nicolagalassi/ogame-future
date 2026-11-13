@@ -189,7 +189,7 @@
   "tech.added": "Added ✓",
   "plan.title": "Construction plan",
   "plan.titleCount": "Construction plan ({n})",
-  "plan.sub": "By planet: one button brings there everything it lacks. Red is what that planet lacks.",
+  "plan.sub": "One button per planet brings what it lacks. Builds queued in the game keep their resources aside.",
   "plan.moonOf": "Moon of {name}",
   "plan.clear": "Clear",
   "plan.colItem": "What",
@@ -751,5 +751,14 @@
   "marks.st.outlaw": "outlaw",
   "marks.st.admin": "administrator",
   "marks.lastCheck": "Last checked in the galaxy: {time}",
-  "marks.neverChecked": "Never seen in the galaxy"
+  "marks.neverChecked": "Never seen in the galaxy",
+  "plan.sec.missing": "To supply",
+  "plan.sec.arriving": "On the way",
+  "plan.sec.unknown": "Resources unknown",
+  "plan.sec.ready": "Ready",
+  "plan.colMissing": "missing (metal · crystal · deuterium)",
+  "plan.colCost": "cost",
+  "plan.queued": "queued",
+  "plan.queuedHint": "Queued in the game, not paid yet: its resources are held back and count neither for the plan nor for transports",
+  "plan.unhold": "Stop holding back (already started or cancelled)"
 }

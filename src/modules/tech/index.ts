@@ -28,7 +28,8 @@ import {
   type Cost,
 } from '../../engines/tech';
 import { extraConsumption, perSatellite, satellitesFor, type SatelliteBook } from '../../engines/energy';
-import { addToPlan, inPlan, PLAN_KEY, prune, removeFromPlan, startBuild, type Plan, type PlanItem } from '../../engines/planner';
+import { addToPlan, holdQueued, inPlan, PLAN_KEY, prune, QUEUED_KEY, queuedLevel, queueKindOf, releaseQueued, removeFromPlan, startBuild, type Plan, type PlanItem, type Queued, type QueueKind } from '../../engines/planner';
+import { QUEUES_KEY, type QueueSnapshot } from '../../data/queues';
 import { TECH_CSS } from './style';
 
 export type T = (key: string, vars?: Record<string, string | number>) => string;
@@ -492,16 +493,35 @@ function injectStyle(doc: Document): void {
 }
 
 /**
+ * Is a build of this kind running on this body (research: anywhere)? From the page (the game marks
+ * the technology being built) or the queues read at page load. No network.
+ */
+function queueBusy(doc: Document, store: TechOptions['store'], bodyId: number, kind: QueueKind, now: number): boolean {
+  if (doc.querySelector('#technologies .technology[data-status="active"]')) return true;
+  const snap = store.get<QueueSnapshot | null>(QUEUES_KEY, null);
+  if (!snap) return false;
+  const lists = kind === 'research' ? Object.values(snap.bodies) : [snap.bodies[String(bodyId)] ?? []];
+  return lists.flat().some((q) => q.kind === kind && q.end > now);
+}
+
+/**
  * On a technology page: drops the plan's levels already reached, then adds the panel every
  * time the game opens a details panel.
  */
 export function watchTechPages(o: TechOptions): void {
   const { doc } = o;
   if (!doc.querySelector('#technologies')) return;
-  const levels = levelsOf(readTechList(doc));
+  const list = readTechList(doc);
+  const levels = levelsOf(list);
   const pruned = prune(loadPlan(o.store), o.bodyId, levels);
   if (pruned.changed) {
     o.store.set(PLAN_KEY, pruned.plan);
+    o.onPlanChange?.();
+  }
+  // Queued levels already built (the level the page shows as done, not the target) stop being held.
+  const released = releaseQueued(o.store.get<Queued>(QUEUED_KEY, {}), { built: { bodyId: o.bodyId, levels: Object.fromEntries(list.map((e) => [e.id, e.built])) } });
+  if (released.changed) {
+    o.store.set(QUEUED_KEY, released.queued);
     o.onPlanChange?.();
   }
   injectStyle(doc);
@@ -518,13 +538,24 @@ export function watchTechPages(o: TechOptions): void {
       if (!id) return;
       const entry = readTechList(doc).find((x) => x.id === id);
       const amountInput = doc.querySelector<HTMLInputElement>('#technologydetails #build_amount');
+      const queued = o.store.get<Queued>(QUEUED_KEY, {});
+      const kind = isLevelled(id) ? queueKindOf(id) : null;
+      // Levels already waiting in the game's queue come before this one.
+      const level = Math.max(entry?.level ?? 0, queuedLevel(queued, o.bodyId, id)) + 1;
       const change = isLevelled(id)
-        ? startBuild(loadPlan(o.store), o.bodyId, id, { level: (entry?.level ?? 0) + 1 })
+        ? startBuild(loadPlan(o.store), o.bodyId, id, { level })
         : startBuild(loadPlan(o.store), o.bodyId, id, { amount: Math.max(1, Math.floor(Number(amountInput?.value) || 1)) });
-      if (change.changed) {
-        o.store.set(PLAN_KEY, change.plan);
-        o.onPlanChange?.();
+      if (change.changed) o.store.set(PLAN_KEY, change.plan);
+      // Something of its kind is running already: the game queues this level and takes its
+      // resources only when it starts. Until then they are held back here (plan and transports).
+      if (kind && queueBusy(doc, o.store, o.bodyId, kind, Date.now())) {
+        const planned = change.removed.find((x) => x.level === level);
+        const details = readTechDetails(doc);
+        const discount = details && details.id === id ? startLevel(details, entry?.level, entry?.built).discount : 0;
+        const item = { id, level, kind, name: planned?.name ?? entry?.name ?? String(id), cost: planned?.cost ?? levelCost(id, level, discount), added: planned?.added ?? Date.now(), queuedAt: Date.now() };
+        o.store.set(QUEUED_KEY, holdQueued(queued, o.bodyId, item));
       }
+      if (change.changed || kind) o.onPlanChange?.();
     },
     true,
   );
