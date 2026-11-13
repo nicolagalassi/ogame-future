@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.72
+// @version      0.3.73
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -584,6 +584,11 @@
     "dash.openLfSettings": "Impostazioni forme di vita",
     "dash.needBuildings": "Edifici FV a livello 0 da controllare (requisiti) su {count} pianeti, apri la pagina di:",
     "dash.needSlots": "Ricerche FV attive da confermare su {count} pianeti, apri la pagina di:",
+    "dash.tab.investments": "Investimenti",
+    "dash.movesOpen": "Apri la scheda Investimenti",
+    "dash.stepDone": "fatto",
+    "dash.planetsCount": "{count} pianeti",
+    "dash.doneCount": "{done} su {count} fatti",
     "dash.movesNone": "Servono i livelli delle miniere: premi Sincronizza.",
     "dash.movesHint": "Come gli ammortamenti di InfoCompte: miniere, plasma e nuova colonia (astrofisica + attrezzatura media di un pianeta) per giorni di ritorno ai tassi scelti; ogni passo conta i precedenti. Non conta energia n\xE9 sconti delle forme di vita.",
     "dash.colQueue": "In corso",
@@ -1375,6 +1380,11 @@
     "dash.openLfSettings": "Lifeform settings",
     "dash.needBuildings": "Lifeform buildings at level 0 to check (requirements) on {count} planets, open the page of:",
     "dash.needSlots": "Active lifeform research to confirm on {count} planets, open the page of:",
+    "dash.tab.investments": "Investments",
+    "dash.movesOpen": "Open the Investments tab",
+    "dash.stepDone": "done",
+    "dash.planetsCount": "{count} planets",
+    "dash.doneCount": "{done} of {count} done",
     "dash.movesNone": "Mine levels needed: press Sync.",
     "dash.movesHint": "As InfoCompte's amortizations: mines, plasma and a new colony (astrophysics + a planet's average equipment) by payback days at your trade rates; each step counts the ones before. Energy and lifeform discounts not counted.",
     "dash.colQueue": "Running",
@@ -2166,6 +2176,11 @@
     "dash.openLfSettings": "Options des formes de vie",
     "dash.needBuildings": "B\xE2timents FDV au niveau 0 \xE0 v\xE9rifier (pr\xE9requis) sur {count} plan\xE8tes, ouvrez la page de :",
     "dash.needSlots": "Recherches FDV actives \xE0 confirmer sur {count} plan\xE8tes, ouvrez la page de :",
+    "dash.tab.investments": "Investissements",
+    "dash.movesOpen": "Ouvrir l'onglet Investissements",
+    "dash.stepDone": "fait",
+    "dash.planetsCount": "{count} plan\xE8tes",
+    "dash.doneCount": "{done} sur {count} faits",
     "dash.movesNone": "Niveaux des mines requis : Synchroniser.",
     "dash.movesHint": "Comme les amortissements d'InfoCompte : mines, plasma et nouvelle colonie (astrophysique + \xE9quipement moyen d'une plan\xE8te) par jours d'amortissement \xE0 vos taux ; chaque \xE9tape compte les pr\xE9c\xE9dentes. Sans \xE9nergie ni r\xE9ductions formes de vie.",
     "dash.colQueue": "En cours",
@@ -2957,6 +2972,11 @@
     "dash.openLfSettings": "Lebensform-Einstellungen",
     "dash.needBuildings": "Lebensform-Geb\xE4ude auf Stufe 0 zu pr\xFCfen (Voraussetzungen) auf {count} Planeten, \xF6ffne die Seite von:",
     "dash.needSlots": "Aktive Lebensform-Forschung auf {count} Planeten zu best\xE4tigen, \xF6ffne die Seite von:",
+    "dash.tab.investments": "Investitionen",
+    "dash.movesOpen": "Reiter Investitionen \xF6ffnen",
+    "dash.stepDone": "erledigt",
+    "dash.planetsCount": "{count} Planeten",
+    "dash.doneCount": "{done} von {count} erledigt",
     "dash.movesNone": "Minenstufen n\xF6tig: Synchronisieren.",
     "dash.movesHint": "Wie die Amortisation von InfoCompte: Minen, Plasma und neue Kolonie (Astrophysik + durchschnittliche Ausstattung eines Planeten) nach Amortisationstagen zu deinen Kursen; jeder Schritt z\xE4hlt die vorherigen. Ohne Energie und Lebensform-Rabatte.",
     "dash.colQueue": "L\xE4uft",
@@ -9973,15 +9993,17 @@ td.guess { font-style: italic; opacity: 0.7; }
 .move .pic { border-radius: 5px; }
 .head-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
 .head-toggle:hover, .head-toggle:focus-visible { color: #4FD1E8; }
-.head-toggle svg { transition: transform 0.15s; }
-.head-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
-.moves-open { grid-column: 1 / -1; order: 3; }
 .needs { margin: 0 0 8px; padding: 8px 10px; border: 1px solid #1F2C40; border-radius: 7px; background: #0D1522; color: #B4C2D3; font-size: 12px; }
 .needs p { margin: 4px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .needs .chip { display: inline-flex; align-items: center; height: 22px; text-decoration: none; }
 .move-text .guess { color: #E3BB28; font-style: normal; }
-.moves-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
-.moves-list .move:nth-child(2) { border-top: 0; }
+.move-text .ok { color: #38C56E; font-style: normal; }
+.move.done { opacity: 0.55; }
+.pls { display: flex; flex-wrap: wrap; gap: 4px; margin: 3px 0 2px; }
+.pl { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border: 1px solid #1F2C40; border-radius: 5px; background: #0A111C; color: #B4C2D3; font-size: 11px; text-decoration: none; white-space: nowrap; }
+.pl:hover, .pl:focus-visible { border-color: #4FD1E8; color: #E6EDF5; }
+.pl.guess { border-color: #5C4A12; }
+.pl.done { color: #5F7189; text-decoration: line-through; border-style: dashed; }
 
 /* Planets | moons switch on the ships and defence pages. */
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
@@ -10025,9 +10047,7 @@ table.scrap .unit-label[aria-pressed="true"] { border-color: var(--accent); back
 @media (max-width: 900px) {
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cols { grid-template-columns: 1fr; }
-  .moves-list { grid-template-columns: 1fr; }
-  .moves-list .move:nth-child(2) { border-top: 1px solid #1A2638; }
-}
+    }
 .charts { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 12px; }
 .chart { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
 .chart figcaption { margin-bottom: 6px; color: var(--text); font-weight: 700; font-size: 13px; }
@@ -10049,12 +10069,11 @@ table.queues td.acts { width: 1%; text-align: right; }
 `;
 
   // src/modules/dashboard/index.ts
-  var TABS = ["summary", "history", "mines", "facilities", "lifeforms", "ships", "defence", "scrap"];
+  var TABS = ["summary", "investments", "history", "mines", "facilities", "lifeforms", "ships", "defence", "scrap"];
   var HOST_ID = "fut-dashboard";
   var tab = "summary";
   var scrapBody = null;
   var scrapRate = 35;
-  var movesOpen = false;
   var unitScope = "planet";
   var keyHandler2 = null;
   function h3(tag, className = "", text) {
@@ -10203,6 +10222,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const body = h3("div", "tab-body");
     if (!o.snapshot) body.append(h3("p", "empty", t("dash.noData")));
     else if (tab === "summary") summaryTab(body, ctx);
+    else if (tab === "investments") investmentsTab(body, ctx);
     else if (tab === "history") historyTab(body, ctx);
     else if (tab === "mines") minesTab(body, ctx);
     else if (tab === "facilities") facilitiesTab(body, ctx);
@@ -10553,53 +10573,94 @@ table.queues td.acts { width: 1%; text-align: right; }
     list(slots, "dash.needSlots", "lfresearch");
     return box;
   }
-  function stepLine(ctx, m, i, numbered = false) {
+  function groupSteps(steps) {
+    const out = [];
+    for (const s of steps) {
+      const last2 = out[out.length - 1];
+      if (last2 && s.planetId && last2.first.planetId && last2.first.id === s.id && last2.first.from === s.from && last2.first.to === s.to) last2.steps.push(s);
+      else out.push({ first: s, steps: [s] });
+    }
+    return out;
+  }
+  function stepDone(ctx, s) {
+    const { o } = ctx;
+    if (!s.planetId) return false;
+    if ((o.seenLevels?.[String(s.planetId)]?.[String(s.id)] ?? 0) >= s.to) return true;
+    const name = ctx.name(s.id);
+    return activeItems(o.queues?.bodies[String(s.planetId)], o.now).some((q) => q.name === name && q.level >= s.to);
+  }
+  function stepPage(s) {
+    const component = s.kind === "mine" ? "supplies" : s.kind === "lfBuilding" ? "lfbuildings" : s.kind === "lfResearch" ? "lfresearch" : "research";
+    return `index.php?page=ingame&component=${component}${s.planetId ? `&cp=${s.planetId}` : ""}`;
+  }
+  function daysText(ctx, d) {
     const { t, locale } = ctx.o;
-    const id = m.id;
+    return d < 1 ? `<1 ${t("dash.daysShort")}` : `${d.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${t("dash.daysShort")}`;
+  }
+  function groupLine(ctx, g, i, numbered) {
+    const { t } = ctx.o;
+    const m = g.first;
     const line = h3("div", "move");
     if (numbered) line.append(h3("span", "n", String(i + 1)));
-    const pic = ctx.pic(id, 28);
+    const pic = ctx.pic(m.id, 28);
     if (pic) line.append(pic);
     else if (!numbered) line.append(h3("span", "n", String(i + 1)));
     const text = h3("div", "move-text");
-    const what = m.kind === "mine" ? t(`mine.${m.mine}`) : ctx.name(id);
+    const what = m.kind === "mine" ? t(`mine.${m.mine}`) : ctx.name(m.id);
     text.append(h3("strong", "", `${what} ${m.from} \u2192 ${m.to}${m.kind === "astro" ? ` \xB7 ${t("dash.newColony")}` : ""}`));
-    const cost = [`${ctx.fmt(m.cost.metal)} M`, `${ctx.fmt(m.cost.crystal)} C`, ...m.cost.deuterium ? [`${ctx.fmt(m.cost.deuterium)} D`] : []].join(" \xB7 ");
-    const place2 = m.planetId ? `${m.name} [${m.coords}]` : t("dash.account");
-    const sub = h3("span", "", `${place2} \xB7 ${cost}`);
-    if (m.guessed) {
-      sub.append(h3("em", "guess", ` \xB7 ${t("dash.lfGuessed")}`));
-      sub.title = t("dash.lfGuessedHint");
+    const total = g.steps.reduce((sum, s) => ({ metal: sum.metal + s.cost.metal, crystal: sum.crystal + s.cost.crystal, deuterium: sum.deuterium + s.cost.deuterium }), { metal: 0, crystal: 0, deuterium: 0 });
+    const cost = [`${ctx.fmt(total.metal)} M`, `${ctx.fmt(total.crystal)} C`, ...total.deuterium ? [`${ctx.fmt(total.deuterium)} D`] : []].join(" \xB7 ");
+    if (m.planetId) {
+      const chips = h3("div", "pls");
+      let done = 0;
+      for (const s of g.steps) {
+        const a = h3("a", "pl", s.name || `[${s.coords}]`);
+        a.setAttribute("href", stepPage(s));
+        a.title = `${s.name} [${s.coords}] \xB7 ${daysText(ctx, s.days)}${s.guessed ? ` \xB7 ${t("dash.lfGuessedHint")}` : ""}`;
+        if (s.guessed) a.classList.add("guess");
+        if (stepDone(ctx, s)) {
+          a.classList.add("done");
+          a.setAttribute("aria-label", `${a.title} \xB7 ${t("dash.stepDone")}`);
+          done++;
+        }
+        chips.append(a);
+      }
+      if (done === g.steps.length) line.classList.add("done");
+      const sub = h3("span", "", g.steps.length > 1 ? `${t("dash.planetsCount", { count: g.steps.length })} \xB7 ${cost}` : cost);
+      if (done) sub.append(h3("em", "ok", ` \xB7 ${t("dash.doneCount", { done, count: g.steps.length })}`));
+      text.append(chips, sub);
+    } else {
+      text.append(h3("span", "", `${t("dash.account")} \xB7 ${cost}`));
     }
-    text.append(sub);
-    line.append(text, h3("span", "roi mono", m.days < 1 ? `<1 ${t("dash.daysShort")}` : `${m.days.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${t("dash.daysShort")}`));
+    const days2 = g.steps.map((s) => s.days);
+    const lo = Math.min(...days2), hi = Math.max(...days2);
+    line.append(text, h3("span", "roi mono", hi - lo >= 0.05 ? `${daysText(ctx, lo)}\u2013${daysText(ctx, hi)}`.replace(` ${t("dash.daysShort")}\u2013`, "\u2013") : daysText(ctx, lo)));
     return line;
   }
   function buildOrderCard(ctx) {
     const { o } = ctx;
     const { t, doc } = o;
-    const s = h3("div", movesOpen ? "card moves-open" : "card");
+    const s = h3("div", "card");
     const head = h3("h3", "");
-    const toggle = h3("button", "head-toggle");
-    toggle.type = "button";
-    toggle.title = t("dash.movesHint");
-    toggle.setAttribute("aria-expanded", String(movesOpen));
-    toggle.append(h3("span", "", t("dash.moves")), icon(doc, "chevron", 14));
-    toggle.addEventListener("click", () => {
-      movesOpen = !movesOpen;
+    const go = h3("button", "head-toggle");
+    go.type = "button";
+    go.title = t("dash.movesOpen");
+    go.append(h3("span", "", t("dash.moves")), icon(doc, "next", 14));
+    go.addEventListener("click", () => {
+      tab = "investments";
       ctx.redraw();
     });
-    head.append(toggle);
+    head.append(go);
     s.append(head);
-    const steps = buildOrder(ctx, movesOpen ? 30 : 5);
-    if (!steps.length) {
-      s.append(h3("p", "hint", t("dash.movesNone")));
-      return s;
-    }
-    if (!movesOpen) {
-      steps.forEach((m, i) => s.append(stepLine(ctx, m, i)));
-      return s;
-    }
+    const groups = groupSteps(buildOrder(ctx, 15)).slice(0, 5);
+    if (!groups.length) s.append(h3("p", "hint", t("dash.movesNone")));
+    groups.forEach((g, i) => s.append(groupLine(ctx, g, i, false)));
+    return s;
+  }
+  function investmentsTab(parent, ctx) {
+    const { o } = ctx;
+    const { t } = o;
+    const s = section(parent, t("dash.moves"), t("dash.movesHint"));
     const bar = h3("div", "scrap-bar");
     const rates = loadRates(o);
     const label = h3("label", "field-label", t("dash.rates"));
@@ -10625,10 +10686,9 @@ table.queues td.acts { width: 1%; text-align: right; }
     s.append(bar);
     const missing2 = missingData(ctx);
     if (missing2) s.append(missing2);
-    const list = h3("div", "moves-list");
-    steps.forEach((m, i) => list.append(stepLine(ctx, m, i, true)));
-    s.append(list);
-    return s;
+    const groups = groupSteps(buildOrder(ctx, 60));
+    if (!groups.length) s.append(h3("p", "hint", t("dash.movesNone")));
+    groups.forEach((g, i) => s.append(groupLine(ctx, g, i, true)));
   }
   function minesTab(parent, ctx) {
     const { t } = ctx.o;
@@ -15091,6 +15151,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   }
 
   // src/main.ts
+  var SEEN_LEVELS_KEY = "tech.seen";
   async function bootstrap() {
     const namespace = serverNamespace(document);
     if (!namespace) return;
@@ -15157,6 +15218,16 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     const lfSlots = store.get(LF_SLOTS_KEY, {});
     const seenSlots = readLfSlots(document, techList);
     if (seenSlots && bodyId && rememberLfSlots(lfSlots, bodyId, seenSlots)) store.set(LF_SLOTS_KEY, lfSlots);
+    if (bodyId && techList.length) {
+      const seen = store.get(SEEN_LEVELS_KEY, {});
+      const mine = { ...seen[String(bodyId)] };
+      let changed = false;
+      for (const e of techList) if (mine[String(e.id)] !== e.level) {
+        mine[String(e.id)] = e.level;
+        changed = true;
+      }
+      if (changed) store.set(SEEN_LEVELS_KEY, { ...seen, [String(bodyId)]: mine });
+    }
     const seenLocked = readLfLocked(document);
     if (seenLocked && bodyId) {
       const locked = store.get(LF_LOCKED_KEY, {});
@@ -15304,6 +15375,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           lfSlots,
           lfLevels: store.get(LF_LEVELS_KEY, null),
           lfLocked: store.get(LF_LOCKED_KEY, {}),
+          seenLevels: store.get(SEEN_LEVELS_KEY, {}),
           icons: store.get(TECH_ICONS_KEY, {}),
           store,
           now: Date.now(),
