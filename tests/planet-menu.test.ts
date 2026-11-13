@@ -51,7 +51,7 @@ describe('renderPlanetMenu', () => {
     visits = markVisited(visits, 2, 50 * 60_000);
     // The snapshot's resourcesAt (sync time) is ignored; body 3 was never opened: 60, as stale.
     renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, visits, settings: { mode: 'side', showTotals: true }, now: 61 * 60_000, locale: 'it', t, onSync: vi.fn(async () => true) });
-    expect([...document.querySelectorAll('.fut-age')].map((b) => b.textContent)).toEqual(['1h', '11', '60']);
+    expect([...document.querySelectorAll('.fut-age')].map((b) => b.textContent)).toEqual(['60', '11', '60']);
   });
 
   it('a redraw (e.g. after adding to the plan) leaves one fleet line per planet, inside the name column', () => {
@@ -233,12 +233,12 @@ describe('width and banner', () => {
 });
 
 describe('data age badge', () => {
-  it('counts minutes, then hours and days, with OGLight colour steps', () => {
+  it('counts minutes up to 60, with OGLight colour steps', () => {
     expect(dataAge(0, 5 * 60_000)).toEqual({ text: '5', cls: 'fut-age-fresh' });
     expect(dataAge(0, 20 * 60_000)).toEqual({ text: '20', cls: 'fut-age-warm' });
     expect(dataAge(0, 45 * 60_000)).toEqual({ text: '45', cls: 'fut-age-old' });
-    expect(dataAge(0, 3 * 3_600_000)).toEqual({ text: '3h', cls: 'fut-age-old' });
-    expect(dataAge(0, 2 * 86_400_000)).toEqual({ text: '2d', cls: 'fut-age-old' });
+    expect(dataAge(0, 3 * 3_600_000)).toEqual({ text: '60', cls: 'fut-age-old' });
+    expect(dataAge(0, 2 * 86_400_000)).toEqual({ text: '60', cls: 'fut-age-old' });
   });
 });
 
