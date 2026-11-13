@@ -151,7 +151,13 @@ export interface AmortInput {
   lfLevels?: LfLevels;
   /** Lifeform technologies locked by their requirements, per planet, from the game's pages. */
   lfLocked?: LfLocked;
+  /** Kinds left out of the list (as InfoCompte's settings): a mine by its resource, or a step kind. */
+  exclude?: InvestKind[];
 }
+
+/** What the list can offer, as InfoCompte's settings: each mine, lifeform buildings and research, plasma, astrophysics. */
+export const INVEST_KINDS = ['metal', 'crystal', 'deuterium', 'lfBuilding', 'lfResearch', 'plasma', 'astro'] as const;
+export type InvestKind = (typeof INVEST_KINDS)[number];
 
 /**
  * Whether a lifeform technology can be raised on this planet: built already (so unlocked), or
@@ -163,7 +169,7 @@ function open(locked: LfLocked, planetId: number, id: number, level: number): bo
   return seen !== undefined && !seen.includes(id);
 }
 
-export function amortizationPlan({ snapshot, planets, speed, rates = DEFAULT_RATES, steps = 20, lfSlots = {}, lfLevels = {}, lfLocked = {} }: AmortInput): AmortStep[] {
+export function amortizationPlan({ snapshot, planets, speed, rates = DEFAULT_RATES, steps = 20, lfSlots = {}, lfLevels = {}, lfLocked = {}, exclude = [] }: AmortInput): AmortStep[] {
   if (!snapshot) return [];
   const byId = new Map(snapshot.bodies.map((b) => [b.id, b]));
   const state: PlanetState[] = [];
@@ -231,6 +237,7 @@ export function amortizationPlan({ snapshot, planets, speed, rates = DEFAULT_RAT
   for (let i = 0; i < steps; i++) {
     let best: AmortStep | null = null;
     const consider = (s: Omit<AmortStep, 'days'>) => {
+      if (exclude.includes(s.kind === 'mine' ? s.mine! : s.kind)) return;
       const d = days(s.cost, s.gain, rates);
       if (Number.isFinite(d) && (!best || d < best.days)) best = { ...s, days: d };
     };

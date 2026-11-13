@@ -124,6 +124,15 @@ describe('amortizations (InfoCompte)', () => {
     expect(plan({ '12205': 10 }, { '2': 0.1 }).gain.metal).toBeCloseTo(plain.gain.metal * 1.1, 3);
   });
 
+  it('leaves out the kinds switched off, as InfoCompte\'s settings', () => {
+    const kinds = (exclude: Parameters<typeof amortizationPlan>[0]['exclude']) =>
+      new Set(amortizationPlan({ snapshot: rocktal({ '12106': 3 }), planets, speed: 1, steps: 30, exclude }).map((s) => (s.kind === 'mine' ? s.mine : s.kind)));
+    expect(kinds([]).has('lfBuilding')).toBe(true);
+    const without = kinds(['lfBuilding', 'lfResearch', 'astro']);
+    expect([...without].some((k) => k === 'lfBuilding' || k === 'lfResearch' || k === 'astro')).toBe(false);
+    expect(without.size).toBeGreaterThan(0);
+  });
+
   it('reads the species bonus on the lifeform settings page', () => {
     history.replaceState(null, '', '/game/index.php?page=ingame&component=lfsettings');
     document.body.innerHTML = `
