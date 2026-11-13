@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.66
+// @version      0.3.67
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -7189,6 +7189,9 @@ td.spark-cell { width: 90px; }
     }
     return false;
   }
+  function sharedBy(msg) {
+    return !!msg.querySelector(":scope .msgHead .delActions .player, :scope .msgHead .delActions [data-playerid]");
+  }
   function quiet(msg) {
     msg.querySelectorAll(":scope .fut-msg").forEach((n) => n.remove());
     msg.classList.remove("fut-msg-folded", "fut-msgrar", "fut-msgrar-0", "fut-msgrar-1");
@@ -7418,6 +7421,7 @@ td.spark-cell { width: 90px; }
     const seen = store.get(FOREIGN_KEY, 0);
     const silentNow = (msg) => style === "never" || style === "auto" && (seen > 0 && now - seen < FOREIGN_MS || foreignTool(msg));
     const sharedTab = !!doc.querySelector('[data-subtab-id="11"].active, [data-subtab-id="11"][aria-selected="true"]');
+    const sharedAny = !!doc.querySelector(["11", "12", "13"].map((n) => `[data-subtab-id="${n}"].active, [data-subtab-id="${n}"][aria-selected="true"]`).join(", "));
     const expeditions = [];
     const spies = [];
     let journal = null;
@@ -7463,7 +7467,7 @@ td.spark-cell { width: 90px; }
         if (fold && (parsed.kind === "expedition" || parsed.kind === "discovery" || parsed.kind === "recycle" || parsed.kind === "transport" || parsed.kind === "deploy" || parsed.kind === "return")) msg.classList.add("fut-msg-folded");
         sync();
       }
-      if (sharedTab) {
+      if (sharedAny || sharedBy(msg)) {
         journal ?? (journal = store.get(JOURNAL_KEY, {}));
         if (journal[parsed.id]) {
           const { [parsed.id]: _gone, ...rest } = journal;
