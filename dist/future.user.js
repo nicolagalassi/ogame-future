@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.59
+// @version      0.3.60
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -949,7 +949,9 @@
     "plan.colCost": "costo",
     "plan.queued": "in coda",
     "plan.queuedHint": "In coda nel gioco, non ancora pagato: le sue risorse restano da parte e non contano per il piano n\xE9 per i trasporti",
-    "plan.unhold": "Non tenere pi\xF9 da parte (gi\xE0 partito o annullato)"
+    "plan.unhold": "Non tenere pi\xF9 da parte (gi\xE0 partito o annullato)",
+    "fleet.mainShipIs": "Nave principale dei trasporti automatici",
+    "fleet.mainShipPick": "Usa questa nave per i trasporti automatici (luna, raccolta, piano)"
   };
 
   // src/i18n/en.json
@@ -1715,7 +1717,9 @@
     "plan.colCost": "cost",
     "plan.queued": "queued",
     "plan.queuedHint": "Queued in the game, not paid yet: its resources are held back and count neither for the plan nor for transports",
-    "plan.unhold": "Stop holding back (already started or cancelled)"
+    "plan.unhold": "Stop holding back (already started or cancelled)",
+    "fleet.mainShipIs": "Main ship for automatic transports",
+    "fleet.mainShipPick": "Use this ship for automatic transports (moon, collection, plan)"
   };
 
   // src/i18n/fr.json
@@ -2481,7 +2485,9 @@
     "plan.colCost": "co\xFBt",
     "plan.queued": "en file",
     "plan.queuedHint": "En file d'attente dans le jeu, pas encore pay\xE9 : ses ressources sont mises de c\xF4t\xE9 et ne comptent ni pour le plan ni pour les transports",
-    "plan.unhold": "Ne plus mettre de c\xF4t\xE9 (d\xE9j\xE0 lanc\xE9 ou annul\xE9)"
+    "plan.unhold": "Ne plus mettre de c\xF4t\xE9 (d\xE9j\xE0 lanc\xE9 ou annul\xE9)",
+    "fleet.mainShipIs": "Vaisseau principal des transports automatiques",
+    "fleet.mainShipPick": "Utiliser ce vaisseau pour les transports automatiques (lune, collecte, plan)"
   };
 
   // src/i18n/de.json
@@ -3247,7 +3253,9 @@
     "plan.colCost": "Kosten",
     "plan.queued": "in Warteschlange",
     "plan.queuedHint": "Im Spiel in der Warteschlange, noch nicht bezahlt: seine Ressourcen werden zur\xFCckgehalten und z\xE4hlen weder f\xFCr den Plan noch f\xFCr Transporte",
-    "plan.unhold": "Nicht mehr zur\xFCckhalten (schon gestartet oder abgebrochen)"
+    "plan.unhold": "Nicht mehr zur\xFCckhalten (schon gestartet oder abgebrochen)",
+    "fleet.mainShipIs": "Hauptschiff f\xFCr automatische Transporte",
+    "fleet.mainShipPick": "Dieses Schiff f\xFCr automatische Transporte nutzen (Mond, Sammeln, Plan)"
   };
 
   // src/core/i18n.ts
@@ -10930,6 +10938,11 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fsecond .fut-fact { background: none; border-color: var(--line); color: var(--mute); }
 .fut-fsecond .fut-fact:hover { background: var(--tile); border-color: #47607D; color: var(--ico-hi); }
 .fut-fskip[hidden] { display: none; }
+/* Main cargo ship, picked on the ship itself (top right; the game keeps the top left). */
+#fleet1 #technologies li[data-technology] { position: relative; }
+.fut-mainship { position: absolute; top: 2px; right: 2px; z-index: 2; width: 20px; height: 20px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #1F2C40; border-radius: 5px; background: rgba(13, 21, 34, 0.85); color: #8A9BB4; cursor: pointer; opacity: 0.75; }
+.fut-mainship:hover { opacity: 1; color: #F1F4F7; border-color: #6FB6C8; }
+.fut-mainship.on { opacity: 1; color: #0D1522; background: #6FB6C8; border-color: #6FB6C8; cursor: default; }
 /* "Opens a list" mark, in the corner where the others have their key. */
 .fut-fact .more-mark { position: absolute; right: 3px; bottom: 3px; width: 0; height: 0; border-left: 5px solid transparent; border-bottom: 5px solid currentColor; opacity: 0.7; }
 
@@ -12088,11 +12101,36 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         report(r, "fleet.ok.cargo");
       });
     }
+    state.rerun = (mode, dest) => run[mode](dest);
     const favRun = {
       collect: () => settings.favTransport ? run.collect(settings.favTransport) : say(t("fleet.err.noDefault"), true),
       collectDeploy: () => settings.favDeploy ? run.collectDeploy(settings.favDeploy) : say(t("fleet.err.noDefault"), true)
     };
     if (fleet1 && anchor1) {
+      const AUTO_CARGO = ["moon", "collect", "plan"];
+      for (const li of Array.from(fleet1.querySelectorAll("#technologies li[data-technology]"))) {
+        li.querySelector(".fut-mainship")?.remove();
+        const id = Number(li.dataset.technology);
+        if (!CARGO_SHIPS.includes(id)) continue;
+        const main2 = settings.mainShip === id;
+        const pick = el4(doc, "button", `fut-mainship${main2 ? " on" : ""}`);
+        pick.type = "button";
+        pick.innerHTML = iconSvg("cargo", 12);
+        pick.title = main2 ? t("fleet.mainShipIs") : t("fleet.mainShipPick");
+        pick.setAttribute("aria-label", `${pick.title}: ${li.getAttribute("aria-label") ?? id}`);
+        pick.setAttribute("aria-pressed", String(main2));
+        pick.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (main2) return;
+          const now = loadSettings(o.store);
+          o.store.set(SETTINGS_KEY, { ...now, mainShip: id, secondShip: now.secondShip === id ? now.mainShip : now.secondShip });
+          const active = state.active;
+          redraw();
+          if (active && AUTO_CARGO.includes(active.mode)) pageState.get(doc)?.rerun?.(active.mode, active.dest);
+        });
+        li.append(pick);
+      }
       const bar = el4(doc, "div", "fut-fbar");
       const keys = keymap(o.store);
       const k = (id) => keys.get(id) ?? "";

@@ -760,5 +760,7 @@
   "plan.colCost": "Kosten",
   "plan.queued": "in Warteschlange",
   "plan.queuedHint": "Im Spiel in der Warteschlange, noch nicht bezahlt: seine Ressourcen werden zurückgehalten und zählen weder für den Plan noch für Transporte",
-  "plan.unhold": "Nicht mehr zurückhalten (schon gestartet oder abgebrochen)"
+  "plan.unhold": "Nicht mehr zurückhalten (schon gestartet oder abgebrochen)",
+  "fleet.mainShipIs": "Hauptschiff für automatische Transporte",
+  "fleet.mainShipPick": "Dieses Schiff für automatische Transporte nutzen (Mond, Sammeln, Plan)"
 }

@@ -760,5 +760,7 @@
   "plan.colCost": "cost",
   "plan.queued": "queued",
   "plan.queuedHint": "Queued in the game, not paid yet: its resources are held back and count neither for the plan nor for transports",
-  "plan.unhold": "Stop holding back (already started or cancelled)"
+  "plan.unhold": "Stop holding back (already started or cancelled)",
+  "fleet.mainShipIs": "Main ship for automatic transports",
+  "fleet.mainShipPick": "Use this ship for automatic transports (moon, collection, plan)"
 }
