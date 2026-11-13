@@ -81,7 +81,11 @@ export function readCurrentEnergy(doc: Document): number | null {
 export function currentMaxTemperature(doc: Document): number | null {
   if (doc.querySelector('meta[name="ogame-planet-type"]')?.getAttribute('content') === 'moon') return null;
   const id = currentBodyId(doc);
-  const link = id ? doc.querySelector<HTMLElement>(`#planet-${id} .planetlink`) : null;
+  return maxTemperatureOf(id ? doc.querySelector<HTMLElement>(`#planet-${id} .planetlink`) : null);
+}
+
+/** Max temperature of any planet, from its link's tooltip in the planet list; null when it does not say. */
+export function maxTemperatureOf(link: Element | null): number | null {
   const tip = link?.getAttribute('data-tooltip-title') ?? link?.getAttribute('title') ?? '';
   const temps = Array.from(tip.matchAll(/(-?\d+)\s*°\s*C/g), (m) => Number(m[1]));
   return temps.length >= 2 ? Math.max(...temps.slice(0, 2)) : null;

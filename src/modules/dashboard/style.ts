@@ -97,6 +97,13 @@ td.guess { font-style: italic; opacity: 0.7; }
 .lv .lv-name { height: 40px; display: flex; align-items: center; text-align: center; color: var(--text-2); font-size: 10px; line-height: 1.15; overflow: hidden; }
 .lv.zero { opacity: 0.45; } .lv.zero b { color: var(--muted); }
 .move .pic { border-radius: 5px; }
+.head-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
+.head-toggle:hover, .head-toggle:focus-visible { color: #4FD1E8; }
+.head-toggle svg { transition: transform 0.15s; }
+.head-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+.moves-open { grid-column: 1 / -1; order: 3; }
+.moves-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
+.moves-list .move:nth-child(2) { border-top: 0; }
 
 /* Planets | moons switch on the ships and defence pages. */
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
@@ -140,6 +147,8 @@ table.scrap .unit-label[aria-pressed="true"] { border-color: var(--accent); back
 @media (max-width: 900px) {
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cols { grid-template-columns: 1fr; }
+  .moves-list { grid-template-columns: 1fr; }
+  .moves-list .move:nth-child(2) { border-top: 1px solid #1A2638; }
 }
 .charts { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 12px; }
 .chart { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
