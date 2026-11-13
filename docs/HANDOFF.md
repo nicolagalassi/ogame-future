@@ -182,6 +182,9 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     Detriti raccolti in pos. 16 (report di riciclaggio, pathfinder in spedizione) ora entrano nelle risorse delle
     spedizioni, come OGLight, senza contare come spedizione (`recordDebris`, `debris: true`). Report uguali con id
     diversi contano una volta (`signature` / `dedupe`, pulizia anche dei diari vecchi).
+    **Correzione 0.3.65**: i report «navi trovate» portano anche le risorse (il valore delle navi): Future le
+    sommava e le navi contavano due volte (OGLight con valore navi 0% = 2,28G/1,01G/472M). Ora un ritrovamento
+    di navi conta solo le navi, nel parser e nelle statistiche (anche per i diari già salvati).
 14. **Grafica** (2026-11-06): tutte le finestre (`WINDOW_SHEET`) riprendono il menu pianeti: riquadri #111B2A
     con bordo #1F2C40, schede a segmenti, numeri monospazio, ciano per la selezione. Pila z-index sopra il
     footer del gioco (999999): barra laterale 1000000, finestre 1000001, popup 1000002-3.
