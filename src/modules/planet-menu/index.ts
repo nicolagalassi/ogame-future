@@ -172,12 +172,11 @@ export function guardSkin(img: HTMLImageElement): void {
   if (img.complete && img.naturalWidth === 0 && img.getAttribute('src')) fail();
 }
 
-/** Age badge text and colour class, like OGLight's timers (minutes up to an hour, then hours/days). */
+/** Age badge text and colour class, like OGLight's timers: minutes, capped at 60. */
 export function dataAge(resourcesAt: number, now: number): { text: string; cls: string } {
-  const minutes = Math.max(0, Math.floor((now - resourcesAt) / 60_000));
+  const minutes = Math.min(60, Math.max(0, Math.floor((now - resourcesAt) / 60_000)));
   const cls = minutes < 15 ? 'fut-age-fresh' : minutes <= 30 ? 'fut-age-warm' : 'fut-age-old';
-  const text = minutes < 60 ? String(minutes) : minutes < 1440 ? `${Math.floor(minutes / 60)}h` : `${Math.floor(minutes / 1440)}d`;
-  return { text, cls };
+  return { text: String(minutes), cls };
 }
 
 /** Time since the player last opened the body (not since a sync); a body never opened shows 60, as stale. */
