@@ -73,3 +73,19 @@ export function activeLfResearch(body: OwnBody, seen?: number[]): ActiveTech[] {
   }
   return out;
 }
+
+export const LF_LOCKED_KEY = 'lf.locked';
+/** Planet id → lifeform buildings (`b`) and research (`r`) whose requirements are not met, as last seen on the game's pages. */
+export type LfLocked = Record<string, { b?: number[]; r?: number[] }>;
+
+/**
+ * On the lifeform buildings or research page: the technologies the game shows as locked
+ * (requirements not met, `data-status="off"`), else null. A page seen with nothing locked gives [].
+ */
+export function readLfLocked(doc: Document): { part: 'b' | 'r'; ids: number[] } | null {
+  const component = new URL(doc.location?.href ?? 'http://x/').searchParams.get('component');
+  const part = component === 'lfbuildings' ? 'b' : component === 'lfresearch' ? 'r' : null;
+  const items = Array.from(doc.querySelectorAll<HTMLElement>('#technologies .technology[data-technology]'));
+  if (!part || !items.length) return null;
+  return { part, ids: items.filter((e) => e.dataset.status === 'off').map((e) => Number(e.dataset.technology)).filter((id) => id > 0) };
+}
