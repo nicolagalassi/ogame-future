@@ -11,7 +11,7 @@ import { formatUnits } from '../../core/format';
 import { readMessage, type ExpeditionMessage, type ParsedMessage, type Res, type SpyMessage } from '../../data/messages';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { SHIP_ICONS } from '../../data/ship-icons';
-import { JOURNAL_KEY, record, recordCombat, trim, unitsValue, msu, type Journal, type JournalEntry } from '../../engines/expeditions';
+import { dedupe, JOURNAL_KEY, record, recordCombat, recordDebris, trim, unitsValue, msu, type Journal, type JournalEntry } from '../../engines/expeditions';
 import { rememberSpies, SPY_BOARD_KEY, type SpyBoard, type Universe } from '../../engines/raids';
 import { MESSAGES_CSS } from './style';
 import { mountSpyPanel, universeOf, type SpyContext } from './spy-table';
@@ -395,6 +395,14 @@ export function processMessages(o: MessagesOptions): number {
     }
     if (parsed.kind === 'expedition' || parsed.kind === 'discovery') expeditions.push(parsed);
     if (parsed.kind === 'spy') spies.push(parsed);
+    // Pathfinders on an expedition harvest the debris at position 16: those resources count with
+    // the expeditions (not as one more expedition), as OGLight does.
+    if (parsed.kind === 'recycle' && parsed.coords?.replace(/[[\]]/g, '').split(':')[2] === '16') {
+      journal ??= store.get<Journal>(JOURNAL_KEY, {});
+      const r = recordDebris(journal, parsed.id, parsed.at, parsed.res, parsed.coords);
+      journal = r.journal;
+      added += r.added;
+    }
     // Pirates and aliens: the losses are in the combat report at position 16.
     if (parsed.kind === 'combat' && parsed.coords?.split(':')[2] === '16' && Object.keys(parsed.lost).length) {
       journal ??= store.get<Journal>(JOURNAL_KEY, {});
@@ -406,6 +414,12 @@ export function processMessages(o: MessagesOptions): number {
   }
   if (expeditions.length) {
     journal ??= store.get<Journal>(JOURNAL_KEY, {});
+    // Reports recorded twice under different ids by older versions: once is enough.
+    const clean = dedupe(journal);
+    if (clean.removed) {
+      journal = clean.journal;
+      store.set(JOURNAL_KEY, journal);
+    }
     const before = journal;
     const r = record(journal, expeditions);
     journal = r.journal;

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import { readMessage } from '../src/data/messages';
-import { byDay, daySeries, entriesIn, hourSeries, JOURNAL_KEY, periodRange, periodStats, record, recordCombat, trim, valueMix, type Journal } from '../src/engines/expeditions';
+import { byDay, dedupe, recordDebris, daySeries, entriesIn, hourSeries, JOURNAL_KEY, periodRange, periodStats, record, recordCombat, trim, valueMix, type Journal } from '../src/engines/expeditions';
 import { processMessages } from '../src/modules/messages';
 import { openJournal, closeJournal } from '../src/modules/messages/journal-view';
 import { MemoryStore, Store } from '../src/core/storage';
@@ -133,6 +133,22 @@ describe('expedition journal', () => {
     expect(s.lostValue.metal).toBe(12000);
     // 1000 + ships (20000 + 1.5·20000) − lost (12000 + 1.5·4000)
     expect(s.netMsu).toBe(1000 + 50000 - 18000);
+  });
+
+  it('the same report under two ids counts once; debris at 16 adds resources, not expeditions', () => {
+    let j: Journal = {};
+    j = record(j, [entry('a', day(5)), entry('b', day(5))]).journal;
+    expect(Object.keys(j)).toEqual(['a']);
+    // Old journals with doubles: cleaned, the oldest id stays.
+    const dirty: Journal = { '20': { ...entry('x', day(6)) }, '10': { ...entry('y', day(6)) }, '30': { ...entry('z', day(6), { at: day(6) + 1000 }) } };
+    const clean = dedupe(dirty);
+    expect(clean.removed).toBe(1);
+    expect(Object.keys(clean.journal).sort()).toEqual(['10', '30']);
+    j = recordDebris(j, 'd', day(5), { metal: 500, crystal: 2000, deuterium: 0 }, '1:1:16').journal;
+    const s = periodStats(Object.values(j));
+    expect(s.count).toBe(1);
+    expect(s.res.crystal).toBe(2000);
+    expect(s.debris).toBe(500 + 3000);
   });
 
   it('picks periods and days', () => {

@@ -17,6 +17,8 @@ export type JournalEntry = Omit<ExpeditionMessage, 'id' | 'kind'> & {
   kind: ExpeditionMessage['kind'] | 'raid';
   /** Losses from the combat report at position 16 (pirates/aliens), not a separate expedition. */
   combat?: boolean;
+  /** Debris harvested at position 16 by the expedition's pathfinders (recycling report): resources, not an expedition. As OGLight. */
+  debris?: boolean;
   /** A whole day from OGLight's statistics: how many reports it stands for, and their outcomes. */
   summary?: { count: number; outcomes: Partial<Record<Outcome, number>> };
 };
@@ -29,13 +31,67 @@ const ZERO = (): Res4 => ({ metal: 0, crystal: 0, deuterium: 0, darkMatter: 0 })
 export function record(journal: Journal, messages: ExpeditionMessage[]): { journal: Journal; added: number } {
   let added = 0;
   let next = journal;
+  const seen = new Set(Object.values(journal).map(signature).filter(Boolean));
   for (const { id, ...entry } of messages) {
     if (next[id]) continue;
+    // The same report under another id (e.g. a copy in another inbox tab) is the same expedition.
+    const sig = signature(entry);
+    if (sig && seen.has(sig)) continue;
+    if (sig) seen.add(sig);
     if (next === journal) next = { ...journal };
     next[id] = entry;
     added++;
   }
   return { journal: next, added };
+}
+
+/**
+ * What makes a report one expedition: arrival second, spot, outcome and everything it brought.
+ * Two different expeditions match on all of it practically never. Summaries, combat and debris: none.
+ */
+export function signature(e: JournalEntry): string {
+  if (e.summary || e.combat || e.debris || e.kind !== 'expedition') return '';
+  const units = (u: Record<number, number>) => Object.entries(u).sort(([a], [b]) => Number(a) - Number(b)).map(([k, v]) => `${k}:${v}`).join(',');
+  return [e.at, e.coords ?? '', e.result, e.size, e.res.metal, e.res.crystal, e.res.deuterium, e.res.darkMatter, units(e.ships), units(e.lost), e.item ?? ''].join('|');
+}
+
+/** Drops reports recorded twice under different ids (the oldest id stays). */
+export function dedupe(journal: Journal): { journal: Journal; removed: number } {
+  const seen = new Set<string>();
+  let removed = 0;
+  const next: Journal = {};
+  for (const [id, e] of Object.entries(journal).sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))) {
+    const sig = signature(e);
+    if (sig && seen.has(sig)) {
+      removed++;
+      continue;
+    }
+    if (sig) seen.add(sig);
+    next[id] = e;
+  }
+  return { journal: removed ? next : journal, removed };
+}
+
+/** Debris the expedition's pathfinders harvested at position 16: their resources count with the expeditions. */
+export function recordDebris(journal: Journal, id: string, at: number, res: { metal: number; crystal: number; deuterium: number }, coords: string | null): { journal: Journal; added: number } {
+  if (journal[id] || res.metal + res.crystal + res.deuterium <= 0) return { journal, added: 0 };
+  const entry: JournalEntry = {
+    kind: 'expedition',
+    at,
+    result: 'unknown',
+    size: -1,
+    depletion: 0,
+    res: { metal: res.metal, crystal: res.crystal, deuterium: res.deuterium, darkMatter: 0, food: 0 },
+    ships: {},
+    lost: {},
+    item: null,
+    lfXp: 0,
+    lifeform: 0,
+    artefacts: 0,
+    coords,
+    debris: true,
+  };
+  return { journal: { ...journal, [id]: entry }, added: 1 };
 }
 
 /** Losses of a combat at an expedition position: they count against the expeditions. */
@@ -95,6 +151,8 @@ export interface PeriodStats {
   artefacts: number;
   items: string[];
   sizes: [number, number, number];
+  /** Of the resources: debris harvested at position 16, in MSU. */
+  debris: number;
   /** Resources + ships found − ships lost, in MSU. */
   netMsu: number;
 }
@@ -113,19 +171,21 @@ export function periodStats(entries: JournalEntry[]): PeriodStats {
     artefacts: 0,
     items: [],
     sizes: [0, 0, 0],
+    debris: 0,
     netMsu: 0,
   };
   for (const e of entries) {
     if (e.kind === 'raid') continue;
     const n = e.summary ? e.summary.count : 1;
     if (e.kind === 'discovery') s.discoveries += n;
-    else if (!e.combat) s.count += n;
+    else if (!e.combat && !e.debris) s.count += n;
     if (e.summary) for (const [k, v] of Object.entries(e.summary.outcomes)) s.outcomes[k as Outcome] = (s.outcomes[k as Outcome] ?? 0) + (v ?? 0);
-    else if (!e.combat) s.outcomes[e.result] = (s.outcomes[e.result] ?? 0) + 1;
+    else if (!e.combat && !e.debris) s.outcomes[e.result] = (s.outcomes[e.result] ?? 0) + 1;
     s.res.metal += e.res.metal;
     s.res.crystal += e.res.crystal;
     s.res.deuterium += e.res.deuterium;
     s.res.darkMatter += e.res.darkMatter;
+    if (e.debris) s.debris += msu(e.res);
     for (const [id, n] of Object.entries(e.ships)) s.shipsFound[Number(id)] = (s.shipsFound[Number(id)] ?? 0) + n;
     for (const [id, n] of Object.entries(e.lost)) s.lost[Number(id)] = (s.lost[Number(id)] ?? 0) + n;
     s.lfXp += e.lfXp;
