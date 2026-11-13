@@ -56,6 +56,11 @@ export function foreignTool(msg: Element): boolean {
   return false;
 }
 
+/** A report an alliance member shared: the game writes "Condiviso da <player>" in its header. */
+export function sharedBy(msg: Element): boolean {
+  return !!msg.querySelector(':scope .msgHead .delActions .player, :scope .msgHead .delActions [data-playerid]');
+}
+
 /** Takes our summary, folding and tint off a report (the game's own markup stays). */
 function quiet(msg: Element): void {
   msg.querySelectorAll(':scope .fut-msg').forEach((n) => n.remove());
@@ -343,6 +348,8 @@ export function processMessages(o: MessagesOptions): number {
   const silentNow = (msg: Element) => style === 'never' || (style === 'auto' && ((seen > 0 && now - seen < FOREIGN_MS) || foreignTool(msg)));
   // Communication › shared espionage reports: an alliance member's probes.
   const sharedTab = !!doc.querySelector('[data-subtab-id="11"].active, [data-subtab-id="11"][aria-selected="true"]');
+  // Communication › shared reports (11 spy, 12 combat, 13 expeditions): an alliance member's, not the player's.
+  const sharedAny = !!doc.querySelector(['11', '12', '13'].map((n) => `[data-subtab-id="${n}"].active, [data-subtab-id="${n}"][aria-selected="true"]`).join(', '));
   const expeditions: ExpeditionMessage[] = [];
   const spies: SpyMessage[] = [];
   let journal: Journal | null = null;
@@ -397,7 +404,7 @@ export function processMessages(o: MessagesOptions): number {
     }
     // Reports an alliance member shared are not the player's: never in the journal, and taken out
     // if an older version put them there (they keep their message id).
-    if (sharedTab) {
+    if (sharedAny || sharedBy(msg)) {
       journal ??= store.get<Journal>(JOURNAL_KEY, {});
       if (journal[parsed.id]) {
         const { [parsed.id]: _gone, ...rest } = journal;
