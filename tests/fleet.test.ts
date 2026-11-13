@@ -547,6 +547,25 @@ describe('whole numbers in the game form', () => {
 });
 
 describe('rules window', () => {
+  it('the main cargo ship is picked on the ship itself', async () => {
+    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    const doc = fleetPage();
+    const store = new Store(new MemoryStore(), 'x');
+    const bodies = [{ planetId: 1, moonId: null, name: 'Casa', coords: '5:185:8' }];
+    renderFleetTools({ doc, store, bodyId: 1, bodies, t: (k: string) => k, locale: 'it', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch' });
+    const pick = (id: number) => doc.querySelector<HTMLButtonElement>(`li[data-technology="${id}"] .fut-mainship`)!;
+    expect(pick(203).classList.contains('on')).toBe(true);
+    let gameClick = 0;
+    doc.querySelector('li[data-technology="210"]')!.addEventListener('click', () => gameClick++);
+    pick(210).click();
+    expect(gameClick).toBe(0);
+    expect(store.get<{ mainShip: number }>('fleet.settings', { mainShip: 0 }).mainShip).toBe(210);
+    // Redrawn: one button per ship, the new one marked.
+    expect(doc.querySelectorAll('li[data-technology="210"] .fut-mainship')).toHaveLength(1);
+    expect(pick(210).classList.contains('on')).toBe(true);
+    expect(pick(203).classList.contains('on')).toBe(false);
+  });
+
   it('shows where each rule stands and copies only the chosen rules onto the chosen bodies', async () => {
     const { renderFleetTools } = await import('../src/modules/fleet/index');
     const doc = fleetPage();
