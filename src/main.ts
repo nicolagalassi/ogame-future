@@ -283,6 +283,7 @@ async function bootstrap(): Promise<void> {
           names: techNames,
           lfSlots,
           icons: store.get<Record<string, TechIcon>>(TECH_ICONS_KEY, {}),
+          store,
           now: Date.now(),
           locale,
           t,
