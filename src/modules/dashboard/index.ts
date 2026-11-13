@@ -48,6 +48,8 @@ export interface DashboardOptions {
   lfLevels?: LfLevels | null;
   /** Lifeform technologies locked by their requirements, per planet (lifeform pages seen). */
   lfLocked?: LfLocked;
+  /** Levels seen on the game's technology pages since the last sync, per planet (data/seen-levels). */
+  seenLevels?: Record<string, Record<string, number>>;
   /** The game's technology pictures seen so far (data/tech-icons); a missing one falls back to the name. */
   icons?: Record<string, TechIcon>;
   /** Where the trade rates of the build order are kept; none = the default 3 : 2 : 1 for this session. */
@@ -57,15 +59,13 @@ export interface DashboardOptions {
   t: (key: string, vars?: Record<string, string | number>) => string;
 }
 
-export const TABS = ['summary', 'history', 'mines', 'facilities', 'lifeforms', 'ships', 'defence', 'scrap'] as const;
+export const TABS = ['summary', 'investments', 'history', 'mines', 'facilities', 'lifeforms', 'ships', 'defence', 'scrap'] as const;
 export type Tab = (typeof TABS)[number];
 
 const HOST_ID = 'fut-dashboard';
 let tab: Tab = 'summary';
 let scrapBody: number | null = null;
 let scrapRate = 35;
-/** The "Investimenti" card opened across the whole summary. */
-let movesOpen = false;
 /** Ships and defences: planets and moons on separate pages. */
 let unitScope: 'planet' | 'moon' = 'planet';
 let keyHandler: ((e: KeyboardEvent) => void) | null = null;
@@ -246,6 +246,7 @@ export function openDashboard(o: DashboardOptions): void {
   const body = h('div', 'tab-body');
   if (!o.snapshot) body.append(h('p', 'empty', t('dash.noData')));
   else if (tab === 'summary') summaryTab(body, ctx);
+  else if (tab === 'investments') investmentsTab(body, ctx);
   else if (tab === 'history') historyTab(body, ctx);
   else if (tab === 'mines') minesTab(body, ctx);
   else if (tab === 'facilities') facilitiesTab(body, ctx);
@@ -645,58 +646,111 @@ function missingData(ctx: Ctx): HTMLElement | null {
   return box;
 }
 
-function stepLine(ctx: Ctx, m: AmortStep, i: number, numbered = false): HTMLElement {
+/** Consecutive steps that raise the same technology to the same level on different planets, as one. */
+interface StepGroup {
+  first: AmortStep;
+  steps: AmortStep[];
+}
+
+export function groupSteps(steps: AmortStep[]): StepGroup[] {
+  const out: StepGroup[] = [];
+  for (const s of steps) {
+    const last = out[out.length - 1];
+    if (last && s.planetId && last.first.planetId && last.first.id === s.id && last.first.from === s.from && last.first.to === s.to) last.steps.push(s);
+    else out.push({ first: s, steps: [s] });
+  }
+  return out;
+}
+
+/** Done since the last sync: the level is in construction (production queue) or seen on the game's page. */
+function stepDone(ctx: Ctx, s: AmortStep): boolean {
+  const { o } = ctx;
+  if (!s.planetId) return false;
+  if ((o.seenLevels?.[String(s.planetId)]?.[String(s.id)] ?? 0) >= s.to) return true;
+  const name = ctx.name(s.id);
+  return activeItems(o.queues?.bodies[String(s.planetId)], o.now).some((q) => q.name === name && q.level >= s.to);
+}
+
+/** The game page where a step is built, on its planet. */
+function stepPage(s: AmortStep): string {
+  const component = s.kind === 'mine' ? 'supplies' : s.kind === 'lfBuilding' ? 'lfbuildings' : s.kind === 'lfResearch' ? 'lfresearch' : 'research';
+  return `index.php?page=ingame&component=${component}${s.planetId ? `&cp=${s.planetId}` : ''}`;
+}
+
+function daysText(ctx: Ctx, d: number): string {
   const { t, locale } = ctx.o;
-  const id = m.id;
+  return d < 1 ? `<1 ${t('dash.daysShort')}` : `${d.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${t('dash.daysShort')}`;
+}
+
+function groupLine(ctx: Ctx, g: StepGroup, i: number, numbered: boolean): HTMLElement {
+  const { t } = ctx.o;
+  const m = g.first;
   const line = h('div', 'move');
   if (numbered) line.append(h('span', 'n', String(i + 1)));
-  const pic = ctx.pic(id, 28);
+  const pic = ctx.pic(m.id, 28);
   if (pic) line.append(pic);
   else if (!numbered) line.append(h('span', 'n', String(i + 1)));
   const text = h('div', 'move-text');
-  const what = m.kind === 'mine' ? t(`mine.${m.mine}`) : ctx.name(id);
+  const what = m.kind === 'mine' ? t(`mine.${m.mine}`) : ctx.name(m.id);
   text.append(h('strong', '', `${what} ${m.from} → ${m.to}${m.kind === 'astro' ? ` · ${t('dash.newColony')}` : ''}`));
-  const cost = [`${ctx.fmt(m.cost.metal)} M`, `${ctx.fmt(m.cost.crystal)} C`, ...(m.cost.deuterium ? [`${ctx.fmt(m.cost.deuterium)} D`] : [])].join(' · ');
-  const place = m.planetId ? `${m.name} [${m.coords}]` : t('dash.account');
-  const sub = h('span', '', `${place} · ${cost}`);
-  if (m.guessed) {
-    sub.append(h('em', 'guess', ` · ${t('dash.lfGuessed')}`));
-    sub.title = t('dash.lfGuessedHint');
+  const total = g.steps.reduce((sum, s) => ({ metal: sum.metal + s.cost.metal, crystal: sum.crystal + s.cost.crystal, deuterium: sum.deuterium + s.cost.deuterium }), { metal: 0, crystal: 0, deuterium: 0 });
+  const cost = [`${ctx.fmt(total.metal)} M`, `${ctx.fmt(total.crystal)} C`, ...(total.deuterium ? [`${ctx.fmt(total.deuterium)} D`] : [])].join(' · ');
+  if (m.planetId) {
+    // One chip per planet, linking to the page where it is built; done ones are struck through.
+    const chips = h('div', 'pls');
+    let done = 0;
+    for (const s of g.steps) {
+      const a = h('a', 'pl', s.name || `[${s.coords}]`);
+      a.setAttribute('href', stepPage(s));
+      a.title = `${s.name} [${s.coords}] · ${daysText(ctx, s.days)}${s.guessed ? ` · ${t('dash.lfGuessedHint')}` : ''}`;
+      if (s.guessed) a.classList.add('guess');
+      if (stepDone(ctx, s)) {
+        a.classList.add('done');
+        a.setAttribute('aria-label', `${a.title} · ${t('dash.stepDone')}`);
+        done++;
+      }
+      chips.append(a);
+    }
+    if (done === g.steps.length) line.classList.add('done');
+    const sub = h('span', '', g.steps.length > 1 ? `${t('dash.planetsCount', { count: g.steps.length })} · ${cost}` : cost);
+    if (done) sub.append(h('em', 'ok', ` · ${t('dash.doneCount', { done, count: g.steps.length })}`));
+    text.append(chips, sub);
+  } else {
+    text.append(h('span', '', `${t('dash.account')} · ${cost}`));
   }
-  text.append(sub);
-  line.append(text, h('span', 'roi mono', m.days < 1 ? `<1 ${t('dash.daysShort')}` : `${m.days.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${t('dash.daysShort')}`));
+  const days = g.steps.map((s) => s.days);
+  const lo = Math.min(...days), hi = Math.max(...days);
+  line.append(text, h('span', 'roi mono', hi - lo >= 0.05 ? `${daysText(ctx, lo)}–${daysText(ctx, hi)}`.replace(` ${t('dash.daysShort')}–`, '–') : daysText(ctx, lo)));
   return line;
 }
 
-/**
- * "Investimenti più convenienti": the first 5 steps; a click on the title opens the card across
- * the whole width with 30 steps and the trade rates.
- */
+/** Summary card: the first 5 investments; the title opens their own tab. */
 function buildOrderCard(ctx: Ctx): HTMLElement {
   const { o } = ctx;
   const { t, doc } = o;
-  const s = h('div', movesOpen ? 'card moves-open' : 'card');
+  const s = h('div', 'card');
   const head = h('h3', '');
-  const toggle = h('button', 'head-toggle');
-  toggle.type = 'button';
-  toggle.title = t('dash.movesHint');
-  toggle.setAttribute('aria-expanded', String(movesOpen));
-  toggle.append(h('span', '', t('dash.moves')), icon(doc, 'chevron', 14));
-  toggle.addEventListener('click', () => {
-    movesOpen = !movesOpen;
+  const go = h('button', 'head-toggle');
+  go.type = 'button';
+  go.title = t('dash.movesOpen');
+  go.append(h('span', '', t('dash.moves')), icon(doc, 'next', 14));
+  go.addEventListener('click', () => {
+    tab = 'investments';
     ctx.redraw();
   });
-  head.append(toggle);
+  head.append(go);
   s.append(head);
-  const steps = buildOrder(ctx, movesOpen ? 30 : 5);
-  if (!steps.length) {
-    s.append(h('p', 'hint', t('dash.movesNone')));
-    return s;
-  }
-  if (!movesOpen) {
-    steps.forEach((m, i) => s.append(stepLine(ctx, m, i)));
-    return s;
-  }
+  const groups = groupSteps(buildOrder(ctx, 15)).slice(0, 5);
+  if (!groups.length) s.append(h('p', 'hint', t('dash.movesNone')));
+  groups.forEach((g, i) => s.append(groupLine(ctx, g, i, false)));
+  return s;
+}
+
+/** The investments tab: trade rates, the pages still to open, the build order grouped by step. */
+function investmentsTab(parent: HTMLElement, ctx: Ctx): void {
+  const { o } = ctx;
+  const { t } = o;
+  const s = section(parent, t('dash.moves'), t('dash.movesHint'));
   const bar = h('div', 'scrap-bar');
   const rates = loadRates(o);
   const label = h('label', 'field-label', t('dash.rates'));
@@ -722,10 +776,9 @@ function buildOrderCard(ctx: Ctx): HTMLElement {
   s.append(bar);
   const missing = missingData(ctx);
   if (missing) s.append(missing);
-  const list = h('div', 'moves-list');
-  steps.forEach((m, i) => list.append(stepLine(ctx, m, i, true)));
-  s.append(list);
-  return s;
+  const groups = groupSteps(buildOrder(ctx, 60));
+  if (!groups.length) s.append(h('p', 'hint', t('dash.movesNone')));
+  groups.forEach((g, i) => s.append(groupLine(ctx, g, i, true)));
 }
 
 function minesTab(parent: HTMLElement, ctx: Ctx): void {

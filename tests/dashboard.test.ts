@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { readPlanetList } from '../src/data/planet-list';
 import { readScore, watchScore } from '../src/data/score';
 import { accountAlerts, bodyRows, summarize } from '../src/engines/account';
-import { closeDashboard, isDashboardOpen, openDashboard, scrapReturn, TABS } from '../src/modules/dashboard';
+import { closeDashboard, groupSteps, isDashboardOpen, openDashboard, scrapReturn, TABS } from '../src/modules/dashboard';
 import { lfResearch, techName } from '../src/data/tech-names';
 import { translator } from '../src/core/i18n';
 import { PLANET_LIST_HTML, SNAPSHOT } from './fixtures';
@@ -77,22 +77,24 @@ describe('dashboard panel', () => {
     expect(isDashboardOpen(document)).toBe(false);
   });
 
-  it('the investments card opens across the summary with more steps and the trade rates', () => {
+  it('the investments card leads to its own tab, with the trade rates', () => {
     open();
-    const toggle = () => shadow().querySelector<HTMLButtonElement>('.head-toggle')!;
-    const steps = () => shadow().querySelectorAll('.card .move').length;
-    expect(toggle().getAttribute('aria-expanded')).toBe('false');
-    expect(steps()).toBeLessThanOrEqual(5);
-    const closed = steps();
-    toggle().click();
-    expect(toggle().getAttribute('aria-expanded')).toBe('true');
-    expect(shadow().querySelector('.moves-open')).not.toBeNull();
-    expect(shadow().querySelectorAll('.moves-open .field.rate')).toHaveLength(3);
-    expect(steps()).toBeGreaterThan(closed);
+    expect(shadow().querySelectorAll('.card .move').length).toBeLessThanOrEqual(5);
+    shadow().querySelector<HTMLButtonElement>('.head-toggle')!.click();
+    expect(shadow().querySelector('.tab[aria-pressed="true"]')?.getAttribute('data-tab')).toBe('investments');
+    expect(shadow().querySelectorAll('.field.rate')).toHaveLength(3);
+    expect(shadow().querySelectorAll('.move').length).toBeGreaterThan(0);
     expect(shadow().textContent).not.toMatch(/NaN|undefined|Infinity/);
-    toggle().click();
-    expect(shadow().querySelector('.moves-open')).toBeNull();
+    goTo('summary');
     closeDashboard(document);
+  });
+
+  it('groups consecutive steps of the same technology and level, one chip per planet', () => {
+    const step = (planetId: number, id = 12109, from = 6) => ({ kind: 'lfBuilding' as const, id, planetId, name: `P${planetId}`, coords: '1:1:1', from, to: from + 1, cost: { metal: 1, crystal: 1, deuterium: 0, energy: 0 }, gain: { metal: 0, crystal: 1, deuterium: 0 }, days: 1 });
+    const groups = groupSteps([step(1, 12109, 5), step(1), step(2), step(3), step(4, 12205), step(5)]);
+    expect(groups.map((g) => [g.first.id, g.first.from, g.steps.map((s) => s.planetId)])).toEqual([
+      [12109, 5, [1]], [12109, 6, [1, 2, 3]], [12205, 6, [4]], [12109, 6, [5]],
+    ]);
   });
 
   it('re-opening does not duplicate the panel', () => {
