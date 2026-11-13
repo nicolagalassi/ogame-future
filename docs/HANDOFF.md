@@ -185,6 +185,9 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     **Correzione 0.3.65**: i report «navi trovate» portano anche le risorse (il valore delle navi): Future le
     sommava e le navi contavano due volte (OGLight con valore navi 0% = 2,28G/1,01G/472M). Ora un ritrovamento
     di navi conta solo le navi, nel parser e nelle statistiche (anche per i diari già salvati).
+    **Causa vera (0.3.66)**: le 4 spedizioni in più erano report **condivisi in alleanza** (Comunicazione →
+    Condivisi, `data-subtab-id="11"`), non del giocatore. Su quella scheda nessun report entra nel diario
+    (spedizioni, scoperte, detriti, combattimenti) e quelli già salvati con lo stesso id vengono tolti.
 14. **Grafica** (2026-11-06): tutte le finestre (`WINDOW_SHEET`) riprendono il menu pianeti: riquadri #111B2A
     con bordo #1F2C40, schede a segmenti, numeri monospazio, ciano per la selezione. Pila z-index sopra il
     footer del gioco (999999): barra laterale 1000000, finestre 1000001, popup 1000002-3.
