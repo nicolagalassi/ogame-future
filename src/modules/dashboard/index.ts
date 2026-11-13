@@ -9,13 +9,14 @@
 import { icon } from '../../core/icons';
 import { WINDOW_SHEET } from '../../core/sheet';
 import type { AccountSnapshot, OwnBody } from '../../data/account-info';
-import type { PlanetListEntry } from '../../data/planet-list';
+import { maxTemperatureOf, type PlanetListEntry } from '../../data/planet-list';
+import type { Store } from '../../core/storage';
 import type { Score } from '../../data/score';
 import { formatUnits } from '../../core/format';
 import { accountAlerts, bodyRows, msu, summarize } from '../../engines/account';
 import { activeItems, QUEUE_KINDS, queueLabel, type QueueItem, type QueueSnapshot } from '../../data/queues';
 import { remaining } from '../planet-menu';
-import { bestUpgrades } from '../../engines/roi';
+import { amortizationPlan, DEFAULT_RATES, type AmortStep, type Rates } from '../../engines/roi';
 import { changeOver, type History, type HistoryDay } from '../../engines/history';
 import type { Reminder } from '../../engines/reminders';
 import { rawCost } from '../../engines/tech';
@@ -44,6 +45,8 @@ export interface DashboardOptions {
   lfSlots?: LfSlots;
   /** The game's technology pictures seen so far (data/tech-icons); a missing one falls back to the name. */
   icons?: Record<string, TechIcon>;
+  /** Where the trade rates of the build order are kept; none = the default 3 : 2 : 1 for this session. */
+  store?: Store;
   now: number;
   locale: string;
   t: (key: string, vars?: Record<string, string | number>) => string;
@@ -56,6 +59,8 @@ const HOST_ID = 'fut-dashboard';
 let tab: Tab = 'summary';
 let scrapBody: number | null = null;
 let scrapRate = 35;
+/** The "Investimenti" card opened across the whole summary. */
+let movesOpen = false;
 /** Ships and defences: planets and moons on separate pages. */
 let unitScope: 'planet' | 'moon' = 'planet';
 let keyHandler: ((e: KeyboardEvent) => void) | null = null;
@@ -97,7 +102,6 @@ function orderedBodies(snapshot: AccountSnapshot | null, entries: PlanetListEntr
 
 const level = (b: OwnBody, id: number): number => b.levels[String(id)] ?? 0;
 /** The mine each ROI key stands for. */
-const MINE_ID = { metal: 1, crystal: 2, deuterium: 3 } as const;
 /** Unit counts: exact up to a million, then short. */
 let numLocale = 'it';
 const count = (n: number): string => (n < 1e6 ? n.toLocaleString(numLocale) : formatUnits(n, numLocale));
@@ -403,21 +407,7 @@ function summaryTab(parent: HTMLElement, ctx: Ctx): void {
     prod.append(h('h4', '', t('dash.tab.lifeforms')), lf);
   }
 
-  const movesCard = h('div', 'card');
-  const movesHead = h('h3', '', t('dash.moves'));
-  movesHead.title = t('dash.movesHint');
-  movesCard.append(movesHead);
-  const moves = bestUpgrades(o.snapshot, o.entries, 5);
-  if (!moves.length) movesCard.append(h('p', 'hint', t('dash.movesNone')));
-  moves.forEach((m, i) => {
-    const line = h('div', 'move');
-    line.append(ctx.pic(MINE_ID[m.mine], 28) ?? h('span', 'n', String(i + 1)));
-    const text = h('div', 'move-text');
-    text.append(h('strong', '', `${t(`mine.${m.mine}`)} ${m.from} → ${m.from + 1}`));
-    text.append(h('span', '', `${m.name} [${m.coords}] · ${fmt(m.cost.metal)} M · ${fmt(m.cost.crystal)} C`));
-    line.append(text, h('span', 'roi mono', m.days < 1 ? `<1 ${t('dash.daysShort')}` : `${m.days.toLocaleString(ctx.o.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${t('dash.daysShort')}`));
-    movesCard.append(line);
-  });
+  const movesCard = buildOrderCard(ctx);
 
   const checks = h('div', 'card');
   checks.append(h('h3', '', t('dash.checks')));
@@ -595,6 +585,97 @@ function historyTab(parent: HTMLElement, ctx: Ctx): void {
   table.append(tbody);
   wrap.append(table);
   s.append(wrap);
+}
+
+const RATES_KEY = 'dash.rates';
+let sessionRates: Rates = DEFAULT_RATES;
+const loadRates = (o: DashboardOptions): Rates => o.store?.get<Rates>(RATES_KEY, DEFAULT_RATES) ?? sessionRates;
+
+/** InfoCompte's amortizations: mines, plasma and a new colony, best payback first, each step applied before the next. */
+function buildOrder(ctx: Ctx, steps: number): AmortStep[] {
+  const { o } = ctx;
+  const speed = Number(o.doc.querySelector('meta[name="ogame-universe-speed"]')?.getAttribute('content')) || 1;
+  const planets = o.entries
+    .filter((e) => e.planetId)
+    .map((e) => ({ id: e.planetId!, name: e.name, coords: e.coords, maxTemp: maxTemperatureOf(e.planetLink) }));
+  return amortizationPlan({ snapshot: o.snapshot, planets, speed, rates: loadRates(o), steps });
+}
+
+const STEP_ID = { metal: 1, crystal: 2, deuterium: 3, plasma: 122, astro: 124 } as const;
+
+function stepLine(ctx: Ctx, m: AmortStep, i: number, numbered = false): HTMLElement {
+  const { t, locale } = ctx.o;
+  const id = m.kind === 'mine' ? STEP_ID[m.mine!] : STEP_ID[m.kind];
+  const line = h('div', 'move');
+  if (numbered) line.append(h('span', 'n', String(i + 1)));
+  const pic = ctx.pic(id, 28);
+  if (pic) line.append(pic);
+  else if (!numbered) line.append(h('span', 'n', String(i + 1)));
+  const text = h('div', 'move-text');
+  const what = m.kind === 'mine' ? t(`mine.${m.mine}`) : ctx.name(id);
+  text.append(h('strong', '', `${what} ${m.from} → ${m.to}${m.kind === 'astro' ? ` · ${t('dash.newColony')}` : ''}`));
+  const cost = [`${ctx.fmt(m.cost.metal)} M`, `${ctx.fmt(m.cost.crystal)} C`, ...(m.cost.deuterium ? [`${ctx.fmt(m.cost.deuterium)} D`] : [])].join(' · ');
+  text.append(h('span', '', m.kind === 'mine' ? `${m.name} [${m.coords}] · ${cost}` : `${t('dash.account')} · ${cost}`));
+  line.append(text, h('span', 'roi mono', m.days < 1 ? `<1 ${t('dash.daysShort')}` : `${m.days.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${t('dash.daysShort')}`));
+  return line;
+}
+
+/**
+ * "Investimenti più convenienti": the first 5 steps; a click on the title opens the card across
+ * the whole width with 30 steps and the trade rates.
+ */
+function buildOrderCard(ctx: Ctx): HTMLElement {
+  const { o } = ctx;
+  const { t, doc } = o;
+  const s = h('div', movesOpen ? 'card moves-open' : 'card');
+  const head = h('h3', '');
+  const toggle = h('button', 'head-toggle');
+  toggle.type = 'button';
+  toggle.title = t('dash.movesHint');
+  toggle.setAttribute('aria-expanded', String(movesOpen));
+  toggle.append(h('span', '', t('dash.moves')), icon(doc, 'chevron', 14));
+  toggle.addEventListener('click', () => {
+    movesOpen = !movesOpen;
+    ctx.redraw();
+  });
+  head.append(toggle);
+  s.append(head);
+  const steps = buildOrder(ctx, movesOpen ? 30 : 5);
+  if (!steps.length) {
+    s.append(h('p', 'hint', t('dash.movesNone')));
+    return s;
+  }
+  if (!movesOpen) {
+    steps.forEach((m, i) => s.append(stepLine(ctx, m, i)));
+    return s;
+  }
+  const bar = h('div', 'scrap-bar');
+  const rates = loadRates(o);
+  const label = h('label', 'field-label', t('dash.rates'));
+  (['metal', 'crystal', 'deuterium'] as const).forEach((k, i) => {
+    const input = h('input', 'field rate');
+    input.type = 'number';
+    input.min = '0.1';
+    input.step = '0.1';
+    input.value = String(rates[k]);
+    input.setAttribute('aria-label', `${t('dash.rates')}: ${t(`res.${k}`)}`);
+    input.addEventListener('change', () => {
+      const v = Number(input.value);
+      if (!(v > 0)) return;
+      const next = { ...loadRates(o), [k]: v };
+      if (o.store) o.store.set(RATES_KEY, next);
+      else sessionRates = next;
+      ctx.redraw();
+    });
+    if (i) label.append(h('span', '', ':'));
+    label.append(input);
+  });
+  bar.append(label);
+  s.append(bar);
+  const list = h('div', 'moves-list');
+  steps.forEach((m, i) => list.append(stepLine(ctx, m, i, true)));
+  s.append(list);
+  return s;
 }
 
 function minesTab(parent: HTMLElement, ctx: Ctx): void {

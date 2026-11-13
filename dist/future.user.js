@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.70
+// @version      0.3.71
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -574,9 +574,12 @@
     "dash.queues": "Code attive",
     "dash.queuesNone": "nessuna costruzione in corso",
     "dash.queuesUnknown": "non ancora lette",
-    "dash.moves": "Miniere pi\xF9 convenienti",
+    "dash.moves": "Investimenti pi\xF9 convenienti",
+    "dash.rates": "Tassi M : C : D",
+    "dash.newColony": "nuova colonia",
+    "dash.account": "Account",
     "dash.movesNone": "Servono i livelli delle miniere: premi Sincronizza.",
-    "dash.movesHint": "Giorni per ripagare il costo con la produzione in pi\xF9 (MSU). Stima: non conta energia n\xE9 sconti delle forme di vita.",
+    "dash.movesHint": "Come gli ammortamenti di InfoCompte: miniere, plasma e nuova colonia (astrofisica + attrezzatura media di un pianeta) per giorni di ritorno ai tassi scelti; ogni passo conta i precedenti. Non conta energia n\xE9 sconti delle forme di vita.",
     "dash.colQueue": "In corso",
     "mine.metal": "Miniera di metallo",
     "mine.crystal": "Miniera di cristallo",
@@ -1356,9 +1359,12 @@
     "dash.queues": "Active queues",
     "dash.queuesNone": "nothing under construction",
     "dash.queuesUnknown": "not read yet",
-    "dash.moves": "Best mine upgrades",
+    "dash.moves": "Best investments",
+    "dash.rates": "Rates M : C : D",
+    "dash.newColony": "new colony",
+    "dash.account": "Account",
     "dash.movesNone": "Mine levels needed: press Sync.",
-    "dash.movesHint": "Days to pay back the cost with the extra production (MSU). Estimate: energy and lifeform discounts not counted.",
+    "dash.movesHint": "As InfoCompte's amortizations: mines, plasma and a new colony (astrophysics + a planet's average equipment) by payback days at your trade rates; each step counts the ones before. Energy and lifeform discounts not counted.",
     "dash.colQueue": "Running",
     "mine.metal": "Metal mine",
     "mine.crystal": "Crystal mine",
@@ -2138,9 +2144,12 @@
     "dash.queues": "Files actives",
     "dash.queuesNone": "aucune construction",
     "dash.queuesUnknown": "pas encore lues",
-    "dash.moves": "Mines les plus rentables",
+    "dash.moves": "Investissements les plus rentables",
+    "dash.rates": "Taux M : C : D",
+    "dash.newColony": "nouvelle colonie",
+    "dash.account": "Compte",
     "dash.movesNone": "Niveaux des mines requis : Synchroniser.",
-    "dash.movesHint": "Jours pour rembourser le co\xFBt (MSU). Estimation sans \xE9nergie ni r\xE9ductions formes de vie.",
+    "dash.movesHint": "Comme les amortissements d'InfoCompte : mines, plasma et nouvelle colonie (astrophysique + \xE9quipement moyen d'une plan\xE8te) par jours d'amortissement \xE0 vos taux ; chaque \xE9tape compte les pr\xE9c\xE9dentes. Sans \xE9nergie ni r\xE9ductions formes de vie.",
     "dash.colQueue": "En cours",
     "mine.metal": "Mine de m\xE9tal",
     "mine.crystal": "Mine de cristal",
@@ -2920,9 +2929,12 @@
     "dash.queues": "Aktive Auftr\xE4ge",
     "dash.queuesNone": "kein Bau im Gange",
     "dash.queuesUnknown": "noch nicht gelesen",
-    "dash.moves": "Lohnendste Minen",
+    "dash.moves": "Lohnendste Investitionen",
+    "dash.rates": "Kurse M : K : D",
+    "dash.newColony": "neue Kolonie",
+    "dash.account": "Konto",
     "dash.movesNone": "Minenstufen n\xF6tig: Synchronisieren.",
-    "dash.movesHint": "Tage bis zur Amortisation (MSU). Sch\xE4tzung ohne Energie und Lebensform-Rabatte.",
+    "dash.movesHint": "Wie die Amortisation von InfoCompte: Minen, Plasma und neue Kolonie (Astrophysik + durchschnittliche Ausstattung eines Planeten) nach Amortisationstagen zu deinen Kursen; jeder Schritt z\xE4hlt die vorherigen. Ohne Energie und Lebensform-Rabatte.",
     "dash.colQueue": "L\xE4uft",
     "mine.metal": "Metallmine",
     "mine.crystal": "Kristallmine",
@@ -3768,7 +3780,9 @@
   function currentMaxTemperature(doc) {
     if (doc.querySelector('meta[name="ogame-planet-type"]')?.getAttribute("content") === "moon") return null;
     const id = currentBodyId(doc);
-    const link = id ? doc.querySelector(`#planet-${id} .planetlink`) : null;
+    return maxTemperatureOf(id ? doc.querySelector(`#planet-${id} .planetlink`) : null);
+  }
+  function maxTemperatureOf(link) {
     const tip = link?.getAttribute("data-tooltip-title") ?? link?.getAttribute("title") ?? "";
     const temps = Array.from(tip.matchAll(/(-?\d+)\s*°\s*C/g), (m) => Number(m[1]));
     return temps.length >= 2 ? Math.max(...temps.slice(0, 2)) : null;
@@ -3973,10 +3987,10 @@
     const out = history.filter((d) => d.day !== day).concat(next).sort((a, b) => a.day < b.day ? -1 : a.day > b.day ? 1 : 0);
     return out.slice(-HISTORY_MAX);
   }
-  function changeOver(history, days) {
+  function changeOver(history, days2) {
     const last2 = history.at(-1);
     if (!last2 || history.length < 2) return null;
-    const limit = last2.at - days * 864e5;
+    const limit = last2.at - days2 * 864e5;
     const base = [...history].reverse().find((d) => d.at <= limit + 36e5) ?? history[0];
     if (base === last2) return null;
     const span = Math.max(1, Math.round((last2.at - base.at) / 864e5));
@@ -5433,13 +5447,13 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     const big = el2(doc, "span", `v${today.count ? today.net < 0 ? " neg" : "" : " none"}`, today.count ? signed(today.net) : "\u2014");
     if (today.count) big.append(el2(doc, "small", "", "MSU"));
     block.append(el2(doc, "span", "k", t("dock.today")), big, el2(doc, "span", "c", t("dock.todayCount", { n: today.count })));
-    const days = o.journal.days ?? [];
-    if (days.length) {
+    const days2 = o.journal.days ?? [];
+    if (days2.length) {
       const cols = el2(doc, "span", "days");
       cols.setAttribute("aria-hidden", "true");
-      const top = Math.max(1, ...days.map((d) => d.net));
-      days.forEach((d, i) => {
-        const bar = el2(doc, "i", d.net > 0 ? i === days.length - 1 ? "today" : "" : "zero");
+      const top = Math.max(1, ...days2.map((d) => d.net));
+      days2.forEach((d, i) => {
+        const bar = el2(doc, "i", d.net > 0 ? i === days2.length - 1 ? "today" : "" : "zero");
         bar.style.height = `${Math.max(0, d.net / top * 100)}%`;
         bar.title = `${new Date(d.start).toLocaleDateString(o.locale, { weekday: "short", day: "2-digit", month: "2-digit" })} \xB7 ${d.count} \xB7 ${d.count ? signed(d.net) : "\u2014"} MSU`;
         cols.append(bar);
@@ -5634,15 +5648,15 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     return Object.values(journal).filter((e) => e.at >= from && e.at < to).sort((a, b) => b.at - a.at);
   }
   function byDay(entries, limit = 14) {
-    const days = /* @__PURE__ */ new Map();
+    const days2 = /* @__PURE__ */ new Map();
     for (const e of entries) {
       if (e.kind === "raid") continue;
       const key = dayStart(e.at);
-      const list = days.get(key) ?? [];
+      const list = days2.get(key) ?? [];
       list.push(e);
-      days.set(key, list);
+      days2.set(key, list);
     }
-    return [...days.entries()].sort((a, b) => b[0] - a[0]).slice(0, limit).map(([day, list]) => ({ day, stats: periodStats(list) }));
+    return [...days2.entries()].sort((a, b) => b[0] - a[0]).slice(0, limit).map(([day, list]) => ({ day, stats: periodStats(list) }));
   }
   function hourSeries(entries, day) {
     const lists = Array.from({ length: 24 }, () => []);
@@ -5742,7 +5756,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
   function convertOglightStats(stats, journal) {
     const own = new Set(Object.entries(journal).filter(([id, e]) => !id.startsWith("ogl-") && e.kind !== "raid").map(([, e]) => dayStart(e.at)));
     const next = { ...journal };
-    let days = 0;
+    let days2 = 0;
     let expeditions = 0;
     let raids = 0;
     for (const [key, day] of Object.entries(stats)) {
@@ -5778,9 +5792,9 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
         put(`ogl-raid-${tag}`, { ...blank("raid", at), res: { ...g.res, metal: g.res.metal + deb.metal, crystal: g.res.crystal + deb.crystal, deuterium: g.res.deuterium + deb.deuterium }, lost: g.lost, summary: { count: day.raid?.count ?? 0, outcomes: {} } });
         raids += day.raid?.count ?? 0;
       }
-      if (used) days++;
+      if (used) days2++;
     }
-    return { journal: next, days, expeditions, raids };
+    return { journal: next, days: days2, expeditions, raids };
   }
 
   // src/data/queues.ts
@@ -9293,55 +9307,125 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
   }
 
   // src/engines/roi.ts
-  var MINES = {
-    metal: { id: "1", base: [60, 15], factor: 1.5 },
-    crystal: { id: "2", base: [48, 24], factor: 1.6 },
-    deuterium: { id: "3", base: [225, 75], factor: 1.5 }
+  var KEYS4 = ["metal", "crystal", "deuterium"];
+  var MINE_ID = { metal: 1, crystal: 2, deuterium: 3 };
+  var PLASMA = 122;
+  var ASTRO = 124;
+  var PLASMA_RATE = { metal: 0.01, crystal: 66e-4, deuterium: 33e-4 };
+  var METAL_POS = [1.35, 1.23, 1.17, 1];
+  var CRYSTAL_POS = [1.4, 1.3, 1.2, 1];
+  var MOON_ONLY = /* @__PURE__ */ new Set([41, 42, 43]);
+  var DEFAULT_RATES = { metal: 3, crystal: 2, deuterium: 1 };
+  function inMetal(r, rates) {
+    return KEYS4.reduce((sum, k) => sum + (rates[k] > 0 ? r[k] * rates.metal / rates[k] : 0), 0);
+  }
+  function mineBase(mine, level2, position, maxTemp, speed) {
+    const k = speed * level2 * Math.pow(1.1, level2);
+    if (mine === "metal") return Math.trunc(30 * k * METAL_POS[Math.min(3, Math.abs(position - 8))]);
+    if (mine === "crystal") return Math.trunc(20 * k * CRYSTAL_POS[Math.min(3, Math.max(0, position - 1))]);
+    return Math.trunc(10 * k * (1.44 - 4e-3 * maxTemp));
+  }
+  var zero = () => ({ metal: 0, crystal: 0, deuterium: 0 });
+  var days = (cost, gain, rates) => {
+    const g = inMetal(gain, rates);
+    return g > 0 ? inMetal(cost, rates) / (g * 24) : Infinity;
   };
-  var WEIGHT = { metal: 1, crystal: 1.5, deuterium: 3 };
-  function mineCost(mine, level2) {
-    const { base, factor } = MINES[mine];
-    const k = Math.pow(factor, level2);
-    return { metal: Math.floor(base[0] * k), crystal: Math.floor(base[1] * k), deuterium: 0 };
-  }
-  function mineGainRatio(level2) {
-    if (level2 <= 0) return 0;
-    return (level2 + 1) * 1.1 / level2 - 1;
-  }
-  function bestUpgrades(snapshot, entries, limit = 5) {
-    if (!snapshot) return [];
-    const byId = new Map(snapshot.bodies.map((b) => [b.id, b]));
-    const moves = [];
-    for (const entry of entries) {
-      const body = entry.planetId ? byId.get(entry.planetId) : void 0;
-      if (!body || body.type !== "planet") continue;
-      for (const mine of Object.keys(MINES)) {
-        const level2 = body.levels[MINES[mine].id] ?? 0;
-        const ratio = mineGainRatio(level2);
-        const gain = body.production[mine] * ratio;
-        if (gain <= 0) continue;
-        const cost = mineCost(mine, level2);
-        const costMsu = cost.metal + cost.crystal * 1.5;
-        const gainPerHour = gain * WEIGHT[mine];
-        moves.push({
-          planetId: body.id,
-          name: entry.name || body.name,
-          coords: entry.coords || body.coords,
-          mine,
-          from: level2,
-          cost,
-          costMsu,
-          gainPerHour,
-          days: costMsu / (gainPerHour * 24)
-        });
+  function equipment(levels, moon) {
+    let total = { ...ZERO_COST };
+    for (const [key, value] of Object.entries(levels)) {
+      const id = Number(key);
+      const kind = techKind(id);
+      if (!value || !kind) continue;
+      if (kind === "unit") {
+        if (id >= 400 && id < 500) total = addCost(total, scaleCost(levelCost(id, 1), value));
+      } else if (kind === "building" && (moon || !MOON_ONLY.has(id)) || kind === "lfBuilding" && !moon) {
+        total = addCost(total, rangeCost(id, 1, value));
       }
     }
-    return moves.sort((a, b) => a.days - b.days).slice(0, limit);
+    return { ...total, energy: 0 };
+  }
+  function amortizationPlan({ snapshot, planets, speed, rates = DEFAULT_RATES, steps = 20 }) {
+    if (!snapshot) return [];
+    const byId = new Map(snapshot.bodies.map((b) => [b.id, b]));
+    const state = [];
+    for (const input of planets) {
+      const body = byId.get(input.id);
+      if (!body || body.type !== "planet") continue;
+      const position = Number(input.coords.split(":")[2]) || 8;
+      const temp = input.maxTemp ?? 50;
+      const levels = { metal: body.levels["1"] ?? 0, crystal: body.levels["2"] ?? 0, deuterium: body.levels["3"] ?? 0 };
+      const flat = { metal: 30 * speed, crystal: 15 * speed, deuterium: 0 };
+      const mult = zero();
+      for (const k of KEYS4) {
+        const base = mineBase(k, levels[k], position, temp, speed);
+        mult[k] = base > 0 ? Math.max(1, (body.production[k] - flat[k]) / base) : 1;
+      }
+      state.push({ input, position, temp, levels, mult, production: { ...body.production } });
+    }
+    if (!state.length) return [];
+    const count2 = state.length;
+    let equip = { ...ZERO_COST };
+    for (const p of state) {
+      const body = byId.get(p.input.id);
+      equip = addCost(equip, equipment(body.levels, false));
+      const moon = body.siblingId ? byId.get(body.siblingId) : void 0;
+      if (moon) equip = addCost(equip, equipment(moon.levels, true));
+    }
+    const colonyCost = { metal: equip.metal / count2, crystal: equip.crystal / count2, deuterium: equip.deuterium / count2, energy: 0 };
+    let plasma = snapshot.researches[String(PLASMA)] ?? 0;
+    let astro = snapshot.researches[String(ASTRO)] ?? 0;
+    let extra = 0;
+    const out = [];
+    for (let i = 0; i < steps; i++) {
+      let best = null;
+      const consider = (s) => {
+        if (Number.isFinite(s.days) && (!best || s.days < best.days)) best = s;
+      };
+      for (const p of state) {
+        for (const k of KEYS4) {
+          const L2 = p.levels[k];
+          const gain = zero();
+          gain[k] = (mineBase(k, L2 + 1, p.position, p.temp, speed) - mineBase(k, L2, p.position, p.temp, speed)) * p.mult[k];
+          const cost = levelCost(MINE_ID[k], L2 + 1);
+          consider({ kind: "mine", mine: k, planetId: p.input.id, name: p.input.name, coords: p.input.coords, from: L2, to: L2 + 1, cost, gain, days: days(cost, gain, rates) });
+        }
+      }
+      const plasmaGain = zero();
+      for (const p of state) for (const k of KEYS4) plasmaGain[k] += mineBase(k, p.levels[k], p.position, p.temp, speed) * PLASMA_RATE[k];
+      for (const k of KEYS4) plasmaGain[k] *= (count2 + extra) / count2;
+      const plasmaCost = levelCost(PLASMA, plasma + 1);
+      consider({ kind: "plasma", from: plasma, to: plasma + 1, cost: plasmaCost, gain: plasmaGain, days: days(plasmaCost, plasmaGain, rates) });
+      const next = astro % 2 === 1 ? astro + 2 : astro + 1;
+      const astroCost = addCost(rangeCost(ASTRO, astro + 1, next), colonyCost);
+      const avg = zero();
+      for (const p of state) for (const k of KEYS4) avg[k] += p.production[k] / count2;
+      consider({ kind: "astro", from: astro, to: next, cost: astroCost, gain: avg, days: days(astroCost, avg, rates) });
+      const step = best;
+      if (!step) break;
+      out.push(step);
+      if (step.kind === "mine") {
+        const p = state.find((x) => x.input.id === step.planetId);
+        p.levels[step.mine] = step.to;
+        p.production[step.mine] += step.gain[step.mine];
+      } else if (step.kind === "plasma") {
+        plasma = step.to;
+        for (const p of state)
+          for (const k of KEYS4) {
+            const add = mineBase(k, p.levels[k], p.position, p.temp, speed) * PLASMA_RATE[k];
+            p.mult[k] += PLASMA_RATE[k];
+            p.production[k] += add;
+          }
+      } else {
+        astro = step.to;
+        extra++;
+      }
+    }
+    return out;
   }
 
   // src/data/tech-names.ts
   var TECH_NAMES_KEY = "tech.names";
-  var MINES2 = [1, 2, 3, 4, 12, 212, 217, 22, 23, 24];
+  var MINES = [1, 2, 3, 4, 12, 212, 217, 22, 23, 24];
   var PLANET_FACILITIES = [14, 15, 21, 31, 33, 34, 36, 44];
   var MOON_FACILITIES = [41, 42, 43, 14, 21, 22, 23, 24];
   var RESEARCH = [106, 108, 109, 110, 111, 113, 114, 115, 117, 118, 120, 121, 122, 123, 124, 199];
@@ -9689,6 +9773,13 @@ td.guess { font-style: italic; opacity: 0.7; }
 .lv .lv-name { height: 40px; display: flex; align-items: center; text-align: center; color: var(--text-2); font-size: 10px; line-height: 1.15; overflow: hidden; }
 .lv.zero { opacity: 0.45; } .lv.zero b { color: var(--muted); }
 .move .pic { border-radius: 5px; }
+.head-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
+.head-toggle:hover, .head-toggle:focus-visible { color: #4FD1E8; }
+.head-toggle svg { transition: transform 0.15s; }
+.head-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+.moves-open { grid-column: 1 / -1; order: 3; }
+.moves-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
+.moves-list .move:nth-child(2) { border-top: 0; }
 
 /* Planets | moons switch on the ships and defence pages. */
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
@@ -9732,6 +9823,8 @@ table.scrap .unit-label[aria-pressed="true"] { border-color: var(--accent); back
 @media (max-width: 900px) {
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cols { grid-template-columns: 1fr; }
+  .moves-list { grid-template-columns: 1fr; }
+  .moves-list .move:nth-child(2) { border-top: 1px solid #1A2638; }
 }
 .charts { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 12px; }
 .chart { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
@@ -9759,6 +9852,7 @@ table.queues td.acts { width: 1%; text-align: right; }
   var tab = "summary";
   var scrapBody = null;
   var scrapRate = 35;
+  var movesOpen = false;
   var unitScope = "planet";
   var keyHandler2 = null;
   function h3(tag, className = "", text) {
@@ -9787,7 +9881,6 @@ table.queues td.acts { width: 1%; text-align: right; }
     return list;
   }
   var level = (b, id) => b.levels[String(id)] ?? 0;
-  var MINE_ID = { metal: 1, crystal: 2, deuterium: 3 };
   var numLocale = "it";
   var count = (n) => n < 1e6 ? n.toLocaleString(numLocale) : formatUnits(n, numLocale);
   function unitsValue2(b, ids) {
@@ -10046,21 +10139,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       lf.textContent = SPECIES.filter((s) => bySpecies.has(s)).map((s) => `${t(`lf.${s}`)} ${bySpecies.get(s)}`).join(" \xB7 ");
       prod.append(h3("h4", "", t("dash.tab.lifeforms")), lf);
     }
-    const movesCard = h3("div", "card");
-    const movesHead = h3("h3", "", t("dash.moves"));
-    movesHead.title = t("dash.movesHint");
-    movesCard.append(movesHead);
-    const moves = bestUpgrades(o.snapshot, o.entries, 5);
-    if (!moves.length) movesCard.append(h3("p", "hint", t("dash.movesNone")));
-    moves.forEach((m, i) => {
-      const line = h3("div", "move");
-      line.append(ctx.pic(MINE_ID[m.mine], 28) ?? h3("span", "n", String(i + 1)));
-      const text = h3("div", "move-text");
-      text.append(h3("strong", "", `${t(`mine.${m.mine}`)} ${m.from} \u2192 ${m.from + 1}`));
-      text.append(h3("span", "", `${m.name} [${m.coords}] \xB7 ${fmt(m.cost.metal)} M \xB7 ${fmt(m.cost.crystal)} C`));
-      line.append(text, h3("span", "roi mono", m.days < 1 ? `<1 ${t("dash.daysShort")}` : `${m.days.toLocaleString(ctx.o.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${t("dash.daysShort")}`));
-      movesCard.append(line);
-    });
+    const movesCard = buildOrderCard(ctx);
     const checks = h3("div", "card");
     checks.append(h3("h3", "", t("dash.checks")));
     if (!alerts.length) checks.append(h3("p", "ok", t("dash.allGood")));
@@ -10116,9 +10195,9 @@ table.queues td.acts { width: 1%; text-align: right; }
     for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, String(v));
     return node;
   }
-  function lineChart(doc, days, value, fmt, label, locale) {
+  function lineChart(doc, days2, value, fmt, label, locale) {
     const W = 520, H = 140, L2 = 56, R = 8, T = 10, B = 22;
-    const pts = days.filter((d) => value(d) > 0);
+    const pts = days2.filter((d) => value(d) > 0);
     const box = h3("figure", "chart");
     box.append(h3("figcaption", "", label));
     if (pts.length < 2) {
@@ -10179,15 +10258,15 @@ table.queues td.acts { width: 1%; text-align: right; }
   function historyTab(parent, ctx) {
     const { o, fmt } = ctx;
     const { t, locale } = o;
-    const days = o.history ?? [];
-    if (days.length < 2) {
+    const days2 = o.history ?? [];
+    if (days2.length < 2) {
       parent.append(h3("p", "empty", t("dash.historyEmpty")));
       return;
     }
     const signed = (v, f) => v > 0 ? `+${f(v)}` : v < 0 ? `\u2212${f(-v)}` : "0";
     const kpis = h3("div", "kpis");
     for (const span of [1, 7, 30]) {
-      const c = changeOver(days, span);
+      const c = changeOver(days2, span);
       const box = h3("div", "kpi");
       box.append(h3("span", "label", t("dash.historySpan", { n: span })));
       box.append(h3("span", `value ${c && c.points < 0 ? "neg" : ""}`, c ? signed(c.points, (n) => n.toLocaleString(locale)) : "\u2014"));
@@ -10198,8 +10277,8 @@ table.queues td.acts { width: 1%; text-align: right; }
     parent.append(kpis);
     const charts = h3("div", "cols charts");
     charts.append(
-      lineChart(o.doc, days, (d) => d.points, (v) => formatUnits(v, locale), t("dash.points"), locale),
-      lineChart(o.doc, days, (d) => d.prodDay, (v) => formatUnits(v, locale), t("dash.historyProd"), locale)
+      lineChart(o.doc, days2, (d) => d.points, (v) => formatUnits(v, locale), t("dash.points"), locale),
+      lineChart(o.doc, days2, (d) => d.prodDay, (v) => formatUnits(v, locale), t("dash.historyProd"), locale)
     );
     parent.append(charts);
     const s = section(parent, t("dash.historyDays"));
@@ -10211,7 +10290,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     thead.append(head);
     table.append(thead);
     const tbody = h3("tbody");
-    [...days].reverse().slice(0, 60).forEach((d, i, list) => {
+    [...days2].reverse().slice(0, 60).forEach((d, i, list) => {
       const prev = list[i + 1];
       const tr = h3("tr");
       const delta = prev ? d.points - prev.points : 0;
@@ -10230,12 +10309,91 @@ table.queues td.acts { width: 1%; text-align: right; }
     wrap.append(table);
     s.append(wrap);
   }
+  var RATES_KEY = "dash.rates";
+  var sessionRates = DEFAULT_RATES;
+  var loadRates = (o) => o.store?.get(RATES_KEY, DEFAULT_RATES) ?? sessionRates;
+  function buildOrder(ctx, steps) {
+    const { o } = ctx;
+    const speed = Number(o.doc.querySelector('meta[name="ogame-universe-speed"]')?.getAttribute("content")) || 1;
+    const planets = o.entries.filter((e) => e.planetId).map((e) => ({ id: e.planetId, name: e.name, coords: e.coords, maxTemp: maxTemperatureOf(e.planetLink) }));
+    return amortizationPlan({ snapshot: o.snapshot, planets, speed, rates: loadRates(o), steps });
+  }
+  var STEP_ID = { metal: 1, crystal: 2, deuterium: 3, plasma: 122, astro: 124 };
+  function stepLine(ctx, m, i, numbered = false) {
+    const { t, locale } = ctx.o;
+    const id = m.kind === "mine" ? STEP_ID[m.mine] : STEP_ID[m.kind];
+    const line = h3("div", "move");
+    if (numbered) line.append(h3("span", "n", String(i + 1)));
+    const pic = ctx.pic(id, 28);
+    if (pic) line.append(pic);
+    else if (!numbered) line.append(h3("span", "n", String(i + 1)));
+    const text = h3("div", "move-text");
+    const what = m.kind === "mine" ? t(`mine.${m.mine}`) : ctx.name(id);
+    text.append(h3("strong", "", `${what} ${m.from} \u2192 ${m.to}${m.kind === "astro" ? ` \xB7 ${t("dash.newColony")}` : ""}`));
+    const cost = [`${ctx.fmt(m.cost.metal)} M`, `${ctx.fmt(m.cost.crystal)} C`, ...m.cost.deuterium ? [`${ctx.fmt(m.cost.deuterium)} D`] : []].join(" \xB7 ");
+    text.append(h3("span", "", m.kind === "mine" ? `${m.name} [${m.coords}] \xB7 ${cost}` : `${t("dash.account")} \xB7 ${cost}`));
+    line.append(text, h3("span", "roi mono", m.days < 1 ? `<1 ${t("dash.daysShort")}` : `${m.days.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${t("dash.daysShort")}`));
+    return line;
+  }
+  function buildOrderCard(ctx) {
+    const { o } = ctx;
+    const { t, doc } = o;
+    const s = h3("div", movesOpen ? "card moves-open" : "card");
+    const head = h3("h3", "");
+    const toggle = h3("button", "head-toggle");
+    toggle.type = "button";
+    toggle.title = t("dash.movesHint");
+    toggle.setAttribute("aria-expanded", String(movesOpen));
+    toggle.append(h3("span", "", t("dash.moves")), icon(doc, "chevron", 14));
+    toggle.addEventListener("click", () => {
+      movesOpen = !movesOpen;
+      ctx.redraw();
+    });
+    head.append(toggle);
+    s.append(head);
+    const steps = buildOrder(ctx, movesOpen ? 30 : 5);
+    if (!steps.length) {
+      s.append(h3("p", "hint", t("dash.movesNone")));
+      return s;
+    }
+    if (!movesOpen) {
+      steps.forEach((m, i) => s.append(stepLine(ctx, m, i)));
+      return s;
+    }
+    const bar = h3("div", "scrap-bar");
+    const rates = loadRates(o);
+    const label = h3("label", "field-label", t("dash.rates"));
+    ["metal", "crystal", "deuterium"].forEach((k, i) => {
+      const input = h3("input", "field rate");
+      input.type = "number";
+      input.min = "0.1";
+      input.step = "0.1";
+      input.value = String(rates[k]);
+      input.setAttribute("aria-label", `${t("dash.rates")}: ${t(`res.${k}`)}`);
+      input.addEventListener("change", () => {
+        const v = Number(input.value);
+        if (!(v > 0)) return;
+        const next = { ...loadRates(o), [k]: v };
+        if (o.store) o.store.set(RATES_KEY, next);
+        else sessionRates = next;
+        ctx.redraw();
+      });
+      if (i) label.append(h3("span", "", ":"));
+      label.append(input);
+    });
+    bar.append(label);
+    s.append(bar);
+    const list = h3("div", "moves-list");
+    steps.forEach((m, i) => list.append(stepLine(ctx, m, i, true)));
+    s.append(list);
+    return s;
+  }
   function minesTab(parent, ctx) {
     const { t } = ctx.o;
     const planets = ctx.bodies.filter((b) => b.type === "planet");
     const s = section(parent, t("dash.tab.mines"), t("dash.minesHint"));
     s.append(
-      bodyMatrix(ctx, planets, MINES2, {
+      bodyMatrix(ctx, planets, MINES, {
         foot: "avg",
         extra: [
           { label: `${t("res.metal")}/${t("dash.dayShort")}`, cls: "m", value: (b) => ctx.fmt(b.production.metal * 24) },
@@ -14148,9 +14306,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         th("MSU");
         th("");
         table.append(hr);
-        const days = byDay(entries, 31);
-        const top2 = Math.max(1, ...days.map((d) => d.stats.netMsu));
-        for (const { day, stats } of days) {
+        const days2 = byDay(entries, 31);
+        const top2 = Math.max(1, ...days2.map((d) => d.stats.netMsu));
+        for (const { day, stats } of days2) {
           const tr = h5("tr");
           if (focus === day) tr.className = "on";
           const spark = h5("td", "spark-cell");
@@ -14291,8 +14449,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           card.append(strip);
           parts.push(card);
         }
-        const days = byDay(entries, 31);
-        if (kind !== "raid" && (days.length > 1 || period !== "today")) {
+        const days2 = byDay(entries, 31);
+        if (kind !== "raid" && (days2.length > 1 || period !== "today")) {
           const card = h5("div", "card");
           card.append(h5("h3", "", t("exp.byDay")));
           const scroll = h5("div", "scroll");
@@ -14301,7 +14459,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           const labels = isDisc ? [t("exp.day"), t("exp.countShort"), t("exp.artefacts"), t("exp.lfXp")] : [t("exp.day"), t("exp.countShort"), t("msg.res.metal"), t("msg.res.crystal"), t("msg.res.deuterium"), t("exp.dmShort"), t("exp.shipsShort"), "MSU"];
           for (const label of labels) hr.append(h5("th", "", label));
           table.append(hr);
-          for (const { day, stats } of days) {
+          for (const { day, stats } of days2) {
             const tr = h5("tr");
             if (isDisc) {
               tr.append(
@@ -14849,9 +15007,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           const out = convertOglight(json2, loadMarks(store.get(MARKS_KEY, null)), store.get(POSITIONS_KEY, {}), Date.now());
           store.set(MARKS_KEY, out.marks);
           store.set(POSITIONS_KEY, out.positions);
-          const days = convertOglightStats(json2.stats ?? {}, store.get(JOURNAL_KEY, {}));
-          store.set(JOURNAL_KEY, days.journal);
-          return t("settings.oglightDone", { players: out.players, seen: out.seen, exp: days.expeditions.toLocaleString(locale), raids: days.raids.toLocaleString(locale), days: days.days });
+          const days2 = convertOglightStats(json2.stats ?? {}, store.get(JOURNAL_KEY, {}));
+          store.set(JOURNAL_KEY, days2.journal);
+          return t("settings.oglightDone", { players: out.players, seen: out.seen, exp: days2.expeditions.toLocaleString(locale), raids: days2.raids.toLocaleString(locale), days: days2.days });
         }
       },
       notes: [menuCtx.colonies, snapshot ? t("toolbar.lastSync", { time: new Date(snapshot.fetchedAt).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) }) : ""].filter(Boolean),
@@ -14895,6 +15053,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           names: techNames,
           lfSlots,
           icons: store.get(TECH_ICONS_KEY, {}),
+          store,
           now: Date.now(),
           locale,
           t
