@@ -247,6 +247,27 @@ describe('inbox page', () => {
 });
 
 describe('reports shared by the alliance', () => {
+  it('the game\'s header "Condiviso da" marks them, on any tab', () => {
+    document.body.innerHTML = '<div class="innerTabItem active" data-subtab-id="22"></div>';
+    const store = new Store(new MemoryStore(), 'shared2');
+    store.set(JOURNAL_KEY, { '600': { kind: 'expedition', at: 1, result: 'resource', size: 0, depletion: 0, res: { metal: 9e8, crystal: 0, deuterium: 0, darkMatter: 0, food: 0 }, ships: {}, lost: {}, item: null, lfXp: 0, lifeform: 0, artefacts: 0, coords: '1:1:16' } });
+    const m = msg('600', deut);
+    m.insertAdjacentHTML('afterbegin', '<div class="msgHead"><div class="msgHeadItem delActions">Condiviso da <span class="tooltipHTML player">AngryVito</span></div></div>');
+    const own = msg('601', deut);
+    own.insertAdjacentHTML('afterbegin', '<div class="msgHead"><div class="msgHeadItem delActions"><button class="msgDeleteBtn"></button></div></div>');
+    document.body.append(m, own);
+    processMessages({ doc: document, store, playerId: OWN, locale: 'it', t, now: () => 1793891482000 });
+    expect(Object.keys(store.get<Journal>(JOURNAL_KEY, {}))).toEqual(['601']);
+  });
+
+  it('the shared expeditions tab (13) counts nothing', () => {
+    document.body.innerHTML = '<div class="innerTabItem active" data-subtab-id="13"></div>';
+    const store = new Store(new MemoryStore(), 'shared3');
+    document.body.append(msg('700', deut));
+    processMessages({ doc: document, store, playerId: OWN, locale: 'it', t, now: () => 1793891482000 });
+    expect(store.get<Journal>(JOURNAL_KEY, {})).toEqual({});
+  });
+
   it('are marked when read from Communication › shared espionage reports', async () => {
     const { SPY_BOARD_KEY } = await import('../src/engines/raids');
     const spyAttrs = { coordinates: '1:476:7', playername: 'el_loco', targetplayerid: '5', resources: '211740737', loot: '75', metal: '122942381', crystal: '25224981', deuterium: '63573375', fleetvalue: '0', defensevalue: '329025000', activity: '-1' };
