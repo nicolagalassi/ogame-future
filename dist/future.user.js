@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.71
+// @version      0.3.72
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -256,15 +256,15 @@
   function matchShownLevel(id, candidates, shown2) {
     let best = null;
     for (const level2 of new Set(candidates.filter((l) => l >= 1))) {
-      const discount = discountFrom(id, level2, shown2);
-      if (discount === null) continue;
-      if (!best || discount < best.discount) best = { level: level2, discount };
+      const discount2 = discountFrom(id, level2, shown2);
+      if (discount2 === null) continue;
+      if (!best || discount2 < best.discount) best = { level: level2, discount: discount2 };
     }
     return best;
   }
-  function levelCost(id, level2, discount = 0) {
+  function levelCost(id, level2, discount2 = 0) {
     const raw = rawCost(id, level2);
-    const keep = 1 - discount;
+    const keep = 1 - discount2;
     return {
       metal: Math.floor(raw.metal * keep),
       crystal: Math.floor(raw.crystal * keep),
@@ -278,9 +278,9 @@
   function scaleCost(a, n) {
     return { metal: a.metal * n, crystal: a.crystal * n, deuterium: a.deuterium * n, energy: a.energy };
   }
-  function rangeCost(id, from, to, discount = 0) {
+  function rangeCost(id, from, to, discount2 = 0) {
     let total = { ...ZERO_COST };
-    for (let level2 = from; level2 <= to; level2++) total = addCost(total, levelCost(id, level2, discount));
+    for (let level2 = from; level2 <= to; level2++) total = addCost(total, levelCost(id, level2, discount2));
     return total;
   }
   function durationWeight(id, level2) {
@@ -296,8 +296,8 @@
     return sum / (flat ? 1 : Math.max(4 - level2 / 2, 1));
   }
   function scaleDuration(id, shownLevel, shownMs, level2) {
-    const base = durationWeight(id, shownLevel);
-    return base > 0 ? shownMs * durationWeight(id, level2) / base : 0;
+    const base2 = durationWeight(id, shownLevel);
+    return base2 > 0 ? shownMs * durationWeight(id, level2) / base2 : 0;
   }
   function missing(cost, have) {
     return {
@@ -578,6 +578,12 @@
     "dash.rates": "Tassi M : C : D",
     "dash.newColony": "nuova colonia",
     "dash.account": "Account",
+    "dash.lfGuessed": "slot da confermare",
+    "dash.lfGuessedHint": "Ricerca dedotta dai livelli: apri la pagina Ricerche FV di questo pianeta per sapere quale \xE8 attiva.",
+    "dash.needLevels": "Per il bonus del livello delle specie apri:",
+    "dash.openLfSettings": "Impostazioni forme di vita",
+    "dash.needBuildings": "Edifici FV a livello 0 da controllare (requisiti) su {count} pianeti, apri la pagina di:",
+    "dash.needSlots": "Ricerche FV attive da confermare su {count} pianeti, apri la pagina di:",
     "dash.movesNone": "Servono i livelli delle miniere: premi Sincronizza.",
     "dash.movesHint": "Come gli ammortamenti di InfoCompte: miniere, plasma e nuova colonia (astrofisica + attrezzatura media di un pianeta) per giorni di ritorno ai tassi scelti; ogni passo conta i precedenti. Non conta energia n\xE9 sconti delle forme di vita.",
     "dash.colQueue": "In corso",
@@ -1363,6 +1369,12 @@
     "dash.rates": "Rates M : C : D",
     "dash.newColony": "new colony",
     "dash.account": "Account",
+    "dash.lfGuessed": "slot to confirm",
+    "dash.lfGuessedHint": "Research guessed from the levels: open this planet's lifeform research page to know which one is active.",
+    "dash.needLevels": "For the species level bonus open:",
+    "dash.openLfSettings": "Lifeform settings",
+    "dash.needBuildings": "Lifeform buildings at level 0 to check (requirements) on {count} planets, open the page of:",
+    "dash.needSlots": "Active lifeform research to confirm on {count} planets, open the page of:",
     "dash.movesNone": "Mine levels needed: press Sync.",
     "dash.movesHint": "As InfoCompte's amortizations: mines, plasma and a new colony (astrophysics + a planet's average equipment) by payback days at your trade rates; each step counts the ones before. Energy and lifeform discounts not counted.",
     "dash.colQueue": "Running",
@@ -2148,6 +2160,12 @@
     "dash.rates": "Taux M : C : D",
     "dash.newColony": "nouvelle colonie",
     "dash.account": "Compte",
+    "dash.lfGuessed": "emplacement \xE0 confirmer",
+    "dash.lfGuessedHint": "Recherche d\xE9duite des niveaux : ouvrez la page Recherches FDV de cette plan\xE8te pour savoir laquelle est active.",
+    "dash.needLevels": "Pour le bonus du niveau des esp\xE8ces, ouvrez :",
+    "dash.openLfSettings": "Options des formes de vie",
+    "dash.needBuildings": "B\xE2timents FDV au niveau 0 \xE0 v\xE9rifier (pr\xE9requis) sur {count} plan\xE8tes, ouvrez la page de :",
+    "dash.needSlots": "Recherches FDV actives \xE0 confirmer sur {count} plan\xE8tes, ouvrez la page de :",
     "dash.movesNone": "Niveaux des mines requis : Synchroniser.",
     "dash.movesHint": "Comme les amortissements d'InfoCompte : mines, plasma et nouvelle colonie (astrophysique + \xE9quipement moyen d'une plan\xE8te) par jours d'amortissement \xE0 vos taux ; chaque \xE9tape compte les pr\xE9c\xE9dentes. Sans \xE9nergie ni r\xE9ductions formes de vie.",
     "dash.colQueue": "En cours",
@@ -2933,6 +2951,12 @@
     "dash.rates": "Kurse M : K : D",
     "dash.newColony": "neue Kolonie",
     "dash.account": "Konto",
+    "dash.lfGuessed": "Platz zu best\xE4tigen",
+    "dash.lfGuessedHint": "Forschung aus den Stufen gesch\xE4tzt: \xD6ffne die Lebensform-Forschungsseite dieses Planeten, um die aktive zu sehen.",
+    "dash.needLevels": "F\xFCr den Bonus der Lebensform-Stufe \xF6ffne:",
+    "dash.openLfSettings": "Lebensform-Einstellungen",
+    "dash.needBuildings": "Lebensform-Geb\xE4ude auf Stufe 0 zu pr\xFCfen (Voraussetzungen) auf {count} Planeten, \xF6ffne die Seite von:",
+    "dash.needSlots": "Aktive Lebensform-Forschung auf {count} Planeten zu best\xE4tigen, \xF6ffne die Seite von:",
     "dash.movesNone": "Minenstufen n\xF6tig: Synchronisieren.",
     "dash.movesHint": "Wie die Amortisation von InfoCompte: Minen, Plasma und neue Kolonie (Astrophysik + durchschnittliche Ausstattung eines Planeten) nach Amortisationstagen zu deinen Kursen; jeder Schritt z\xE4hlt die vorherigen. Ohne Energie und Lebensform-Rabatte.",
     "dash.colQueue": "L\xE4uft",
@@ -3991,14 +4015,14 @@
     const last2 = history.at(-1);
     if (!last2 || history.length < 2) return null;
     const limit = last2.at - days2 * 864e5;
-    const base = [...history].reverse().find((d) => d.at <= limit + 36e5) ?? history[0];
-    if (base === last2) return null;
-    const span = Math.max(1, Math.round((last2.at - base.at) / 864e5));
+    const base2 = [...history].reverse().find((d) => d.at <= limit + 36e5) ?? history[0];
+    if (base2 === last2) return null;
+    const span = Math.max(1, Math.round((last2.at - base2.at) / 864e5));
     return {
       days: span,
-      points: last2.points - base.points,
-      rank: last2.rank !== null && base.rank !== null ? base.rank - last2.rank : null,
-      perDay: (last2.points - base.points) / span
+      points: last2.points - base2.points,
+      rank: last2.rank !== null && base2.rank !== null ? base2.rank - last2.rank : null,
+      perDay: (last2.points - base2.points) / span
     };
   }
 
@@ -6361,29 +6385,29 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     return Math.round((10 + 3500 * (100 / percent) * Math.sqrt(10 * dist / speed)) / u.fleetSpeed);
   }
   function nearestBase(bases, coords, u) {
-    let base = null;
+    let base2 = null;
     let dist = Infinity;
     for (const b of bases) {
       const d = distance(b.coords, coords, u);
       if (d < dist) {
         dist = d;
-        base = b;
+        base2 = b;
       }
     }
-    return { base, dist };
+    return { base: base2, dist };
   }
   function targetRows(board, bases, o) {
     return Object.values(board).map((entry) => {
       const lootRes = Math.floor((entry.res.metal + entry.res.crystal + entry.res.deuterium) * entry.loot);
       const lootMsu = (entry.res.metal + entry.res.crystal * 1.5 + entry.res.deuterium * 3) * entry.loot;
-      const { base, dist } = nearestBase(bases, entry.coords, o.universe);
-      const flight = base && o.speed > 0 ? flightSeconds(dist, o.speed, o.universe) : null;
+      const { base: base2, dist } = nearestBase(bases, entry.coords, o.universe);
+      const flight = base2 && o.speed > 0 ? flightSeconds(dist, o.speed, o.universe) : null;
       return {
         entry,
         lootRes,
         lootMsu,
         ships: o.capacity > 0 ? Math.ceil(lootRes / o.capacity) : 0,
-        base,
+        base: base2,
         flight,
         msuPerHour: flight ? lootMsu / (2 * flight / 3600) : null,
         ageMinutes: Math.max(0, Math.round((o.now - entry.at) / 6e4))
@@ -6958,7 +6982,7 @@ td.spark-cell { width: 90px; }
       const e = r.entry;
       const [g, s, p] = e.coords.split(":");
       const row = line(defended(r) ? "defended" : "");
-      const open = expanded.has(e.key);
+      const open2 = expanded.has(e.key);
       const from = here ?? r.base;
       const attackUrl = (n2, id) => `/game/index.php?page=ingame&component=fleetdispatch&galaxy=${g}&system=${s}&position=${p}&type=${e.moon ? 3 : 1}&mission=1${n2 > 0 ? `&am${id}=${n2}` : ""}`;
       const cellOf = {
@@ -7019,17 +7043,17 @@ td.spark-cell { width: 90px; }
       };
       const acts = el6("div", "fut-sp-c fut-sp-acts");
       const more = iconButton3("fut-sp-more", "more", t("spy.waves"), () => {
-        if (open) expanded.delete(e.key);
+        if (open2) expanded.delete(e.key);
         else expanded.add(e.key);
         mountSpyPanel(o);
       });
       more.dataset.focus = `more-${e.key}`;
-      more.setAttribute("aria-expanded", String(open));
+      more.setAttribute("aria-expanded", String(open2));
       more.setAttribute("aria-controls", `fut-sp-w-${index}`);
       acts.append(more);
       if (from) {
-        const base = from;
-        acts.append(iconButton3("fut-sp-attack", "sword", t("spy.attackHint", { name: baseName(base) }), () => {
+        const base2 = from;
+        acts.append(iconButton3("fut-sp-attack", "sword", t("spy.attackHint", { name: baseName(base2) }), () => {
           doc.location.assign(attackUrl(0, 203));
         }));
       }
@@ -7056,7 +7080,7 @@ td.spark-cell { width: 90px; }
       for (const c of cells) c.setAttribute("role", "cell");
       row.append(...cells);
       list.append(row);
-      if (open) {
+      if (open2) {
         const det = el6("div", "fut-sp-waves");
         det.id = `fut-sp-w-${index}`;
         det.setAttribute("role", "row");
@@ -9014,14 +9038,14 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     const hours = Math.floor(min / 60);
     return hours < 48 ? `${hours}h ${String(min % 60).padStart(2, "0")}m` : `${Math.floor(hours / 24)}d ${hours % 24}h`;
   }
-  function queueDots(doc, items, building, now, t, locale) {
-    if (!items.length && !building) return null;
+  function queueDots(doc, items, building2, now, t, locale) {
+    if (!items.length && !building2) return null;
     const box = el3(doc, "span", "fut-queue");
     if (items.length) {
       box.title = items.map((i) => `${t(`queue.${i.kind}`)}: ${queueLabel(i, locale)} \xB7 ${remaining(i.end, now)}`).join("\n");
       for (const kind of new Set(items.map((i) => i.kind))) box.append(el3(doc, "span", `fut-q fut-q-${kind}`));
     } else {
-      box.title = building?.getAttribute("title") || t("planetMenu.building");
+      box.title = building2?.getAttribute("title") || t("planetMenu.building");
       box.append(el3(doc, "span", "fut-q fut-q-unknown"));
     }
     return box;
@@ -9264,10 +9288,10 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     const colonies = (doc.getElementById("countColonies")?.textContent ?? "").replace(/\s+/g, " ").trim();
     list.before(toolbar(o, colonies, roomy));
     if (o.snapshot && o.settings.showTotals) {
-      const base = totals(o.snapshot, o.now);
-      const perHour = base.perHour;
+      const base2 = totals(o.snapshot, o.now);
+      const perHour = base2.perHour;
       const fly = o.flying ?? { metal: 0, crystal: 0, deuterium: 0 };
-      const stock2 = { metal: base.stock.metal + fly.metal, crystal: base.stock.crystal + fly.crystal, deuterium: base.stock.deuterium + fly.deuterium };
+      const stock2 = { metal: base2.stock.metal + fly.metal, crystal: base2.stock.crystal + fly.crystal, deuterium: base2.stock.deuterium + fly.deuterium };
       const msu4 = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
       const box = el3(doc, "div", "fut-totals");
       box.setAttribute("role", "table");
@@ -9304,123 +9328,6 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
       if (view2.fleet) row("fut-fleetrow", [o.t("planetMenu.fleet"), formatUnits(o.snapshot.bodies.reduce((sum, b) => sum + fleetValue(b), 0), o.locale), ""], "fleetValue");
       list.after(box);
     }
-  }
-
-  // src/engines/roi.ts
-  var KEYS4 = ["metal", "crystal", "deuterium"];
-  var MINE_ID = { metal: 1, crystal: 2, deuterium: 3 };
-  var PLASMA = 122;
-  var ASTRO = 124;
-  var PLASMA_RATE = { metal: 0.01, crystal: 66e-4, deuterium: 33e-4 };
-  var METAL_POS = [1.35, 1.23, 1.17, 1];
-  var CRYSTAL_POS = [1.4, 1.3, 1.2, 1];
-  var MOON_ONLY = /* @__PURE__ */ new Set([41, 42, 43]);
-  var DEFAULT_RATES = { metal: 3, crystal: 2, deuterium: 1 };
-  function inMetal(r, rates) {
-    return KEYS4.reduce((sum, k) => sum + (rates[k] > 0 ? r[k] * rates.metal / rates[k] : 0), 0);
-  }
-  function mineBase(mine, level2, position, maxTemp, speed) {
-    const k = speed * level2 * Math.pow(1.1, level2);
-    if (mine === "metal") return Math.trunc(30 * k * METAL_POS[Math.min(3, Math.abs(position - 8))]);
-    if (mine === "crystal") return Math.trunc(20 * k * CRYSTAL_POS[Math.min(3, Math.max(0, position - 1))]);
-    return Math.trunc(10 * k * (1.44 - 4e-3 * maxTemp));
-  }
-  var zero = () => ({ metal: 0, crystal: 0, deuterium: 0 });
-  var days = (cost, gain, rates) => {
-    const g = inMetal(gain, rates);
-    return g > 0 ? inMetal(cost, rates) / (g * 24) : Infinity;
-  };
-  function equipment(levels, moon) {
-    let total = { ...ZERO_COST };
-    for (const [key, value] of Object.entries(levels)) {
-      const id = Number(key);
-      const kind = techKind(id);
-      if (!value || !kind) continue;
-      if (kind === "unit") {
-        if (id >= 400 && id < 500) total = addCost(total, scaleCost(levelCost(id, 1), value));
-      } else if (kind === "building" && (moon || !MOON_ONLY.has(id)) || kind === "lfBuilding" && !moon) {
-        total = addCost(total, rangeCost(id, 1, value));
-      }
-    }
-    return { ...total, energy: 0 };
-  }
-  function amortizationPlan({ snapshot, planets, speed, rates = DEFAULT_RATES, steps = 20 }) {
-    if (!snapshot) return [];
-    const byId = new Map(snapshot.bodies.map((b) => [b.id, b]));
-    const state = [];
-    for (const input of planets) {
-      const body = byId.get(input.id);
-      if (!body || body.type !== "planet") continue;
-      const position = Number(input.coords.split(":")[2]) || 8;
-      const temp = input.maxTemp ?? 50;
-      const levels = { metal: body.levels["1"] ?? 0, crystal: body.levels["2"] ?? 0, deuterium: body.levels["3"] ?? 0 };
-      const flat = { metal: 30 * speed, crystal: 15 * speed, deuterium: 0 };
-      const mult = zero();
-      for (const k of KEYS4) {
-        const base = mineBase(k, levels[k], position, temp, speed);
-        mult[k] = base > 0 ? Math.max(1, (body.production[k] - flat[k]) / base) : 1;
-      }
-      state.push({ input, position, temp, levels, mult, production: { ...body.production } });
-    }
-    if (!state.length) return [];
-    const count2 = state.length;
-    let equip = { ...ZERO_COST };
-    for (const p of state) {
-      const body = byId.get(p.input.id);
-      equip = addCost(equip, equipment(body.levels, false));
-      const moon = body.siblingId ? byId.get(body.siblingId) : void 0;
-      if (moon) equip = addCost(equip, equipment(moon.levels, true));
-    }
-    const colonyCost = { metal: equip.metal / count2, crystal: equip.crystal / count2, deuterium: equip.deuterium / count2, energy: 0 };
-    let plasma = snapshot.researches[String(PLASMA)] ?? 0;
-    let astro = snapshot.researches[String(ASTRO)] ?? 0;
-    let extra = 0;
-    const out = [];
-    for (let i = 0; i < steps; i++) {
-      let best = null;
-      const consider = (s) => {
-        if (Number.isFinite(s.days) && (!best || s.days < best.days)) best = s;
-      };
-      for (const p of state) {
-        for (const k of KEYS4) {
-          const L2 = p.levels[k];
-          const gain = zero();
-          gain[k] = (mineBase(k, L2 + 1, p.position, p.temp, speed) - mineBase(k, L2, p.position, p.temp, speed)) * p.mult[k];
-          const cost = levelCost(MINE_ID[k], L2 + 1);
-          consider({ kind: "mine", mine: k, planetId: p.input.id, name: p.input.name, coords: p.input.coords, from: L2, to: L2 + 1, cost, gain, days: days(cost, gain, rates) });
-        }
-      }
-      const plasmaGain = zero();
-      for (const p of state) for (const k of KEYS4) plasmaGain[k] += mineBase(k, p.levels[k], p.position, p.temp, speed) * PLASMA_RATE[k];
-      for (const k of KEYS4) plasmaGain[k] *= (count2 + extra) / count2;
-      const plasmaCost = levelCost(PLASMA, plasma + 1);
-      consider({ kind: "plasma", from: plasma, to: plasma + 1, cost: plasmaCost, gain: plasmaGain, days: days(plasmaCost, plasmaGain, rates) });
-      const next = astro % 2 === 1 ? astro + 2 : astro + 1;
-      const astroCost = addCost(rangeCost(ASTRO, astro + 1, next), colonyCost);
-      const avg = zero();
-      for (const p of state) for (const k of KEYS4) avg[k] += p.production[k] / count2;
-      consider({ kind: "astro", from: astro, to: next, cost: astroCost, gain: avg, days: days(astroCost, avg, rates) });
-      const step = best;
-      if (!step) break;
-      out.push(step);
-      if (step.kind === "mine") {
-        const p = state.find((x) => x.input.id === step.planetId);
-        p.levels[step.mine] = step.to;
-        p.production[step.mine] += step.gain[step.mine];
-      } else if (step.kind === "plasma") {
-        plasma = step.to;
-        for (const p of state)
-          for (const k of KEYS4) {
-            const add = mineBase(k, p.levels[k], p.position, p.temp, speed) * PLASMA_RATE[k];
-            p.mult[k] += PLASMA_RATE[k];
-            p.production[k] += add;
-          }
-      } else {
-        astro = step.to;
-        extra++;
-      }
-    }
-    return out;
   }
 
   // src/data/tech-names.ts
@@ -9639,6 +9546,297 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     }
     return out;
   }
+  var LF_LOCKED_KEY = "lf.locked";
+  function readLfLocked(doc) {
+    const component = new URL(doc.location?.href ?? "http://x/").searchParams.get("component");
+    const part = component === "lfbuildings" ? "b" : component === "lfresearch" ? "r" : null;
+    const items = Array.from(doc.querySelectorAll("#technologies .technology[data-technology]"));
+    if (!part || !items.length) return null;
+    return { part, ids: items.filter((e) => e.dataset.status === "off").map((e) => Number(e.dataset.technology)).filter((id) => id > 0) };
+  }
+
+  // src/data/lf-production.ts
+  var LF_BUILDING_BONUS = {
+    11103: [25e-4, 0, 0, 0.25, 0, 0],
+    11106: [0.015, 0, 0, 0, 0, 0],
+    11108: [0, 0.015, 0.01, 0, 0, 0],
+    11111: [5e-3, 0, 0, 1, 0, 0],
+    12103: [25e-4, 0, 0, 0.25, 0, 0],
+    12106: [0.02, 0, 0, 0, 0, 0],
+    12108: [0.01, 0, 0, 0.5, 0, 0],
+    12109: [0, 0.02, 0, 0, 0, 0],
+    12110: [0, 0, 0.02, 0, 0, 0],
+    12111: [5e-3, 0, 0, 0.5, 0, 0],
+    13103: [25e-4, 0, 0, 0.25, 0, 0],
+    13107: [0, 3e-3, 0, 0, 0, 0],
+    13110: [0, 0, 0.02, 0, 0, 0],
+    13111: [4e-3, 0, 0, 1, 0, 0],
+    14103: [25e-4, 0, 0, 0.25, 0, 0],
+    14107: [25e-4, 0, 0, 0, 0, 0]
+  };
+  var LF_RESEARCH_BONUS = {
+    11202: [6e-4, 6e-4, 6e-4, 0, 0, 0],
+    11208: [6e-4, 6e-4, 6e-4, 0, 0, 0],
+    12202: [0, 8e-4, 0, 0, 0, 0],
+    12203: [0, 0, 8e-4, 0, 0, 0],
+    12205: [8e-4, 8e-4, 8e-4, 0, 0, 0],
+    12207: [8e-4, 0, 0, 0, 0, 0],
+    12209: [15e-4, 0, 0, 0.5, 0, 0],
+    12210: [8e-4, 0, 0, 0, 0, 0],
+    12211: [0, 8e-4, 0, 0, 0, 0],
+    12212: [0, 0, 8e-4, 0, 0, 0],
+    13201: [0, 0, 8e-4, 0, 0, 0],
+    13206: [6e-4, 6e-4, 6e-4, 0, 0, 0],
+    13213: [6e-4, 6e-4, 6e-4, 0, 0, 0],
+    14202: [0, 0, 8e-4, 0, 0, 0],
+    14212: [6e-4, 6e-4, 6e-4, 0, 0, 0]
+  };
+  var LF_PRODUCTION_BUILDINGS = [11106, 11108, 12106, 12109, 12110, 13110];
+  var LF_PRODUCTION_RESEARCH = [11202, 11208, 12202, 12203, 12205, 12207, 12210, 12211, 12212, 13201, 13206, 13213, 14202, 14212];
+  var LF_RESEARCH_BOOSTERS = [[11111, 0], [13107, 1], [13111, 0]];
+  var KAELESH_BOOSTER = 14107;
+  var LF_RESEARCH_DISCOUNT = [11103, 12103, 13103, 14103];
+  var ROCKTAL_BUILDING_DISCOUNT = 12108;
+  var PRODUCER_DISCOUNT = 12111;
+  var PRODUCERS = /* @__PURE__ */ new Set([1, 2, 3, 4, 12, 11101, 11102, 12101, 12102, 13101, 13102, 14101, 14102]);
+  var PLASMA_DISCOUNT = 12209;
+  var LF_LEVELS_KEY = "lf.levels";
+  function readLfLevels(doc) {
+    const component = new URL(doc.location?.href ?? "http://x/").searchParams.get("component");
+    if (component !== "lfsettings") return null;
+    const out = {};
+    for (const item of Array.from(doc.querySelectorAll(".lifeform-item"))) {
+      const species = Number(/lifeform(\d)/.exec(item.querySelector(".lifeform-item-icon")?.className ?? "")?.[1]);
+      if (!species) continue;
+      const ps = Array.from(item.querySelectorAll(".lifeform-item-wrapper p"));
+      const pct = /(\d+(?:[.,]\d+)?)\s*%/.exec(ps[ps.length - 1]?.textContent ?? "");
+      if (pct) out[species] = Number(pct[1].replace(",", ".")) / 100;
+      else {
+        const level2 = Number(/\d+/.exec(ps[ps.length - 2]?.textContent ?? "")?.[0]);
+        if (level2 > 0) out[species] = level2 * 1e-3;
+      }
+    }
+    return Object.keys(out).length ? out : null;
+  }
+
+  // src/engines/roi.ts
+  var KEYS4 = ["metal", "crystal", "deuterium"];
+  var MINE_ID = { metal: 1, crystal: 2, deuterium: 3 };
+  var PLASMA = 122;
+  var ASTRO = 124;
+  var PLASMA_RATE = { metal: 0.01, crystal: 66e-4, deuterium: 33e-4 };
+  var METAL_POS = [1.35, 1.23, 1.17, 1];
+  var CRYSTAL_POS = [1.4, 1.3, 1.2, 1];
+  var MOON_ONLY = /* @__PURE__ */ new Set([41, 42, 43]);
+  var DEFAULT_RATES = { metal: 3, crystal: 2, deuterium: 1 };
+  function inMetal(r, rates) {
+    return KEYS4.reduce((sum, k) => sum + (rates[k] > 0 ? r[k] * rates.metal / rates[k] : 0), 0);
+  }
+  function mineBase(mine, level2, position, maxTemp, speed) {
+    const k = speed * level2 * Math.pow(1.1, level2);
+    if (mine === "metal") return Math.trunc(30 * k * METAL_POS[Math.min(3, Math.abs(position - 8))]);
+    if (mine === "crystal") return Math.trunc(20 * k * CRYSTAL_POS[Math.min(3, Math.max(0, position - 1))]);
+    return Math.trunc(10 * k * (1.44 - 4e-3 * maxTemp));
+  }
+  var zero = () => ({ metal: 0, crystal: 0, deuterium: 0 });
+  var days = (cost, gain, rates) => {
+    const g = inMetal(gain, rates);
+    return g > 0 ? inMetal(cost, rates) / (g * 24) : Infinity;
+  };
+  var lvl2 = (p, id) => p.levels[String(id)] ?? 0;
+  var base = (p, k, speed, level2 = lvl2(p, MINE_ID[k])) => mineBase(k, level2, p.position, p.temp, speed);
+  function building(p, id, column, level2 = lvl2(p, id)) {
+    const row = LF_BUILDING_BONUS[id];
+    if (!row || speciesOf(id) !== p.species) return 0;
+    return capped(row, column, row[column] * level2);
+  }
+  var capped = (row, column, value) => row[column + 3] ? Math.min(value, row[column + 3]) : value;
+  function researchFactor(p, id, levels, boosters = LF_RESEARCH_BOOSTERS.reduce((s, [b, c]) => s + building(p, b, c), 0)) {
+    const kaelesh = speciesOf(id) === 4 ? building(p, KAELESH_BOOSTER, 0) : 0;
+    return (1 + boosters) * (1 + kaelesh) * (1 + (levels[String(p.species)] ?? 0));
+  }
+  function discount(p, id) {
+    let d = 0;
+    if (PRODUCERS.has(id)) d += building(p, PRODUCER_DISCOUNT, 0);
+    const kind = techKind(id);
+    if (kind === "lfBuilding" && speciesOf(id) === 2) d += building(p, ROCKTAL_BUILDING_DISCOUNT, 0);
+    if (kind === "lfResearch") for (const b of LF_RESEARCH_DISCOUNT) d += building(p, b, 0);
+    return Math.min(d, 0.99);
+  }
+  function equipment(levels, moon) {
+    let total = { ...ZERO_COST };
+    for (const [key, value] of Object.entries(levels)) {
+      const id = Number(key);
+      const kind = techKind(id);
+      if (!value || !kind) continue;
+      if (kind === "unit") {
+        if (id >= 400 && id < 500) total = addCost(total, scaleCost(levelCost(id, 1), value));
+      } else if (kind === "building" && (moon || !MOON_ONLY.has(id)) || kind === "lfBuilding" && !moon) {
+        total = addCost(total, rangeCost(id, 1, value));
+      }
+    }
+    return { ...total, energy: 0 };
+  }
+  function open(locked, planetId, id, level2) {
+    if (level2 > 0) return true;
+    const seen = locked[String(planetId)]?.[techKind(id) === "lfBuilding" ? "b" : "r"];
+    return seen !== void 0 && !seen.includes(id);
+  }
+  function amortizationPlan({ snapshot, planets, speed, rates = DEFAULT_RATES, steps = 20, lfSlots = {}, lfLevels = {}, lfLocked = {} }) {
+    if (!snapshot) return [];
+    const byId = new Map(snapshot.bodies.map((b) => [b.id, b]));
+    const state = [];
+    for (const input of planets) {
+      const body = byId.get(input.id);
+      if (!body || body.type !== "planet") continue;
+      const p = {
+        input,
+        species: body.species ?? 0,
+        position: Number(input.coords.split(":")[2]) || 8,
+        temp: input.maxTemp ?? 50,
+        levels: { ...body.levels },
+        research: activeLfResearch(body, lfSlots[String(body.id)]).map((r) => ({ id: r.id, guessed: r.guessed })),
+        mult: zero(),
+        production: { ...body.production }
+      };
+      const flat = { metal: 30 * speed, crystal: 15 * speed, deuterium: 0 };
+      for (const k of KEYS4) {
+        const b = base(p, k, speed);
+        p.mult[k] = b > 0 ? Math.max(1, (body.production[k] - flat[k]) / b) : 1;
+      }
+      state.push(p);
+    }
+    if (!state.length) return [];
+    const count2 = state.length;
+    let equip = { ...ZERO_COST };
+    for (const p of state) {
+      const body = byId.get(p.input.id);
+      equip = addCost(equip, equipment(body.levels, false));
+      const moon = body.siblingId ? byId.get(body.siblingId) : void 0;
+      if (moon) equip = addCost(equip, equipment(moon.levels, true));
+    }
+    const colonyCost = { metal: equip.metal / count2, crystal: equip.crystal / count2, deuterium: equip.deuterium / count2, energy: 0 };
+    let plasma = snapshot.researches[String(PLASMA)] ?? 0;
+    let astro = snapshot.researches[String(ASTRO)] ?? 0;
+    let extra = 0;
+    const scale = () => (count2 + extra) / count2;
+    const accountBase = () => {
+      const out2 = zero();
+      for (const p of state) for (const k of KEYS4) out2[k] += base(p, k, speed);
+      return out2;
+    };
+    const addEverywhere = (share) => {
+      for (const p of state)
+        for (const k of KEYS4) {
+          p.mult[k] += share[k];
+          p.production[k] += base(p, k, speed) * share[k];
+        }
+    };
+    const plasmaDiscount = () => {
+      let d = 0;
+      const row = LF_RESEARCH_BONUS[PLASMA_DISCOUNT];
+      for (const p of state) if (p.research.some((r) => r.id === PLASMA_DISCOUNT)) d += row[0] * lvl2(p, PLASMA_DISCOUNT) * researchFactor(p, PLASMA_DISCOUNT, lfLevels);
+      return capped(row, 0, d);
+    };
+    const where = (p) => ({ planetId: p.input.id, name: p.input.name, coords: p.input.coords });
+    const out = [];
+    for (let i = 0; i < steps; i++) {
+      let best = null;
+      const consider = (s) => {
+        const d = days(s.cost, s.gain, rates);
+        if (Number.isFinite(d) && (!best || d < best.days)) best = { ...s, days: d };
+      };
+      const all2 = accountBase();
+      for (const p2 of state) {
+        for (const k of KEYS4) {
+          const id = MINE_ID[k];
+          const L2 = lvl2(p2, id);
+          const gain = zero();
+          gain[k] = (base(p2, k, speed, L2 + 1) - base(p2, k, speed, L2)) * p2.mult[k];
+          consider({ kind: "mine", id, mine: k, ...where(p2), from: L2, to: L2 + 1, cost: levelCost(id, L2 + 1, discount(p2, id)), gain });
+        }
+        for (const id of LF_PRODUCTION_BUILDINGS) {
+          if (speciesOf(id) !== p2.species) continue;
+          const L2 = lvl2(p2, id);
+          if (!open(lfLocked, p2.input.id, id, L2)) continue;
+          const gain = zero();
+          KEYS4.forEach((k, c) => gain[k] = (building(p2, id, c, L2 + 1) - building(p2, id, c, L2)) * base(p2, k, speed));
+          consider({ kind: "lfBuilding", id, ...where(p2), from: L2, to: L2 + 1, cost: levelCost(id, L2 + 1, discount(p2, id)), gain });
+        }
+        const boostersNow = LF_RESEARCH_BOOSTERS.reduce((s, [b, c]) => s + building(p2, b, c), 0);
+        for (const [id, column] of LF_RESEARCH_BOOSTERS) {
+          if (speciesOf(id) !== p2.species) continue;
+          const L2 = lvl2(p2, id);
+          if (!open(lfLocked, p2.input.id, id, L2)) continue;
+          const boostersNext = boostersNow - building(p2, id, column) + building(p2, id, column, L2 + 1);
+          const gain = zero();
+          for (const r of p2.research) {
+            const row = LF_RESEARCH_BONUS[r.id];
+            if (!row || !LF_PRODUCTION_RESEARCH.includes(r.id)) continue;
+            const delta = researchFactor(p2, r.id, lfLevels, boostersNext) - researchFactor(p2, r.id, lfLevels, boostersNow);
+            KEYS4.forEach((k, c) => gain[k] += (row[c] ?? 0) * lvl2(p2, r.id) * delta * all2[k] * scale());
+          }
+          consider({ kind: "lfBuilding", id, ...where(p2), from: L2, to: L2 + 1, cost: levelCost(id, L2 + 1, discount(p2, id)), gain });
+        }
+        for (const r of p2.research) {
+          const row = LF_RESEARCH_BONUS[r.id];
+          if (!row || !LF_PRODUCTION_RESEARCH.includes(r.id)) continue;
+          const L2 = lvl2(p2, r.id);
+          if (!open(lfLocked, p2.input.id, r.id, L2)) continue;
+          const f = researchFactor(p2, r.id, lfLevels);
+          const gain = zero();
+          KEYS4.forEach((k, c) => gain[k] = (row[c] ?? 0) * f * all2[k] * scale());
+          consider({ kind: "lfResearch", id: r.id, ...where(p2), from: L2, to: L2 + 1, cost: levelCost(r.id, L2 + 1, discount(p2, r.id)), gain, guessed: r.guessed });
+        }
+      }
+      const plasmaGain = zero();
+      for (const k of KEYS4) plasmaGain[k] = all2[k] * PLASMA_RATE[k] * scale();
+      consider({ kind: "plasma", id: PLASMA, from: plasma, to: plasma + 1, cost: levelCost(PLASMA, plasma + 1, plasmaDiscount()), gain: plasmaGain });
+      const next = astro % 2 === 1 ? astro + 2 : astro + 1;
+      const avg = zero();
+      for (const p2 of state) for (const k of KEYS4) avg[k] += p2.production[k] / count2;
+      consider({ kind: "astro", id: ASTRO, from: astro, to: next, cost: addCost(rangeCost(ASTRO, astro + 1, next), colonyCost), gain: avg });
+      const step = best;
+      if (!step) break;
+      out.push(step);
+      const p = state.find((x) => x.input.id === step.planetId);
+      if (step.kind === "mine" && p) {
+        p.levels[String(step.id)] = step.to;
+        p.production[step.mine] += step.gain[step.mine];
+      } else if (step.kind === "lfBuilding" && p) {
+        const share = zero();
+        KEYS4.forEach((k, c) => share[k] = building(p, step.id, c, step.to) - building(p, step.id, c, step.from));
+        p.levels[String(step.id)] = step.to;
+        if (LF_PRODUCTION_BUILDINGS.includes(step.id)) {
+          for (const k of KEYS4) {
+            p.mult[k] += share[k];
+            p.production[k] += base(p, k, speed) * share[k];
+          }
+        } else {
+          addEverywhere({ metal: step.gain.metal / all2.metal || 0, crystal: step.gain.crystal / all2.crystal || 0, deuterium: step.gain.deuterium / all2.deuterium || 0 });
+        }
+      } else if (step.kind === "lfResearch" && p) {
+        p.levels[String(step.id)] = step.to;
+        addEverywhere({ metal: step.gain.metal / all2.metal || 0, crystal: step.gain.crystal / all2.crystal || 0, deuterium: step.gain.deuterium / all2.deuterium || 0 });
+      } else if (step.kind === "plasma") {
+        plasma = step.to;
+        addEverywhere(PLASMA_RATE);
+      } else if (step.kind === "astro") {
+        astro = step.to;
+        extra++;
+      }
+    }
+    return out;
+  }
+  function lfBuildingsMissing(snapshot, lfLocked = {}) {
+    if (!snapshot) return [];
+    const ids = [...LF_PRODUCTION_BUILDINGS, ...LF_RESEARCH_BOOSTERS.map(([id]) => id)];
+    return snapshot.bodies.filter((b) => b.type === "planet" && b.species && !lfLocked[String(b.id)]?.b && ids.some((id) => speciesOf(id) === b.species && !(b.levels[String(id)] ?? 0))).map((b) => b.id);
+  }
+  function lfSlotsMissing(snapshot, lfSlots = {}) {
+    if (!snapshot) return [];
+    return snapshot.bodies.filter((b) => b.type === "planet" && !lfSlots[String(b.id)] && activeLfResearch(b).length > 0).map((b) => b.id);
+  }
 
   // src/data/tech-icons.ts
   var TECH_ICONS_KEY = "tech.icons";
@@ -9778,6 +9976,10 @@ td.guess { font-style: italic; opacity: 0.7; }
 .head-toggle svg { transition: transform 0.15s; }
 .head-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
 .moves-open { grid-column: 1 / -1; order: 3; }
+.needs { margin: 0 0 8px; padding: 8px 10px; border: 1px solid #1F2C40; border-radius: 7px; background: #0D1522; color: #B4C2D3; font-size: 12px; }
+.needs p { margin: 4px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.needs .chip { display: inline-flex; align-items: center; height: 22px; text-decoration: none; }
+.move-text .guess { color: #E3BB28; font-style: normal; }
 .moves-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
 .moves-list .move:nth-child(2) { border-top: 0; }
 
@@ -10316,12 +10518,44 @@ table.queues td.acts { width: 1%; text-align: right; }
     const { o } = ctx;
     const speed = Number(o.doc.querySelector('meta[name="ogame-universe-speed"]')?.getAttribute("content")) || 1;
     const planets = o.entries.filter((e) => e.planetId).map((e) => ({ id: e.planetId, name: e.name, coords: e.coords, maxTemp: maxTemperatureOf(e.planetLink) }));
-    return amortizationPlan({ snapshot: o.snapshot, planets, speed, rates: loadRates(o), steps });
+    return amortizationPlan({ snapshot: o.snapshot, planets, speed, rates: loadRates(o), steps, lfSlots: o.lfSlots, lfLevels: o.lfLevels ?? void 0, lfLocked: o.lfLocked });
   }
-  var STEP_ID = { metal: 1, crystal: 2, deuterium: 3, plasma: 122, astro: 124 };
+  function missingData(ctx) {
+    const { o } = ctx;
+    const { t } = o;
+    const slots = lfSlotsMissing(o.snapshot, o.lfSlots);
+    const buildings = lfBuildingsMissing(o.snapshot, o.lfLocked);
+    const firstPlanet = ctx.bodies.find((b) => b.type === "planet");
+    if (!slots.length && !buildings.length && (o.lfLevels || !firstPlanet)) return null;
+    const box = h3("div", "needs");
+    const base2 = "index.php?page=ingame&component=";
+    const link = (text, href) => {
+      const a = h3("a", "chip", text);
+      a.setAttribute("href", href);
+      return a;
+    };
+    if (!o.lfLevels && firstPlanet) {
+      const p = h3("p", "");
+      p.append(h3("span", "", `${t("dash.needLevels")} `), link(t("dash.openLfSettings"), `${base2}lfsettings&cp=${firstPlanet.id}`));
+      box.append(p);
+    }
+    const list = (ids, key, component) => {
+      if (!ids.length) return;
+      const p = h3("p", "");
+      p.append(h3("span", "", `${t(key, { count: ids.length })} `));
+      for (const id of ids) {
+        const name = o.entries.find((e) => e.planetId === id)?.name || ctx.bodies.find((x) => x.id === id)?.name || String(id);
+        p.append(link(name, `${base2}${component}&cp=${id}`));
+      }
+      box.append(p);
+    };
+    list(buildings, "dash.needBuildings", "lfbuildings");
+    list(slots, "dash.needSlots", "lfresearch");
+    return box;
+  }
   function stepLine(ctx, m, i, numbered = false) {
     const { t, locale } = ctx.o;
-    const id = m.kind === "mine" ? STEP_ID[m.mine] : STEP_ID[m.kind];
+    const id = m.id;
     const line = h3("div", "move");
     if (numbered) line.append(h3("span", "n", String(i + 1)));
     const pic = ctx.pic(id, 28);
@@ -10331,7 +10565,13 @@ table.queues td.acts { width: 1%; text-align: right; }
     const what = m.kind === "mine" ? t(`mine.${m.mine}`) : ctx.name(id);
     text.append(h3("strong", "", `${what} ${m.from} \u2192 ${m.to}${m.kind === "astro" ? ` \xB7 ${t("dash.newColony")}` : ""}`));
     const cost = [`${ctx.fmt(m.cost.metal)} M`, `${ctx.fmt(m.cost.crystal)} C`, ...m.cost.deuterium ? [`${ctx.fmt(m.cost.deuterium)} D`] : []].join(" \xB7 ");
-    text.append(h3("span", "", m.kind === "mine" ? `${m.name} [${m.coords}] \xB7 ${cost}` : `${t("dash.account")} \xB7 ${cost}`));
+    const place2 = m.planetId ? `${m.name} [${m.coords}]` : t("dash.account");
+    const sub = h3("span", "", `${place2} \xB7 ${cost}`);
+    if (m.guessed) {
+      sub.append(h3("em", "guess", ` \xB7 ${t("dash.lfGuessed")}`));
+      sub.title = t("dash.lfGuessedHint");
+    }
+    text.append(sub);
     line.append(text, h3("span", "roi mono", m.days < 1 ? `<1 ${t("dash.daysShort")}` : `${m.days.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${t("dash.daysShort")}`));
     return line;
   }
@@ -10383,6 +10623,8 @@ table.queues td.acts { width: 1%; text-align: right; }
     });
     bar.append(label);
     s.append(bar);
+    const missing2 = missingData(ctx);
+    if (missing2) s.append(missing2);
     const list = h3("div", "moves-list");
     steps.forEach((m, i) => list.append(stepLine(ctx, m, i, true)));
     s.append(list);
@@ -10541,9 +10783,9 @@ table.queues td.acts { width: 1%; text-align: right; }
     const planets = ctx.bodies.filter((b) => b.type === "planet");
     const moons = new Map(ctx.bodies.filter((b) => b.type === "moon").map((m) => [m.coords, m]));
     for (const p of planets) menu.append(cell(p, false), cell(moons.get(p.coords), true));
-    const set = (open) => {
-      menu.hidden = !open;
-      button3.setAttribute("aria-expanded", String(open));
+    const set = (open2) => {
+      menu.hidden = !open2;
+      button3.setAttribute("aria-expanded", String(open2));
     };
     button3.addEventListener("click", () => set(menu.hidden));
     wrap.addEventListener("focusout", (e) => {
@@ -11090,8 +11332,8 @@ table.queues td.acts { width: 1%; text-align: right; }
     const cargo = count2 > 0 && settings.collectDeployRes ? loadCargo(fd, profile, settings.loadOrder) : 0;
     return finish(fd, DEPLOY, count2, cargo);
   }
-  function prepareFleetsave(fd, doc, base, save) {
-    const profile = { ...base, reserve: base.saveReserve ?? EMPTY_RESERVE };
+  function prepareFleetsave(fd, doc, base2, save) {
+    const profile = { ...base2, reserve: base2.saveReserve ?? EMPTY_RESERVE };
     const ships = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
     const count2 = selectShips(fd, ships);
     setTarget(fd, doc, resolveTarget(save, fd.currentPlanet));
@@ -11100,9 +11342,9 @@ table.queues td.acts { width: 1%; text-align: right; }
     const cargo = count2 > 0 ? loadCargo(fd, profile) : 0;
     return finish(fd, save.mission, count2, cargo);
   }
-  function prepareDelivery(fd, doc, base, settings, target, need, hold = { metal: 0, crystal: 0, deuterium: 0 }) {
-    const r = base.reserve.resources;
-    const profile = { ...base, reserve: { ships: {}, resources: { ...r, metal: r.metal + hold.metal, crystal: r.crystal + hold.crystal, deuterium: r.deuterium + hold.deuterium } } };
+  function prepareDelivery(fd, doc, base2, settings, target, need, hold = { metal: 0, crystal: 0, deuterium: 0 }) {
+    const r = base2.reserve.resources;
+    const profile = { ...base2, reserve: { ships: {}, resources: { ...r, metal: r.metal + hold.metal, crystal: r.crystal + hold.crystal, deuterium: r.deuterium + hold.deuterium } } };
     const free = deliveryLoad(onPlanet(fd), profile.reserve, 0, Number.MAX_SAFE_INTEGER, need);
     const amount = free.metal + free.crystal + free.deuterium;
     if (amount <= 0) return { ok: false, reason: "fleet.err.noResources", ships: 0, cargo: 0 };
@@ -11133,8 +11375,8 @@ table.queues td.acts { width: 1%; text-align: right; }
       itemBoost: universe.itemBoost
     });
     const target = expeditionTarget(limits.max, settings.expeditionValue);
-    const base = settings.expeditionValue.trim() ? 0 : limits.base;
-    const ships = expeditionFleet(stock(fd, profile), { ship: settings.expeditionShip, target, base, extras: settings.expeditionExtras });
+    const base2 = settings.expeditionValue.trim() ? 0 : limits.base;
+    const ships = expeditionFleet(stock(fd, profile), { ship: settings.expeditionShip, target, base: base2, extras: settings.expeditionExtras });
     const count2 = selectShips(fd, ships);
     const here = fd.currentPlanet;
     setTarget(fd, doc, { galaxy: here.galaxy, system: here.system, position: 16, type: 1 });
@@ -11218,8 +11460,8 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (Number.isInteger(speed) && speed >= 10 && speed <= 100) state.speed = speed;
     return state;
   }
-  function repeatUrl(base, cp, state) {
-    const u = new URL(base);
+  function repeatUrl(base2, cp, state) {
+    const u = new URL(base2);
     u.search = "";
     u.searchParams.set("page", "ingame");
     u.searchParams.set("component", "fleetdispatch");
@@ -12977,11 +13219,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const own = book[String(bodyId)];
     if (own && own.perUnit > 0) return { value: own.perUnit, exact: true };
     if (maxTemp === null) return null;
-    const base = satelliteBase(maxTemp);
-    if (base <= 0) return null;
+    const base2 = satelliteBase(maxTemp);
+    if (base2 <= 0) return null;
     const ref = Object.values(book).filter((e) => e.perUnit > 0 && e.maxTemp !== null && satelliteBase(e.maxTemp) > 0).sort((a, b) => b.at - a.at)[0];
     const ratio = ref ? ref.perUnit / satelliteBase(ref.maxTemp) : 1;
-    return { value: base * ratio, exact: false };
+    return { value: base2 * ratio, exact: false };
   }
   function satellitesFor(balance, need, perUnit) {
     const energy = need - balance;
@@ -13456,7 +13698,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       draw();
     } else {
       const unit = matchShownLevel(details.id, [1], details.shown);
-      const discount = unit?.discount ?? 0;
+      const discount2 = unit?.discount ?? 0;
       const amount = el5(doc, "input", "fut-tp-amount");
       amount.type = "text";
       amount.inputMode = "numeric";
@@ -13468,7 +13710,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       let added = false;
       const draw = () => {
         const n = amountOf();
-        const one = levelCost(details.id, 1, discount);
+        const one = levelCost(details.id, 1, discount2);
         const total = scaleCost(one, n);
         const have = o.have();
         const gap = missing(total, have ?? { metal: 0, crystal: 0, deuterium: 0 });
@@ -13571,8 +13813,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         if (kind && queueBusy(doc, o.store, o.bodyId, kind, Date.now())) {
           const planned = change.removed.find((x) => x.level === level2);
           const details = readTechDetails(doc);
-          const discount = details && details.id === id ? startLevel(details, entry?.level, entry?.built).discount : 0;
-          const item = { id, level: level2, kind, name: planned?.name ?? entry?.name ?? String(id), cost: planned?.cost ?? levelCost(id, level2, discount), added: planned?.added ?? Date.now(), queuedAt: Date.now() };
+          const discount2 = details && details.id === id ? startLevel(details, entry?.level, entry?.built).discount : 0;
+          const item = { id, level: level2, kind, name: planned?.name ?? entry?.name ?? String(id), cost: planned?.cost ?? levelCost(id, level2, discount2), added: planned?.added ?? Date.now(), queuedAt: Date.now() };
           o.store.set(QUEUED_KEY, holdQueued(queued2, o.bodyId, item));
         }
         if (change.changed || kind) o.onPlanChange?.();
@@ -13860,18 +14102,18 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       }
       for (const q of waiting) chips.append(queuedChip(q));
       const many = rows.length + waiting.length > 1;
-      const open = many && opened.has(bodyId);
+      const open2 = many && opened.has(bodyId);
       if (many) {
         const caret = h4("button", "ib");
         caret.type = "button";
-        caret.setAttribute("aria-expanded", String(open));
-        caret.title = t(open ? "plan.collapse" : "plan.expand");
+        caret.setAttribute("aria-expanded", String(open2));
+        caret.title = t(open2 ? "plan.collapse" : "plan.expand");
         caret.setAttribute("aria-label", caret.title);
         const mark = icon(doc, "chevron", 13);
-        if (open) mark.style.transform = "rotate(180deg)";
+        if (open2) mark.style.transform = "rotate(180deg)";
         caret.append(mark);
         caret.addEventListener("click", () => {
-          if (open) opened.delete(bodyId);
+          if (open2) opened.delete(bodyId);
           else opened.add(bodyId);
           draw();
         });
@@ -13905,7 +14147,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       acts.append(remove);
       top.append(acts);
       tile2.append(top);
-      if (open) {
+      if (open2) {
         const list = h4("div", "grows");
         for (const r of rows) {
           const on = isOn(r);
@@ -13966,7 +14208,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     const groupTile = (g, plan, haveOf, pendingOf, save) => {
       const tile2 = h4("div", "group");
       const one = g.rows.length === 1 ? g.rows[0] : null;
-      const open = one ? false : toggled.has(g.id) ? g.rows.length > 3 : g.rows.length <= 3;
+      const open2 = one ? false : toggled.has(g.id) ? g.rows.length > 3 : g.rows.length <= 3;
       const top = h4("div", "ghead");
       const name = h4("div", "gname");
       const titleLine = h4("span", "gtitle", g.name);
@@ -13978,9 +14220,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       else {
         const caret = h4("button", "ib");
         caret.type = "button";
-        caret.setAttribute("aria-expanded", String(open));
-        caret.title = t(open ? "plan.collapse" : "plan.expand");
-        caret.textContent = open ? "\u25B4" : "\u25BE";
+        caret.setAttribute("aria-expanded", String(open2));
+        caret.title = t(open2 ? "plan.collapse" : "plan.expand");
+        caret.textContent = open2 ? "\u25B4" : "\u25BE";
         const flip = () => {
           if (toggled.has(g.id)) toggled.delete(g.id);
           else toggled.add(g.id);
@@ -14002,7 +14244,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       }
       top.append(acts);
       tile2.append(top);
-      if (open) {
+      if (open2) {
         const rows = h4("div", "grows");
         for (const r of [...g.rows].sort(byList)) {
           const row = h4("div", "grow");
@@ -14653,9 +14895,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       r.row.querySelectorAll(".fut-hs-gap").forEach((n) => n.remove());
       r.row.classList.toggle("fut-hs-top", r.rank <= 3);
       const scoreCell = r.row.querySelector("td.score");
-      const base = snap?.scores[String(r.playerId)];
-      if (scoreCell && base !== void 0 && r.score !== base) {
-        const made = r.score - base;
+      const base2 = snap?.scores[String(r.playerId)];
+      if (scoreCell && base2 !== void 0 && r.score !== base2) {
+        const made = r.score - base2;
         const g = doc.createElement("span");
         g.className = `fut-hs-gap ${made > 0 ? "up" : "down"}`;
         g.textContent = made > 0 ? `+${fmt(made)}` : `\u2212${fmt(-made)}`;
@@ -14915,6 +15157,14 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     const lfSlots = store.get(LF_SLOTS_KEY, {});
     const seenSlots = readLfSlots(document, techList);
     if (seenSlots && bodyId && rememberLfSlots(lfSlots, bodyId, seenSlots)) store.set(LF_SLOTS_KEY, lfSlots);
+    const seenLocked = readLfLocked(document);
+    if (seenLocked && bodyId) {
+      const locked = store.get(LF_LOCKED_KEY, {});
+      locked[String(bodyId)] = { ...locked[String(bodyId)], [seenLocked.part]: seenLocked.ids };
+      store.set(LF_LOCKED_KEY, locked);
+    }
+    const seenLevels = readLfLevels(document);
+    if (seenLevels) store.set(LF_LEVELS_KEY, seenLevels);
     watchScore(document, () => Date.now(), (score) => {
       store.set(SCORE_KEY, score);
       store.set(HISTORY_KEY, recordDay(store.get(HISTORY_KEY, []), { at: score.at, points: score.points, rank: score.rank, ...dayFigures(snapshot) }));
@@ -15052,6 +15302,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           queues,
           names: techNames,
           lfSlots,
+          lfLevels: store.get(LF_LEVELS_KEY, null),
+          lfLocked: store.get(LF_LOCKED_KEY, {}),
           icons: store.get(TECH_ICONS_KEY, {}),
           store,
           now: Date.now(),

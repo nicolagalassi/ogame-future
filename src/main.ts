@@ -28,7 +28,8 @@ import { openSettings, type Section } from './modules/settings';
 import { dayFigures, openDashboard } from './modules/dashboard';
 import { TECH_NAMES_KEY, learnTechNames, type TechNames } from './data/tech-names';
 import { readTechList } from './data/tech-details';
-import { LF_SLOTS_KEY, readLfSlots, rememberLfSlots, type LfSlots } from './data/lf-slots';
+import { LF_LOCKED_KEY, LF_SLOTS_KEY, readLfLocked, readLfSlots, rememberLfSlots, type LfLocked, type LfSlots } from './data/lf-slots';
+import { LF_LEVELS_KEY, readLfLevels, type LfLevels } from './data/lf-production';
 import { isFleetDispatch } from './data/fleet-page';
 import { universeRanks } from './data/universe-ranks';
 import { renderFleetTools } from './modules/fleet';
@@ -132,6 +133,16 @@ async function bootstrap(): Promise<void> {
   const lfSlots = store.get<LfSlots>(LF_SLOTS_KEY, {});
   const seenSlots = readLfSlots(document, techList);
   if (seenSlots && bodyId && rememberLfSlots(lfSlots, bodyId, seenSlots)) store.set(LF_SLOTS_KEY, lfSlots);
+  // How much each species' level adds to its technologies, from the lifeform settings page.
+  // Lifeform buildings / research locked by their requirements on this planet, from the same pages.
+  const seenLocked = readLfLocked(document);
+  if (seenLocked && bodyId) {
+    const locked = store.get<LfLocked>(LF_LOCKED_KEY, {});
+    locked[String(bodyId)] = { ...locked[String(bodyId)], [seenLocked.part]: seenLocked.ids };
+    store.set(LF_LOCKED_KEY, locked);
+  }
+  const seenLevels = readLfLevels(document);
+  if (seenLevels) store.set(LF_LEVELS_KEY, seenLevels);
 
   // Points are on the overview page only, typed in by the game's own script after load: keep the last value seen.
   watchScore(document, () => Date.now(), (score) => {
@@ -282,6 +293,8 @@ async function bootstrap(): Promise<void> {
           queues,
           names: techNames,
           lfSlots,
+          lfLevels: store.get<LfLevels | null>(LF_LEVELS_KEY, null),
+          lfLocked: store.get<LfLocked>(LF_LOCKED_KEY, {}),
           icons: store.get<Record<string, TechIcon>>(TECH_ICONS_KEY, {}),
           store,
           now: Date.now(),

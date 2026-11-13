@@ -1,15 +1,24 @@
 /**
  * Amortization advisor, after InfoCompte's "Amortizations" (MIT, Vulca, benneb, The Stubbs):
- * mines, plasma technology and astrophysics (a new colony) ranked by the days the extra
- * production takes to pay the cost back, in units of metal at the player's trade rates.
- * Each step is applied before the next one is chosen, so the list is a build order.
+ * mines, plasma technology, astrophysics (a new colony) and the lifeform buildings and research
+ * that raise production, ranked by the days the extra production takes to pay the cost back, in
+ * units of metal at the player's trade rates. Each step is applied before the next one is
+ * chosen, so the list is a build order.
  *
  * Production: the mine formula (position and temperature bonuses, universe speed) gives each
- * mine's base output; everything else the game adds (plasma, class, officers, lifeforms,
+ * mine's base output; everything the game adds on top (plasma, class, officers, lifeforms,
  * crawlers, boosters) is read out of the production accountInfo reports, as one multiplier per
- * planet and resource. Not counted, as in InfoCompte: energy, lifeform cost discounts.
+ * planet and resource, and each step adds its own share to it. Costs carry the lifeform
+ * discounts InfoCompte counts (12111 mines, 12108 Rock'tal buildings, x103 research, 12209
+ * plasma). Not counted, as in InfoCompte: energy.
  */
 import type { AccountSnapshot, Resources } from '../data/account-info';
+import { activeLfResearch, type LfLocked, type LfSlots } from '../data/lf-slots';
+import {
+  KAELESH_BOOSTER, LF_BUILDING_BONUS, LF_PRODUCTION_BUILDINGS, LF_PRODUCTION_RESEARCH, LF_RESEARCH_BONUS, LF_RESEARCH_BOOSTERS,
+  LF_RESEARCH_DISCOUNT, PLASMA_DISCOUNT, PRODUCER_DISCOUNT, PRODUCERS, ROCKTAL_BUILDING_DISCOUNT, type LfLevels, type LfRow,
+} from '../data/lf-production';
+import { speciesOf } from '../data/tech-names';
 import { addCost, levelCost, rangeCost, scaleCost, techKind, ZERO_COST, type Cost } from './tech';
 
 export type MineKey = 'metal' | 'crystal' | 'deuterium';
@@ -50,7 +59,9 @@ export interface PlanetInput {
 }
 
 export interface AmortStep {
-  kind: 'mine' | 'plasma' | 'astro';
+  kind: 'mine' | 'plasma' | 'astro' | 'lfBuilding' | 'lfResearch';
+  /** The technology raised. */
+  id: number;
   mine?: MineKey;
   planetId?: number;
   name?: string;
@@ -62,13 +73,18 @@ export interface AmortStep {
   gain: Resources;
   /** Days to pay the cost back with the extra production, at the trade rates. */
   days: number;
+  /** Lifeform research whose slot was guessed (the planet's research page not seen yet). */
+  guessed?: boolean;
 }
 
 interface PlanetState {
   input: PlanetInput;
+  species: number;
   position: number;
   temp: number;
-  levels: Record<MineKey, number>;
+  levels: Record<string, number>;
+  /** Active lifeform research, one per slot. */
+  research: { id: number; guessed: boolean }[];
   /** Everything the game adds on top of the mine base, per resource (≥ 1). */
   mult: Resources;
   production: Resources;
@@ -79,6 +95,32 @@ const days = (cost: Resources, gain: Resources, rates: Rates) => {
   const g = inMetal(gain, rates);
   return g > 0 ? inMetal(cost, rates) / (g * 24) : Infinity;
 };
+const lvl = (p: PlanetState, id: number) => p.levels[String(id)] ?? 0;
+const base = (p: PlanetState, k: MineKey, speed: number, level = lvl(p, MINE_ID[k])) => mineBase(k, level, p.position, p.temp, speed);
+
+/** One column of a lifeform building's bonus on its planet (0 when it is not of the planet's species), capped. */
+function building(p: PlanetState, id: number, column: 0 | 1 | 2, level = lvl(p, id)): number {
+  const row = LF_BUILDING_BONUS[id];
+  if (!row || speciesOf(id) !== p.species) return 0;
+  return capped(row, column, row[column] * level);
+}
+const capped = (row: LfRow, column: 0 | 1 | 2, value: number) => (row[column + 3] ? Math.min(value, row[column + 3]!) : value);
+
+/** How strong lifeform research is on this planet: its boosters, Kaelesh's own, the species level. */
+function researchFactor(p: PlanetState, id: number, levels: LfLevels, boosters = LF_RESEARCH_BOOSTERS.reduce((s, [b, c]) => s + building(p, b, c), 0)): number {
+  const kaelesh = speciesOf(id) === 4 ? building(p, KAELESH_BOOSTER, 0) : 0;
+  return (1 + boosters) * (1 + kaelesh) * (1 + (levels[String(p.species)] ?? 0));
+}
+
+/** Discount on the next level of `id` on this planet, as a fraction. */
+function discount(p: PlanetState, id: number): number {
+  let d = 0;
+  if (PRODUCERS.has(id)) d += building(p, PRODUCER_DISCOUNT, 0);
+  const kind = techKind(id);
+  if (kind === 'lfBuilding' && speciesOf(id) === 2) d += building(p, ROCKTAL_BUILDING_DISCOUNT, 0);
+  if (kind === 'lfResearch') for (const b of LF_RESEARCH_DISCOUNT) d += building(p, b, 0);
+  return Math.min(d, 0.99);
+}
 
 /** What a planet with its moon is built of (buildings, lifeform buildings, defences), for the new colony's cost. */
 function equipment(levels: Record<string, number>, moon: boolean): Cost {
@@ -103,25 +145,47 @@ export interface AmortInput {
   speed: number;
   rates?: Rates;
   steps?: number;
+  /** Active lifeform research per planet, as seen on the game's page (else guessed). */
+  lfSlots?: LfSlots;
+  /** Species technology bonus from its level (lifeform settings page); unknown = 0. */
+  lfLevels?: LfLevels;
+  /** Lifeform technologies locked by their requirements, per planet, from the game's pages. */
+  lfLocked?: LfLocked;
 }
 
-export function amortizationPlan({ snapshot, planets, speed, rates = DEFAULT_RATES, steps = 20 }: AmortInput): AmortStep[] {
+/**
+ * Whether a lifeform technology can be raised on this planet: built already (so unlocked), or
+ * at level 0 on a page the player has opened that does not show it locked. Never seen = no.
+ */
+function open(locked: LfLocked, planetId: number, id: number, level: number): boolean {
+  if (level > 0) return true;
+  const seen = locked[String(planetId)]?.[techKind(id) === 'lfBuilding' ? 'b' : 'r'];
+  return seen !== undefined && !seen.includes(id);
+}
+
+export function amortizationPlan({ snapshot, planets, speed, rates = DEFAULT_RATES, steps = 20, lfSlots = {}, lfLevels = {}, lfLocked = {} }: AmortInput): AmortStep[] {
   if (!snapshot) return [];
   const byId = new Map(snapshot.bodies.map((b) => [b.id, b]));
   const state: PlanetState[] = [];
   for (const input of planets) {
     const body = byId.get(input.id);
     if (!body || body.type !== 'planet') continue;
-    const position = Number(input.coords.split(':')[2]) || 8;
-    const temp = input.maxTemp ?? 50;
-    const levels = { metal: body.levels['1'] ?? 0, crystal: body.levels['2'] ?? 0, deuterium: body.levels['3'] ?? 0 };
+    const p: PlanetState = {
+      input,
+      species: body.species ?? 0,
+      position: Number(input.coords.split(':')[2]) || 8,
+      temp: input.maxTemp ?? 50,
+      levels: { ...body.levels },
+      research: activeLfResearch(body, lfSlots[String(body.id)]).map((r) => ({ id: r.id, guessed: r.guessed })),
+      mult: zero(),
+      production: { ...body.production },
+    };
     const flat: Resources = { metal: 30 * speed, crystal: 15 * speed, deuterium: 0 };
-    const mult = zero();
     for (const k of KEYS) {
-      const base = mineBase(k, levels[k], position, temp, speed);
-      mult[k] = base > 0 ? Math.max(1, (body.production[k] - flat[k]) / base) : 1;
+      const b = base(p, k, speed);
+      p.mult[k] = b > 0 ? Math.max(1, (body.production[k] - flat[k]) / b) : 1;
     }
-    state.push({ input, position, temp, levels, mult, production: { ...body.production } });
+    state.push(p);
   }
   if (!state.length) return [];
 
@@ -140,52 +204,136 @@ export function amortizationPlan({ snapshot, planets, speed, rates = DEFAULT_RAT
   let astro = snapshot.researches[String(ASTRO)] ?? 0;
   /** Colonies the plan has already added (each produces like an average planet). */
   let extra = 0;
+  const scale = () => (count + extra) / count;
+  /** The mines' base output of the whole account, per resource. */
+  const accountBase = () => {
+    const out = zero();
+    for (const p of state) for (const k of KEYS) out[k] += base(p, k, speed);
+    return out;
+  };
+  /** A share of the base output added on every planet (account-wide research). */
+  const addEverywhere = (share: Resources) => {
+    for (const p of state)
+      for (const k of KEYS) {
+        p.mult[k] += share[k];
+        p.production[k] += base(p, k, speed) * share[k];
+      }
+  };
+  const plasmaDiscount = () => {
+    let d = 0;
+    const row = LF_RESEARCH_BONUS[PLASMA_DISCOUNT]!;
+    for (const p of state) if (p.research.some((r) => r.id === PLASMA_DISCOUNT)) d += row[0] * lvl(p, PLASMA_DISCOUNT) * researchFactor(p, PLASMA_DISCOUNT, lfLevels);
+    return capped(row, 0, d);
+  };
+  const where = (p: PlanetState) => ({ planetId: p.input.id, name: p.input.name, coords: p.input.coords });
+
   const out: AmortStep[] = [];
   for (let i = 0; i < steps; i++) {
     let best: AmortStep | null = null;
-    const consider = (s: AmortStep) => {
-      if (Number.isFinite(s.days) && (!best || s.days < best.days)) best = s;
+    const consider = (s: Omit<AmortStep, 'days'>) => {
+      const d = days(s.cost, s.gain, rates);
+      if (Number.isFinite(d) && (!best || d < best.days)) best = { ...s, days: d };
     };
+    const all = accountBase();
     for (const p of state) {
       for (const k of KEYS) {
-        const L = p.levels[k];
+        const id = MINE_ID[k];
+        const L = lvl(p, id);
         const gain = zero();
-        gain[k] = (mineBase(k, L + 1, p.position, p.temp, speed) - mineBase(k, L, p.position, p.temp, speed)) * p.mult[k];
-        const cost = levelCost(MINE_ID[k], L + 1);
-        consider({ kind: 'mine', mine: k, planetId: p.input.id, name: p.input.name, coords: p.input.coords, from: L, to: L + 1, cost, gain, days: days(cost, gain, rates) });
+        gain[k] = (base(p, k, speed, L + 1) - base(p, k, speed, L)) * p.mult[k];
+        consider({ kind: 'mine', id, mine: k, ...where(p), from: L, to: L + 1, cost: levelCost(id, L + 1, discount(p, id)), gain });
+      }
+      for (const id of LF_PRODUCTION_BUILDINGS) {
+        if (speciesOf(id) !== p.species) continue;
+        const L = lvl(p, id);
+        if (!open(lfLocked, p.input.id, id, L)) continue;
+        const gain = zero();
+        KEYS.forEach((k, c) => (gain[k] = (building(p, id, c as 0 | 1 | 2, L + 1) - building(p, id, c as 0 | 1 | 2, L)) * base(p, k, speed)));
+        consider({ kind: 'lfBuilding', id, ...where(p), from: L, to: L + 1, cost: levelCost(id, L + 1, discount(p, id)), gain });
+      }
+      // Research boosters: every production research on this planet gets stronger.
+      const boostersNow = LF_RESEARCH_BOOSTERS.reduce((s, [b, c]) => s + building(p, b, c), 0);
+      for (const [id, column] of LF_RESEARCH_BOOSTERS) {
+        if (speciesOf(id) !== p.species) continue;
+        const L = lvl(p, id);
+        if (!open(lfLocked, p.input.id, id, L)) continue;
+        const boostersNext = boostersNow - building(p, id, column) + building(p, id, column, L + 1);
+        const gain = zero();
+        for (const r of p.research) {
+          const row = LF_RESEARCH_BONUS[r.id];
+          if (!row || !LF_PRODUCTION_RESEARCH.includes(r.id)) continue;
+          const delta = researchFactor(p, r.id, lfLevels, boostersNext) - researchFactor(p, r.id, lfLevels, boostersNow);
+          KEYS.forEach((k, c) => (gain[k] += (row[c] ?? 0) * lvl(p, r.id) * delta * all[k] * scale()));
+        }
+        consider({ kind: 'lfBuilding', id, ...where(p), from: L, to: L + 1, cost: levelCost(id, L + 1, discount(p, id)), gain });
+      }
+      for (const r of p.research) {
+        const row = LF_RESEARCH_BONUS[r.id];
+        if (!row || !LF_PRODUCTION_RESEARCH.includes(r.id)) continue;
+        const L = lvl(p, r.id);
+        if (!open(lfLocked, p.input.id, r.id, L)) continue;
+        const f = researchFactor(p, r.id, lfLevels);
+        const gain = zero();
+        KEYS.forEach((k, c) => (gain[k] = (row[c] ?? 0) * f * all[k] * scale()));
+        consider({ kind: 'lfResearch', id: r.id, ...where(p), from: L, to: L + 1, cost: levelCost(r.id, L + 1, discount(p, r.id)), gain, guessed: r.guessed });
       }
     }
     const plasmaGain = zero();
-    for (const p of state) for (const k of KEYS) plasmaGain[k] += mineBase(k, p.levels[k], p.position, p.temp, speed) * PLASMA_RATE[k];
-    for (const k of KEYS) plasmaGain[k] *= (count + extra) / count;
-    const plasmaCost = levelCost(PLASMA, plasma + 1);
-    consider({ kind: 'plasma', from: plasma, to: plasma + 1, cost: plasmaCost, gain: plasmaGain, days: days(plasmaCost, plasmaGain, rates) });
+    for (const k of KEYS) plasmaGain[k] = all[k] * PLASMA_RATE[k] * scale();
+    consider({ kind: 'plasma', id: PLASMA, from: plasma, to: plasma + 1, cost: levelCost(PLASMA, plasma + 1, plasmaDiscount()), gain: plasmaGain });
     // A new slot comes with every odd level of astrophysics.
     const next = astro % 2 === 1 ? astro + 2 : astro + 1;
-    const astroCost = addCost(rangeCost(ASTRO, astro + 1, next), colonyCost);
     const avg = zero();
     for (const p of state) for (const k of KEYS) avg[k] += p.production[k] / count;
-    consider({ kind: 'astro', from: astro, to: next, cost: astroCost, gain: avg, days: days(astroCost, avg, rates) });
+    consider({ kind: 'astro', id: ASTRO, from: astro, to: next, cost: addCost(rangeCost(ASTRO, astro + 1, next), colonyCost), gain: avg });
 
     const step = best as AmortStep | null;
     if (!step) break;
     out.push(step);
-    if (step.kind === 'mine') {
-      const p = state.find((x) => x.input.id === step.planetId)!;
-      p.levels[step.mine!] = step.to;
+    const p = state.find((x) => x.input.id === step.planetId);
+    if (step.kind === 'mine' && p) {
+      p.levels[String(step.id)] = step.to;
       p.production[step.mine!] += step.gain[step.mine!];
+    } else if (step.kind === 'lfBuilding' && p) {
+      const share = zero();
+      KEYS.forEach((k, c) => (share[k] = building(p, step.id, c as 0 | 1 | 2, step.to) - building(p, step.id, c as 0 | 1 | 2, step.from)));
+      p.levels[String(step.id)] = step.to;
+      if (LF_PRODUCTION_BUILDINGS.includes(step.id)) {
+        for (const k of KEYS) {
+          p.mult[k] += share[k];
+          p.production[k] += base(p, k, speed) * share[k];
+        }
+      } else {
+        // A research booster: its gain was computed for the whole account.
+        addEverywhere({ metal: step.gain.metal / all.metal || 0, crystal: step.gain.crystal / all.crystal || 0, deuterium: step.gain.deuterium / all.deuterium || 0 });
+      }
+    } else if (step.kind === 'lfResearch' && p) {
+      p.levels[String(step.id)] = step.to;
+      addEverywhere({ metal: step.gain.metal / all.metal || 0, crystal: step.gain.crystal / all.crystal || 0, deuterium: step.gain.deuterium / all.deuterium || 0 });
     } else if (step.kind === 'plasma') {
       plasma = step.to;
-      for (const p of state)
-        for (const k of KEYS) {
-          const add = mineBase(k, p.levels[k], p.position, p.temp, speed) * PLASMA_RATE[k];
-          p.mult[k] += PLASMA_RATE[k];
-          p.production[k] += add;
-        }
-    } else {
+      addEverywhere(PLASMA_RATE);
+    } else if (step.kind === 'astro') {
       astro = step.to;
       extra++;
     }
   }
   return out;
+}
+
+/** Planets with a production building of their species at level 0 whose lifeform buildings page was never opened. */
+export function lfBuildingsMissing(snapshot: AccountSnapshot | null, lfLocked: LfLocked = {}): number[] {
+  if (!snapshot) return [];
+  const ids = [...LF_PRODUCTION_BUILDINGS, ...LF_RESEARCH_BOOSTERS.map(([id]) => id)];
+  return snapshot.bodies
+    .filter((b) => b.type === 'planet' && b.species && !lfLocked[String(b.id)]?.b && ids.some((id) => speciesOf(id) === b.species && !(b.levels[String(id)] ?? 0)))
+    .map((b) => b.id);
+}
+
+/** Planets whose lifeform research slots are still a guess: their research page has not been opened. */
+export function lfSlotsMissing(snapshot: AccountSnapshot | null, lfSlots: LfSlots = {}): number[] {
+  if (!snapshot) return [];
+  return snapshot.bodies
+    .filter((b) => b.type === 'planet' && !lfSlots[String(b.id)] && activeLfResearch(b).length > 0)
+    .map((b) => b.id);
 }

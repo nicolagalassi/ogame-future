@@ -16,14 +16,15 @@ import { formatUnits } from '../../core/format';
 import { accountAlerts, bodyRows, msu, summarize } from '../../engines/account';
 import { activeItems, QUEUE_KINDS, queueLabel, type QueueItem, type QueueSnapshot } from '../../data/queues';
 import { remaining } from '../planet-menu';
-import { amortizationPlan, DEFAULT_RATES, type AmortStep, type Rates } from '../../engines/roi';
+import { amortizationPlan, DEFAULT_RATES, lfBuildingsMissing, lfSlotsMissing, type AmortStep, type Rates } from '../../engines/roi';
+import type { LfLevels } from '../../data/lf-production';
 import { changeOver, type History, type HistoryDay } from '../../engines/history';
 import type { Reminder } from '../../engines/reminders';
 import { rawCost } from '../../engines/tech';
 import {
   DEFENCES, MINES, MOON_FACILITIES, PLANET_FACILITIES, RESEARCH, SHIPS, SPECIES, speciesOf, techName, type TechNames,
 } from '../../data/tech-names';
-import { activeLfBuildings, activeLfResearch, type ActiveTech, type LfSlots } from '../../data/lf-slots';
+import { activeLfBuildings, activeLfResearch, type ActiveTech, type LfLocked, type LfSlots } from '../../data/lf-slots';
 import { shipIcon } from '../messages';
 import { SHIP_ICONS } from '../../data/ship-icons';
 import { techIconEl, type TechIcon } from '../../data/tech-icons';
@@ -43,6 +44,10 @@ export interface DashboardOptions {
   names?: TechNames;
   /** Lifeform research slots seen on the game's page, per planet (see data/lf-slots). */
   lfSlots?: LfSlots;
+  /** Species technology bonus from its level, seen on the lifeform settings page. */
+  lfLevels?: LfLevels | null;
+  /** Lifeform technologies locked by their requirements, per planet (lifeform pages seen). */
+  lfLocked?: LfLocked;
   /** The game's technology pictures seen so far (data/tech-icons); a missing one falls back to the name. */
   icons?: Record<string, TechIcon>;
   /** Where the trade rates of the build order are kept; none = the default 3 : 2 : 1 for this session. */
@@ -598,14 +603,51 @@ function buildOrder(ctx: Ctx, steps: number): AmortStep[] {
   const planets = o.entries
     .filter((e) => e.planetId)
     .map((e) => ({ id: e.planetId!, name: e.name, coords: e.coords, maxTemp: maxTemperatureOf(e.planetLink) }));
-  return amortizationPlan({ snapshot: o.snapshot, planets, speed, rates: loadRates(o), steps });
+  return amortizationPlan({ snapshot: o.snapshot, planets, speed, rates: loadRates(o), steps, lfSlots: o.lfSlots, lfLevels: o.lfLevels ?? undefined, lfLocked: o.lfLocked });
 }
 
-const STEP_ID = { metal: 1, crystal: 2, deuterium: 3, plasma: 122, astro: 124 } as const;
+/**
+ * What the lifeform part still needs, as InfoCompte asks: links to the game pages that carry it.
+ * A click is a normal navigation (with cp=, so the planet changes, as the player chose); Future
+ * reads the page when it loads.
+ */
+function missingData(ctx: Ctx): HTMLElement | null {
+  const { o } = ctx;
+  const { t } = o;
+  const slots = lfSlotsMissing(o.snapshot, o.lfSlots);
+  const buildings = lfBuildingsMissing(o.snapshot, o.lfLocked);
+  const firstPlanet = ctx.bodies.find((b) => b.type === 'planet');
+  if (!slots.length && !buildings.length && (o.lfLevels || !firstPlanet)) return null;
+  const box = h('div', 'needs');
+  const base = 'index.php?page=ingame&component=';
+  const link = (text: string, href: string) => {
+    const a = h('a', 'chip', text);
+    a.setAttribute('href', href);
+    return a;
+  };
+  if (!o.lfLevels && firstPlanet) {
+    const p = h('p', '');
+    p.append(h('span', '', `${t('dash.needLevels')} `), link(t('dash.openLfSettings'), `${base}lfsettings&cp=${firstPlanet.id}`));
+    box.append(p);
+  }
+  const list = (ids: number[], key: string, component: string) => {
+    if (!ids.length) return;
+    const p = h('p', '');
+    p.append(h('span', '', `${t(key, { count: ids.length })} `));
+    for (const id of ids) {
+      const name = o.entries.find((e) => e.planetId === id)?.name || ctx.bodies.find((x) => x.id === id)?.name || String(id);
+      p.append(link(name, `${base}${component}&cp=${id}`));
+    }
+    box.append(p);
+  };
+  list(buildings, 'dash.needBuildings', 'lfbuildings');
+  list(slots, 'dash.needSlots', 'lfresearch');
+  return box;
+}
 
 function stepLine(ctx: Ctx, m: AmortStep, i: number, numbered = false): HTMLElement {
   const { t, locale } = ctx.o;
-  const id = m.kind === 'mine' ? STEP_ID[m.mine!] : STEP_ID[m.kind];
+  const id = m.id;
   const line = h('div', 'move');
   if (numbered) line.append(h('span', 'n', String(i + 1)));
   const pic = ctx.pic(id, 28);
@@ -615,7 +657,13 @@ function stepLine(ctx: Ctx, m: AmortStep, i: number, numbered = false): HTMLElem
   const what = m.kind === 'mine' ? t(`mine.${m.mine}`) : ctx.name(id);
   text.append(h('strong', '', `${what} ${m.from} → ${m.to}${m.kind === 'astro' ? ` · ${t('dash.newColony')}` : ''}`));
   const cost = [`${ctx.fmt(m.cost.metal)} M`, `${ctx.fmt(m.cost.crystal)} C`, ...(m.cost.deuterium ? [`${ctx.fmt(m.cost.deuterium)} D`] : [])].join(' · ');
-  text.append(h('span', '', m.kind === 'mine' ? `${m.name} [${m.coords}] · ${cost}` : `${t('dash.account')} · ${cost}`));
+  const place = m.planetId ? `${m.name} [${m.coords}]` : t('dash.account');
+  const sub = h('span', '', `${place} · ${cost}`);
+  if (m.guessed) {
+    sub.append(h('em', 'guess', ` · ${t('dash.lfGuessed')}`));
+    sub.title = t('dash.lfGuessedHint');
+  }
+  text.append(sub);
   line.append(text, h('span', 'roi mono', m.days < 1 ? `<1 ${t('dash.daysShort')}` : `${m.days.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${t('dash.daysShort')}`));
   return line;
 }
@@ -672,6 +720,8 @@ function buildOrderCard(ctx: Ctx): HTMLElement {
   });
   bar.append(label);
   s.append(bar);
+  const missing = missingData(ctx);
+  if (missing) s.append(missing);
   const list = h('div', 'moves-list');
   steps.forEach((m, i) => list.append(stepLine(ctx, m, i, true)));
   s.append(list);
