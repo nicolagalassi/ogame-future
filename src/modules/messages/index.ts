@@ -347,6 +347,8 @@ export function processMessages(o: MessagesOptions): number {
   const spies: SpyMessage[] = [];
   let journal: Journal | null = null;
   let added = 0;
+  /** Shared reports found in the journal and taken out. */
+  let dropped = 0;
   /** What entered the journal in this pass, for the "just read" panel. */
   const fresh: JournalEntry[] = [];
   for (const msg of Array.from(doc.querySelectorAll('.msg[data-msg-id]'))) {
@@ -393,6 +395,18 @@ export function processMessages(o: MessagesOptions): number {
       if (fold && (parsed.kind === 'expedition' || parsed.kind === 'discovery' || parsed.kind === 'recycle' || parsed.kind === 'transport' || parsed.kind === 'deploy' || parsed.kind === 'return')) msg.classList.add('fut-msg-folded');
       sync();
     }
+    // Reports an alliance member shared are not the player's: never in the journal, and taken out
+    // if an older version put them there (they keep their message id).
+    if (sharedTab) {
+      journal ??= store.get<Journal>(JOURNAL_KEY, {});
+      if (journal[parsed.id]) {
+        const { [parsed.id]: _gone, ...rest } = journal;
+        journal = rest;
+        dropped++;
+      }
+      if (parsed.kind === 'spy') spies.push(parsed);
+      continue;
+    }
     if (parsed.kind === 'expedition' || parsed.kind === 'discovery') expeditions.push(parsed);
     if (parsed.kind === 'spy') spies.push(parsed);
     // Pathfinders on an expedition harvest the debris at position 16: those resources count with
@@ -432,7 +446,7 @@ export function processMessages(o: MessagesOptions): number {
     if (rememberSpies(board, spies, o.now?.() ?? Date.now(), sharedTab)) store.set(SPY_BOARD_KEY, board);
   }
   if (o.spy) mountSpyPanel({ doc, store, t, locale, spy: o.spy, now: o.now });
-  if (journal && added) {
+  if (journal && (added || dropped)) {
     store.set(JOURNAL_KEY, trim(journal, o.now?.() ?? Date.now()));
     o.onJournal?.(added);
   }
