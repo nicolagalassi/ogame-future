@@ -762,5 +762,10 @@
   "plan.queuedHint": "In coda nel gioco, non ancora pagato: le sue risorse restano da parte e non contano per il piano né per i trasporti",
   "plan.unhold": "Non tenere più da parte (già partito o annullato)",
   "fleet.mainShipIs": "Nave principale dei trasporti automatici",
-  "fleet.mainShipPick": "Usa questa nave per i trasporti automatici (luna, raccolta, piano)"
+  "fleet.mainShipPick": "Usa questa nave per i trasporti automatici (luna, raccolta, piano)",
+  "settings.expStyle": "Riepilogo spedizioni",
+  "settings.expStyleHint": "Con un altro tool che decora i messaggi (OGame Tracker, OGLight, …) Future si fa da parte e registra soltanto, come OGLight. Il diario registra sempre.",
+  "settings.expStyle.auto": "Automatico",
+  "settings.expStyle.always": "Sempre Future",
+  "settings.expStyle.never": "Solo registra"
 }
