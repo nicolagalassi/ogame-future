@@ -771,5 +771,9 @@
   "tech.labShort": "Rete {total} · {n} lab",
   "tech.labNet": "Laboratori al lavoro su questa ricerca: {total} = qui {here} + {linked} (Rete di ricerca intergalattica liv. {irn})",
   "tech.labNeed": "contano i laboratori dal liv. {need}",
-  "tech.labHereShort": "il laboratorio di questo pianeta è sotto il liv. {need}: qui non si può avviare"
+  "tech.labHereShort": "il laboratorio di questo pianeta è sotto il liv. {need}: qui non si può avviare",
+  "exp.heroRes": "Risorse",
+  "exp.heroFleet": "Flotta",
+  "exp.heroFound": "trovate",
+  "exp.heroLostShort": "perse"
 }

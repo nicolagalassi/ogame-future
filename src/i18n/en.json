@@ -771,5 +771,9 @@
   "tech.labShort": "Network {total} · {n} labs",
   "tech.labNet": "Labs working on this research: {total} = here {here} + {linked} (Intergalactic Research Network level {irn})",
   "tech.labNeed": "labs from level {need} count",
-  "tech.labHereShort": "this planet's lab is below level {need}: it cannot start here"
+  "tech.labHereShort": "this planet's lab is below level {need}: it cannot start here",
+  "exp.heroRes": "Resources",
+  "exp.heroFleet": "Fleet",
+  "exp.heroFound": "found",
+  "exp.heroLostShort": "lost"
 }
