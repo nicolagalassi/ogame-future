@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.65
+// @version      0.3.66
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -7422,6 +7422,7 @@ td.spark-cell { width: 90px; }
     const spies = [];
     let journal = null;
     let added = 0;
+    let dropped = 0;
     const fresh = [];
     for (const msg of Array.from(doc.querySelectorAll(".msg[data-msg-id]"))) {
       if (msg.hasAttribute("data-fut-done") || msg.closest("#fut-journal")) continue;
@@ -7462,6 +7463,16 @@ td.spark-cell { width: 90px; }
         if (fold && (parsed.kind === "expedition" || parsed.kind === "discovery" || parsed.kind === "recycle" || parsed.kind === "transport" || parsed.kind === "deploy" || parsed.kind === "return")) msg.classList.add("fut-msg-folded");
         sync();
       }
+      if (sharedTab) {
+        journal ?? (journal = store.get(JOURNAL_KEY, {}));
+        if (journal[parsed.id]) {
+          const { [parsed.id]: _gone, ...rest } = journal;
+          journal = rest;
+          dropped++;
+        }
+        if (parsed.kind === "spy") spies.push(parsed);
+        continue;
+      }
       if (parsed.kind === "expedition" || parsed.kind === "discovery") expeditions.push(parsed);
       if (parsed.kind === "spy") spies.push(parsed);
       if (parsed.kind === "recycle" && parsed.coords?.replace(/[[\]]/g, "").split(":")[2] === "16") {
@@ -7496,7 +7507,7 @@ td.spark-cell { width: 90px; }
       if (rememberSpies(board, spies, o.now?.() ?? Date.now(), sharedTab)) store.set(SPY_BOARD_KEY, board);
     }
     if (o.spy) mountSpyPanel({ doc, store, t, locale, spy: o.spy, now: o.now });
-    if (journal && added) {
+    if (journal && (added || dropped)) {
       store.set(JOURNAL_KEY, trim(journal, o.now?.() ?? Date.now()));
       o.onJournal?.(added);
     }

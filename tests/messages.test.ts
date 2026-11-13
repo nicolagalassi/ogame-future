@@ -401,3 +401,19 @@ describe('another tool on the expedition reports', () => {
     expect(c.querySelector('.fut-msg')).not.toBeNull();
   });
 });
+
+describe('reports shared by the alliance', () => {
+  it('never enter the journal, and leave it if an older version put them there', () => {
+    document.body.innerHTML = '<ul><li data-subtab-id="11" class="active">Condivisi</li></ul>';
+    const store = new Store(new MemoryStore(), 'shared');
+    store.set(JOURNAL_KEY, { '555': { kind: 'expedition', at: 1, result: 'resource', size: 0, depletion: 0, res: { metal: 9e8, crystal: 0, deuterium: 0, darkMatter: 0, food: 0 }, ships: {}, lost: {}, item: null, lfXp: 0, lifeform: 0, artefacts: 0, coords: '1:1:16' } });
+    document.body.append(msg('555', deut), msg('556', shipwrecks));
+    processMessages({ doc: document, store, playerId: OWN, locale: 'it', t, now: () => 1793891482000 });
+    expect(store.get<Journal>(JOURNAL_KEY, {})).toEqual({});
+    // On the player's own tab they count as usual.
+    document.body.innerHTML = '';
+    document.body.append(msg('557', deut));
+    processMessages({ doc: document, store, playerId: OWN, locale: 'it', t, now: () => 1793891482000 });
+    expect(Object.keys(store.get<Journal>(JOURNAL_KEY, {}))).toEqual(['557']);
+  });
+});
