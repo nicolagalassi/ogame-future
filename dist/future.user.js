@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.60
+// @version      0.3.61
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -951,7 +951,12 @@
     "plan.queuedHint": "In coda nel gioco, non ancora pagato: le sue risorse restano da parte e non contano per il piano n\xE9 per i trasporti",
     "plan.unhold": "Non tenere pi\xF9 da parte (gi\xE0 partito o annullato)",
     "fleet.mainShipIs": "Nave principale dei trasporti automatici",
-    "fleet.mainShipPick": "Usa questa nave per i trasporti automatici (luna, raccolta, piano)"
+    "fleet.mainShipPick": "Usa questa nave per i trasporti automatici (luna, raccolta, piano)",
+    "settings.expStyle": "Riepilogo spedizioni",
+    "settings.expStyleHint": "Con un altro tool che decora i messaggi (OGame Tracker, OGLight, \u2026) Future si fa da parte e registra soltanto, come OGLight. Il diario registra sempre.",
+    "settings.expStyle.auto": "Automatico",
+    "settings.expStyle.always": "Sempre Future",
+    "settings.expStyle.never": "Solo registra"
   };
 
   // src/i18n/en.json
@@ -1719,7 +1724,12 @@
     "plan.queuedHint": "Queued in the game, not paid yet: its resources are held back and count neither for the plan nor for transports",
     "plan.unhold": "Stop holding back (already started or cancelled)",
     "fleet.mainShipIs": "Main ship for automatic transports",
-    "fleet.mainShipPick": "Use this ship for automatic transports (moon, collection, plan)"
+    "fleet.mainShipPick": "Use this ship for automatic transports (moon, collection, plan)",
+    "settings.expStyle": "Expedition summary",
+    "settings.expStyleHint": "With another tool decorating the reports (OGame Tracker, OGLight, \u2026) Future steps aside and only records, as OGLight does. The journal always records.",
+    "settings.expStyle.auto": "Automatic",
+    "settings.expStyle.always": "Always Future",
+    "settings.expStyle.never": "Record only"
   };
 
   // src/i18n/fr.json
@@ -2487,7 +2497,12 @@
     "plan.queuedHint": "En file d'attente dans le jeu, pas encore pay\xE9 : ses ressources sont mises de c\xF4t\xE9 et ne comptent ni pour le plan ni pour les transports",
     "plan.unhold": "Ne plus mettre de c\xF4t\xE9 (d\xE9j\xE0 lanc\xE9 ou annul\xE9)",
     "fleet.mainShipIs": "Vaisseau principal des transports automatiques",
-    "fleet.mainShipPick": "Utiliser ce vaisseau pour les transports automatiques (lune, collecte, plan)"
+    "fleet.mainShipPick": "Utiliser ce vaisseau pour les transports automatiques (lune, collecte, plan)",
+    "settings.expStyle": "R\xE9sum\xE9 des exp\xE9ditions",
+    "settings.expStyleHint": "Si un autre outil d\xE9core les rapports (OGame Tracker, OGLight, \u2026), Future s'efface et enregistre seulement, comme OGLight. Le journal enregistre toujours.",
+    "settings.expStyle.auto": "Automatique",
+    "settings.expStyle.always": "Toujours Future",
+    "settings.expStyle.never": "Enregistrer seulement"
   };
 
   // src/i18n/de.json
@@ -3255,7 +3270,12 @@
     "plan.queuedHint": "Im Spiel in der Warteschlange, noch nicht bezahlt: seine Ressourcen werden zur\xFCckgehalten und z\xE4hlen weder f\xFCr den Plan noch f\xFCr Transporte",
     "plan.unhold": "Nicht mehr zur\xFCckhalten (schon gestartet oder abgebrochen)",
     "fleet.mainShipIs": "Hauptschiff f\xFCr automatische Transporte",
-    "fleet.mainShipPick": "Dieses Schiff f\xFCr automatische Transporte nutzen (Mond, Sammeln, Plan)"
+    "fleet.mainShipPick": "Dieses Schiff f\xFCr automatische Transporte nutzen (Mond, Sammeln, Plan)",
+    "settings.expStyle": "Expeditions\xFCbersicht",
+    "settings.expStyleHint": "Schm\xFCckt ein anderes Tool die Berichte (OGame Tracker, OGLight, \u2026), tritt Future zur\xFCck und zeichnet nur auf, wie OGLight. Das Journal zeichnet immer auf.",
+    "settings.expStyle.auto": "Automatisch",
+    "settings.expStyle.always": "Immer Future",
+    "settings.expStyle.never": "Nur aufzeichnen"
   };
 
   // src/core/i18n.ts
@@ -7035,6 +7055,27 @@ td.spark-cell { width: 90px; }
 
   // src/modules/messages/index.ts
   var FOLD_KEY = "msg.fold";
+  var EXP_STYLE_KEY = "msg.expStyle";
+  var FOREIGN_KEY = "msg.foreignAt";
+  var FOREIGN_MS = 3 * 864e5;
+  var FOREIGN_CHECK_MS = 4e3;
+  var FOREIGN_NAME = /ogame-?tracker|ogt[-_]|ogk[-_]|ogi[-_]|ogl[-_]|oginfinity|ogame-?infinity/i;
+  function foreignTool(msg) {
+    for (const el6 of Array.from(msg.querySelectorAll("*"))) {
+      const ours = el6.closest('[class*="fut-"]');
+      if (ours && ours !== msg && msg.contains(ours)) continue;
+      if (el6.shadowRoot) return true;
+      if (Array.from(el6.attributes).some((a) => a.name.startsWith("data-v-"))) return true;
+      const cls = typeof el6.className === "string" ? el6.className : el6.getAttribute("class") ?? "";
+      if (FOREIGN_NAME.test(cls) || FOREIGN_NAME.test(el6.id)) return true;
+    }
+    return false;
+  }
+  function quiet(msg) {
+    msg.querySelectorAll(":scope .fut-msg").forEach((n) => n.remove());
+    msg.classList.remove("fut-msg-folded", "fut-msgrar", "fut-msgrar-0", "fut-msgrar-1");
+    msg.setAttribute("data-fut-quiet", "");
+  }
   function h2(doc, tag, cls = "", text) {
     const node = doc.createElement(tag);
     if (cls) node.className = cls;
@@ -7249,6 +7290,15 @@ td.spark-cell { width: 90px; }
     const universe = universeOf(doc, store.get(SERVER_DATA_KEY, null));
     const fold = store.get(FOLD_KEY, true);
     const sim = simTool(store.get(SIM_KEY, "osims"));
+    const now = o.now?.() ?? Date.now();
+    const style = store.get(EXP_STYLE_KEY, "auto");
+    for (const msg of Array.from(doc.querySelectorAll('.msg[data-fut-kind="expedition"]:not([data-fut-quiet])'))) {
+      if (style !== "auto" || !foreignTool(msg)) continue;
+      quiet(msg);
+      store.set(FOREIGN_KEY, now);
+    }
+    const seen = store.get(FOREIGN_KEY, 0);
+    const silentNow = (msg) => style === "never" || style === "auto" && (seen > 0 && now - seen < FOREIGN_MS || foreignTool(msg));
     const sharedTab = !!doc.querySelector('[data-subtab-id="11"].active, [data-subtab-id="11"][aria-selected="true"]');
     const expeditions = [];
     const spies = [];
@@ -7260,7 +7310,10 @@ td.spark-cell { width: 90px; }
       msg.setAttribute("data-fut-done", "");
       const parsed = readMessage(msg, o.playerId);
       if (!parsed) continue;
-      const box = summaryFor(doc, parsed, { locale, t, ships, spy: o.spy, universe, sim });
+      if (parsed.kind === "expedition") msg.setAttribute("data-fut-kind", "expedition");
+      const silent = parsed.kind === "expedition" && silentNow(msg);
+      if (silent) msg.setAttribute("data-fut-quiet", "");
+      const box = silent ? null : summaryFor(doc, parsed, { locale, t, ships, spy: o.spy, universe, sim });
       if (box) {
         box.title = [box.dataset.size, t("msg.toggle")].filter(Boolean).join(" \xB7 ");
         box.tabIndex = 0;
@@ -7330,6 +7383,13 @@ td.spark-cell { width: 90px; }
       doc.head.append(style);
     }
     processMessages(o);
+    setTimeout(() => {
+      if (o.store.get(EXP_STYLE_KEY, "auto") !== "auto") return;
+      const quietOnes = Array.from(doc.querySelectorAll(".msg[data-fut-quiet]"));
+      if (!quietOnes.length || quietOnes.some((m) => foreignTool(m))) return;
+      o.store.set(FOREIGN_KEY, 0);
+      redraw();
+    }, FOREIGN_CHECK_MS);
     let queued2 = false;
     const observer = new MutationObserver(() => {
       if (queued2) return;
@@ -7340,14 +7400,16 @@ td.spark-cell { width: 90px; }
       }, 50);
     });
     observer.observe(doc.body, { childList: true, subtree: true });
-    return () => {
+    function redraw() {
       doc.querySelectorAll(".msg .fut-msg").forEach((n) => n.remove());
       doc.querySelectorAll(".msg[data-fut-done]").forEach((m) => {
         m.removeAttribute("data-fut-done");
+        m.removeAttribute("data-fut-quiet");
         m.classList.remove("fut-msg-folded", "fut-msgrar", "fut-msgrar-0", "fut-msgrar-1");
       });
       processMessages(o);
-    };
+    }
+    return redraw;
   }
 
   // src/engines/fleet.ts
@@ -8245,7 +8307,16 @@ input.field { width: 190px; }
         body.append(
           row(t("settings.sim"), t("settings.simHint"), choice(tools, simTool(store.get(SIM_KEY, "osims")), (v) => set(SIM_KEY, v))),
           row(t("settings.shared"), t("settings.sharedHint"), yesNo(store.get(SPY_SHARED_KEY, true), (v) => set(SPY_SHARED_KEY, v))),
-          row(t("settings.fold"), t("settings.foldHint"), yesNo(store.get(FOLD_KEY, true), (v) => set(FOLD_KEY, v)))
+          row(t("settings.fold"), t("settings.foldHint"), yesNo(store.get(FOLD_KEY, true), (v) => set(FOLD_KEY, v))),
+          row(
+            t("settings.expStyle"),
+            t("settings.expStyleHint"),
+            choice(
+              ["auto", "always", "never"].map((k) => [k, t(`settings.expStyle.${k}`)]),
+              store.get(EXP_STYLE_KEY, "auto"),
+              (v) => set(EXP_STYLE_KEY, v)
+            )
+          )
         );
       } else if (section2 === "galaxy") {
         const current3 = store.get(BIG_DEBRIS_KEY, BIG_DEBRIS);

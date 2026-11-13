@@ -762,5 +762,10 @@
   "plan.queuedHint": "En file d'attente dans le jeu, pas encore payé : ses ressources sont mises de côté et ne comptent ni pour le plan ni pour les transports",
   "plan.unhold": "Ne plus mettre de côté (déjà lancé ou annulé)",
   "fleet.mainShipIs": "Vaisseau principal des transports automatiques",
-  "fleet.mainShipPick": "Utiliser ce vaisseau pour les transports automatiques (lune, collecte, plan)"
+  "fleet.mainShipPick": "Utiliser ce vaisseau pour les transports automatiques (lune, collecte, plan)",
+  "settings.expStyle": "Résumé des expéditions",
+  "settings.expStyleHint": "Si un autre outil décore les rapports (OGame Tracker, OGLight, …), Future s'efface et enregistre seulement, comme OGLight. Le journal enregistre toujours.",
+  "settings.expStyle.auto": "Automatique",
+  "settings.expStyle.always": "Toujours Future",
+  "settings.expStyle.never": "Enregistrer seulement"
 }
