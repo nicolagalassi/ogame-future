@@ -102,6 +102,10 @@ td.guess { font-style: italic; opacity: 0.7; }
 .head-toggle svg { transition: transform 0.15s; }
 .head-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
 .moves-open { grid-column: 1 / -1; order: 3; }
+.needs { margin: 0 0 8px; padding: 8px 10px; border: 1px solid #1F2C40; border-radius: 7px; background: #0D1522; color: #B4C2D3; font-size: 12px; }
+.needs p { margin: 4px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.needs .chip { display: inline-flex; align-items: center; height: 22px; text-decoration: none; }
+.move-text .guess { color: #E3BB28; font-style: normal; }
 .moves-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
 .moves-list .move:nth-child(2) { border-top: 0; }
 
