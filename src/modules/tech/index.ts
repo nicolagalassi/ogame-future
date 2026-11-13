@@ -18,7 +18,9 @@ import { formatUnits, groupInt, groupWhileTyping } from '../../core/format';
 import { levelsOf, readTechDetails, readTechList, type TechDetails } from '../../data/tech-details';
 import {
   isLevelled,
+  LAB_NEEDED,
   levelCost,
+  researchNetwork,
   matchShownLevel,
   missing,
   rangeCost,
@@ -48,6 +50,8 @@ export interface TechOptions {
   maxTemp: number | null;
   /** Called after the plan changes (planet menu badge). */
   onPlanChange?: () => void;
+  /** Research labs from the last sync: this planet's, the other planets', and the network level. */
+  labs?: () => { here: number; others: number[]; irn: number } | null;
 }
 
 const RES = [
@@ -128,6 +132,7 @@ const ICON = {
   energy: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>',
   start: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v5h5"/></svg>',
   sat: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="9" y="9" width="6" height="6" rx="1"/><path d="M2 9h5v6H2zM17 9h5v6h-5zM7 12h2M15 12h2M12 9V5"/></svg>',
+  lab: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5.5 9.5A1.6 1.6 0 0 0 5.9 21h12.2a1.6 1.6 0 0 0 1.4-2.5L14 9V3"/><path d="M7.5 15h9"/></svg>',
   pop: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.6 3-5.5 6-5.5s5.4 1.9 6 5.5"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.8M18.5 15c1.5.9 2.3 2.6 2.6 5"/></svg>',
 };
 
@@ -265,6 +270,21 @@ function takeAskedSatellites(doc: Document): number | null {
  * else a plain link to that page) and types N there.
  * Null when none are needed.
  */
+/** Research: the lab levels that work on it here, this lab plus the ones the network links. */
+function labChip(o: TechOptions, id: number): HTMLElement | null {
+  if (techKind(id) !== 'research') return null;
+  const labs = o.labs?.();
+  if (!labs) return null;
+  const need = LAB_NEEDED[id] ?? 1;
+  const net = researchNetwork(labs.here, labs.others, labs.irn, need);
+  const title = [
+    o.t('tech.labNet', { total: net.total, here: labs.here, linked: net.linked.length ? net.linked.join(' + ') : '—', irn: labs.irn }),
+    o.t('tech.labNeed', { need }),
+    ...(net.hereOk ? [] : [o.t('tech.labHereShort', { need })]),
+  ].join(' · ');
+  return chip(o.doc, ICON.lab, o.t('tech.labShort', { total: net.total, n: net.linked.length + 1 }), title, net.hereOk ? 'fut-tp-lab' : 'fut-tp-lab fut-tp-lack');
+}
+
 function satelliteChip(o: TechOptions, need: number, amountInput: HTMLInputElement | null): HTMLElement | null {
   const { doc, t, locale } = o;
   const balance = o.energy();
@@ -399,6 +419,8 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
         const sat = need === null ? null : satelliteChip(o, need, null);
         if (sat) row.append(sat);
       }
+      const net = labChip(o, details.id);
+      if (net) row.append(net);
       if (start.discount > 0.0005) row.append(chip(doc, '', t('tech.discountShort', { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), t('tech.discount', { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), 'fut-tp-disc'));
       box.replaceChildren(grid(o, view, have !== null), row);
     };

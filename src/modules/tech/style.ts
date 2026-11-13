@@ -73,6 +73,7 @@ export const TECH_CSS = `
 .fut-tp-lack { border-color: var(--bad); color: var(--bad); } .fut-tp-lack svg { color: var(--bad); }
 .fut-tp-sat { border-color: #6B5A1E; color: var(--energy); cursor: pointer; } .fut-tp-sat svg { color: var(--energy); }
 .fut-tp-sat:hover { border-color: var(--energy); background: #1E1A0C; }
+.fut-tp-lab { border-color: #35576A; color: var(--text, #C9D2DC); }
 .fut-tp-sat-link { display: inline-flex; max-width: 100%; text-decoration: none; }
 /* Tools over the picture, like OGLight. */
 .fut-tp-tools { position: absolute; top: 4px; left: 4px; right: 4px; display: flex; gap: 4px; z-index: 2; }

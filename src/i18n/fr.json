@@ -767,5 +767,9 @@
   "settings.expStyleHint": "Si un autre outil décore les rapports (OGame Tracker, OGLight, …), Future s'efface et enregistre seulement, comme OGLight. Le journal enregistre toujours.",
   "settings.expStyle.auto": "Automatique",
   "settings.expStyle.always": "Toujours Future",
-  "settings.expStyle.never": "Enregistrer seulement"
+  "settings.expStyle.never": "Enregistrer seulement",
+  "tech.labShort": "Réseau {total} · {n} labos",
+  "tech.labNet": "Laboratoires sur cette recherche : {total} = ici {here} + {linked} (Réseau de recherche intergalactique niv. {irn})",
+  "tech.labNeed": "comptent les labos dès le niv. {need}",
+  "tech.labHereShort": "le labo de cette planète est sous le niv. {need} : impossible de la lancer ici"
 }
