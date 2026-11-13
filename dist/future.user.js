@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.63
+// @version      0.3.64
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -804,7 +804,7 @@
     "exp.dm": "Materia oscura",
     "exp.shipsFound": "Navi trovate",
     "exp.lost": "Navi perse",
-    "exp.net": "Guadagno netto",
+    "exp.net": "Totale (risorse + flotta)",
     "exp.average": "Media a spedizione",
     "exp.lfXp": "Esperienza FV",
     "exp.outcomes": "Esiti",
@@ -1283,7 +1283,8 @@
     "exp.heroRes": "Risorse",
     "exp.heroFleet": "Flotta",
     "exp.heroFound": "trovate",
-    "exp.heroLostShort": "perse"
+    "exp.heroLostShort": "perse",
+    "exp.heroDebris": "di cui detriti pos. 16"
   };
 
   // src/i18n/en.json
@@ -1585,7 +1586,7 @@
     "exp.dm": "Dark Matter",
     "exp.shipsFound": "Ships found",
     "exp.lost": "Ships lost",
-    "exp.net": "Net gain",
+    "exp.net": "Total (resources + fleet)",
     "exp.average": "Average per expedition",
     "exp.lfXp": "LF experience",
     "exp.outcomes": "Outcomes",
@@ -2064,7 +2065,8 @@
     "exp.heroRes": "Resources",
     "exp.heroFleet": "Fleet",
     "exp.heroFound": "found",
-    "exp.heroLostShort": "lost"
+    "exp.heroLostShort": "lost",
+    "exp.heroDebris": "of which debris at 16"
   };
 
   // src/i18n/fr.json
@@ -2366,7 +2368,7 @@
     "exp.dm": "Antimati\xE8re",
     "exp.shipsFound": "Vaisseaux trouv\xE9s",
     "exp.lost": "Vaisseaux perdus",
-    "exp.net": "Gain net",
+    "exp.net": "Total (ressources + flotte)",
     "exp.average": "Moyenne par exp\xE9dition",
     "exp.lfXp": "Exp\xE9rience FV",
     "exp.outcomes": "R\xE9sultats",
@@ -2845,7 +2847,8 @@
     "exp.heroRes": "Ressources",
     "exp.heroFleet": "Flotte",
     "exp.heroFound": "trouv\xE9s",
-    "exp.heroLostShort": "perdus"
+    "exp.heroLostShort": "perdus",
+    "exp.heroDebris": "dont d\xE9bris en 16"
   };
 
   // src/i18n/de.json
@@ -3147,7 +3150,7 @@
     "exp.dm": "Dunkle Materie",
     "exp.shipsFound": "Gefundene Schiffe",
     "exp.lost": "Verlorene Schiffe",
-    "exp.net": "Nettogewinn",
+    "exp.net": "Gesamt (Ressourcen + Flotte)",
     "exp.average": "Schnitt pro Expedition",
     "exp.lfXp": "LF-Erfahrung",
     "exp.outcomes": "Ergebnisse",
@@ -3626,7 +3629,8 @@
     "exp.heroRes": "Ressourcen",
     "exp.heroFleet": "Flotte",
     "exp.heroFound": "gefunden",
-    "exp.heroLostShort": "verloren"
+    "exp.heroLostShort": "verloren",
+    "exp.heroDebris": "davon Tr\xFCmmer auf 16"
   };
 
   // src/core/i18n.ts
@@ -5476,13 +5480,57 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
   function record2(journal, messages) {
     let added = 0;
     let next = journal;
+    const seen = new Set(Object.values(journal).map(signature).filter(Boolean));
     for (const { id, ...entry } of messages) {
       if (next[id]) continue;
+      const sig = signature(entry);
+      if (sig && seen.has(sig)) continue;
+      if (sig) seen.add(sig);
       if (next === journal) next = { ...journal };
       next[id] = entry;
       added++;
     }
     return { journal: next, added };
+  }
+  function signature(e) {
+    if (e.summary || e.combat || e.debris || e.kind !== "expedition") return "";
+    const units = (u) => Object.entries(u).sort(([a], [b]) => Number(a) - Number(b)).map(([k, v]) => `${k}:${v}`).join(",");
+    return [e.at, e.coords ?? "", e.result, e.size, e.res.metal, e.res.crystal, e.res.deuterium, e.res.darkMatter, units(e.ships), units(e.lost), e.item ?? ""].join("|");
+  }
+  function dedupe(journal) {
+    const seen = /* @__PURE__ */ new Set();
+    let removed = 0;
+    const next = {};
+    for (const [id, e] of Object.entries(journal).sort(([a], [b]) => a.localeCompare(b, void 0, { numeric: true }))) {
+      const sig = signature(e);
+      if (sig && seen.has(sig)) {
+        removed++;
+        continue;
+      }
+      if (sig) seen.add(sig);
+      next[id] = e;
+    }
+    return { journal: removed ? next : journal, removed };
+  }
+  function recordDebris(journal, id, at, res, coords) {
+    if (journal[id] || res.metal + res.crystal + res.deuterium <= 0) return { journal, added: 0 };
+    const entry = {
+      kind: "expedition",
+      at,
+      result: "unknown",
+      size: -1,
+      depletion: 0,
+      res: { metal: res.metal, crystal: res.crystal, deuterium: res.deuterium, darkMatter: 0, food: 0 },
+      ships: {},
+      lost: {},
+      item: null,
+      lfXp: 0,
+      lifeform: 0,
+      artefacts: 0,
+      coords,
+      debris: true
+    };
+    return { journal: { ...journal, [id]: entry }, added: 1 };
   }
   function recordCombat(journal, id, at, lost, coords) {
     if (journal[id] || !Object.keys(lost).length) return { journal, added: 0 };
@@ -5534,19 +5582,21 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       artefacts: 0,
       items: [],
       sizes: [0, 0, 0],
+      debris: 0,
       netMsu: 0
     };
     for (const e of entries) {
       if (e.kind === "raid") continue;
       const n = e.summary ? e.summary.count : 1;
       if (e.kind === "discovery") s.discoveries += n;
-      else if (!e.combat) s.count += n;
+      else if (!e.combat && !e.debris) s.count += n;
       if (e.summary) for (const [k, v] of Object.entries(e.summary.outcomes)) s.outcomes[k] = (s.outcomes[k] ?? 0) + (v ?? 0);
-      else if (!e.combat) s.outcomes[e.result] = (s.outcomes[e.result] ?? 0) + 1;
+      else if (!e.combat && !e.debris) s.outcomes[e.result] = (s.outcomes[e.result] ?? 0) + 1;
       s.res.metal += e.res.metal;
       s.res.crystal += e.res.crystal;
       s.res.deuterium += e.res.deuterium;
       s.res.darkMatter += e.res.darkMatter;
+      if (e.debris) s.debris += msu(e.res);
       for (const [id, n2] of Object.entries(e.ships)) s.shipsFound[Number(id)] = (s.shipsFound[Number(id)] ?? 0) + n2;
       for (const [id, n2] of Object.entries(e.lost)) s.lost[Number(id)] = (s.lost[Number(id)] ?? 0) + n2;
       s.lfXp += e.lfXp;
@@ -7411,6 +7461,12 @@ td.spark-cell { width: 90px; }
       }
       if (parsed.kind === "expedition" || parsed.kind === "discovery") expeditions.push(parsed);
       if (parsed.kind === "spy") spies.push(parsed);
+      if (parsed.kind === "recycle" && parsed.coords?.replace(/[[\]]/g, "").split(":")[2] === "16") {
+        journal ?? (journal = store.get(JOURNAL_KEY, {}));
+        const r = recordDebris(journal, parsed.id, parsed.at, parsed.res, parsed.coords);
+        journal = r.journal;
+        added += r.added;
+      }
       if (parsed.kind === "combat" && parsed.coords?.split(":")[2] === "16" && Object.keys(parsed.lost).length) {
         journal ?? (journal = store.get(JOURNAL_KEY, {}));
         const r = recordCombat(journal, parsed.id, parsed.at, parsed.lost, parsed.coords);
@@ -7421,6 +7477,11 @@ td.spark-cell { width: 90px; }
     }
     if (expeditions.length) {
       journal ?? (journal = store.get(JOURNAL_KEY, {}));
+      const clean = dedupe(journal);
+      if (clean.removed) {
+        journal = clean.journal;
+        store.set(JOURNAL_KEY, journal);
+      }
       const before = journal;
       const r = record2(journal, expeditions);
       journal = r.journal;
@@ -13893,7 +13954,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       const lostNote = h5("span", "hero-note");
       lostNote.append(`${t("exp.heroFound")} `, h5("b", "", fmt(msu(s.shipsValue))));
       if (msu(s.lostValue)) lostNote.append(` \xB7 ${t("exp.heroLostShort")} `, h5("b", "neg", `\u2212${fmt(msu(s.lostValue))}`));
-      top.append(net, part(t("exp.heroRes"), resMsu), part(t("exp.heroFleet"), fleetMsu, lostNote));
+      const debrisNote = s.debris ? h5("span", "hero-note") : void 0;
+      debrisNote?.append(`${t("exp.heroDebris")} `, h5("b", "", fmt(s.debris)));
+      top.append(net, part(t("exp.heroRes"), resMsu, debrisNote), part(t("exp.heroFleet"), fleetMsu, lostNote));
       const mix = valueMix(s);
       const mixTotal = mix.metal + mix.crystal + mix.deuterium + mix.ships;
       const bar = h5("div", "mix");
@@ -14070,7 +14133,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       return out;
     };
     const draw = () => {
-      const journal = store.get(JOURNAL_KEY, {});
+      const clean = dedupe(store.get(JOURNAL_KEY, {}));
+      if (clean.removed) store.set(JOURNAL_KEY, clean.journal);
+      const journal = clean.journal;
       const inPeriod = entriesIn(journal, periodRange(period, o.now));
       const hasRaids = Object.values(journal).some((e) => e.kind === "raid");
       if (kind === "raid" && !hasRaids) kind = "expedition";
