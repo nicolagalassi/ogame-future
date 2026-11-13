@@ -23,6 +23,46 @@ export type T = (key: string, vars?: Record<string, string | number>) => string;
 
 export const FOLD_KEY = 'msg.fold';
 
+/**
+ * Expedition reports with another tool around (OGame Tracker, OGLight, OGame Infinity, …), as
+ * OGLight does: Future steps aside and only records. 'auto' = silent when another tool decorates
+ * the reports; 'always' = our summary anyway; 'never' = always silent. The journal records in every case.
+ */
+export const EXP_STYLE_KEY = 'msg.expStyle';
+export type ExpStyle = 'auto' | 'always' | 'never';
+/** When another tool was last seen on the expedition reports (auto mode starts silent after it). */
+export const FOREIGN_KEY = 'msg.foreignAt';
+/** How long that sighting makes the next pages start silent; each page checks again. */
+const FOREIGN_MS = 3 * 86_400_000;
+/** On a page started silent: if no other tool shows up on the reports by then, ours come back. */
+export const FOREIGN_CHECK_MS = 4_000;
+
+const FOREIGN_NAME = /ogame-?tracker|ogt[-_]|ogk[-_]|ogi[-_]|ogl[-_]|oginfinity|ogame-?infinity/i;
+
+/**
+ * Does another tool decorate this report? Read from the page only: elements that are not ours with
+ * the marks extensions leave (Vue's data-v-* attributes, a shadow root, a known tool prefix).
+ */
+export function foreignTool(msg: Element): boolean {
+  for (const el of Array.from(msg.querySelectorAll('*'))) {
+    // Ours (the report itself carries our fold / tint classes: only what is inside it counts).
+    const ours = el.closest('[class*="fut-"]');
+    if (ours && ours !== msg && msg.contains(ours)) continue;
+    if (el.shadowRoot) return true;
+    if (Array.from(el.attributes).some((a) => a.name.startsWith('data-v-'))) return true;
+    const cls = typeof el.className === 'string' ? el.className : el.getAttribute('class') ?? '';
+    if (FOREIGN_NAME.test(cls) || FOREIGN_NAME.test(el.id)) return true;
+  }
+  return false;
+}
+
+/** Takes our summary, folding and tint off a report (the game's own markup stays). */
+function quiet(msg: Element): void {
+  msg.querySelectorAll(':scope .fut-msg').forEach((n) => n.remove());
+  msg.classList.remove('fut-msg-folded', 'fut-msgrar', 'fut-msgrar-0', 'fut-msgrar-1');
+  msg.setAttribute('data-fut-quiet', '');
+}
+
 export interface MessagesOptions {
   doc: Document;
   store: Store;
@@ -291,6 +331,16 @@ export function processMessages(o: MessagesOptions): number {
   const universe = universeOf(doc, store.get<ServerData | null>(SERVER_DATA_KEY, null));
   const fold = store.get<boolean>(FOLD_KEY, true);
   const sim = simTool(store.get<string>(SIM_KEY, 'osims'));
+  const now = o.now?.() ?? Date.now();
+  const style = store.get<ExpStyle>(EXP_STYLE_KEY, 'auto');
+  // Another tool already decorates the expedition reports here: Future only records them.
+  for (const msg of Array.from(doc.querySelectorAll('.msg[data-fut-kind="expedition"]:not([data-fut-quiet])'))) {
+    if (style !== 'auto' || !foreignTool(msg)) continue;
+    quiet(msg);
+    store.set(FOREIGN_KEY, now);
+  }
+  const seen = store.get<number>(FOREIGN_KEY, 0);
+  const silentNow = (msg: Element) => style === 'never' || (style === 'auto' && ((seen > 0 && now - seen < FOREIGN_MS) || foreignTool(msg)));
   // Communication › shared espionage reports: an alliance member's probes.
   const sharedTab = !!doc.querySelector('[data-subtab-id="11"].active, [data-subtab-id="11"][aria-selected="true"]');
   const expeditions: ExpeditionMessage[] = [];
@@ -304,7 +354,10 @@ export function processMessages(o: MessagesOptions): number {
     msg.setAttribute('data-fut-done', '');
     const parsed = readMessage(msg, o.playerId);
     if (!parsed) continue;
-    const box = summaryFor(doc, parsed, { locale, t, ships, spy: o.spy, universe, sim });
+    if (parsed.kind === 'expedition') msg.setAttribute('data-fut-kind', 'expedition');
+    const silent = parsed.kind === 'expedition' && silentNow(msg);
+    if (silent) msg.setAttribute('data-fut-quiet', '');
+    const box = silent ? null : summaryFor(doc, parsed, { locale, t, ships, spy: o.spy, universe, sim });
     if (box) {
       box.title = [box.dataset.size, t('msg.toggle')].filter(Boolean).join(' · ');
       // A real control: reachable with Tab, Enter / Space open and close the game's text.
@@ -387,6 +440,14 @@ export function watchMessages(o: MessagesOptions): () => void {
     doc.head.append(style);
   }
   processMessages(o);
+  // Started silent because another tool was seen lately: if none shows up on these reports, ours come back.
+  setTimeout(() => {
+    if (o.store.get<ExpStyle>(EXP_STYLE_KEY, 'auto') !== 'auto') return;
+    const quietOnes = Array.from(doc.querySelectorAll('.msg[data-fut-quiet]'));
+    if (!quietOnes.length || quietOnes.some((m) => foreignTool(m))) return;
+    o.store.set(FOREIGN_KEY, 0);
+    redraw();
+  }, FOREIGN_CHECK_MS);
   // Tabs and pages are loaded by the game without a page change: watch for new reports.
   let queued = false;
   const observer = new MutationObserver(() => {
@@ -398,12 +459,14 @@ export function watchMessages(o: MessagesOptions): () => void {
     }, 50);
   });
   observer.observe(doc.body, { childList: true, subtree: true });
-  return () => {
+  function redraw(): void {
     doc.querySelectorAll('.msg .fut-msg').forEach((n) => n.remove());
     doc.querySelectorAll('.msg[data-fut-done]').forEach((m) => {
       m.removeAttribute('data-fut-done');
+      m.removeAttribute('data-fut-quiet');
       m.classList.remove('fut-msg-folded', 'fut-msgrar', 'fut-msgrar-0', 'fut-msgrar-1');
     });
     processMessages(o);
-  };
+  }
+  return redraw;
 }

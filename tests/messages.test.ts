@@ -342,3 +342,35 @@ describe('"just read" panel', () => {
     expect(document.getElementById('fut-expfresh')).toBeNull();
   });
 });
+
+describe('another tool on the expedition reports', () => {
+  it('steps aside and only records, as OGLight does', () => {
+    document.body.innerHTML = '';
+    const store = new Store(new MemoryStore(), 'quiet');
+    const a = msg('901', shipwrecks);
+    document.body.append(a);
+    processMessages({ doc: document, store, playerId: OWN, locale: 'it', t, now: () => 1000 });
+    expect(a.querySelector('.fut-msg')).not.toBeNull();
+    // The other tool decorates the report afterwards (Vue scoped markup): ours goes, the journal keeps it.
+    const other = document.createElement('div');
+    other.setAttribute('data-v-1a2b3c', '');
+    a.querySelector('.msgContent')!.after(other);
+    processMessages({ doc: document, store, playerId: OWN, locale: 'it', t, now: () => 2000 });
+    expect(a.querySelector('.fut-msg')).toBeNull();
+    expect(a.classList.contains('fut-msg-folded')).toBe(false);
+    expect(store.get<number>('msg.foreignAt', 0)).toBe(2000);
+    expect(Object.keys(store.get<Journal>(JOURNAL_KEY, {}))).toContain('901');
+    // Next reports start silent, and still enter the journal.
+    const b = msg('902', deut);
+    document.body.append(b);
+    processMessages({ doc: document, store, playerId: OWN, locale: 'it', t, now: () => 3000 });
+    expect(b.querySelector('.fut-msg')).toBeNull();
+    expect(Object.keys(store.get<Journal>(JOURNAL_KEY, {}))).toContain('902');
+    // "Always": our summary anyway.
+    store.set('msg.expStyle', 'always');
+    const c = msg('903', nothing);
+    document.body.append(c);
+    processMessages({ doc: document, store, playerId: OWN, locale: 'it', t, now: () => 4000 });
+    expect(c.querySelector('.fut-msg')).not.toBeNull();
+  });
+});

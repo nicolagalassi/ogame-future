@@ -762,5 +762,10 @@
   "plan.queuedHint": "Queued in the game, not paid yet: its resources are held back and count neither for the plan nor for transports",
   "plan.unhold": "Stop holding back (already started or cancelled)",
   "fleet.mainShipIs": "Main ship for automatic transports",
-  "fleet.mainShipPick": "Use this ship for automatic transports (moon, collection, plan)"
+  "fleet.mainShipPick": "Use this ship for automatic transports (moon, collection, plan)",
+  "settings.expStyle": "Expedition summary",
+  "settings.expStyleHint": "With another tool decorating the reports (OGame Tracker, OGLight, …) Future steps aside and only records, as OGLight does. The journal always records.",
+  "settings.expStyle.auto": "Automatic",
+  "settings.expStyle.always": "Always Future",
+  "settings.expStyle.never": "Record only"
 }

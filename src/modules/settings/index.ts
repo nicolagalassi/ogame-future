@@ -7,7 +7,7 @@ import { icon } from '../../core/icons';
 import type { Store } from '../../core/storage';
 import { WINDOW_SHEET } from '../../core/sheet';
 import { SIM_KEY, SIM_TOOLS, simTool, type SimTool } from '../../engines/sim-links';
-import { FOLD_KEY } from '../messages';
+import { EXP_STYLE_KEY, FOLD_KEY, type ExpStyle } from '../messages';
 import { SPY_SHARED_KEY } from '../messages/spy-table';
 import type { MenuSettings } from '../planet-menu';
 import { CARGO_SHIPS, LOAD_ORDERS, parseAmount, SETTINGS_KEY as FLEET_SETTINGS_KEY, settingsFrom, validOrder, type FleetSettings } from '../../engines/fleet';
@@ -404,6 +404,15 @@ export function openSettings(o: SettingsOptions): void {
         row(t('settings.sim'), t('settings.simHint'), choice(tools, simTool(store.get<string>(SIM_KEY, 'osims')), (v) => set(SIM_KEY, v))),
         row(t('settings.shared'), t('settings.sharedHint'), yesNo(store.get<boolean>(SPY_SHARED_KEY, true), (v) => set(SPY_SHARED_KEY, v))),
         row(t('settings.fold'), t('settings.foldHint'), yesNo(store.get<boolean>(FOLD_KEY, true), (v) => set(FOLD_KEY, v))),
+        row(
+          t('settings.expStyle'),
+          t('settings.expStyleHint'),
+          choice(
+            (['auto', 'always', 'never'] as ExpStyle[]).map((k) => [k, t(`settings.expStyle.${k}`)] as [ExpStyle, string]),
+            store.get<ExpStyle>(EXP_STYLE_KEY, 'auto'),
+            (v) => set(EXP_STYLE_KEY, v),
+          ),
+        ),
       );
     } else if (section === 'galaxy') {
       // Debris from this size up is lit in the galaxy and in the targets bar: "1M", "500k", "2,5G".

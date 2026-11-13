@@ -164,6 +164,13 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     comprese) ha in alto a destra un tasto cargo (in alto a sinistra c'è già il gioco). Clic = diventa la nave
     principale (impostazione salvata, la vecchia principale diventa seconda se serve) e l'azione in corso
     (luna, raccolta, piano) si prepara di nuovo con quella. Come OGLight.
+19. **Spedizioni in silenzio** (2026-11-13, 0.3.61, `foreignTool` in `modules/messages/index.ts`): se un altro tool
+    decora i report di spedizione (OGame Tracker, OGLight, OGame Infinity), Future toglie riepilogo, ripiegatura e
+    tinta e registra soltanto nel diario, come OGLight. Segni cercati nel report, fuori dai nostri elementi: attributi
+    `data-v-*` (Vue), shadow root, prefissi `ogame-tracker` / `ogt-` / `ogk-` / `ogi-` / `ogl_`. Avvistamento
+    salvato (`msg.foreignAt`, 3 giorni): le pagine dopo partono già in silenzio; se dopo 4 s nessun report ha l'altro
+    tool, il nostro stile torna. Impostazioni → Posta → Riepilogo spedizioni: Automatico / Sempre Future / Solo
+    registra. **Da verificare** sul markup vero di OGame Tracker (scritto senza poterlo vedere).
 14. **Grafica** (2026-11-06): tutte le finestre (`WINDOW_SHEET`) riprendono il menu pianeti: riquadri #111B2A
     con bordo #1F2C40, schede a segmenti, numeri monospazio, ciano per la selezione. Pila z-index sopra il
     footer del gioco (999999): barra laterale 1000000, finestre 1000001, popup 1000002-3.
