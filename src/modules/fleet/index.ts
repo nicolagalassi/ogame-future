@@ -102,7 +102,7 @@ const MODAL_ID = 'fut-fleet-modal';
 /** Missions offered for fleetsave, in the game's order codes. */
 export const FLEETSAVE_MISSIONS = [3, 4, 6, 8, 15, 5, 1];
 /** Per page: the round in progress, the options, and the speed (%) Future's last preparation set here. */
-const pageState = new WeakMap<Document, { active: RepeatState | null; o: FleetOptions; prepared?: number }>();
+const pageState = new WeakMap<Document, { active: RepeatState | null; o: FleetOptions; prepared?: number; rerun?: (mode: FleetMode, dest?: number | null) => void }>();
 const REPEATABLE: FleetMode[] = ['moon', 'collect', 'collectDeploy', 'expedition', 'fleetsave', 'plan'];
 /** Rounds that offer "Salta" (nothing worth moving here: on to the next body). */
 const SKIPPABLE: FleetMode[] = ['moon', 'collect', 'collectDeploy'];
@@ -1260,12 +1260,42 @@ export function renderFleetTools(o: FleetOptions): void {
       report(r, 'fleet.ok.cargo');
     });
   }
+  // The redraw after a new main ship builds a new `run`: the page state keeps the latest one.
+  state.rerun = (mode, dest) => run[mode](dest);
   const favRun = {
     collect: () => (settings.favTransport ? run.collect(settings.favTransport) : say(t('fleet.err.noDefault'), true)),
     collectDeploy: () => (settings.favDeploy ? run.collectDeploy(settings.favDeploy) : say(t('fleet.err.noDefault'), true)),
   };
 
   if (fleet1 && anchor1) {
+    // Main cargo ship, chosen on the ship itself (as in OGLight): the automatic transports (planet
+    // → moon, collection, plan delivery) take it first. A click saves the choice and prepares the
+    // running action again with it. COMPLIANCE: only the form changes, the player still sends.
+    const AUTO_CARGO: FleetMode[] = ['moon', 'collect', 'plan'];
+    for (const li of Array.from(fleet1.querySelectorAll<HTMLElement>('#technologies li[data-technology]'))) {
+      li.querySelector('.fut-mainship')?.remove();
+      const id = Number(li.dataset.technology);
+      if (!CARGO_SHIPS.includes(id)) continue;
+      const main = settings.mainShip === id;
+      const pick = el(doc, 'button', `fut-mainship${main ? ' on' : ''}`);
+      pick.type = 'button';
+      pick.innerHTML = iconSvg('cargo', 12);
+      pick.title = main ? t('fleet.mainShipIs') : t('fleet.mainShipPick');
+      pick.setAttribute('aria-label', `${pick.title}: ${li.getAttribute('aria-label') ?? id}`);
+      pick.setAttribute('aria-pressed', String(main));
+      pick.addEventListener('click', (e) => {
+        // The game selects every ship of this kind on a click on its picture: not this one.
+        e.preventDefault();
+        e.stopPropagation();
+        if (main) return;
+        const now = loadSettings(o.store);
+        o.store.set(SETTINGS_KEY, { ...now, mainShip: id, secondShip: now.secondShip === id ? now.mainShip : now.secondShip });
+        const active = state.active;
+        redraw();
+        if (active && AUTO_CARGO.includes(active.mode)) pageState.get(doc)?.rerun?.(active.mode, active.dest);
+      });
+      li.append(pick);
+    }
     const bar = el(doc, 'div', 'fut-fbar');
     const keys = keymap(o.store);
     const k = (id: string) => keys.get(id) ?? '';

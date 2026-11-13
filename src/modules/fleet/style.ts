@@ -38,6 +38,11 @@ export const FLEET_CSS = `
 .fut-fsecond .fut-fact { background: none; border-color: var(--line); color: var(--mute); }
 .fut-fsecond .fut-fact:hover { background: var(--tile); border-color: #47607D; color: var(--ico-hi); }
 .fut-fskip[hidden] { display: none; }
+/* Main cargo ship, picked on the ship itself (top right; the game keeps the top left). */
+#fleet1 #technologies li[data-technology] { position: relative; }
+.fut-mainship { position: absolute; top: 2px; right: 2px; z-index: 2; width: 20px; height: 20px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #1F2C40; border-radius: 5px; background: rgba(13, 21, 34, 0.85); color: #8A9BB4; cursor: pointer; opacity: 0.75; }
+.fut-mainship:hover { opacity: 1; color: #F1F4F7; border-color: #6FB6C8; }
+.fut-mainship.on { opacity: 1; color: #0D1522; background: #6FB6C8; border-color: #6FB6C8; cursor: default; }
 /* "Opens a list" mark, in the corner where the others have their key. */
 .fut-fact .more-mark { position: absolute; right: 3px; bottom: 3px; width: 0; height: 0; border-left: 5px solid transparent; border-bottom: 5px solid currentColor; opacity: 0.7; }
 
