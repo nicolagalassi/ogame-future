@@ -695,14 +695,19 @@ describe('plain Trasporto / Schiera', () => {
     expect([...menu.querySelectorAll('.fut-fmain b')].map((b) => b.textContent)).toEqual(['fleet.collect.transport', 'fleet.collect.deploy']);
   });
 
-  it('S from a moon starts on its planet', async () => {
+  it('S from a moon starts on its planet, and the game form takes it for ships picked by hand', async () => {
     const { renderFleetTools } = await import('../src/modules/fleet/index');
     const doc = fleetPage();
+    const fd = fakeDispatcher({ currentPlanet: { galaxy: 5, system: 185, position: 8, type: 3 }, targetPlanet: { galaxy: 5, system: 185, position: 8, type: 3 } });
+    (window as unknown as { fleetDispatcher: unknown }).fleetDispatcher = fd;
     const store = new Store(new MemoryStore(), 'twin');
     const bodies = [{ planetId: 1, moonId: 11, name: 'Casa', coords: '5:185:8' }];
     renderFleetTools({ doc, store, bodyId: 11, bodies, t: (k: string) => k, locale: 'it', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch' });
     doc.querySelector<HTMLButtonElement>('.fut-fact[aria-label="fleet.btn.deploy"]')!.click();
     expect(store.get<typeof DEFAULT_SETTINGS>('fleet.settings', DEFAULT_SETTINGS).sendTarget).toEqual({ galaxy: 5, system: 185, position: 8, type: 1 });
+    await Promise.resolve();
+    expect([fd.targetPlanet.type, fd.mission]).toEqual([1, 4]);
+    expect(fd.selected).toEqual({});
   });
 });
 

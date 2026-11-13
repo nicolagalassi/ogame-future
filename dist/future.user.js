@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.69
+// @version      0.3.70
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -11035,6 +11035,10 @@ table.queues td.acts { width: 1%; text-align: right; }
     }
     return { ...finish(fd, code, count2, cargo), missing: Math.max(0, needed - n) };
   }
+  function aimSend(fd, doc, target, mission) {
+    setTarget(fd, doc, target);
+    fd.mission = mission === "transport" ? TRANSPORT : DEPLOY;
+  }
   function snapshotFleet(fd) {
     return {
       ships: Object.fromEntries(fd.shipsToSend.map((s) => [String(s.id), s.number])),
@@ -11955,10 +11959,13 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     return { ...r, name: b?.name };
   }
   var SEND_CARGO = [202, 203];
-  function sendPanel(o, peek, onCargo) {
+  function sendPanel(o, peek, onCargo, onTarget) {
     const { doc, t } = o;
     const settings = loadSettings(o.store);
-    const save = (part) => o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), ...part });
+    const save = (part) => {
+      o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), ...part });
+      if ("sendTarget" in part) onTarget();
+    };
     const origin = originCoords(doc);
     const panel = el4(doc, "div", "fut-fsend");
     panel.setAttribute("role", "group");
@@ -12306,6 +12313,16 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       if (next) say(t(next === "transport" ? "fleet.send.onTransport" : "fleet.send.onDeploy"));
       doc.querySelector(".fut-fsend .fut-fin.p")?.focus();
     }
+    function aim() {
+      const fd = getDispatcher();
+      if (!fd || fd.currentPage !== "fleet1") return;
+      void whenTargetIdle(fd).then(() => {
+        const now = loadSettings(o.store);
+        if (!now.sendMode) return;
+        const target = sendTargetOf(o, now.sendTarget, fd.currentPlanet);
+        if (target) aimSend(fd, doc, target, now.sendMode);
+      });
+    }
     function sendWith(ship) {
       withDispatcher((fd) => {
         const now = loadSettings(o.store);
@@ -12467,7 +12484,10 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const bottom = el4(doc, "div", "fut-frow");
       bottom.append(rules, out.box);
       bar.append(top);
-      if (settings.sendMode) bar.append(sendPanel(o, out.peek, sendWith));
+      if (settings.sendMode) {
+        bar.append(sendPanel(o, out.peek, sendWith, aim));
+        aim();
+      }
       if (focusRes) doc.querySelector(".fut-fsend .fut-fresin.metal input")?.focus();
       bar.append(bottom);
       anchor1.before(bar);
