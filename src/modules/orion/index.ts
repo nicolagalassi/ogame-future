@@ -17,10 +17,10 @@ import { formatUnits } from '../../core/format';
 import { resIconSvg } from '../../core/res-icons';
 import { RES_COLORS } from '../../core/sheet';
 import { pageWindow } from '../../data/fleet-dispatcher';
-import { COLLECT_DIALOG, depletionHours, isDisabled, lithiumNow, lithiumPerHour, MISSION_CARD, readCollectDialog, readMissionCard, readScanCard, SCAN_CARD, scanCost, storageCap, type MissionCard } from '../../data/orion';
+import { COLLECT_DIALOG, depletionHours, isCombat, isDisabled, lithiumNow, lithiumPerHour, MISSION_CARD, readCollectDialog, readMissionCard, readScanCard, SCAN_CARD, scanCost, storageCap, type MissionCard } from '../../data/orion';
 import {
-  ARCHIVE_KEY, cardValue, counted, freeLithium, IGNORED_KEY, launchPlan, LEDGER_KEY, loadArchive, PENDING_KEY, profit, pruneLedger, scansPossible, settle, syncArchive, syncLedger,
-  type Archive, type CardState, type Ignored, type Ledger, type LedgerRecord, type Lithium, type PendingMap, type Rewards,
+  ARCHIVE_KEY, budgetOf, cardValue, counted, freeLithium, IGNORED_KEY, launchPlan, learnMult, LEDGER_KEY, loadArchive, LOW_ROLL, MULT_KEY, multKey, PENDING_KEY, profit, pruneLedger, scansPossible, settle, SHIP_RATE, syncArchive, syncLedger,
+  type Archive, type CardState, type Ignored, type Ledger, type LedgerRecord, type Lithium, type Mults, type PendingMap, type Rewards,
 } from '../../engines/orion';
 import { msu } from '../../engines/expeditions';
 
@@ -55,6 +55,8 @@ const CSS = `
 .fut-or-val b { font-size: 15px; line-height: 18px; color: var(--accent); }
 .fut-or-val small { font-size: 10px; color: var(--mute); }
 .fut-or-val.free b { color: var(--ok); }
+.fut-or-val small.fut-or-risk { color: var(--warn); }
+.fut-or-x { color: #4FE0B0; }
 .fut-or-best { outline: 1px solid var(--gold, #F5C542); outline-offset: -1px; border-radius: 4px; }
 .fut-or-best .fut-or-val b { color: #F5C542; }
 .fut-or-line { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding-top: 6px; border-top: 1px solid var(--line); }
@@ -114,7 +116,7 @@ const isShown = (el: Element) => el.isConnected && el.getClientRects().length > 
 
 export function watchOrion(o: OrionOptions): void {
   const { doc, store, t, locale } = o;
-  const win = pageWindow() as Window & { lithiumProduction?: unknown };
+  const win = pageWindow() as Window & { lithiumProduction?: unknown; scannerLoca?: Record<string, string> };
   const fmt = (n: number) => formatUnits(n, locale);
   /** Text with <b> around each {var} (but `held`, a phrase of its own): the figures stand out. */
   const rich = (key: string, vars: Record<string, string | number>) => {
@@ -179,7 +181,7 @@ export function watchOrion(o: OrionOptions): void {
     const ignored = loadIgnored();
     if (Object.keys(ignored).some((c) => !ledger[c])) store.set(IGNORED_KEY, Object.fromEntries(Object.keys(ignored).filter((c) => ledger[c]).map((c) => [c, true])));
     // The archive: written down or updated, collections settled once the game has paid out.
-    let archive = syncArchive(loadArch(), read.filter((m) => m.id).map((m) => ({ id: m.id, name: m.name, coords: m.coords, level: m.level, stars: m.stars, mode: m.mode, kind: m.kind, spawnedAt: m.spawnedAt, wave: m.incoming, waves: m.total })), now);
+    let archive = syncArchive(loadArch(), read.filter((m) => m.id).map((m) => ({ id: m.id, name: m.name, coords: m.coords, level: m.level, stars: m.stars, mode: m.mode, kind: m.kind, spawnedAt: m.spawnedAt, wave: m.incoming, waves: m.total, possibleMsu: msu(m.possible), combat: isCombat(m.kind, win) })), now);
     const states = new Map<string, CardState>(read.filter((m) => m.id).map((m) => [m.id, { cost: m.cost, value: cardValue(m.rewards), rewards: m.rewards }]));
     const s = settle(pending, archive, states, (id) => !!doc.querySelector(`${COLLECT_DIALOG}[data-space-object-id="${CSS_ESCAPE(id)}"]`), now);
     archive = s.archive;
@@ -315,6 +317,15 @@ export function watchOrion(o: OrionOptions): void {
   const renderKind = (kind: (typeof KINDS)[number], l: Lithium | null, records: LedgerRecord[]): Element[] => {
     const perHour = l?.perHour ?? 0;
     const ledger = loadLedger();
+    // Each mission type's k (MSU per lithium before the wave bonus), learned from the scanner cards
+    // whose rewards are all resources: it values the others (ships…) on the cards that have them.
+    const mults = { ...store.get<Mults>(MULT_KEY, {}) };
+    let learned = false;
+    if (kind.scanner) for (const c of Array.from(doc.querySelectorAll(kind.card))) {
+      const x = readScanCard(c);
+      if (learnMult(mults, x.name, x.mode, x.cost, x.waves, x.rewards)) learned = true;
+    }
+    if (learned) store.set(MULT_KEY, mults);
     const scored: { card: Element; index: number }[] = [];
     for (const card of Array.from(doc.querySelectorAll(kind.card))) {
       card.setAttribute('data-fut-or', fingerprint(card, kind.rewards));
@@ -326,7 +337,12 @@ export function watchOrion(o: OrionOptions): void {
       // The value: a scanner card's whole redemption; a mission's whole mission (cost and possible
       // rewards from its details), what is waiting now shown in the tiles.
       const whole = m && m.totalCost ? { cost: m.totalCost, rewards: m.possible } : { cost: data.cost, rewards: data.rewards };
-      const p = profit(whole.cost, whole.rewards, perHour);
+      // Rewards that are not resources: their share of the card's budget, at the ship rate (an estimate).
+      const waves = s ? s.waves : m?.total ?? 0;
+      const est = whole.rewards.other.length ? budgetOf(mults[multKey(s?.name ?? m?.name ?? '', s?.mode ?? m?.mode ?? '')], whole.cost, waves, whole.rewards) : null;
+      const extraMsu = est ? est.extra * SHIP_RATE : 0;
+      const p = profit(whole.cost, { ...whole.rewards, metal: whole.rewards.metal + extraMsu }, perHour);
+      const combat = isCombat(s ? s.type : m?.kind ?? '', win);
       const box = h(doc, 'div', 'fut-or');
       const tiles = h(doc, 'div', 'fut-or-tiles');
       const val = h(doc, 'div', 'fut-or-val');
@@ -334,6 +350,11 @@ export function watchOrion(o: OrionOptions): void {
       if (m && !m.cost && !msu(m.rewards) && !m.rewards.lithium) tiles.append(tile('note', null, t('orion.waiting')));
       else {
         tiles.append(...rewardTiles(data.rewards));
+        if (est && !m) {
+          const x = tile('fut-or-x', null, `≈${fmt(extraMsu)}`, t('orion.extraValue'));
+          x.title = t('orion.extraHint', { budget: fmt(est.budget), extra: fmt(est.extra), rate: SHIP_RATE * 100 });
+          tiles.append(x);
+        }
         if (data.cost) tiles.append(tile('fut-or-li neg', lithiumIcon(), `−${fmt(data.cost)}`, kind.scanner ? t('orion.redeemCost') : t('orion.collectCost')));
       }
       if (!whole.cost) val.append(h(doc, 'b', '', m && !msu(whole.rewards) ? '—' : fmt(p.msu)), h(doc, 'small', '', m && !msu(whole.rewards) ? t('orion.waitingShort') : t('orion.msuNoCost')));
@@ -345,7 +366,15 @@ export function watchOrion(o: OrionOptions): void {
         if (perHour > 0) val.append(h(doc, 'small', '', t('orion.redeemHours', { h: hoursText(p.hours) })));
         if (m) val.append(h(doc, 'small', '', t('orion.wholeMission')));
       }
-      val.title = `${t('orion.rewards', { v: fmt(p.msu) })}${whole.rewards.lithium ? ` · ${t('orion.paidBack', { paid: fmt(whole.cost), back: fmt(whole.rewards.lithium) })}` : ''}`;
+      // Per hour of the mission itself (the scanner card gives its length): the other way to choose.
+      if (s && s.hours > 0 && p.msu) val.append(h(doc, 'small', '', t('orion.perMissionHour', { v: fmt(p.msu / s.hours) })));
+      // Combat: all the rewards, or 37.5% of them (deliveries always all).
+      if (combat && p.msu) {
+        const low = h(doc, 'small', 'fut-or-risk', t('orion.lowRoll', { v: fmt(p.msu * LOW_ROLL) }));
+        low.title = t('orion.lowRollHint');
+        val.append(low);
+      }
+      val.title = `${t('orion.rewards', { v: fmt(p.msu) })}${extraMsu ? ` (${t('orion.withExtra', { v: fmt(extraMsu) })})` : ''}${whole.rewards.lithium ? ` · ${t('orion.paidBack', { paid: fmt(whole.cost), back: fmt(whole.rewards.lithium) })}` : ''}`;
       box.append(tiles, val);
       // The launch plan, on scanner cards: the mission's length and waves are on the card.
       const plan = s && l ? launchPlan({ cost: s.cost, lithium: s.rewards.lithium, msu: p.msu }, s.hours, s.waves, l, records, s.coords, Date.now()) : null;

@@ -268,6 +268,8 @@ export interface Collection extends Res3 {
   /** Lithium received. */
   lithium: number;
   other: string[];
+  /** Combat: the rewards came out whole ('high') or at 37.5% ('low'), against the possible rewards. */
+  roll?: 'low' | 'high';
 }
 
 export interface Entry {
@@ -289,6 +291,9 @@ export interface Entry {
   status: 'running' | 'collected' | 'expired';
   endedAt: number;
   collections: Collection[];
+  /** The mission's possible resource rewards in MSU (its details), and whether it is a combat one. */
+  possibleMsu?: number;
+  combat?: boolean;
 }
 
 export interface Fuel {
@@ -331,6 +336,8 @@ export interface MissionSeen {
   spawnedAt: number;
   wave: number;
   waves: number;
+  possibleMsu?: number;
+  combat?: boolean;
 }
 
 /** The missions tab: each anomaly listed written down or updated; one no longer listed is closed. */
@@ -461,7 +468,8 @@ export function settle(pending: PendingMap, archive: Archive, cards: Map<string,
     const entry = entries[id];
     if (entry) {
       const r = collectedOnly(p.rewards, p.before, card ? card.rewards : null);
-      entries[id] = { ...entry, collections: [...entry.collections, { at: p.at, wave: p.wave, waves: p.waves, cost: p.cost, lithium: r.lithium, metal: r.metal, crystal: r.crystal, deuterium: r.deuterium, other: r.other }] };
+      const roll = entry.combat ? rollOf(msu(r), entry.possibleMsu ?? 0, p.waves, entry.waves) : undefined;
+      entries[id] = { ...entry, collections: [...entry.collections, { at: p.at, wave: p.wave, waves: p.waves, cost: p.cost, lithium: r.lithium, metal: r.metal, crystal: r.crystal, deuterium: r.deuterium, other: r.other, ...(roll ? { roll } : {}) }] };
     }
     changed = true;
   }
@@ -548,9 +556,12 @@ export interface OrionTotals {
   lost: Record<string, number>;
   lostN: number;
   lostMsu: number;
+  /** Combat collections whose roll is known, and the low ones among them. */
+  rolled: number;
+  lowRolls: number;
 }
 
-export const noTotals = (): OrionTotals => ({ collections: 0, waves: 0, paid: 0, back: 0, res: { metal: 0, crystal: 0, deuterium: 0 }, gain: 0, other: [], got: {}, gotN: 0, gotMsu: 0, fuel: 0, fuelMsu: 0, battles: 0, lost: {}, lostN: 0, lostMsu: 0 });
+export const noTotals = (): OrionTotals => ({ rolled: 0, lowRolls: 0, collections: 0, waves: 0, paid: 0, back: 0, res: { metal: 0, crystal: 0, deuterium: 0 }, gain: 0, other: [], got: {}, gotN: 0, gotMsu: 0, fuel: 0, fuelMsu: 0, battles: 0, lost: {}, lostN: 0, lostMsu: 0 });
 
 const unitsMsu = (units: Record<string, number>) => msu(unitsValue(Object.fromEntries(Object.entries(units).map(([k, n]) => [Number(k), n]))));
 
@@ -571,6 +582,10 @@ export function orionTotals(events: OrionEvent[], shipOf: (text: string) => { id
       t.res.crystal += c.crystal || 0;
       t.res.deuterium += c.deuterium || 0;
       t.gain += msu(c);
+      if (c.roll) {
+        t.rolled++;
+        if (c.roll === 'low') t.lowRolls++;
+      }
       for (const text of c.other ?? []) {
         const ship = shipOf(text);
         if (!ship) {
@@ -674,3 +689,55 @@ export function importLegacy(cur: { archive: Archive; ledger: Ledger; ignored: I
   for (const k of Object.keys((old.ignored ?? {}) as Ignored)) ignored[k] = true;
   return { archive: { entries, fuel, battles }, ledger, ignored };
 }
+
+// ---------- reward model (reverse-engineered by the community, checked on s808: see docs/ORION-NOTES.md) ----------
+//   rewards MSU = base × m × level × stars × waves × (1 + (waves − 1) / 51) × mode
+//   lithium cost = c × level × stars × waves
+// So MSU per lithium does not depend on level or stars: k = MSU / (cost × wave bonus) is a constant of
+// the mission type (its name) and mode (PvE / PvP, with the player's class), learned from any card
+// whose rewards are all resources.
+
+export const MULT_KEY = 'orion.mult';
+/** Learned k by "name|mode". */
+export type Mults = Record<string, number>;
+
+export const waveBonus = (waves: number): number => 1 + (Math.max(1, waves) - 1) / 51;
+export const multKey = (name: string, mode: string): string => `${name.trim()}|${mode.trim().toLowerCase()}`;
+
+/** Learns k from a card whose rewards are only resources (and lithium); true when it changed. */
+export function learnMult(mults: Mults, name: string, mode: string, cost: number, waves: number, r: Rewards): boolean {
+  const value = msu(r);
+  if (!name || !cost || !waves || !value || r.other.length) return false;
+  const k = value / (cost * waveBonus(waves));
+  const key = multKey(name, mode);
+  if (mults[key] !== undefined && Math.abs(mults[key]! - k) / k < 1e-6) return false;
+  mults[key] = k;
+  return true;
+}
+
+/**
+ * Community figure: a ship reward is worth 0.75 of the MSU the same budget would give in resources.
+ * (Another guide says 75% of the ships' build cost: the archive values ships really received at
+ * their build cost, so the two can be compared once collections come in.)
+ */
+export const SHIP_RATE = 0.75;
+
+/** The MSU budget of a card, from its learned k; what the resources do not take went to other rewards (ships…). */
+export function budgetOf(k: number | undefined, cost: number, waves: number, r: Rewards): { budget: number; extra: number } | null {
+  if (!k || !cost || !waves) return null;
+  const budget = k * cost * waveBonus(waves);
+  return { budget, extra: Math.max(0, budget - msu(r)) };
+}
+
+/** Combat anomalies pay either all their rewards or 37.5% of them (deliveries always all). */
+export const LOW_ROLL = 0.375;
+
+/** A collection against what its waves should have paid: 'low' near 37.5%, 'high' near 100%. */
+export function rollOf(collectedMsu: number, possibleMsu: number, waves: number, totalWaves: number): 'low' | 'high' | undefined {
+  if (!possibleMsu || !waves || !totalWaves || !collectedMsu) return undefined;
+  const ratio = collectedMsu / ((possibleMsu * waves) / totalWaves);
+  return ratio < 0.6 ? 'low' : ratio > 0.8 ? 'high' : undefined;
+}
+
+/** Lithium per hour of an anomaly scanner at `level` while converting: floor(15.36 × L × 1.1^L × economy speed). */
+export const iasProduction = (level: number, economy: number): number => (level > 0 ? Math.floor(15.36 * level * 1.1 ** level * economy) : 0);

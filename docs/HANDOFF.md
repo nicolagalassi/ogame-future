@@ -225,6 +225,12 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     possibili di una missione si leggono dai suoi dettagli (`.missionDetailsTable` cella col litio, `.possibleRewardsCell`)
     invece di stimarli dalle ondate; la scheda missione mostra l'indice della missione intera. Il piano di lancio vale
     anche a produzione ferma.
+    **0.3.80** (dati in `docs/ORION-NOTES.md`): modello delle ricompense verificato (MSU per litio non dipende da livello
+    e stelle). Future impara il moltiplicatore di ogni tipo e modalità (`orion.mult`) dalle schede con sole risorse e stima
+    le altre ricompense (navi) come (budget − risorse) × 0,75; sui combattimenti mostra «se esce basso» (37,5%) e
+    nell'archivio segna ogni riscatto alto/basso («esiti bassi» nel Diario); MSU per ora di missione sulle schede dello
+    scanner; chip «Litio +X/h» nel pannello costi dello Scanner (45). **Da fare**: impianti del Centro controllo nel
+    Piano (serve il markup della scheda Centro controllo).
 
 ## Come si prova senza il gioco
 
