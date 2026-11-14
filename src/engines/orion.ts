@@ -741,3 +741,20 @@ export function rollOf(collectedMsu: number, possibleMsu: number, waves: number,
 
 /** Lithium per hour of an anomaly scanner at `level` while converting: floor(15.36 × L × 1.1^L × economy speed). */
 export const iasProduction = (level: number, economy: number): number => (level > 0 ? Math.floor(15.36 * level * 1.1 ** level * economy) : 0);
+
+// ---------- delivery anomalies ----------
+// The game: "send only cargo ships … a cargo capacity at least equal to the incoming fleet's". The waves
+// of a delivery are NPC cargo fleets: what each needs is that fleet's capacity (base, with its bonus).
+
+/** Base cargo capacity per ship id (the game's ship data). */
+export const BASE_CARGO: Record<number, number> = { 202: 5_000, 203: 25_000, 204: 50, 205: 100, 206: 800, 207: 1_500, 208: 7_500, 209: 20_000, 210: 5, 211: 500, 213: 2_000, 214: 1_000_000, 215: 750, 217: 0, 218: 10_000, 219: 10_000 };
+
+/** Cargo capacity of an incoming NPC fleet (each ship at its base capacity, with its cargo bonus). */
+export function fleetCapacity(ships: Record<string, { amount?: number; cargo?: number }> | undefined): number {
+  let total = 0;
+  for (const [id, x] of Object.entries(ships ?? {})) total += (x.amount ?? 0) * (BASE_CARGO[Number(id)] ?? 0) * (1 + (x.cargo ?? 0));
+  return Math.ceil(total);
+}
+
+/** Ships of a type to carry `capacity` (0 when the ship carries nothing). */
+export const shipsFor = (capacity: number, perShip: number): number => (perShip > 0 ? Math.ceil(capacity / perShip) : 0);

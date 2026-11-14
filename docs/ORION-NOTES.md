@@ -58,6 +58,14 @@ Altre 5 anomalie (PvE e PvP, livelli 296–379) danno lo stesso `m` con la formu
   budget dal moltiplicatore imparato; l'archivio conta le navi ricevute al loro costo di costruzione, così
   le due cose si possono confrontare.
 
+## Consegne
+
+- Il gioco: «Invia esclusivamente cargo … Se la tua flotta comprende navi da guerra, non riceverai alcuna ricompensa»
+  e «Devi inviare una capacità di carico almeno pari a quella della flotta in arrivo» (**ufficiale**, testi del gioco).
+- Le ondate di una consegna sono flotte NPC di cargo (cargo leggeri, pesanti, a volte sonde): la capacità da tenere
+  all'anomalia è quella della flotta in arrivo, non la ricompensa dell'ondata (s808: ondata da 4.752 cargo leggeri =
+  23,8M di capacità per ≈7,9M di ricompensa). Future la calcola alla capacità base delle navi NPC (da verificare).
+
 ## Litio
 
 - **Produzione dello Scanner** durante la conversione: `floor(15,36 × L × 1,1^L × velocità economica)`

@@ -236,6 +236,11 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     `.waveApiButton`: ricerche, navi, bonus) e il giocatore come difensore all'anomalia (ricerche dell'ultimo sync,
     classe, bonus FV come per la posta); le navi del giocatore si aggiungono nel simulatore. Formato del prefill letto
     dal codice di simulator.ogame-tools.com (`ships: {id: {count}}`). **Da verificare** che OSimS accetti lo stesso.
+    **0.3.83**: scheda missione = ricompense previste alla ricerca (`.possibleRewardsCell`, le stesse cifre dello scanner)
+    in tessere + costo totale; sotto «Da riscattare ora». Consegne: capacità di carico almeno pari alla flotta NPC in
+    arrivo (testo del gioco), calcolata dal JSON di ogni ondata (`fleetCapacity`, capacità base × bonus); la più
+    grande in CP / CL con la capacità del giocatore letta dalla pagina flotta (`ship.info`). **Da verificare** che il
+    gioco usi la capacità base delle navi NPC.
 
 ## Come si prova senza il gioco
 

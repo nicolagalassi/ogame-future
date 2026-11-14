@@ -901,5 +901,11 @@
   "orion.lowRolls": "tirages bas",
   "tech.iasShort": "Lithium +{v}/h",
   "tech.ias": "Production de lithium de ce scanner pendant la conversion : {from}/h → {to}/h au niveau {level} (formule de la communauté : 15,36 × L × 1,1^L × vitesse économique)",
-  "orion.simOpen": "Simuler cette vague dans {tool} (nouvel onglet) : la vague attaque, ta flotte à l’anomalie défend ; ajoute tes vaisseaux dans le simulateur"
+  "orion.simOpen": "Simuler cette vague dans {tool} (nouvel onglet) : la vague attaque, ta flotte à l’anomalie défend ; ajoute tes vaisseaux dans le simulateur",
+  "orion.expected": "Prévu au scan (mission entière)",
+  "orion.nowLabel": "À racheter maintenant :",
+  "orion.nowCost": "pour {v} de lithium",
+  "orion.cargoNeed": "Livraison : uniquement des transporteurs, avec au moins la capacité de la flotte entrante. La plus grande : {cap} (vague {wave}) ≈ {lc} grands ou {sc} petits transporteurs",
+  "orion.cargoHint": "Capacité des flottes PNJ entrantes (capacité de base de leurs vaisseaux, avec leur bonus), d’après les données de la vague ; tes transporteurs à la capacité lue sur la page flotte. Vaisseaux de guerre dans la flotte = aucune récompense.",
+  "orion.waveN": "Vague {n}"
 }
