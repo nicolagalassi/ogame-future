@@ -15,6 +15,7 @@
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
 import { resIconSvg } from '../../core/res-icons';
+import { icon } from '../../core/icons';
 import { RES_COLORS } from '../../core/sheet';
 import { pageWindow } from '../../data/fleet-dispatcher';
 import { prefillLink, SIM_TOOLS, waveSimPrefill, type Attacker, type SimTool } from '../../engines/sim-links';
@@ -60,7 +61,8 @@ const CSS = `
 .fut-or-val.free b { color: var(--ok); }
 .fut-or-val small.fut-or-risk { color: var(--warn); }
 .fut-or-x { color: #4FE0B0; }
-.fut-or-sim { min-width: 30px; font: 700 11px Verdana, Arial, sans-serif; color: #CFF5FC; }
+.fut-or-sim { display: inline-flex; align-items: center; justify-content: center; color: #4FD1E8; }
+.fut-or-sim:hover { color: #CFF5FC; }
 .fut-or-best { outline: 1px solid var(--gold, #F5C542); outline-offset: -1px; border-radius: 4px; }
 .fut-or-best .fut-or-val b { color: #F5C542; }
 .fut-or-line { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding-top: 6px; border-top: 1px solid var(--line); }
@@ -486,9 +488,12 @@ export function watchOrion(o: OrionOptions): void {
       game.setAttribute('data-fut-sim', '1');
       if (!wave) continue;
       const tool = o.sim.tool();
-      const b = h(doc, 'button', 'custom_btn fut-or-sim', tool === 'osims' ? 'OS' : 'OT');
+      // The same "simulate" icon as Future's spy table; the tool's name is in the tooltip.
+      const b = h(doc, 'button', 'custom_btn fut-or-sim');
+      b.append(icon(doc, 'play', 16));
       b.type = 'button';
       b.title = t('orion.simOpen', { tool: SIM_TOOLS[tool].name });
+      b.setAttribute('aria-label', b.title);
       b.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
