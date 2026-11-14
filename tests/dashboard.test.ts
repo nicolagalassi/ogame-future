@@ -95,11 +95,11 @@ describe('dashboard panel', () => {
     closeDashboard(document);
   });
 
-  it('groups consecutive steps of the same technology and level, one chip per planet', () => {
+  it('groups consecutive steps of the same technology: same level on several planets, or successive levels on one', () => {
     const step = (planetId: number, id = 12109, from = 6) => ({ kind: 'lfBuilding' as const, id, planetId, name: `P${planetId}`, coords: '1:1:1', from, to: from + 1, cost: { metal: 1, crystal: 1, deuterium: 0, energy: 0 }, gain: { metal: 0, crystal: 1, deuterium: 0 }, days: 1 });
-    const groups = groupSteps([step(1, 12109, 5), step(1), step(2), step(3), step(4, 12205), step(5)]);
-    expect(groups.map((g) => [g.first.id, g.first.from, g.steps.map((s) => s.planetId)])).toEqual([
-      [12109, 5, [1]], [12109, 6, [1, 2, 3]], [12205, 6, [4]], [12109, 6, [5]],
+    const groups = groupSteps([step(1, 12109, 5), step(1), step(1, 12109, 7), step(2), step(3), step(4, 12205), step(5), step(6, 12109, 7), step(5, 12109, 8)]);
+    expect(groups.map((g) => [g.first.id, g.first.from, g.steps[g.steps.length - 1]!.to, g.steps.map((s) => s.planetId)])).toEqual([
+      [12109, 5, 8, [1, 1, 1]], [12109, 6, 7, [2, 3]], [12205, 6, 7, [4]], [12109, 6, 7, [5]], [12109, 7, 8, [6]], [12109, 8, 9, [5]],
     ]);
   });
 
