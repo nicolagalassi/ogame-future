@@ -901,5 +901,11 @@
   "orion.lowRolls": "niedrige Würfe",
   "tech.iasShort": "Lithium +{v}/h",
   "tech.ias": "Lithiumproduktion dieses Scanners beim Umwandeln: {from}/h → {to}/h auf Stufe {level} (Community-Formel: 15,36 × L × 1,1^L × Wirtschaftsgeschwindigkeit)",
-  "orion.simOpen": "Diese Welle in {tool} simulieren (neuer Tab): die Welle greift an, deine Flotte an der Anomalie verteidigt; füge deine Schiffe im Simulator hinzu"
+  "orion.simOpen": "Diese Welle in {tool} simulieren (neuer Tab): die Welle greift an, deine Flotte an der Anomalie verteidigt; füge deine Schiffe im Simulator hinzu",
+  "orion.expected": "Beim Scan erwartet (ganze Mission)",
+  "orion.nowLabel": "Jetzt einlösbar:",
+  "orion.nowCost": "für {v} Lithium",
+  "orion.cargoNeed": "Lieferung: nur Transporter, mit mindestens der Kapazität der ankommenden Flotte. Die größte: {cap} (Welle {wave}) ≈ {lc} große oder {sc} kleine Transporter",
+  "orion.cargoHint": "Kapazität der ankommenden NPC-Flotten (Grundkapazität ihrer Schiffe, mit Bonus), aus den Wellendaten; deine Transporter mit der Kapazität von der Flottenseite. Kriegsschiffe in der Flotte = keine Belohnung.",
+  "orion.waveN": "Welle {n}"
 }

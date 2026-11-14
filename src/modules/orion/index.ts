@@ -17,11 +17,11 @@ import { formatUnits } from '../../core/format';
 import { resIconSvg } from '../../core/res-icons';
 import { icon } from '../../core/icons';
 import { RES_COLORS } from '../../core/sheet';
-import { pageWindow } from '../../data/fleet-dispatcher';
+import { pageWindow, SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { prefillLink, SIM_TOOLS, waveSimPrefill, type Attacker, type SimTool } from '../../engines/sim-links';
-import { COLLECT_DIALOG, depletionHours, isCombat, isDisabled, readWaveFleet, WAVE_API, WAVE_SIM, lithiumNow, lithiumPerHour, MISSION_CARD, readCollectDialog, readMissionCard, readScanCard, SCAN_CARD, scanCost, storageCap, type MissionCard } from '../../data/orion';
+import { COLLECT_DIALOG, depletionHours, isCombat, isDisabled, readMissionWaves, readWaveFleet, WAVE_API, WAVE_SIM, lithiumNow, lithiumPerHour, MISSION_CARD, readCollectDialog, readMissionCard, readScanCard, SCAN_CARD, scanCost, storageCap, type MissionCard } from '../../data/orion';
 import {
-  ARCHIVE_KEY, budgetOf, cardValue, counted, freeLithium, IGNORED_KEY, launchPlan, learnMult, LEDGER_KEY, loadArchive, LOW_ROLL, MULT_KEY, multKey, PENDING_KEY, profit, pruneLedger, scansPossible, settle, SHIP_RATE, syncArchive, syncLedger,
+  ARCHIVE_KEY, BASE_CARGO, budgetOf, fleetCapacity, shipsFor, cardValue, counted, freeLithium, IGNORED_KEY, launchPlan, learnMult, LEDGER_KEY, loadArchive, LOW_ROLL, MULT_KEY, multKey, PENDING_KEY, profit, pruneLedger, scansPossible, settle, SHIP_RATE, syncArchive, syncLedger,
   type Archive, type CardState, type Ignored, type Ledger, type LedgerRecord, type Lithium, type Mults, type PendingMap, type Rewards,
 } from '../../engines/orion';
 import { msu } from '../../engines/expeditions';
@@ -61,6 +61,7 @@ const CSS = `
 .fut-or-val.free b { color: var(--ok); }
 .fut-or-val small.fut-or-risk { color: var(--warn); }
 .fut-or-x { color: #4FE0B0; }
+.fut-or-cap { flex-basis: 100%; color: var(--mute); font-size: 10px; }
 .fut-or-sim { display: inline-flex; align-items: center; justify-content: center; color: #4FD1E8; }
 .fut-or-sim:hover { color: #CFF5FC; }
 .fut-or-best { outline: 1px solid var(--gold, #F5C542); outline-offset: -1px; border-radius: 4px; }
@@ -353,8 +354,18 @@ export function watchOrion(o: OrionOptions): void {
       const tiles = h(doc, 'div', 'fut-or-tiles');
       const val = h(doc, 'div', 'fut-or-val');
       const known = m ? ledger[m.coords] : undefined;
-      if (m && !m.cost && !msu(m.rewards) && !m.rewards.lithium) tiles.append(tile('note', null, t('orion.waiting')));
-      else {
+      if (m) {
+        // A mission: what it was worth when it was scanned (its possible rewards and their lithium cost),
+        // the same figures the scanner card showed; what is waiting now goes on a line of its own below.
+        tiles.append(h(doc, 'span', 'fut-or-cap', t('orion.expected')));
+        tiles.append(...rewardTiles(m.possible));
+        if (est) {
+          const x = tile('fut-or-x', null, `≈${fmt(extraMsu)}`, t('orion.extraValue'));
+          x.title = t('orion.extraHint', { budget: fmt(est.budget), extra: fmt(est.extra), rate: SHIP_RATE * 100 });
+          tiles.append(x);
+        }
+        if (m.totalCost) tiles.append(tile('fut-or-li neg', lithiumIcon(), `−${fmt(m.totalCost)}`, t('orion.redeemCost')));
+      } else {
         tiles.append(...rewardTiles(data.rewards));
         if (est && !m) {
           const x = tile('fut-or-x', null, `≈${fmt(extraMsu)}`, t('orion.extraValue'));
@@ -395,6 +406,33 @@ export function watchOrion(o: OrionOptions): void {
           line.append(plan.wait === null ? h(doc, 'span', 'fut-or-dim', t(perHour > 0 ? 'orion.planNever' : 'orion.planNoProd', { waves: plan.waves })) : rich('orion.planWait', { waves: plan.waves, h: hoursText(plan.wait) }));
         }
         box.append(line);
+      }
+      if (m) {
+        // Waiting on the card now: collect it, or not yet.
+        const now = h(doc, 'div', 'fut-or-line');
+        if (!m.cost && !msu(m.rewards) && !m.rewards.lithium) now.append(h(doc, 'span', 'fut-or-dim', t('orion.waiting')));
+        else {
+          now.append(h(doc, 'span', 'fut-or-dim', t('orion.nowLabel')));
+          const parts = (['metal', 'crystal', 'deuterium'] as const).filter((k) => m.rewards[k]).map((k) => `${t(`msg.res.${k}`)} ${fmt(m.rewards[k])}`);
+          if (m.rewards.lithium) parts.push(`${t('orion.lithiumBack')} ${fmt(m.rewards.lithium)}`);
+          if (m.rewards.other.length) parts.push(m.rewards.other.join(', '));
+          now.append(h(doc, 'b', '', parts.join(' · ') || '—'));
+          if (m.cost) now.append(h(doc, 'span', 'fut-or-dim', t('orion.nowCost', { v: fmt(m.cost) })));
+        }
+        box.append(now);
+        // A delivery: only cargo ships, at least the capacity of each incoming NPC fleet.
+        if (!combat) {
+          const waves = readMissionWaves(card).map((w, i) => ({ n: m.incoming + i, cap: w ? fleetCapacity(w.ships) : 0 })).filter((w) => w.cap > 0);
+          if (waves.length) {
+            const top = waves.reduce((a, b) => (b.cap > a.cap ? b : a));
+            const ships = store.get<ShipsInfo>(SHIPS_INFO_KEY, {});
+            const per = (id: number) => ships[String(id)]?.capacity || BASE_CARGO[id]!;
+            const line = h(doc, 'div', 'fut-or-line');
+            line.append(h(doc, 'i', 'fut-or-dot'), rich('orion.cargoNeed', { cap: fmt(top.cap), wave: top.n, lc: shipsFor(top.cap, per(203)).toLocaleString(locale), sc: shipsFor(top.cap, per(202)).toLocaleString(locale) }));
+            line.title = `${t('orion.cargoHint')}\n${waves.map((w) => `${t('orion.waveN', { n: w.n })}: ${fmt(w.cap)}`).join('\n')}`;
+            box.append(line);
+          }
+        }
       }
       // A mission: its switch in the lithium planning, with what it will still cost.
       if (m?.coords) {
