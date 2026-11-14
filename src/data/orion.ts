@@ -126,9 +126,13 @@ export interface MissionCard {
   name: string;
   /** The anomaly's coordinates: the route reads origin → anomaly → wave; with no fleet out, the anomaly alone. */
   coords: string;
-  /** The collect button's own "Lithium costs: 2.567.018". */
+  /** The collect button's own "Lithium costs: 2.567.018": what collecting now costs. */
   cost: number;
+  /** What has piled up so far. */
   rewards: Rewards;
+  /** The whole mission, from its details: the reward cost (lithium cell, exact in its tooltip) and the possible rewards. */
+  totalCost: number;
+  possible: Rewards;
   /** "Wave: 2 / 7" (the one on its way). */
   incoming: number;
   total: number;
@@ -152,6 +156,11 @@ export function readMissionCard(card: Element): MissionCard {
     coords,
     cost: parseNumber((card.querySelector('.collectRewards .btnSub')?.textContent ?? '').split(':').pop()),
     rewards: readRewards(card, '.rewardsCell .rewardLine'),
+    totalCost: (() => {
+      const cell = Array.from(card.querySelectorAll('.missionDetailsTable .cell')).find((c) => c.querySelector('lithium-icon'));
+      return parseNumber(cell?.querySelector('[data-tooltip-title]')?.getAttribute('data-tooltip-title') || cell?.getAttribute('data-tooltip-title')) || parseNumber(cell?.textContent);
+    })(),
+    possible: readRewards(card, '.possibleRewardsCell .rewardLine'),
     incoming: incoming || 0,
     total: total || 0,
     seconds: Number(card.querySelector('[id^="despawn_"]')?.getAttribute('data-seconds')) || 0,
