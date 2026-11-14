@@ -11,6 +11,7 @@
 | `src/modules/tech` | cost panel on tech pages, planner window |
 | `src/modules/fleet` | fleet page buttons, reserves, fleetsave, jump gate, repeat |
 | `src/modules/messages` | inbox summaries, expedition journal window |
+| `src/modules/orion` | Project Orion pages: anomaly profitability, lithium planning, archive (stats in the journal's Orion tab) |
 | `src/modules/shortcuts` | keyboard shortcuts |
 | `src/i18n/` | it / en / fr / de strings |
 | `tests/` | vitest specs and fixtures |
