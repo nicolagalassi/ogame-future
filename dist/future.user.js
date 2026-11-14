@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.75
+// @version      0.3.76
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -9915,6 +9915,104 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     if (Object.entries(seen).every(([id, i]) => JSON.stringify(known[id]) === JSON.stringify(i))) return;
     store.set(TECH_ICONS_KEY, { ...known, ...seen });
   }
+  var TILE_CLASS = {
+    1: "metalMine",
+    2: "crystalMine",
+    3: "deuteriumSynthesizer",
+    4: "solarPlant",
+    12: "fusionPlant",
+    14: "roboticsFactory",
+    15: "naniteFactory",
+    21: "shipyard",
+    22: "metalStorage",
+    23: "crystalStorage",
+    24: "deuteriumStorage",
+    31: "researchLaboratory",
+    33: "terraformer",
+    34: "allianceDepot",
+    36: "repairDock",
+    41: "moonbase",
+    42: "sensorPhalanx",
+    43: "jumpGate",
+    44: "missileSilo",
+    45: "iaScanner",
+    106: "espionageTechnology",
+    108: "computerTechnology",
+    109: "weaponsTechnology",
+    110: "shieldingTechnology",
+    111: "armorTechnology",
+    113: "energyTechnology",
+    114: "hyperspaceTechnology",
+    115: "combustionDriveTechnology",
+    117: "impulseDriveTechnology",
+    118: "hyperspaceDriveTechnology",
+    120: "laserTechnology",
+    121: "ionTechnology",
+    122: "plasmaTechnology",
+    123: "researchNetworkTechnology",
+    124: "astrophysicsTechnology",
+    199: "gravitonTechnology",
+    202: "transporterSmall",
+    203: "transporterLarge",
+    204: "fighterLight",
+    205: "fighterHeavy",
+    206: "cruiser",
+    207: "battleship",
+    208: "colonyShip",
+    209: "recycler",
+    210: "espionageProbe",
+    211: "bomber",
+    212: "solarSatellite",
+    213: "destroyer",
+    214: "deathstar",
+    215: "interceptor",
+    217: "resbuggy",
+    218: "reaper",
+    219: "explorer",
+    401: "rocketLauncher",
+    402: "laserCannonLight",
+    403: "laserCannonHeavy",
+    404: "gaussCannon",
+    405: "ionCannon",
+    406: "plasmaCannon",
+    407: "shieldDomeSmall",
+    408: "shieldDomeLarge",
+    502: "missileInterceptor",
+    503: "missileInterplanetary"
+  };
+  var LF_IDS = [1, 2, 3, 4].flatMap((s) => [...Array.from({ length: 12 }, (_, i) => 10101 + s * 1e3 + i), ...Array.from({ length: 18 }, (_, i) => 10201 + s * 1e3 + i)]);
+  function probeTechIcons(doc, ids) {
+    const view2 = doc.defaultView;
+    const out = {};
+    if (!view2 || !doc.body) return out;
+    const box = doc.createElement("div");
+    box.style.cssText = "position:absolute;left:-9999px;top:0;visibility:hidden;";
+    doc.body.append(box);
+    for (const id of ids) {
+      const cls = TILE_CLASS[id] ? `icon sprite sprite_medium medium ${TILE_CLASS[id]}` : LF_IDS.includes(id) ? `queuePic lifeformqueue lifeformTech${id}` : "";
+      if (!cls) continue;
+      const el6 = doc.createElement("div");
+      el6.className = cls;
+      box.append(el6);
+      const cs = view2.getComputedStyle(el6);
+      const url = /url\("?([^")]+)"?\)/.exec(cs.backgroundImage)?.[1];
+      const w = parseFloat(cs.width);
+      const pos = cs.backgroundPosition;
+      if (url && w > 0 && (id === 1 || id === 11101 || !/^0(px|%) 0(px|%)$/.test(pos))) out[id] = { url, pos, size: cs.backgroundSize, w };
+    }
+    box.remove();
+    return out;
+  }
+  function techIcons(doc, store) {
+    const known = store.get(TECH_ICONS_KEY, {});
+    const missing2 = [...Object.keys(TILE_CLASS).map(Number), ...LF_IDS].filter((id) => !known[id]);
+    if (!missing2.length) return known;
+    const found = probeTechIcons(doc, missing2);
+    if (!Object.keys(found).length) return known;
+    const all2 = { ...known, ...found };
+    store.set(TECH_ICONS_KEY, all2);
+    return all2;
+  }
   function techIconEl(doc, icon2, px, cls = "tico") {
     const box = doc.createElement("span");
     box.className = cls;
@@ -14011,7 +14109,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     };
     const seenAt = (id) => o.current && o.current.id === id ? o.now : byId.get(id)?.resourcesAt ?? 0;
     const timeOf = (ms) => new Date(ms).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
-    const icons = o.store.get(TECH_ICONS_KEY, {});
+    const icons = techIcons(doc, o.store);
     let confirmClear = false;
     let focusPending = o.focus !== void 0;
     if (o.focus !== void 0) {
@@ -15440,7 +15538,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           lfLevels: store.get(LF_LEVELS_KEY, null),
           lfLocked: store.get(LF_LOCKED_KEY, {}),
           seenLevels: store.get(SEEN_LEVELS_KEY, {}),
-          icons: store.get(TECH_ICONS_KEY, {}),
+          icons: techIcons(document, store),
           store,
           now: Date.now(),
           locale,
