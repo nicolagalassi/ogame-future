@@ -900,5 +900,6 @@
   "orion.lowRollHint": "Combat : un rachat paie tout ou 37,5 % des récompenses (les livraisons paient toujours tout). Donnée de la communauté, vérifiée par le journal Orion.",
   "orion.lowRolls": "tirages bas",
   "tech.iasShort": "Lithium +{v}/h",
-  "tech.ias": "Production de lithium de ce scanner pendant la conversion : {from}/h → {to}/h au niveau {level} (formule de la communauté : 15,36 × L × 1,1^L × vitesse économique)"
+  "tech.ias": "Production de lithium de ce scanner pendant la conversion : {from}/h → {to}/h au niveau {level} (formule de la communauté : 15,36 × L × 1,1^L × vitesse économique)",
+  "orion.simOpen": "Simuler cette vague dans {tool} (nouvel onglet) : la vague attaque, ta flotte à l’anomalie défend ; ajoute tes vaisseaux dans le simulateur"
 }
