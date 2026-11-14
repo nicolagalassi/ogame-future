@@ -246,3 +246,8 @@ export function readWaveFleet(apiButton: Element): import('../engines/sim-links'
     return null;
   }
 }
+
+/** The waves still to come on a mission card (incoming first), each its NPC fleet; unreadable ones are null. */
+export function readMissionWaves(card: Element): (import('../engines/sim-links').WaveFleet | null)[] {
+  return Array.from(card.querySelectorAll(WAVE_API)).map((b) => readWaveFleet(b));
+}

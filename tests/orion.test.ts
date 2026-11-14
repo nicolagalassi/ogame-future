@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  fleetCapacity, shipsFor,
   budgetOf, iasProduction, learnMult, rollOf, waveBonus, type Mults,
   balance, collectedOnly, emptyArchive, importLegacy, launchPlan, noRewards, noteBattle, noteFuel, orionEvents, orionTotals, otherSummary, poolAt, profit, projectMission, scansPossible, settle, shipMatcher, syncArchive, syncLedger, dueList,
   type Archive, type LedgerRecord, type Lithium, type PendingMap, type Rewards,
@@ -217,5 +218,15 @@ describe('orion waves in the simulator', () => {
     // The player: General +2 on weapons, shielding, armour; at the anomaly.
     expect(data[1][0]).toMatchObject({ planet: { galaxy: '9' }, class: 2, research: { 109: { level: 22 } } });
     expect(prefillLink('ogametools', 'it', 'X')).toBe('https://simulator.ogame-tools.com/it#prefill=X');
+  });
+});
+
+describe('orion deliveries', () => {
+  it('needs the capacity of each incoming NPC fleet', () => {
+    expect(fleetCapacity({ 202: { amount: 4752 } })).toBe(23_760_000);
+    expect(fleetCapacity({ 202: { amount: 829 }, 203: { amount: 362 }, 210: { amount: 9468 } })).toBe(829 * 5_000 + 362 * 25_000 + 9468 * 5);
+    expect(fleetCapacity({ 203: { amount: 10, cargo: 0.5 } })).toBe(375_000);
+    expect(shipsFor(23_760_000, 31_250)).toBe(761);
+    expect(shipsFor(1, 0)).toBe(0);
   });
 });

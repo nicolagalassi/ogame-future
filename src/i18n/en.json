@@ -901,5 +901,11 @@
   "orion.lowRolls": "low rolls",
   "tech.iasShort": "Lithium +{v}/h",
   "tech.ias": "Lithium production of this scanner while converting: {from}/h → {to}/h at level {level} (community formula: 15.36 × L × 1.1^L × economy speed)",
-  "orion.simOpen": "Simulate this wave in {tool} (new tab): the wave attacks, your fleet at the anomaly defends; add your ships in the simulator"
+  "orion.simOpen": "Simulate this wave in {tool} (new tab): the wave attacks, your fleet at the anomaly defends; add your ships in the simulator",
+  "orion.expected": "Expected when scanned (whole mission)",
+  "orion.nowLabel": "To collect now:",
+  "orion.nowCost": "for {v} lithium",
+  "orion.cargoNeed": "Delivery: cargo ships only, with at least the incoming fleet’s capacity. The largest: {cap} (wave {wave}) ≈ {lc} large or {sc} small cargoes",
+  "orion.cargoHint": "Capacity of the incoming NPC fleets (their ships’ base capacity, with their bonus), from the wave data; the player’s cargoes at the capacity read on the fleet page. Warships in the fleet = no reward.",
+  "orion.waveN": "Wave {n}"
 }

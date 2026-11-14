@@ -901,5 +901,11 @@
   "orion.lowRolls": "esiti bassi",
   "tech.iasShort": "Litio +{v}/h",
   "tech.ias": "Produzione di litio di questo scanner durante la conversione: {from}/h → {to}/h al livello {level} (formula della community: 15,36 × L × 1,1^L × velocità economica)",
-  "orion.simOpen": "Simula questa ondata in {tool} (nuova scheda): l’ondata attacca, la tua flotta all’anomalia difende; aggiungi le tue navi nel simulatore"
+  "orion.simOpen": "Simula questa ondata in {tool} (nuova scheda): l’ondata attacca, la tua flotta all’anomalia difende; aggiungi le tue navi nel simulatore",
+  "orion.expected": "Previste alla ricerca (intera missione)",
+  "orion.nowLabel": "Da riscattare ora:",
+  "orion.nowCost": "per {v} di litio",
+  "orion.cargoNeed": "Consegna: solo cargo, con capacità almeno pari alla flotta in arrivo. La più grande: {cap} (ondata {wave}) ≈ {lc} cargo pesanti o {sc} cargo leggeri",
+  "orion.cargoHint": "Capacità delle flotte NPC in arrivo (capacità base delle loro navi, col loro bonus), dai dati dell’ondata; i cargo del giocatore con la capacità letta dalla pagina flotta. Navi da guerra nella flotta = nessuna ricompensa.",
+  "orion.waveN": "Ondata {n}"
 }
