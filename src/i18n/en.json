@@ -900,5 +900,6 @@
   "orion.lowRollHint": "Combat: a collection pays everything or 37.5% of the rewards (deliveries always pay everything). Community figure, checked by the Orion journal.",
   "orion.lowRolls": "low rolls",
   "tech.iasShort": "Lithium +{v}/h",
-  "tech.ias": "Lithium production of this scanner while converting: {from}/h → {to}/h at level {level} (community formula: 15.36 × L × 1.1^L × economy speed)"
+  "tech.ias": "Lithium production of this scanner while converting: {from}/h → {to}/h at level {level} (community formula: 15.36 × L × 1.1^L × economy speed)",
+  "orion.simOpen": "Simulate this wave in {tool} (new tab): the wave attacks, your fleet at the anomaly defends; add your ships in the simulator"
 }

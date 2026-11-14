@@ -47,11 +47,11 @@ export const toolLang = (lang: string) => (lang === 'us' ? 'en' : lang === 'ar' 
  * General's +2 and its lifeform boost, and the Warriors' +1), class, alliance class and the lifeform
  * bonuses of each ship. The defender comes from the report's key.
  */
-export function simPrefill(server: string, attacker: Attacker | null, defenderCoords: string): string {
-  const planet = (c: string) => {
-    const [galaxy, system, position] = c.split(':');
-    return { galaxy, system, position };
-  };
+/**
+ * The player's side of a simulation, filled like OGLight's: combat research (with the General's +2 and
+ * its lifeform boost, and the Warriors' +1), class, alliance class and the lifeform bonuses of each ship.
+ */
+function playerSide(attacker: Attacker | null) {
   const cls = attacker?.classId ?? 0;
   const booster = attacker?.lf?.classBooster?.[String(cls)] ?? 0;
   // OGLight: the General gets +2 combat levels, +1 more for every 50% of class booster.
@@ -64,13 +64,65 @@ export function simPrefill(server: string, attacker: Attacker | null, defenderCo
     (lifeformBonuses.BaseStatsBooster as Record<string, unknown>)[id] = { weapon: b.weapon, shield: b.shield, armor: b.armor, cargo: b.cargo, speed: b.speed };
     if (b.fuel) lifeformBonuses.ShipFuelConsumption = Math.abs(b.fuel);
   }
+  return { research, class: cls, characterClassesEnabled: true, allianceClass: attacker?.allianceClass ?? 0, lifeformBonuses };
+}
+
+const planetOf = (c: string) => {
+  const [galaxy, system, position] = c.split(':');
+  return { galaxy, system, position };
+};
+
+/**
+ * The `#prefill=` payload, filled like OGLight's: the attacker's planet and side (see playerSide).
+ * The defender comes from the report's key.
+ */
+export function simPrefill(server: string, attacker: Attacker | null, defenderCoords: string): string {
   const data = {
     settings: { server },
-    0: [{ planet: planet(attacker?.coords ?? '0:0:0'), research, class: cls, characterClassesEnabled: true, allianceClass: attacker?.allianceClass ?? 0, lifeformBonuses }],
-    1: [{ planet: planet(defenderCoords), research: {}, resources: {}, defence: {} }],
+    0: [{ planet: planetOf(attacker?.coords ?? '0:0:0'), ...playerSide(attacker) }],
+    1: [{ planet: planetOf(defenderCoords), research: {}, resources: {}, defence: {} }],
   };
   return btoa(JSON.stringify(data));
 }
+
+/**
+ * An Orion wave as the game offers it "for a compatible battle simulator" (the API button of the
+ * wave): the NPC fleet with its research, ships and their bonuses (fractions).
+ */
+export interface WaveFleet {
+  coords: string;
+  characterClassId?: number;
+  allianceClassId?: number;
+  researches?: Record<string, number>;
+  ships?: Record<string, { amount?: number; weapon?: number; shield?: number; armor?: number; cargo?: number; speed?: number }>;
+  bonuses?: { characterClassBooster?: Record<string, number> };
+}
+
+/**
+ * A wave in the simulator: the NPC wave attacks (side 0), the player's fleet at the anomaly defends
+ * (side 1, research, class and bonuses as for the reports; its ships are added in the simulator, the
+ * page does not say which they are).
+ */
+export function waveSimPrefill(server: string, wave: WaveFleet, player: Attacker | null): string {
+  const research: Record<string, { level: number }> = {};
+  for (const [id, level] of Object.entries(wave.researches ?? {})) research[id] = { level };
+  const ships: Record<string, { count: number }> = {};
+  const base: Record<string, unknown> = {};
+  for (const [id, x] of Object.entries(wave.ships ?? {})) {
+    if (!x.amount) continue;
+    ships[id] = { count: x.amount };
+    base[id] = { weapon: x.weapon ?? 0, shield: x.shield ?? 0, armor: x.armor ?? 0, cargo: x.cargo ?? 0, speed: x.speed ?? 0 };
+  }
+  const data = {
+    settings: { server },
+    0: [{ planet: planetOf(wave.coords), research, class: wave.characterClassId ?? 0, allianceClass: wave.allianceClassId ?? 0, ships, lifeformBonuses: { BaseStatsBooster: base, CharacterClassBooster: wave.bonuses?.characterClassBooster ?? {} } }],
+    1: [{ planet: planetOf(wave.coords), ...playerSide(player), resources: {}, defence: {} }],
+  };
+  return btoa(JSON.stringify(data));
+}
+
+/** The picked simulator with a prefilled battle and no report: `<tool>/<lang>#prefill=…`. */
+export const prefillLink = (tool: SimTool, lang: string, prefill: string): string => `${SIM_TOOLS[tool].url}${toolLang(lang)}#prefill=${prefill}`;
 
 /** The picked simulator with the report loaded: `<tool>/<lang>?SR_KEY=…#prefill=…`, as OGLight builds it. */
 export function simLink(tool: SimTool, apiKey: string, lang: string, prefill: string): string {
