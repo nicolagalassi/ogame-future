@@ -53,6 +53,7 @@ import { renderPlanetMenu, watchPlanetBar, type MenuMode, type MenuSettings, typ
 import { techIcons } from './data/tech-icons';
 import { isOrionPage } from './data/orion';
 import { watchOrion } from './modules/orion';
+import { SIM_KEY, simTool } from './engines/sim-links';
 import { ARCHIVE_KEY as ORION_ARCHIVE_KEY, IGNORED_KEY as ORION_IGNORED_KEY, IMPORTED_KEY as ORION_IMPORTED_KEY, LEDGER_KEY as ORION_LEDGER_KEY, importLegacy, loadArchive, type Archive as OrionArchive, type Ignored as OrionIgnored, type Ledger as OrionLedger } from './engines/orion';
 
 async function bootstrap(): Promise<void> {
@@ -451,7 +452,23 @@ async function bootstrap(): Promise<void> {
       console.warn(`[${t('app.name')}]`, error);
     }
   }
-  if (isOrionPage(document)) watchOrion({ doc: document, store, t, locale });
+  if (isOrionPage(document))
+    watchOrion({
+      doc: document, store, t, locale,
+      // The waves' simulator links: the player's side as for the inbox reports (research from the last sync).
+      sim: {
+        server: pageMeta('ogame-universe').split('.')[0] ?? '',
+        lang: pageMeta('ogame-ui-language') || pageMeta('ogame-language'),
+        tool: () => simTool(store.get<string>(SIM_KEY, 'osims')),
+        player: () => ({
+          coords: '0:0:0',
+          researches: snapshot?.researches ?? {},
+          classId: Number(pageMeta('ogame-player-characterclass-id')) || 0,
+          allianceClass: Number(pageMeta('ogame-allianceclass-id')) || 0,
+          lf: store.get<LfBonuses | null>(LF_BONUS_KEY, null) ?? undefined,
+        }),
+      },
+    });
 
   // Highscore: gap to the player, days to catch up, rival star.
   if (isHighscorePage(document)) watchHighscore({ doc: document, store, locale, t, guard });

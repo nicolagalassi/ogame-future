@@ -900,5 +900,6 @@
   "orion.lowRollHint": "Combattimento: al riscatto si prende tutto oppure il 37,5% delle ricompense (le consegne danno sempre tutto). Dato della community, verificato dal diario Orion.",
   "orion.lowRolls": "esiti bassi",
   "tech.iasShort": "Litio +{v}/h",
-  "tech.ias": "Produzione di litio di questo scanner durante la conversione: {from}/h → {to}/h al livello {level} (formula della community: 15,36 × L × 1,1^L × velocità economica)"
+  "tech.ias": "Produzione di litio di questo scanner durante la conversione: {from}/h → {to}/h al livello {level} (formula della community: 15,36 × L × 1,1^L × velocità economica)",
+  "orion.simOpen": "Simula questa ondata in {tool} (nuova scheda): l’ondata attacca, la tua flotta all’anomalia difende; aggiungi le tue navi nel simulatore"
 }

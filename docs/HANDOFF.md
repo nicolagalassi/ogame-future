@@ -231,6 +231,11 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     nell'archivio segna ogni riscatto alto/basso («esiti bassi» nel Diario); MSU per ora di missione sulle schede dello
     scanner; chip «Litio +X/h» nel pannello costi dello Scanner (45). **Da fare**: impianti del Centro controllo nel
     Piano (serve il markup della scheda Centro controllo).
+    **0.3.81**: nelle ondate il pulsante del simulatore del gioco (`.waveSimButton`, nascosto) è sostituito da OS/OT
+    (simulatore scelto nelle impostazioni): `#prefill` con l'ondata NPC come attaccante (JSON del pulsante API
+    `.waveApiButton`: ricerche, navi, bonus) e il giocatore come difensore all'anomalia (ricerche dell'ultimo sync,
+    classe, bonus FV come per la posta); le navi del giocatore si aggiungono nel simulatore. Formato del prefill letto
+    dal codice di simulator.ogame-tools.com (`ships: {id: {count}}`). **Da verificare** che OSimS accetti lo stesso.
 
 ## Come si prova senza il gioco
 
