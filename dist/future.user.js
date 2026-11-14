@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.78
+// @version      0.3.79
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1308,12 +1308,8 @@
     "exp.heroLostShort": "perse",
     "exp.heroDebris": "di cui detriti pos. 16",
     "exp.kind.orion": "Anomalie Orion",
-    "orion.index": "{v} MSU per ora di litio",
-    "orion.indexM": "{v} MSU per 1M di litio",
     "orion.redeemHours": "riscatto = {h} di produzione",
     "orion.rewards": "ricompense {v} MSU",
-    "orion.noCost": "nessun costo in litio sulla scheda",
-    "orion.free": "{v}: il litio reso copre il costo",
     "orion.freeWord": "gratis",
     "orion.paidBack": "litio {paid} pagato, {back} reso",
     "orion.planAll": "lancio ora: {free} di litio libero alla fine{held} riscatta tutte le {waves} ondate, \u2248{msu} MSU",
@@ -1324,30 +1320,16 @@
     "orion.planTitle": "Litio ora pi\xF9 {h} di produzione, riscattato alla fine, tenendo da parte quello che serviranno le anomalie in corso quando finiscono:",
     "orion.planNone": "nessuna in memoria.",
     "orion.planOwnBack": "Il litio reso da questa ({v}) arriva con il riscatto: non pu\xF2 pagarla.",
-    "orion.toggleOn": "\u2611 contata nel piano del litio \xB7 clic per ignorarla",
-    "orion.toggleOff": "\u2610 ignorata nel piano del litio \xB7 clic per contarla",
     "orion.toggleHint": "Se il litio che questa anomalia deve ancora pagare va tenuto da parte nei piani dello scanner",
-    "orion.notCounted": "non contati: {list}",
     "orion.soFar": "finora",
     "orion.back": "reso",
     "orion.paid": "pagato",
     "orion.over": "finita, da pagare ora",
     "orion.endsIn": "finisce tra {h}",
-    "orion.scansKeep": "Scansioni possibili ora: {n} da {cost}, tenendo riscattabili tutte le anomalie in corso ({free} liberi)",
-    "orion.scansNone": "Scansioni possibili ora: {n} da {cost}, nessuna anomalia in corso da tenere ({free} liberi)",
-    "orion.scansShort": "Scansioni possibili ora: 0 \xB7 alle anomalie in corso mancano gi\xE0 {v}",
-    "orion.scansZero": "Scansioni possibili ora: 0 \xB7 {free} liberi, una scansione costa {cost}",
     "orion.warnShort": "Attenzione: scansionare ora lascia troppo poco litio per riscattare le anomalie in corso. Mancano gi\xE0 {v}, prima di qualsiasi scansione.",
     "orion.warnFree": "Attenzione: scansionare ora lascia troppo poco litio per riscattare le anomalie in corso. Sono liberi solo {free} e una scansione costa {cost}.",
-    "orion.allIgnored": "Nessuna anomalia in corso conta: quelle in memoria sono tutte ignorate.",
-    "orion.noneRemembered": "Nessuna anomalia in corso in memoria. Se ne hai, apri una volta la panoramica delle missioni perch\xE9 il loro litio venga contato.",
-    "orion.toPay": "Litio ancora da pagare per {n} anomalie in corso: {v}",
+    "orion.noneRemembered": "Nessuna anomalia in corso in memoria. Se ne hai, apri una volta la panoramica delle missioni.",
     "orion.partial": "costo finora, totale non ancora noto",
-    "orion.ignore": "ignora",
-    "orion.ignoreHint": "Lascia questa anomalia fuori dal litio ancora da pagare",
-    "orion.countAgain": "conta di nuovo",
-    "orion.ignoredList": "Ignorate da te, non contate:",
-    "orion.openArchive": "Diario Orion ({n} anomalie)",
     "orion.empty": "Ancora nessuna anomalia registrata. Apri la panoramica delle missioni di Orion: le anomalie elencate vengono salvate qui.",
     "orion.balance": "Bilancio",
     "orion.balanceHint": "ricompense + navi ricevute \u2212 navi perse \u2212 carburante (litio a parte)",
@@ -1389,7 +1371,35 @@
     "orion.clear": "Svuota archivio Orion",
     "orion.costs": "Costi",
     "orion.title": "Diario Orion",
-    "orion.sub": "Dalle pagine Orion, dai riscatti, dagli invii e dai report che apri: niente richieste al server"
+    "orion.sub": "Dalle pagine Orion, dai riscatti, dagli invii e dai report che apri: niente richieste al server",
+    "orion.countSwitch": "Conta nel piano del litio",
+    "orion.waiting": "In attesa della prima ondata: ancora niente da riscattare",
+    "orion.waitingShort": "in attesa",
+    "orion.redeemCost": "costo ricompensa",
+    "orion.collectCost": "da pagare ora",
+    "orion.lithiumBack": "litio reso",
+    "orion.notCountedHint": "Ricompense non contate nel valore: la pagina dice solo quante, non quali",
+    "orion.msuNoCost": "MSU \xB7 nessun costo",
+    "orion.freeHint": "il litio reso copre il costo",
+    "orion.unitH": "MSU per ora di litio",
+    "orion.unitM": "MSU per 1M di litio",
+    "orion.planNoProd": "non tutte le {waves}: la produzione di litio \xE8 ferma",
+    "orion.totalCost": "costo totale {v}",
+    "orion.boxTitle": "Litio",
+    "orion.prod": "+{v}/h",
+    "orion.stopsIn": "conversione finita tra {h}",
+    "orion.fullIn": "deposito pieno tra {h}",
+    "orion.prodFull": "deposito pieno: produzione ferma",
+    "orion.prodStopped": "produzione ferma: nessuna conversione attiva",
+    "orion.kScans": "Scansioni possibili",
+    "orion.kScansSub": "da {v} ciascuna",
+    "orion.kFree": "Litio libero",
+    "orion.kFreeSub": "dopo le anomalie in corso",
+    "orion.kHeld": "Da tenere",
+    "orion.kHeldSub": "per {n} anomalie in corso",
+    "orion.kBar": "In cassa",
+    "orion.kBarSub": "deposito {v}",
+    "orion.wholeMission": "intera missione"
   };
 
   // src/i18n/en.json
@@ -2195,12 +2205,8 @@
     "exp.heroLostShort": "lost",
     "exp.heroDebris": "of which debris at 16",
     "exp.kind.orion": "Orion anomalies",
-    "orion.index": "{v} MSU per hour of lithium",
-    "orion.indexM": "{v} MSU per 1M lithium",
     "orion.redeemHours": "redeeming = {h} of production",
     "orion.rewards": "rewards {v} MSU",
-    "orion.noCost": "no lithium cost shown",
-    "orion.free": "{v}: the lithium it gives back covers its cost",
     "orion.freeWord": "free",
     "orion.paidBack": "lithium {paid} paid, {back} back",
     "orion.planAll": "launch now: {free} lithium free at the end{held} collects all {waves} waves, \u2248{msu} MSU",
@@ -2211,30 +2217,16 @@
     "orion.planTitle": "Lithium now plus {h} of production, collected at the end, keeping back what the anomalies under way will need when they end:",
     "orion.planNone": "none remembered.",
     "orion.planOwnBack": "This anomaly\u2019s own {v} lithium back arrives with the collection, so it cannot pay for it.",
-    "orion.toggleOn": "\u2611 counted in lithium planning \xB7 click to ignore",
-    "orion.toggleOff": "\u2610 ignored in lithium planning \xB7 click to count it",
     "orion.toggleHint": "Whether the lithium this anomaly still needs is held back in the scanner\u2019s plans",
-    "orion.notCounted": "not counted: {list}",
     "orion.soFar": "so far",
     "orion.back": "back",
     "orion.paid": "paid",
     "orion.over": "over, due now",
     "orion.endsIn": "ends in {h}",
-    "orion.scansKeep": "Scans you can make now: {n} at {cost} each, keeping every anomaly under way redeemable ({free} free)",
-    "orion.scansNone": "Scans you can make now: {n} at {cost} each, nothing held back, none under way ({free} free)",
-    "orion.scansShort": "Scans you can make now: 0 \xB7 the anomalies under way are already short by {v}",
-    "orion.scansZero": "Scans you can make now: 0 \xB7 {free} free, one scan costs {cost}",
     "orion.warnShort": "Warning: scanning now leaves too little lithium to redeem every anomaly under way. They are already short by {v}, before any scan.",
     "orion.warnFree": "Warning: scanning now leaves too little lithium to redeem every anomaly under way. Only {free} is free and one scan costs {cost}.",
-    "orion.allIgnored": "No anomaly under way counts: every one remembered is ignored.",
-    "orion.noneRemembered": "No anomaly under way is remembered. If you have some, open the missions overview once so their lithium is counted.",
-    "orion.toPay": "Lithium still to pay for {n} anomalies under way: {v}",
+    "orion.noneRemembered": "No anomaly under way remembered. If you have some, open the missions overview once.",
     "orion.partial": "cost so far, total not known yet",
-    "orion.ignore": "ignore",
-    "orion.ignoreHint": "Leave this anomaly out of the lithium still to pay",
-    "orion.countAgain": "count again",
-    "orion.ignoredList": "Ignored by you, not counted:",
-    "orion.openArchive": "Orion journal ({n} anomalies)",
     "orion.empty": "No anomaly recorded yet. Open the Orion missions overview: the anomalies listed there are saved here.",
     "orion.balance": "Balance",
     "orion.balanceHint": "rewards + ships received \u2212 ships lost \u2212 fuel (lithium apart)",
@@ -2276,7 +2268,35 @@
     "orion.clear": "Clear Orion archive",
     "orion.costs": "Costs",
     "orion.title": "Orion journal",
-    "orion.sub": "From the Orion pages, your collections, fleets sent and the reports you open: no request to the server"
+    "orion.sub": "From the Orion pages, your collections, fleets sent and the reports you open: no request to the server",
+    "orion.countSwitch": "Count in lithium planning",
+    "orion.waiting": "Waiting for the first wave: nothing to collect yet",
+    "orion.waitingShort": "waiting",
+    "orion.redeemCost": "reward cost",
+    "orion.collectCost": "to pay now",
+    "orion.lithiumBack": "lithium back",
+    "orion.notCountedHint": "Rewards not counted in the value: the page gives only how many, not which",
+    "orion.msuNoCost": "MSU \xB7 no cost",
+    "orion.freeHint": "the lithium back covers the cost",
+    "orion.unitH": "MSU per hour of lithium",
+    "orion.unitM": "MSU per 1M lithium",
+    "orion.planNoProd": "not all {waves}: lithium production is stopped",
+    "orion.totalCost": "total cost {v}",
+    "orion.boxTitle": "Lithium",
+    "orion.prod": "+{v}/h",
+    "orion.stopsIn": "conversion ends in {h}",
+    "orion.fullIn": "storage full in {h}",
+    "orion.prodFull": "storage full: production stopped",
+    "orion.prodStopped": "production stopped: no conversion running",
+    "orion.kScans": "Scans possible",
+    "orion.kScansSub": "{v} each",
+    "orion.kFree": "Free lithium",
+    "orion.kFreeSub": "after the anomalies under way",
+    "orion.kHeld": "Held back",
+    "orion.kHeldSub": "for {n} anomalies under way",
+    "orion.kBar": "In the bar",
+    "orion.kBarSub": "storage {v}",
+    "orion.wholeMission": "whole mission"
   };
 
   // src/i18n/fr.json
@@ -3082,12 +3102,8 @@
     "exp.heroLostShort": "perdus",
     "exp.heroDebris": "dont d\xE9bris en 16",
     "exp.kind.orion": "Anomalies Orion",
-    "orion.index": "{v} MSU par heure de lithium",
-    "orion.indexM": "{v} MSU par 1M de lithium",
     "orion.redeemHours": "rachat = {h} de production",
     "orion.rewards": "r\xE9compenses {v} MSU",
-    "orion.noCost": "aucun co\xFBt en lithium affich\xE9",
-    "orion.free": "{v} : le lithium rendu couvre le co\xFBt",
     "orion.freeWord": "gratuit",
     "orion.paidBack": "lithium {paid} pay\xE9, {back} rendu",
     "orion.planAll": "lancement maintenant : {free} de lithium libre \xE0 la fin{held} rach\xE8te les {waves} vagues, \u2248{msu} MSU",
@@ -3098,30 +3114,16 @@
     "orion.planTitle": "Lithium actuel plus {h} de production, rachet\xE9 \xE0 la fin, en gardant ce qu\u2019il faudra aux anomalies en cours \xE0 leur fin :",
     "orion.planNone": "aucune en m\xE9moire.",
     "orion.planOwnBack": "Le lithium rendu par celle-ci ({v}) arrive avec le rachat : il ne peut pas la payer.",
-    "orion.toggleOn": "\u2611 compt\xE9e dans le plan du lithium \xB7 clic pour l\u2019ignorer",
-    "orion.toggleOff": "\u2610 ignor\xE9e dans le plan du lithium \xB7 clic pour la compter",
     "orion.toggleHint": "Si le lithium que cette anomalie doit encore payer est r\xE9serv\xE9 dans les plans du scanner",
-    "orion.notCounted": "non compt\xE9s : {list}",
     "orion.soFar": "jusqu\u2019ici",
     "orion.back": "rendu",
     "orion.paid": "pay\xE9",
     "orion.over": "termin\xE9e, \xE0 payer maintenant",
     "orion.endsIn": "se termine dans {h}",
-    "orion.scansKeep": "Scans possibles maintenant : {n} \xE0 {cost}, en gardant toutes les anomalies en cours rachetables ({free} libres)",
-    "orion.scansNone": "Scans possibles maintenant : {n} \xE0 {cost}, rien \xE0 r\xE9server, aucune en cours ({free} libres)",
-    "orion.scansShort": "Scans possibles maintenant : 0 \xB7 il manque d\xE9j\xE0 {v} aux anomalies en cours",
-    "orion.scansZero": "Scans possibles maintenant : 0 \xB7 {free} libres, un scan co\xFBte {cost}",
     "orion.warnShort": "Attention : scanner maintenant laisse trop peu de lithium pour racheter les anomalies en cours. Il manque d\xE9j\xE0 {v}, avant tout scan.",
     "orion.warnFree": "Attention : scanner maintenant laisse trop peu de lithium pour racheter les anomalies en cours. Seuls {free} sont libres et un scan co\xFBte {cost}.",
-    "orion.allIgnored": "Aucune anomalie en cours ne compte : toutes celles en m\xE9moire sont ignor\xE9es.",
-    "orion.noneRemembered": "Aucune anomalie en cours en m\xE9moire. Si tu en as, ouvre une fois l\u2019aper\xE7u des missions pour que leur lithium soit compt\xE9.",
-    "orion.toPay": "Lithium encore \xE0 payer pour {n} anomalies en cours : {v}",
+    "orion.noneRemembered": "Aucune anomalie en cours en m\xE9moire. Si tu en as, ouvre une fois l\u2019aper\xE7u des missions.",
     "orion.partial": "co\xFBt jusqu\u2019ici, total pas encore connu",
-    "orion.ignore": "ignorer",
-    "orion.ignoreHint": "Laisser cette anomalie hors du lithium encore \xE0 payer",
-    "orion.countAgain": "compter \xE0 nouveau",
-    "orion.ignoredList": "Ignor\xE9es par toi, non compt\xE9es :",
-    "orion.openArchive": "Journal Orion ({n} anomalies)",
     "orion.empty": "Aucune anomalie enregistr\xE9e. Ouvre l\u2019aper\xE7u des missions Orion : les anomalies list\xE9es sont enregistr\xE9es ici.",
     "orion.balance": "Bilan",
     "orion.balanceHint": "r\xE9compenses + vaisseaux re\xE7us \u2212 vaisseaux perdus \u2212 carburant (lithium \xE0 part)",
@@ -3163,7 +3165,35 @@
     "orion.clear": "Vider l\u2019archive Orion",
     "orion.costs": "Co\xFBts",
     "orion.title": "Journal Orion",
-    "orion.sub": "Des pages Orion, de tes rachats, des flottes envoy\xE9es et des rapports ouverts : aucune requ\xEAte au serveur"
+    "orion.sub": "Des pages Orion, de tes rachats, des flottes envoy\xE9es et des rapports ouverts : aucune requ\xEAte au serveur",
+    "orion.countSwitch": "Compter dans le plan du lithium",
+    "orion.waiting": "En attente de la premi\xE8re vague : rien \xE0 racheter",
+    "orion.waitingShort": "en attente",
+    "orion.redeemCost": "co\xFBt r\xE9compense",
+    "orion.collectCost": "\xE0 payer maintenant",
+    "orion.lithiumBack": "lithium rendu",
+    "orion.notCountedHint": "R\xE9compenses non compt\xE9es : la page dit combien, pas lesquelles",
+    "orion.msuNoCost": "MSU \xB7 sans co\xFBt",
+    "orion.freeHint": "le lithium rendu couvre le co\xFBt",
+    "orion.unitH": "MSU par heure de lithium",
+    "orion.unitM": "MSU par 1M de lithium",
+    "orion.planNoProd": "pas les {waves} : la production de lithium est arr\xEAt\xE9e",
+    "orion.totalCost": "co\xFBt total {v}",
+    "orion.boxTitle": "Lithium",
+    "orion.prod": "+{v}/h",
+    "orion.stopsIn": "conversion termin\xE9e dans {h}",
+    "orion.fullIn": "stockage plein dans {h}",
+    "orion.prodFull": "stockage plein : production arr\xEAt\xE9e",
+    "orion.prodStopped": "production arr\xEAt\xE9e : aucune conversion en cours",
+    "orion.kScans": "Scans possibles",
+    "orion.kScansSub": "{v} chacun",
+    "orion.kFree": "Lithium libre",
+    "orion.kFreeSub": "apr\xE8s les anomalies en cours",
+    "orion.kHeld": "R\xE9serv\xE9",
+    "orion.kHeldSub": "pour {n} anomalies en cours",
+    "orion.kBar": "En stock",
+    "orion.kBarSub": "stockage {v}",
+    "orion.wholeMission": "mission enti\xE8re"
   };
 
   // src/i18n/de.json
@@ -3969,12 +3999,8 @@
     "exp.heroLostShort": "verloren",
     "exp.heroDebris": "davon Tr\xFCmmer auf 16",
     "exp.kind.orion": "Orion-Anomalien",
-    "orion.index": "{v} MSU pro Stunde Lithium",
-    "orion.indexM": "{v} MSU pro 1 Mio. Lithium",
     "orion.redeemHours": "Einl\xF6sen = {h} Produktion",
     "orion.rewards": "Belohnungen {v} MSU",
-    "orion.noCost": "keine Lithiumkosten angezeigt",
-    "orion.free": "{v}: das zur\xFCckgegebene Lithium deckt die Kosten",
     "orion.freeWord": "gratis",
     "orion.paidBack": "Lithium {paid} bezahlt, {back} zur\xFCck",
     "orion.planAll": "jetzt starten: {free} Lithium frei am Ende{held} l\xF6st alle {waves} Wellen ein, \u2248{msu} MSU",
@@ -3985,30 +4011,16 @@
     "orion.planTitle": "Lithium jetzt plus {h} Produktion, am Ende eingel\xF6st, abz\xFCglich dessen, was laufende Anomalien am Ende brauchen:",
     "orion.planNone": "keine gespeichert.",
     "orion.planOwnBack": "Das von dieser Anomalie zur\xFCckgegebene Lithium ({v}) kommt erst mit der Einl\xF6sung und kann sie nicht bezahlen.",
-    "orion.toggleOn": "\u2611 in der Lithiumplanung gez\xE4hlt \xB7 Klick zum Ignorieren",
-    "orion.toggleOff": "\u2610 in der Lithiumplanung ignoriert \xB7 Klick zum Z\xE4hlen",
     "orion.toggleHint": "Ob das Lithium, das diese Anomalie noch braucht, in den Pl\xE4nen des Scanners zur\xFCckgehalten wird",
-    "orion.notCounted": "nicht gez\xE4hlt: {list}",
     "orion.soFar": "bisher",
     "orion.back": "zur\xFCck",
     "orion.paid": "bezahlt",
     "orion.over": "vorbei, jetzt f\xE4llig",
     "orion.endsIn": "endet in {h}",
-    "orion.scansKeep": "Jetzt m\xF6gliche Scans: {n} zu je {cost}, alle laufenden Anomalien bleiben einl\xF6sbar ({free} frei)",
-    "orion.scansNone": "Jetzt m\xF6gliche Scans: {n} zu je {cost}, nichts zur\xFCckgehalten, keine l\xE4uft ({free} frei)",
-    "orion.scansShort": "Jetzt m\xF6gliche Scans: 0 \xB7 den laufenden Anomalien fehlen schon {v}",
-    "orion.scansZero": "Jetzt m\xF6gliche Scans: 0 \xB7 {free} frei, ein Scan kostet {cost}",
     "orion.warnShort": "Achtung: Ein Scan jetzt l\xE4sst zu wenig Lithium, um alle laufenden Anomalien einzul\xF6sen. Es fehlen schon {v}, vor jedem Scan.",
     "orion.warnFree": "Achtung: Ein Scan jetzt l\xE4sst zu wenig Lithium, um alle laufenden Anomalien einzul\xF6sen. Nur {free} sind frei, ein Scan kostet {cost}.",
-    "orion.allIgnored": "Keine laufende Anomalie z\xE4hlt: alle gespeicherten werden ignoriert.",
-    "orion.noneRemembered": "Keine laufende Anomalie gespeichert. Falls du welche hast, \xF6ffne einmal die Missions\xFCbersicht, damit ihr Lithium gez\xE4hlt wird.",
-    "orion.toPay": "Noch zu zahlendes Lithium f\xFCr {n} laufende Anomalien: {v}",
+    "orion.noneRemembered": "Keine laufende Anomalie gespeichert. Falls du welche hast, \xF6ffne einmal die Missions\xFCbersicht.",
     "orion.partial": "bisherige Kosten, Gesamt noch unbekannt",
-    "orion.ignore": "ignorieren",
-    "orion.ignoreHint": "Diese Anomalie aus dem noch zu zahlenden Lithium herausnehmen",
-    "orion.countAgain": "wieder z\xE4hlen",
-    "orion.ignoredList": "Von dir ignoriert, nicht gez\xE4hlt:",
-    "orion.openArchive": "Orion-Tagebuch ({n} Anomalien)",
     "orion.empty": "Noch keine Anomalie gespeichert. \xD6ffne die Orion-Missions\xFCbersicht: die dort gelisteten Anomalien werden hier gespeichert.",
     "orion.balance": "Bilanz",
     "orion.balanceHint": "Belohnungen + erhaltene Schiffe \u2212 verlorene Schiffe \u2212 Treibstoff (Lithium separat)",
@@ -4050,7 +4062,35 @@
     "orion.clear": "Orion-Archiv leeren",
     "orion.costs": "Kosten",
     "orion.title": "Orion-Tagebuch",
-    "orion.sub": "Aus den Orion-Seiten, deinen Einl\xF6sungen, gesendeten Flotten und ge\xF6ffneten Berichten: keine Serveranfrage"
+    "orion.sub": "Aus den Orion-Seiten, deinen Einl\xF6sungen, gesendeten Flotten und ge\xF6ffneten Berichten: keine Serveranfrage",
+    "orion.countSwitch": "In der Lithiumplanung z\xE4hlen",
+    "orion.waiting": "Warten auf die erste Welle: noch nichts einzul\xF6sen",
+    "orion.waitingShort": "wartet",
+    "orion.redeemCost": "Belohnungskosten",
+    "orion.collectCost": "jetzt zu zahlen",
+    "orion.lithiumBack": "Lithium zur\xFCck",
+    "orion.notCountedHint": "Nicht gez\xE4hlte Belohnungen: die Seite nennt nur die Anzahl, nicht welche",
+    "orion.msuNoCost": "MSU \xB7 ohne Kosten",
+    "orion.freeHint": "das Lithium zur\xFCck deckt die Kosten",
+    "orion.unitH": "MSU pro Stunde Lithium",
+    "orion.unitM": "MSU pro 1 Mio. Lithium",
+    "orion.planNoProd": "nicht alle {waves}: die Lithiumproduktion steht",
+    "orion.totalCost": "Gesamtkosten {v}",
+    "orion.boxTitle": "Lithium",
+    "orion.prod": "+{v}/h",
+    "orion.stopsIn": "Umwandlung endet in {h}",
+    "orion.fullIn": "Speicher voll in {h}",
+    "orion.prodFull": "Speicher voll: Produktion gestoppt",
+    "orion.prodStopped": "Produktion gestoppt: keine Umwandlung aktiv",
+    "orion.kScans": "M\xF6gliche Scans",
+    "orion.kScansSub": "je {v}",
+    "orion.kFree": "Freies Lithium",
+    "orion.kFreeSub": "nach den laufenden Anomalien",
+    "orion.kHeld": "Zur\xFCckgehalten",
+    "orion.kHeldSub": "f\xFCr {n} laufende Anomalien",
+    "orion.kBar": "Vorrat",
+    "orion.kBarSub": "Speicher {v}",
+    "orion.wholeMission": "ganze Mission"
   };
 
   // src/core/i18n.ts
@@ -6518,7 +6558,21 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     for (const [k, r] of Object.entries(ledger)) if (r.source !== "mission") out[k] = r;
     for (const m of missions) {
       if (!m.coords) continue;
-      out[m.coords] = { coords: m.coords, name: m.name || m.coords, ...projectMission(m, { incoming: m.incoming, total: m.total }, m.seconds, ledger[m.coords], now), source: "mission", at: now };
+      const known = ledger[m.coords];
+      const p = projectMission(m, { incoming: m.incoming, total: m.total }, m.seconds, known, now);
+      const total = m.totalCost ?? 0;
+      const value = m.possible ? msu(m.possible) : 0;
+      out[m.coords] = {
+        coords: m.coords,
+        name: m.name || m.coords,
+        ...p,
+        cost: Math.max(p.cost, total),
+        lithium: Math.max(p.lithium, m.possible?.lithium ?? 0),
+        partial: p.partial && !total,
+        source: "mission",
+        at: now,
+        ...value || known?.msu ? { msu: value || known.msu } : {}
+      };
     }
     return out;
   }
@@ -6542,7 +6596,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     return pool;
   }
   function launchPlan(card, hours, waves, l, records, ownCoords, now) {
-    if (!(l.perHour > 0) || !(hours > 0) || !(waves > 0) || !card.cost) return null;
+    if (!(hours > 0) || !(waves > 0) || !card.cost) return null;
     const due = dueList(records.filter((r) => r.coords !== ownCoords), now);
     const freeAt = (h8) => Math.min(poolAt(l, due, h8), ...due.filter((d) => d.h > h8).map((d) => poolAt(l, due, d.h) + card.lithium));
     const free = freeAt(hours);
@@ -6551,8 +6605,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     if (free < card.cost) {
       const totalNet = due.reduce((s, d) => s + d.net, 0);
       const last2 = due.length ? due[due.length - 1].h : 0;
-      const fill = Number.isFinite(l.cap) ? last2 + l.cap / l.perHour : 0;
-      const top = Math.max(hours, last2, fill, Number.isFinite(l.stopsIn) ? l.stopsIn : (card.cost + totalNet - l.now) / l.perHour) + 1;
+      const producing = l.perHour > 0 && l.stopsIn > 0;
+      const fill = producing && Number.isFinite(l.cap) ? last2 + l.cap / l.perHour : 0;
+      const need = !producing ? 0 : Number.isFinite(l.stopsIn) ? l.stopsIn : (card.cost + totalNet - l.now) / l.perHour;
+      const top = Math.max(hours, last2, fill, need) + 1;
       if (freeAt(top) < card.cost) wait = null;
       else {
         let lo = hours;
@@ -6569,9 +6625,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   }
   function scansPossible(l, records, scanCost2, now) {
     if (!scanCost2) return null;
-    const due = dueList(records, now);
-    const free = Math.min(poolAt(l, due, 0), ...due.map((d) => poolAt(l, due, d.h)));
+    const free = freeLithium(l, records, now);
     return { cost: scanCost2, free, count: Math.max(0, Math.floor(free / scanCost2)) };
+  }
+  function freeLithium(l, records, now) {
+    const due = dueList(records, now);
+    return Math.min(poolAt(l, due, 0), ...due.map((d) => poolAt(l, due, d.h)));
   }
   var emptyArchive = () => ({ entries: {}, fuel: [], battles: {} });
   function loadArchive(raw) {
@@ -16441,6 +16500,11 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       coords,
       cost: parseNumber((card.querySelector(".collectRewards .btnSub")?.textContent ?? "").split(":").pop()),
       rewards: readRewards(card, ".rewardsCell .rewardLine"),
+      totalCost: (() => {
+        const cell = Array.from(card.querySelectorAll(".missionDetailsTable .cell")).find((c) => c.querySelector("lithium-icon"));
+        return parseNumber(cell?.querySelector("[data-tooltip-title]")?.getAttribute("data-tooltip-title") || cell?.getAttribute("data-tooltip-title")) || parseNumber(cell?.textContent);
+      })(),
+      possible: readRewards(card, ".possibleRewardsCell .rewardLine"),
       incoming: incoming || 0,
       total: total || 0,
       seconds: Number(card.querySelector('[id^="despawn_"]')?.getAttribute("data-seconds")) || 0,
@@ -16468,29 +16532,62 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   // src/modules/orion/index.ts
   var STYLE_ID4 = "fut-orion-style";
   var CSS5 = `
-.fut-or { display:flex; flex-wrap:wrap; align-items:baseline; gap:3px 14px; margin:6px 0 2px; padding:5px 8px; font-size:11px; color:#a9b7c6; background:rgba(0,0,0,.28); border-radius:3px; }
-.fut-or b { color:#fff; }
-.fut-or .fut-or-index { font-size:13px; }
-.fut-or .fut-or-muted { color:#7c8a99; }
-.fut-or-best { outline:2px solid #ffb800; outline-offset:-2px; }
-.fut-or-best .fut-or-index b { color:#ffb800; }
-.fut-or .fut-or-plan { flex-basis:100%; padding-top:3px; border-top:1px solid rgba(255,255,255,.06); color:#8fd19e; }
-.fut-or .fut-or-plan.short { color:#e0b25a; }
-.fut-or-reserve { margin:4px 0 8px; padding:6px 9px; font-size:11px; color:#a9b7c6; background:rgba(0,0,0,.35); border:1px solid rgba(224,178,90,.35); border-radius:3px; }
-.fut-or-reserve b { color:#fff; }
-.fut-or-reserve .fut-or-row { margin-top:2px; color:#8d9bab; }
-.fut-or-reserve .fut-or-ignored { margin-top:4px; color:#7c8a99; }
-.fut-or-reserve .fut-or-scans { margin-bottom:4px; font-size:12px; color:#8fd19e; }
-.fut-or-reserve .fut-or-short, .fut-or-reserve .fut-or-scans.fut-or-short { color:#e0b25a; }
-.fut-or-link { color:#6fa8dc !important; cursor:pointer; text-decoration:none !important; background:none; border:0; padding:0; font:inherit; }
-.fut-or-link:hover { text-decoration:underline !important; }
-.fut-or .fut-or-link { flex-basis:100%; text-align:left; }
-.fut-or .fut-or-link.off { color:#e0b25a !important; }
-.fut-or-warn { margin:6px 0; padding:7px 10px; font-size:12px; color:#ffd7d2; background:rgba(160,30,20,.45); border:1px solid #e0533f; border-radius:3px; }
-.fut-or-warn b { color:#fff; }
-.fut-or-bar { margin:4px 0 6px; text-align:right; }
-.fut-or-open { display:inline-block; padding:3px 9px; font-size:11px; color:#d7e3ef; background:rgba(0,0,0,.4); border:1px solid rgba(143,209,158,.45); border-radius:3px; cursor:pointer; }
-.fut-or-open:hover { border-color:#8fd19e; color:#fff; }
+.fut-or, .fut-or-box {
+  --hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1; --line: rgba(120, 150, 180, 0.14);
+  --accent: #4FD1E8; --neg: #F07A6E; --warn: #E3B341; --ok: #7BC47F; --gold: #F5C542; --tile: rgba(120, 150, 180, 0.09);
+  box-sizing: border-box; font: 11px/16px Verdana, Arial, Helvetica, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums; text-align: left;
+}
+.fut-or { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; row-gap: 6px; margin: 8px 0 4px; padding: 8px 12px; border-radius: 4px; background: rgba(13, 21, 34, 0.72); }
+.fut-or-tiles { display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px; min-width: 0; }
+.fut-or-t { display: inline-flex; flex-direction: column; justify-content: center; gap: 3px; min-width: 64px; padding: 6px 9px 5px; border-radius: 4px; background: var(--tile); font-size: 12px; line-height: 15px; font-weight: 700; color: var(--dot, var(--hi)); white-space: nowrap; }
+.fut-or-t > span { display: inline-flex; align-items: center; gap: 5px; }
+.fut-or-t small { font-size: 10px; font-weight: 400; color: var(--mute); }
+.fut-or-t.neg { color: var(--neg); }
+.fut-or-t.note { flex-direction: row; align-items: center; font-weight: 400; color: var(--mute); white-space: normal; }
+.fut-or-m { --dot: ${RES_COLORS.metal}; } .fut-or-c { --dot: ${RES_COLORS.crystal}; } .fut-or-d { --dot: ${RES_COLORS.deuterium}; } .fut-or-li { --dot: #7FC8F0; }
+.fut-or-t svg { flex: none; }
+.fut-or-val { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; min-width: 96px; padding-left: 10px; border-left: 1px solid var(--line); white-space: nowrap; }
+.fut-or-val b { font-size: 15px; line-height: 18px; color: var(--accent); }
+.fut-or-val small { font-size: 10px; color: var(--mute); }
+.fut-or-val.free b { color: var(--ok); }
+.fut-or-best { outline: 1px solid var(--gold, #F5C542); outline-offset: -1px; border-radius: 4px; }
+.fut-or-best .fut-or-val b { color: #F5C542; }
+.fut-or-line { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding-top: 6px; border-top: 1px solid var(--line); }
+.fut-or-line b { color: var(--hi); font-weight: 700; }
+.fut-or-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); flex: none; }
+.fut-or-line.short .fut-or-dot { background: var(--warn); }
+.fut-or-line.short { color: var(--warn); }
+.fut-or-line .fut-or-dim { color: var(--mute); }
+.fut-or-sw { display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: none; color: var(--txt); font: inherit; cursor: pointer; }
+.fut-or-sw i { position: relative; width: 26px; height: 14px; border-radius: 7px; background: #3A4756; flex: none; transition: background-color 120ms ease-out; }
+.fut-or-sw i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 10px; height: 10px; border-radius: 50%; background: #C9D2DC; transition: transform 120ms ease-out; }
+.fut-or-sw[aria-checked="true"] i { background: var(--accent); }
+.fut-or-sw[aria-checked="true"] i::after { transform: translateX(12px); background: #0D1116; }
+.fut-or-sw:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+.fut-or-sw:hover span { color: var(--hi); }
+.fut-or-box { margin: 6px 0 10px; padding: 10px 14px; border-radius: 4px; background: #0E151C; }
+.fut-or-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 8px; }
+.fut-or-head > b { font-size: 12px; color: var(--hi); }
+.fut-or-head > span { color: var(--mute); }
+.fut-or-head > span.warn { color: var(--warn); }
+.fut-or-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 6px; }
+.fut-or-kpi { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 7px 9px; border-radius: 4px; background: rgba(120, 150, 180, 0.07); }
+.fut-or-kpi span { color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fut-or-kpi b { font-size: 16px; line-height: 1.2; color: var(--hi); white-space: nowrap; }
+.fut-or-kpi b.ok { color: var(--ok); } .fut-or-kpi b.neg { color: var(--neg); } .fut-or-kpi b.warn { color: var(--warn); }
+.fut-or-kpi em { font-style: normal; color: var(--dim); font-size: 10px; }
+.fut-or-rows { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
+.fut-or-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; align-items: center; column-gap: 12px; padding: 4px 8px; border-radius: 3px; background: rgba(120, 150, 180, 0.05); }
+.fut-or-row.off { opacity: 0.55; }
+.fut-or-row .n { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--hi); }
+.fut-or-row .n small { margin-left: 6px; color: var(--mute); }
+.fut-or-row .v { text-align: right; color: var(--hi); font-weight: 700; }
+.fut-or-row .v.partial { color: var(--warn); }
+.fut-or-row .e { color: var(--mute); text-align: right; white-space: nowrap; }
+.fut-or-empty { margin-top: 6px; color: var(--mute); }
+.fut-or-warn { margin: 6px 0; padding: 8px 12px; border-radius: 4px; background: color-mix(in srgb, var(--neg, #F07A6E) 16%, #141C26); box-shadow: inset 0 0 0 1px #F07A6E; color: #FFD7D2; font: 12px/16px Verdana, Arial, sans-serif; }
+.fut-or-warn b { color: #fff; }
+@media (max-width: 640px) { .fut-or { grid-template-columns: 1fr; } .fut-or-val { align-items: flex-start; padding: 6px 0 0; border-left: 0; border-top: 1px solid var(--line); } .fut-or-row { grid-template-columns: minmax(0, 1fr) auto; } }
 `;
   function h7(doc, tag, cls = "", text) {
     const node = doc.createElement(tag);
@@ -16500,6 +16597,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   }
   var hoursText = (hours) => {
     const minutes = Math.round(hours * 60);
+    if (minutes >= 24 * 60) return `${Math.floor(minutes / 1440)}d ${Math.floor(minutes % 1440 / 60)}h`;
     return `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}m`;
   };
   var isShown = (el6) => el6.isConnected && el6.getClientRects().length > 0;
@@ -16515,6 +16613,17 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         else if (part) span.append(part);
       });
       return span;
+    };
+    const lithiumIcon = () => {
+      const i = doc.createElement("lithium-icon");
+      i.setAttribute("sq16", "");
+      i.setAttribute("icon-blue", "");
+      return i;
+    };
+    const svg2 = (html) => {
+      const s = h7(doc, "span");
+      s.innerHTML = html;
+      return s.firstElementChild ?? s;
     };
     if (!doc.getElementById(STYLE_ID4)) {
       const style = h7(doc, "style");
@@ -16534,31 +16643,29 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       const now = lithiumNow(doc);
       return now === null ? null : { now, perHour: lithiumPerHour(doc, win), stopsIn: depletionHours(doc), cap: storageCap(doc) };
     };
+    const CSS_ESCAPE = (s) => s.replace(/["\\]/g, "");
     let lastPrint = "";
     const syncMissions = () => {
       const tab2 = doc.querySelector("#orionMission, .orionTabContentWrapper.anomalyMissions");
       if (!tab2) return;
       tab2.setAttribute("data-fut-or-synced", "1");
-      const cards = Array.from(doc.querySelectorAll(MISSION_CARD));
-      const read = cards.map((c) => ({ el: c, m: readMissionCard(c) }));
+      const read = Array.from(doc.querySelectorAll(MISSION_CARD)).map((c) => readMissionCard(c));
       const pending = store.get(PENDING_KEY, {});
-      const print = read.map(({ m }) => `${m.id}:${m.cost}:${cardValue(m.rewards)}:${m.incoming}/${m.total}`).join("#");
+      const print = read.map((m) => `${m.id}:${m.cost}:${cardValue(m.rewards)}:${m.incoming}/${m.total}`).join("#");
       if (print === lastPrint && !Object.keys(pending).length) return;
       lastPrint = print;
       const now = Date.now();
-      const ledger = syncLedger(loadLedger(), read.map(({ m }) => ({ ...m, lithium: m.rewards.lithium })), now);
+      const ledger = syncLedger(loadLedger(), read.map((m) => ({ ...m, lithium: m.rewards.lithium })), now);
       store.set(LEDGER_KEY, ledger);
       const ignored = loadIgnored();
       if (Object.keys(ignored).some((c) => !ledger[c])) store.set(IGNORED_KEY, Object.fromEntries(Object.keys(ignored).filter((c) => ledger[c]).map((c) => [c, true])));
-      let archive = syncArchive(loadArch(), read.filter(({ m }) => m.id).map(({ m }) => ({ id: m.id, name: m.name, coords: m.coords, level: m.level, stars: m.stars, mode: m.mode, kind: m.kind, spawnedAt: m.spawnedAt, wave: m.incoming, waves: m.total })), now);
-      const states = new Map(read.filter(({ m }) => m.id).map(({ m }) => [m.id, { cost: m.cost, value: cardValue(m.rewards), rewards: m.rewards }]));
+      let archive = syncArchive(loadArch(), read.filter((m) => m.id).map((m) => ({ id: m.id, name: m.name, coords: m.coords, level: m.level, stars: m.stars, mode: m.mode, kind: m.kind, spawnedAt: m.spawnedAt, wave: m.incoming, waves: m.total })), now);
+      const states = new Map(read.filter((m) => m.id).map((m) => [m.id, { cost: m.cost, value: cardValue(m.rewards), rewards: m.rewards }]));
       const s = settle(pending, archive, states, (id) => !!doc.querySelector(`${COLLECT_DIALOG}[data-space-object-id="${CSS_ESCAPE(id)}"]`), now);
       archive = s.archive;
       if (s.changed) store.set(PENDING_KEY, s.pending);
       store.set(ARCHIVE_KEY, archive);
-      updateOpenButtons();
     };
-    const CSS_ESCAPE = (s) => s.replace(/["\\]/g, "");
     const discovered = /* @__PURE__ */ new Map();
     const DISCOVER_TTL = 15e3;
     doc.addEventListener(
@@ -16569,7 +16676,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         if (!card || !target?.closest(".discoverButton")) return;
         const c = readScanCard(card);
         if (!c.coords || !c.cost) return;
-        discovered.set(c.coords, { coords: c.coords, name: c.name || c.coords, cost: c.cost, lithium: c.rewards.lithium, endAt: Date.now() + c.hours * 36e5, source: "scanner", at: Date.now() });
+        discovered.set(c.coords, { coords: c.coords, name: c.name || c.coords, cost: c.cost, lithium: c.rewards.lithium, msu: msu(c.rewards), endAt: Date.now() + c.hours * 36e5, source: "scanner", at: Date.now() });
       },
       true
     );
@@ -16618,9 +16725,16 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       },
       true
     );
-    const ignoreButton = (coords, label, cls = "") => {
-      const b = h7(doc, "button", `fut-or-link ${cls}`.trim(), label);
+    const countSwitch = (coords, label) => {
+      const on = !loadIgnored()[coords];
+      const b = h7(doc, "button", "fut-or-sw");
       b.type = "button";
+      b.setAttribute("role", "switch");
+      b.setAttribute("aria-checked", String(on));
+      b.title = t("orion.toggleHint");
+      b.append(h7(doc, "i"));
+      if (label) b.append(h7(doc, "span", "", t("orion.countSwitch")));
+      else b.setAttribute("aria-label", t("orion.countSwitch"));
       b.addEventListener("click", (e) => {
         e.preventDefault();
         const ignored = { ...loadIgnored() };
@@ -16631,7 +16745,30 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       });
       return b;
     };
-    const fingerprint = (card, rewards) => `${card.querySelector(".collectRewards .btnSub")?.textContent ?? ""}|${card.querySelector(".scannerResultRow:not(.header)")?.textContent ?? ""}|${Array.from(card.querySelectorAll(rewards)).map((l) => l.textContent).join("|")}`.replace(/\s+/g, " ");
+    const tile2 = (cls, icon2, amount, label) => {
+      const x = h7(doc, "span", `fut-or-t ${cls}`);
+      const top = h7(doc, "span");
+      if (icon2) top.append(icon2);
+      top.append(amount);
+      x.append(top);
+      if (label) x.append(h7(doc, "small", "", label));
+      return x;
+    };
+    const rewardTiles = (r) => {
+      const out = [];
+      for (const [k, cls] of [["metal", "fut-or-m"], ["crystal", "fut-or-c"], ["deuterium", "fut-or-d"]])
+        if (r[k]) out.push(tile2(cls, svg2(resIconSvg(k, 16)), fmt(r[k]), t(`msg.res.${k}`)));
+      if (r.lithium) out.push(tile2("fut-or-li", lithiumIcon(), `+${fmt(r.lithium)}`, t("orion.lithiumBack")));
+      if (r.other.length) {
+        const n = tile2("note", null, r.other.join(", "));
+        n.title = t("orion.notCountedHint");
+        out.push(n);
+      }
+      return out;
+    };
+    const endsIn = (r) => r.endAt <= Date.now() ? t("orion.over") : t("orion.endsIn", { h: hoursText((r.endAt - Date.now()) / 36e5) });
+    const recordText = (r) => `${r.name} [${r.coords}] ${fmt(r.cost)}${r.partial ? ` (${t("orion.soFar")})` : ""}${r.lithium ? ` \u2212${fmt(r.lithium)} ${t("orion.back")}` : ""}, ${endsIn(r)}`;
+    const fingerprint = (card, rewards) => `${card.querySelector(".collectRewards .btnSub")?.textContent ?? ""}|${card.querySelector(".scannerResultRow:not(.header)")?.textContent ?? ""}|${card.querySelector(".nodeWave")?.textContent ?? ""}|${Array.from(card.querySelectorAll(rewards)).map((l) => l.textContent).join("|")}`.replace(/\s+/g, " ");
     const KINDS = [
       { card: SCAN_CARD, rewards: ".scannerResultRewardsList .rewardLine", after: ".scannerResultTable", scanner: true },
       { card: MISSION_CARD, rewards: ".rewardsCell .rewardLine", after: ".missionActionBar", scanner: false }
@@ -16639,6 +16776,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     let rendered = [];
     const renderKind = (kind, l, records) => {
       const perHour = l?.perHour ?? 0;
+      const ledger = loadLedger();
       const scored = [];
       for (const card of Array.from(doc.querySelectorAll(kind.card))) {
         card.setAttribute("data-fut-or", fingerprint(card, kind.rewards));
@@ -16647,40 +16785,49 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         const s = kind.scanner ? readScanCard(card) : null;
         const m = kind.scanner ? null : readMissionCard(card);
         const data = s ?? m;
-        const p = profit(data.cost, data.rewards, perHour);
+        const whole = m && m.totalCost ? { cost: m.totalCost, rewards: m.possible } : { cost: data.cost, rewards: data.rewards };
+        const p = profit(whole.cost, whole.rewards, perHour);
         const box = h7(doc, "div", "fut-or");
-        if (!data.cost) {
-          box.append(rich("orion.rewards", { v: fmt(p.msu) }), h7(doc, "span", "fut-or-muted", t("orion.noCost")));
+        const tiles = h7(doc, "div", "fut-or-tiles");
+        const val = h7(doc, "div", "fut-or-val");
+        const known = m ? ledger[m.coords] : void 0;
+        if (m && !m.cost && !msu(m.rewards) && !m.rewards.lithium) tiles.append(tile2("note", null, t("orion.waiting")));
+        else {
+          tiles.append(...rewardTiles(data.rewards));
+          if (data.cost) tiles.append(tile2("fut-or-li neg", lithiumIcon(), `\u2212${fmt(data.cost)}`, kind.scanner ? t("orion.redeemCost") : t("orion.collectCost")));
+        }
+        if (!whole.cost) val.append(h7(doc, "b", "", m && !msu(whole.rewards) ? "\u2014" : fmt(p.msu)), h7(doc, "small", "", m && !msu(whole.rewards) ? t("orion.waitingShort") : t("orion.msuNoCost")));
+        else if (p.free) {
+          val.classList.add("free");
+          val.append(h7(doc, "b", "", t("orion.freeWord")), h7(doc, "small", "", t("orion.freeHint")));
         } else {
-          const idx = h7(doc, "span", "fut-or-index");
-          idx.append(p.free ? rich("orion.free", { v: t("orion.freeWord") }) : rich(perHour > 0 ? "orion.index" : "orion.indexM", { v: fmt(p.index) }));
-          box.append(idx);
-          if (!p.free && perHour > 0) box.append(rich("orion.redeemHours", { h: hoursText(p.hours) }));
-          box.append(rich("orion.rewards", { v: fmt(p.msu) }));
-          if (data.rewards.lithium) box.append(rich("orion.paidBack", { paid: fmt(data.cost), back: fmt(data.rewards.lithium) }));
-          const plan = s && l ? launchPlan({ cost: s.cost, lithium: s.rewards.lithium, msu: p.msu }, s.hours, s.waves, l, records, s.coords, Date.now()) : null;
-          if (plan && s) {
-            const line = h7(doc, "span", `fut-or-plan${plan.covered < plan.waves ? " short" : ""}`);
-            const dueText = plan.due.map((r) => recordText(r)).join("\n  ");
-            line.title = `${t("orion.planTitle", { h: hoursText(s.hours) })}${plan.due.length ? `
-  ${dueText}` : ` ${t("orion.planNone")}`}${s.rewards.lithium ? `
+          val.append(h7(doc, "b", "", fmt(p.index)), h7(doc, "small", "", t(perHour > 0 ? "orion.unitH" : "orion.unitM")));
+          if (perHour > 0) val.append(h7(doc, "small", "", t("orion.redeemHours", { h: hoursText(p.hours) })));
+          if (m) val.append(h7(doc, "small", "", t("orion.wholeMission")));
+        }
+        val.title = `${t("orion.rewards", { v: fmt(p.msu) })}${whole.rewards.lithium ? ` \xB7 ${t("orion.paidBack", { paid: fmt(whole.cost), back: fmt(whole.rewards.lithium) })}` : ""}`;
+        box.append(tiles, val);
+        const plan = s && l ? launchPlan({ cost: s.cost, lithium: s.rewards.lithium, msu: p.msu }, s.hours, s.waves, l, records, s.coords, Date.now()) : null;
+        if (plan && s) {
+          const line = h7(doc, "div", `fut-or-line${plan.covered < plan.waves ? " short" : ""}`);
+          line.title = `${t("orion.planTitle", { h: hoursText(s.hours) })}${plan.due.length ? `
+  ${plan.due.map(recordText).join("\n  ")}` : ` ${t("orion.planNone")}`}${s.rewards.lithium ? `
 ${t("orion.planOwnBack", { v: fmt(s.rewards.lithium) })}` : ""}`;
-            const held = plan.reserved > 0 ? t("orion.held", { v: fmt(plan.reserved), n: plan.due.length }) : "";
-            if (plan.covered >= plan.waves) line.append(rich("orion.planAll", { free: fmt(plan.free), held, waves: plan.waves, msu: fmt(plan.msu) }));
-            else {
-              line.append(rich("orion.planSome", { free: fmt(Math.max(0, plan.free)), held, covered: plan.covered, waves: plan.waves, msu: fmt(plan.msu) }));
-              line.append(" \xB7 ", plan.wait === null ? t("orion.planNever", { waves: plan.waves }) : rich("orion.planWait", { waves: plan.waves, h: hoursText(plan.wait) }));
-            }
-            box.append(line);
+          const held = plan.reserved > 0 ? t("orion.held", { v: fmt(plan.reserved), n: plan.due.length }) : "";
+          line.append(h7(doc, "i", "fut-or-dot"));
+          if (plan.covered >= plan.waves) line.append(rich("orion.planAll", { free: fmt(plan.free), held, waves: plan.waves, msu: fmt(plan.msu) }));
+          else {
+            line.append(rich("orion.planSome", { free: fmt(Math.max(0, plan.free)), held, covered: plan.covered, waves: plan.waves, msu: fmt(plan.msu) }));
+            line.append(plan.wait === null ? h7(doc, "span", "fut-or-dim", t(perHour > 0 ? "orion.planNever" : "orion.planNoProd", { waves: plan.waves })) : rich("orion.planWait", { waves: plan.waves, h: hoursText(plan.wait) }));
           }
+          box.append(line);
         }
         if (m?.coords) {
-          const off = !!loadIgnored()[m.coords];
-          const b = ignoreButton(m.coords, off ? t("orion.toggleOff") : t("orion.toggleOn"), off ? "off" : "");
-          b.title = t("orion.toggleHint");
-          box.append(b);
+          const line = h7(doc, "div", "fut-or-line");
+          line.append(countSwitch(m.coords, true));
+          if (known && known.cost) line.append(h7(doc, "span", "fut-or-dim", `${t("orion.totalCost", { v: fmt(known.cost) })}${known.partial ? ` (${t("orion.soFar")})` : ""}${known.msu ? ` \xB7 \u2248${fmt(known.msu)} MSU` : ""} \xB7 ${endsIn(known)}`));
+          box.append(line);
         }
-        if (data.rewards.other.length) box.append(h7(doc, "span", "fut-or-muted", t("orion.notCounted", { list: data.rewards.other.join(", ") })));
         const anchor = card.querySelector(kind.after);
         if (anchor) anchor.after(box);
         else card.append(box);
@@ -16689,75 +16836,62 @@ ${t("orion.planOwnBack", { v: fmt(s.rewards.lithium) })}` : ""}`;
       scored.sort((a, b) => b.index - a.index);
       for (const { card } of scored) card.parentElement?.append(card);
       const shown2 = scored.filter((x) => isShown(x.card));
-      if (shown2.length > 1 && shown2[0].index >= 0) shown2[0].card.classList.add("fut-or-best");
+      if (shown2.length > 1 && shown2[0].index >= 0) shown2[0].card.querySelector(".fut-or")?.classList.add("fut-or-best");
       return shown2.map((x) => x.card);
     };
-    const recordText = (r) => `${r.name} [${r.coords}] ${fmt(r.cost)}${r.partial ? ` (${t("orion.soFar")})` : ""}${r.lithium ? ` \u2212${fmt(r.lithium)} ${t("orion.back")}` : ""}, ${endsIn(r)}`;
-    const endsIn = (r) => r.endAt <= Date.now() ? t("orion.over") : t("orion.endsIn", { h: hoursText((r.endAt - Date.now()) / 36e5) });
     let lastScanCost = null;
-    const renderReserve = (l, records) => {
-      doc.querySelectorAll(".fut-or-reserve, .fut-or-warn").forEach((n) => n.remove());
-      const holder = doc.querySelector("#scannerResultHolder") ?? doc.querySelector(SCAN_CARD)?.parentElement;
-      if (!holder) return;
+    const renderBox = (l, records) => {
+      doc.querySelectorAll(".fut-or-box, .fut-or-warn").forEach((n) => n.remove());
+      const scanner = doc.querySelector("#scannerResultHolder") ?? doc.querySelector(SCAN_CARD)?.parentElement ?? null;
+      const missions = doc.querySelector(".orionTabContentWrapper.anomalyMissions");
+      const holder = scanner ?? missions;
+      if (!holder || !l) return;
       const sorted = [...records].sort((a, b) => a.endAt - b.endAt);
-      const scans = l ? scansPossible(l, sorted, scanCost(doc), Date.now()) : null;
-      const box = h7(doc, "div", "fut-or-reserve");
-      if (scans) {
-        const line = h7(doc, "div", `fut-or-scans${scans.count > 0 ? "" : " fut-or-short"}`);
-        if (scans.count > 0) line.append(rich(sorted.length ? "orion.scansKeep" : "orion.scansNone", { n: scans.count, cost: fmt(scans.cost), free: fmt(scans.free) }));
-        else line.append(rich(scans.free < 0 ? "orion.scansShort" : "orion.scansZero", { v: fmt(-scans.free), free: fmt(scans.free), cost: fmt(scans.cost) }));
-        box.append(line);
+      const scans = scanner ? scansPossible(l, sorted, scanCost(doc), Date.now()) : null;
+      const box = h7(doc, "div", "fut-or-box");
+      const head = h7(doc, "div", "fut-or-head");
+      head.append(h7(doc, "b", "", t("orion.boxTitle")));
+      if (l.perHour > 0) head.append(h7(doc, "span", "", `${t("orion.prod", { v: fmt(l.perHour) })}${Number.isFinite(l.stopsIn) ? ` \xB7 ${t("orion.stopsIn", { h: hoursText(l.stopsIn) })}` : ""}${Number.isFinite(l.cap) && l.now < l.cap ? ` \xB7 ${t("orion.fullIn", { h: hoursText((l.cap - l.now) / l.perHour) })}` : ""}`));
+      else head.append(h7(doc, "span", "warn", Number.isFinite(l.cap) && l.now >= l.cap ? t("orion.prodFull") : t("orion.prodStopped")));
+      box.append(head);
+      const kpis = h7(doc, "div", "fut-or-kpis");
+      const kpi = (label, value, cls = "", sub = "") => {
+        const k = h7(doc, "div", "fut-or-kpi");
+        k.append(h7(doc, "span", "", label), h7(doc, "b", cls, value));
+        if (sub) k.append(h7(doc, "em", "", sub));
+        kpis.append(k);
+      };
+      const toPay = sorted.reduce((s, r) => s + (r.cost || 0) - (r.lithium || 0), 0);
+      const free = scans?.free ?? freeLithium(l, sorted, Date.now());
+      if (scans) kpi(t("orion.kScans"), String(scans.count), scans.count ? "ok" : "warn", t("orion.kScansSub", { v: fmt(scans.cost) }));
+      kpi(t("orion.kFree"), fmt(free), free < 0 ? "neg" : "", t("orion.kFreeSub"));
+      kpi(t("orion.kHeld"), fmt(toPay), "", t("orion.kHeldSub", { n: sorted.length }));
+      kpi(t("orion.kBar"), fmt(l.now), "", Number.isFinite(l.cap) ? t("orion.kBarSub", { v: fmt(l.cap) }) : "");
+      box.append(kpis);
+      const all2 = Object.values(loadLedger()).sort((a, b) => a.endAt - b.endAt);
+      const ignored = loadIgnored();
+      if (!all2.length) box.append(h7(doc, "p", "fut-or-empty", t("orion.noneRemembered")));
+      else {
+        const rows = h7(doc, "div", "fut-or-rows");
+        for (const r of all2) {
+          const row = h7(doc, "div", `fut-or-row${ignored[r.coords] ? " off" : ""}`);
+          const n = h7(doc, "span", "n", r.name);
+          n.append(h7(doc, "small", "", `[${r.coords}]`));
+          const v = h7(doc, "span", `v${r.partial ? " partial" : ""}`, fmt(r.cost));
+          v.title = r.partial ? t("orion.partial") : `${t("orion.totalCost", { v: fmt(r.cost) })}${r.lithium ? ` \xB7 ${fmt(r.lithium)} ${t("orion.back")}` : ""}`;
+          row.append(n, v, h7(doc, "span", "e", endsIn(r)), countSwitch(r.coords, false));
+          rows.append(row);
+        }
+        box.append(rows);
       }
+      holder.before(box);
+      lastScanCost = scanCost(doc);
       const panel = doc.querySelector("#scannerPanelGroup");
       if (scans && scans.count === 0 && sorted.length && panel) {
         const warn = h7(doc, "div", "fut-or-warn");
         warn.append(rich(scans.free < 0 ? "orion.warnShort" : "orion.warnFree", { v: fmt(-scans.free), free: fmt(scans.free), cost: fmt(scans.cost) }));
         panel.after(warn);
       }
-      const all2 = Object.values(loadLedger());
-      const ignored = loadIgnored();
-      const skipped = all2.filter((r) => ignored[r.coords]);
-      if (!sorted.length) box.append(t(skipped.length ? "orion.allIgnored" : "orion.noneRemembered"));
-      else {
-        box.append(rich("orion.toPay", { n: sorted.length, v: fmt(sorted.reduce((s, r) => s + (r.cost || 0) - (r.lithium || 0), 0)) }));
-        for (const r of sorted) {
-          const row = h7(doc, "div", "fut-or-row");
-          row.append(`${r.name} [${r.coords}] \xB7 `, h7(doc, "b", "", fmt(r.cost)));
-          if (r.partial) row.append(" ", h7(doc, "span", "fut-or-short", t("orion.partial")));
-          if (r.lithium) row.append(` \xB7 ${fmt(r.lithium)} ${t("orion.back")}`);
-          row.append(` \xB7 ${endsIn(r)} \xB7 `, ignoreButton(r.coords, t("orion.ignore")));
-          row.lastElementChild.setAttribute("title", t("orion.ignoreHint"));
-          box.append(row);
-        }
-      }
-      if (skipped.length) {
-        const row = h7(doc, "div", "fut-or-ignored", `${t("orion.ignoredList")} `);
-        skipped.forEach((r, i) => {
-          if (i) row.append(" \xB7 ");
-          row.append(`${r.name} [${r.coords}] \xB7 ${fmt(r.cost)} `, ignoreButton(r.coords, t("orion.countAgain")));
-        });
-        box.append(row);
-      }
-      holder.before(box);
-      lastScanCost = scanCost(doc);
-    };
-    const updateOpenButtons = () => {
-      const n = Object.keys(loadArch().entries).length;
-      doc.querySelectorAll(".fut-or-open").forEach((b) => b.textContent = t("orion.openArchive", { n }));
-    };
-    const placeOpenButton = () => {
-      let added = false;
-      for (const wrapper of Array.from(doc.querySelectorAll(".orionTabContentWrapper.anomalyMissions"))) {
-        if (wrapper.previousElementSibling?.classList.contains("fut-or-bar")) continue;
-        const bar = h7(doc, "div", "fut-or-bar");
-        const b = h7(doc, "button", "fut-or-open");
-        b.type = "button";
-        b.addEventListener("click", () => o.onOpenArchive());
-        bar.append(b);
-        wrapper.before(bar);
-        added = true;
-      }
-      if (added) updateOpenButtons();
     };
     const render = () => {
       syncMissions();
@@ -16765,13 +16899,12 @@ ${t("orion.planOwnBack", { v: fmt(s.rewards.lithium) })}` : ""}`;
       const l = lithium();
       const records = live();
       rendered = KINDS.flatMap((k) => renderKind(k, l, records));
-      renderReserve(l, records);
-      placeOpenButton();
+      renderBox(l, records);
     };
     const outOfDate = () => {
       if (doc.querySelector("#orionMission:not([data-fut-or-synced]), .orionTabContentWrapper.anomalyMissions:not([data-fut-or-synced])")) return true;
-      if (doc.querySelector("#scannerResultHolder") && (!doc.querySelector(".fut-or-reserve") || scanCost(doc) !== lastScanCost)) return true;
-      if (doc.querySelector(".orionTabContentWrapper.anomalyMissions") && !doc.querySelector(".fut-or-bar")) return true;
+      if ((doc.querySelector("#scannerResultHolder") || doc.querySelector(".orionTabContentWrapper.anomalyMissions")) && !doc.querySelector(".fut-or-box") && lithiumNow(doc) !== null) return true;
+      if (doc.querySelector("#scannerResultHolder") && scanCost(doc) !== lastScanCost) return true;
       if (Object.keys(store.get(PENDING_KEY, {})).length || discovered.size) return true;
       const shown2 = [];
       for (const k of KINDS)
@@ -17164,7 +17297,7 @@ ${t("orion.planOwnBack", { v: fmt(s.rewards.lithium) })}` : ""}`;
         console.warn(`[${t("app.name")}]`, error);
       }
     }
-    if (isOrionPage(document)) watchOrion({ doc: document, store, t, locale, onOpenArchive: () => openJournal({ doc: document, store, now: Date.now(), locale, t, kind: "orion" }) });
+    if (isOrionPage(document)) watchOrion({ doc: document, store, t, locale });
     if (isHighscorePage(document)) watchHighscore({ doc: document, store, locale, t, guard });
     if (isMessagesPage(document))
       refreshInbox = watchMessages({
