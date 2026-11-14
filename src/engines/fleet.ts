@@ -406,7 +406,8 @@ export function expeditionMax(o: {
   itemBoost?: number;
 }): { base: number; max: number } {
   const row = EXPEDITION_TABLE.find((r) => r.topScore >= (o.topScore ?? Infinity))!;
-  const factor = o.characterClass === 3 ? 3 * o.economySpeed : 2;
+  // Since OGame 13, every class follows the economy speed (before, only the Discoverer did).
+  const factor = (o.characterClass === 3 ? 3 : 2) * o.economySpeed;
   const bonus = (1 + o.classBooster) * (1 + (o.lfBooster ?? 0)) * (1 + (o.itemBoost ?? 0));
   return { base: row.base, max: Math.round(row.max * factor * bonus) };
 }
