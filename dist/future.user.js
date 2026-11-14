@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.82
+// @version      0.3.83
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1409,7 +1409,13 @@
     "orion.lowRolls": "esiti bassi",
     "tech.iasShort": "Litio +{v}/h",
     "tech.ias": "Produzione di litio di questo scanner durante la conversione: {from}/h \u2192 {to}/h al livello {level} (formula della community: 15,36 \xD7 L \xD7 1,1^L \xD7 velocit\xE0 economica)",
-    "orion.simOpen": "Simula questa ondata in {tool} (nuova scheda): l\u2019ondata attacca, la tua flotta all\u2019anomalia difende; aggiungi le tue navi nel simulatore"
+    "orion.simOpen": "Simula questa ondata in {tool} (nuova scheda): l\u2019ondata attacca, la tua flotta all\u2019anomalia difende; aggiungi le tue navi nel simulatore",
+    "orion.expected": "Previste alla ricerca (intera missione)",
+    "orion.nowLabel": "Da riscattare ora:",
+    "orion.nowCost": "per {v} di litio",
+    "orion.cargoNeed": "Consegna: solo cargo, con capacit\xE0 almeno pari alla flotta in arrivo. La pi\xF9 grande: {cap} (ondata {wave}) \u2248 {lc} cargo pesanti o {sc} cargo leggeri",
+    "orion.cargoHint": "Capacit\xE0 delle flotte NPC in arrivo (capacit\xE0 base delle loro navi, col loro bonus), dai dati dell\u2019ondata; i cargo del giocatore con la capacit\xE0 letta dalla pagina flotta. Navi da guerra nella flotta = nessuna ricompensa.",
+    "orion.waveN": "Ondata {n}"
   };
 
   // src/i18n/en.json
@@ -2316,7 +2322,13 @@
     "orion.lowRolls": "low rolls",
     "tech.iasShort": "Lithium +{v}/h",
     "tech.ias": "Lithium production of this scanner while converting: {from}/h \u2192 {to}/h at level {level} (community formula: 15.36 \xD7 L \xD7 1.1^L \xD7 economy speed)",
-    "orion.simOpen": "Simulate this wave in {tool} (new tab): the wave attacks, your fleet at the anomaly defends; add your ships in the simulator"
+    "orion.simOpen": "Simulate this wave in {tool} (new tab): the wave attacks, your fleet at the anomaly defends; add your ships in the simulator",
+    "orion.expected": "Expected when scanned (whole mission)",
+    "orion.nowLabel": "To collect now:",
+    "orion.nowCost": "for {v} lithium",
+    "orion.cargoNeed": "Delivery: cargo ships only, with at least the incoming fleet\u2019s capacity. The largest: {cap} (wave {wave}) \u2248 {lc} large or {sc} small cargoes",
+    "orion.cargoHint": "Capacity of the incoming NPC fleets (their ships\u2019 base capacity, with their bonus), from the wave data; the player\u2019s cargoes at the capacity read on the fleet page. Warships in the fleet = no reward.",
+    "orion.waveN": "Wave {n}"
   };
 
   // src/i18n/fr.json
@@ -3223,7 +3235,13 @@
     "orion.lowRolls": "tirages bas",
     "tech.iasShort": "Lithium +{v}/h",
     "tech.ias": "Production de lithium de ce scanner pendant la conversion : {from}/h \u2192 {to}/h au niveau {level} (formule de la communaut\xE9 : 15,36 \xD7 L \xD7 1,1^L \xD7 vitesse \xE9conomique)",
-    "orion.simOpen": "Simuler cette vague dans {tool} (nouvel onglet) : la vague attaque, ta flotte \xE0 l\u2019anomalie d\xE9fend ; ajoute tes vaisseaux dans le simulateur"
+    "orion.simOpen": "Simuler cette vague dans {tool} (nouvel onglet) : la vague attaque, ta flotte \xE0 l\u2019anomalie d\xE9fend ; ajoute tes vaisseaux dans le simulateur",
+    "orion.expected": "Pr\xE9vu au scan (mission enti\xE8re)",
+    "orion.nowLabel": "\xC0 racheter maintenant :",
+    "orion.nowCost": "pour {v} de lithium",
+    "orion.cargoNeed": "Livraison : uniquement des transporteurs, avec au moins la capacit\xE9 de la flotte entrante. La plus grande : {cap} (vague {wave}) \u2248 {lc} grands ou {sc} petits transporteurs",
+    "orion.cargoHint": "Capacit\xE9 des flottes PNJ entrantes (capacit\xE9 de base de leurs vaisseaux, avec leur bonus), d\u2019apr\xE8s les donn\xE9es de la vague ; tes transporteurs \xE0 la capacit\xE9 lue sur la page flotte. Vaisseaux de guerre dans la flotte = aucune r\xE9compense.",
+    "orion.waveN": "Vague {n}"
   };
 
   // src/i18n/de.json
@@ -4130,7 +4148,13 @@
     "orion.lowRolls": "niedrige W\xFCrfe",
     "tech.iasShort": "Lithium +{v}/h",
     "tech.ias": "Lithiumproduktion dieses Scanners beim Umwandeln: {from}/h \u2192 {to}/h auf Stufe {level} (Community-Formel: 15,36 \xD7 L \xD7 1,1^L \xD7 Wirtschaftsgeschwindigkeit)",
-    "orion.simOpen": "Diese Welle in {tool} simulieren (neuer Tab): die Welle greift an, deine Flotte an der Anomalie verteidigt; f\xFCge deine Schiffe im Simulator hinzu"
+    "orion.simOpen": "Diese Welle in {tool} simulieren (neuer Tab): die Welle greift an, deine Flotte an der Anomalie verteidigt; f\xFCge deine Schiffe im Simulator hinzu",
+    "orion.expected": "Beim Scan erwartet (ganze Mission)",
+    "orion.nowLabel": "Jetzt einl\xF6sbar:",
+    "orion.nowCost": "f\xFCr {v} Lithium",
+    "orion.cargoNeed": "Lieferung: nur Transporter, mit mindestens der Kapazit\xE4t der ankommenden Flotte. Die gr\xF6\xDFte: {cap} (Welle {wave}) \u2248 {lc} gro\xDFe oder {sc} kleine Transporter",
+    "orion.cargoHint": "Kapazit\xE4t der ankommenden NPC-Flotten (Grundkapazit\xE4t ihrer Schiffe, mit Bonus), aus den Wellendaten; deine Transporter mit der Kapazit\xE4t von der Flottenseite. Kriegsschiffe in der Flotte = keine Belohnung.",
+    "orion.waveN": "Welle {n}"
   };
 
   // src/core/i18n.ts
@@ -6950,6 +6974,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     return ratio < 0.6 ? "low" : ratio > 0.8 ? "high" : void 0;
   }
   var iasProduction = (level2, economy) => level2 > 0 ? Math.floor(15.36 * level2 * 1.1 ** level2 * economy) : 0;
+  var BASE_CARGO = { 202: 5e3, 203: 25e3, 204: 50, 205: 100, 206: 800, 207: 1500, 208: 7500, 209: 2e4, 210: 5, 211: 500, 213: 2e3, 214: 1e6, 215: 750, 217: 0, 218: 1e4, 219: 1e4 };
+  function fleetCapacity(ships) {
+    let total = 0;
+    for (const [id, x] of Object.entries(ships ?? {})) total += (x.amount ?? 0) * (BASE_CARGO[Number(id)] ?? 0) * (1 + (x.cargo ?? 0));
+    return Math.ceil(total);
+  }
+  var shipsFor = (capacity, perShip) => perShip > 0 ? Math.ceil(capacity / perShip) : 0;
 
   // src/data/messages.ts
   var json = (value, fallback) => {
@@ -16657,6 +16688,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       return null;
     }
   }
+  function readMissionWaves(card) {
+    return Array.from(card.querySelectorAll(WAVE_API)).map((b) => readWaveFleet(b));
+  }
 
   // src/modules/orion/index.ts
   var STYLE_ID4 = "fut-orion-style";
@@ -16681,6 +16715,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
 .fut-or-val.free b { color: var(--ok); }
 .fut-or-val small.fut-or-risk { color: var(--warn); }
 .fut-or-x { color: #4FE0B0; }
+.fut-or-cap { flex-basis: 100%; color: var(--mute); font-size: 10px; }
 .fut-or-sim { display: inline-flex; align-items: center; justify-content: center; color: #4FD1E8; }
 .fut-or-sim:hover { color: #CFF5FC; }
 .fut-or-best { outline: 1px solid var(--gold, #F5C542); outline-offset: -1px; border-radius: 4px; }
@@ -16935,8 +16970,16 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         const tiles = h7(doc, "div", "fut-or-tiles");
         const val = h7(doc, "div", "fut-or-val");
         const known = m ? ledger[m.coords] : void 0;
-        if (m && !m.cost && !msu(m.rewards) && !m.rewards.lithium) tiles.append(tile2("note", null, t("orion.waiting")));
-        else {
+        if (m) {
+          tiles.append(h7(doc, "span", "fut-or-cap", t("orion.expected")));
+          tiles.append(...rewardTiles(m.possible));
+          if (est) {
+            const x = tile2("fut-or-x", null, `\u2248${fmt(extraMsu)}`, t("orion.extraValue"));
+            x.title = t("orion.extraHint", { budget: fmt(est.budget), extra: fmt(est.extra), rate: SHIP_RATE * 100 });
+            tiles.append(x);
+          }
+          if (m.totalCost) tiles.append(tile2("fut-or-li neg", lithiumIcon(), `\u2212${fmt(m.totalCost)}`, t("orion.redeemCost")));
+        } else {
           tiles.append(...rewardTiles(data.rewards));
           if (est && !m) {
             const x = tile2("fut-or-x", null, `\u2248${fmt(extraMsu)}`, t("orion.extraValue"));
@@ -16976,6 +17019,32 @@ ${t("orion.planOwnBack", { v: fmt(s.rewards.lithium) })}` : ""}`;
             line.append(plan.wait === null ? h7(doc, "span", "fut-or-dim", t(perHour > 0 ? "orion.planNever" : "orion.planNoProd", { waves: plan.waves })) : rich("orion.planWait", { waves: plan.waves, h: hoursText(plan.wait) }));
           }
           box.append(line);
+        }
+        if (m) {
+          const now = h7(doc, "div", "fut-or-line");
+          if (!m.cost && !msu(m.rewards) && !m.rewards.lithium) now.append(h7(doc, "span", "fut-or-dim", t("orion.waiting")));
+          else {
+            now.append(h7(doc, "span", "fut-or-dim", t("orion.nowLabel")));
+            const parts = ["metal", "crystal", "deuterium"].filter((k) => m.rewards[k]).map((k) => `${t(`msg.res.${k}`)} ${fmt(m.rewards[k])}`);
+            if (m.rewards.lithium) parts.push(`${t("orion.lithiumBack")} ${fmt(m.rewards.lithium)}`);
+            if (m.rewards.other.length) parts.push(m.rewards.other.join(", "));
+            now.append(h7(doc, "b", "", parts.join(" \xB7 ") || "\u2014"));
+            if (m.cost) now.append(h7(doc, "span", "fut-or-dim", t("orion.nowCost", { v: fmt(m.cost) })));
+          }
+          box.append(now);
+          if (!combat) {
+            const waves2 = readMissionWaves(card).map((w, i) => ({ n: m.incoming + i, cap: w ? fleetCapacity(w.ships) : 0 })).filter((w) => w.cap > 0);
+            if (waves2.length) {
+              const top = waves2.reduce((a, b) => b.cap > a.cap ? b : a);
+              const ships = store.get(SHIPS_INFO_KEY, {});
+              const per = (id) => ships[String(id)]?.capacity || BASE_CARGO[id];
+              const line = h7(doc, "div", "fut-or-line");
+              line.append(h7(doc, "i", "fut-or-dot"), rich("orion.cargoNeed", { cap: fmt(top.cap), wave: top.n, lc: shipsFor(top.cap, per(203)).toLocaleString(locale), sc: shipsFor(top.cap, per(202)).toLocaleString(locale) }));
+              line.title = `${t("orion.cargoHint")}
+${waves2.map((w) => `${t("orion.waveN", { n: w.n })}: ${fmt(w.cap)}`).join("\n")}`;
+              box.append(line);
+            }
+          }
         }
         if (m?.coords) {
           const line = h7(doc, "div", "fut-or-line");
