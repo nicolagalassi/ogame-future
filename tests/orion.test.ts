@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  budgetOf, iasProduction, learnMult, rollOf, waveBonus, type Mults,
   balance, collectedOnly, emptyArchive, importLegacy, launchPlan, noRewards, noteBattle, noteFuel, orionEvents, orionTotals, otherSummary, poolAt, profit, projectMission, scansPossible, settle, shipMatcher, syncArchive, syncLedger, dueList,
   type Archive, type LedgerRecord, type Lithium, type PendingMap, type Rewards,
 } from '../src/engines/orion';
@@ -148,6 +149,34 @@ describe('orion archive', () => {
   });
 });
 
+describe('orion reward model (s808, General)', () => {
+  it('learns k per type and mode: the same at every level, stars and waves', () => {
+    const m: Mults = {};
+    // Incontro alieno medio PvP: level 390 · 2 waves · 2 stars, and level 342 · 1 wave · 1 star.
+    expect(learnMult(m, 'Incontro alieno medio', 'PvP', 484_794, 2, rw({ metal: 1_966_324, crystal: 865_182, deuterium: 1_533_732 }))).toBe(true);
+    const k = m['Incontro alieno medio|pvp']!;
+    expect(1_691_159 / (106_282 * waveBonus(1))).toBeCloseTo(k, 1);
+    expect(k).toBeCloseTo(0.306 * 13 * 4, 1);
+    // Not from a card with other rewards.
+    expect(learnMult(m, 'Incontro alieno piccolo', 'PvP', 258_246, 3, rw({ metal: 1_313_955, deuterium: 437_985, other: ['Navi casuali 32'] }))).toBe(false);
+    // Its budget at k = 0.306 × 12 × 4: the resources take 2/3, the rest went to the 32 ships.
+    const b = budgetOf(0.306 * 12 * 4, 258_246, 3, rw({ metal: 1_313_955, deuterium: 437_985 }))!;
+    expect(b.budget).toBeCloseTo(3_941_867, 0);
+    expect(b.extra).toBeCloseTo(b.budget - 2_627_910, 0);
+  });
+
+  it('tells a low roll from a whole one, and the scanner production', () => {
+    expect(rollOf(375, 1_000, 2, 2)).toBe('low');
+    expect(rollOf(500, 1_000, 1, 2)).toBe('high');
+    expect(rollOf(700, 1_000, 2, 2)).toBeUndefined();
+    // Community table "new" (economy 10, shifted by one row): level 1 → 168, 9 → 3.259, 50 → 901.561 at row 51.
+    expect(iasProduction(1, 10)).toBe(168);
+    expect(iasProduction(9, 10)).toBe(3_259);
+    expect(iasProduction(50, 10)).toBe(901_561);
+    expect(iasProduction(0, 10)).toBe(0);
+  });
+});
+
 describe('orion page readers', () => {
   it('reads a scanner card as the game draws it (s808, 13.x)', () => {
     document.body.innerHTML = `<div class="scannerResultCard"><div class="scannerResultName">Risorsa: Metallo</div>
@@ -157,7 +186,7 @@ describe('orion page readers', () => {
       <div class="scannerResultRewardsList"><div class="rewardLine"><resource-icon class="metal"></resource-icon><span class="rewardName">Metallo</span><span class="rewardAmount">≈943.352</span></div>
       <div class="rewardLine"><lithium-icon></lithium-icon><span class="rewardName">Litio</span><span class="rewardAmount">1.000</span></div>
       <div class="rewardLine"><span class="rewardName">Caccia leggero</span><span class="rewardAmount">10 - 20</span></div></div></div>`;
-    expect(readScanCard(document.querySelector('.scannerResultCard')!)).toEqual({ coords: '9:249:10', name: 'Risorsa: Metallo', cost: 158_095, rewards: { metal: 943_352, crystal: 0, deuterium: 0, lithium: 1_000, other: ['Caccia leggero 10 - 20'] }, hours: 26 + 40 / 60, waves: 3 });
+    expect(readScanCard(document.querySelector('.scannerResultCard')!)).toEqual({ coords: '9:249:10', name: 'Risorsa: Metallo', cost: 158_095, rewards: { metal: 943_352, crystal: 0, deuterium: 0, lithium: 1_000, other: ['Caccia leggero 10 - 20'] }, hours: 26 + 40 / 60, waves: 3, level: 306, stars: 0, mode: '', type: 'Battaglia' });
   });
 
   it('reads a mission card and the collect dialog', () => {

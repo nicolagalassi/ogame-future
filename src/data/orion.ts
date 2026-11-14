@@ -88,6 +88,25 @@ export function readRewards(box: ParentNode, selector: string): Rewards {
   return r;
 }
 
+/**
+ * A combat anomaly (not a delivery): its type reads as the game's own word for combat (the scanner's
+ * localisation, `scannerLoca.LOCA_ALL_COMBAT`, when on the page), else the word in the known languages.
+ */
+export function isCombat(type: string, win?: { scannerLoca?: Record<string, string> } | null): boolean {
+  const words = [win?.scannerLoca?.LOCA_ALL_COMBAT, 'Battaglia', 'Combat', 'Kampf', 'Combate', 'Walka'].filter(Boolean).map((w) => w!.toLowerCase());
+  const t = clean(type).toLowerCase();
+  return !!t && words.some((w) => t.split(/\s*\/\s*/).includes(w));
+}
+
+/** PvP / PvE: the badge on the card. */
+function modeOf(card: Element): string {
+  for (const el of Array.from(card.querySelectorAll('span, div'))) {
+    const t = clean(el.textContent);
+    if ((t === 'PvP' || t === 'PvE') && !el.children.length) return t;
+  }
+  return '';
+}
+
 // ---------- scanner results ----------
 
 export const SCAN_CARD = '.scannerResultCard';
@@ -100,6 +119,11 @@ export interface ScanCard {
   rewards: Rewards;
   hours: number;
   waves: number;
+  level: number;
+  stars: number;
+  mode: string;
+  /** The type column (combat, delivery…). */
+  type: string;
 }
 
 export function readScanCard(card: Element): ScanCard {
@@ -114,6 +138,10 @@ export function readScanCard(card: Element): ScanCard {
     rewards: readRewards(card, '.scannerResultRewardsList .rewardLine'),
     hours: durationHours(cells[2]?.textContent),
     waves: parseNumber(cells[3]?.textContent),
+    level: parseNumber(cells[0]?.textContent),
+    stars: card.querySelectorAll('img[src*="star"]').length,
+    mode: modeOf(card),
+    type: clean(cells[5]?.textContent),
   };
 }
 
