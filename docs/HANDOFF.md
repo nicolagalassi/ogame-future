@@ -207,6 +207,19 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     Carburante (`conso`) non portato: il Diario di Future non lo conta. Prova sul file reale di Nicola (Nembus):
     42 giocatori, 570 posizioni, 40.196 spedizioni, 14.178 scoperte, 138 raid su 220 giorni.
 
+23. **Project Orion** (2026-11-14, 0.3.78, `engines/orion.ts`, `data/orion.ts`, `modules/orion`, `messages/orion-view.ts`):
+    il calcolatore Orion 1.3.7 di Nicola dentro Future. Pagine Orion: sotto ogni anomalia dello scanner e ogni missione
+    l'indice (MSU per ora di produzione di litio), ricompense, litio reso, piano di lancio che tiene il litio per le
+    anomalie in corso (ora anche col tetto del deposito, `lithiumStorageCapacity`), schede ordinate con la migliore in
+    oro; sopra i risultati le scansioni possibili e il litio da tenere, con «ignora» / «conta di nuovo». Archivio:
+    missioni dalla panoramica, riscatti (Accetta del dialogo o pulsante della scheda, contati solo quando il gioco ha
+    pagato), carburante dall'invio flotta accettato (`hookSend`), navi perse dai report di combattimento in posta
+    (`place.type === 'anomaly'`). Statistiche nella scheda «Anomalie Orion» del Diario (stessi periodi, colonne
+    ricompense sopra / costi sotto, tabella con filtri, CSV per giorno, JSON). I dati dello script Orion
+    (`orionArchive.v1`, `orionAddons.*` nella localStorage della pagina) vengono copiati una volta (`orion.imported`).
+    **Da verificare in gioco**: il dialogo di riscatto e i report di combattimento a un'anomalia (nessuno disponibile
+    il 2026-11-14); lo script Orion va disinstallato, altrimenti le righe compaiono due volte.
+
 ## Come si prova senza il gioco
 
 I test (`npm test`, vitest + jsdom) usano fixture in `tests/`. Le anteprime grafiche sono state

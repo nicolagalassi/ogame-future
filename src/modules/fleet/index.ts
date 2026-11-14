@@ -24,6 +24,7 @@ import { WINDOW_SHEET } from '../../core/sheet';
 import { PLAN_KEY, QUEUED_KEY, reservedFor, SENT_KEY, type Plan, type Queued, type Shipment } from '../../engines/planner';
 import { expeditionItemBoost, ITEMS_KEY, LF_BONUS_KEY, type ActiveItems, type LfBonuses } from '../../data/bonuses';
 import type { Store } from '../../core/storage';
+import { ARCHIVE_KEY, loadArchive, noteFuel, type Archive } from '../../engines/orion';
 import {
   CARGO_SHIPS,
   cargoLoad,
@@ -1524,6 +1525,7 @@ export function renderFleetTools(o: FleetOptions): void {
       try {
         o.store.set(LAST_FLEET_KEY, snapshotFleet(fd));
         recordShipment(o, fd);
+        recordOrionFuel(o.store, fd);
       } catch {
         /* storage full or blocked: the send itself is unaffected */
       }
@@ -1619,6 +1621,18 @@ function recordShipment(o: FleetOptions, fd: FleetDispatcher): void {
   const now = Date.now();
   const list = o.store.get<Shipment[]>(SENT_KEY, []);
   o.store.set(SENT_KEY, [...list, { target, cargo, sentAt: now, arriveAt: now + Math.max(0, seconds) * 1000 }]);
+}
+
+/**
+ * Project Orion: the fuel of a fleet the game accepted, when it went to an anomaly (deep space, the
+ * anomaly mission, or coordinates the archive knows). The figure is the page's own consumption.
+ * Read only, after the game's own send (see hookSend).
+ */
+function recordOrionFuel(store: Store, fd: FleetDispatcher): void {
+  const tp = fd.targetPlanet;
+  const archive = loadArchive(store.get<Archive | null>(ARCHIVE_KEY, null));
+  const next = noteFuel(archive, { at: Date.now(), coords: `${tp.galaxy}:${tp.system}:${tp.position}`, type: Number(tp.type), mission: Number(fd.mission), deut: Math.round(Number(fd.getConsumption()) || 0) });
+  if (next) store.set(ARCHIVE_KEY, next);
 }
 
 const initialFood = new WeakMap<FleetDispatcher, number>();
