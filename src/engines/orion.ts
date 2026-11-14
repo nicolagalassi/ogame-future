@@ -74,6 +74,8 @@ export interface LedgerRecord {
   at: number;
   /** Cost so far only: no wave done yet, the total is not known. */
   partial?: boolean;
+  /** Rewards in MSU the scanner showed at Discover (kept when the mission takes over). */
+  msu?: number;
 }
 export type Ledger = Record<string, LedgerRecord>;
 /** Anomalies the player leaves out of the lithium planning, by coordinates. */
@@ -114,12 +116,27 @@ export function projectMission(now: { cost: number; lithium: number }, wave: { i
 }
 
 /** The missions tab is the full list: write each mission, drop the missions it no longer lists. Scanner records stay. */
-export function syncLedger(ledger: Ledger, missions: { coords: string; name: string; cost: number; lithium: number; incoming: number; total: number; seconds: number }[], now: number): Ledger {
+export function syncLedger(ledger: Ledger, missions: { coords: string; name: string; cost: number; lithium: number; incoming: number; total: number; seconds: number; totalCost?: number; possible?: Rewards }[], now: number): Ledger {
   const out: Ledger = {};
   for (const [k, r] of Object.entries(ledger)) if (r.source !== 'mission') out[k] = r;
   for (const m of missions) {
     if (!m.coords) continue;
-    out[m.coords] = { coords: m.coords, name: m.name || m.coords, ...projectMission(m, { incoming: m.incoming, total: m.total }, m.seconds, ledger[m.coords], now), source: 'mission', at: now };
+    const known = ledger[m.coords];
+    const p = projectMission(m, { incoming: m.incoming, total: m.total }, m.seconds, known, now);
+    // The card's details give the whole mission's reward cost and possible rewards: better than the projection.
+    const total = m.totalCost ?? 0;
+    const value = m.possible ? msu(m.possible) : 0;
+    out[m.coords] = {
+      coords: m.coords,
+      name: m.name || m.coords,
+      ...p,
+      cost: Math.max(p.cost, total),
+      lithium: Math.max(p.lithium, m.possible?.lithium ?? 0),
+      partial: p.partial && !total,
+      source: 'mission',
+      at: now,
+      ...(value || known?.msu ? { msu: value || known!.msu } : {}),
+    };
   }
   return out;
 }
@@ -191,7 +208,8 @@ export interface LaunchPlan {
  * pay for itself. The card's own coordinates are left out, should a record for it exist.
  */
 export function launchPlan(card: { cost: number; lithium: number; msu: number }, hours: number, waves: number, l: Lithium, records: LedgerRecord[], ownCoords: string, now: number): LaunchPlan | null {
-  if (!(l.perHour > 0) || !(hours > 0) || !(waves > 0) || !card.cost) return null;
+  // Without production (conversion idle) the plan still holds: the bar only goes down.
+  if (!(hours > 0) || !(waves > 0) || !card.cost) return null;
   const due = dueList(records.filter((r) => r.coords !== ownCoords), now);
   const freeAt = (h: number) => Math.min(poolAt(l, due, h), ...due.filter((d) => d.h > h).map((d) => poolAt(l, due, d.h) + card.lithium));
   const free = freeAt(hours);
@@ -203,8 +221,10 @@ export function launchPlan(card: { cost: number; lithium: number; msu: number },
   if (free < card.cost) {
     const totalNet = due.reduce((s, d) => s + d.net, 0);
     const last = due.length ? due[due.length - 1]!.h : 0;
-    const fill = Number.isFinite(l.cap) ? last + l.cap / l.perHour : 0;
-    const top = Math.max(hours, last, fill, Number.isFinite(l.stopsIn) ? l.stopsIn : (card.cost + totalNet - l.now) / l.perHour) + 1;
+    const producing = l.perHour > 0 && l.stopsIn > 0;
+    const fill = producing && Number.isFinite(l.cap) ? last + l.cap / l.perHour : 0;
+    const need = !producing ? 0 : Number.isFinite(l.stopsIn) ? l.stopsIn : (card.cost + totalNet - l.now) / l.perHour;
+    const top = Math.max(hours, last, fill, need) + 1;
     if (freeAt(top) < card.cost) wait = null;
     else {
       let lo = hours;
@@ -227,9 +247,14 @@ export function launchPlan(card: { cost: number; lithium: number; msu: number },
  */
 export function scansPossible(l: Lithium, records: LedgerRecord[], scanCost: number, now: number): { cost: number; free: number; count: number } | null {
   if (!scanCost) return null;
-  const due = dueList(records, now);
-  const free = Math.min(poolAt(l, due, 0), ...due.map((d) => poolAt(l, due, d.h)));
+  const free = freeLithium(l, records, now);
   return { cost: scanCost, free, count: Math.max(0, Math.floor(free / scanCost)) };
+}
+
+/** Lithium free to spend now: the lowest the bar would go from now on, every anomaly under way paid at its end. */
+export function freeLithium(l: Lithium, records: LedgerRecord[], now: number): number {
+  const due = dueList(records, now);
+  return Math.min(poolAt(l, due, 0), ...due.map((d) => poolAt(l, due, d.h)));
 }
 
 // ---------- the archive ----------

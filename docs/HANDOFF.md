@@ -219,6 +219,12 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     (`orionArchive.v1`, `orionAddons.*` nella localStorage della pagina) vengono copiati una volta (`orion.imported`).
     **Da verificare in gioco**: il dialogo di riscatto e i report di combattimento a un'anomalia (nessuno disponibile
     il 2026-11-14); lo script Orion va disinstallato, altrimenti le righe compaiono due volte.
+    **0.3.79**: grafica come i riepiloghi della posta (tessere con i simboli delle risorse e `<lithium-icon>` del gioco,
+    valore a destra, interruttori), riquadro Litio (produzione, scansioni, libero, da tenere, in cassa, anomalie con
+    interruttore) anche sopra la panoramica missioni, niente pulsante «Diario Orion» lì. Il costo totale e le ricompense
+    possibili di una missione si leggono dai suoi dettagli (`.missionDetailsTable` cella col litio, `.possibleRewardsCell`)
+    invece di stimarli dalle ondate; la scheda missione mostra l'indice della missione intera. Il piano di lancio vale
+    anche a produzione ferma.
 
 ## Come si prova senza il gioco
 

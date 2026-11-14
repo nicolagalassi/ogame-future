@@ -451,7 +451,7 @@ async function bootstrap(): Promise<void> {
       console.warn(`[${t('app.name')}]`, error);
     }
   }
-  if (isOrionPage(document)) watchOrion({ doc: document, store, t, locale, onOpenArchive: () => openJournal({ doc: document, store, now: Date.now(), locale, t, kind: 'orion' }) });
+  if (isOrionPage(document)) watchOrion({ doc: document, store, t, locale });
 
   // Highscore: gap to the player, days to catch up, rival star.
   if (isHighscorePage(document)) watchHighscore({ doc: document, store, locale, t, guard });

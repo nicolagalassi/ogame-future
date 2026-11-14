@@ -53,6 +53,14 @@ describe('orion lithium timeline', () => {
     expect(launchPlan({ cost: 5_000, lithium: 0, msu: 1 }, 1, 1, l({ stopsIn: 1 }), [], '', NOW)!.wait).toBeNull();
   });
 
+  it('plans without production too (the bar only goes down), and reads the mission details for the real total', () => {
+    const idle = l({ perHour: 0 });
+    expect(launchPlan({ cost: 500, lithium: 0, msu: 1 }, 2, 2, idle, [], '', NOW)).toMatchObject({ free: 1_000, covered: 2, wait: 0 });
+    expect(launchPlan({ cost: 2_000, lithium: 0, msu: 1 }, 2, 2, idle, [], '', NOW)!.wait).toBeNull();
+    const ledger = syncLedger({ '5:5:5': { ...rec('5:5:5', 10, 1), source: 'scanner', msu: 99 } }, [{ coords: '5:5:5', name: 'X', cost: 0, lithium: 0, incoming: 1, total: 6, seconds: 60, totalCost: 2_826_000, possible: rw({ metal: 18_520_704 }) }], NOW);
+    expect(ledger['5:5:5']).toMatchObject({ cost: 2_826_000, partial: false, msu: 18_520_704 });
+  });
+
   it('counts the scans the bar can pay without starving the anomalies under way', () => {
     expect(scansPossible(l(), [], 300, NOW)).toEqual({ cost: 300, free: 1_000, count: 3 });
     expect(scansPossible(l(), [rec('1:1:1', 1_000, 1)], 300, NOW)!.count).toBe(0);
