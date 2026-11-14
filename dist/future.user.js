@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.74
+// @version      0.3.75
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -10613,8 +10613,14 @@ table.queues td.acts { width: 1%; text-align: right; }
   function groupSteps(steps) {
     const out = [];
     for (const s of steps) {
-      const last2 = out[out.length - 1];
-      if (last2 && s.planetId && last2.first.planetId && last2.first.id === s.id && last2.first.from === s.from && last2.first.to === s.to) last2.steps.push(s);
+      const g = out[out.length - 1];
+      const prev = g?.steps[g.steps.length - 1];
+      const sameTech = !!g && g.first.id === s.id && s.kind !== "astro";
+      const isChain = !!g && g.steps.length > 1 && prev.from !== g.first.from;
+      const isSpread = !!g && g.steps.length > 1 && !isChain;
+      const chain = sameTech && !isSpread && prev.planetId === s.planetId && prev.to === s.from;
+      const spread = sameTech && !isChain && !!s.planetId && !!g.first.planetId && g.first.from === s.from && g.first.to === s.to;
+      if (chain || spread) g.steps.push(s);
       else out.push({ first: s, steps: [s] });
     }
     return out;
@@ -10644,17 +10650,20 @@ table.queues td.acts { width: 1%; text-align: right; }
     else if (!numbered) line.append(h3("span", "n", String(i + 1)));
     const text = h3("div", "move-text");
     const what = m.kind === "mine" ? t(`mine.${m.mine}`) : ctx.name(m.id);
-    text.append(h3("strong", "", `${what} ${m.from} \u2192 ${m.to}${m.kind === "astro" ? ` \xB7 ${t("dash.newColony")}` : ""}`));
+    const to = g.steps[g.steps.length - 1].to;
+    text.append(h3("strong", "", `${what} ${m.from} \u2192 ${to}${m.kind === "astro" ? ` \xB7 ${t("dash.newColony")}` : ""}`));
     const total = g.steps.reduce((sum, s) => ({ metal: sum.metal + s.cost.metal, crystal: sum.crystal + s.cost.crystal, deuterium: sum.deuterium + s.cost.deuterium }), { metal: 0, crystal: 0, deuterium: 0 });
     const cost = [`${ctx.fmt(total.metal)} M`, `${ctx.fmt(total.crystal)} C`, ...total.deuterium ? [`${ctx.fmt(total.deuterium)} D`] : []].join(" \xB7 ");
     if (m.planetId) {
       const chips = h3("div", "pls");
+      const perPlanet = [...new Map(g.steps.map((s) => [s.planetId, s])).values()];
       let done = 0;
-      for (const s of g.steps) {
+      for (const s of perPlanet) {
         const a = h3("a", "pl", s.name || `[${s.coords}]`);
         a.setAttribute("href", stepPage(s));
-        a.title = `${s.name} [${s.coords}] \xB7 ${daysText(ctx, s.days)}${s.guessed ? ` \xB7 ${t("dash.lfGuessedHint")}` : ""}`;
-        if (s.guessed) a.classList.add("guess");
+        const guessed = g.steps.some((x) => x.planetId === s.planetId && x.guessed);
+        a.title = `${s.name} [${s.coords}] \xB7 ${daysText(ctx, s.days)}${guessed ? ` \xB7 ${t("dash.lfGuessedHint")}` : ""}`;
+        if (guessed) a.classList.add("guess");
         if (stepDone(ctx, s)) {
           a.classList.add("done");
           a.setAttribute("aria-label", `${a.title} \xB7 ${t("dash.stepDone")}`);
@@ -10662,9 +10671,9 @@ table.queues td.acts { width: 1%; text-align: right; }
         }
         chips.append(a);
       }
-      if (done === g.steps.length) line.classList.add("done");
-      const sub = h3("span", "", g.steps.length > 1 ? `${t("dash.planetsCount", { count: g.steps.length })} \xB7 ${cost}` : cost);
-      if (done) sub.append(h3("em", "ok", ` \xB7 ${t("dash.doneCount", { done, count: g.steps.length })}`));
+      if (done === perPlanet.length) line.classList.add("done");
+      const sub = h3("span", "", perPlanet.length > 1 ? `${t("dash.planetsCount", { count: perPlanet.length })} \xB7 ${cost}` : cost);
+      if (done) sub.append(h3("em", "ok", ` \xB7 ${t("dash.doneCount", { done, count: perPlanet.length })}`));
       text.append(chips, sub);
     } else {
       text.append(h3("span", "", `${t("dash.account")} \xB7 ${cost}`));

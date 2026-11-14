@@ -649,7 +649,10 @@ function missingData(ctx: Ctx): HTMLElement | null {
   return box;
 }
 
-/** Consecutive steps that raise the same technology to the same level on different planets, as one. */
+/**
+ * Consecutive steps of the same technology, as one: the same level on different planets, or
+ * successive levels on the same planet (or on the account, as plasma).
+ */
 interface StepGroup {
   first: AmortStep;
   steps: AmortStep[];
@@ -658,8 +661,14 @@ interface StepGroup {
 export function groupSteps(steps: AmortStep[]): StepGroup[] {
   const out: StepGroup[] = [];
   for (const s of steps) {
-    const last = out[out.length - 1];
-    if (last && s.planetId && last.first.planetId && last.first.id === s.id && last.first.from === s.from && last.first.to === s.to) last.steps.push(s);
+    const g = out[out.length - 1];
+    const prev = g?.steps[g.steps.length - 1];
+    const sameTech = !!g && g.first.id === s.id && s.kind !== 'astro';
+    const isChain = !!g && g.steps.length > 1 && prev!.from !== g.first.from;
+    const isSpread = !!g && g.steps.length > 1 && !isChain;
+    const chain = sameTech && !isSpread && prev!.planetId === s.planetId && prev!.to === s.from;
+    const spread = sameTech && !isChain && !!s.planetId && !!g.first.planetId && g.first.from === s.from && g.first.to === s.to;
+    if (chain || spread) g!.steps.push(s);
     else out.push({ first: s, steps: [s] });
   }
   return out;
@@ -695,18 +704,21 @@ function groupLine(ctx: Ctx, g: StepGroup, i: number, numbered: boolean): HTMLEl
   else if (!numbered) line.append(h('span', 'n', String(i + 1)));
   const text = h('div', 'move-text');
   const what = m.kind === 'mine' ? t(`mine.${m.mine}`) : ctx.name(m.id);
-  text.append(h('strong', '', `${what} ${m.from} → ${m.to}${m.kind === 'astro' ? ` · ${t('dash.newColony')}` : ''}`));
+  const to = g.steps[g.steps.length - 1]!.to;
+  text.append(h('strong', '', `${what} ${m.from} → ${to}${m.kind === 'astro' ? ` · ${t('dash.newColony')}` : ''}`));
   const total = g.steps.reduce((sum, s) => ({ metal: sum.metal + s.cost.metal, crystal: sum.crystal + s.cost.crystal, deuterium: sum.deuterium + s.cost.deuterium }), { metal: 0, crystal: 0, deuterium: 0 });
   const cost = [`${ctx.fmt(total.metal)} M`, `${ctx.fmt(total.crystal)} C`, ...(total.deuterium ? [`${ctx.fmt(total.deuterium)} D`] : [])].join(' · ');
   if (m.planetId) {
-    // One chip per planet, linking to the page where it is built; done ones are struck through.
+    // One chip per planet (its last level in the group), linking to the page where it is built; done ones are struck through.
     const chips = h('div', 'pls');
+    const perPlanet = [...new Map(g.steps.map((s) => [s.planetId, s])).values()];
     let done = 0;
-    for (const s of g.steps) {
+    for (const s of perPlanet) {
       const a = h('a', 'pl', s.name || `[${s.coords}]`);
       a.setAttribute('href', stepPage(s));
-      a.title = `${s.name} [${s.coords}] · ${daysText(ctx, s.days)}${s.guessed ? ` · ${t('dash.lfGuessedHint')}` : ''}`;
-      if (s.guessed) a.classList.add('guess');
+      const guessed = g.steps.some((x) => x.planetId === s.planetId && x.guessed);
+      a.title = `${s.name} [${s.coords}] · ${daysText(ctx, s.days)}${guessed ? ` · ${t('dash.lfGuessedHint')}` : ''}`;
+      if (guessed) a.classList.add('guess');
       if (stepDone(ctx, s)) {
         a.classList.add('done');
         a.setAttribute('aria-label', `${a.title} · ${t('dash.stepDone')}`);
@@ -714,9 +726,9 @@ function groupLine(ctx: Ctx, g: StepGroup, i: number, numbered: boolean): HTMLEl
       }
       chips.append(a);
     }
-    if (done === g.steps.length) line.classList.add('done');
-    const sub = h('span', '', g.steps.length > 1 ? `${t('dash.planetsCount', { count: g.steps.length })} · ${cost}` : cost);
-    if (done) sub.append(h('em', 'ok', ` · ${t('dash.doneCount', { done, count: g.steps.length })}`));
+    if (done === perPlanet.length) line.classList.add('done');
+    const sub = h('span', '', perPlanet.length > 1 ? `${t('dash.planetsCount', { count: perPlanet.length })} · ${cost}` : cost);
+    if (done) sub.append(h('em', 'ok', ` · ${t('dash.doneCount', { done, count: perPlanet.length })}`));
     text.append(chips, sub);
   } else {
     text.append(h('span', '', `${t('dash.account')} · ${cost}`));
