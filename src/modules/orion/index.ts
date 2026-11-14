@@ -17,7 +17,8 @@ import { formatUnits } from '../../core/format';
 import { resIconSvg } from '../../core/res-icons';
 import { RES_COLORS } from '../../core/sheet';
 import { pageWindow } from '../../data/fleet-dispatcher';
-import { COLLECT_DIALOG, depletionHours, isCombat, isDisabled, lithiumNow, lithiumPerHour, MISSION_CARD, readCollectDialog, readMissionCard, readScanCard, SCAN_CARD, scanCost, storageCap, type MissionCard } from '../../data/orion';
+import { prefillLink, SIM_TOOLS, waveSimPrefill, type Attacker, type SimTool } from '../../engines/sim-links';
+import { COLLECT_DIALOG, depletionHours, isCombat, isDisabled, readWaveFleet, WAVE_API, WAVE_SIM, lithiumNow, lithiumPerHour, MISSION_CARD, readCollectDialog, readMissionCard, readScanCard, SCAN_CARD, scanCost, storageCap, type MissionCard } from '../../data/orion';
 import {
   ARCHIVE_KEY, budgetOf, cardValue, counted, freeLithium, IGNORED_KEY, launchPlan, learnMult, LEDGER_KEY, loadArchive, LOW_ROLL, MULT_KEY, multKey, PENDING_KEY, profit, pruneLedger, scansPossible, settle, SHIP_RATE, syncArchive, syncLedger,
   type Archive, type CardState, type Ignored, type Ledger, type LedgerRecord, type Lithium, type Mults, type PendingMap, type Rewards,
@@ -31,6 +32,8 @@ export interface OrionOptions {
   store: Store;
   t: T;
   locale: string;
+  /** For the waves' simulator links: universe, language, the simulator picked and the player's side. */
+  sim: { server: string; lang: string; tool: () => SimTool; player: () => Attacker | null };
 }
 
 const STYLE_ID = 'fut-orion-style';
@@ -57,6 +60,7 @@ const CSS = `
 .fut-or-val.free b { color: var(--ok); }
 .fut-or-val small.fut-or-risk { color: var(--warn); }
 .fut-or-x { color: #4FE0B0; }
+.fut-or-sim { min-width: 30px; font: 700 11px Verdana, Arial, sans-serif; color: #CFF5FC; }
 .fut-or-best { outline: 1px solid var(--gold, #F5C542); outline-offset: -1px; border-radius: 4px; }
 .fut-or-best .fut-or-val b { color: #F5C542; }
 .fut-or-line { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding-top: 6px; border-top: 1px solid var(--line); }
@@ -472,7 +476,32 @@ export function watchOrion(o: OrionOptions): void {
     }
   };
 
+  // ---------- the waves: the simulator picked in Future in place of the game's ----------
+  // COMPLIANCE: a link the player clicks, opening the simulator in a new tab with the wave the game
+  // itself offers for simulators (§1.9: nothing is sent by Future). The game's button is only hidden.
+  const placeSimButtons = () => {
+    for (const game of Array.from(doc.querySelectorAll<HTMLElement>(`${WAVE_SIM}:not([data-fut-sim])`))) {
+      const api = game.parentElement?.querySelector(WAVE_API) ?? game.closest('tr, .row, div')?.querySelector(WAVE_API);
+      const wave = api ? readWaveFleet(api) : null;
+      game.setAttribute('data-fut-sim', '1');
+      if (!wave) continue;
+      const tool = o.sim.tool();
+      const b = h(doc, 'button', 'custom_btn fut-or-sim', tool === 'osims' ? 'OS' : 'OT');
+      b.type = 'button';
+      b.title = t('orion.simOpen', { tool: SIM_TOOLS[tool].name });
+      b.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const url = prefillLink(o.sim.tool(), o.sim.lang, waveSimPrefill(o.sim.server, wave, o.sim.player()));
+        doc.defaultView?.open(url, '_blank', 'noopener');
+      });
+      game.style.display = 'none';
+      game.after(b);
+    }
+  };
+
   const render = () => {
+    placeSimButtons();
     syncMissions();
     commitDiscovered();
     const l = lithium();
@@ -483,6 +512,7 @@ export function watchOrion(o: OrionOptions): void {
 
   /** Something changed for the cards since the last render: one new, gone, hidden, or its cost or rewards moved. */
   const outOfDate = () => {
+    if (doc.querySelector(`${WAVE_SIM}:not([data-fut-sim])`)) return true;
     if (doc.querySelector('#orionMission:not([data-fut-or-synced]), .orionTabContentWrapper.anomalyMissions:not([data-fut-or-synced])')) return true;
     if ((doc.querySelector('#scannerResultHolder') || doc.querySelector('.orionTabContentWrapper.anomalyMissions')) && !doc.querySelector('.fut-or-box') && lithiumNow(doc) !== null) return true;
     if (doc.querySelector('#scannerResultHolder') && scanCost(doc) !== lastScanCost) return true;

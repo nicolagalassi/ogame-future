@@ -223,3 +223,26 @@ export function readCollectDialog(dialog: Element): { id: string; waves: number[
 
 /** The game greys a refused button out with the attribute, a class or aria-disabled: a click on it does nothing. */
 export const isDisabled = (el: Element): boolean => !!((el as HTMLButtonElement).disabled || el.classList.contains('disabled') || el.getAttribute('aria-disabled') === 'true');
+
+// ---------- waves ----------
+
+/** The game's simulator button of a wave, and its API button (same row). */
+export const WAVE_SIM = '.waveSimButton';
+export const WAVE_API = '.waveApiButton';
+
+/**
+ * The wave's fleet, from its API button: the tooltip holds `<input value='{json}'>` (the data the game
+ * offers "for a compatible battle simulator"). Null when it cannot be read.
+ */
+export function readWaveFleet(apiButton: Element): import('../engines/sim-links').WaveFleet | null {
+  const tip = apiButton.getAttribute('data-tooltip-title') ?? apiButton.getAttribute('title') ?? '';
+  const raw = /value='([^']*)'/.exec(tip)?.[1] ?? /value="([^"]*)"/.exec(tip)?.[1];
+  if (!raw) return null;
+  try {
+    const decoded = raw.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+    const data = JSON.parse(decoded) as import('../engines/sim-links').WaveFleet;
+    return data && typeof data.coords === 'string' ? data : null;
+  } catch {
+    return null;
+  }
+}

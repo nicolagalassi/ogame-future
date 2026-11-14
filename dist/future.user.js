@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.80
+// @version      0.3.81
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1408,7 +1408,8 @@
     "orion.lowRollHint": "Combattimento: al riscatto si prende tutto oppure il 37,5% delle ricompense (le consegne danno sempre tutto). Dato della community, verificato dal diario Orion.",
     "orion.lowRolls": "esiti bassi",
     "tech.iasShort": "Litio +{v}/h",
-    "tech.ias": "Produzione di litio di questo scanner durante la conversione: {from}/h \u2192 {to}/h al livello {level} (formula della community: 15,36 \xD7 L \xD7 1,1^L \xD7 velocit\xE0 economica)"
+    "tech.ias": "Produzione di litio di questo scanner durante la conversione: {from}/h \u2192 {to}/h al livello {level} (formula della community: 15,36 \xD7 L \xD7 1,1^L \xD7 velocit\xE0 economica)",
+    "orion.simOpen": "Simula questa ondata in {tool} (nuova scheda): l\u2019ondata attacca, la tua flotta all\u2019anomalia difende; aggiungi le tue navi nel simulatore"
   };
 
   // src/i18n/en.json
@@ -2314,7 +2315,8 @@
     "orion.lowRollHint": "Combat: a collection pays everything or 37.5% of the rewards (deliveries always pay everything). Community figure, checked by the Orion journal.",
     "orion.lowRolls": "low rolls",
     "tech.iasShort": "Lithium +{v}/h",
-    "tech.ias": "Lithium production of this scanner while converting: {from}/h \u2192 {to}/h at level {level} (community formula: 15.36 \xD7 L \xD7 1.1^L \xD7 economy speed)"
+    "tech.ias": "Lithium production of this scanner while converting: {from}/h \u2192 {to}/h at level {level} (community formula: 15.36 \xD7 L \xD7 1.1^L \xD7 economy speed)",
+    "orion.simOpen": "Simulate this wave in {tool} (new tab): the wave attacks, your fleet at the anomaly defends; add your ships in the simulator"
   };
 
   // src/i18n/fr.json
@@ -3220,7 +3222,8 @@
     "orion.lowRollHint": "Combat : un rachat paie tout ou 37,5 % des r\xE9compenses (les livraisons paient toujours tout). Donn\xE9e de la communaut\xE9, v\xE9rifi\xE9e par le journal Orion.",
     "orion.lowRolls": "tirages bas",
     "tech.iasShort": "Lithium +{v}/h",
-    "tech.ias": "Production de lithium de ce scanner pendant la conversion : {from}/h \u2192 {to}/h au niveau {level} (formule de la communaut\xE9 : 15,36 \xD7 L \xD7 1,1^L \xD7 vitesse \xE9conomique)"
+    "tech.ias": "Production de lithium de ce scanner pendant la conversion : {from}/h \u2192 {to}/h au niveau {level} (formule de la communaut\xE9 : 15,36 \xD7 L \xD7 1,1^L \xD7 vitesse \xE9conomique)",
+    "orion.simOpen": "Simuler cette vague dans {tool} (nouvel onglet) : la vague attaque, ta flotte \xE0 l\u2019anomalie d\xE9fend ; ajoute tes vaisseaux dans le simulateur"
   };
 
   // src/i18n/de.json
@@ -4126,7 +4129,8 @@
     "orion.lowRollHint": "Kampf: eine Einl\xF6sung zahlt alles oder 37,5 % der Belohnungen (Lieferungen zahlen immer alles). Community-Wert, vom Orion-Tagebuch gepr\xFCft.",
     "orion.lowRolls": "niedrige W\xFCrfe",
     "tech.iasShort": "Lithium +{v}/h",
-    "tech.ias": "Lithiumproduktion dieses Scanners beim Umwandeln: {from}/h \u2192 {to}/h auf Stufe {level} (Community-Formel: 15,36 \xD7 L \xD7 1,1^L \xD7 Wirtschaftsgeschwindigkeit)"
+    "tech.ias": "Lithiumproduktion dieses Scanners beim Umwandeln: {from}/h \u2192 {to}/h auf Stufe {level} (Community-Formel: 15,36 \xD7 L \xD7 1,1^L \xD7 Wirtschaftsgeschwindigkeit)",
+    "orion.simOpen": "Diese Welle in {tool} simulieren (neuer Tab): die Welle greift an, deine Flotte an der Anomalie verteidigt; f\xFCge deine Schiffe im Simulator hinzu"
   };
 
   // src/core/i18n.ts
@@ -6505,11 +6509,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   var GENERAL = 2;
   var WARRIORS = 1;
   var toolLang = (lang) => lang === "us" ? "en" : lang === "ar" ? "es" : lang || "en";
-  function simPrefill(server, attacker, defenderCoords) {
-    const planet = (c) => {
-      const [galaxy, system, position] = c.split(":");
-      return { galaxy, system, position };
-    };
+  function playerSide(attacker) {
     const cls = attacker?.classId ?? 0;
     const booster = attacker?.lf?.classBooster?.[String(cls)] ?? 0;
     let bonus = cls === GENERAL ? 2 + Math.floor(booster * 100 / 50) : 0;
@@ -6521,13 +6521,38 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
       lifeformBonuses.BaseStatsBooster[id] = { weapon: b.weapon, shield: b.shield, armor: b.armor, cargo: b.cargo, speed: b.speed };
       if (b.fuel) lifeformBonuses.ShipFuelConsumption = Math.abs(b.fuel);
     }
+    return { research, class: cls, characterClassesEnabled: true, allianceClass: attacker?.allianceClass ?? 0, lifeformBonuses };
+  }
+  var planetOf = (c) => {
+    const [galaxy, system, position] = c.split(":");
+    return { galaxy, system, position };
+  };
+  function simPrefill(server, attacker, defenderCoords) {
     const data = {
       settings: { server },
-      0: [{ planet: planet(attacker?.coords ?? "0:0:0"), research, class: cls, characterClassesEnabled: true, allianceClass: attacker?.allianceClass ?? 0, lifeformBonuses }],
-      1: [{ planet: planet(defenderCoords), research: {}, resources: {}, defence: {} }]
+      0: [{ planet: planetOf(attacker?.coords ?? "0:0:0"), ...playerSide(attacker) }],
+      1: [{ planet: planetOf(defenderCoords), research: {}, resources: {}, defence: {} }]
     };
     return btoa(JSON.stringify(data));
   }
+  function waveSimPrefill(server, wave, player) {
+    const research = {};
+    for (const [id, level2] of Object.entries(wave.researches ?? {})) research[id] = { level: level2 };
+    const ships = {};
+    const base2 = {};
+    for (const [id, x] of Object.entries(wave.ships ?? {})) {
+      if (!x.amount) continue;
+      ships[id] = { count: x.amount };
+      base2[id] = { weapon: x.weapon ?? 0, shield: x.shield ?? 0, armor: x.armor ?? 0, cargo: x.cargo ?? 0, speed: x.speed ?? 0 };
+    }
+    const data = {
+      settings: { server },
+      0: [{ planet: planetOf(wave.coords), research, class: wave.characterClassId ?? 0, allianceClass: wave.allianceClassId ?? 0, ships, lifeformBonuses: { BaseStatsBooster: base2, CharacterClassBooster: wave.bonuses?.characterClassBooster ?? {} } }],
+      1: [{ planet: planetOf(wave.coords), ...playerSide(player), resources: {}, defence: {} }]
+    };
+    return btoa(JSON.stringify(data));
+  }
+  var prefillLink = (tool, lang, prefill) => `${SIM_TOOLS[tool].url}${toolLang(lang)}#prefill=${prefill}`;
   function simLink(tool, apiKey, lang, prefill) {
     return `${SIM_TOOLS[tool].url}${toolLang(lang)}?SR_KEY=${encodeURIComponent(apiKey)}#prefill=${prefill}`;
   }
@@ -16618,6 +16643,20 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     };
   }
   var isDisabled = (el6) => !!(el6.disabled || el6.classList.contains("disabled") || el6.getAttribute("aria-disabled") === "true");
+  var WAVE_SIM = ".waveSimButton";
+  var WAVE_API = ".waveApiButton";
+  function readWaveFleet(apiButton) {
+    const tip = apiButton.getAttribute("data-tooltip-title") ?? apiButton.getAttribute("title") ?? "";
+    const raw = /value='([^']*)'/.exec(tip)?.[1] ?? /value="([^"]*)"/.exec(tip)?.[1];
+    if (!raw) return null;
+    try {
+      const decoded = raw.replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+      const data = JSON.parse(decoded);
+      return data && typeof data.coords === "string" ? data : null;
+    } catch {
+      return null;
+    }
+  }
 
   // src/modules/orion/index.ts
   var STYLE_ID4 = "fut-orion-style";
@@ -16642,6 +16681,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
 .fut-or-val.free b { color: var(--ok); }
 .fut-or-val small.fut-or-risk { color: var(--warn); }
 .fut-or-x { color: #4FE0B0; }
+.fut-or-sim { min-width: 30px; font: 700 11px Verdana, Arial, sans-serif; color: #CFF5FC; }
 .fut-or-best { outline: 1px solid var(--gold, #F5C542); outline-offset: -1px; border-radius: 4px; }
 .fut-or-best .fut-or-val b { color: #F5C542; }
 .fut-or-line { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding-top: 6px; border-top: 1px solid var(--line); }
@@ -17007,7 +17047,28 @@ ${t("orion.planOwnBack", { v: fmt(s.rewards.lithium) })}` : ""}`;
         panel.after(warn);
       }
     };
+    const placeSimButtons = () => {
+      for (const game of Array.from(doc.querySelectorAll(`${WAVE_SIM}:not([data-fut-sim])`))) {
+        const api = game.parentElement?.querySelector(WAVE_API) ?? game.closest("tr, .row, div")?.querySelector(WAVE_API);
+        const wave = api ? readWaveFleet(api) : null;
+        game.setAttribute("data-fut-sim", "1");
+        if (!wave) continue;
+        const tool = o.sim.tool();
+        const b = h7(doc, "button", "custom_btn fut-or-sim", tool === "osims" ? "OS" : "OT");
+        b.type = "button";
+        b.title = t("orion.simOpen", { tool: SIM_TOOLS[tool].name });
+        b.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const url = prefillLink(o.sim.tool(), o.sim.lang, waveSimPrefill(o.sim.server, wave, o.sim.player()));
+          doc.defaultView?.open(url, "_blank", "noopener");
+        });
+        game.style.display = "none";
+        game.after(b);
+      }
+    };
     const render = () => {
+      placeSimButtons();
       syncMissions();
       commitDiscovered();
       const l = lithium();
@@ -17016,6 +17077,7 @@ ${t("orion.planOwnBack", { v: fmt(s.rewards.lithium) })}` : ""}`;
       renderBox(l, records);
     };
     const outOfDate = () => {
+      if (doc.querySelector(`${WAVE_SIM}:not([data-fut-sim])`)) return true;
       if (doc.querySelector("#orionMission:not([data-fut-or-synced]), .orionTabContentWrapper.anomalyMissions:not([data-fut-or-synced])")) return true;
       if ((doc.querySelector("#scannerResultHolder") || doc.querySelector(".orionTabContentWrapper.anomalyMissions")) && !doc.querySelector(".fut-or-box") && lithiumNow(doc) !== null) return true;
       if (doc.querySelector("#scannerResultHolder") && scanCost(doc) !== lastScanCost) return true;
@@ -17411,7 +17473,26 @@ ${t("orion.planOwnBack", { v: fmt(s.rewards.lithium) })}` : ""}`;
         console.warn(`[${t("app.name")}]`, error);
       }
     }
-    if (isOrionPage(document)) watchOrion({ doc: document, store, t, locale });
+    if (isOrionPage(document))
+      watchOrion({
+        doc: document,
+        store,
+        t,
+        locale,
+        // The waves' simulator links: the player's side as for the inbox reports (research from the last sync).
+        sim: {
+          server: pageMeta("ogame-universe").split(".")[0] ?? "",
+          lang: pageMeta("ogame-ui-language") || pageMeta("ogame-language"),
+          tool: () => simTool(store.get(SIM_KEY, "osims")),
+          player: () => ({
+            coords: "0:0:0",
+            researches: snapshot?.researches ?? {},
+            classId: Number(pageMeta("ogame-player-characterclass-id")) || 0,
+            allianceClass: Number(pageMeta("ogame-allianceclass-id")) || 0,
+            lf: store.get(LF_BONUS_KEY, null) ?? void 0
+          })
+        }
+      });
     if (isHighscorePage(document)) watchHighscore({ doc: document, store, locale, t, guard });
     if (isMessagesPage(document))
       refreshInbox = watchMessages({

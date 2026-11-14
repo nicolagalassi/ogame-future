@@ -4,7 +4,8 @@ import {
   balance, collectedOnly, emptyArchive, importLegacy, launchPlan, noRewards, noteBattle, noteFuel, orionEvents, orionTotals, otherSummary, poolAt, profit, projectMission, scansPossible, settle, shipMatcher, syncArchive, syncLedger, dueList,
   type Archive, type LedgerRecord, type Lithium, type PendingMap, type Rewards,
 } from '../src/engines/orion';
-import { durationHours, parseGameDate, readCollectDialog, readMissionCard, readScanCard } from '../src/data/orion';
+import { durationHours, parseGameDate, readCollectDialog, readMissionCard, readScanCard, readWaveFleet } from '../src/data/orion';
+import { prefillLink, waveSimPrefill } from '../src/engines/sim-links';
 
 const H = 3_600_000;
 const NOW = new Date(2026, 10, 14, 12, 0, 0).getTime();
@@ -201,5 +202,20 @@ describe('orion page readers', () => {
     expect(readMissionCard(document.querySelector('.anomalyMission')!)).toMatchObject({ id: '777', name: 'Chaos', coords: '4:5:6', cost: 2_567_018, incoming: 2, total: 7, seconds: 7200, level: 120, stars: 2, mode: 'PvP', kind: 'Battaglia', spawnedAt: parseGameDate('02.10.2026 09:05:49'), rewards: { crystal: 2_000 } });
     expect(readCollectDialog(document.querySelector('.orionCollectRewards')!)).toEqual({ id: '777', waves: [1], rewards: { metal: 500, crystal: 0, deuterium: 0, lithium: 0, other: [] }, cost: 1_234 });
     expect(durationHours('45m 10s')).toBeCloseTo(0.75 + 10 / 3600);
+  });
+});
+
+describe('orion waves in the simulator', () => {
+  it('reads the wave the game offers and prefills it: the wave attacks, the player defends', () => {
+    const json = '{"coords":"9:249:15","characterClassId":0,"allianceClassId":0,"researches":{"109":16,"110":21,"111":16},"defenses":[],"ships":{"202":{"amount":3052,"weapon":0,"shield":0,"armor":0,"cargo":0,"speed":0,"fuel":0},"203":{"amount":567,"weapon":0.1,"shield":0,"armor":0,"cargo":0,"speed":0,"fuel":0}},"bonuses":{"characterClassBooster":{"1":0,"2":0,"3":0}}}';
+    document.body.innerHTML = `<button class="waveApiButton" data-tooltip-title="Questi dati possono essere letti:&lt;br/&gt;&lt;input value='${json.replace(/"/g, '&quot;')}' readonly&gt;"></button>`;
+    const wave = readWaveFleet(document.querySelector('.waveApiButton')!)!;
+    expect(wave.ships!['202']!.amount).toBe(3052);
+    const data = JSON.parse(atob(waveSimPrefill('s808', wave, { coords: '1:1:1', researches: { 109: 20, 110: 20, 111: 20 }, classId: 2 })));
+    expect(data[0][0]).toMatchObject({ planet: { galaxy: '9', system: '249', position: '15' }, research: { 109: { level: 16 } }, ships: { 202: { count: 3052 }, 203: { count: 567 } } });
+    expect(data[0][0].lifeformBonuses.BaseStatsBooster['203'].weapon).toBe(0.1);
+    // The player: General +2 on weapons, shielding, armour; at the anomaly.
+    expect(data[1][0]).toMatchObject({ planet: { galaxy: '9' }, class: 2, research: { 109: { level: 22 } } });
+    expect(prefillLink('ogametools', 'it', 'X')).toBe('https://simulator.ogame-tools.com/it#prefill=X');
   });
 });

@@ -900,5 +900,6 @@
   "orion.lowRollHint": "Kampf: eine Einlösung zahlt alles oder 37,5 % der Belohnungen (Lieferungen zahlen immer alles). Community-Wert, vom Orion-Tagebuch geprüft.",
   "orion.lowRolls": "niedrige Würfe",
   "tech.iasShort": "Lithium +{v}/h",
-  "tech.ias": "Lithiumproduktion dieses Scanners beim Umwandeln: {from}/h → {to}/h auf Stufe {level} (Community-Formel: 15,36 × L × 1,1^L × Wirtschaftsgeschwindigkeit)"
+  "tech.ias": "Lithiumproduktion dieses Scanners beim Umwandeln: {from}/h → {to}/h auf Stufe {level} (Community-Formel: 15,36 × L × 1,1^L × Wirtschaftsgeschwindigkeit)",
+  "orion.simOpen": "Diese Welle in {tool} simulieren (neuer Tab): die Welle greift an, deine Flotte an der Anomalie verteidigt; füge deine Schiffe im Simulator hinzu"
 }
