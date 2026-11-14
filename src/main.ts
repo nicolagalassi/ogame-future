@@ -51,6 +51,9 @@ import { isHighscorePage, watchHighscore } from './modules/highscore';
 import { bellButton, clockOffset, startReminders, watchEventList } from './modules/reminders';
 import { renderPlanetMenu, watchPlanetBar, type MenuMode, type MenuSettings, type PlanMark } from './modules/planet-menu';
 import { techIcons } from './data/tech-icons';
+import { isOrionPage } from './data/orion';
+import { watchOrion } from './modules/orion';
+import { ARCHIVE_KEY as ORION_ARCHIVE_KEY, IGNORED_KEY as ORION_IGNORED_KEY, IMPORTED_KEY as ORION_IMPORTED_KEY, LEDGER_KEY as ORION_LEDGER_KEY, importLegacy, loadArchive, type Archive as OrionArchive, type Ignored as OrionIgnored, type Ledger as OrionLedger } from './engines/orion';
 
 async function bootstrap(): Promise<void> {
   const namespace = serverNamespace(document);
@@ -427,6 +430,28 @@ async function bootstrap(): Promise<void> {
     store.set(FLIGHTS_KEY, { readAt: Date.now(), list } satisfies Flights);
     draw();
   });
+
+  // Project Orion: one-time copy of what the Orion Calculator userscript kept in this page's
+  // localStorage (same origin, nothing leaves the browser), as Nicola chose; then its pages.
+  if (!store.get<boolean>(ORION_IMPORTED_KEY, false)) {
+    try {
+      const read = (key: string): unknown => {
+        const raw = window.localStorage.getItem(key);
+        return raw ? (JSON.parse(raw) as unknown) : undefined;
+      };
+      const old = { archive: read('orionArchive.v1'), ledger: read('orionAddons.anomalies'), ignored: read('orionAddons.ignored') };
+      if (old.archive || old.ledger || old.ignored) {
+        const merged = importLegacy({ archive: loadArchive(store.get<OrionArchive | null>(ORION_ARCHIVE_KEY, null)), ledger: store.get<OrionLedger>(ORION_LEDGER_KEY, {}), ignored: store.get<OrionIgnored>(ORION_IGNORED_KEY, {}) }, old);
+        store.set(ORION_ARCHIVE_KEY, merged.archive);
+        store.set(ORION_LEDGER_KEY, merged.ledger);
+        store.set(ORION_IGNORED_KEY, merged.ignored);
+      }
+      store.set(ORION_IMPORTED_KEY, true);
+    } catch (error) {
+      console.warn(`[${t('app.name')}]`, error);
+    }
+  }
+  if (isOrionPage(document)) watchOrion({ doc: document, store, t, locale, onOpenArchive: () => openJournal({ doc: document, store, now: Date.now(), locale, t, kind: 'orion' }) });
 
   // Highscore: gap to the player, days to catch up, rival star.
   if (isHighscorePage(document)) watchHighscore({ doc: document, store, locale, t, guard });

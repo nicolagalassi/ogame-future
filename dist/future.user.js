@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.77
+// @version      0.3.78
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -310,8 +310,8 @@
   function isoDurationMs(value) {
     const m = /^P(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$/.exec(value.trim());
     if (!m) return null;
-    const [w = 0, d = 0, h6 = 0, min = 0, s = 0] = m.slice(1).map((x) => Number(x ?? 0));
-    return ((((w * 7 + d) * 24 + h6) * 60 + min) * 60 + s) * 1e3;
+    const [w = 0, d = 0, h8 = 0, min = 0, s = 0] = m.slice(1).map((x) => Number(x ?? 0));
+    return ((((w * 7 + d) * 24 + h8) * 60 + min) * 60 + s) * 1e3;
   }
   var LAB = 31;
   var IRN = 123;
@@ -1306,7 +1306,90 @@
     "exp.heroFleet": "Flotta",
     "exp.heroFound": "trovate",
     "exp.heroLostShort": "perse",
-    "exp.heroDebris": "di cui detriti pos. 16"
+    "exp.heroDebris": "di cui detriti pos. 16",
+    "exp.kind.orion": "Anomalie Orion",
+    "orion.index": "{v} MSU per ora di litio",
+    "orion.indexM": "{v} MSU per 1M di litio",
+    "orion.redeemHours": "riscatto = {h} di produzione",
+    "orion.rewards": "ricompense {v} MSU",
+    "orion.noCost": "nessun costo in litio sulla scheda",
+    "orion.free": "{v}: il litio reso copre il costo",
+    "orion.freeWord": "gratis",
+    "orion.paidBack": "litio {paid} pagato, {back} reso",
+    "orion.planAll": "lancio ora: {free} di litio libero alla fine{held} riscatta tutte le {waves} ondate, \u2248{msu} MSU",
+    "orion.planSome": "lancio ora: {free} di litio libero alla fine{held} riscatta {covered}/{waves} ondate, \u2248{msu} MSU",
+    "orion.held": " ({v} tenuti per {n} in corso)",
+    "orion.planNever": "non tutte le {waves}: la produzione di litio si ferma prima",
+    "orion.planWait": "tutte le {waves} se lanci tra {h} o pi\xF9 tardi",
+    "orion.planTitle": "Litio ora pi\xF9 {h} di produzione, riscattato alla fine, tenendo da parte quello che serviranno le anomalie in corso quando finiscono:",
+    "orion.planNone": "nessuna in memoria.",
+    "orion.planOwnBack": "Il litio reso da questa ({v}) arriva con il riscatto: non pu\xF2 pagarla.",
+    "orion.toggleOn": "\u2611 contata nel piano del litio \xB7 clic per ignorarla",
+    "orion.toggleOff": "\u2610 ignorata nel piano del litio \xB7 clic per contarla",
+    "orion.toggleHint": "Se il litio che questa anomalia deve ancora pagare va tenuto da parte nei piani dello scanner",
+    "orion.notCounted": "non contati: {list}",
+    "orion.soFar": "finora",
+    "orion.back": "reso",
+    "orion.paid": "pagato",
+    "orion.over": "finita, da pagare ora",
+    "orion.endsIn": "finisce tra {h}",
+    "orion.scansKeep": "Scansioni possibili ora: {n} da {cost}, tenendo riscattabili tutte le anomalie in corso ({free} liberi)",
+    "orion.scansNone": "Scansioni possibili ora: {n} da {cost}, nessuna anomalia in corso da tenere ({free} liberi)",
+    "orion.scansShort": "Scansioni possibili ora: 0 \xB7 alle anomalie in corso mancano gi\xE0 {v}",
+    "orion.scansZero": "Scansioni possibili ora: 0 \xB7 {free} liberi, una scansione costa {cost}",
+    "orion.warnShort": "Attenzione: scansionare ora lascia troppo poco litio per riscattare le anomalie in corso. Mancano gi\xE0 {v}, prima di qualsiasi scansione.",
+    "orion.warnFree": "Attenzione: scansionare ora lascia troppo poco litio per riscattare le anomalie in corso. Sono liberi solo {free} e una scansione costa {cost}.",
+    "orion.allIgnored": "Nessuna anomalia in corso conta: quelle in memoria sono tutte ignorate.",
+    "orion.noneRemembered": "Nessuna anomalia in corso in memoria. Se ne hai, apri una volta la panoramica delle missioni perch\xE9 il loro litio venga contato.",
+    "orion.toPay": "Litio ancora da pagare per {n} anomalie in corso: {v}",
+    "orion.partial": "costo finora, totale non ancora noto",
+    "orion.ignore": "ignora",
+    "orion.ignoreHint": "Lascia questa anomalia fuori dal litio ancora da pagare",
+    "orion.countAgain": "conta di nuovo",
+    "orion.ignoredList": "Ignorate da te, non contate:",
+    "orion.openArchive": "Diario Orion ({n} anomalie)",
+    "orion.empty": "Ancora nessuna anomalia registrata. Apri la panoramica delle missioni di Orion: le anomalie elencate vengono salvate qui.",
+    "orion.balance": "Bilancio",
+    "orion.balanceHint": "ricompense + navi ricevute \u2212 navi perse \u2212 carburante (litio a parte)",
+    "orion.rewardsK": "Ricompense",
+    "orion.shipsGot": "Navi ricevute",
+    "orion.lost": "Navi perse",
+    "orion.fuel": "Carburante",
+    "orion.shipsN": "navi",
+    "orion.battlesN": "battaglie",
+    "orion.collectionsN": "riscatti",
+    "orion.wavesN": "ondate",
+    "orion.lithiumNet": "litio netto speso",
+    "orion.legendUp": "Ricompense + navi ricevute (MSU)",
+    "orion.legendDown": "Costi: navi perse + carburante (MSU)",
+    "orion.other": "Altro",
+    "orion.anomalies": "Anomalie apparse",
+    "orion.search": "Cerca nome o coordinate\u2026",
+    "orion.all": "tutte",
+    "orion.rowsHint": "cifre della riga = solo il periodo scelto",
+    "orion.noneInPeriod": "Nessuna anomalia apparsa in questo periodo.",
+    "orion.col.spawned": "Apparsa",
+    "orion.col.name": "Nome",
+    "orion.col.coords": "Coord.",
+    "orion.col.level": "Liv.",
+    "orion.col.stars": "Stelle",
+    "orion.col.mode": "Modalit\xE0",
+    "orion.col.kind": "Tipo",
+    "orion.col.waves": "Ondate",
+    "orion.col.status": "Stato",
+    "orion.col.paid": "Litio pagato",
+    "orion.col.back": "Litio reso",
+    "orion.status.running": "in corso",
+    "orion.status.collected": "riscattata",
+    "orion.status.expired": "scaduta",
+    "orion.del": "Togli questa anomalia dal diario",
+    "orion.delConfirm": "Togli?",
+    "orion.csv": "CSV per giorno",
+    "orion.json": "Esporta JSON",
+    "orion.clear": "Svuota archivio Orion",
+    "orion.costs": "Costi",
+    "orion.title": "Diario Orion",
+    "orion.sub": "Dalle pagine Orion, dai riscatti, dagli invii e dai report che apri: niente richieste al server"
   };
 
   // src/i18n/en.json
@@ -2110,7 +2193,90 @@
     "exp.heroFleet": "Fleet",
     "exp.heroFound": "found",
     "exp.heroLostShort": "lost",
-    "exp.heroDebris": "of which debris at 16"
+    "exp.heroDebris": "of which debris at 16",
+    "exp.kind.orion": "Orion anomalies",
+    "orion.index": "{v} MSU per hour of lithium",
+    "orion.indexM": "{v} MSU per 1M lithium",
+    "orion.redeemHours": "redeeming = {h} of production",
+    "orion.rewards": "rewards {v} MSU",
+    "orion.noCost": "no lithium cost shown",
+    "orion.free": "{v}: the lithium it gives back covers its cost",
+    "orion.freeWord": "free",
+    "orion.paidBack": "lithium {paid} paid, {back} back",
+    "orion.planAll": "launch now: {free} lithium free at the end{held} collects all {waves} waves, \u2248{msu} MSU",
+    "orion.planSome": "launch now: {free} lithium free at the end{held} collects {covered}/{waves} waves, \u2248{msu} MSU",
+    "orion.held": " ({v} held back for {n} under way)",
+    "orion.planNever": "not all {waves}: lithium production stops before it gets there",
+    "orion.planWait": "all {waves} if launched {h} from now or later",
+    "orion.planTitle": "Lithium now plus {h} of production, collected at the end, keeping back what the anomalies under way will need when they end:",
+    "orion.planNone": "none remembered.",
+    "orion.planOwnBack": "This anomaly\u2019s own {v} lithium back arrives with the collection, so it cannot pay for it.",
+    "orion.toggleOn": "\u2611 counted in lithium planning \xB7 click to ignore",
+    "orion.toggleOff": "\u2610 ignored in lithium planning \xB7 click to count it",
+    "orion.toggleHint": "Whether the lithium this anomaly still needs is held back in the scanner\u2019s plans",
+    "orion.notCounted": "not counted: {list}",
+    "orion.soFar": "so far",
+    "orion.back": "back",
+    "orion.paid": "paid",
+    "orion.over": "over, due now",
+    "orion.endsIn": "ends in {h}",
+    "orion.scansKeep": "Scans you can make now: {n} at {cost} each, keeping every anomaly under way redeemable ({free} free)",
+    "orion.scansNone": "Scans you can make now: {n} at {cost} each, nothing held back, none under way ({free} free)",
+    "orion.scansShort": "Scans you can make now: 0 \xB7 the anomalies under way are already short by {v}",
+    "orion.scansZero": "Scans you can make now: 0 \xB7 {free} free, one scan costs {cost}",
+    "orion.warnShort": "Warning: scanning now leaves too little lithium to redeem every anomaly under way. They are already short by {v}, before any scan.",
+    "orion.warnFree": "Warning: scanning now leaves too little lithium to redeem every anomaly under way. Only {free} is free and one scan costs {cost}.",
+    "orion.allIgnored": "No anomaly under way counts: every one remembered is ignored.",
+    "orion.noneRemembered": "No anomaly under way is remembered. If you have some, open the missions overview once so their lithium is counted.",
+    "orion.toPay": "Lithium still to pay for {n} anomalies under way: {v}",
+    "orion.partial": "cost so far, total not known yet",
+    "orion.ignore": "ignore",
+    "orion.ignoreHint": "Leave this anomaly out of the lithium still to pay",
+    "orion.countAgain": "count again",
+    "orion.ignoredList": "Ignored by you, not counted:",
+    "orion.openArchive": "Orion journal ({n} anomalies)",
+    "orion.empty": "No anomaly recorded yet. Open the Orion missions overview: the anomalies listed there are saved here.",
+    "orion.balance": "Balance",
+    "orion.balanceHint": "rewards + ships received \u2212 ships lost \u2212 fuel (lithium apart)",
+    "orion.rewardsK": "Rewards",
+    "orion.shipsGot": "Ships received",
+    "orion.lost": "Ships lost",
+    "orion.fuel": "Fuel",
+    "orion.shipsN": "ships",
+    "orion.battlesN": "battles",
+    "orion.collectionsN": "collections",
+    "orion.wavesN": "waves",
+    "orion.lithiumNet": "net lithium spent",
+    "orion.legendUp": "Rewards + ships received (MSU)",
+    "orion.legendDown": "Costs: ships lost + fuel (MSU)",
+    "orion.other": "Other",
+    "orion.anomalies": "Anomalies appeared",
+    "orion.search": "Search name or coordinates\u2026",
+    "orion.all": "all",
+    "orion.rowsHint": "row figures = chosen period only",
+    "orion.noneInPeriod": "No anomaly appeared in this period.",
+    "orion.col.spawned": "Appeared",
+    "orion.col.name": "Name",
+    "orion.col.coords": "Coords",
+    "orion.col.level": "Lvl",
+    "orion.col.stars": "Stars",
+    "orion.col.mode": "Mode",
+    "orion.col.kind": "Type",
+    "orion.col.waves": "Waves",
+    "orion.col.status": "Status",
+    "orion.col.paid": "Lithium paid",
+    "orion.col.back": "Lithium back",
+    "orion.status.running": "running",
+    "orion.status.collected": "collected",
+    "orion.status.expired": "expired",
+    "orion.del": "Remove this anomaly from the journal",
+    "orion.delConfirm": "Remove?",
+    "orion.csv": "CSV per day",
+    "orion.json": "Export JSON",
+    "orion.clear": "Clear Orion archive",
+    "orion.costs": "Costs",
+    "orion.title": "Orion journal",
+    "orion.sub": "From the Orion pages, your collections, fleets sent and the reports you open: no request to the server"
   };
 
   // src/i18n/fr.json
@@ -2914,7 +3080,90 @@
     "exp.heroFleet": "Flotte",
     "exp.heroFound": "trouv\xE9s",
     "exp.heroLostShort": "perdus",
-    "exp.heroDebris": "dont d\xE9bris en 16"
+    "exp.heroDebris": "dont d\xE9bris en 16",
+    "exp.kind.orion": "Anomalies Orion",
+    "orion.index": "{v} MSU par heure de lithium",
+    "orion.indexM": "{v} MSU par 1M de lithium",
+    "orion.redeemHours": "rachat = {h} de production",
+    "orion.rewards": "r\xE9compenses {v} MSU",
+    "orion.noCost": "aucun co\xFBt en lithium affich\xE9",
+    "orion.free": "{v} : le lithium rendu couvre le co\xFBt",
+    "orion.freeWord": "gratuit",
+    "orion.paidBack": "lithium {paid} pay\xE9, {back} rendu",
+    "orion.planAll": "lancement maintenant : {free} de lithium libre \xE0 la fin{held} rach\xE8te les {waves} vagues, \u2248{msu} MSU",
+    "orion.planSome": "lancement maintenant : {free} de lithium libre \xE0 la fin{held} rach\xE8te {covered}/{waves} vagues, \u2248{msu} MSU",
+    "orion.held": " ({v} r\xE9serv\xE9s pour {n} en cours)",
+    "orion.planNever": "pas les {waves} : la production de lithium s\u2019arr\xEAte avant",
+    "orion.planWait": "les {waves} si lanc\xE9 dans {h} ou plus tard",
+    "orion.planTitle": "Lithium actuel plus {h} de production, rachet\xE9 \xE0 la fin, en gardant ce qu\u2019il faudra aux anomalies en cours \xE0 leur fin :",
+    "orion.planNone": "aucune en m\xE9moire.",
+    "orion.planOwnBack": "Le lithium rendu par celle-ci ({v}) arrive avec le rachat : il ne peut pas la payer.",
+    "orion.toggleOn": "\u2611 compt\xE9e dans le plan du lithium \xB7 clic pour l\u2019ignorer",
+    "orion.toggleOff": "\u2610 ignor\xE9e dans le plan du lithium \xB7 clic pour la compter",
+    "orion.toggleHint": "Si le lithium que cette anomalie doit encore payer est r\xE9serv\xE9 dans les plans du scanner",
+    "orion.notCounted": "non compt\xE9s : {list}",
+    "orion.soFar": "jusqu\u2019ici",
+    "orion.back": "rendu",
+    "orion.paid": "pay\xE9",
+    "orion.over": "termin\xE9e, \xE0 payer maintenant",
+    "orion.endsIn": "se termine dans {h}",
+    "orion.scansKeep": "Scans possibles maintenant : {n} \xE0 {cost}, en gardant toutes les anomalies en cours rachetables ({free} libres)",
+    "orion.scansNone": "Scans possibles maintenant : {n} \xE0 {cost}, rien \xE0 r\xE9server, aucune en cours ({free} libres)",
+    "orion.scansShort": "Scans possibles maintenant : 0 \xB7 il manque d\xE9j\xE0 {v} aux anomalies en cours",
+    "orion.scansZero": "Scans possibles maintenant : 0 \xB7 {free} libres, un scan co\xFBte {cost}",
+    "orion.warnShort": "Attention : scanner maintenant laisse trop peu de lithium pour racheter les anomalies en cours. Il manque d\xE9j\xE0 {v}, avant tout scan.",
+    "orion.warnFree": "Attention : scanner maintenant laisse trop peu de lithium pour racheter les anomalies en cours. Seuls {free} sont libres et un scan co\xFBte {cost}.",
+    "orion.allIgnored": "Aucune anomalie en cours ne compte : toutes celles en m\xE9moire sont ignor\xE9es.",
+    "orion.noneRemembered": "Aucune anomalie en cours en m\xE9moire. Si tu en as, ouvre une fois l\u2019aper\xE7u des missions pour que leur lithium soit compt\xE9.",
+    "orion.toPay": "Lithium encore \xE0 payer pour {n} anomalies en cours : {v}",
+    "orion.partial": "co\xFBt jusqu\u2019ici, total pas encore connu",
+    "orion.ignore": "ignorer",
+    "orion.ignoreHint": "Laisser cette anomalie hors du lithium encore \xE0 payer",
+    "orion.countAgain": "compter \xE0 nouveau",
+    "orion.ignoredList": "Ignor\xE9es par toi, non compt\xE9es :",
+    "orion.openArchive": "Journal Orion ({n} anomalies)",
+    "orion.empty": "Aucune anomalie enregistr\xE9e. Ouvre l\u2019aper\xE7u des missions Orion : les anomalies list\xE9es sont enregistr\xE9es ici.",
+    "orion.balance": "Bilan",
+    "orion.balanceHint": "r\xE9compenses + vaisseaux re\xE7us \u2212 vaisseaux perdus \u2212 carburant (lithium \xE0 part)",
+    "orion.rewardsK": "R\xE9compenses",
+    "orion.shipsGot": "Vaisseaux re\xE7us",
+    "orion.lost": "Vaisseaux perdus",
+    "orion.fuel": "Carburant",
+    "orion.shipsN": "vaisseaux",
+    "orion.battlesN": "combats",
+    "orion.collectionsN": "rachats",
+    "orion.wavesN": "vagues",
+    "orion.lithiumNet": "lithium net d\xE9pens\xE9",
+    "orion.legendUp": "R\xE9compenses + vaisseaux re\xE7us (MSU)",
+    "orion.legendDown": "Co\xFBts : vaisseaux perdus + carburant (MSU)",
+    "orion.other": "Autre",
+    "orion.anomalies": "Anomalies apparues",
+    "orion.search": "Chercher nom ou coordonn\xE9es\u2026",
+    "orion.all": "toutes",
+    "orion.rowsHint": "chiffres de la ligne = p\xE9riode choisie seulement",
+    "orion.noneInPeriod": "Aucune anomalie apparue dans cette p\xE9riode.",
+    "orion.col.spawned": "Apparue",
+    "orion.col.name": "Nom",
+    "orion.col.coords": "Coord.",
+    "orion.col.level": "Niv.",
+    "orion.col.stars": "\xC9toiles",
+    "orion.col.mode": "Mode",
+    "orion.col.kind": "Type",
+    "orion.col.waves": "Vagues",
+    "orion.col.status": "\xC9tat",
+    "orion.col.paid": "Lithium pay\xE9",
+    "orion.col.back": "Lithium rendu",
+    "orion.status.running": "en cours",
+    "orion.status.collected": "rachet\xE9e",
+    "orion.status.expired": "expir\xE9e",
+    "orion.del": "Retirer cette anomalie du journal",
+    "orion.delConfirm": "Retirer ?",
+    "orion.csv": "CSV par jour",
+    "orion.json": "Exporter JSON",
+    "orion.clear": "Vider l\u2019archive Orion",
+    "orion.costs": "Co\xFBts",
+    "orion.title": "Journal Orion",
+    "orion.sub": "Des pages Orion, de tes rachats, des flottes envoy\xE9es et des rapports ouverts : aucune requ\xEAte au serveur"
   };
 
   // src/i18n/de.json
@@ -3718,7 +3967,90 @@
     "exp.heroFleet": "Flotte",
     "exp.heroFound": "gefunden",
     "exp.heroLostShort": "verloren",
-    "exp.heroDebris": "davon Tr\xFCmmer auf 16"
+    "exp.heroDebris": "davon Tr\xFCmmer auf 16",
+    "exp.kind.orion": "Orion-Anomalien",
+    "orion.index": "{v} MSU pro Stunde Lithium",
+    "orion.indexM": "{v} MSU pro 1 Mio. Lithium",
+    "orion.redeemHours": "Einl\xF6sen = {h} Produktion",
+    "orion.rewards": "Belohnungen {v} MSU",
+    "orion.noCost": "keine Lithiumkosten angezeigt",
+    "orion.free": "{v}: das zur\xFCckgegebene Lithium deckt die Kosten",
+    "orion.freeWord": "gratis",
+    "orion.paidBack": "Lithium {paid} bezahlt, {back} zur\xFCck",
+    "orion.planAll": "jetzt starten: {free} Lithium frei am Ende{held} l\xF6st alle {waves} Wellen ein, \u2248{msu} MSU",
+    "orion.planSome": "jetzt starten: {free} Lithium frei am Ende{held} l\xF6st {covered}/{waves} Wellen ein, \u2248{msu} MSU",
+    "orion.held": " ({v} zur\xFCckgehalten f\xFCr {n} laufende)",
+    "orion.planNever": "nicht alle {waves}: die Lithiumproduktion stoppt vorher",
+    "orion.planWait": "alle {waves}, wenn in {h} oder sp\xE4ter gestartet",
+    "orion.planTitle": "Lithium jetzt plus {h} Produktion, am Ende eingel\xF6st, abz\xFCglich dessen, was laufende Anomalien am Ende brauchen:",
+    "orion.planNone": "keine gespeichert.",
+    "orion.planOwnBack": "Das von dieser Anomalie zur\xFCckgegebene Lithium ({v}) kommt erst mit der Einl\xF6sung und kann sie nicht bezahlen.",
+    "orion.toggleOn": "\u2611 in der Lithiumplanung gez\xE4hlt \xB7 Klick zum Ignorieren",
+    "orion.toggleOff": "\u2610 in der Lithiumplanung ignoriert \xB7 Klick zum Z\xE4hlen",
+    "orion.toggleHint": "Ob das Lithium, das diese Anomalie noch braucht, in den Pl\xE4nen des Scanners zur\xFCckgehalten wird",
+    "orion.notCounted": "nicht gez\xE4hlt: {list}",
+    "orion.soFar": "bisher",
+    "orion.back": "zur\xFCck",
+    "orion.paid": "bezahlt",
+    "orion.over": "vorbei, jetzt f\xE4llig",
+    "orion.endsIn": "endet in {h}",
+    "orion.scansKeep": "Jetzt m\xF6gliche Scans: {n} zu je {cost}, alle laufenden Anomalien bleiben einl\xF6sbar ({free} frei)",
+    "orion.scansNone": "Jetzt m\xF6gliche Scans: {n} zu je {cost}, nichts zur\xFCckgehalten, keine l\xE4uft ({free} frei)",
+    "orion.scansShort": "Jetzt m\xF6gliche Scans: 0 \xB7 den laufenden Anomalien fehlen schon {v}",
+    "orion.scansZero": "Jetzt m\xF6gliche Scans: 0 \xB7 {free} frei, ein Scan kostet {cost}",
+    "orion.warnShort": "Achtung: Ein Scan jetzt l\xE4sst zu wenig Lithium, um alle laufenden Anomalien einzul\xF6sen. Es fehlen schon {v}, vor jedem Scan.",
+    "orion.warnFree": "Achtung: Ein Scan jetzt l\xE4sst zu wenig Lithium, um alle laufenden Anomalien einzul\xF6sen. Nur {free} sind frei, ein Scan kostet {cost}.",
+    "orion.allIgnored": "Keine laufende Anomalie z\xE4hlt: alle gespeicherten werden ignoriert.",
+    "orion.noneRemembered": "Keine laufende Anomalie gespeichert. Falls du welche hast, \xF6ffne einmal die Missions\xFCbersicht, damit ihr Lithium gez\xE4hlt wird.",
+    "orion.toPay": "Noch zu zahlendes Lithium f\xFCr {n} laufende Anomalien: {v}",
+    "orion.partial": "bisherige Kosten, Gesamt noch unbekannt",
+    "orion.ignore": "ignorieren",
+    "orion.ignoreHint": "Diese Anomalie aus dem noch zu zahlenden Lithium herausnehmen",
+    "orion.countAgain": "wieder z\xE4hlen",
+    "orion.ignoredList": "Von dir ignoriert, nicht gez\xE4hlt:",
+    "orion.openArchive": "Orion-Tagebuch ({n} Anomalien)",
+    "orion.empty": "Noch keine Anomalie gespeichert. \xD6ffne die Orion-Missions\xFCbersicht: die dort gelisteten Anomalien werden hier gespeichert.",
+    "orion.balance": "Bilanz",
+    "orion.balanceHint": "Belohnungen + erhaltene Schiffe \u2212 verlorene Schiffe \u2212 Treibstoff (Lithium separat)",
+    "orion.rewardsK": "Belohnungen",
+    "orion.shipsGot": "Erhaltene Schiffe",
+    "orion.lost": "Verlorene Schiffe",
+    "orion.fuel": "Treibstoff",
+    "orion.shipsN": "Schiffe",
+    "orion.battlesN": "K\xE4mpfe",
+    "orion.collectionsN": "Einl\xF6sungen",
+    "orion.wavesN": "Wellen",
+    "orion.lithiumNet": "netto ausgegebenes Lithium",
+    "orion.legendUp": "Belohnungen + erhaltene Schiffe (MSU)",
+    "orion.legendDown": "Kosten: verlorene Schiffe + Treibstoff (MSU)",
+    "orion.other": "Sonstiges",
+    "orion.anomalies": "Erschienene Anomalien",
+    "orion.search": "Name oder Koordinaten suchen\u2026",
+    "orion.all": "alle",
+    "orion.rowsHint": "Zeilenwerte = nur der gew\xE4hlte Zeitraum",
+    "orion.noneInPeriod": "In diesem Zeitraum ist keine Anomalie erschienen.",
+    "orion.col.spawned": "Erschienen",
+    "orion.col.name": "Name",
+    "orion.col.coords": "Koord.",
+    "orion.col.level": "Stufe",
+    "orion.col.stars": "Sterne",
+    "orion.col.mode": "Modus",
+    "orion.col.kind": "Typ",
+    "orion.col.waves": "Wellen",
+    "orion.col.status": "Status",
+    "orion.col.paid": "Lithium bezahlt",
+    "orion.col.back": "Lithium zur\xFCck",
+    "orion.status.running": "l\xE4uft",
+    "orion.status.collected": "eingel\xF6st",
+    "orion.status.expired": "abgelaufen",
+    "orion.del": "Diese Anomalie aus dem Tagebuch entfernen",
+    "orion.delConfirm": "Entfernen?",
+    "orion.csv": "CSV pro Tag",
+    "orion.json": "JSON exportieren",
+    "orion.clear": "Orion-Archiv leeren",
+    "orion.costs": "Kosten",
+    "orion.title": "Orion-Tagebuch",
+    "orion.sub": "Aus den Orion-Seiten, deinen Einl\xF6sungen, gesendeten Flotten und ge\xF6ffneten Berichten: keine Serveranfrage"
   };
 
   // src/core/i18n.ts
@@ -4316,7 +4648,7 @@
   }
   var all = (root, sel) => [...root.querySelectorAll(sel)];
   function everyRoot(doc) {
-    return [doc, ...[...doc.querySelectorAll('[id^="fut-"]')].map((h6) => h6.shadowRoot).filter((r) => !!r)];
+    return [doc, ...[...doc.querySelectorAll('[id^="fut-"]')].map((h8) => h8.shadowRoot).filter((r) => !!r)];
   }
   function flagButton(o, id, name) {
     const { doc, store, t } = o;
@@ -5399,10 +5731,10 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     const place2 = () => {
       const box = anchor.getBoundingClientRect();
       const view2 = doc.defaultView;
-      const h6 = card.offsetHeight;
-      const below = box.bottom + 6 + h6 <= (view2?.innerHeight ?? 800);
+      const h8 = card.offsetHeight;
+      const below = box.bottom + 6 + h8 <= (view2?.innerHeight ?? 800);
       card.style.left = `${Math.max(8, Math.min(box.left, (view2?.innerWidth ?? 1200) - card.offsetWidth - 8))}px`;
-      card.style.top = `${below ? box.bottom + 6 : Math.max(8, box.top - 6 - h6)}px`;
+      card.style.top = `${below ? box.bottom + 6 : Math.max(8, box.top - 6 - h8)}px`;
     };
     place2();
     let data = null;
@@ -5740,7 +6072,7 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
       if (e.kind === "raid" || dayStart(e.at) !== day) continue;
       lists[new Date(e.at).getHours()].push(e);
     }
-    return lists.map((list, h6) => ({ start: new Date(day).setHours(h6, 0, 0, 0), stats: periodStats(list) }));
+    return lists.map((list, h8) => ({ start: new Date(day).setHours(h8, 0, 0, 0), stats: periodStats(list) }));
   }
   function daySeries(entries, last2, n) {
     const starts = [];
@@ -6144,6 +6476,331 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     return `<svg class="fut-res-ico" viewBox="0 0 24 24" width="${size}" height="${size}" fill="currentColor" aria-hidden="true">${RES_PATHS[key]}</svg>`;
   }
 
+  // src/engines/orion.ts
+  var LEDGER_KEY = "orion.ledger";
+  var IGNORED_KEY = "orion.ignored";
+  var ARCHIVE_KEY = "orion.archive";
+  var PENDING_KEY = "orion.pending";
+  var IMPORTED_KEY = "orion.imported";
+  var HOUR2 = 36e5;
+  function profit(cost, rewards, perHour) {
+    const value = msu(rewards);
+    const net = cost - rewards.lithium;
+    if (!cost) return { index: -1, net: 0, free: false, hours: 0, msu: value };
+    if (net <= 0) return { index: 1e18 + value, net, free: true, hours: 0, msu: value };
+    return { index: perHour > 0 ? value * perHour / net : value * 1e6 / net, net, free: false, hours: perHour > 0 ? net / perHour : 0, msu: value };
+  }
+  var SCANNER_TTL = 24 * HOUR2;
+  function pruneLedger(ledger, now) {
+    const out = {};
+    let changed = false;
+    for (const [k, r] of Object.entries(ledger)) {
+      if (r.source === "scanner" && now - r.at > SCANNER_TTL) changed = true;
+      else out[k] = r;
+    }
+    return { ledger: changed ? out : ledger, changed };
+  }
+  var counted = (ledger, ignored) => Object.values(ledger).filter((r) => !ignored[r.coords]);
+  function projectMission(now, wave, seconds, known, at) {
+    const done = wave.total ? Math.max(0, wave.incoming - 1) : 0;
+    const scale = wave.total && done ? wave.total / done : 0;
+    const cost = Math.max(scale ? Math.round(now.cost * scale) : now.cost, known?.cost ?? 0);
+    const lithium = Math.max(scale ? Math.round(now.lithium * scale) : now.lithium, known?.lithium ?? 0);
+    return {
+      cost,
+      lithium,
+      partial: !scale && !((known?.cost ?? 0) > now.cost) && !!wave.total && done < wave.total,
+      endAt: seconds ? at + seconds * 1e3 : known?.endAt ?? at
+    };
+  }
+  function syncLedger(ledger, missions, now) {
+    const out = {};
+    for (const [k, r] of Object.entries(ledger)) if (r.source !== "mission") out[k] = r;
+    for (const m of missions) {
+      if (!m.coords) continue;
+      out[m.coords] = { coords: m.coords, name: m.name || m.coords, ...projectMission(m, { incoming: m.incoming, total: m.total }, m.seconds, ledger[m.coords], now), source: "mission", at: now };
+    }
+    return out;
+  }
+  function dueList(records, now) {
+    return records.map((r) => ({ h: Math.max(0, (r.endAt - now) / HOUR2), net: (r.cost || 0) - (r.lithium || 0), record: r })).sort((a, b) => a.h - b.h);
+  }
+  function poolAt(l, due, h8) {
+    let pool = l.now;
+    let t = 0;
+    const run = (to) => {
+      const hours = Math.max(0, Math.min(to, l.stopsIn) - Math.min(t, l.stopsIn));
+      if (hours > 0 && l.perHour > 0 && pool < l.cap) pool = Math.min(l.cap, pool + l.perHour * hours);
+      t = Math.max(t, to);
+    };
+    for (const d of due) {
+      if (d.h > h8) break;
+      run(d.h);
+      pool -= d.net;
+    }
+    run(h8);
+    return pool;
+  }
+  function launchPlan(card, hours, waves, l, records, ownCoords, now) {
+    if (!(l.perHour > 0) || !(hours > 0) || !(waves > 0) || !card.cost) return null;
+    const due = dueList(records.filter((r) => r.coords !== ownCoords), now);
+    const freeAt = (h8) => Math.min(poolAt(l, due, h8), ...due.filter((d) => d.h > h8).map((d) => poolAt(l, due, d.h) + card.lithium));
+    const free = freeAt(hours);
+    const covered = Math.max(0, Math.min(waves, Math.floor(free / (card.cost / waves))));
+    let wait = 0;
+    if (free < card.cost) {
+      const totalNet = due.reduce((s, d) => s + d.net, 0);
+      const last2 = due.length ? due[due.length - 1].h : 0;
+      const fill = Number.isFinite(l.cap) ? last2 + l.cap / l.perHour : 0;
+      const top = Math.max(hours, last2, fill, Number.isFinite(l.stopsIn) ? l.stopsIn : (card.cost + totalNet - l.now) / l.perHour) + 1;
+      if (freeAt(top) < card.cost) wait = null;
+      else {
+        let lo = hours;
+        let hi = top;
+        for (let i = 0; i < 40; i++) {
+          const mid = (lo + hi) / 2;
+          if (freeAt(mid) >= card.cost) hi = mid;
+          else lo = mid;
+        }
+        wait = hi - hours;
+      }
+    }
+    return { free, covered, waves, due: due.map((d) => d.record), reserved: Math.max(0, poolAt(l, [], hours) - free), msu: card.msu * covered / waves, wait };
+  }
+  function scansPossible(l, records, scanCost2, now) {
+    if (!scanCost2) return null;
+    const due = dueList(records, now);
+    const free = Math.min(poolAt(l, due, 0), ...due.map((d) => poolAt(l, due, d.h)));
+    return { cost: scanCost2, free, count: Math.max(0, Math.floor(free / scanCost2)) };
+  }
+  var emptyArchive = () => ({ entries: {}, fuel: [], battles: {} });
+  function loadArchive(raw) {
+    return { entries: raw?.entries ?? {}, fuel: raw?.fuel ?? [], battles: raw?.battles ?? {} };
+  }
+  function syncArchive(archive, seen, now) {
+    const entries = { ...archive.entries };
+    const listed = /* @__PURE__ */ new Set();
+    for (const s of seen) {
+      if (!s.id) continue;
+      listed.add(s.id);
+      const old = entries[s.id] ?? { id: s.id, name: "", coords: "", level: 0, stars: 0, mode: "", kind: "", spawnedAt: 0, wave: 0, waves: 0, firstSeen: now, lastSeen: now, status: "running", endedAt: 0, collections: [] };
+      const known = Object.fromEntries(Object.entries(s).filter(([, v]) => v !== "" && v !== 0));
+      entries[s.id] = { ...old, ...known, ...s.coords ? { located: true } : {}, wave: Math.max(old.wave, s.wave), lastSeen: now, status: "running", endedAt: 0 };
+    }
+    for (const e of Object.values(entries)) {
+      if (e.status === "running" && !listed.has(e.id)) entries[e.id] = { ...e, status: e.collections.length ? "collected" : "expired", endedAt: now };
+      else if (e.status === "expired" && e.collections.length) entries[e.id] = { ...e, status: "collected" };
+    }
+    return { ...archive, entries };
+  }
+  function splitCount(text) {
+    const m = /^(.*?)\s*(\d[\d.,' ]*)$/.exec(text.replace(/\s+/g, " ").trim());
+    return m && m[1] ? [m[1], Number(m[2].replace(/\D/g, "")) || 0] : null;
+  }
+  function collectedOnly(r, before, after) {
+    if (!before) return r;
+    const out = { ...r, other: [] };
+    for (const k of ["metal", "crystal", "deuterium", "lithium"]) out[k] = Math.min(r[k] || 0, Math.max(0, (before[k] || 0) - (after ? after[k] || 0 : 0)));
+    const counts = (list) => list.reduce((acc, text) => {
+      const x = splitCount(text);
+      if (x) acc[x[0]] = (acc[x[0]] ?? 0) + x[1];
+      return acc;
+    }, {});
+    const had = counts(before.other);
+    const still = after ? counts(after.other) : {};
+    for (const text of r.other) {
+      const x = splitCount(text);
+      if (!x || !(x[0] in had)) {
+        out.other.push(text);
+        continue;
+      }
+      const n = Math.min(x[1], Math.max(0, had[x[0]] - (still[x[0]] ?? 0)));
+      if (n) out.other.push(n === x[1] ? text : `${x[0]} ${n}`);
+    }
+    return out;
+  }
+  var PENDING_TTL = 6e4;
+  var GONE_SETTLE = 3e3;
+  var cardValue = (r) => msu(r) + r.lithium;
+  function settle(pending, archive, cards, dialogFor, now) {
+    const out = {};
+    const entries = { ...archive.entries };
+    let changed = false;
+    for (const [id, p] of Object.entries(pending)) {
+      if (p.via === "card" && dialogFor(id)) {
+        changed = true;
+        continue;
+      }
+      const card = cards.get(id);
+      if (card) {
+        const q = p.goneSince ? (({ goneSince: _g, ...rest }) => rest)(p) : p;
+        if (p.goneSince) changed = true;
+        const paid = q.cardCost ? card.cost < q.cardCost : card.value < q.cardValue;
+        if (!paid) {
+          if (now - q.at > PENDING_TTL) changed = true;
+          else out[id] = q;
+          continue;
+        }
+      } else {
+        if (!p.goneSince) {
+          out[id] = { ...p, goneSince: now };
+          changed = true;
+          continue;
+        }
+        if (now - p.goneSince < GONE_SETTLE) {
+          out[id] = p;
+          continue;
+        }
+      }
+      const entry = entries[id];
+      if (entry) {
+        const r = collectedOnly(p.rewards, p.before, card ? card.rewards : null);
+        entries[id] = { ...entry, collections: [...entry.collections, { at: p.at, wave: p.wave, waves: p.waves, cost: p.cost, lithium: r.lithium, metal: r.metal, crystal: r.crystal, deuterium: r.deuterium, other: r.other }] };
+      }
+      changed = true;
+    }
+    return { pending: out, archive: { ...archive, entries }, changed };
+  }
+  var ANOMALY_MISSION = 14;
+  var DEEP_SPACE = 4;
+  var MARGIN = 12 * HOUR2;
+  function matchEntry(entries, coords, at, now) {
+    const fits = entries.filter((e) => e.coords === coords && at >= (e.spawnedAt || e.firstSeen || 0) - MARGIN && at <= (e.endedAt || now) + MARGIN);
+    const start = (e) => e.spawnedAt || e.firstSeen;
+    return fits.sort((a, b) => Math.abs(at - start(a)) - Math.abs(at - start(b)))[0] ?? null;
+  }
+  function noteFuel(archive, f) {
+    if (!(f.deut > 0)) return null;
+    const known = new Set(Object.values(archive.entries).filter((e) => e.located).map((e) => e.coords));
+    if (!(f.type === DEEP_SPACE || f.mission === ANOMALY_MISSION || known.has(f.coords))) return null;
+    return { ...archive, fuel: [...archive.fuel, { at: f.at, coords: f.coords, deut: f.deut, mission: f.mission }] };
+  }
+  function noteBattle(archive, b, now) {
+    if (!b.id || archive.battles[b.id]) return null;
+    if (b.targetType && b.targetType !== "anomaly") return null;
+    const byId = b.targetId ? archive.entries[b.targetId] : void 0;
+    const entry = byId ?? matchEntry(Object.values(archive.entries).filter((e) => e.located), b.coords, b.at, now);
+    if (!entry) return null;
+    const entries = !entry.located && b.coords ? { ...archive.entries, [entry.id]: { ...entry, coords: b.coords, located: true } } : archive.entries;
+    const lost = Object.fromEntries(Object.entries(b.lost).map(([k, n]) => [k, n]));
+    return { ...archive, entries, battles: { ...archive.battles, [b.id]: { at: b.at, coords: b.coords, entry: entry.id, lost, won: b.won, draw: b.draw } } };
+  }
+  function orionEvents(archive, home, now) {
+    const entries = Object.values(archive.entries);
+    const located = entries.filter((e) => e.located);
+    const out = [];
+    for (const e of entries) for (const c of e.collections) out.push({ kind: "collect", at: c.at, entry: e.id, c });
+    for (const f of archive.fuel) {
+      if (f.mission !== ANOMALY_MISSION && home.has(f.coords)) continue;
+      out.push({ kind: "fuel", at: f.at, entry: matchEntry(located, f.coords, f.at, now)?.id ?? "", deut: f.deut });
+    }
+    for (const b of Object.values(archive.battles)) out.push({ kind: "battle", at: b.at, entry: b.entry, lost: b.lost });
+    return out;
+  }
+  var noTotals = () => ({ collections: 0, waves: 0, paid: 0, back: 0, res: { metal: 0, crystal: 0, deuterium: 0 }, gain: 0, other: [], got: {}, gotN: 0, gotMsu: 0, fuel: 0, fuelMsu: 0, battles: 0, lost: {}, lostN: 0, lostMsu: 0 });
+  var unitsMsu = (units) => msu(unitsValue(Object.fromEntries(Object.entries(units).map(([k, n]) => [Number(k), n]))));
+  function orionTotals(events, shipOf) {
+    const t = noTotals();
+    for (const ev of events) {
+      if (ev.kind === "collect") {
+        const c = ev.c;
+        t.collections++;
+        t.waves += c.waves || 0;
+        t.paid += c.cost || 0;
+        t.back += c.lithium || 0;
+        t.res.metal += c.metal || 0;
+        t.res.crystal += c.crystal || 0;
+        t.res.deuterium += c.deuterium || 0;
+        t.gain += msu(c);
+        for (const text of c.other ?? []) {
+          const ship = shipOf(text);
+          if (!ship) {
+            t.other.push(text);
+            continue;
+          }
+          t.got[ship.id] = (t.got[ship.id] ?? 0) + ship.n;
+          t.gotN += ship.n;
+          t.gotMsu += unitsMsu({ [ship.id]: ship.n });
+        }
+      } else if (ev.kind === "fuel") {
+        t.fuel += ev.deut || 0;
+        t.fuelMsu += msu({ metal: 0, crystal: 0, deuterium: ev.deut || 0 });
+      } else {
+        t.battles++;
+        for (const [id, n] of Object.entries(ev.lost)) {
+          t.lost[id] = (t.lost[id] ?? 0) + n;
+          t.lostN += n;
+        }
+        t.lostMsu += unitsMsu(ev.lost);
+      }
+    }
+    return t;
+  }
+  var balance = (t) => t.gain + t.gotMsu - t.lostMsu - t.fuelMsu;
+  function shipMatcher(names) {
+    const list = names.filter(([, n]) => n).sort((a, b) => b[1].length - a[1].length);
+    return (text) => {
+      const tx = text.replace(/\s+/g, " ").trim().toLowerCase();
+      const hit = list.find(([, name]) => tx.startsWith(name.toLowerCase()) && !/[a-zà-ÿ]/i.test(tx.charAt(name.length)));
+      if (!hit) return null;
+      const n = Number(tx.slice(hit[1].length).replace(/\D/g, "")) || 0;
+      return n ? { id: hit[0], n } : null;
+    };
+  }
+  function otherSummary(list, locale) {
+    const sums = /* @__PURE__ */ new Map();
+    for (const text of list) {
+      const x = splitCount(text);
+      const key = x ? x[0] : text.replace(/\s+/g, " ").trim();
+      const cur = sums.get(key) ?? { n: 0, times: 0, counted: !!x };
+      if (x) cur.n += x[1];
+      cur.times++;
+      sums.set(key, cur);
+    }
+    return [...sums].map(([name, v]) => v.counted ? `${name} ${v.n.toLocaleString(locale)}` : name + (v.times > 1 ? ` \xD7${v.times}` : "")).join(", ");
+  }
+  function importLegacy(cur, old) {
+    const a = old.archive ?? {};
+    const entries = { ...cur.archive.entries };
+    for (const [id, e] of Object.entries(a.entries ?? {})) {
+      if (entries[id] || !e) continue;
+      entries[id] = {
+        id,
+        name: e.name ?? "",
+        coords: e.coords ?? "",
+        level: e.level ?? 0,
+        stars: e.stars ?? 0,
+        mode: e.mode ?? "",
+        kind: e.kind ?? "",
+        spawnedAt: e.spawnedAt ?? 0,
+        wave: e.wave ?? 0,
+        waves: e.waves ?? 0,
+        ...e.located ? { located: true } : {},
+        firstSeen: e.firstSeen ?? 0,
+        lastSeen: e.lastSeen ?? 0,
+        status: e.status === "collected" || e.status === "expired" ? e.status : "running",
+        endedAt: e.endedAt ?? 0,
+        collections: (e.collections ?? []).map((c) => ({ at: c.at ?? 0, wave: c.wave ?? 0, waves: c.waves ?? 0, cost: c.cost ?? 0, lithium: c.lithium ?? 0, metal: c.metal ?? 0, crystal: c.crystal ?? 0, deuterium: c.deuterium ?? 0, other: c.other ?? [] }))
+      };
+    }
+    const seenFuel = new Set(cur.archive.fuel.map((f) => `${f.at}|${f.coords}`));
+    const fuel = [...cur.archive.fuel];
+    for (const f of a.fuel ?? []) {
+      if (!f.at || !f.coords || seenFuel.has(`${f.at}|${f.coords}`)) continue;
+      fuel.push({ at: f.at, coords: f.coords, deut: f.deut ?? 0, mission: f.mission ?? 0 });
+    }
+    const battles = { ...cur.archive.battles };
+    for (const [id, b] of Object.entries(a.battles ?? {})) {
+      if (battles[id] || !b?.v) continue;
+      battles[id] = { at: b.at ?? 0, coords: b.coords ?? "", entry: b.entry ?? "", lost: b.lost ?? {}, won: !!b.won, draw: !!b.draw };
+    }
+    const ledger = { ...cur.ledger };
+    for (const [k, r] of Object.entries(old.ledger ?? {})) if (!ledger[k] && r?.coords) ledger[k] = r;
+    const ignored = { ...cur.ignored };
+    for (const k of Object.keys(old.ignored ?? {})) ignored[k] = true;
+    return { archive: { entries, fuel, battles }, ledger, ignored };
+  }
+
   // src/data/messages.ts
   var json = (value, fallback) => {
     if (!value || value === "-") return fallback;
@@ -6353,7 +7010,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     if (!attacker && defender.owner?.id === own) {
       for (const r of result.repairedTechnologies ?? []) if (r.technologyId && lost[r.technologyId]) lost[r.technologyId] = Math.max(0, lost[r.technologyId] - num3(r.amount));
     }
-    return { kind: "combat", id, at, coords: d.rawCoords || null, attacker, winner, loot, lost, debris: pick(result.debris?.resources, "remaining"), apiKey: d.rawHashcode ?? "" };
+    return { kind: "combat", id, at, coords: d.rawCoords || null, attacker, winner, loot, lost, debris: pick(result.debris?.resources, "remaining"), apiKey: d.rawHashcode ?? "", place: { type: defender.type, id: defender.id === void 0 ? void 0 : String(defender.id) } };
   }
   function ownPlayerId(doc) {
     return int2(doc.querySelector('meta[name="ogame-player-id"]')?.getAttribute("content") ?? "");
@@ -7517,6 +8174,8 @@ td.spark-cell { width: 90px; }
     let journal = null;
     let added = 0;
     let dropped = 0;
+    let archive = null;
+    let archiveChanged = false;
     const fresh = [];
     for (const msg of Array.from(doc.querySelectorAll(".msg[data-msg-id]"))) {
       if (msg.hasAttribute("data-fut-done") || msg.closest("#fut-journal")) continue;
@@ -7575,6 +8234,14 @@ td.spark-cell { width: 90px; }
         journal = r.journal;
         added += r.added;
       }
+      if (parsed.kind === "combat") {
+        archive ?? (archive = loadArchive(store.get(ARCHIVE_KEY, null)));
+        const next = noteBattle(archive, { id: parsed.id, at: parsed.at, coords: parsed.coords ?? "", targetType: parsed.place?.type, targetId: parsed.place?.id, lost: parsed.lost, won: parsed.winner === "won", draw: parsed.winner === "draw" }, now);
+        if (next) {
+          archive = next;
+          archiveChanged = true;
+        }
+      }
       if (parsed.kind === "combat" && parsed.coords?.split(":")[2] === "16" && Object.keys(parsed.lost).length) {
         journal ?? (journal = store.get(JOURNAL_KEY, {}));
         const r = recordCombat(journal, parsed.id, parsed.at, parsed.lost, parsed.coords);
@@ -7585,9 +8252,9 @@ td.spark-cell { width: 90px; }
     }
     if (expeditions.length) {
       journal ?? (journal = store.get(JOURNAL_KEY, {}));
-      const clean = dedupe(journal);
-      if (clean.removed) {
-        journal = clean.journal;
+      const clean2 = dedupe(journal);
+      if (clean2.removed) {
+        journal = clean2.journal;
         store.set(JOURNAL_KEY, journal);
       }
       const before = journal;
@@ -7601,6 +8268,7 @@ td.spark-cell { width: 90px; }
       if (rememberSpies(board, spies, o.now?.() ?? Date.now(), sharedTab)) store.set(SPY_BOARD_KEY, board);
     }
     if (o.spy) mountSpyPanel({ doc, store, t, locale, spy: o.spy, now: o.now });
+    if (archive && archiveChanged) store.set(ARCHIVE_KEY, archive);
     if (journal && (added || dropped)) {
       store.set(JOURNAL_KEY, trim(journal, o.now?.() ?? Date.now()));
       o.onJournal?.(added);
@@ -8702,7 +9370,7 @@ input.field { width: 190px; }
     const missing2 = entries.filter((e) => e.planetId && !known.has(e.planetId) || e.moonId && !known.has(e.moonId));
     const planets = rows.filter((r) => r.type === "planet");
     const minHours = (r) => {
-      const hours = KEYS3.map((k) => r.hoursToFull[k]).filter((h6) => h6 !== null);
+      const hours = KEYS3.map((k) => r.hoursToFull[k]).filter((h8) => h8 !== null);
       return hours.length ? Math.min(...hours) : null;
     };
     const full = planets.filter((r) => minHours(r) === 0 || r.fill !== null && KEYS3.some((k) => r.fill[k] >= 0.9));
@@ -13175,6 +13843,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         try {
           o.store.set(LAST_FLEET_KEY, snapshotFleet(fd));
           recordShipment(o, fd);
+          recordOrionFuel(o.store, fd);
         } catch {
         }
         const current3 = pageState.get(doc);
@@ -13255,6 +13924,12 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const now = Date.now();
     const list = o.store.get(SENT_KEY, []);
     o.store.set(SENT_KEY, [...list, { target, cargo, sentAt: now, arriveAt: now + Math.max(0, seconds) * 1e3 }]);
+  }
+  function recordOrionFuel(store, fd) {
+    const tp = fd.targetPlanet;
+    const archive = loadArchive(store.get(ARCHIVE_KEY, null));
+    const next = noteFuel(archive, { at: Date.now(), coords: `${tp.galaxy}:${tp.system}:${tp.position}`, type: Number(tp.type), mission: Number(fd.mission), deut: Math.round(Number(fd.getConsumption()) || 0) });
+    if (next) store.set(ARCHIVE_KEY, next);
   }
   var initialFood = /* @__PURE__ */ new WeakMap();
   function applyFood(store, fd = getDispatcher()) {
@@ -13447,8 +14122,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const ratio = ref ? ref.perUnit / satelliteBase(ref.maxTemp) : 1;
     return { value: base2 * ratio, exact: false };
   }
-  function satellitesFor(balance, need, perUnit) {
-    const energy = need - balance;
+  function satellitesFor(balance2, need, perUnit) {
+    const energy = need - balance2;
     if (energy <= 0 || perUnit <= 0) return null;
     return { count: Math.ceil(energy / perUnit), energy };
   }
@@ -13701,7 +14376,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     g.style.gridTemplateColumns = `minmax(0, auto) repeat(${view2.cols.length}, minmax(0, 1fr))`;
     const band = (col) => col.short ? msu3(col.cost) > 0 ? " fut-tp-miss" : " fut-tp-miss fut-tp-none" : "";
     g.append(el5(doc, "span", "fut-tp-h"));
-    view2.heads.forEach((h6, i) => g.append(el5(doc, "span", `fut-tp-h${band(view2.cols[i])}`, h6)));
+    view2.heads.forEach((h8, i) => g.append(el5(doc, "span", `fut-tp-h${band(view2.cols[i])}`, h8)));
     const rows = RES.filter(([key]) => view2.cols.some((c) => !c.short && c.cost[key] > 0));
     const cell = (value, cls) => {
       const c = el5(doc, "span", `fut-tp-v ${cls}`, value ? formatUnits(value, locale) : "\u2014");
@@ -13794,16 +14469,16 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   }
   function satelliteChip(o, need, amountInput) {
     const { doc, t, locale } = o;
-    const balance = o.energy();
-    if (balance === null) return null;
+    const balance2 = o.energy();
+    if (balance2 === null) return null;
     const per = perSatellite(o.store.get(SAT_KEY, {}), o.bodyId, o.maxTemp);
     if (!per) return null;
-    const sat = satellitesFor(balance, need, per.value);
+    const sat = satellitesFor(balance2, need, per.value);
     if (!sat) return null;
     const perText = per.value.toLocaleString(locale, { maximumFractionDigits: 1 });
     const title = [
       t(need > 0 ? "tech.satNeed" : "tech.satDeficit", { n: groupInt(sat.count, locale), energy: groupInt(Math.round(sat.energy), locale) }),
-      t("tech.satBalance", { energy: groupInt(Math.round(balance), locale) }),
+      t("tech.satBalance", { energy: groupInt(Math.round(balance2), locale) }),
       t(per.exact ? "tech.satPer" : "tech.satPerGuess", { energy: perText })
     ].join(" \xB7 ");
     const c = chip(doc, ICON.sat, `${per.exact ? "" : "\u2248"}${groupInt(sat.count, locale)} ${t("tech.satShort")} \xB7 ${groupInt(Math.round(sat.energy), locale)}`, `${title} \xB7 ${t(amountInput ? "tech.satFill" : "tech.satGo")}`, "fut-tp-sat");
@@ -14533,6 +15208,336 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     draw();
   }
 
+  // src/modules/messages/orion-view.ts
+  var ORION_CSS = `
+.och { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 6px; height: 200px; }
+.och.dense { gap: 3px; }
+.och .col { display: grid; grid-template-rows: 15px var(--up) var(--down) 14px; gap: 0; }
+.och .up { display: flex; align-items: flex-end; justify-content: center; border-bottom: 1px solid var(--line); }
+.och .down { display: flex; align-items: flex-start; justify-content: center; }
+.och .up i, .och .down i { display: block; width: 72%; max-width: 34px; }
+.och .up i { background: #3987E5; border-radius: 3px 3px 0 0; }
+.och .down i { background: #E66767; border-radius: 0 0 3px 3px; }
+.och .col.on .up i, .och .col.on .down i { box-shadow: 0 0 0 2px var(--accent); }
+.olegend { display: flex; flex-wrap: wrap; gap: 14px; margin: 0 0 8px; color: var(--muted); font-size: 11px; }
+.olegend i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 2px; vertical-align: -1px; }
+.ofilters { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; margin-bottom: 8px; font-size: 12px; color: var(--muted); }
+.ofilters input, .ofilters select { height: 24px; padding: 0 6px; border: 1px solid var(--line); border-radius: 5px; background: var(--bg); color: var(--text); font: 12px Arial, sans-serif; }
+.ofilters input { width: 200px; }
+.otable th { cursor: pointer; white-space: nowrap; }
+.otable td { white-space: nowrap; }
+.otable td.num, .otable th.num { text-align: right; font-family: var(--mono); }
+.otag { padding: 0 5px; border-radius: 3px; background: #2A3542; color: #fff; }
+.otag.pvp { background: #7A2A22; } .otag.pve { background: #24563A; }
+.ost-running { color: #E0B25A; } .ost-collected { color: var(--ok); } .ost-expired { color: var(--muted); }
+.odel { padding: 0 6px; border: 0; background: none; color: #C06050; font-weight: 700; cursor: pointer; }
+.odel.armed { color: #fff; background: var(--bad); border-radius: 3px; }
+.oother { margin: 6px 0 0; color: var(--text-2); font-size: 12px; line-height: 1.6; }
+`;
+  var orionState = () => ({ q: "", mode: "", kind: "", stars: "", status: "", sort: "date", desc: true, focus: null, armed: null });
+  function h5(tag, cls = "", text) {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== void 0) node.textContent = text;
+    return node;
+  }
+  var loadOrion = (store) => loadArchive(store.get(ARCHIVE_KEY, null));
+  var hasOrion = (store) => Object.keys(loadOrion(store).entries).length > 0 || loadOrion(store).fuel.length > 0;
+  function matcher(store, locale) {
+    const info = store.get(SHIPS_INFO_KEY, {});
+    const learned = store.get(TECH_NAMES_KEY, {});
+    const names = [];
+    for (const id of SHIPS) {
+      if (info[String(id)]?.name) names.push([id, info[String(id)].name]);
+      names.push([id, techName(id, locale, learned)], [id, techName(id, "en")]);
+    }
+    return shipMatcher(names);
+  }
+  function orionData(doc, store, locale, now) {
+    const archive = loadOrion(store);
+    const home = new Set(Array.from(doc.querySelectorAll("#planetList .planet-koords")).map((el6) => /\d+:\d+:\d+/.exec(el6.textContent ?? "")?.[0] ?? ""));
+    return { archive, events: orionEvents(archive, home, now), shipOf: matcher(store, locale) };
+  }
+  function orionCount(store, period, now) {
+    const [from, to] = periodRange(period, now);
+    return Object.values(loadOrion(store).entries).filter((e) => {
+      const at = e.spawnedAt || e.firstSeen;
+      return at >= from && at < to;
+    }).length;
+  }
+  var inRange = (events, from, to) => events.filter((e) => e.at >= from && e.at < to);
+  function orionView(c) {
+    const { t, locale, now, period, state } = c;
+    const fmt = (n) => formatUnits(n, locale);
+    const sign = (n) => `${n < 0 ? "\u2212" : ""}${fmt(Math.abs(n))}`;
+    const { archive, events, shipOf } = orionData(c.doc, c.store, locale, now);
+    const out = [];
+    if (!Object.keys(archive.entries).length && !archive.fuel.length) return [h5("p", "empty", t("orion.empty"))];
+    const [pFrom, pTo] = periodRange(period, now);
+    const single = period === "today" || period === "yesterday";
+    const starts = [];
+    if (single) for (let i = 0; i < 24; i++) starts.push(new Date(pFrom).setHours(i, 0, 0, 0));
+    else {
+      let d = dayStart(now);
+      for (let i = 0; i < (period === "week" ? 7 : 30); i++) {
+        starts.unshift(d);
+        d = dayStart(d - 1);
+      }
+    }
+    const endOf = (s, i) => starts[i + 1] ?? (single ? new Date(s).setHours(24, 0, 0, 0) : dayStart(s + 36 * 36e5));
+    if (state.focus !== null && !starts.includes(state.focus)) state.focus = null;
+    const fi = state.focus !== null ? starts.indexOf(state.focus) : -1;
+    const [from, to] = fi >= 0 ? [starts[fi], endOf(starts[fi], fi)] : [pFrom, pTo];
+    const label = (s, short) => {
+      const d = new Date(s);
+      if (single) return short ? d.getHours() % 3 === 0 ? String(d.getHours()) : "" : `${String(d.getHours()).padStart(2, "0")}:00`;
+      if (starts.length <= 7) return d.toLocaleDateString(locale, { weekday: "short", day: "2-digit" });
+      return short ? (starts.length - 1 - starts.indexOf(s)) % 5 === 0 ? String(d.getDate()) : "" : d.toLocaleDateString(locale, { weekday: "short", day: "2-digit", month: "2-digit" });
+    };
+    const tot = orionTotals(inRange(events, from, to), shipOf);
+    const net = balance(tot);
+    const hero = h5("div", "card hero");
+    const top = h5("div", "hero-top");
+    const main2 = h5("div", "hero-net");
+    main2.append(h5("span", "hero-k", `${t("orion.balance")} \xB7 ${fi >= 0 ? label(from, false) : t(`exp.period.${period}`)}`));
+    const big = h5("b", `hero-v${net < 0 ? " neg" : ""}`, sign(net));
+    big.append(h5("small", "", "MSU"));
+    main2.title = t("orion.balanceHint");
+    main2.append(big);
+    const part = (k, value, note, neg = false) => {
+      const p = h5("div", "hero-part");
+      const v = h5("b", `hero-pv${neg && value ? " neg" : ""}`, `${neg && value ? "\u2212" : ""}${fmt(value)}`);
+      v.append(h5("small", "", "MSU"));
+      p.append(h5("span", "hero-k", k), v, h5("span", "hero-note", note));
+      return p;
+    };
+    top.append(
+      main2,
+      part(t("orion.rewardsK"), tot.gain, `M ${fmt(tot.res.metal)} \xB7 C ${fmt(tot.res.crystal)} \xB7 D ${fmt(tot.res.deuterium)}`),
+      part(t("orion.shipsGot"), tot.gotMsu, `${fmt(tot.gotN)} ${t("orion.shipsN")}`),
+      part(t("orion.costs"), tot.lostMsu + tot.fuelMsu, `${t("orion.lost")} ${fmt(tot.lostMsu)} (${fmt(tot.lostN)}, ${tot.battles} ${t("orion.battlesN")}) \xB7 ${t("orion.fuel")} ${fmt(tot.fuel)} D`, true)
+    );
+    const strip = h5("p", "hero-sub");
+    strip.append(
+      h5("b", "", String(tot.collections)),
+      ` ${t("orion.collectionsN")} \xB7 `,
+      h5("b", "", String(tot.waves)),
+      ` ${t("orion.wavesN")} \xB7 ${t("orion.lithiumNet")} `,
+      h5("b", "", fmt(tot.paid - tot.back)),
+      ` (${t("orion.paid")} ${fmt(tot.paid)} \xB7 ${t("orion.back")} ${fmt(tot.back)})`
+    );
+    hero.append(top, strip);
+    out.push(hero);
+    const cols = starts.map((s, i) => {
+      const x = orionTotals(inRange(events, s, endOf(s, i)), shipOf);
+      return { s, x, up: x.gain + x.gotMsu, down: x.lostMsu + x.fuelMsu };
+    });
+    const maxUp = Math.max(0, ...cols.map((x) => x.up));
+    const maxDown = Math.max(0, ...cols.map((x) => x.down));
+    const H = 165;
+    const upH = maxUp + maxDown ? Math.max(30, Math.round(H * maxUp / (maxUp + maxDown))) : H;
+    const downH = Math.max(0, H - upH);
+    const card = h5("div", "card");
+    const head = h5("div", "card-head");
+    head.append(h5("h3", "", t(single ? "exp.byHour" : "exp.byDay")));
+    if (state.focus !== null) {
+      const all3 = h5("button", "act ghost", t("exp.focusAll"));
+      all3.addEventListener("click", () => {
+        state.focus = null;
+        c.redraw();
+      });
+      head.append(all3);
+    }
+    const legend = h5("div", "olegend");
+    const key = (color, text) => {
+      const s = h5("span");
+      const sw = h5("i");
+      sw.style.background = color;
+      s.append(sw, text);
+      legend.append(s);
+    };
+    key("#3987E5", t("orion.legendUp"));
+    key("#E66767", t("orion.legendDown"));
+    card.append(head, legend);
+    const chart = h5("div", `och${cols.length > 14 ? " dense" : ""}`);
+    chart.style.setProperty("--n", String(cols.length));
+    chart.style.setProperty("--up", `${upH}px`);
+    chart.style.setProperty("--down", `${downH}px`);
+    for (const col of cols) {
+      const b = h5("button", `col${state.focus === col.s ? " on" : ""}`);
+      b.type = "button";
+      b.setAttribute("aria-pressed", String(state.focus === col.s));
+      b.title = [label(col.s, false), `${t("orion.rewardsK")}: ${fmt(col.x.gain)} MSU`, `${t("orion.shipsGot")}: ${fmt(col.x.gotMsu)} MSU`, `${t("orion.lost")}: ${fmt(col.x.lostMsu)} MSU`, `${t("orion.fuel")}: ${fmt(col.x.fuel)} D`, `${t("orion.balance")}: ${sign(balance(col.x))} MSU`].join("\n");
+      const up = h5("span", "up");
+      const down = h5("span", "down");
+      if (col.up > 0) {
+        const i = h5("i");
+        i.style.height = `${Math.max(2, Math.round(upH * col.up / (maxUp || 1)))}px`;
+        up.append(i);
+      }
+      if (col.down > 0) {
+        const i = h5("i");
+        i.style.height = `${Math.max(2, Math.round(downH * col.down / (maxDown || 1)))}px`;
+        down.append(i);
+      }
+      b.append(h5("span", "tot", cols.length <= 14 && (col.up || col.down) ? sign(balance(col.x)) : ""), up, down, h5("span", "lbl", label(col.s, true)));
+      b.addEventListener("click", () => {
+        state.focus = state.focus === col.s ? null : col.s;
+        c.redraw();
+      });
+      chart.append(b);
+    }
+    card.append(chart);
+    out.push(card);
+    const got = Object.entries(tot.got);
+    const lost = Object.entries(tot.lost);
+    if (got.length || lost.length || tot.other.length) {
+      const two = h5("div", "two");
+      const a = h5("div", "card");
+      a.append(h5("h3", "", t("orion.shipsGot")));
+      a.append(got.length ? c.shipGrid(got, false) : h5("p", "empty", t("exp.noneHere")));
+      if (tot.other.length) a.append(h5("p", "oother", `${t("orion.other")}: ${otherSummary(tot.other, locale)}`));
+      const b = h5("div", "card");
+      b.append(h5("h3", "", t("orion.lost")));
+      b.append(lost.length ? c.shipGrid(lost, true) : h5("p", "empty", t("exp.noneHere")));
+      two.append(a, b);
+      out.push(two);
+    }
+    const all2 = Object.values(archive.entries);
+    const q = state.q.toLowerCase();
+    const rows = all2.filter((e) => {
+      const at = e.spawnedAt || e.firstSeen || 0;
+      return at >= from && at < to;
+    }).map((e) => ({ ...e, date: e.spawnedAt || e.firstSeen || 0, x: orionTotals(inRange(events, from, to).filter((ev) => ev.entry === e.id), shipOf) })).filter((r) => (!q || `${r.name} ${r.coords}`.toLowerCase().includes(q)) && (!state.mode || r.mode === state.mode) && (!state.kind || r.kind === state.kind) && (!state.stars || String(r.stars) === state.stars) && (!state.status || r.status === state.status));
+    const COLS2 = [
+      { k: "date", label: t("orion.col.spawned"), num: true, v: (r) => r.date, show: (r) => r.date ? new Date(r.date).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "" },
+      { k: "name", label: t("orion.col.name"), v: (r) => r.name, show: (r) => r.name },
+      { k: "coords", label: t("orion.col.coords"), v: (r) => r.coords, show: (r) => r.coords },
+      { k: "level", label: t("orion.col.level"), num: true, v: (r) => r.level, show: (r) => r.level ? String(r.level) : "" },
+      { k: "stars", label: t("orion.col.stars"), num: true, v: (r) => r.stars, show: (r) => "\u2605".repeat(r.stars) },
+      { k: "mode", label: t("orion.col.mode"), v: (r) => r.mode, show: (r) => {
+        const s = h5("span", `otag ${r.mode.toLowerCase()}`, r.mode);
+        return r.mode ? s : "";
+      } },
+      { k: "kind", label: t("orion.col.kind"), v: (r) => r.kind, show: (r) => r.kind },
+      { k: "wave", label: t("orion.col.waves"), num: true, v: (r) => r.wave, show: (r) => r.waves ? `${r.wave}/${r.waves}` : "" },
+      { k: "status", label: t("orion.col.status"), v: (r) => r.status, show: (r) => h5("span", `ost-${r.status}`, t(`orion.status.${r.status}`)) },
+      { k: "paid", label: t("orion.col.paid"), num: true, v: (r) => r.x.paid, show: (r) => r.x.paid ? fmt(r.x.paid) : "" },
+      { k: "back", label: t("orion.col.back"), num: true, v: (r) => r.x.back, show: (r) => r.x.back ? fmt(r.x.back) : "" },
+      { k: "gain", label: t("orion.rewardsK"), num: true, v: (r) => r.x.gain, show: (r) => r.x.gain ? fmt(r.x.gain) : "" },
+      { k: "got", label: t("orion.shipsGot"), num: true, v: (r) => r.x.gotMsu, show: (r) => r.x.gotN ? `${fmt(r.x.gotMsu)} (${fmt(r.x.gotN)})` : "" },
+      { k: "fuel", label: t("orion.fuel"), num: true, v: (r) => r.x.fuel, show: (r) => r.x.fuel ? fmt(r.x.fuel) : "" },
+      { k: "lost", label: t("orion.lost"), num: true, v: (r) => r.x.lostMsu, show: (r) => r.x.lostN ? `${fmt(r.x.lostMsu)} (${fmt(r.x.lostN)})` : "" },
+      { k: "net", label: t("orion.balance"), num: true, v: (r) => balance(r.x), show: (r) => {
+        const n = balance(r.x);
+        return r.x.gain || r.x.gotMsu || r.x.lostMsu || r.x.fuelMsu ? h5("span", n < 0 ? "neg" : "", sign(n)) : "";
+      } },
+      { k: "other", label: t("orion.other"), v: (r) => otherSummary(r.x.other, locale), show: (r) => otherSummary(r.x.other, locale) }
+    ];
+    const sortCol = COLS2.find((x) => x.k === state.sort) ?? COLS2[0];
+    rows.sort((a, b) => {
+      const x = sortCol.v(a);
+      const y = sortCol.v(b);
+      const d = typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y));
+      return state.desc ? -d : d;
+    });
+    const tcard = h5("div", "card");
+    tcard.append(h5("h3", "", `${t("orion.anomalies")} \xB7 ${rows.length}`));
+    const filters = h5("div", "ofilters");
+    const search = h5("input");
+    search.type = "search";
+    search.placeholder = t("orion.search");
+    search.value = state.q;
+    search.addEventListener("change", () => {
+      state.q = search.value;
+      c.redraw();
+    });
+    filters.append(search);
+    const select = (k, values, text = (v) => v) => {
+      const l = h5("label", "", `${t(`orion.col.${k}`)} `);
+      const s = h5("select");
+      for (const v of ["", ...[...new Set(values.filter(Boolean))].sort()]) {
+        const opt = h5("option", "", v ? text(v) : t("orion.all"));
+        opt.value = v;
+        opt.selected = v === state[k];
+        s.append(opt);
+      }
+      s.addEventListener("change", () => {
+        state[k] = s.value;
+        c.redraw();
+      });
+      l.append(s);
+      filters.append(l);
+    };
+    select("mode", all2.map((e) => e.mode));
+    select("kind", all2.map((e) => e.kind));
+    select("stars", all2.map((e) => e.stars ? String(e.stars) : ""));
+    select("status", ["running", "collected", "expired"], (v) => t(`orion.status.${v}`));
+    filters.append(h5("span", "", t("orion.rowsHint")));
+    tcard.append(filters);
+    if (!rows.length) tcard.append(h5("p", "empty", t("orion.noneInPeriod")));
+    else {
+      const scroll = h5("div", "scroll");
+      const table = h5("table", "otable");
+      const hr = h5("tr");
+      for (const col of COLS2) {
+        const th = h5("th", col.num ? "num" : "", `${col.label}${state.sort === col.k ? state.desc ? " \u25BE" : " \u25B4" : ""}`);
+        th.addEventListener("click", () => {
+          state.desc = state.sort === col.k ? !state.desc : !!col.num;
+          state.sort = col.k;
+          c.redraw();
+        });
+        hr.append(th);
+      }
+      hr.append(h5("th"));
+      table.append(hr);
+      for (const r of rows) {
+        const tr = h5("tr");
+        for (const col of COLS2) {
+          const td2 = h5("td", col.num ? "num" : "");
+          td2.append(col.show(r));
+          tr.append(td2);
+        }
+        const del = h5("button", `odel${state.armed === r.id ? " armed" : ""}`, state.armed === r.id ? t("orion.delConfirm") : "\xD7");
+        del.type = "button";
+        del.title = t("orion.del");
+        del.addEventListener("click", () => {
+          if (state.armed !== r.id) {
+            state.armed = r.id;
+            return c.redraw();
+          }
+          state.armed = null;
+          const a = loadOrion(c.store);
+          const { [r.id]: _gone, ...entries } = a.entries;
+          c.store.set(ARCHIVE_KEY, { ...a, entries });
+          c.redraw();
+        });
+        const td = h5("td");
+        td.append(del);
+        tr.append(td);
+        table.append(tr);
+      }
+      scroll.append(table);
+      tcard.append(scroll);
+    }
+    out.push(tcard);
+    return out;
+  }
+  function orionCsv(events, shipOf) {
+    const days2 = [...new Set(events.map((e) => dayStart(e.at)))].sort((a, b) => a - b);
+    const head = ["day", "collections", "waves", "lithium_paid", "lithium_back", "metal", "crystal", "deuterium", "rewards_msu", "ships_reward", "ships_reward_msu", "fuel_deut", "battles", "ships_lost", "ships_lost_msu", "net_msu"];
+    const iso = (d) => {
+      const x = new Date(d);
+      return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
+    };
+    const lines = days2.map((d) => {
+      const x = orionTotals(events.filter((e) => dayStart(e.at) === d), shipOf);
+      return [iso(d), x.collections, x.waves, x.paid, x.back, x.res.metal, x.res.crystal, x.res.deuterium, Math.round(x.gain), x.gotN, Math.round(x.gotMsu), x.fuel, x.battles, x.lostN, Math.round(x.lostMsu), Math.round(balance(x))].join(";");
+    });
+    return `\uFEFF${[head.join(";"), ...lines].join("\n")}`;
+  }
+  var clearOrion = (store) => store.set(ARCHIVE_KEY, emptyArchive());
+
   // src/modules/messages/journal-view.ts
   var JOURNAL_ID = "fut-journal";
   var PERIOD_KEY = "exp.period";
@@ -14540,7 +15545,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   var PERIODS = ["today", "yesterday", "week", "month", "all"];
   var ORDER = ["resource", "darkmatter", "ship", "item", "trader", "early", "late", "pirate", "alien", "blackhole", "nothing", "artefact", "lifeform", "unknown"];
   var keyHandler4 = null;
-  function h5(tag, cls = "", text) {
+  function h6(tag, cls = "", text) {
     const node = document.createElement(tag);
     if (cls) node.className = cls;
     if (text !== void 0) node.textContent = text;
@@ -14557,10 +15562,10 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     const host = doc.createElement("div");
     host.id = JOURNAL_ID;
     const root = host.attachShadow({ mode: "open" });
-    const style = h5("style");
-    style.textContent = WINDOW_SHEET + JOURNAL_CSS;
-    const backdrop = h5("div", "backdrop");
-    const panel = h5("div", "panel");
+    const style = h6("style");
+    style.textContent = WINDOW_SHEET + JOURNAL_CSS + ORION_CSS;
+    const backdrop = h6("div", "backdrop");
+    const panel = h6("div", "panel");
     backdrop.append(panel);
     root.append(style, backdrop);
     doc.body.append(host);
@@ -14569,21 +15574,22 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     let period = store.get(PERIOD_KEY, "week");
     if (!PERIODS.includes(period)) period = "week";
     let confirmClear = false;
-    let kind = store.get(KIND_KEY, "expedition");
+    let kind = o.kind ?? store.get(KIND_KEY, "expedition");
+    const orion = orionState();
     let focus = null;
     const MIX_COLORS = { metal: "var(--m)", crystal: "var(--c)", deuterium: "var(--d)", ships: "#2E9E7E" };
     const svg2 = (html) => {
-      const span = h5("span", "gi");
+      const span = h6("span", "gi");
       span.innerHTML = html;
       return span;
     };
     const shipGrid = (units, lost) => {
-      const list = h5("div", `ships${lost ? " lost" : ""}`);
+      const list = h6("div", `ships${lost ? " lost" : ""}`);
       for (const [id, n] of units.sort((x, y) => Number(x[0]) - Number(y[0]))) {
         const name = shipName(Number(id), ships, t);
-        const tile2 = h5("div", "ship");
-        const info = h5("div", "ship-info");
-        info.append(h5("b", lost ? "neg" : "pos", `${lost ? "\u2212" : "+"}${n.toLocaleString(locale)}`), h5("span", "ship-name", name));
+        const tile2 = h6("div", "ship");
+        const info = h6("div", "ship-info");
+        info.append(h6("b", lost ? "neg" : "pos", `${lost ? "\u2212" : "+"}${n.toLocaleString(locale)}`), h6("span", "ship-name", name));
         tile2.append(shipIcon(doc, Number(id), name, "ship-img"), info);
         list.append(tile2);
       }
@@ -14592,52 +15598,52 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     const expeditionView = (entries, s) => {
       const out = [];
       const sign = (n) => `${n < 0 ? "\u2212" : ""}${fmt(Math.abs(n))}`;
-      const hero = h5("div", "card hero");
-      const top = h5("div", "hero-top");
-      const net = h5("div", "hero-net");
-      net.append(h5("span", "hero-k", `${t("exp.net")} \xB7 ${t(`exp.period.${period}`)}`));
-      const big = h5("b", `hero-v${s.netMsu < 0 ? " neg" : ""}`, sign(s.netMsu));
-      big.append(h5("small", "", "MSU"));
+      const hero = h6("div", "card hero");
+      const top = h6("div", "hero-top");
+      const net = h6("div", "hero-net");
+      net.append(h6("span", "hero-k", `${t("exp.net")} \xB7 ${t(`exp.period.${period}`)}`));
+      const big = h6("b", `hero-v${s.netMsu < 0 ? " neg" : ""}`, sign(s.netMsu));
+      big.append(h6("small", "", "MSU"));
       net.append(big);
-      const sub = h5("p", "hero-sub");
+      const sub = h6("p", "hero-sub");
       sub.append(
-        h5("b", "", s.count.toLocaleString(locale)),
+        h6("b", "", s.count.toLocaleString(locale)),
         ` ${t("exp.heroCount")} \xB7 `,
-        h5("b", "", s.count ? fmt(s.netMsu / s.count) : "\u2014"),
+        h6("b", "", s.count ? fmt(s.netMsu / s.count) : "\u2014"),
         ` ${t("exp.heroAvg")}`
       );
       net.append(sub);
       const part = (label2, value, note) => {
-        const p = h5("div", "hero-part");
-        const v = h5("b", `hero-pv${value < 0 ? " neg" : ""}`, sign(value));
-        v.append(h5("small", "", "MSU"));
-        p.append(h5("span", "hero-k", label2), v);
+        const p = h6("div", "hero-part");
+        const v = h6("b", `hero-pv${value < 0 ? " neg" : ""}`, sign(value));
+        v.append(h6("small", "", "MSU"));
+        p.append(h6("span", "hero-k", label2), v);
         if (note) p.append(note);
         return p;
       };
       const resMsu = msu(s.res);
       const fleetMsu = msu(s.shipsValue) - msu(s.lostValue);
-      const lostNote = h5("span", "hero-note");
-      lostNote.append(`${t("exp.heroFound")} `, h5("b", "", fmt(msu(s.shipsValue))));
-      if (msu(s.lostValue)) lostNote.append(` \xB7 ${t("exp.heroLostShort")} `, h5("b", "neg", `\u2212${fmt(msu(s.lostValue))}`));
-      const debrisNote = s.debris ? h5("span", "hero-note") : void 0;
-      debrisNote?.append(`${t("exp.heroDebris")} `, h5("b", "", fmt(s.debris)));
+      const lostNote = h6("span", "hero-note");
+      lostNote.append(`${t("exp.heroFound")} `, h6("b", "", fmt(msu(s.shipsValue))));
+      if (msu(s.lostValue)) lostNote.append(` \xB7 ${t("exp.heroLostShort")} `, h6("b", "neg", `\u2212${fmt(msu(s.lostValue))}`));
+      const debrisNote = s.debris ? h6("span", "hero-note") : void 0;
+      debrisNote?.append(`${t("exp.heroDebris")} `, h6("b", "", fmt(s.debris)));
       top.append(net, part(t("exp.heroRes"), resMsu, debrisNote), part(t("exp.heroFleet"), fleetMsu, lostNote));
       const mix = valueMix(s);
       const mixTotal = mix.metal + mix.crystal + mix.deuterium + mix.ships;
-      const bar = h5("div", "mix");
+      const bar = h6("div", "mix");
       for (const k of ["metal", "crystal", "deuterium", "ships"]) {
         if (!mix[k]) continue;
-        const seg = h5("i");
+        const seg = h6("i");
         seg.style.width = `${mix[k] / (mixTotal || 1) * 100}%`;
         seg.style.background = MIX_COLORS[k];
         seg.title = `${k === "ships" ? t("exp.shipsFound") : t(`msg.res.${k}`)}: ${fmt(mix[k])} MSU (${Math.round(mix[k] / (mixTotal || 1) * 100)}%)`;
         bar.append(seg);
       }
-      const keys = h5("div", "mix-keys");
+      const keys = h6("div", "mix-keys");
       const key = (glyph2, label2, value, cls) => {
-        const k = h5("span", `mix-key ${cls}`);
-        k.append(glyph2, h5("span", "mk-l", label2), h5("b", "", value));
+        const k = h6("span", `mix-key ${cls}`);
+        k.append(glyph2, h6("span", "mk-l", label2), h6("b", "", value));
         keys.append(k);
       };
       key(svg2(resIconSvg("metal", 15)), t("msg.res.metal"), fmt(s.res.metal), "m");
@@ -14659,11 +15665,11 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         return short ? (buckets.length - 1 - buckets.indexOf(b)) % 5 === 0 ? String(d.getDate()) : "" : d.toLocaleDateString(locale, { weekday: "short", day: "2-digit", month: "2-digit" });
       };
       if (focus !== null && !buckets.some((b) => b.start === focus)) focus = null;
-      const chartCard = h5("div", "card");
-      const chartHead = h5("div", "card-head");
-      chartHead.append(h5("h3", "", t(single ? "exp.byHour" : "exp.byDay")));
+      const chartCard = h6("div", "card");
+      const chartHead = h6("div", "card-head");
+      chartHead.append(h6("h3", "", t(single ? "exp.byHour" : "exp.byDay")));
       if (focus !== null) {
-        const all2 = h5("button", "act ghost", t("exp.focusAll"));
+        const all2 = h6("button", "act ghost", t("exp.focusAll"));
         all2.addEventListener("click", () => {
           focus = null;
           draw();
@@ -14671,7 +15677,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         chartHead.append(all2);
       }
       chartCard.append(chartHead);
-      const chart = h5("div", `chart${buckets.length > 14 ? " dense" : ""}`);
+      const chart = h6("div", `chart${buckets.length > 14 ? " dense" : ""}`);
       chart.style.setProperty("--n", String(buckets.length));
       const max = Math.max(1, ...buckets.map((b) => {
         const m = valueMix(b.stats);
@@ -14680,23 +15686,23 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       for (const b of buckets) {
         const m = valueMix(b.stats);
         const tot = m.metal + m.crystal + m.deuterium + m.ships;
-        const col = h5("button", `col${focus === b.start ? " on" : ""}${b.stats.count ? "" : " empty"}`);
+        const col = h6("button", `col${focus === b.start ? " on" : ""}${b.stats.count ? "" : " empty"}`);
         col.type = "button";
         col.title = `${label(b, false)} \xB7 ${b.stats.count.toLocaleString(locale)} ${t("exp.heroCount")} \xB7 ${sign(b.stats.netMsu)} MSU`;
         col.setAttribute("aria-pressed", String(focus === b.start));
-        if (buckets.length <= 14) col.append(h5("span", "tot", b.stats.count ? sign(b.stats.netMsu) : ""));
-        const stack = h5("span", "stack");
+        if (buckets.length <= 14) col.append(h6("span", "tot", b.stats.count ? sign(b.stats.netMsu) : ""));
+        const stack = h6("span", "stack");
         stack.style.height = `${Math.round(tot / max * 100)}%`;
         for (const k of ["metal", "crystal", "deuterium", "ships"]) {
           if (!m[k]) continue;
-          const seg = h5("i");
+          const seg = h6("i");
           seg.style.height = `${m[k] / tot * 100}%`;
           seg.style.background = MIX_COLORS[k];
           stack.append(seg);
         }
-        const area = h5("span", "area");
+        const area = h6("span", "area");
         area.append(stack);
-        col.append(area, h5("span", "lbl", label(b, true)));
+        col.append(area, h6("span", "lbl", label(b, true)));
         col.addEventListener("click", () => {
           focus = focus === b.start ? null : b.start;
           draw();
@@ -14708,54 +15714,54 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       const picked2 = focus !== null ? buckets.find((b) => b.start === focus) : null;
       const fs = picked2 ? picked2.stats : s;
       const suffix = picked2 ? ` \xB7 ${label(picked2, false)}` : "";
-      const two = h5("div", "two");
-      const outs = h5("div", "card");
-      outs.append(h5("h3", "", `${t("exp.outcomes")}${suffix}`));
+      const two = h6("div", "two");
+      const outs = h6("div", "card");
+      outs.append(h6("h3", "", `${t("exp.outcomes")}${suffix}`));
       const rows = ORDER.filter((k) => fs.outcomes[k]).sort((a, b) => (fs.outcomes[b] ?? 0) - (fs.outcomes[a] ?? 0));
       const total = rows.reduce((a, k) => a + (fs.outcomes[k] ?? 0), 0);
       const top1 = Math.max(1, ...rows.map((k) => fs.outcomes[k] ?? 0));
-      if (!rows.length) outs.append(h5("p", "empty", t("exp.noneHere")));
-      const list = h5("div", "outs");
+      if (!rows.length) outs.append(h6("p", "empty", t("exp.noneHere")));
+      const list = h6("div", "outs");
       for (const k of rows) {
         const n = fs.outcomes[k] ?? 0;
-        const track = h5("span", "track");
-        const fill = h5("i");
+        const track = h6("span", "track");
+        const fill = h6("i");
         fill.style.width = `${n / top1 * 100}%`;
         fill.style.background = OUTCOME_COLORS[k] ?? "#5B6B80";
         track.append(fill);
-        list.append(h5("span", "o-l", t(`msg.out.${k}`)), track, h5("span", "o-n", n.toLocaleString(locale)), h5("span", "o-p", (n / total).toLocaleString(locale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 })));
+        list.append(h6("span", "o-l", t(`msg.out.${k}`)), track, h6("span", "o-n", n.toLocaleString(locale)), h6("span", "o-p", (n / total).toLocaleString(locale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 })));
       }
       if (rows.length) outs.append(list);
       const sized = fs.sizes[0] + fs.sizes[1] + fs.sizes[2];
       if (sized) {
-        const sizes = h5("div", "sizes");
+        const sizes = h6("div", "sizes");
         for (const i of [2, 1, 0]) {
-          const sz = h5("span", `sz rar-${i}`, `${t(`msg.size.${i}`)} `);
-          sz.append(h5("b", "", fs.sizes[i].toLocaleString(locale)));
+          const sz = h6("span", `sz rar-${i}`, `${t(`msg.size.${i}`)} `);
+          sz.append(h6("b", "", fs.sizes[i].toLocaleString(locale)));
           sizes.append(sz);
         }
         outs.append(sizes);
       }
-      const shipsCard = h5("div", "card");
-      shipsCard.append(h5("h3", "", `${t("exp.shipsFound")}${suffix}`));
+      const shipsCard = h6("div", "card");
+      shipsCard.append(h6("h3", "", `${t("exp.shipsFound")}${suffix}`));
       const found = Object.entries(fs.shipsFound);
       const lost = Object.entries(fs.lost);
       if (found.length) shipsCard.append(shipGrid(found, false));
-      else shipsCard.append(h5("p", "empty", t("exp.noneHere")));
+      else shipsCard.append(h6("p", "empty", t("exp.noneHere")));
       if (lost.length) {
-        shipsCard.append(h5("h4", "lost", t("exp.lost")));
+        shipsCard.append(h6("h4", "lost", t("exp.lost")));
         shipsCard.append(shipGrid(lost, true));
       }
       two.append(outs, shipsCard);
       out.push(two);
       if (!single) {
-        const card = h5("div", "card");
-        card.append(h5("h3", "", t("exp.daysTable")));
-        const scroll = h5("div", "scroll");
-        const table = h5("table");
-        const hr = h5("tr");
+        const card = h6("div", "card");
+        card.append(h6("h3", "", t("exp.daysTable")));
+        const scroll = h6("div", "scroll");
+        const table = h6("table");
+        const hr = h6("tr");
         const th = (content, title = "") => {
-          const c = h5("th");
+          const c = h6("th");
           c.append(content);
           if (title) c.title = title;
           hr.append(c);
@@ -14773,21 +15779,21 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         const days2 = byDay(entries, 31);
         const top2 = Math.max(1, ...days2.map((d) => d.stats.netMsu));
         for (const { day, stats } of days2) {
-          const tr = h5("tr");
+          const tr = h6("tr");
           if (focus === day) tr.className = "on";
-          const spark = h5("td", "spark-cell");
-          const sp = h5("i", "spark");
+          const spark = h6("td", "spark-cell");
+          const sp = h6("i", "spark");
           sp.style.width = `${Math.max(0, stats.netMsu / top2 * 100)}%`;
           spark.append(sp);
           tr.append(
-            h5("td", "", new Date(day).toLocaleDateString(locale, { weekday: "short", day: "2-digit", month: "2-digit" })),
-            h5("td", "", String(stats.count)),
-            h5("td", "m", fmt(stats.res.metal)),
-            h5("td", "c", fmt(stats.res.crystal)),
-            h5("td", "d", fmt(stats.res.deuterium)),
-            h5("td", "dm", fmt(stats.res.darkMatter)),
-            h5("td", "pos", fmt(msu(stats.shipsValue) - msu(stats.lostValue))),
-            h5("td", stats.netMsu < 0 ? "neg" : "hi", fmt(stats.netMsu)),
+            h6("td", "", new Date(day).toLocaleDateString(locale, { weekday: "short", day: "2-digit", month: "2-digit" })),
+            h6("td", "", String(stats.count)),
+            h6("td", "m", fmt(stats.res.metal)),
+            h6("td", "c", fmt(stats.res.crystal)),
+            h6("td", "d", fmt(stats.res.deuterium)),
+            h6("td", "dm", fmt(stats.res.darkMatter)),
+            h6("td", "pos", fmt(msu(stats.shipsValue) - msu(stats.lostValue))),
+            h6("td", stats.netMsu < 0 ? "neg" : "hi", fmt(stats.netMsu)),
             spark
           );
           table.append(tr);
@@ -14799,65 +15805,71 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       return out;
     };
     const draw = () => {
-      const clean = dedupe(store.get(JOURNAL_KEY, {}));
-      if (clean.removed) store.set(JOURNAL_KEY, clean.journal);
-      const journal = clean.journal;
+      const clean2 = dedupe(store.get(JOURNAL_KEY, {}));
+      if (clean2.removed) store.set(JOURNAL_KEY, clean2.journal);
+      const journal = clean2.journal;
       const inPeriod = entriesIn(journal, periodRange(period, o.now));
       const hasRaids = Object.values(journal).some((e) => e.kind === "raid");
       if (kind === "raid" && !hasRaids) kind = "expedition";
+      const hasAnomalies = hasOrion(store);
+      if (kind === "orion" && !hasAnomalies) kind = "expedition";
       const entries = inPeriod.filter((e) => e.kind === kind);
       const s = periodStats(entries);
       const isDisc = kind === "discovery";
-      const head = h5("div", "head");
-      const titles = h5("div", "titles");
-      titles.append(h5("h2", "", t("exp.title")), h5("span", "sub", t("exp.sub")));
-      const close = h5("button", "close");
+      const head = h6("div", "head");
+      const titles = h6("div", "titles");
+      titles.append(h6("h2", "", t(kind === "orion" ? "orion.title" : "exp.title")), h6("span", "sub", t(kind === "orion" ? "orion.sub" : "exp.sub")));
+      const close = h6("button", "close");
       close.append(icon(doc, "close", 16));
       close.title = t("fleet.close");
       close.addEventListener("click", () => closeJournal(doc));
       head.append(titles, close);
-      const tabs = h5("div", "tabs");
+      const tabs = h6("div", "tabs");
       for (const p of PERIODS) {
-        const b = h5("button", "tab", t(`exp.period.${p}`));
+        const b = h6("button", "tab", t(`exp.period.${p}`));
         b.setAttribute("aria-pressed", String(p === period));
         b.addEventListener("click", () => {
           period = p;
           focus = null;
+          orion.focus = null;
           store.set(PERIOD_KEY, p);
           draw();
         });
         tabs.append(b);
       }
-      const kinds = h5("div", "tabs");
-      for (const k of ["expedition", "discovery", ...hasRaids ? ["raid"] : []]) {
+      const kinds = h6("div", "tabs");
+      for (const k of ["expedition", "discovery", ...hasRaids ? ["raid"] : [], ...hasAnomalies ? ["orion"] : []]) {
         const n = periodStats(inPeriod.filter((e) => e.kind === k));
-        const count2 = k === "raid" ? raidStats(inPeriod).count : k === "discovery" ? n.discoveries : n.count;
-        const b = h5("button", "tab", `${t(`exp.kind.${k}`)} \xB7 ${count2.toLocaleString(locale)}`);
+        const count2 = k === "orion" ? orionCount(store, period, o.now) : k === "raid" ? raidStats(inPeriod).count : k === "discovery" ? n.discoveries : n.count;
+        const b = h6("button", "tab", `${t(`exp.kind.${k}`)} \xB7 ${count2.toLocaleString(locale)}`);
         b.setAttribute("aria-pressed", String(k === kind));
         b.addEventListener("click", () => {
           kind = k;
           focus = null;
+          orion.focus = null;
           store.set(KIND_KEY, k);
           draw();
         });
         kinds.append(b);
       }
       const parts = [head, kinds, tabs];
-      if (!entries.length) {
-        parts.push(h5("p", "empty", Object.keys(journal).length ? t("exp.emptyPeriod") : t("exp.empty")));
+      if (kind === "orion") {
+        parts.push(...orionView({ doc, store, t, locale, now: o.now, period, state: orion, redraw: draw, shipGrid }));
+      } else if (!entries.length) {
+        parts.push(h6("p", "empty", Object.keys(journal).length ? t("exp.emptyPeriod") : t("exp.empty")));
       } else if (kind === "expedition") {
         parts.push(...expeditionView(entries, s));
       } else {
-        const kpis = h5("div", "kpis");
+        const kpis = h6("div", "kpis");
         const kpi = (label, value, cls = "", detail) => {
-          const box2 = h5("div", "kpi");
-          box2.append(h5("span", "label", label), h5("span", `value ${cls}`, value));
+          const box2 = h6("div", "kpi");
+          box2.append(h6("span", "label", label), h6("span", `value ${cls}`, value));
           if (detail) box2.append(detail);
           kpis.append(box2);
         };
         const triple = (r2) => {
-          const d = h5("div", "detail");
-          d.append(h5("span", "m", fmt(r2.metal)), h5("span", "c", fmt(r2.crystal)), h5("span", "d", fmt(r2.deuterium)));
+          const d = h6("div", "detail");
+          d.append(h6("span", "m", fmt(r2.metal)), h6("span", "c", fmt(r2.crystal)), h6("span", "d", fmt(r2.deuterium)));
           return d;
         };
         if (isDisc) {
@@ -14867,42 +15879,42 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           kpi(t("exp.artefactsAvg"), s.discoveries ? (s.artefacts / s.discoveries).toLocaleString(locale, { maximumFractionDigits: 2 }) : "\u2014");
         }
         if (kind !== "raid") parts.push(kpis);
-        const outs = h5("div", "card");
-        if (kind !== "raid") outs.append(h5("h3", "", t("exp.outcomes")));
+        const outs = h6("div", "card");
+        if (kind !== "raid") outs.append(h6("h3", "", t("exp.outcomes")));
         const total = Object.values(s.outcomes).reduce((a, b) => a + (b ?? 0), 0) || 1;
-        const bar = h5("div", "bar");
-        const legend = h5("div", "legend");
+        const bar = h6("div", "bar");
+        const legend = h6("div", "legend");
         for (const key of ORDER) {
           const n = s.outcomes[key];
           if (!n) continue;
-          const seg = h5("span");
+          const seg = h6("span");
           seg.style.width = `${n / total * 100}%`;
           seg.style.background = OUTCOME_COLORS[key] ?? "#5B6B80";
           seg.title = `${t(`msg.out.${key}`)}: ${n}`;
           bar.append(seg);
-          const row = h5("div");
-          const dot = h5("span", "dot");
+          const row = h6("div");
+          const dot = h6("span", "dot");
           dot.style.background = OUTCOME_COLORS[key] ?? "#5B6B80";
-          row.append(dot, h5("span", "", t(`msg.out.${key}`)), h5("span", "n", n.toLocaleString(locale)), h5("span", "pct", (n / total).toLocaleString(locale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 })));
+          row.append(dot, h6("span", "", t(`msg.out.${key}`)), h6("span", "n", n.toLocaleString(locale)), h6("span", "pct", (n / total).toLocaleString(locale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 })));
           legend.append(row);
         }
         if (kind !== "raid") outs.append(bar, legend);
         const sized = s.sizes[0] + s.sizes[1] + s.sizes[2];
         if (sized) {
-          const sizes = h5("div", "detail");
+          const sizes = h6("div", "detail");
           sizes.className = "sizes";
-          for (const i of [2, 1, 0]) sizes.append(h5("span", `rar rar-${i}`, `${t(`msg.size.${i}`)} ${s.sizes[i].toLocaleString(locale)} (${(s.sizes[i] / sized).toLocaleString(locale, { style: "percent", maximumFractionDigits: 0 })})`));
+          for (const i of [2, 1, 0]) sizes.append(h6("span", `rar rar-${i}`, `${t(`msg.size.${i}`)} ${s.sizes[i].toLocaleString(locale)} (${(s.sizes[i] / sized).toLocaleString(locale, { style: "percent", maximumFractionDigits: 0 })})`));
           outs.append(sizes);
         }
         if (kind !== "raid") parts.push(outs);
         const r = raidStats(entries);
         if (kind === "raid") {
-          const card = h5("div", "card");
-          card.append(h5("h3", "", t("exp.raids")));
-          const strip = h5("div", "kpis");
+          const card = h6("div", "card");
+          card.append(h6("h3", "", t("exp.raids")));
+          const strip = h6("div", "kpis");
           const cell = (label, value, cls = "", detail) => {
-            const box2 = h5("div", "kpi");
-            box2.append(h5("span", "label", label), h5("span", `value ${cls}`, value));
+            const box2 = h6("div", "kpi");
+            box2.append(h6("span", "label", label), h6("span", `value ${cls}`, value));
             if (detail) box2.append(detail);
             strip.append(box2);
           };
@@ -14915,35 +15927,35 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         }
         const days2 = byDay(entries, 31);
         if (kind !== "raid" && (days2.length > 1 || period !== "today")) {
-          const card = h5("div", "card");
-          card.append(h5("h3", "", t("exp.byDay")));
-          const scroll = h5("div", "scroll");
-          const table = h5("table");
-          const hr = h5("tr");
+          const card = h6("div", "card");
+          card.append(h6("h3", "", t("exp.byDay")));
+          const scroll = h6("div", "scroll");
+          const table = h6("table");
+          const hr = h6("tr");
           const labels = isDisc ? [t("exp.day"), t("exp.countShort"), t("exp.artefacts"), t("exp.lfXp")] : [t("exp.day"), t("exp.countShort"), t("msg.res.metal"), t("msg.res.crystal"), t("msg.res.deuterium"), t("exp.dmShort"), t("exp.shipsShort"), "MSU"];
-          for (const label of labels) hr.append(h5("th", "", label));
+          for (const label of labels) hr.append(h6("th", "", label));
           table.append(hr);
           for (const { day, stats } of days2) {
-            const tr = h5("tr");
+            const tr = h6("tr");
             if (isDisc) {
               tr.append(
-                h5("td", "", new Date(day).toLocaleDateString(locale, { weekday: "short", day: "2-digit", month: "2-digit" })),
-                h5("td", "", stats.discoveries.toLocaleString(locale)),
-                h5("td", "pos", stats.artefacts.toLocaleString(locale)),
-                h5("td", "", stats.lfXp.toLocaleString(locale))
+                h6("td", "", new Date(day).toLocaleDateString(locale, { weekday: "short", day: "2-digit", month: "2-digit" })),
+                h6("td", "", stats.discoveries.toLocaleString(locale)),
+                h6("td", "pos", stats.artefacts.toLocaleString(locale)),
+                h6("td", "", stats.lfXp.toLocaleString(locale))
               );
               table.append(tr);
               continue;
             }
             tr.append(
-              h5("td", "", new Date(day).toLocaleDateString(locale, { weekday: "short", day: "2-digit", month: "2-digit" })),
-              h5("td", "", String(stats.count)),
-              h5("td", "m", fmt(stats.res.metal)),
-              h5("td", "c", fmt(stats.res.crystal)),
-              h5("td", "d", fmt(stats.res.deuterium)),
-              h5("td", "dm", fmt(stats.res.darkMatter)),
-              h5("td", "pos", fmt(msu(stats.shipsValue) - msu(stats.lostValue))),
-              h5("td", stats.netMsu < 0 ? "neg" : "", fmt(stats.netMsu))
+              h6("td", "", new Date(day).toLocaleDateString(locale, { weekday: "short", day: "2-digit", month: "2-digit" })),
+              h6("td", "", String(stats.count)),
+              h6("td", "m", fmt(stats.res.metal)),
+              h6("td", "c", fmt(stats.res.crystal)),
+              h6("td", "d", fmt(stats.res.deuterium)),
+              h6("td", "dm", fmt(stats.res.darkMatter)),
+              h6("td", "pos", fmt(msu(stats.shipsValue) - msu(stats.lostValue))),
+              h6("td", stats.netMsu < 0 ? "neg" : "", fmt(stats.netMsu))
             );
             table.append(tr);
           }
@@ -14952,15 +15964,15 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           parts.push(card);
         }
       }
-      const foot = h5("div", "foot");
-      const opt = h5("label", "opt");
-      const box = h5("input");
+      const foot = h6("div", "foot");
+      const opt = h6("label", "opt");
+      const box = h6("input");
       box.type = "checkbox";
       box.checked = store.get(FOLD_KEY, true);
       box.addEventListener("change", () => store.set(FOLD_KEY, box.checked));
       opt.append(box, document.createTextNode(t("exp.fold")));
-      const acts = h5("div", "acts");
-      const exp = h5("button", "act", t("exp.export"));
+      const acts = h6("div", "acts");
+      const exp = h6("button", "act", t("exp.export"));
       exp.title = t("exp.exportHint");
       exp.addEventListener("click", () => {
         const blob = new Blob([JSON.stringify({ app: "future", kind: "expedition-journal", exportedAt: o.now, entries: journal }, null, 1)], { type: "application/json" });
@@ -14972,7 +15984,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         a.remove();
         setTimeout(() => URL.revokeObjectURL(a.href), 1e3);
       });
-      const clear = h5("button", confirmClear ? "act danger" : "act ghost", confirmClear ? t("exp.clearConfirm") : t("exp.clear"));
+      const clear = h6("button", confirmClear ? "act danger" : "act ghost", confirmClear ? t("exp.clearConfirm") : t("exp.clear"));
       clear.addEventListener("click", () => {
         if (!confirmClear) {
           confirmClear = true;
@@ -14983,7 +15995,36 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         store.set(JOURNAL_KEY, {});
         draw();
       });
-      if (Object.keys(journal).length) acts.append(exp, clear);
+      if (kind === "orion") {
+        const save = (name, text, type) => {
+          const a = doc.createElement("a");
+          a.href = URL.createObjectURL(new Blob([text], { type }));
+          a.download = name;
+          doc.body.append(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(a.href), 1e3);
+        };
+        const csv = h6("button", "act", t("orion.csv"));
+        csv.addEventListener("click", () => {
+          const d = orionData(doc, store, locale, o.now);
+          save("orion-anomalies-per-day.csv", orionCsv(d.events, d.shipOf), "text/csv");
+        });
+        const json2 = h6("button", "act", t("orion.json"));
+        json2.addEventListener("click", () => save("orion-anomalies.json", JSON.stringify(loadOrion(store), null, 1), "application/json"));
+        const wipe = h6("button", confirmClear ? "act danger" : "act ghost", confirmClear ? t("exp.clearConfirm") : t("orion.clear"));
+        wipe.addEventListener("click", () => {
+          if (!confirmClear) {
+            confirmClear = true;
+            draw();
+            return;
+          }
+          confirmClear = false;
+          clearOrion(store);
+          draw();
+        });
+        acts.append(csv, json2, wipe);
+      } else if (Object.keys(journal).length) acts.append(exp, clear);
       foot.append(opt, acts);
       parts.push(foot);
       panel.replaceChildren(...parts);
@@ -15310,6 +16351,457 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         decorateEventList(o);
       }, 50);
     }).observe(o.doc.body, { childList: true, subtree: true });
+  }
+
+  // src/data/orion.ts
+  var isOrionPage = (doc) => /component=orion\b/.test(doc.location?.search ?? "") || !!doc.querySelector("#orioncomponent");
+  var parseNumber = (text) => parseInt(String(text ?? "").replace(/[^\d]/g, ""), 10) || 0;
+  var clean = (text) => String(text ?? "").replace(/\s+/g, " ").trim();
+  var coordsText = (text) => /\d+:\d+:\d+/.exec(String(text ?? ""))?.[0] ?? "";
+  function durationHours(text) {
+    const part = (re) => parseInt(re.exec(String(text ?? ""))?.[1] ?? "0", 10);
+    return part(/(\d+)\s*[dg]\b/) * 24 + part(/(\d+)\s*[ho]\b/) + part(/(\d+)\s*m\b/) / 60 + part(/(\d+)\s*s\b/) / 3600;
+  }
+  function parseGameDate(text) {
+    const m = /(\d{1,2})\.(\d{1,2})\.(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?/.exec(String(text ?? ""));
+    return m ? new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5], +(m[6] ?? 0)).getTime() : 0;
+  }
+  function scriptValue(doc, ...res) {
+    for (const s of Array.from(doc.querySelectorAll("#orionContent script, #orioncomponent script, #orionMission script"))) {
+      for (const re of res) {
+        const m = re.exec(s.textContent ?? "");
+        if (m) return m[1];
+      }
+    }
+    return null;
+  }
+  function lithiumPerHour(doc, win) {
+    const value = Number(win?.lithiumProduction);
+    if (value > 0) return value;
+    return Number(scriptValue(doc, /lithiumProduction\s*=\s*([\d.]+)/, /lithiumPerHour\s*:\s*([\d.]+)/)) || 0;
+  }
+  function lithiumNow(doc) {
+    const el6 = doc.querySelector("#lithiumAmount, .orionLithiumAmount");
+    if (!el6) return null;
+    return parseNumber(el6.textContent) || Math.floor(Number(el6.getAttribute("data-value")) || 0);
+  }
+  function depletionHours(doc) {
+    const v = scriptValue(doc, /lithiumDepletionSeconds\s*=\s*(\d+)/, /depletionSeconds\s*:\s*(\d+)/);
+    return v !== null && Number(v) > 0 ? Number(v) / 3600 : Infinity;
+  }
+  function storageCap(doc) {
+    const v = Number(scriptValue(doc, /lithiumStorageCapacity\s*=\s*(\d+)/, /lithiumStorageCapacity\s*:\s*(\d+)/));
+    return v > 0 ? v : Infinity;
+  }
+  function scanCost(doc) {
+    const el6 = doc.querySelector("#scanCostValue");
+    return el6 ? parseNumber(el6.getAttribute("data-tooltip-title")) || parseNumber(el6.textContent) : 0;
+  }
+  var isLithium = (line) => !!line.querySelector("lithium-icon") || /^\s*lit(h)?i/i.test(line.querySelector(".rewardName")?.textContent ?? "");
+  function readRewards(box, selector) {
+    const r = { metal: 0, crystal: 0, deuterium: 0, lithium: 0, other: [] };
+    for (const line of Array.from(box.querySelectorAll(selector))) {
+      if (line.classList.contains("rewardLineEmpty")) continue;
+      const icon2 = line.querySelector("resource-icon");
+      const type = icon2 ? ["metal", "crystal", "deuterium"].find((k) => icon2.classList.contains(k)) : void 0;
+      const amount = clean(line.querySelector(".rewardAmount")?.textContent);
+      const name = clean(line.querySelector(".rewardName")?.textContent);
+      if (type) r[type] += parseNumber(amount);
+      else if (isLithium(line)) r.lithium += parseNumber(amount);
+      else {
+        const text = clean(`${name} ${amount}`) || clean(line.textContent);
+        if (text) r.other.push(text);
+      }
+    }
+    return r;
+  }
+  var SCAN_CARD = ".scannerResultCard";
+  function readScanCard(card) {
+    const row = card.querySelector(".scannerResultRow:not(.header)");
+    const cells = row ? Array.from(row.querySelectorAll(":scope > .cell")) : [];
+    const costCell = cells.find((c) => c.querySelector("lithium-icon"));
+    return {
+      coords: coordsText(row?.querySelector("a")?.textContent),
+      name: clean(card.querySelector(".scannerResultName")?.textContent),
+      cost: parseNumber(costCell?.getAttribute("data-tooltip-title") || costCell?.getAttribute("title")),
+      rewards: readRewards(card, ".scannerResultRewardsList .rewardLine"),
+      hours: durationHours(cells[2]?.textContent),
+      waves: parseNumber(cells[3]?.textContent)
+    };
+  }
+  var MISSION_CARD = ".anomalyMission";
+  function readMissionCard(card) {
+    const labels = card.querySelectorAll(".missionRouteLabels .routeLabelCell");
+    const coords = coordsText(labels[labels.length === 1 ? 0 : 1]?.querySelector(".nodeCoords")?.textContent) || coordsText(card.querySelector(".missionDetailsTable .cell:nth-child(3) span:last-child")?.textContent);
+    const [incoming, total] = (/(\d+)\s*\/\s*(\d+)/.exec(clean(card.querySelector(".nodeWave")?.textContent)) ?? []).slice(1).map(Number);
+    const tags = Array.from(card.querySelectorAll(".missionDetailsSubtitle .titleTypeIcon")).map((x) => clean(x.textContent));
+    return {
+      id: card.getAttribute("data-space-object-id") ?? "",
+      name: clean(card.querySelector(".missionNameText")?.textContent) || clean(card.querySelector(".missionNameCompact")?.textContent) || coords,
+      coords,
+      cost: parseNumber((card.querySelector(".collectRewards .btnSub")?.textContent ?? "").split(":").pop()),
+      rewards: readRewards(card, ".rewardsCell .rewardLine"),
+      incoming: incoming || 0,
+      total: total || 0,
+      seconds: Number(card.querySelector('[id^="despawn_"]')?.getAttribute("data-seconds")) || 0,
+      level: parseNumber(card.querySelector(".missionLevel")?.textContent),
+      stars: card.querySelectorAll(".missionDifficultyStars img").length,
+      mode: tags[0] || (card.classList.contains("pvp") ? "PvP" : card.classList.contains("pve") ? "PvE" : ""),
+      kind: tags.slice(1).join(" / "),
+      spawnedAt: parseGameDate(card.querySelector(".spawnedCell")?.textContent)
+    };
+  }
+  var COLLECT_DIALOG = ".orionCollectRewards";
+  function readCollectDialog(dialog) {
+    const rows = Array.from(dialog.querySelectorAll(dialog.querySelector(".collectWaveRow.affordable") ? ".collectWaveRow.affordable" : ".collectWaveRow"));
+    const rewards = dialog.querySelector(".collectWaveRow.affordable .cwRewards .rewardLine") ? readRewards(dialog, ".collectWaveRow.affordable .cwRewards .rewardLine") : readRewards(dialog, ".collectSummaryRewards .rewardLine");
+    const cost = parseNumber(dialog.querySelector(".collectTotalValue")?.textContent) || rows.reduce((s, r) => s + parseNumber((r.querySelector(".cwCost")?.textContent ?? "").split(":").pop()), 0);
+    return {
+      id: dialog.getAttribute("data-space-object-id") ?? "",
+      waves: rows.map((r) => parseNumber(r.querySelector(".cwWave")?.textContent)).filter(Boolean),
+      rewards,
+      cost
+    };
+  }
+  var isDisabled = (el6) => !!(el6.disabled || el6.classList.contains("disabled") || el6.getAttribute("aria-disabled") === "true");
+
+  // src/modules/orion/index.ts
+  var STYLE_ID4 = "fut-orion-style";
+  var CSS5 = `
+.fut-or { display:flex; flex-wrap:wrap; align-items:baseline; gap:3px 14px; margin:6px 0 2px; padding:5px 8px; font-size:11px; color:#a9b7c6; background:rgba(0,0,0,.28); border-radius:3px; }
+.fut-or b { color:#fff; }
+.fut-or .fut-or-index { font-size:13px; }
+.fut-or .fut-or-muted { color:#7c8a99; }
+.fut-or-best { outline:2px solid #ffb800; outline-offset:-2px; }
+.fut-or-best .fut-or-index b { color:#ffb800; }
+.fut-or .fut-or-plan { flex-basis:100%; padding-top:3px; border-top:1px solid rgba(255,255,255,.06); color:#8fd19e; }
+.fut-or .fut-or-plan.short { color:#e0b25a; }
+.fut-or-reserve { margin:4px 0 8px; padding:6px 9px; font-size:11px; color:#a9b7c6; background:rgba(0,0,0,.35); border:1px solid rgba(224,178,90,.35); border-radius:3px; }
+.fut-or-reserve b { color:#fff; }
+.fut-or-reserve .fut-or-row { margin-top:2px; color:#8d9bab; }
+.fut-or-reserve .fut-or-ignored { margin-top:4px; color:#7c8a99; }
+.fut-or-reserve .fut-or-scans { margin-bottom:4px; font-size:12px; color:#8fd19e; }
+.fut-or-reserve .fut-or-short, .fut-or-reserve .fut-or-scans.fut-or-short { color:#e0b25a; }
+.fut-or-link { color:#6fa8dc !important; cursor:pointer; text-decoration:none !important; background:none; border:0; padding:0; font:inherit; }
+.fut-or-link:hover { text-decoration:underline !important; }
+.fut-or .fut-or-link { flex-basis:100%; text-align:left; }
+.fut-or .fut-or-link.off { color:#e0b25a !important; }
+.fut-or-warn { margin:6px 0; padding:7px 10px; font-size:12px; color:#ffd7d2; background:rgba(160,30,20,.45); border:1px solid #e0533f; border-radius:3px; }
+.fut-or-warn b { color:#fff; }
+.fut-or-bar { margin:4px 0 6px; text-align:right; }
+.fut-or-open { display:inline-block; padding:3px 9px; font-size:11px; color:#d7e3ef; background:rgba(0,0,0,.4); border:1px solid rgba(143,209,158,.45); border-radius:3px; cursor:pointer; }
+.fut-or-open:hover { border-color:#8fd19e; color:#fff; }
+`;
+  function h7(doc, tag, cls = "", text) {
+    const node = doc.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== void 0) node.textContent = text;
+    return node;
+  }
+  var hoursText = (hours) => {
+    const minutes = Math.round(hours * 60);
+    return `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}m`;
+  };
+  var isShown = (el6) => el6.isConnected && el6.getClientRects().length > 0;
+  function watchOrion(o) {
+    const { doc, store, t, locale } = o;
+    const win = pageWindow();
+    const fmt = (n) => formatUnits(n, locale);
+    const rich = (key, vars) => {
+      const span = h7(doc, "span");
+      const text = t(key, Object.fromEntries(Object.keys(vars).map((k) => [k, `\0${k}\0`])));
+      text.split("\0").forEach((part, i) => {
+        if (i % 2) span.append(part === "held" ? String(vars[part] ?? "") : h7(doc, "b", "", String(vars[part] ?? "")));
+        else if (part) span.append(part);
+      });
+      return span;
+    };
+    if (!doc.getElementById(STYLE_ID4)) {
+      const style = h7(doc, "style");
+      style.id = STYLE_ID4;
+      style.textContent = CSS5;
+      doc.head.append(style);
+    }
+    const loadLedger = () => store.get(LEDGER_KEY, {});
+    const loadIgnored = () => store.get(IGNORED_KEY, {});
+    const loadArch = () => loadArchive(store.get(ARCHIVE_KEY, null));
+    const live = () => {
+      const p = pruneLedger(loadLedger(), Date.now());
+      if (p.changed) store.set(LEDGER_KEY, p.ledger);
+      return counted(p.ledger, loadIgnored());
+    };
+    const lithium = () => {
+      const now = lithiumNow(doc);
+      return now === null ? null : { now, perHour: lithiumPerHour(doc, win), stopsIn: depletionHours(doc), cap: storageCap(doc) };
+    };
+    let lastPrint = "";
+    const syncMissions = () => {
+      const tab2 = doc.querySelector("#orionMission, .orionTabContentWrapper.anomalyMissions");
+      if (!tab2) return;
+      tab2.setAttribute("data-fut-or-synced", "1");
+      const cards = Array.from(doc.querySelectorAll(MISSION_CARD));
+      const read = cards.map((c) => ({ el: c, m: readMissionCard(c) }));
+      const pending = store.get(PENDING_KEY, {});
+      const print = read.map(({ m }) => `${m.id}:${m.cost}:${cardValue(m.rewards)}:${m.incoming}/${m.total}`).join("#");
+      if (print === lastPrint && !Object.keys(pending).length) return;
+      lastPrint = print;
+      const now = Date.now();
+      const ledger = syncLedger(loadLedger(), read.map(({ m }) => ({ ...m, lithium: m.rewards.lithium })), now);
+      store.set(LEDGER_KEY, ledger);
+      const ignored = loadIgnored();
+      if (Object.keys(ignored).some((c) => !ledger[c])) store.set(IGNORED_KEY, Object.fromEntries(Object.keys(ignored).filter((c) => ledger[c]).map((c) => [c, true])));
+      let archive = syncArchive(loadArch(), read.filter(({ m }) => m.id).map(({ m }) => ({ id: m.id, name: m.name, coords: m.coords, level: m.level, stars: m.stars, mode: m.mode, kind: m.kind, spawnedAt: m.spawnedAt, wave: m.incoming, waves: m.total })), now);
+      const states = new Map(read.filter(({ m }) => m.id).map(({ m }) => [m.id, { cost: m.cost, value: cardValue(m.rewards), rewards: m.rewards }]));
+      const s = settle(pending, archive, states, (id) => !!doc.querySelector(`${COLLECT_DIALOG}[data-space-object-id="${CSS_ESCAPE(id)}"]`), now);
+      archive = s.archive;
+      if (s.changed) store.set(PENDING_KEY, s.pending);
+      store.set(ARCHIVE_KEY, archive);
+      updateOpenButtons();
+    };
+    const CSS_ESCAPE = (s) => s.replace(/["\\]/g, "");
+    const discovered = /* @__PURE__ */ new Map();
+    const DISCOVER_TTL = 15e3;
+    doc.addEventListener(
+      "click",
+      (e) => {
+        const target = e.target;
+        const card = target?.closest?.(SCAN_CARD);
+        if (!card || !target?.closest(".discoverButton")) return;
+        const c = readScanCard(card);
+        if (!c.coords || !c.cost) return;
+        discovered.set(c.coords, { coords: c.coords, name: c.name || c.coords, cost: c.cost, lithium: c.rewards.lithium, endAt: Date.now() + c.hours * 36e5, source: "scanner", at: Date.now() });
+      },
+      true
+    );
+    const commitDiscovered = () => {
+      if (!discovered.size) return;
+      const onScreen = new Set(Array.from(doc.querySelectorAll(SCAN_CARD)).filter(isShown).map((c) => readScanCard(c).coords));
+      const ledger = { ...loadLedger() };
+      let changed = false;
+      for (const [coords, r] of [...discovered]) {
+        if (!onScreen.has(coords)) {
+          if (ledger[coords]?.source !== "mission") ledger[coords] = r;
+          discovered.delete(coords);
+          changed = true;
+        } else if (Date.now() - r.at > DISCOVER_TTL) discovered.delete(coords);
+      }
+      if (changed) store.set(LEDGER_KEY, ledger);
+    };
+    let dialogSeen = 0;
+    const addPending = (id, p) => store.set(PENDING_KEY, { ...store.get(PENDING_KEY, {}), [id]: p });
+    const cardOf = (id) => doc.querySelector(`${MISSION_CARD}[data-space-object-id="${CSS_ESCAPE(id)}"]`);
+    doc.addEventListener(
+      "click",
+      (e) => {
+        const target = e.target;
+        if (target?.closest?.(COLLECT_DIALOG) || target?.closest?.(".ui-dialog")?.querySelector(COLLECT_DIALOG)) dialogSeen = Date.now();
+        const confirm = target?.closest?.(".orionCollectConfirm");
+        const dialog = confirm?.closest(COLLECT_DIALOG);
+        if (confirm && dialog && !isDisabled(confirm)) {
+          const d = readCollectDialog(dialog);
+          if (!d.id) return;
+          const el6 = cardOf(d.id);
+          const m2 = el6 ? readMissionCard(el6) : null;
+          addPending(d.id, { at: Date.now(), via: "dialog", cost: d.cost, rewards: d.rewards, before: m2?.rewards ?? null, cardCost: m2?.cost ?? 0, cardValue: m2 ? cardValue(m2.rewards) : 0, wave: d.waves.length ? Math.max(...d.waves) : m2?.incoming ?? 0, waves: d.waves.length });
+          return;
+        }
+        const button3 = target?.closest?.(".collectRewards");
+        const card = button3?.closest(MISSION_CARD);
+        if (!button3 || !card || isDisabled(button3)) return;
+        const m = readMissionCard(card);
+        if (!m.id) return;
+        const at = Date.now();
+        const p = { at, via: "card", cost: m.cost, rewards: m.rewards, before: m.rewards, cardCost: m.cost, cardValue: cardValue(m.rewards), wave: m.incoming, waves: 0 };
+        setTimeout(() => {
+          if (!doc.querySelector(COLLECT_DIALOG) && dialogSeen < at) addPending(m.id, p);
+        }, 1500);
+      },
+      true
+    );
+    const ignoreButton = (coords, label, cls = "") => {
+      const b = h7(doc, "button", `fut-or-link ${cls}`.trim(), label);
+      b.type = "button";
+      b.addEventListener("click", (e) => {
+        e.preventDefault();
+        const ignored = { ...loadIgnored() };
+        if (ignored[coords]) delete ignored[coords];
+        else ignored[coords] = true;
+        store.set(IGNORED_KEY, ignored);
+        redraw();
+      });
+      return b;
+    };
+    const fingerprint = (card, rewards) => `${card.querySelector(".collectRewards .btnSub")?.textContent ?? ""}|${card.querySelector(".scannerResultRow:not(.header)")?.textContent ?? ""}|${Array.from(card.querySelectorAll(rewards)).map((l) => l.textContent).join("|")}`.replace(/\s+/g, " ");
+    const KINDS = [
+      { card: SCAN_CARD, rewards: ".scannerResultRewardsList .rewardLine", after: ".scannerResultTable", scanner: true },
+      { card: MISSION_CARD, rewards: ".rewardsCell .rewardLine", after: ".missionActionBar", scanner: false }
+    ];
+    let rendered = [];
+    const renderKind = (kind, l, records) => {
+      const perHour = l?.perHour ?? 0;
+      const scored = [];
+      for (const card of Array.from(doc.querySelectorAll(kind.card))) {
+        card.setAttribute("data-fut-or", fingerprint(card, kind.rewards));
+        card.classList.remove("fut-or-best");
+        card.querySelector(".fut-or")?.remove();
+        const s = kind.scanner ? readScanCard(card) : null;
+        const m = kind.scanner ? null : readMissionCard(card);
+        const data = s ?? m;
+        const p = profit(data.cost, data.rewards, perHour);
+        const box = h7(doc, "div", "fut-or");
+        if (!data.cost) {
+          box.append(rich("orion.rewards", { v: fmt(p.msu) }), h7(doc, "span", "fut-or-muted", t("orion.noCost")));
+        } else {
+          const idx = h7(doc, "span", "fut-or-index");
+          idx.append(p.free ? rich("orion.free", { v: t("orion.freeWord") }) : rich(perHour > 0 ? "orion.index" : "orion.indexM", { v: fmt(p.index) }));
+          box.append(idx);
+          if (!p.free && perHour > 0) box.append(rich("orion.redeemHours", { h: hoursText(p.hours) }));
+          box.append(rich("orion.rewards", { v: fmt(p.msu) }));
+          if (data.rewards.lithium) box.append(rich("orion.paidBack", { paid: fmt(data.cost), back: fmt(data.rewards.lithium) }));
+          const plan = s && l ? launchPlan({ cost: s.cost, lithium: s.rewards.lithium, msu: p.msu }, s.hours, s.waves, l, records, s.coords, Date.now()) : null;
+          if (plan && s) {
+            const line = h7(doc, "span", `fut-or-plan${plan.covered < plan.waves ? " short" : ""}`);
+            const dueText = plan.due.map((r) => recordText(r)).join("\n  ");
+            line.title = `${t("orion.planTitle", { h: hoursText(s.hours) })}${plan.due.length ? `
+  ${dueText}` : ` ${t("orion.planNone")}`}${s.rewards.lithium ? `
+${t("orion.planOwnBack", { v: fmt(s.rewards.lithium) })}` : ""}`;
+            const held = plan.reserved > 0 ? t("orion.held", { v: fmt(plan.reserved), n: plan.due.length }) : "";
+            if (plan.covered >= plan.waves) line.append(rich("orion.planAll", { free: fmt(plan.free), held, waves: plan.waves, msu: fmt(plan.msu) }));
+            else {
+              line.append(rich("orion.planSome", { free: fmt(Math.max(0, plan.free)), held, covered: plan.covered, waves: plan.waves, msu: fmt(plan.msu) }));
+              line.append(" \xB7 ", plan.wait === null ? t("orion.planNever", { waves: plan.waves }) : rich("orion.planWait", { waves: plan.waves, h: hoursText(plan.wait) }));
+            }
+            box.append(line);
+          }
+        }
+        if (m?.coords) {
+          const off = !!loadIgnored()[m.coords];
+          const b = ignoreButton(m.coords, off ? t("orion.toggleOff") : t("orion.toggleOn"), off ? "off" : "");
+          b.title = t("orion.toggleHint");
+          box.append(b);
+        }
+        if (data.rewards.other.length) box.append(h7(doc, "span", "fut-or-muted", t("orion.notCounted", { list: data.rewards.other.join(", ") })));
+        const anchor = card.querySelector(kind.after);
+        if (anchor) anchor.after(box);
+        else card.append(box);
+        scored.push({ card, index: p.index });
+      }
+      scored.sort((a, b) => b.index - a.index);
+      for (const { card } of scored) card.parentElement?.append(card);
+      const shown2 = scored.filter((x) => isShown(x.card));
+      if (shown2.length > 1 && shown2[0].index >= 0) shown2[0].card.classList.add("fut-or-best");
+      return shown2.map((x) => x.card);
+    };
+    const recordText = (r) => `${r.name} [${r.coords}] ${fmt(r.cost)}${r.partial ? ` (${t("orion.soFar")})` : ""}${r.lithium ? ` \u2212${fmt(r.lithium)} ${t("orion.back")}` : ""}, ${endsIn(r)}`;
+    const endsIn = (r) => r.endAt <= Date.now() ? t("orion.over") : t("orion.endsIn", { h: hoursText((r.endAt - Date.now()) / 36e5) });
+    let lastScanCost = null;
+    const renderReserve = (l, records) => {
+      doc.querySelectorAll(".fut-or-reserve, .fut-or-warn").forEach((n) => n.remove());
+      const holder = doc.querySelector("#scannerResultHolder") ?? doc.querySelector(SCAN_CARD)?.parentElement;
+      if (!holder) return;
+      const sorted = [...records].sort((a, b) => a.endAt - b.endAt);
+      const scans = l ? scansPossible(l, sorted, scanCost(doc), Date.now()) : null;
+      const box = h7(doc, "div", "fut-or-reserve");
+      if (scans) {
+        const line = h7(doc, "div", `fut-or-scans${scans.count > 0 ? "" : " fut-or-short"}`);
+        if (scans.count > 0) line.append(rich(sorted.length ? "orion.scansKeep" : "orion.scansNone", { n: scans.count, cost: fmt(scans.cost), free: fmt(scans.free) }));
+        else line.append(rich(scans.free < 0 ? "orion.scansShort" : "orion.scansZero", { v: fmt(-scans.free), free: fmt(scans.free), cost: fmt(scans.cost) }));
+        box.append(line);
+      }
+      const panel = doc.querySelector("#scannerPanelGroup");
+      if (scans && scans.count === 0 && sorted.length && panel) {
+        const warn = h7(doc, "div", "fut-or-warn");
+        warn.append(rich(scans.free < 0 ? "orion.warnShort" : "orion.warnFree", { v: fmt(-scans.free), free: fmt(scans.free), cost: fmt(scans.cost) }));
+        panel.after(warn);
+      }
+      const all2 = Object.values(loadLedger());
+      const ignored = loadIgnored();
+      const skipped = all2.filter((r) => ignored[r.coords]);
+      if (!sorted.length) box.append(t(skipped.length ? "orion.allIgnored" : "orion.noneRemembered"));
+      else {
+        box.append(rich("orion.toPay", { n: sorted.length, v: fmt(sorted.reduce((s, r) => s + (r.cost || 0) - (r.lithium || 0), 0)) }));
+        for (const r of sorted) {
+          const row = h7(doc, "div", "fut-or-row");
+          row.append(`${r.name} [${r.coords}] \xB7 `, h7(doc, "b", "", fmt(r.cost)));
+          if (r.partial) row.append(" ", h7(doc, "span", "fut-or-short", t("orion.partial")));
+          if (r.lithium) row.append(` \xB7 ${fmt(r.lithium)} ${t("orion.back")}`);
+          row.append(` \xB7 ${endsIn(r)} \xB7 `, ignoreButton(r.coords, t("orion.ignore")));
+          row.lastElementChild.setAttribute("title", t("orion.ignoreHint"));
+          box.append(row);
+        }
+      }
+      if (skipped.length) {
+        const row = h7(doc, "div", "fut-or-ignored", `${t("orion.ignoredList")} `);
+        skipped.forEach((r, i) => {
+          if (i) row.append(" \xB7 ");
+          row.append(`${r.name} [${r.coords}] \xB7 ${fmt(r.cost)} `, ignoreButton(r.coords, t("orion.countAgain")));
+        });
+        box.append(row);
+      }
+      holder.before(box);
+      lastScanCost = scanCost(doc);
+    };
+    const updateOpenButtons = () => {
+      const n = Object.keys(loadArch().entries).length;
+      doc.querySelectorAll(".fut-or-open").forEach((b) => b.textContent = t("orion.openArchive", { n }));
+    };
+    const placeOpenButton = () => {
+      let added = false;
+      for (const wrapper of Array.from(doc.querySelectorAll(".orionTabContentWrapper.anomalyMissions"))) {
+        if (wrapper.previousElementSibling?.classList.contains("fut-or-bar")) continue;
+        const bar = h7(doc, "div", "fut-or-bar");
+        const b = h7(doc, "button", "fut-or-open");
+        b.type = "button";
+        b.addEventListener("click", () => o.onOpenArchive());
+        bar.append(b);
+        wrapper.before(bar);
+        added = true;
+      }
+      if (added) updateOpenButtons();
+    };
+    const render = () => {
+      syncMissions();
+      commitDiscovered();
+      const l = lithium();
+      const records = live();
+      rendered = KINDS.flatMap((k) => renderKind(k, l, records));
+      renderReserve(l, records);
+      placeOpenButton();
+    };
+    const outOfDate = () => {
+      if (doc.querySelector("#orionMission:not([data-fut-or-synced]), .orionTabContentWrapper.anomalyMissions:not([data-fut-or-synced])")) return true;
+      if (doc.querySelector("#scannerResultHolder") && (!doc.querySelector(".fut-or-reserve") || scanCost(doc) !== lastScanCost)) return true;
+      if (doc.querySelector(".orionTabContentWrapper.anomalyMissions") && !doc.querySelector(".fut-or-bar")) return true;
+      if (Object.keys(store.get(PENDING_KEY, {})).length || discovered.size) return true;
+      const shown2 = [];
+      for (const k of KINDS)
+        for (const card of Array.from(doc.querySelectorAll(k.card))) {
+          if (card.getAttribute("data-fut-or") !== fingerprint(card, k.rewards)) return true;
+          if (isShown(card)) shown2.push(card);
+        }
+      return shown2.length !== rendered.length || shown2.some((c) => !rendered.includes(c));
+    };
+    let scheduled = false;
+    const watch = () => observer.observe(doc.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "class", "hidden"] });
+    const redraw = () => {
+      observer.disconnect();
+      try {
+        if (doc.querySelector(COLLECT_DIALOG)) dialogSeen = Date.now();
+        render();
+      } finally {
+        watch();
+      }
+    };
+    const observer = new MutationObserver(() => {
+      if (scheduled) return;
+      scheduled = true;
+      requestAnimationFrame(() => {
+        scheduled = false;
+        if (doc.querySelector(COLLECT_DIALOG)) dialogSeen = Date.now();
+        if (outOfDate()) redraw();
+      });
+    });
+    redraw();
   }
 
   // src/main.ts
@@ -15654,6 +17146,25 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       store.set(FLIGHTS_KEY, { readAt: Date.now(), list: list2 });
       draw();
     });
+    if (!store.get(IMPORTED_KEY, false)) {
+      try {
+        const read = (key) => {
+          const raw = window.localStorage.getItem(key);
+          return raw ? JSON.parse(raw) : void 0;
+        };
+        const old = { archive: read("orionArchive.v1"), ledger: read("orionAddons.anomalies"), ignored: read("orionAddons.ignored") };
+        if (old.archive || old.ledger || old.ignored) {
+          const merged = importLegacy({ archive: loadArchive(store.get(ARCHIVE_KEY, null)), ledger: store.get(LEDGER_KEY, {}), ignored: store.get(IGNORED_KEY, {}) }, old);
+          store.set(ARCHIVE_KEY, merged.archive);
+          store.set(LEDGER_KEY, merged.ledger);
+          store.set(IGNORED_KEY, merged.ignored);
+        }
+        store.set(IMPORTED_KEY, true);
+      } catch (error) {
+        console.warn(`[${t("app.name")}]`, error);
+      }
+    }
+    if (isOrionPage(document)) watchOrion({ doc: document, store, t, locale, onOpenArchive: () => openJournal({ doc: document, store, now: Date.now(), locale, t, kind: "orion" }) });
     if (isHighscorePage(document)) watchHighscore({ doc: document, store, locale, t, guard });
     if (isMessagesPage(document))
       refreshInbox = watchMessages({

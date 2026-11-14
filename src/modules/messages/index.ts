@@ -8,6 +8,7 @@ import { icon } from '../../core/icons';
 import { resIconSvg } from '../../core/res-icons';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
+import { ARCHIVE_KEY, loadArchive, noteBattle, type Archive } from '../../engines/orion';
 import { readMessage, type ExpeditionMessage, type ParsedMessage, type Res, type SpyMessage } from '../../data/messages';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { SHIP_ICONS } from '../../data/ship-icons';
@@ -356,6 +357,8 @@ export function processMessages(o: MessagesOptions): number {
   let added = 0;
   /** Shared reports found in the journal and taken out. */
   let dropped = 0;
+  let archive: Archive | null = null;
+  let archiveChanged = false;
   /** What entered the journal in this pass, for the "just read" panel. */
   const fresh: JournalEntry[] = [];
   for (const msg of Array.from(doc.querySelectorAll('.msg[data-msg-id]'))) {
@@ -424,6 +427,15 @@ export function processMessages(o: MessagesOptions): number {
       journal = r.journal;
       added += r.added;
     }
+    // Project Orion: a battle at an anomaly the archive knows, its ships lost (modules/orion, journal Orion tab).
+    if (parsed.kind === 'combat') {
+      archive ??= loadArchive(store.get<Archive | null>(ARCHIVE_KEY, null));
+      const next = noteBattle(archive, { id: parsed.id, at: parsed.at, coords: parsed.coords ?? '', targetType: parsed.place?.type, targetId: parsed.place?.id, lost: parsed.lost, won: parsed.winner === 'won', draw: parsed.winner === 'draw' }, now);
+      if (next) {
+        archive = next;
+        archiveChanged = true;
+      }
+    }
     // Pirates and aliens: the losses are in the combat report at position 16.
     if (parsed.kind === 'combat' && parsed.coords?.split(':')[2] === '16' && Object.keys(parsed.lost).length) {
       journal ??= store.get<Journal>(JOURNAL_KEY, {});
@@ -453,6 +465,7 @@ export function processMessages(o: MessagesOptions): number {
     if (rememberSpies(board, spies, o.now?.() ?? Date.now(), sharedTab)) store.set(SPY_BOARD_KEY, board);
   }
   if (o.spy) mountSpyPanel({ doc, store, t, locale, spy: o.spy, now: o.now });
+  if (archive && archiveChanged) store.set(ARCHIVE_KEY, archive);
   if (journal && (added || dropped)) {
     store.set(JOURNAL_KEY, trim(journal, o.now?.() ?? Date.now()));
     o.onJournal?.(added);

@@ -13,12 +13,13 @@ import { resIconSvg } from '../../core/res-icons';
 import { iconSvg } from '../fleet/icons';
 import { FOLD_KEY, shipIcon, shipName, type T } from './index';
 import { JOURNAL_CSS, OUTCOME_COLORS } from './style';
+import { clearOrion, hasOrion, loadOrion, ORION_CSS, orionCount, orionCsv, orionData, orionState, orionView } from './orion-view';
 
 export const JOURNAL_ID = 'fut-journal';
 const PERIOD_KEY = 'exp.period';
 const KIND_KEY = 'exp.kind';
-/** Expeditions, discovery missions (artefacts, lifeform XP) and imported raids: each its own tab. */
-type Kind = 'expedition' | 'discovery' | 'raid';
+/** Expeditions, discovery missions (artefacts, lifeform XP), imported raids and Orion anomalies: each its own tab. */
+export type Kind = 'expedition' | 'discovery' | 'raid' | 'orion';
 const PERIODS: Period[] = ['today', 'yesterday', 'week', 'month', 'all'];
 const ORDER: Outcome[] = ['resource', 'darkmatter', 'ship', 'item', 'trader', 'early', 'late', 'pirate', 'alien', 'blackhole', 'nothing', 'artefact', 'lifeform', 'unknown'];
 
@@ -28,6 +29,8 @@ export interface JournalOptions {
   now: number;
   locale: string;
   t: T;
+  /** The tab to open on (the Orion pages open the Orion one). */
+  kind?: Kind;
 }
 
 let keyHandler: ((e: KeyboardEvent) => void) | null = null;
@@ -52,7 +55,7 @@ export function openJournal(o: JournalOptions): void {
   host.id = JOURNAL_ID;
   const root = host.attachShadow({ mode: 'open' });
   const style = h('style');
-  style.textContent = WINDOW_SHEET + JOURNAL_CSS;
+  style.textContent = WINDOW_SHEET + JOURNAL_CSS + ORION_CSS;
   const backdrop = h('div', 'backdrop');
   const panel = h('div', 'panel');
   backdrop.append(panel);
@@ -64,7 +67,9 @@ export function openJournal(o: JournalOptions): void {
   let period = store.get<Period>(PERIOD_KEY, 'week');
   if (!PERIODS.includes(period)) period = 'week';
   let confirmClear = false;
-  let kind = store.get<Kind>(KIND_KEY, 'expedition');
+  let kind = o.kind ?? store.get<Kind>(KIND_KEY, 'expedition');
+  /** Filters, sorting and the column picked on the Orion tab: kept while the window is open. */
+  const orion = orionState();
   /** The chart column picked (its start), whose outcomes and ships are shown; null = the whole period. */
   let focus: number | null = null;
   const MIX_COLORS = { metal: 'var(--m)', crystal: 'var(--c)', deuterium: 'var(--d)', ships: '#2E9E7E' } as const;
@@ -316,13 +321,15 @@ export function openJournal(o: JournalOptions): void {
     const inPeriod = entriesIn(journal, periodRange(period, o.now));
     const hasRaids = Object.values(journal).some((e) => e.kind === 'raid');
     if (kind === 'raid' && !hasRaids) kind = 'expedition';
+    const hasAnomalies = hasOrion(store);
+    if (kind === 'orion' && !hasAnomalies) kind = 'expedition';
     const entries = inPeriod.filter((e) => e.kind === kind);
     const s = periodStats(entries);
     const isDisc = kind === 'discovery';
 
     const head = h('div', 'head');
     const titles = h('div', 'titles');
-    titles.append(h('h2', '', t('exp.title')), h('span', 'sub', t('exp.sub')));
+    titles.append(h('h2', '', t(kind === 'orion' ? 'orion.title' : 'exp.title')), h('span', 'sub', t(kind === 'orion' ? 'orion.sub' : 'exp.sub')));
     const close = h('button', 'close');
     close.append(icon(doc, 'close', 16));
     close.title = t('fleet.close');
@@ -336,6 +343,7 @@ export function openJournal(o: JournalOptions): void {
       b.addEventListener('click', () => {
         period = p;
         focus = null;
+        orion.focus = null;
         store.set(PERIOD_KEY, p);
         draw();
       });
@@ -343,14 +351,15 @@ export function openJournal(o: JournalOptions): void {
     }
 
     const kinds = h('div', 'tabs');
-    for (const k of ['expedition', 'discovery', ...(hasRaids ? ['raid'] : [])] as Kind[]) {
+    for (const k of ['expedition', 'discovery', ...(hasRaids ? ['raid'] : []), ...(hasAnomalies ? ['orion'] : [])] as Kind[]) {
       const n = periodStats(inPeriod.filter((e) => e.kind === k));
-      const count = k === 'raid' ? raidStats(inPeriod).count : k === 'discovery' ? n.discoveries : n.count;
+      const count = k === 'orion' ? orionCount(store, period, o.now) : k === 'raid' ? raidStats(inPeriod).count : k === 'discovery' ? n.discoveries : n.count;
       const b = h('button', 'tab', `${t(`exp.kind.${k}`)} · ${count.toLocaleString(locale)}`);
       b.setAttribute('aria-pressed', String(k === kind));
       b.addEventListener('click', () => {
         kind = k;
         focus = null;
+        orion.focus = null;
         store.set(KIND_KEY, k);
         draw();
       });
@@ -358,7 +367,9 @@ export function openJournal(o: JournalOptions): void {
     }
 
     const parts: HTMLElement[] = [head, kinds, tabs];
-    if (!entries.length) {
+    if (kind === 'orion') {
+      parts.push(...orionView({ doc, store, t, locale, now: o.now, period, state: orion, redraw: draw, shipGrid }));
+    } else if (!entries.length) {
       parts.push(h('p', 'empty', Object.keys(journal).length ? t('exp.emptyPeriod') : t('exp.empty')));
     } else if (kind === 'expedition') {
       parts.push(...expeditionView(entries, s));
@@ -508,7 +519,37 @@ export function openJournal(o: JournalOptions): void {
       store.set(JOURNAL_KEY, {});
       draw();
     });
-    if (Object.keys(journal).length) acts.append(exp, clear);
+    if (kind === 'orion') {
+      // The Orion archive: a CSV per day and the whole archive as JSON (files on this computer, only on a click).
+      const save = (name: string, text: string, type: string) => {
+        const a = doc.createElement('a');
+        a.href = URL.createObjectURL(new Blob([text], { type }));
+        a.download = name;
+        doc.body.append(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      };
+      const csv = h('button', 'act', t('orion.csv'));
+      csv.addEventListener('click', () => {
+        const d = orionData(doc, store, locale, o.now);
+        save('orion-anomalies-per-day.csv', orionCsv(d.events, d.shipOf), 'text/csv');
+      });
+      const json = h('button', 'act', t('orion.json'));
+      json.addEventListener('click', () => save('orion-anomalies.json', JSON.stringify(loadOrion(store), null, 1), 'application/json'));
+      const wipe = h('button', confirmClear ? 'act danger' : 'act ghost', confirmClear ? t('exp.clearConfirm') : t('orion.clear'));
+      wipe.addEventListener('click', () => {
+        if (!confirmClear) {
+          confirmClear = true;
+          draw();
+          return;
+        }
+        confirmClear = false;
+        clearOrion(store);
+        draw();
+      });
+      acts.append(csv, json, wipe);
+    } else if (Object.keys(journal).length) acts.append(exp, clear);
     foot.append(opt, acts);
     parts.push(foot);
 

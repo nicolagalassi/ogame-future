@@ -105,6 +105,8 @@ export interface CombatMessage {
   debris: Res;
   /** The report's API key ("cr-…"), for the combat report converter; '' when absent. */
   apiKey: string;
+  /** Where it was fought, as the report says (type 'anomaly' with the anomaly's id at Project Orion). */
+  place?: { type?: string; id?: string };
 }
 
 export type ParsedMessage = ExpeditionMessage | SpyMessage | CargoMessage | CombatMessage;
@@ -325,7 +327,7 @@ function readCombat(id: string, at: number, d: DOMStringMap, own: number): Comba
   const fleets = json<CombatFleet[]>(d.rawFleets, []);
   const rounds = json<CombatRound[]>(d.rawCombatrounds, []);
   const result = json<CombatResult>(d.rawResult, {});
-  const defender = json<{ owner?: { id?: number } }>(d.rawDefenderspaceobject, {});
+  const defender = json<{ owner?: { id?: number }; type?: string; id?: string | number }>(d.rawDefenderspaceobject, {});
   const mine = (Array.isArray(fleets) ? fleets : []).filter((f) => f.player?.id === own);
   const ownIds = new Set(mine.map((f) => f.fleetId));
   const sides = new Set(mine.map((f) => f.side));
@@ -345,7 +347,7 @@ function readCombat(id: string, at: number, d: DOMStringMap, own: number): Comba
     if (ownIds.has(f.fleetId)) for (const tech of f.technologies ?? []) if (tech.technologyId && tech.destroyedTotal) lost[tech.technologyId] = (lost[tech.technologyId] ?? 0) + tech.destroyedTotal;
   if (!attacker && defender.owner?.id === own)
     for (const r of result.repairedTechnologies ?? []) if (r.technologyId && lost[r.technologyId]) lost[r.technologyId] = Math.max(0, lost[r.technologyId]! - num(r.amount));
-  return { kind: 'combat', id, at, coords: d.rawCoords || null, attacker, winner, loot, lost, debris: pick(result.debris?.resources, 'remaining'), apiKey: d.rawHashcode ?? '' };
+  return { kind: 'combat', id, at, coords: d.rawCoords || null, attacker, winner, loot, lost, debris: pick(result.debris?.resources, 'remaining'), apiKey: d.rawHashcode ?? '', place: { type: defender.type, id: defender.id === undefined ? undefined : String(defender.id) } };
 }
 
 /** The player's id, from the meta tag OGame puts on every game page. */
