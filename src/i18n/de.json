@@ -891,5 +891,14 @@
   "orion.kHeldSub": "für {n} laufende Anomalien",
   "orion.kBar": "Vorrat",
   "orion.kBarSub": "Speicher {v}",
-  "orion.wholeMission": "ganze Mission"
+  "orion.wholeMission": "ganze Mission",
+  "orion.extraValue": "andere Belohnungen (Schätzung)",
+  "orion.extraHint": "Budget der Karte ≈{budget} MSU (gelernter Multiplikator für Typ und Modus); die Rohstoffe nehmen einen Teil, der Rest ≈{extra} geht an andere Belohnungen, zu {rate} % gezählt.",
+  "orion.withExtra": "davon ≈{v} geschätzt für andere Belohnungen",
+  "orion.perMissionHour": "≈{v} MSU/h Mission",
+  "orion.lowRoll": "bei niedrigem Wurf ≈{v}",
+  "orion.lowRollHint": "Kampf: eine Einlösung zahlt alles oder 37,5 % der Belohnungen (Lieferungen zahlen immer alles). Community-Wert, vom Orion-Tagebuch geprüft.",
+  "orion.lowRolls": "niedrige Würfe",
+  "tech.iasShort": "Lithium +{v}/h",
+  "tech.ias": "Lithiumproduktion dieses Scanners beim Umwandeln: {from}/h → {to}/h auf Stufe {level} (Community-Formel: 15,36 × L × 1,1^L × Wirtschaftsgeschwindigkeit)"
 }

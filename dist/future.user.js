@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.79
+// @version      0.3.80
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1399,7 +1399,16 @@
     "orion.kHeldSub": "per {n} anomalie in corso",
     "orion.kBar": "In cassa",
     "orion.kBarSub": "deposito {v}",
-    "orion.wholeMission": "intera missione"
+    "orion.wholeMission": "intera missione",
+    "orion.extraValue": "altre ricompense (stima)",
+    "orion.extraHint": "Budget della scheda \u2248{budget} MSU (dal moltiplicatore imparato per questo tipo e modalit\xE0); le risorse ne prendono una parte, il resto \u2248{extra} va alle altre ricompense, contate al {rate}%.",
+    "orion.withExtra": "di cui \u2248{v} stimati per le altre ricompense",
+    "orion.perMissionHour": "\u2248{v} MSU/h di missione",
+    "orion.lowRoll": "se esce basso \u2248{v}",
+    "orion.lowRollHint": "Combattimento: al riscatto si prende tutto oppure il 37,5% delle ricompense (le consegne danno sempre tutto). Dato della community, verificato dal diario Orion.",
+    "orion.lowRolls": "esiti bassi",
+    "tech.iasShort": "Litio +{v}/h",
+    "tech.ias": "Produzione di litio di questo scanner durante la conversione: {from}/h \u2192 {to}/h al livello {level} (formula della community: 15,36 \xD7 L \xD7 1,1^L \xD7 velocit\xE0 economica)"
   };
 
   // src/i18n/en.json
@@ -2296,7 +2305,16 @@
     "orion.kHeldSub": "for {n} anomalies under way",
     "orion.kBar": "In the bar",
     "orion.kBarSub": "storage {v}",
-    "orion.wholeMission": "whole mission"
+    "orion.wholeMission": "whole mission",
+    "orion.extraValue": "other rewards (estimate)",
+    "orion.extraHint": "Card budget \u2248{budget} MSU (from the multiplier learned for this type and mode); the resources take part of it, the rest \u2248{extra} goes to the other rewards, counted at {rate}%.",
+    "orion.withExtra": "\u2248{v} of it estimated for the other rewards",
+    "orion.perMissionHour": "\u2248{v} MSU per mission hour",
+    "orion.lowRoll": "low roll \u2248{v}",
+    "orion.lowRollHint": "Combat: a collection pays everything or 37.5% of the rewards (deliveries always pay everything). Community figure, checked by the Orion journal.",
+    "orion.lowRolls": "low rolls",
+    "tech.iasShort": "Lithium +{v}/h",
+    "tech.ias": "Lithium production of this scanner while converting: {from}/h \u2192 {to}/h at level {level} (community formula: 15.36 \xD7 L \xD7 1.1^L \xD7 economy speed)"
   };
 
   // src/i18n/fr.json
@@ -3193,7 +3211,16 @@
     "orion.kHeldSub": "pour {n} anomalies en cours",
     "orion.kBar": "En stock",
     "orion.kBarSub": "stockage {v}",
-    "orion.wholeMission": "mission enti\xE8re"
+    "orion.wholeMission": "mission enti\xE8re",
+    "orion.extraValue": "autres r\xE9compenses (estimation)",
+    "orion.extraHint": "Budget de la carte \u2248{budget} MSU (multiplicateur appris pour ce type et ce mode) ; les ressources en prennent une partie, le reste \u2248{extra} va aux autres r\xE9compenses, compt\xE9es \xE0 {rate} %.",
+    "orion.withExtra": "dont \u2248{v} estim\xE9s pour les autres r\xE9compenses",
+    "orion.perMissionHour": "\u2248{v} MSU/h de mission",
+    "orion.lowRoll": "si tirage bas \u2248{v}",
+    "orion.lowRollHint": "Combat : un rachat paie tout ou 37,5 % des r\xE9compenses (les livraisons paient toujours tout). Donn\xE9e de la communaut\xE9, v\xE9rifi\xE9e par le journal Orion.",
+    "orion.lowRolls": "tirages bas",
+    "tech.iasShort": "Lithium +{v}/h",
+    "tech.ias": "Production de lithium de ce scanner pendant la conversion : {from}/h \u2192 {to}/h au niveau {level} (formule de la communaut\xE9 : 15,36 \xD7 L \xD7 1,1^L \xD7 vitesse \xE9conomique)"
   };
 
   // src/i18n/de.json
@@ -4090,7 +4117,16 @@
     "orion.kHeldSub": "f\xFCr {n} laufende Anomalien",
     "orion.kBar": "Vorrat",
     "orion.kBarSub": "Speicher {v}",
-    "orion.wholeMission": "ganze Mission"
+    "orion.wholeMission": "ganze Mission",
+    "orion.extraValue": "andere Belohnungen (Sch\xE4tzung)",
+    "orion.extraHint": "Budget der Karte \u2248{budget} MSU (gelernter Multiplikator f\xFCr Typ und Modus); die Rohstoffe nehmen einen Teil, der Rest \u2248{extra} geht an andere Belohnungen, zu {rate} % gez\xE4hlt.",
+    "orion.withExtra": "davon \u2248{v} gesch\xE4tzt f\xFCr andere Belohnungen",
+    "orion.perMissionHour": "\u2248{v} MSU/h Mission",
+    "orion.lowRoll": "bei niedrigem Wurf \u2248{v}",
+    "orion.lowRollHint": "Kampf: eine Einl\xF6sung zahlt alles oder 37,5 % der Belohnungen (Lieferungen zahlen immer alles). Community-Wert, vom Orion-Tagebuch gepr\xFCft.",
+    "orion.lowRolls": "niedrige W\xFCrfe",
+    "tech.iasShort": "Lithium +{v}/h",
+    "tech.ias": "Lithiumproduktion dieses Scanners beim Umwandeln: {from}/h \u2192 {to}/h auf Stufe {level} (Community-Formel: 15,36 \xD7 L \xD7 1,1^L \xD7 Wirtschaftsgeschwindigkeit)"
   };
 
   // src/core/i18n.ts
@@ -6714,7 +6750,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
       const entry = entries[id];
       if (entry) {
         const r = collectedOnly(p.rewards, p.before, card ? card.rewards : null);
-        entries[id] = { ...entry, collections: [...entry.collections, { at: p.at, wave: p.wave, waves: p.waves, cost: p.cost, lithium: r.lithium, metal: r.metal, crystal: r.crystal, deuterium: r.deuterium, other: r.other }] };
+        const roll = entry.combat ? rollOf(msu(r), entry.possibleMsu ?? 0, p.waves, entry.waves) : void 0;
+        entries[id] = { ...entry, collections: [...entry.collections, { at: p.at, wave: p.wave, waves: p.waves, cost: p.cost, lithium: r.lithium, metal: r.metal, crystal: r.crystal, deuterium: r.deuterium, other: r.other, ...roll ? { roll } : {} }] };
       }
       changed = true;
     }
@@ -6756,7 +6793,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     for (const b of Object.values(archive.battles)) out.push({ kind: "battle", at: b.at, entry: b.entry, lost: b.lost });
     return out;
   }
-  var noTotals = () => ({ collections: 0, waves: 0, paid: 0, back: 0, res: { metal: 0, crystal: 0, deuterium: 0 }, gain: 0, other: [], got: {}, gotN: 0, gotMsu: 0, fuel: 0, fuelMsu: 0, battles: 0, lost: {}, lostN: 0, lostMsu: 0 });
+  var noTotals = () => ({ rolled: 0, lowRolls: 0, collections: 0, waves: 0, paid: 0, back: 0, res: { metal: 0, crystal: 0, deuterium: 0 }, gain: 0, other: [], got: {}, gotN: 0, gotMsu: 0, fuel: 0, fuelMsu: 0, battles: 0, lost: {}, lostN: 0, lostMsu: 0 });
   var unitsMsu = (units) => msu(unitsValue(Object.fromEntries(Object.entries(units).map(([k, n]) => [Number(k), n]))));
   function orionTotals(events, shipOf) {
     const t = noTotals();
@@ -6771,6 +6808,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
         t.res.crystal += c.crystal || 0;
         t.res.deuterium += c.deuterium || 0;
         t.gain += msu(c);
+        if (c.roll) {
+          t.rolled++;
+          if (c.roll === "low") t.lowRolls++;
+        }
         for (const text of c.other ?? []) {
           const ship = shipOf(text);
           if (!ship) {
@@ -6859,6 +6900,31 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     for (const k of Object.keys(old.ignored ?? {})) ignored[k] = true;
     return { archive: { entries, fuel, battles }, ledger, ignored };
   }
+  var MULT_KEY = "orion.mult";
+  var waveBonus = (waves) => 1 + (Math.max(1, waves) - 1) / 51;
+  var multKey = (name, mode) => `${name.trim()}|${mode.trim().toLowerCase()}`;
+  function learnMult(mults, name, mode, cost, waves, r) {
+    const value = msu(r);
+    if (!name || !cost || !waves || !value || r.other.length) return false;
+    const k = value / (cost * waveBonus(waves));
+    const key = multKey(name, mode);
+    if (mults[key] !== void 0 && Math.abs(mults[key] - k) / k < 1e-6) return false;
+    mults[key] = k;
+    return true;
+  }
+  var SHIP_RATE = 0.75;
+  function budgetOf(k, cost, waves, r) {
+    if (!k || !cost || !waves) return null;
+    const budget = k * cost * waveBonus(waves);
+    return { budget, extra: Math.max(0, budget - msu(r)) };
+  }
+  var LOW_ROLL = 0.375;
+  function rollOf(collectedMsu, possibleMsu, waves, totalWaves) {
+    if (!possibleMsu || !waves || !totalWaves || !collectedMsu) return void 0;
+    const ratio = collectedMsu / (possibleMsu * waves / totalWaves);
+    return ratio < 0.6 ? "low" : ratio > 0.8 ? "high" : void 0;
+  }
+  var iasProduction = (level2, economy) => level2 > 0 ? Math.floor(15.36 * level2 * 1.1 ** level2 * economy) : 0;
 
   // src/data/messages.ts
   var json = (value, fallback) => {
@@ -14354,6 +14420,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
 `;
 
   // src/modules/tech/index.ts
+  var IAS = 45;
   var RES = [
     ["metal", "m"],
     ["crystal", "c"],
@@ -14648,6 +14715,12 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         }
         const net = labChip(o, details.id);
         if (net) row.append(net);
+        if (details.id === IAS) {
+          const eco = Number(doc.querySelector('meta[name="ogame-universe-speed"]')?.getAttribute("content")) || 1;
+          const from = iasProduction(start.level - 1, eco);
+          const gain = iasProduction(to, eco) - from;
+          row.append(chip(doc, "", t("tech.iasShort", { v: formatUnits(gain, locale) }), t("tech.ias", { from: groupInt(from, locale), to: groupInt(from + gain, locale), level: to }), "fut-tp-ias"));
+        }
         if (start.discount > 5e-4) row.append(chip(doc, "", t("tech.discountShort", { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), t("tech.discount", { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), "fut-tp-disc"));
         box.replaceChildren(grid(o, view2, have !== null), row);
       };
@@ -15385,6 +15458,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       h5("b", "", fmt(tot.paid - tot.back)),
       ` (${t("orion.paid")} ${fmt(tot.paid)} \xB7 ${t("orion.back")} ${fmt(tot.back)})`
     );
+    if (tot.rolled) strip.append(` \xB7 ${t("orion.lowRolls")} `, h5("b", "", `${tot.lowRolls}/${tot.rolled}`));
     hero.append(top, strip);
     out.push(hero);
     const cols = starts.map((s, i) => {
@@ -16474,6 +16548,18 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     }
     return r;
   }
+  function isCombat(type, win) {
+    const words = [win?.scannerLoca?.LOCA_ALL_COMBAT, "Battaglia", "Combat", "Kampf", "Combate", "Walka"].filter(Boolean).map((w) => w.toLowerCase());
+    const t = clean(type).toLowerCase();
+    return !!t && words.some((w) => t.split(/\s*\/\s*/).includes(w));
+  }
+  function modeOf(card) {
+    for (const el6 of Array.from(card.querySelectorAll("span, div"))) {
+      const t = clean(el6.textContent);
+      if ((t === "PvP" || t === "PvE") && !el6.children.length) return t;
+    }
+    return "";
+  }
   var SCAN_CARD = ".scannerResultCard";
   function readScanCard(card) {
     const row = card.querySelector(".scannerResultRow:not(.header)");
@@ -16485,7 +16571,11 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       cost: parseNumber(costCell?.getAttribute("data-tooltip-title") || costCell?.getAttribute("title")),
       rewards: readRewards(card, ".scannerResultRewardsList .rewardLine"),
       hours: durationHours(cells[2]?.textContent),
-      waves: parseNumber(cells[3]?.textContent)
+      waves: parseNumber(cells[3]?.textContent),
+      level: parseNumber(cells[0]?.textContent),
+      stars: card.querySelectorAll('img[src*="star"]').length,
+      mode: modeOf(card),
+      type: clean(cells[5]?.textContent)
     };
   }
   var MISSION_CARD = ".anomalyMission";
@@ -16550,6 +16640,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
 .fut-or-val b { font-size: 15px; line-height: 18px; color: var(--accent); }
 .fut-or-val small { font-size: 10px; color: var(--mute); }
 .fut-or-val.free b { color: var(--ok); }
+.fut-or-val small.fut-or-risk { color: var(--warn); }
+.fut-or-x { color: #4FE0B0; }
 .fut-or-best { outline: 1px solid var(--gold, #F5C542); outline-offset: -1px; border-radius: 4px; }
 .fut-or-best .fut-or-val b { color: #F5C542; }
 .fut-or-line { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding-top: 6px; border-top: 1px solid var(--line); }
@@ -16659,7 +16751,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       store.set(LEDGER_KEY, ledger);
       const ignored = loadIgnored();
       if (Object.keys(ignored).some((c) => !ledger[c])) store.set(IGNORED_KEY, Object.fromEntries(Object.keys(ignored).filter((c) => ledger[c]).map((c) => [c, true])));
-      let archive = syncArchive(loadArch(), read.filter((m) => m.id).map((m) => ({ id: m.id, name: m.name, coords: m.coords, level: m.level, stars: m.stars, mode: m.mode, kind: m.kind, spawnedAt: m.spawnedAt, wave: m.incoming, waves: m.total })), now);
+      let archive = syncArchive(loadArch(), read.filter((m) => m.id).map((m) => ({ id: m.id, name: m.name, coords: m.coords, level: m.level, stars: m.stars, mode: m.mode, kind: m.kind, spawnedAt: m.spawnedAt, wave: m.incoming, waves: m.total, possibleMsu: msu(m.possible), combat: isCombat(m.kind, win) })), now);
       const states = new Map(read.filter((m) => m.id).map((m) => [m.id, { cost: m.cost, value: cardValue(m.rewards), rewards: m.rewards }]));
       const s = settle(pending, archive, states, (id) => !!doc.querySelector(`${COLLECT_DIALOG}[data-space-object-id="${CSS_ESCAPE(id)}"]`), now);
       archive = s.archive;
@@ -16777,6 +16869,13 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     const renderKind = (kind, l, records) => {
       const perHour = l?.perHour ?? 0;
       const ledger = loadLedger();
+      const mults = { ...store.get(MULT_KEY, {}) };
+      let learned = false;
+      if (kind.scanner) for (const c of Array.from(doc.querySelectorAll(kind.card))) {
+        const x = readScanCard(c);
+        if (learnMult(mults, x.name, x.mode, x.cost, x.waves, x.rewards)) learned = true;
+      }
+      if (learned) store.set(MULT_KEY, mults);
       const scored = [];
       for (const card of Array.from(doc.querySelectorAll(kind.card))) {
         card.setAttribute("data-fut-or", fingerprint(card, kind.rewards));
@@ -16786,7 +16885,11 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         const m = kind.scanner ? null : readMissionCard(card);
         const data = s ?? m;
         const whole = m && m.totalCost ? { cost: m.totalCost, rewards: m.possible } : { cost: data.cost, rewards: data.rewards };
-        const p = profit(whole.cost, whole.rewards, perHour);
+        const waves = s ? s.waves : m?.total ?? 0;
+        const est = whole.rewards.other.length ? budgetOf(mults[multKey(s?.name ?? m?.name ?? "", s?.mode ?? m?.mode ?? "")], whole.cost, waves, whole.rewards) : null;
+        const extraMsu = est ? est.extra * SHIP_RATE : 0;
+        const p = profit(whole.cost, { ...whole.rewards, metal: whole.rewards.metal + extraMsu }, perHour);
+        const combat = isCombat(s ? s.type : m?.kind ?? "", win);
         const box = h7(doc, "div", "fut-or");
         const tiles = h7(doc, "div", "fut-or-tiles");
         const val = h7(doc, "div", "fut-or-val");
@@ -16794,6 +16897,11 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         if (m && !m.cost && !msu(m.rewards) && !m.rewards.lithium) tiles.append(tile2("note", null, t("orion.waiting")));
         else {
           tiles.append(...rewardTiles(data.rewards));
+          if (est && !m) {
+            const x = tile2("fut-or-x", null, `\u2248${fmt(extraMsu)}`, t("orion.extraValue"));
+            x.title = t("orion.extraHint", { budget: fmt(est.budget), extra: fmt(est.extra), rate: SHIP_RATE * 100 });
+            tiles.append(x);
+          }
           if (data.cost) tiles.append(tile2("fut-or-li neg", lithiumIcon(), `\u2212${fmt(data.cost)}`, kind.scanner ? t("orion.redeemCost") : t("orion.collectCost")));
         }
         if (!whole.cost) val.append(h7(doc, "b", "", m && !msu(whole.rewards) ? "\u2014" : fmt(p.msu)), h7(doc, "small", "", m && !msu(whole.rewards) ? t("orion.waitingShort") : t("orion.msuNoCost")));
@@ -16805,7 +16913,13 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           if (perHour > 0) val.append(h7(doc, "small", "", t("orion.redeemHours", { h: hoursText(p.hours) })));
           if (m) val.append(h7(doc, "small", "", t("orion.wholeMission")));
         }
-        val.title = `${t("orion.rewards", { v: fmt(p.msu) })}${whole.rewards.lithium ? ` \xB7 ${t("orion.paidBack", { paid: fmt(whole.cost), back: fmt(whole.rewards.lithium) })}` : ""}`;
+        if (s && s.hours > 0 && p.msu) val.append(h7(doc, "small", "", t("orion.perMissionHour", { v: fmt(p.msu / s.hours) })));
+        if (combat && p.msu) {
+          const low = h7(doc, "small", "fut-or-risk", t("orion.lowRoll", { v: fmt(p.msu * LOW_ROLL) }));
+          low.title = t("orion.lowRollHint");
+          val.append(low);
+        }
+        val.title = `${t("orion.rewards", { v: fmt(p.msu) })}${extraMsu ? ` (${t("orion.withExtra", { v: fmt(extraMsu) })})` : ""}${whole.rewards.lithium ? ` \xB7 ${t("orion.paidBack", { paid: fmt(whole.cost), back: fmt(whole.rewards.lithium) })}` : ""}`;
         box.append(tiles, val);
         const plan = s && l ? launchPlan({ cost: s.cost, lithium: s.rewards.lithium, msu: p.msu }, s.hours, s.waves, l, records, s.coords, Date.now()) : null;
         if (plan && s) {

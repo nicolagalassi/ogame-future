@@ -11,6 +11,10 @@
  * is watched with a MutationObserver instead of replacing the game's technologyDetails.
  */
 import { rememberTechIcons } from '../../data/tech-icons';
+import { iasProduction } from '../../engines/orion';
+
+/** The interstellar anomaly scanner (Project Orion). */
+const IAS = 45;
 import { icon } from '../../core/icons';
 import { resIconSvg } from '../../core/res-icons';
 import type { Store } from '../../core/storage';
@@ -421,6 +425,13 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
       }
       const net = labChip(o, details.id);
       if (net) row.append(net);
+      // Anomaly scanner: the lithium per hour the levels picked add while converting (community formula).
+      if (details.id === IAS) {
+        const eco = Number(doc.querySelector('meta[name="ogame-universe-speed"]')?.getAttribute('content')) || 1;
+        const from = iasProduction(start.level - 1, eco);
+        const gain = iasProduction(to, eco) - from;
+        row.append(chip(doc, '', t('tech.iasShort', { v: formatUnits(gain, locale) }), t('tech.ias', { from: groupInt(from, locale), to: groupInt(from + gain, locale), level: to }), 'fut-tp-ias'));
+      }
       if (start.discount > 0.0005) row.append(chip(doc, '', t('tech.discountShort', { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), t('tech.discount', { pct: (start.discount * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }), 'fut-tp-disc'));
       box.replaceChildren(grid(o, view, have !== null), row);
     };

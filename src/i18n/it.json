@@ -891,5 +891,14 @@
   "orion.kHeldSub": "per {n} anomalie in corso",
   "orion.kBar": "In cassa",
   "orion.kBarSub": "deposito {v}",
-  "orion.wholeMission": "intera missione"
+  "orion.wholeMission": "intera missione",
+  "orion.extraValue": "altre ricompense (stima)",
+  "orion.extraHint": "Budget della scheda ≈{budget} MSU (dal moltiplicatore imparato per questo tipo e modalità); le risorse ne prendono una parte, il resto ≈{extra} va alle altre ricompense, contate al {rate}%.",
+  "orion.withExtra": "di cui ≈{v} stimati per le altre ricompense",
+  "orion.perMissionHour": "≈{v} MSU/h di missione",
+  "orion.lowRoll": "se esce basso ≈{v}",
+  "orion.lowRollHint": "Combattimento: al riscatto si prende tutto oppure il 37,5% delle ricompense (le consegne danno sempre tutto). Dato della community, verificato dal diario Orion.",
+  "orion.lowRolls": "esiti bassi",
+  "tech.iasShort": "Litio +{v}/h",
+  "tech.ias": "Produzione di litio di questo scanner durante la conversione: {from}/h → {to}/h al livello {level} (formula della community: 15,36 × L × 1,1^L × velocità economica)"
 }

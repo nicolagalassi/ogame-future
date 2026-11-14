@@ -164,6 +164,8 @@ export function orionView(c: OrionViewContext): HTMLElement[] {
     h('b', '', String(tot.waves)), ` ${t('orion.wavesN')} · ${t('orion.lithiumNet')} `,
     h('b', '', fmt(tot.paid - tot.back)), ` (${t('orion.paid')} ${fmt(tot.paid)} · ${t('orion.back')} ${fmt(tot.back)})`,
   );
+  // Combat collections against their possible rewards: how often the low roll (37.5%) came out.
+  if (tot.rolled) strip.append(` · ${t('orion.lowRolls')} `, h('b', '', `${tot.lowRolls}/${tot.rolled}`));
   hero.append(top, strip);
   out.push(hero);
 
