@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.76
+// @version      0.3.77
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -7852,7 +7852,7 @@ td.spark-cell { width: 90px; }
   ];
   function expeditionMax(o) {
     const row = EXPEDITION_TABLE.find((r) => r.topScore >= (o.topScore ?? Infinity));
-    const factor = o.characterClass === 3 ? 3 * o.economySpeed : 2;
+    const factor = (o.characterClass === 3 ? 3 : 2) * o.economySpeed;
     const bonus = (1 + o.classBooster) * (1 + (o.lfBooster ?? 0)) * (1 + (o.itemBoost ?? 0));
     return { base: row.base, max: Math.round(row.max * factor * bonus) };
   }

@@ -150,9 +150,10 @@ describe('fleet engine, round 2', () => {
     expect(cargoLoad({ metal: 500, crystal: 300, deuterium: 400 }, reserve, 50, 600)).toEqual({ metal: 50, crystal: 300, deuterium: 250 });
   });
 
-  it('computes the expedition limit like OGLight', () => {
+  it('computes the expedition limit, every class scaled by the economy speed', () => {
     expect(expeditionMax({ characterClass: 3, economySpeed: 8, classBooster: 0.5 })).toEqual({ base: 1250, max: 180_000_000 });
-    expect(expeditionMax({ topScore: 3_000_000, characterClass: 1, economySpeed: 8, classBooster: 0 }).max).toBe(3_600_000);
+    expect(expeditionMax({ topScore: 3_000_000, characterClass: 1, economySpeed: 8, classBooster: 0 }).max).toBe(28_800_000);
+    expect(expeditionMax({ topScore: 3_000_000, characterClass: 2, economySpeed: 1, classBooster: 0 }).max).toBe(3_600_000);
     expect(expeditionTarget(1000, '')).toBe(1000);
     expect(expeditionTarget(1000, '50%')).toBe(500);
     expect(expeditionTarget(1000, '2k')).toBe(2000);
