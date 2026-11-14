@@ -891,5 +891,14 @@
   "orion.kHeldSub": "pour {n} anomalies en cours",
   "orion.kBar": "En stock",
   "orion.kBarSub": "stockage {v}",
-  "orion.wholeMission": "mission entière"
+  "orion.wholeMission": "mission entière",
+  "orion.extraValue": "autres récompenses (estimation)",
+  "orion.extraHint": "Budget de la carte ≈{budget} MSU (multiplicateur appris pour ce type et ce mode) ; les ressources en prennent une partie, le reste ≈{extra} va aux autres récompenses, comptées à {rate} %.",
+  "orion.withExtra": "dont ≈{v} estimés pour les autres récompenses",
+  "orion.perMissionHour": "≈{v} MSU/h de mission",
+  "orion.lowRoll": "si tirage bas ≈{v}",
+  "orion.lowRollHint": "Combat : un rachat paie tout ou 37,5 % des récompenses (les livraisons paient toujours tout). Donnée de la communauté, vérifiée par le journal Orion.",
+  "orion.lowRolls": "tirages bas",
+  "tech.iasShort": "Lithium +{v}/h",
+  "tech.ias": "Production de lithium de ce scanner pendant la conversion : {from}/h → {to}/h au niveau {level} (formule de la communauté : 15,36 × L × 1,1^L × vitesse économique)"
 }

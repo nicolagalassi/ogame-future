@@ -891,5 +891,14 @@
   "orion.kHeldSub": "for {n} anomalies under way",
   "orion.kBar": "In the bar",
   "orion.kBarSub": "storage {v}",
-  "orion.wholeMission": "whole mission"
+  "orion.wholeMission": "whole mission",
+  "orion.extraValue": "other rewards (estimate)",
+  "orion.extraHint": "Card budget ≈{budget} MSU (from the multiplier learned for this type and mode); the resources take part of it, the rest ≈{extra} goes to the other rewards, counted at {rate}%.",
+  "orion.withExtra": "≈{v} of it estimated for the other rewards",
+  "orion.perMissionHour": "≈{v} MSU per mission hour",
+  "orion.lowRoll": "low roll ≈{v}",
+  "orion.lowRollHint": "Combat: a collection pays everything or 37.5% of the rewards (deliveries always pay everything). Community figure, checked by the Orion journal.",
+  "orion.lowRolls": "low rolls",
+  "tech.iasShort": "Lithium +{v}/h",
+  "tech.ias": "Lithium production of this scanner while converting: {from}/h → {to}/h at level {level} (community formula: 15.36 × L × 1.1^L × economy speed)"
 }
