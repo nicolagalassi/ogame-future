@@ -50,7 +50,7 @@ import { openJournal } from './modules/messages/journal-view';
 import { isHighscorePage, watchHighscore } from './modules/highscore';
 import { bellButton, clockOffset, startReminders, watchEventList } from './modules/reminders';
 import { renderPlanetMenu, watchPlanetBar, type MenuMode, type MenuSettings, type PlanMark } from './modules/planet-menu';
-import { TECH_ICONS_KEY, type TechIcon } from './data/tech-icons';
+import { techIcons } from './data/tech-icons';
 
 async function bootstrap(): Promise<void> {
   const namespace = serverNamespace(document);
@@ -307,7 +307,7 @@ async function bootstrap(): Promise<void> {
           lfLevels: store.get<LfLevels | null>(LF_LEVELS_KEY, null),
           lfLocked: store.get<LfLocked>(LF_LOCKED_KEY, {}),
           seenLevels: store.get<Record<string, Record<string, number>>>(SEEN_LEVELS_KEY, {}),
-          icons: store.get<Record<string, TechIcon>>(TECH_ICONS_KEY, {}),
+          icons: techIcons(document, store),
           store,
           now: Date.now(),
           locale,
