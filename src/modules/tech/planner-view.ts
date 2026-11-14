@@ -13,7 +13,7 @@ import type { PlanetListEntry } from '../../data/planet-list';
 import { formatUnits } from '../../core/format';
 import { estimateResources } from '../../engines/resources';
 import { accountGap, clearBody, groupByTech, PLAN_KEY, planMissing, removeFromPlan, type Plan, type TechGroup, type TechRow } from '../../engines/planner';
-import { TECH_ICONS_KEY, techIconEl, type TechIcon } from '../../data/tech-icons';
+import { techIconEl, techIcons } from '../../data/tech-icons';
 import type { Cost } from '../../engines/tech';
 import { PLANNER_CSS } from './style';
 import { DELIVERY_KEY, nextBody, type Delivery } from '../../engines/fleet';
@@ -108,7 +108,7 @@ export function openPlanner(o: PlannerOptions): void {
   /** When the resources we have for a body were read. */
   const seenAt = (id: number) => (o.current && o.current.id === id ? o.now : (byId.get(id)?.resourcesAt ?? 0));
   const timeOf = (ms: number) => new Date(ms).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
-  const icons = o.store.get<Record<string, TechIcon>>(TECH_ICONS_KEY, {});
+  const icons = techIcons(doc, o.store);
   let confirmClear = false;
   /** The focused body is scrolled to and its button focused once, on opening. */
   let focusPending = o.focus !== undefined;
