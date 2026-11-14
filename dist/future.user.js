@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.81
+// @version      0.3.82
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -16681,7 +16681,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
 .fut-or-val.free b { color: var(--ok); }
 .fut-or-val small.fut-or-risk { color: var(--warn); }
 .fut-or-x { color: #4FE0B0; }
-.fut-or-sim { min-width: 30px; font: 700 11px Verdana, Arial, sans-serif; color: #CFF5FC; }
+.fut-or-sim { display: inline-flex; align-items: center; justify-content: center; color: #4FD1E8; }
+.fut-or-sim:hover { color: #CFF5FC; }
 .fut-or-best { outline: 1px solid var(--gold, #F5C542); outline-offset: -1px; border-radius: 4px; }
 .fut-or-best .fut-or-val b { color: #F5C542; }
 .fut-or-line { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding-top: 6px; border-top: 1px solid var(--line); }
@@ -17054,9 +17055,11 @@ ${t("orion.planOwnBack", { v: fmt(s.rewards.lithium) })}` : ""}`;
         game.setAttribute("data-fut-sim", "1");
         if (!wave) continue;
         const tool = o.sim.tool();
-        const b = h7(doc, "button", "custom_btn fut-or-sim", tool === "osims" ? "OS" : "OT");
+        const b = h7(doc, "button", "custom_btn fut-or-sim");
+        b.append(icon(doc, "play", 16));
         b.type = "button";
         b.title = t("orion.simOpen", { tool: SIM_TOOLS[tool].name });
+        b.setAttribute("aria-label", b.title);
         b.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
