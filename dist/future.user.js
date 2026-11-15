@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.97
+// @version      0.3.98
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -4469,6 +4469,13 @@
     body.resources = { ...res };
     body.resourcesAt = now;
     return true;
+  }
+  function leftAfterSend(onPlanet2, cargo, fuel) {
+    return {
+      metal: Math.max(0, Math.floor(onPlanet2.metal - cargo.metal)),
+      crystal: Math.max(0, Math.floor(onPlanet2.crystal - cargo.crystal)),
+      deuterium: Math.max(0, Math.floor(onPlanet2.deuterium - cargo.deuterium - fuel))
+    };
   }
   function mergeNewerResources(target, source) {
     for (const body of source.bodies) {
@@ -14528,6 +14535,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       hookSend(fd, () => {
         try {
           o.store.set(LAST_FLEET_KEY, snapshotFleet(fd));
+          recordLeft(o, fd);
           recordShipment(o, fd);
           recordOrionFuel(o.store, fd);
         } catch {
@@ -14594,6 +14602,13 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     };
     win.setTimeout(release, maxMs);
     return release;
+  }
+  function recordLeft(o, fd) {
+    const snapshot = o.store.get(SNAPSHOT_KEY, null);
+    if (!snapshot) return;
+    const onPlanet2 = { metal: Number(fd.metalOnPlanet) || 0, crystal: Number(fd.crystalOnPlanet) || 0, deuterium: Number(fd.deuteriumOnPlanet) || 0 };
+    const cargo = { metal: Number(fd.cargoMetal) || 0, crystal: Number(fd.cargoCrystal) || 0, deuterium: Number(fd.cargoDeuterium) || 0 };
+    if (applyPageResources(snapshot, o.bodyId, leftAfterSend(onPlanet2, cargo, Number(fd.getConsumption()) || 0), Date.now())) o.store.set(SNAPSHOT_KEY, snapshot);
   }
   function recordShipment(o, fd) {
     if (fd.mission !== 3 && fd.mission !== 4) return;
