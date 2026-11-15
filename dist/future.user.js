@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.91
+// @version      0.3.92
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -653,6 +653,8 @@
     "fleet.expeditionShip": "Nave da carico",
     "fleet.bestShip": "La migliore disponibile",
     "fleet.expeditionValue": "Carico da coprire",
+    "fleet.expCalcUnknown": "Apri la pagina flotta per vedere il valore del gioco",
+    "fleet.expCalc": "Massimo del gioco: {value}",
     "fleet.auto": "automatico",
     "fleet.expeditionExtras": "Aggiungi 1 sonda e 1 pathfinder",
     "settings.expBigHint": "Una nave da battaglia in pi\xF9 nella spedizione. Automatica = la pi\xF9 grossa che hai; se quella scelta manca, si usa la pi\xF9 grossa.",
@@ -1591,6 +1593,8 @@
     "fleet.expeditionShip": "Cargo ship",
     "fleet.bestShip": "Best available",
     "fleet.expeditionValue": "Cargo to cover",
+    "fleet.expCalcUnknown": "Open the fleet page to see the game's value",
+    "fleet.expCalc": "Game maximum: {value}",
     "fleet.auto": "automatic",
     "fleet.expeditionExtras": "Add 1 probe and 1 pathfinder",
     "settings.expBigHint": "One extra combat ship in the expedition. Automatic = the biggest you have; if the chosen one is missing, the biggest is used.",
@@ -2529,6 +2533,8 @@
     "fleet.expeditionShip": "Vaisseau cargo",
     "fleet.bestShip": "Le meilleur disponible",
     "fleet.expeditionValue": "Fret \xE0 couvrir",
+    "fleet.expCalcUnknown": "Ouvrez la page flotte pour voir la valeur du jeu",
+    "fleet.expCalc": "Maximum du jeu : {value}",
     "fleet.auto": "automatique",
     "fleet.expeditionExtras": "Ajouter 1 sonde et 1 \xE9claireur",
     "settings.expBigHint": "Un vaisseau de combat en plus dans l'exp\xE9dition. Automatique = le plus gros que vous avez ; si celui choisi manque, le plus gros est utilis\xE9.",
@@ -3467,6 +3473,8 @@
     "fleet.expeditionShip": "Frachtschiff",
     "fleet.bestShip": "Bestes verf\xFCgbares",
     "fleet.expeditionValue": "Abzudeckende Ladung",
+    "fleet.expCalcUnknown": "\xD6ffne die Flottenseite, um den Wert des Spiels zu sehen",
+    "fleet.expCalc": "Maximum des Spiels: {value}",
     "fleet.auto": "automatisch",
     "fleet.expeditionExtras": "1 Spionagesonde und 1 Pathfinder hinzuf\xFCgen",
     "settings.expBigHint": "Ein zus\xE4tzliches Kampfschiff in der Expedition. Automatisch = das gr\xF6\xDFte, das du hast; fehlt das gew\xE4hlte, wird das gr\xF6\xDFte genommen.",
@@ -8954,6 +8962,7 @@ td.spark-cell { width: 90px; }
     const bonus = (1 + o.classBooster) * (1 + (o.lfBooster ?? 0)) * (1 + (o.itemBoost ?? 0));
     return { base: row.base, max: Math.round(row.max * factor * bonus) };
   }
+  var EXPEDITION_MAX_KEY = "fleet.expeditionMax";
   function expeditionTarget(calculated, value) {
     const v = value.trim();
     if (!v) return calculated;
@@ -9319,6 +9328,9 @@ td.spark-cell { width: 90px; }
 .row .name { color: var(--text); font-size: 12px; font-weight: 700; }
 .row .desc { grid-column: 1; color: var(--muted); font-size: 11px; line-height: 1.4; }
 .row .control { grid-column: 2; grid-row: 1 / span 2; display: inline-flex; }
+/* A field with a small note under it (the value the game works out). */
+.row .control:has(.calc) { flex-direction: column; align-items: flex-end; gap: 4px; }
+.calc { color: var(--muted); font-size: 12px; }
 .seg { height: 26px; padding: 0 12px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); font: 12px Arial, sans-serif; cursor: pointer; white-space: nowrap; }
 .seg:first-child { border-radius: 13px 0 0 13px; }
 .seg:last-child { border-radius: 0 13px 13px 0; }
@@ -9478,6 +9490,10 @@ input.field { width: 190px; }
       input.setAttribute("aria-label", t("fleet.expeditionValue"));
       input.addEventListener("change", () => set({ expeditionValue: input.value.trim() }));
       value.append(input);
+      const seen = store.get(EXPEDITION_MAX_KEY, null);
+      const calc = el6("small", "calc", seen ? t("fleet.expCalc", { value: formatUnits(seen.max, doc.documentElement.lang || "it") }) : t("fleet.expCalcUnknown"));
+      if (seen) calc.title = new Date(seen.at).toLocaleString(doc.documentElement.lang || void 0);
+      value.append(calc);
       return [
         group(t("fleet.transportTitle"), fleetGlyph("transport")),
         row(t("fleet.mainShip"), t("settings.mainShipHint"), select(cargo, String(f.mainShip), (v) => set({ mainShip: Number(v) }))),
@@ -12739,11 +12755,10 @@ table.queues td.acts { width: 1%; text-align: right; }
     }
     return finish(fd, TRANSPORT, count2, cargo);
   }
-  function prepareExpedition(fd, doc, profile, settings, universe) {
-    profile = { ...profile, reserve: EMPTY_RESERVE };
+  function expeditionLimits(fd, universe) {
     const cls = fd.apiDataJson?.characterClassId ?? 0;
     const booster = fd.apiDataJson?.bonuses?.characterClassBooster?.[String(cls)] ?? 0;
-    const limits = expeditionMax({
+    return expeditionMax({
       topScore: universe.topScore,
       characterClass: cls,
       economySpeed: universe.economySpeed,
@@ -12751,6 +12766,10 @@ table.queues td.acts { width: 1%; text-align: right; }
       lfBooster: universe.lfBooster,
       itemBoost: universe.itemBoost
     });
+  }
+  function prepareExpedition(fd, doc, profile, settings, universe) {
+    profile = { ...profile, reserve: EMPTY_RESERVE };
+    const limits = expeditionLimits(fd, universe);
     const target = expeditionTarget(limits.max, settings.expeditionValue);
     const base2 = settings.expeditionValue.trim() ? 0 : limits.base;
     const ships = expeditionFleet(stock(fd, profile), { ship: settings.expeditionShip, target, base: base2, extras: settings.expeditionExtras, big: settings.expeditionBig });
@@ -14015,6 +14034,17 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const out = readout(doc, t("fleet.readyHint"));
     const say = out.say;
     const report = (r, okKey, vars = {}) => r.ok ? say(t(okKey, { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), ...vars })) : say(t(r.reason ?? "fleet.err.noShips"), true);
+    const expUniverse = () => ({
+      economySpeed: universeSpeed(doc),
+      topScore: topScore(o.store),
+      lfBooster: o.store.get(LF_BONUS_KEY, null)?.expedition ?? 0,
+      itemBoost: expeditionItemBoost(o.store.get(ITEMS_KEY, null))
+    });
+    if (fleet1)
+      void whenDispatcherReady().then((fd) => {
+        const max = fd ? expeditionLimits(fd, expUniverse()).max : 0;
+        if (max > 0) o.store.set(EXPEDITION_MAX_KEY, { max, at: Date.now() });
+      });
     const withDispatcher = (fn) => {
       const fd = getDispatcher();
       if (!fd || fd.currentPage !== "fleet1") {
@@ -14084,12 +14114,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       deploy: () => toggleSend("deploy"),
       expedition: () => withDispatcher((fd) => {
         begin("expedition");
-        const r = prepareExpedition(fd, doc, profile, settings, {
-          economySpeed: universeSpeed(doc),
-          topScore: topScore(o.store),
-          lfBooster: o.store.get(LF_BONUS_KEY, null)?.expedition ?? 0,
-          itemBoost: expeditionItemBoost(o.store.get(ITEMS_KEY, null))
-        });
+        const r = prepareExpedition(fd, doc, profile, settings, expUniverse());
         report(r, "fleet.ok.expedition", { target: r.target.toLocaleString(o.locale) });
       }),
       fleetsave: () => withDispatcher((fd) => {
