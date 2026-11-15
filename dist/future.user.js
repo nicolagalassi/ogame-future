@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.84
+// @version      0.3.85
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -6442,12 +6442,16 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
 
   // src/core/sheet.ts
   var RES_COLORS = { metal: "#B8C2CC", crystal: "#7FB8FF", deuterium: "#4FE0B0", darkMatter: "#B58CDB", food: "#D6A8C8" };
+  var STATE_COLORS = { accent: "#4FD1E8", ok: "#7BC47F", warn: "#F5B547", bad: "#F07A6E" };
+  var PAGE_TOKENS = `--hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1;
+  --accent: ${STATE_COLORS.accent}; --ok: ${STATE_COLORS.ok}; --warn: ${STATE_COLORS.warn}; --neg: ${STATE_COLORS.bad};`;
   var WINDOW_SHEET = `
 :host {
   all: initial;
   --bg: #0B121D; --surface: #0D1522; --raised: #111B2A; --line: #1F2C40; --line-soft: #16202F;
   --text: #E6EDF5; --text-2: #C9D4E2; --muted: #8A9BB0; --faint: #4A5B72;
-  --accent: #4FD1E8; --accent-soft: #12283A; --warn: #F5B547; --ok: #4FE0B0; --bad: #FF7A7A;
+  --accent: ${STATE_COLORS.accent}; --accent-soft: #12283A; --warn: ${STATE_COLORS.warn}; --ok: ${STATE_COLORS.ok}; --bad: ${STATE_COLORS.bad};
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --m: ${RES_COLORS.metal}; --c: ${RES_COLORS.crystal}; --d: ${RES_COLORS.deuterium}; --dm: ${RES_COLORS.darkMatter};
   --mono: Consolas, "JetBrains Mono", monospace;
   --panel-w: 860px;
@@ -6463,7 +6467,13 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
 .panel {
   width: min(var(--panel-w), 100%); display: flex; flex-direction: column; gap: 8px; padding: 8px;
   border: 1px solid var(--line); border-radius: 9px; background: var(--bg); box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  animation: fut-panel-in 200ms var(--ease-out);
 }
+/* Opening: the window settles in from just below, the page dims behind it. Closing is instant. */
+.backdrop { animation: fut-fade-in 160ms var(--ease-out); }
+@keyframes fut-panel-in { from { opacity: 0; transform: translateY(6px) scale(0.985); } }
+@keyframes fut-fade-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .panel { animation-name: fut-fade-in; } }
 .head { display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 4px 4px 4px 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); }
 .titles { flex: 1; display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; min-width: 0; }
 h2 { margin: 0; font-size: 14px; font-weight: 700; color: var(--text); }
@@ -6511,9 +6521,16 @@ input:checked + .sw-track::after, [aria-checked="true"] > .sw-track::after { tra
 .act:hover { border-color: var(--accent); }
 .act.ghost { border-color: var(--line); background: #0A111C; color: #B4C2D3; font-weight: 400; }
 .act.ghost:hover, .act.danger { border-color: var(--bad); color: var(--bad); }
+/* Press feedback: anything pressable gives a little under the pointer. */
+.act, .tab, .close, .seg button { transition: transform 140ms var(--ease-out); }
+.act:active, .tab:active, .close:active, .seg button:active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) { .act:active, .tab:active, .close:active, .seg button:active { transform: none; } }
+/* A checkbox drawn as the switch: the input stays for keyboard and screen readers, the track shows. */
+input.sw { position: absolute; opacity: 0; pointer-events: none; }
+input.sw:focus-visible + .sw-track { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* Browser surfaces. */
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .backdrop, .scroll, .table-wrap { scrollbar-color: #2A3B55 var(--bg); scrollbar-width: thin; }
 ::selection { background: #2B6F7D; color: #fff; }
 .num, td, .value, .kpi-line { font-variant-numeric: tabular-nums; }
@@ -7361,8 +7378,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 /* One set of tokens for the summaries, the "just read" panel and the spy table. Text tokens keep
    at least 4.5:1 on every background they sit on; --faint is for decoration only (ticks, tracks). */
 .fut-msg, .fut-fresh, #fut-spypanel {
-  --hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1; --faint: #4E5B6A; --line: #2E4356;
-  --link: #6F9FC8; --accent: #4FD1E8; --neg: #F07A6E; --warn: #E3B341; --ok: #7BC47F; --ship: #4FE0B0; --on-tone: #0D1116;
+  ${PAGE_TOKENS} --faint: #4E5B6A; --line: #2E4356;
+  --link: #6F9FC8; --ship: #4FE0B0; --on-tone: #0D1116;
   --loot: #F0A35A; --name: #E8D27A; --on-accent: #CFF5FC; --attack: #FF9B8A; --attack-line: #C0533F; --sim: #8FB6D8; --chip: #1A2733;
 }
 .fut-msg { display: grid; grid-template-columns: 124px minmax(0, 1fr) minmax(84px, auto) auto; align-items: center; column-gap: 10px;
@@ -7461,7 +7478,7 @@ ${outcomeCss}
 .fut-r-m { --dot: ${RES_COLORS.metal}; } .fut-r-c { --dot: ${RES_COLORS.crystal}; } .fut-r-d { --dot: ${RES_COLORS.deuterium}; } .fut-r-f { --dot: ${RES_COLORS.food}; } .fut-r-dm { --dot: ${RES_COLORS.darkMatter}; }
 .fut-u { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 .fut-msg-icon { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; flex: none; }
-.fut-msg-icon-none { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--chip); font-size: 8px; color: var(--mute); }
+.fut-msg-icon-none { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--chip); font-size: 10px; color: var(--mute); }
 .fut-note { white-space: nowrap; color: var(--txt); }
 .fut-msg .fut-muted { color: var(--mute); } .fut-msg .fut-warn { color: var(--warn); } .fut-msg .fut-neg { color: var(--neg); }
 .fut-msg .fut-item { color: #D08A5B; } .fut-msg .fut-lf { color: #E07BC8; } .fut-msg .fut-art { color: #D4A93A; }
@@ -7604,20 +7621,19 @@ ${RARITY.map((c, i) => `.rar-${i} { --rar: ${c}; }`).join(" ")}
 .res-name { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
 .res-name::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--dot); flex: none; }
 .res-tile b { font-size: 22px; line-height: 1.15; color: var(--dot); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.res-tile.zero b { color: var(--faint); }
+.res-tile.zero b { color: var(--dim); }
 /* Ships found: compact, many per row; the count matters more than the picture. */
 .ships { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 4px 10px; }
 .ship { display: flex; align-items: center; gap: 6px; padding: 1px 0; min-width: 0; }
 .ship-img { width: 24px; height: 24px; flex: none; border-radius: 50%; object-fit: cover; background: var(--line-soft); }
-.ship-img-none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 9px; }
+.ship-img-none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 10px; }
 .ship-info { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
 .ship-info b { font-size: 12px; font-variant-numeric: tabular-nums; }
 .ship-name { color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 560px) { .res { grid-template-columns: repeat(2, minmax(0, 1fr)); } .res-tile b { font-size: 18px; } }
 h4.lost { margin: 10px 0 6px; color: var(--bad); }
 .foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
-.opt input { width: 16px; height: 16px; margin: 0; }
-.opt { min-height: 24px; display: flex; gap: 6px; align-items: center; color: var(--text-2); font-size: 12px; cursor: pointer; }
+.opt { position: relative; min-height: 24px; display: flex; gap: 6px; align-items: center; color: var(--text-2); font-size: 12px; cursor: pointer; }
 .acts { display: flex; gap: 6px; }
 @media (max-width: 560px) { .kpi .value { font-size: 15px; } }
 /* Expeditions as a statement: net gain first, where it came from, then the columns. */
@@ -10989,7 +11005,9 @@ td.guess { font-style: italic; opacity: 0.7; }
 .pls { display: flex; flex-wrap: wrap; gap: 4px; margin: 3px 0 2px; }
 .pl { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border: 1px solid #1F2C40; border-radius: 5px; background: #0A111C; color: #B4C2D3; font-size: 11px; text-decoration: none; white-space: nowrap; }
 .pl:hover, .pl:focus-visible { border-color: #4FD1E8; color: #E6EDF5; }
-.pl.guess { border-color: #5C4A12; }
+/* Estimated levels: a dashed amber edge (the title says why), the name stays readable. */
+.move-text .pl.guess:not(.done) { border-style: dashed; border-color: #6B5618; color: #B4C2D3; }
+.move-text .pl.guess:not(.done):hover, .move-text .pl.guess:not(.done):focus-visible { border-color: #4FD1E8; color: #E6EDF5; }
 .pl.done { color: #5F7189; text-decoration: line-through; border-style: dashed; }
 
 /* Planets | moons switch on the ships and defence pages. */
@@ -12597,9 +12615,9 @@ table.queues td.acts { width: 1%; text-align: right; }
   var FLEET_CSS = `
 /* The fleet bar speaks the inbox's language: Verdana 11px, tabular numbers, one set of tokens. */
 .fut-fbar, .fut-fmenu {
-  --hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1; --line: #24344B; --line-soft: #1A2738;
+  ${PAGE_TOKENS} --line: #24344B; --line-soft: #1A2738;
   --tile: #152234; --tile-hi: #1C2D44; --tile-line: #2A3B53; --ico: #C2CCD8; --ico-hi: #F1F4F7;
-  --accent: #6FB6C8; --on-accent: #DCEAF0; --ok: #4FE0B0; --neg: #F07A6E; --warn: #E3B341;
+  --on-accent: #DCEAF0;
   --track: #3A4A60; --knob-on: #0B1A22; --on-line: #35576A; --on-bg: #17293A; --field: #0D1522;
 }
 .fut-fbar {
@@ -14352,7 +14370,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 .fut-tp, .fut-tp-tools {
   /* Future's window tokens (core/sheet.ts), here outside the Shadow DOM. */
   --line: #1F2C40; --line-soft: #16202F; --text: #E6EDF5; --text-2: #C9D4E2; --muted: #8A9BB0;
-  --accent: #4FD1E8; --ok: #4FE0B0; --bad: #FF7A7A; --energy: #F5D547;
+  --accent: ${STATE_COLORS.accent}; --ok: ${STATE_COLORS.ok}; --bad: ${STATE_COLORS.bad}; --energy: #F5D547;
   --m: ${RES_COLORS.metal}; --c: ${RES_COLORS.crystal}; --d: ${RES_COLORS.deuterium};
   --mono: Consolas, "JetBrains Mono", "DejaVu Sans Mono", monospace;
 }
@@ -16163,9 +16181,11 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       const opt = h6("label", "opt");
       const box = h6("input");
       box.type = "checkbox";
+      box.className = "sw";
+      box.setAttribute("role", "switch");
       box.checked = store.get(FOLD_KEY, true);
       box.addEventListener("change", () => store.set(FOLD_KEY, box.checked));
-      opt.append(box, document.createTextNode(t("exp.fold")));
+      opt.append(box, h6("i", "sw-track"), document.createTextNode(t("exp.fold")));
       const acts = h6("div", "acts");
       const exp = h6("button", "act", t("exp.export"));
       exp.title = t("exp.exportHint");
@@ -16702,8 +16722,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   var STYLE_ID4 = "fut-orion-style";
   var CSS5 = `
 .fut-or, .fut-or-box {
-  --hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1; --line: rgba(120, 150, 180, 0.14);
-  --accent: #4FD1E8; --neg: #F07A6E; --warn: #E3B341; --ok: #7BC47F; --gold: #F5C542; --tile: rgba(120, 150, 180, 0.09);
+  ${PAGE_TOKENS} --line: rgba(120, 150, 180, 0.14);
+  --gold: #F5C542; --tile: rgba(120, 150, 180, 0.09);
   box-sizing: border-box; font: 11px/16px Verdana, Arial, Helvetica, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums; text-align: left;
 }
 .fut-or { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; row-gap: 6px; margin: 8px 0 4px; padding: 8px 12px; border-radius: 4px; background: rgba(13, 21, 34, 0.72); }
