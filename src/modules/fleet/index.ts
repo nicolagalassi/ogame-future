@@ -19,7 +19,7 @@
  * target itself when page 2 opens. See ./repeat.ts for the "Ripeti" precedent (OGLight).
  */
 import { icon } from '../../core/icons';
-import { groupInt, groupWhileTyping } from '../../core/format';
+import { groupInt, groupWhileTyping, formatUnits } from '../../core/format';
 import { WINDOW_SHEET } from '../../core/sheet';
 import { PLAN_KEY, QUEUED_KEY, reservedFor, SENT_KEY, type Plan, type Queued, type Shipment } from '../../engines/planner';
 import { expeditionItemBoost, ITEMS_KEY, LF_BONUS_KEY, type ActiveItems, type LfBonuses } from '../../data/bonuses';
@@ -661,15 +661,20 @@ function readout(doc: Document, text: string) {
   };
 }
 
-/** An action of the bar: its icon alone, the key in the corner; the name is its accessible label. */
-function tile(doc: Document, icon: IconName, label: string, onClick: () => void, cls = '', key = ''): HTMLButtonElement {
+/** An action of the bar: its icon over its short name, the key printed in the corner; the full name is its accessible label. */
+function tile(doc: Document, icon: IconName, label: string, onClick: () => void, cls = '', key = '', name = ''): HTMLButtonElement {
   const b = el(doc, 'button', `fut-fact ${cls}`.trim());
   b.type = 'button';
   b.title = key ? `${label} [${keyLabel(key)}]` : label;
   b.setAttribute('aria-label', label);
   const ico = el(doc, 'span', 'ico');
-  ico.innerHTML = iconSvg(icon, 22);
+  ico.innerHTML = iconSvg(icon, 20);
   b.append(ico);
+  if (name) {
+    const n = el(doc, 'span', 'name', name);
+    n.setAttribute('aria-hidden', 'true');
+    b.append(n);
+  }
   if (key) {
     const cap = el(doc, 'kbd', '', keyLabel(key));
     cap.setAttribute('aria-hidden', 'true');
@@ -682,17 +687,24 @@ function tile(doc: Document, icon: IconName, label: string, onClick: () => void,
   return b;
 }
 
-/** A rule switch: the rule's icon and a small track, knob to the right and lit when on. */
-function ruleSwitch(doc: Document, icon: IconName, label: string, on: boolean, onClick: () => void): HTMLButtonElement {
-  const b = el(doc, 'button', 'fut-fsw');
+/**
+ * A reserve or round rule as a printed chip: its pip filled when on, its name, and what it keeps back.
+ * A switch for assistive tech (role=switch); one click flips it.
+ */
+function ruleSwitch(doc: Document, icon: IconName, label: string, on: boolean, onClick: () => void, value?: Node | string): HTMLButtonElement {
+  const b = el(doc, 'button', 'fut-fchip');
   b.type = 'button';
-  b.title = label;
   b.setAttribute('role', 'switch');
   b.setAttribute('aria-checked', String(on));
-  b.setAttribute('aria-label', label);
   const ico = el(doc, 'span', 'ico');
-  ico.innerHTML = iconSvg(icon, 16);
-  b.append(ico, el(doc, 'i', 'track'));
+  ico.innerHTML = iconSvg(icon, 14);
+  b.append(el(doc, 'i', 'pip'), ico, el(doc, 'b', '', label));
+  if (value !== undefined) {
+    const v = el(doc, 'span', 'val');
+    v.append(value);
+    b.append(v);
+  }
+  b.setAttribute('aria-label', typeof value === 'string' && value ? `${label}: ${value}` : label);
   b.addEventListener('click', (e) => {
     e.preventDefault();
     onClick();
@@ -1127,7 +1139,7 @@ export function renderFleetTools(o: FleetOptions): void {
   state.o = o;
   pageState.set(doc, state);
 
-  const out = readout(doc, summary(o, stored, settings));
+  const out = readout(doc, t('fleet.readyHint'));
   const say = out.say;
   const report = (r: PrepareResult, okKey: string, vars: Record<string, string | number> = {}) =>
     r.ok
@@ -1332,7 +1344,7 @@ export function renderFleetTools(o: FleetOptions): void {
     const here = o.bodies.find((b) => b.planetId === o.bodyId);
     /** One action: icon-only tile, described in the readout while pointed at. */
     const act = (ico: IconName, id: string, name: string, where: string, tip: string, onClick: () => void, dim = false) => {
-      const b = tile(doc, ico, where ? `${name} ${where}` : name, onClick, dim ? 'dim' : '', k(id));
+      const b = tile(doc, ico, where ? `${name} ${where}` : name, onClick, dim ? 'dim' : '', k(id), name);
       out.peek(b, where ? `${name} ${where}` : name, tip);
       return b;
     };
@@ -1342,11 +1354,25 @@ export function renderFleetTools(o: FleetOptions): void {
     const collect = tile(doc, 'collect', t('fleet.btn.collect'), () =>
       collectMenu(o, collect, settings, { transport: k('fleet.collect'), deploy: k('fleet.collectDeploy') }, (mode, dest) =>
         dest ? run[mode](dest) : say(t('fleet.err.noDefault'), true),
-      ), 'more');
+      ), 'more', '', t('fleet.btn.collectShort'));
     collect.setAttribute('aria-haspopup', 'menu');
     collect.append(el(doc, 'i', 'more-mark'));
     out.peek(collect, t('fleet.btn.collect'), t('fleet.tip.collect'));
-    tiles.append(
+    const zone = (text: string) => {
+      const z = el(doc, 'span', 'fut-fzone', text);
+      z.setAttribute('aria-hidden', 'true');
+      return z;
+    };
+    // Each zone: its name printed over its buttons.
+    const zoneBox = (text: string, cls = '') => {
+      const box = el(doc, 'span', `fut-fzonebox ${cls}`.trim());
+      const row = el(doc, 'span', 'fut-ftiles');
+      box.append(zone(text), row);
+      return { box, row };
+    };
+    const mission = zoneBox(t('fleet.zone.mission'));
+    tiles.append(mission.box);
+    mission.row.append(
       ...(['transport', 'deploy'] as const).map((m) => {
         const b = act(m, `fleet.${m}`, t(`fleet.btn.${m}`), '', t(`fleet.tip.${m}`), () => run[m]());
         b.setAttribute('aria-pressed', String(settings.sendMode === m));
@@ -1364,10 +1390,11 @@ export function renderFleetTools(o: FleetOptions): void {
       ),
       act('last', 'fleet.last', t('fleet.btn.last'), '', last ? t('fleet.tip.last') : t('fleet.err.noLast'), () => run.last(), !last),
     );
-    const secondary = el(doc, 'span', 'fut-fsecond');
+    const dest = zoneBox(t('fleet.zone.dest'), 'fut-fsecond');
+    const secondary = dest.row;
     if (here?.moonId) secondary.append(act('moon', 'fleet.moon', t('fleet.btn.moon'), to(here.moonId), t('fleet.tip.moon'), () => run.moon()));
     secondary.append(collect);
-    tiles.append(secondary);
+    tiles.append(dest.box);
     // "Salta → next body", only while a collection round is on.
     const skipSlot = el(doc, 'span', 'fut-fsecond fut-fskip');
     drawSkip = () => {
@@ -1396,32 +1423,55 @@ export function renderFleetTools(o: FleetOptions): void {
     rules.setAttribute('role', 'group');
     rules.setAttribute('aria-label', t('fleet.rulesLabel'));
     type Flag = 'shipsOn' | 'resourcesOn' | 'gateOn' | 'ignoreFood' | 'repeat';
-    const sw = (ico: IconName, label: string, hint: string, key: Flag, after?: () => void) => {
+    const rulesOut = readout(doc, t('fleet.reservesHint'));
+    const sw = (ico: IconName, label: string, hint: string, key: Flag, after?: () => void, value?: Node | string) => {
       const b = ruleSwitch(doc, ico, label, settings[key], () => {
         o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: !loadSettings(o.store)[key] });
         after?.();
         redraw();
-      });
-      out.peek(b, `${label}: ${settings[key] ? t('fleet.on') : t('fleet.off')}.`, hint);
+      }, value);
+      rulesOut.peek(b, `${label}: ${settings[key] ? t('fleet.on') : t('fleet.off')}.`, hint);
       return b;
     };
-    rules.append(
-      sw('ships', t('fleet.rule.ships'), t('fleet.rule.shipsHint'), 'shipsOn'),
-      sw('resources', t('fleet.rule.resources'), t('fleet.rule.resourcesHint'), 'resourcesOn'),
-      ...(isMoon(o.bodies, o.bodyId) ? [sw('gate', t('fleet.rule.gate'), t('fleet.rule.gateHint'), 'gateOn')] : []),
+    // What each reserve keeps back, printed on its chip (set in this body's rules).
+    const fmtN = (n: number) => formatUnits(n, o.locale);
+    const sumOf = (r: Record<string, number> | undefined) => Object.values(r ?? {}).reduce((a, b) => a + b, 0);
+    const shipsKept = sumOf(stored.reserve.ships);
+    const res = stored.reserve.resources;
+    const resValue = el(doc, 'span', 'toks');
+    for (const [cls, v] of [['m', res.metal], ['c', res.crystal], ['d', res.deuterium]] as const) {
+      if (!v) continue;
+      const tk = el(doc, 'span', '');
+      tk.append(el(doc, 'i', `tok ${cls}`), doc.createTextNode(fmtN(v)));
+      resValue.append(tk);
+    }
+    const unset = t('fleet.rule.unset');
+    const gateKept = sumOf(stored.gate);
+    const reserves = el(doc, 'span', 'fut-fgroup');
+    reserves.setAttribute('role', 'group');
+    reserves.setAttribute('aria-label', t('fleet.zone.reserves'));
+    reserves.append(
+      zone(t('fleet.zone.reserves')),
+      sw('ships', t('fleet.rule.ships'), t('fleet.rule.shipsHint'), 'shipsOn', undefined, shipsKept ? fmtN(shipsKept) : unset),
+      sw('resources', t('fleet.rule.resources'), t('fleet.rule.resourcesHint'), 'resourcesOn', undefined, res.metal || res.crystal || res.deuterium ? resValue : unset),
+      ...(isMoon(o.bodies, o.bodyId) ? [sw('gate', t('fleet.rule.gate'), t('fleet.rule.gateHint'), 'gateOn', undefined, gateKept ? fmtN(gateKept) : unset)] : []),
       sw('food', t('fleet.foodShort'), t('fleet.foodHint'), 'ignoreFood', () => applyFood(o.store)),
-      sw('repeat', t('fleet.repeatShort'), t('fleet.repeatHint'), 'repeat'),
     );
+    const round = el(doc, 'span', 'fut-fgroup');
+    round.setAttribute('role', 'group');
+    round.setAttribute('aria-label', t('fleet.zone.round'));
+    round.append(zone(t('fleet.zone.round')), sw('repeat', t('fleet.repeatShort'), t('fleet.repeatHint'), 'repeat'));
+    rules.append(reserves, round);
     // This body only: the round (Ripeti, Salta) passes over it.
     const skipped = settings.skipBodies.includes(o.bodyId);
-    const skipSw = ruleSwitch(doc, 'skip', t('fleet.rule.skip'), skipped, () => {
+    const skipSw = ruleSwitch(doc, 'skip', t('fleet.rule.skipHere'), skipped, () => {
       const now = loadSettings(o.store);
       const others = now.skipBodies.filter((id) => id !== o.bodyId);
       o.store.set(SETTINGS_KEY, { ...now, skipBodies: skipped ? others : [...others, o.bodyId] });
       redraw();
     });
-    out.peek(skipSw, `${t('fleet.rule.skip')}: ${skipped ? t('fleet.on') : t('fleet.off')}.`, t('fleet.rule.skipHint'));
-    rules.append(skipSw);
+    rulesOut.peek(skipSw, `${t('fleet.rule.skip')}: ${skipped ? t('fleet.on') : t('fleet.off')}.`, t('fleet.rule.skipHint'));
+    round.append(skipSw);
 
     // The editors: this body's rules, and Future's general fleet settings.
     const edit = el(doc, 'span', 'fut-fedit');
@@ -1438,13 +1488,14 @@ export function renderFleetTools(o: FleetOptions): void {
       out.peek(b, label, hint);
       return b;
     };
-    edit.append(tool('rules', t('fleet.editRules', { body: shortLabel(o, o.bodyId) }), t('fleet.editRulesHint'), () => openSettings(o, 'body', redraw), 'fut-frules-open'));
+    const rulesTool = tool('rules', t('fleet.editRules', { body: shortLabel(o, o.bodyId) }), t('fleet.editRulesHint'), () => openSettings(o, 'body', redraw), 'fut-frules-open');
+    rulesOut.peek(rulesTool, t('fleet.editRules', { body: shortLabel(o, o.bodyId) }), t('fleet.editRulesHint'));
     if (o.onOpenSettings) edit.append(tool('settings', t('fleet.general'), t('fleet.generalHint'), () => o.onOpenSettings?.()));
 
     const top = el(doc, 'div', 'fut-frow');
     top.append(tiles, edit);
     const bottom = el(doc, 'div', 'fut-frow');
-    bottom.append(rules, out.box);
+    bottom.append(out.box);
     bar.append(top);
     if (settings.sendMode) {
       bar.append(sendPanel(o, out.peek, sendWith, aim));
@@ -1453,6 +1504,15 @@ export function renderFleetTools(o: FleetOptions): void {
     if (focusRes) doc.querySelector<HTMLInputElement>('.fut-fsend .fut-fresin.metal input')?.focus();
     bar.append(bottom);
     anchor1.before(bar);
+    // Reserves and the round live under the ships, apart from the actions: what is kept back is a
+    // different question from what to send. Same cleanup as the bar (class fut-fbar).
+    const strip = el(doc, 'div', 'fut-fbar fut-freserves');
+    const stripRow = el(doc, 'div', 'fut-frow');
+    stripRow.append(rules, rulesTool);
+    strip.append(stripRow, rulesOut.box);
+    const below = fleet1.querySelector('#allornone') ?? null;
+    if (below) below.before(strip);
+    else anchor1.after(strip);
     addInvertButtons(o);
   }
 

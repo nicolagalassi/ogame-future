@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.88
+// @version      0.3.89
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1232,6 +1232,15 @@
     "tech.satFill": "clic: scrive il numero nella quantit\xE0",
     "tech.satGo": "clic: apre il Satellite Solare nelle Risorse con il numero gi\xE0 scritto",
     "fleet.btn.collect": "Raccolta spedizioni",
+    "fleet.readyHint": "Scegli cosa preparare: l'invio resta sempre un tuo clic.",
+    "fleet.reservesHint": "Cosa resta sul corpo quando prepari una flotta. Un clic accende o spegne; i valori si cambiano con il pulsante delle regole a destra.",
+    "fleet.rule.skipHere": "Salta questo corpo",
+    "fleet.rule.unset": "da impostare",
+    "fleet.zone.round": "Giro",
+    "fleet.zone.reserves": "Riserve",
+    "fleet.zone.dest": "Destinazione",
+    "fleet.zone.mission": "Missione",
+    "fleet.btn.collectShort": "Raccolta",
     "fleet.btn.collectTransport": "Raccolta: trasporto",
     "fleet.btn.collectDeploy": "Raccolta: schieramento",
     "fleet.btn.skip": "Salta",
@@ -2158,6 +2167,15 @@
     "tech.satFill": "click: types the number in the amount",
     "tech.satGo": "click: opens the Solar Satellite in Resources with the number already typed in",
     "fleet.btn.collect": "Expedition collection",
+    "fleet.readyHint": "Pick what to prepare: sending is always your own click.",
+    "fleet.reservesHint": "What stays on the body when you prepare a fleet. A click turns it on or off; change the amounts with the rules button on the right.",
+    "fleet.rule.skipHere": "Skip this body",
+    "fleet.rule.unset": "not set",
+    "fleet.zone.round": "Round",
+    "fleet.zone.reserves": "Reserves",
+    "fleet.zone.dest": "Destination",
+    "fleet.zone.mission": "Mission",
+    "fleet.btn.collectShort": "Collect",
     "fleet.btn.collectTransport": "Collection: transport",
     "fleet.btn.collectDeploy": "Collection: deploy",
     "fleet.btn.skip": "Skip",
@@ -3084,6 +3102,15 @@
     "tech.satFill": "clic : saisit le nombre dans la quantit\xE9",
     "tech.satGo": "clic : ouvre le Satellite solaire dans Ressources avec le nombre d\xE9j\xE0 saisi",
     "fleet.btn.collect": "Collecte des exp\xE9ditions",
+    "fleet.readyHint": "Choisissez quoi pr\xE9parer : l'envoi reste toujours votre clic.",
+    "fleet.reservesHint": "Ce qui reste sur le corps quand vous pr\xE9parez une flotte. Un clic l'active ou la coupe ; les quantit\xE9s se changent avec le bouton des r\xE8gles \xE0 droite.",
+    "fleet.rule.skipHere": "Sauter ce corps",
+    "fleet.rule.unset": "\xE0 d\xE9finir",
+    "fleet.zone.round": "Tourn\xE9e",
+    "fleet.zone.reserves": "R\xE9serves",
+    "fleet.zone.dest": "Destination",
+    "fleet.zone.mission": "Mission",
+    "fleet.btn.collectShort": "Collecte",
     "fleet.btn.collectTransport": "Collecte : transport",
     "fleet.btn.collectDeploy": "Collecte : stationnement",
     "fleet.btn.skip": "Passer",
@@ -4010,6 +4037,15 @@
     "tech.satFill": "Klick: tr\xE4gt die Zahl als Menge ein",
     "tech.satGo": "Klick: \xF6ffnet den Solarsatelliten unter Rohstoffe mit bereits eingetragener Zahl",
     "fleet.btn.collect": "Expeditionssammlung",
+    "fleet.readyHint": "W\xE4hle, was vorbereitet wird: Senden bleibt immer dein Klick.",
+    "fleet.reservesHint": "Was beim Vorbereiten einer Flotte auf dem K\xF6rper bleibt. Ein Klick schaltet es an oder aus; die Mengen \xE4nderst du mit dem Regel-Knopf rechts.",
+    "fleet.rule.skipHere": "Diesen K\xF6rper \xFCberspringen",
+    "fleet.rule.unset": "nicht gesetzt",
+    "fleet.zone.round": "Runde",
+    "fleet.zone.reserves": "Reserven",
+    "fleet.zone.dest": "Ziel",
+    "fleet.zone.mission": "Auftrag",
+    "fleet.btn.collectShort": "Sammeln",
     "fleet.btn.collectTransport": "Sammlung: Transport",
     "fleet.btn.collectDeploy": "Sammlung: Stationieren",
     "fleet.btn.skip": "\xDCberspringen",
@@ -12807,15 +12843,20 @@ table.queues td.acts { width: 1%; text-align: right; }
    Silver on slate, no neon: colour is left to what the game's own page says. */
 .fut-facts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .fut-fact {
-  position: relative; flex: none; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 40px; padding: 0;
+  position: relative; flex: none; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 62px; height: 48px; padding: 4px 8px 3px;
   border: 1px solid var(--tile-line); border-radius: 6px; background: var(--tile); color: var(--ico);
 }
 .fut-fact:hover { border-color: var(--line-hover); background: var(--tile-hi); color: var(--ico-hi); }
 .fut-fact:active { transform: translateY(1px); }
 .fut-fact .ico { display: inline-flex; }
-/* The key sits in the corner: the icon steps aside for it. */
-.fut-fact:has(kbd) .ico { margin: 5px 6px 0 0; }
-.fut-fact kbd { position: absolute; top: 2px; right: 3px; color: var(--dim); font: 11px/11px Verdana, Arial, sans-serif; }
+/* The name under the icon: what the button does, readable without pointing at it. */
+.fut-fact .name { font: 11px/1 Verdana, Arial, sans-serif; white-space: nowrap; color: inherit; }
+/* Zone labels: what a group of buttons is for, printed once at its head. */
+.fut-fzone { color: var(--mute); font: bold 11px Verdana, Arial, sans-serif; white-space: nowrap; }
+.fut-fzonebox { display: inline-flex; flex-direction: column; gap: 4px; }
+.fut-ftiles { display: inline-flex; gap: 4px; }
+.fut-fgroup .fut-fzone { margin-right: 4px; }
+.fut-fact kbd { position: absolute; top: 3px; right: 4px; color: var(--dim); font: 11px/11px Verdana, Arial, sans-serif; }
 .fut-fact:hover kbd { color: var(--mute); }
 .fut-fact.dim { border-style: dashed; background: none; color: var(--dim); }
 /* Secondary tools (moon, expedition collection): set apart and quieter. */
@@ -12844,7 +12885,24 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-ftool:hover { background: var(--tile-hi); color: var(--hi); }
 
 /* Rules: the rule's icon beside a switch track, so on and off read without a word. */
-.fut-frules { flex: none; display: inline-flex; gap: 4px; }
+.fut-frules { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; min-width: 0; }
+/* Reserves and round: a strip of their own under the ships, apart from the actions. */
+.fut-freserves { margin-top: 8px; }
+.fut-fgroup { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+/* A rule as a printed chip: pip filled when on, its name, what it keeps back. Off = outline only. */
+.fut-fchip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 8px; border: 1px solid var(--tile-line); border-radius: 4px; background: none; color: var(--mute); }
+.fut-fchip .ico { display: inline-flex; opacity: 0.8; }
+.fut-fchip b { font-weight: bold; }
+.fut-fchip .val { color: var(--dim); }
+.fut-fchip .pip { flex: none; width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; }
+.fut-fchip:hover { border-color: var(--line-hover); color: var(--hi); }
+.fut-fchip[aria-checked="true"] { border-color: var(--accent-line); background: var(--tile-hi); color: var(--hi); }
+.fut-fchip[aria-checked="true"] .pip { background: var(--accent); box-shadow: none; }
+.fut-fchip[aria-checked="true"] .val { color: var(--txt); }
+.fut-fchip .toks { display: inline-flex; gap: 8px; }
+.fut-fchip .toks > span { display: inline-flex; align-items: center; gap: 3px; }
+.fut-fbar .tok { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.fut-fbar .tok.m { color: var(--m); } .fut-fbar .tok.c { color: var(--c); } .fut-fbar .tok.d { color: var(--d); }
 .fut-fsw { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 7px 0 8px; border: 1px solid var(--line-soft); border-radius: 14px; background: none; color: var(--dim); }
 .fut-fsw .ico { display: inline-flex; }
 .fut-fsw .track { position: relative; flex: none; width: 20px; height: 12px; border-radius: 6px; background: var(--track); transition: background-color 120ms ease-out; }
@@ -13480,14 +13538,19 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       }
     };
   }
-  function tile(doc, icon2, label, onClick, cls = "", key = "") {
+  function tile(doc, icon2, label, onClick, cls = "", key = "", name = "") {
     const b = el4(doc, "button", `fut-fact ${cls}`.trim());
     b.type = "button";
     b.title = key ? `${label} [${keyLabel(key)}]` : label;
     b.setAttribute("aria-label", label);
     const ico = el4(doc, "span", "ico");
-    ico.innerHTML = iconSvg(icon2, 22);
+    ico.innerHTML = iconSvg(icon2, 20);
     b.append(ico);
+    if (name) {
+      const n = el4(doc, "span", "name", name);
+      n.setAttribute("aria-hidden", "true");
+      b.append(n);
+    }
     if (key) {
       const cap = el4(doc, "kbd", "", keyLabel(key));
       cap.setAttribute("aria-hidden", "true");
@@ -13499,16 +13562,20 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     });
     return b;
   }
-  function ruleSwitch(doc, icon2, label, on, onClick) {
-    const b = el4(doc, "button", "fut-fsw");
+  function ruleSwitch(doc, icon2, label, on, onClick, value) {
+    const b = el4(doc, "button", "fut-fchip");
     b.type = "button";
-    b.title = label;
     b.setAttribute("role", "switch");
     b.setAttribute("aria-checked", String(on));
-    b.setAttribute("aria-label", label);
     const ico = el4(doc, "span", "ico");
-    ico.innerHTML = iconSvg(icon2, 16);
-    b.append(ico, el4(doc, "i", "track"));
+    ico.innerHTML = iconSvg(icon2, 14);
+    b.append(el4(doc, "i", "pip"), ico, el4(doc, "b", "", label));
+    if (value !== void 0) {
+      const v = el4(doc, "span", "val");
+      v.append(value);
+      b.append(v);
+    }
+    b.setAttribute("aria-label", typeof value === "string" && value ? `${label}: ${value}` : label);
     b.addEventListener("click", (e) => {
       e.preventDefault();
       onClick();
@@ -13868,7 +13935,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const state = pageState.get(doc) ?? { active: incoming, o };
     state.o = o;
     pageState.set(doc, state);
-    const out = readout(doc, summary(o, stored, settings));
+    const out = readout(doc, t("fleet.readyHint"));
     const say = out.say;
     const report = (r, okKey, vars = {}) => r.ok ? say(t(okKey, { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), ...vars })) : say(t(r.reason ?? "fleet.err.noShips"), true);
     const withDispatcher = (fn) => {
@@ -14044,7 +14111,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       tiles.setAttribute("aria-label", t("fleet.actionsLabel"));
       const here = o.bodies.find((b) => b.planetId === o.bodyId);
       const act2 = (ico, id, name, where, tip, onClick, dim = false) => {
-        const b = tile(doc, ico, where ? `${name} ${where}` : name, onClick, dim ? "dim" : "", k(id));
+        const b = tile(doc, ico, where ? `${name} ${where}` : name, onClick, dim ? "dim" : "", k(id), name);
         out.peek(b, where ? `${name} ${where}` : name, tip);
         return b;
       };
@@ -14055,12 +14122,25 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         collect,
         settings,
         { transport: k("fleet.collect"), deploy: k("fleet.collectDeploy") },
-        (mode, dest) => dest ? run[mode](dest) : say(t("fleet.err.noDefault"), true)
-      ), "more");
+        (mode, dest2) => dest2 ? run[mode](dest2) : say(t("fleet.err.noDefault"), true)
+      ), "more", "", t("fleet.btn.collectShort"));
       collect.setAttribute("aria-haspopup", "menu");
       collect.append(el4(doc, "i", "more-mark"));
       out.peek(collect, t("fleet.btn.collect"), t("fleet.tip.collect"));
-      tiles.append(
+      const zone = (text) => {
+        const z = el4(doc, "span", "fut-fzone", text);
+        z.setAttribute("aria-hidden", "true");
+        return z;
+      };
+      const zoneBox = (text, cls = "") => {
+        const box = el4(doc, "span", `fut-fzonebox ${cls}`.trim());
+        const row = el4(doc, "span", "fut-ftiles");
+        box.append(zone(text), row);
+        return { box, row };
+      };
+      const mission = zoneBox(t("fleet.zone.mission"));
+      tiles.append(mission.box);
+      mission.row.append(
         ...["transport", "deploy"].map((m) => {
           const b = act2(m, `fleet.${m}`, t(`fleet.btn.${m}`), "", t(`fleet.tip.${m}`), () => run[m]());
           b.setAttribute("aria-pressed", String(settings.sendMode === m));
@@ -14078,10 +14158,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         ),
         act2("last", "fleet.last", t("fleet.btn.last"), "", last2 ? t("fleet.tip.last") : t("fleet.err.noLast"), () => run.last(), !last2)
       );
-      const secondary = el4(doc, "span", "fut-fsecond");
+      const dest = zoneBox(t("fleet.zone.dest"), "fut-fsecond");
+      const secondary = dest.row;
       if (here?.moonId) secondary.append(act2("moon", "fleet.moon", t("fleet.btn.moon"), to(here.moonId), t("fleet.tip.moon"), () => run.moon()));
       secondary.append(collect);
-      tiles.append(secondary);
+      tiles.append(dest.box);
       const skipSlot = el4(doc, "span", "fut-fsecond fut-fskip");
       drawSkip = () => {
         const next = skipTarget();
@@ -14105,31 +14186,53 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const rules = el4(doc, "div", "fut-frules");
       rules.setAttribute("role", "group");
       rules.setAttribute("aria-label", t("fleet.rulesLabel"));
-      const sw = (ico, label, hint, key, after) => {
+      const rulesOut = readout(doc, t("fleet.reservesHint"));
+      const sw = (ico, label, hint, key, after, value) => {
         const b = ruleSwitch(doc, ico, label, settings[key], () => {
           o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: !loadSettings(o.store)[key] });
           after?.();
           redraw();
-        });
-        out.peek(b, `${label}: ${settings[key] ? t("fleet.on") : t("fleet.off")}.`, hint);
+        }, value);
+        rulesOut.peek(b, `${label}: ${settings[key] ? t("fleet.on") : t("fleet.off")}.`, hint);
         return b;
       };
-      rules.append(
-        sw("ships", t("fleet.rule.ships"), t("fleet.rule.shipsHint"), "shipsOn"),
-        sw("resources", t("fleet.rule.resources"), t("fleet.rule.resourcesHint"), "resourcesOn"),
-        ...isMoon(o.bodies, o.bodyId) ? [sw("gate", t("fleet.rule.gate"), t("fleet.rule.gateHint"), "gateOn")] : [],
-        sw("food", t("fleet.foodShort"), t("fleet.foodHint"), "ignoreFood", () => applyFood(o.store)),
-        sw("repeat", t("fleet.repeatShort"), t("fleet.repeatHint"), "repeat")
+      const fmtN = (n) => formatUnits(n, o.locale);
+      const sumOf = (r) => Object.values(r ?? {}).reduce((a, b) => a + b, 0);
+      const shipsKept = sumOf(stored.reserve.ships);
+      const res = stored.reserve.resources;
+      const resValue = el4(doc, "span", "toks");
+      for (const [cls, v] of [["m", res.metal], ["c", res.crystal], ["d", res.deuterium]]) {
+        if (!v) continue;
+        const tk = el4(doc, "span", "");
+        tk.append(el4(doc, "i", `tok ${cls}`), doc.createTextNode(fmtN(v)));
+        resValue.append(tk);
+      }
+      const unset = t("fleet.rule.unset");
+      const gateKept = sumOf(stored.gate);
+      const reserves = el4(doc, "span", "fut-fgroup");
+      reserves.setAttribute("role", "group");
+      reserves.setAttribute("aria-label", t("fleet.zone.reserves"));
+      reserves.append(
+        zone(t("fleet.zone.reserves")),
+        sw("ships", t("fleet.rule.ships"), t("fleet.rule.shipsHint"), "shipsOn", void 0, shipsKept ? fmtN(shipsKept) : unset),
+        sw("resources", t("fleet.rule.resources"), t("fleet.rule.resourcesHint"), "resourcesOn", void 0, res.metal || res.crystal || res.deuterium ? resValue : unset),
+        ...isMoon(o.bodies, o.bodyId) ? [sw("gate", t("fleet.rule.gate"), t("fleet.rule.gateHint"), "gateOn", void 0, gateKept ? fmtN(gateKept) : unset)] : [],
+        sw("food", t("fleet.foodShort"), t("fleet.foodHint"), "ignoreFood", () => applyFood(o.store))
       );
+      const round = el4(doc, "span", "fut-fgroup");
+      round.setAttribute("role", "group");
+      round.setAttribute("aria-label", t("fleet.zone.round"));
+      round.append(zone(t("fleet.zone.round")), sw("repeat", t("fleet.repeatShort"), t("fleet.repeatHint"), "repeat"));
+      rules.append(reserves, round);
       const skipped = settings.skipBodies.includes(o.bodyId);
-      const skipSw = ruleSwitch(doc, "skip", t("fleet.rule.skip"), skipped, () => {
+      const skipSw = ruleSwitch(doc, "skip", t("fleet.rule.skipHere"), skipped, () => {
         const now = loadSettings(o.store);
         const others = now.skipBodies.filter((id) => id !== o.bodyId);
         o.store.set(SETTINGS_KEY, { ...now, skipBodies: skipped ? others : [...others, o.bodyId] });
         redraw();
       });
-      out.peek(skipSw, `${t("fleet.rule.skip")}: ${skipped ? t("fleet.on") : t("fleet.off")}.`, t("fleet.rule.skipHint"));
-      rules.append(skipSw);
+      rulesOut.peek(skipSw, `${t("fleet.rule.skip")}: ${skipped ? t("fleet.on") : t("fleet.off")}.`, t("fleet.rule.skipHint"));
+      round.append(skipSw);
       const edit = el4(doc, "span", "fut-fedit");
       const tool = (ico, label, hint, onClick, cls = "") => {
         const b = el4(doc, "button", `fut-ftool ${cls}`.trim());
@@ -14144,12 +14247,13 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         out.peek(b, label, hint);
         return b;
       };
-      edit.append(tool("rules", t("fleet.editRules", { body: shortLabel(o, o.bodyId) }), t("fleet.editRulesHint"), () => openSettings2(o, "body", redraw), "fut-frules-open"));
+      const rulesTool = tool("rules", t("fleet.editRules", { body: shortLabel(o, o.bodyId) }), t("fleet.editRulesHint"), () => openSettings2(o, "body", redraw), "fut-frules-open");
+      rulesOut.peek(rulesTool, t("fleet.editRules", { body: shortLabel(o, o.bodyId) }), t("fleet.editRulesHint"));
       if (o.onOpenSettings) edit.append(tool("settings", t("fleet.general"), t("fleet.generalHint"), () => o.onOpenSettings?.()));
       const top = el4(doc, "div", "fut-frow");
       top.append(tiles, edit);
       const bottom = el4(doc, "div", "fut-frow");
-      bottom.append(rules, out.box);
+      bottom.append(out.box);
       bar.append(top);
       if (settings.sendMode) {
         bar.append(sendPanel(o, out.peek, sendWith, aim));
@@ -14158,6 +14262,13 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       if (focusRes) doc.querySelector(".fut-fsend .fut-fresin.metal input")?.focus();
       bar.append(bottom);
       anchor1.before(bar);
+      const strip = el4(doc, "div", "fut-fbar fut-freserves");
+      const stripRow = el4(doc, "div", "fut-frow");
+      stripRow.append(rules, rulesTool);
+      strip.append(stripRow, rulesOut.box);
+      const below = fleet1.querySelector("#allornone") ?? null;
+      if (below) below.before(strip);
+      else anchor1.after(strip);
       addInvertButtons(o);
     }
     if (fleet2 && anchor2) {
