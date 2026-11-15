@@ -861,7 +861,7 @@ describe('skip in the collection round', () => {
     expect(went[0]).toContain('cp=13');
     expect(went[0]).toContain('futmode=collect');
     // The switch on this body adds it to the list, pressing again takes it off.
-    const sw = () => [...doc.querySelectorAll<HTMLButtonElement>('.fut-fsw')].find((b) => b.title === 'fleet.rule.skip')!;
+    const sw = () => [...doc.querySelectorAll<HTMLButtonElement>('.fut-freserves .fut-fchip')].find((b) => b.getAttribute('aria-label') === 'fleet.rule.skipHere')!;
     expect(sw().getAttribute('aria-checked')).toBe('false');
     sw().click();
     expect(store.get<{ skipBodies: number[] }>('fleet.settings', { skipBodies: [] }).skipBodies).toEqual([12, 11]);

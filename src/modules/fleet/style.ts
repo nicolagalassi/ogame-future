@@ -26,15 +26,20 @@ export const FLEET_CSS = `
    Silver on slate, no neon: colour is left to what the game's own page says. */
 .fut-facts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .fut-fact {
-  position: relative; flex: none; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 40px; padding: 0;
+  position: relative; flex: none; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 62px; height: 48px; padding: 4px 8px 3px;
   border: 1px solid var(--tile-line); border-radius: 6px; background: var(--tile); color: var(--ico);
 }
 .fut-fact:hover { border-color: var(--line-hover); background: var(--tile-hi); color: var(--ico-hi); }
 .fut-fact:active { transform: translateY(1px); }
 .fut-fact .ico { display: inline-flex; }
-/* The key sits in the corner: the icon steps aside for it. */
-.fut-fact:has(kbd) .ico { margin: 5px 6px 0 0; }
-.fut-fact kbd { position: absolute; top: 2px; right: 3px; color: var(--dim); font: 11px/11px Verdana, Arial, sans-serif; }
+/* The name under the icon: what the button does, readable without pointing at it. */
+.fut-fact .name { font: 11px/1 Verdana, Arial, sans-serif; white-space: nowrap; color: inherit; }
+/* Zone labels: what a group of buttons is for, printed once at its head. */
+.fut-fzone { color: var(--mute); font: bold 11px Verdana, Arial, sans-serif; white-space: nowrap; }
+.fut-fzonebox { display: inline-flex; flex-direction: column; gap: 4px; }
+.fut-ftiles { display: inline-flex; gap: 4px; }
+.fut-fgroup .fut-fzone { margin-right: 4px; }
+.fut-fact kbd { position: absolute; top: 3px; right: 4px; color: var(--dim); font: 11px/11px Verdana, Arial, sans-serif; }
 .fut-fact:hover kbd { color: var(--mute); }
 .fut-fact.dim { border-style: dashed; background: none; color: var(--dim); }
 /* Secondary tools (moon, expedition collection): set apart and quieter. */
@@ -63,7 +68,24 @@ export const FLEET_CSS = `
 .fut-ftool:hover { background: var(--tile-hi); color: var(--hi); }
 
 /* Rules: the rule's icon beside a switch track, so on and off read without a word. */
-.fut-frules { flex: none; display: inline-flex; gap: 4px; }
+.fut-frules { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; min-width: 0; }
+/* Reserves and round: a strip of their own under the ships, apart from the actions. */
+.fut-freserves { margin-top: 8px; }
+.fut-fgroup { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+/* A rule as a printed chip: pip filled when on, its name, what it keeps back. Off = outline only. */
+.fut-fchip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 8px; border: 1px solid var(--tile-line); border-radius: 4px; background: none; color: var(--mute); }
+.fut-fchip .ico { display: inline-flex; opacity: 0.8; }
+.fut-fchip b { font-weight: bold; }
+.fut-fchip .val { color: var(--dim); }
+.fut-fchip .pip { flex: none; width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; }
+.fut-fchip:hover { border-color: var(--line-hover); color: var(--hi); }
+.fut-fchip[aria-checked="true"] { border-color: var(--accent-line); background: var(--tile-hi); color: var(--hi); }
+.fut-fchip[aria-checked="true"] .pip { background: var(--accent); box-shadow: none; }
+.fut-fchip[aria-checked="true"] .val { color: var(--txt); }
+.fut-fchip .toks { display: inline-flex; gap: 8px; }
+.fut-fchip .toks > span { display: inline-flex; align-items: center; gap: 3px; }
+.fut-fbar .tok { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.fut-fbar .tok.m { color: var(--m); } .fut-fbar .tok.c { color: var(--c); } .fut-fbar .tok.d { color: var(--d); }
 .fut-fsw { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 7px 0 8px; border: 1px solid var(--line-soft); border-radius: 14px; background: none; color: var(--dim); }
 .fut-fsw .ico { display: inline-flex; }
 .fut-fsw .track { position: relative; flex: none; width: 20px; height: 12px; border-radius: 6px; background: var(--track); transition: background-color 120ms ease-out; }
