@@ -1,5 +1,5 @@
 /** Inbox summaries (global classes, all prefixed) and expedition journal (Shadow DOM). */
-import { RES_COLORS } from '../../core/sheet';
+import { PAGE_TOKENS, RES_COLORS } from '../../core/sheet';
 
 /** Outcome colours, shared by the inbox chips and the journal. */
 export const OUTCOME_COLORS: Record<string, string> = {
@@ -38,8 +38,8 @@ export const MESSAGES_CSS = `
 /* One set of tokens for the summaries, the "just read" panel and the spy table. Text tokens keep
    at least 4.5:1 on every background they sit on; --faint is for decoration only (ticks, tracks). */
 .fut-msg, .fut-fresh, #fut-spypanel {
-  --hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1; --faint: #4E5B6A; --line: #2E4356;
-  --link: #6F9FC8; --accent: #4FD1E8; --neg: #F07A6E; --warn: #E3B341; --ok: #7BC47F; --ship: #4FE0B0; --on-tone: #0D1116;
+  ${PAGE_TOKENS} --faint: #4E5B6A; --line: #2E4356;
+  --link: #6F9FC8; --ship: #4FE0B0; --on-tone: #0D1116;
   --loot: #F0A35A; --name: #E8D27A; --on-accent: #CFF5FC; --attack: #FF9B8A; --attack-line: #C0533F; --sim: #8FB6D8; --chip: #1A2733;
 }
 .fut-msg { display: grid; grid-template-columns: 124px minmax(0, 1fr) minmax(84px, auto) auto; align-items: center; column-gap: 10px;
@@ -138,7 +138,7 @@ ${outcomeCss}
 .fut-r-m { --dot: ${RES_COLORS.metal}; } .fut-r-c { --dot: ${RES_COLORS.crystal}; } .fut-r-d { --dot: ${RES_COLORS.deuterium}; } .fut-r-f { --dot: ${RES_COLORS.food}; } .fut-r-dm { --dot: ${RES_COLORS.darkMatter}; }
 .fut-u { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 .fut-msg-icon { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; flex: none; }
-.fut-msg-icon-none { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--chip); font-size: 8px; color: var(--mute); }
+.fut-msg-icon-none { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--chip); font-size: 10px; color: var(--mute); }
 .fut-note { white-space: nowrap; color: var(--txt); }
 .fut-msg .fut-muted { color: var(--mute); } .fut-msg .fut-warn { color: var(--warn); } .fut-msg .fut-neg { color: var(--neg); }
 .fut-msg .fut-item { color: #D08A5B; } .fut-msg .fut-lf { color: #E07BC8; } .fut-msg .fut-art { color: #D4A93A; }
@@ -282,20 +282,19 @@ ${RARITY.map((c, i) => `.rar-${i} { --rar: ${c}; }`).join(' ')}
 .res-name { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
 .res-name::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--dot); flex: none; }
 .res-tile b { font-size: 22px; line-height: 1.15; color: var(--dot); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.res-tile.zero b { color: var(--faint); }
+.res-tile.zero b { color: var(--dim); }
 /* Ships found: compact, many per row; the count matters more than the picture. */
 .ships { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 4px 10px; }
 .ship { display: flex; align-items: center; gap: 6px; padding: 1px 0; min-width: 0; }
 .ship-img { width: 24px; height: 24px; flex: none; border-radius: 50%; object-fit: cover; background: var(--line-soft); }
-.ship-img-none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 9px; }
+.ship-img-none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 10px; }
 .ship-info { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
 .ship-info b { font-size: 12px; font-variant-numeric: tabular-nums; }
 .ship-name { color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 560px) { .res { grid-template-columns: repeat(2, minmax(0, 1fr)); } .res-tile b { font-size: 18px; } }
 h4.lost { margin: 10px 0 6px; color: var(--bad); }
 .foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
-.opt input { width: 16px; height: 16px; margin: 0; }
-.opt { min-height: 24px; display: flex; gap: 6px; align-items: center; color: var(--text-2); font-size: 12px; cursor: pointer; }
+.opt { position: relative; min-height: 24px; display: flex; gap: 6px; align-items: center; color: var(--text-2); font-size: 12px; cursor: pointer; }
 .acts { display: flex; gap: 6px; }
 @media (max-width: 560px) { .kpi .value { font-size: 15px; } }
 /* Expeditions as a statement: net gain first, where it came from, then the columns. */

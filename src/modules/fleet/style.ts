@@ -1,10 +1,12 @@
+import { PAGE_TOKENS } from '../../core/sheet';
+
 /** Styles for the action bars on the game's fleet page (scoped by fut- class names). */
 export const FLEET_CSS = `
 /* The fleet bar speaks the inbox's language: Verdana 11px, tabular numbers, one set of tokens. */
 .fut-fbar, .fut-fmenu {
-  --hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1; --line: #24344B; --line-soft: #1A2738;
+  ${PAGE_TOKENS} --line: #24344B; --line-soft: #1A2738;
   --tile: #152234; --tile-hi: #1C2D44; --tile-line: #2A3B53; --ico: #C2CCD8; --ico-hi: #F1F4F7;
-  --accent: #6FB6C8; --on-accent: #DCEAF0; --ok: #4FE0B0; --neg: #F07A6E; --warn: #E3B341;
+  --on-accent: #DCEAF0;
   --track: #3A4A60; --knob-on: #0B1A22; --on-line: #35576A; --on-bg: #17293A; --field: #0D1522;
 }
 .fut-fbar {

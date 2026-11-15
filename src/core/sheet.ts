@@ -7,12 +7,24 @@
 /** Resource colours, the same in the planet menu, the windows and the inbox. */
 export const RES_COLORS = { metal: '#B8C2CC', crystal: '#7FB8FF', deuterium: '#4FE0B0', darkMatter: '#B58CDB', food: '#D6A8C8' };
 
+/** State colours, one value each everywhere: cyan = chosen, green = fine (not the deuterium green), amber = look at it, red = missing or lost. */
+export const STATE_COLORS = { accent: '#4FD1E8', ok: '#7BC47F', warn: '#F5B547', bad: '#F07A6E' };
+
+/**
+ * The tokens of what Future draws inside the game's own pages (inbox, fleet bar, Orion): the game's
+ * Verdana 11px world, text at 4.5:1 or more on the game's dark panels. Each surface adds its own
+ * --line and extras; these names and values are shared.
+ */
+export const PAGE_TOKENS = `--hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1;
+  --accent: ${STATE_COLORS.accent}; --ok: ${STATE_COLORS.ok}; --warn: ${STATE_COLORS.warn}; --neg: ${STATE_COLORS.bad};`;
+
 export const WINDOW_SHEET = `
 :host {
   all: initial;
   --bg: #0B121D; --surface: #0D1522; --raised: #111B2A; --line: #1F2C40; --line-soft: #16202F;
   --text: #E6EDF5; --text-2: #C9D4E2; --muted: #8A9BB0; --faint: #4A5B72;
-  --accent: #4FD1E8; --accent-soft: #12283A; --warn: #F5B547; --ok: #4FE0B0; --bad: #FF7A7A;
+  --accent: ${STATE_COLORS.accent}; --accent-soft: #12283A; --warn: ${STATE_COLORS.warn}; --ok: ${STATE_COLORS.ok}; --bad: ${STATE_COLORS.bad};
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --m: ${RES_COLORS.metal}; --c: ${RES_COLORS.crystal}; --d: ${RES_COLORS.deuterium}; --dm: ${RES_COLORS.darkMatter};
   --mono: Consolas, "JetBrains Mono", monospace;
   --panel-w: 860px;
@@ -28,7 +40,13 @@ export const WINDOW_SHEET = `
 .panel {
   width: min(var(--panel-w), 100%); display: flex; flex-direction: column; gap: 8px; padding: 8px;
   border: 1px solid var(--line); border-radius: 9px; background: var(--bg); box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  animation: fut-panel-in 200ms var(--ease-out);
 }
+/* Opening: the window settles in from just below, the page dims behind it. Closing is instant. */
+.backdrop { animation: fut-fade-in 160ms var(--ease-out); }
+@keyframes fut-panel-in { from { opacity: 0; transform: translateY(6px) scale(0.985); } }
+@keyframes fut-fade-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .panel { animation-name: fut-fade-in; } }
 .head { display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 4px 4px 4px 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); }
 .titles { flex: 1; display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; min-width: 0; }
 h2 { margin: 0; font-size: 14px; font-weight: 700; color: var(--text); }
@@ -76,9 +94,16 @@ input:checked + .sw-track::after, [aria-checked="true"] > .sw-track::after { tra
 .act:hover { border-color: var(--accent); }
 .act.ghost { border-color: var(--line); background: #0A111C; color: #B4C2D3; font-weight: 400; }
 .act.ghost:hover, .act.danger { border-color: var(--bad); color: var(--bad); }
+/* Press feedback: anything pressable gives a little under the pointer. */
+.act, .tab, .close, .seg button { transition: transform 140ms var(--ease-out); }
+.act:active, .tab:active, .close:active, .seg button:active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) { .act:active, .tab:active, .close:active, .seg button:active { transform: none; } }
+/* A checkbox drawn as the switch: the input stays for keyboard and screen readers, the track shows. */
+input.sw { position: absolute; opacity: 0; pointer-events: none; }
+input.sw:focus-visible + .sw-track { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* Browser surfaces. */
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .backdrop, .scroll, .table-wrap { scrollbar-color: #2A3B55 var(--bg); scrollbar-width: thin; }
 ::selection { background: #2B6F7D; color: #fff; }
 .num, td, .value, .kpi-line { font-variant-numeric: tabular-nums; }

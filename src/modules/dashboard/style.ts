@@ -108,7 +108,9 @@ td.guess { font-style: italic; opacity: 0.7; }
 .pls { display: flex; flex-wrap: wrap; gap: 4px; margin: 3px 0 2px; }
 .pl { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border: 1px solid #1F2C40; border-radius: 5px; background: #0A111C; color: #B4C2D3; font-size: 11px; text-decoration: none; white-space: nowrap; }
 .pl:hover, .pl:focus-visible { border-color: #4FD1E8; color: #E6EDF5; }
-.pl.guess { border-color: #5C4A12; }
+/* Estimated levels: a dashed amber edge (the title says why), the name stays readable. */
+.move-text .pl.guess:not(.done) { border-style: dashed; border-color: #6B5618; color: #B4C2D3; }
+.move-text .pl.guess:not(.done):hover, .move-text .pl.guess:not(.done):focus-visible { border-color: #4FD1E8; color: #E6EDF5; }
 .pl.done { color: #5F7189; text-decoration: line-through; border-style: dashed; }
 
 /* Planets | moons switch on the ships and defence pages. */
