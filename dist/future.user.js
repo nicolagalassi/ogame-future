@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.93
+// @version      0.3.94
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -9926,8 +9926,9 @@ ${L} .fut-fleet { display: flex; align-items: center; gap: 5px; min-width: 0; ma
 ${L} .fut-fleet-m { display: inline-flex; align-items: center; gap: 2px; color: #D8A0A0; }
 ${L} .fut-fleet-m svg { flex: none; opacity: 0.8; }
 ${L}.fut-mode-compact .fut-fleet-m { display: none; }
-.fut-totals .fut-fleetrow .fut-tname { color: #FFA0A0; }
-.fut-totals .fut-flyrow, .fut-totals .fut-flyrow .fut-tname { color: var(--muted); font-size: 0.92em; }
+.fut-totals .fut-fleetrow .fut-tname { color: var(--old); }
+.fut-totals .fut-flyrow, .fut-totals .fut-flyrow .fut-tname, .fut-totals .fut-flyrow .fut-tlabel { color: var(--muted); font-size: 0.92em; }
+.fut-totals .fut-flyrow .fut-tnum { color: var(--text-2); font-size: 13px; }
 
 /* Moon: its own tile on the right of the same row. */
 ${L} a.moonlink {
@@ -10058,27 +10059,32 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 
 /* Totals: a table, resource by resource: in stock now, made in a day. Numbers in one bright colour, right-aligned. */
 .fut-totals {
-  box-sizing: border-box; margin-top: 4px; padding: 2px 8px 4px; border-radius: 7px; border: 1px solid var(--line); background: var(--raised);
-  font: 12px/1.3 Arial, Helvetica, sans-serif; font-variant-numeric: tabular-nums;
+  box-sizing: border-box; margin-top: 4px; padding: 0 0 4px; border-radius: 6px; background: var(--raised); overflow: hidden;
+  font: 12px/1.3 var(--body); font-variant-numeric: tabular-nums;
 }
-.fut-totals .fut-trow { display: grid; grid-template-columns: minmax(0, 1fr) 58px 62px; align-items: center; gap: 6px; min-height: 20px; padding: 2px 0; }
-.fut-totals .fut-trow + .fut-trow { border-top: 1px solid var(--line-soft); }
-.fut-totals .fut-thead { min-height: 0; color: var(--label); font-size: 11px; }
-.fut-totals .fut-thead + .fut-trow { border-top-color: var(--line); }
-.fut-totals .fut-tname { display: flex; align-items: center; gap: 6px; min-width: 0; white-space: nowrap; overflow: hidden; }
-.fut-totals .fut-tico { flex: none; display: inline-flex; }
+/* The account's purse, as on the player's board: column heads on the board-blue band, one field per line,
+   figures in the board's condensed face, resources as tokens, the total on the band. */
+.fut-totals .fut-trow { display: grid; grid-template-columns: minmax(0, 1fr) 58px 62px; align-items: center; gap: 6px; min-height: 22px; padding: 2px 8px; }
+.fut-totals .fut-trow + .fut-trow { margin-top: 2px; }
+.fut-totals .fut-thead { min-height: 0; padding-top: 5px; padding-bottom: 5px; background: var(--band); color: var(--on-band); font-size: 11px; }
+.fut-totals .fut-tname { display: flex; align-items: center; gap: 7px; min-width: 0; white-space: nowrap; overflow: hidden; }
+.fut-totals .fut-tico { flex: none; display: inline-flex; width: 13px; justify-content: center; }
+.fut-totals .fut-ttok { width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
 .fut-totals .fut-tlabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); }
-.fut-totals .fut-msu .fut-tlabel { color: var(--accent); }
-.fut-totals .fut-tnum { text-align: right; white-space: nowrap; color: var(--text); font: 700 12px Consolas, "JetBrains Mono", monospace; }
-.fut-totals .fut-tnum:last-child { color: var(--text-2); font-weight: 400; }
+.fut-totals .fut-tnum { text-align: right; white-space: nowrap; color: var(--text); font: 600 condensed 14px var(--display); }
+.fut-totals .fut-tnum:last-child { color: var(--label); font: 400 condensed 13px var(--display); }
 .fut-totals .fut-thead .fut-tnum { color: inherit; font: inherit; }
-.fut-totals .fut-msu { border-top-color: var(--line-strong) !important; }
-.fut-totals .fut-msu .fut-tname { color: var(--accent); font-weight: 700; }
-.fut-totals .fut-msu .fut-tnum:last-child { color: var(--text); }
-#planetbarcomponent:not(.fut-wide) .fut-totals { padding: 2px 4px 4px; }
+/* The total: printed on the band, like the board's score line. */
+.fut-totals .fut-msu { margin: 4px 0 2px; padding-top: 4px; padding-bottom: 4px; background: var(--band-2); }
+.fut-totals .fut-msu .fut-tname, .fut-totals .fut-msu .fut-tlabel { color: var(--text); font-weight: 600; }
+.fut-totals .fut-msu .fut-tico { color: var(--on-band); }
+.fut-totals .fut-msu .fut-tnum { font-size: 15px; }
+.fut-totals .fut-msu .fut-tnum:last-child { color: var(--text); font: 600 condensed 13px var(--display); }
+#planetbarcomponent:not(.fut-wide) .fut-totals { padding: 0 0 4px; }
+#planetbarcomponent:not(.fut-wide) .fut-totals .fut-trow { padding-left: 4px; padding-right: 4px; }
 #planetbarcomponent:not(.fut-wide) .fut-totals .fut-trow { grid-template-columns: 13px minmax(0, 1fr) minmax(0, 1fr); gap: 3px; }
 #planetbarcomponent:not(.fut-wide) .fut-totals .fut-tlabel { display: none; }
-#planetbarcomponent:not(.fut-wide) .fut-totals .fut-tnum { font-size: 11px; }
+#planetbarcomponent:not(.fut-wide) .fut-totals .fut-tnum { font-size: 12px; }
 
 /* The plan's hover card, in the game's tooltip style (dark blue gradient, thin frame, centred title). */
 .fut-plan-tip { position: fixed; z-index: 100000; min-width: 170px; max-width: 260px; padding: 10px 12px; box-sizing: border-box;
@@ -10483,7 +10489,8 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
           c.setAttribute("role", cls === "fut-thead" ? "columnheader" : "cell");
           if (!i && glyph2) {
             const ico = el3(doc, "span", "fut-tico");
-            ico.innerHTML = iconSvg(glyph2, 13);
+            if (glyph2 === "metal" || glyph2 === "crystal" || glyph2 === "deuterium") ico.append(el3(doc, "i", "fut-ttok"));
+            else ico.innerHTML = iconSvg(glyph2, 13);
             c.append(ico);
           }
           c.append(el3(doc, "span", "fut-tlabel", text));
