@@ -301,7 +301,7 @@ The board is flat. Depth is tonal: ground (`bg`) under board (`raised`) under fi
 
 ## Shapes
 
-Small, firm corners on things you press; square corners on things that are printed. Zones, rungs, to-check items, key figures, track cells, tapes and research tiles are square: they are areas of the board, and the 2px seam between them is the shape. Pressable marks carry a slight radius: planet chips and tags 3px, buttons, chips and the close button 4px, tabs 5px on the top corners only (cut from the board), the window sheet 6px. Round forms are reserved for things that are pieces: resource tokens (11px discs), the rung number (22px disc), the switch (8px pill with a round knob).
+Small, firm corners on things you press; square corners on things that are printed. Zones, rungs, to-check items, key figures, track cells, tapes and research tiles are square: they are areas of the board, and the 2px seam between them is the shape. Pressable marks carry a slight radius: planet chips and tags 3px, buttons, chips and the close button 4px, tabs 5px on the top corners only (cut from the board), the window sheet 6px. Round forms are reserved for things that are pieces: the rung number (22px disc), the switch (8px pill with a round knob). Resources are the board's pieces themselves, drawn once in `core/res-icons.ts` (`RES_PATHS`, `resToken`): metal a cube, crystal a cut gem, deuterium a drop, each flat in its resource colour with the same three tones lit from the top left (lit face 1, side .72, shade .5). They are used at 11–14px in figures and costs and at 13px+ beside names, everywhere a resource is named: Dashboard, planet menu totals, fleet bar, inbox.
 
 ## Components
 

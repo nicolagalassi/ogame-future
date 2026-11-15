@@ -18,6 +18,7 @@
  * "Avanti" and "Invia flotta". No request is made by Future here: the game checks the
  * target itself when page 2 opens. See ./repeat.ts for the "Ripeti" precedent (OGLight).
  */
+import { resToken } from '../../core/res-icons';
 import { icon } from '../../core/icons';
 import { groupInt, groupWhileTyping, formatUnits } from '../../core/format';
 import { WINDOW_SHEET } from '../../core/sheet';
@@ -1461,7 +1462,7 @@ export function renderFleetTools(o: FleetOptions): void {
     for (const [cls, v] of [['m', res.metal], ['c', res.crystal], ['d', res.deuterium]] as const) {
       if (!v) continue;
       const tk = el(doc, 'span', '');
-      tk.append(el(doc, 'i', `tok ${cls}`), doc.createTextNode(fmtN(v)));
+      tk.append(resToken(doc, cls, 11), doc.createTextNode(fmtN(v)));
       resValue.append(tk);
     }
     const unset = t('fleet.rule.unset');
