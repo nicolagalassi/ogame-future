@@ -543,9 +543,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
         // Each line's symbol (the same as the fleet page's), in that line's colour.
         if (!i && glyph) {
           const ico = el(doc, 'span', 'fut-tico');
-          // Resources as the board's tokens (discs in the game's resource colours), the rest with their symbol.
-          if (glyph === 'metal' || glyph === 'crystal' || glyph === 'deuterium') ico.append(el(doc, 'i', 'fut-ttok'));
-          else ico.innerHTML = iconSvg(glyph, 13);
+          ico.innerHTML = iconSvg(glyph, 13);
           c.append(ico);
         }
         c.append(el(doc, 'span', 'fut-tlabel', text));

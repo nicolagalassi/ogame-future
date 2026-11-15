@@ -85,7 +85,8 @@ export const FLEET_CSS = `
 .fut-fchip[aria-checked="true"] .val { color: var(--txt); }
 .fut-fchip .toks { display: inline-flex; gap: 8px; }
 .fut-fchip .toks > span { display: inline-flex; align-items: center; gap: 3px; }
-.fut-fbar .tok { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.fut-fbar .tok { display: inline-flex; flex: none; vertical-align: -2px; }
+.fut-fbar .tok svg { display: block; }
 .fut-fbar .tok.m { color: var(--m); } .fut-fbar .tok.c { color: var(--c); } .fut-fbar .tok.d { color: var(--d); }
 .fut-fsw { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 7px 0 8px; border: 1px solid var(--line-soft); border-radius: 14px; background: none; color: var(--dim); }
 .fut-fsw .ico { display: inline-flex; }

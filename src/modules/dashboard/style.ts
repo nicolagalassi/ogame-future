@@ -6,7 +6,8 @@ export const DASHBOARD_CSS = `
 
 .cols { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr) minmax(0, 0.9fr); gap: 2px; }
 /* Resource tokens: discs in the game's resource colours, the way a board game prints costs. */
-.tok { display: inline-block; flex: none; width: 11px; height: 11px; border-radius: 50%; background: currentColor; vertical-align: -1px; }
+.tok { display: inline-flex; flex: none; vertical-align: -2px; }
+.tok svg { display: block; }
 .tok.m { color: var(--m); } .tok.c { color: var(--c); } .tok.d { color: var(--d); }
 /* Income tracks: 20 printed cells on one scale, the pawn on today's income, an outline on the next rung. */
 .prod { margin-bottom: 14px; }

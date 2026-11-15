@@ -62,9 +62,8 @@ describe('renderPlanetMenu', () => {
     const fleets = document.querySelectorAll('#planet-1 .fut-fleet');
     expect(fleets).toHaveLength(1);
     expect(fleets[0]!.parentElement!.classList.contains('fut-name')).toBe(true);
-    // Totals: each line with its mark (the resources as the board's tokens, the rest with their symbol), the fleet included.
-    expect(document.querySelectorAll('.fut-totals .fut-tico').length).toBe(5);
-    expect(document.querySelectorAll('.fut-totals .fut-tico .fut-ttok').length).toBe(3);
+    // Totals: each line with its symbol (the resources as the board's pieces), the fleet included.
+    expect(document.querySelectorAll('.fut-totals .fut-tico svg').length).toBe(5);
   });
 
   it('adds planet and moon rows on the game links themselves', () => {
