@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.104
+// @version      0.3.105
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -5478,70 +5478,69 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .side {
   container-type: inline-size;
   position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000000; width: var(--w, ${SIDE_W}px); max-width: 100vw; display: flex; flex-direction: column; gap: 6px;
-  padding: 8px; background: var(--bg); border-right: 1px solid var(--line); box-shadow: 6px 0 24px rgba(0,0,0,0.45);
-  font: 12px/1.3 Arial, Helvetica, sans-serif; color: var(--text-2); font-variant-numeric: tabular-nums; overflow: hidden;
+  padding: 8px; background: var(--raised); border-right: 0; box-shadow: 6px 0 24px rgba(0,0,0,0.45);
+  font: 12px/1.3 var(--body); color: var(--text-2); font-variant-numeric: tabular-nums; overflow: hidden;
 }
 button, input, textarea { font: inherit; color: inherit; }
-button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; }
-.mono, .coords, .num { font-family: Consolas, "JetBrains Mono", monospace; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.mono, .coords, .num { font-family: var(--display); font-stretch: condensed; }
 
-/* Head: back, who or what, close. */
-.head { display: flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 2px 0 4px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); }
-.title { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; font: 700 14px Arial, sans-serif; color: var(--text); white-space: nowrap; overflow: hidden; }
+/* Head: back, who or what, close, on the board's band (as the windows). */
+.head { display: flex; align-items: center; gap: 4px; min-height: 40px; margin: -8px -8px 0; padding: 0 4px; background: var(--band); }
+.title { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; font: 600 condensed 17px var(--display); color: var(--text); white-space: nowrap; overflow: hidden; }
 .title .name { overflow: hidden; text-overflow: ellipsis; }
-.title a { color: var(--label); font-weight: 400; font-size: 12px; text-decoration: none; }
-.title a:hover { color: var(--accent); }
-.ib { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 5px; background: none; color: var(--label); cursor: pointer; flex: none; text-decoration: none; }
-.ib:hover { background: var(--line); color: var(--text); }
+.title a { color: var(--on-band); font-weight: 400; font-size: 13px; text-decoration: none; }
+.title a:hover { color: var(--accent-hi); }
+.ib { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 4px; background: none; color: var(--on-band); cursor: pointer; flex: none; text-decoration: none; }
+.ib:hover { background: var(--band-2); color: var(--text); }
 
 /* Tabs and filters. */
 .chips { display: flex; flex-wrap: wrap; gap: 3px; }
-.chip { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: 1 0 auto; min-width: 30px; height: 26px; padding: 0 6px; border-radius: 5px; border: 1px solid var(--line); background: var(--bg); color: var(--text-2); cursor: pointer; }
-.chip:hover { border-color: var(--accent-line); }
-.chip[aria-pressed="true"] { border-color: currentColor; background: var(--accent-soft); color: var(--text); font-weight: 700; }
-.chip .n { font: 12px Consolas, monospace; color: var(--label); }
+.chip { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: 1 0 auto; min-width: 30px; height: 28px; padding: 0 6px; border-radius: 4px; border: 0; background: var(--surface); color: var(--text-2); cursor: pointer; }
+.chip:hover { background: var(--hover); }
+.chip[aria-pressed="true"] { background: var(--hover); color: var(--text); box-shadow: inset 0 2px 0 currentColor; }
+.chip .n { font: 600 condensed 13px var(--display); color: var(--text); }
 
 /* Scores: what the number is, the number, the rank. Three per line. */
-.scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 7px; background: var(--raised); overflow: hidden; flex: none; }
-.score { display: flex; flex-direction: column; gap: 1px; min-width: 0; padding: 5px 8px 6px; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
-.score .k { display: flex; align-items: center; gap: 4px; color: var(--label); font-size: 11px; white-space: nowrap; overflow: hidden; }
-.score b { font: 700 14px/16px Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.score i { font: normal 11px Consolas, monospace; color: var(--label); }
+.scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; flex: none; }
+.score { display: flex; flex-direction: column; gap: 1px; min-width: 0; padding: 6px 8px 7px; background: var(--surface); }
+.score .k { display: flex; align-items: center; gap: 5px; color: var(--label); font-size: 12px; white-space: nowrap; overflow: hidden; }
+.score b { font: 600 condensed 17px/19px var(--display); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.score i { font: normal condensed 12px var(--display); color: var(--label); }
 /* The game's own pages about this player. */
-.actions { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); overflow: hidden; flex: none; }
-.actions a { display: flex; align-items: center; justify-content: center; gap: 6px; height: 28px; padding: 0 4px; color: var(--text-2); text-decoration: none; white-space: nowrap; overflow: hidden; }
-.actions > * + * { border-left: 1px solid var(--line); }
-.actions a:hover { background: var(--raised); color: var(--text); }
+.actions { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; flex: none; }
+.actions a { display: flex; align-items: center; justify-content: center; gap: 6px; height: 30px; padding: 0 4px; border-radius: 4px; background: var(--surface); color: var(--text-2); text-decoration: none; white-space: nowrap; overflow: hidden; }
+.actions a:hover { background: var(--hover); color: var(--text); }
 /* The player's note. */
-.note { display: flex; align-items: flex-start; gap: 6px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); flex: none; }
+.note { display: flex; align-items: flex-start; gap: 6px; padding: 6px 8px; border-radius: 4px; background: var(--surface); flex: none; }
 .note svg { flex: none; margin-top: 3px; color: var(--warn); }
 .note textarea { flex: 1; min-width: 0; min-height: 20px; max-height: 120px; padding: 2px 0; border: 0; background: none; color: var(--text); resize: vertical; line-height: 1.4; field-sizing: content; }
 .note textarea::placeholder { color: var(--quiet); }
 .note textarea:focus { outline: none; }
-.note:focus-within { border-color: var(--accent); }
+.note:focus-within { box-shadow: inset 0 0 0 1px var(--accent); }
 .note.off { color: var(--label); }
 
 
-/* Lists: one card, a hairline between rows, the cyan bar on the system on screen. */
+/* Lists: printed on the board, a hairline between rows, the pawn's top edge on the system on screen. */
 .scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: var(--line-strong) var(--bg); scrollbar-width: thin; }
-.pl, .ps { border: 1px solid var(--line); border-radius: 7px; background: var(--raised); overflow: hidden; }
+.pl, .ps { border-radius: 4px; background: var(--surface); overflow: hidden; }
 .cols, .row { display: grid; align-items: center; gap: 6px; min-height: 28px; padding: 0 6px; }
-.cols { min-height: 22px; color: var(--label); font-size: 11px; background: var(--bg); border-bottom: 1px solid var(--line); }
+.cols { min-height: 24px; color: var(--on-band); font-size: 11px; background: var(--band); }
 .row + .row { border-top: 1px solid var(--line-soft); }
 .row.gap { border-top-color: var(--line-strong); }
-.row:hover { background: var(--line); }
-.row.active { background: rgba(79,209,232,0.12); box-shadow: inset 3px 0 0 var(--accent); }
+.row:hover { background: var(--hover); }
+.row.active { background: var(--hover); box-shadow: inset 0 2px 0 var(--accent); }
 .pl .cols, .pl .row { grid-template-columns: 18px 84px minmax(0, 1fr) 46px 40px 40px 34px; }
 .ps .row { grid-template-columns: 18px minmax(0, 1fr) auto 30px auto; min-height: 30px; }
-.idx { color: var(--quiet); font: 11px Consolas, monospace; text-align: right; }
-.coords { all: unset; display: inline-flex; align-items: center; gap: 3px; padding: 2px 3px; border-radius: 4px; color: var(--text); font: 12px Consolas, monospace; cursor: pointer; white-space: nowrap; }
-.coords:hover { background: var(--hover); color: var(--accent-hi); }
-.row.active .coords { color: var(--accent-hi); }
+.idx { color: var(--quiet); font: condensed 12px var(--display); text-align: right; }
+.coords { all: unset; display: inline-flex; align-items: center; gap: 3px; padding: 2px 3px; border-radius: 3px; color: var(--text); font: 600 condensed 14px var(--display); cursor: pointer; white-space: nowrap; }
+.coords:hover { background: var(--band-2); color: var(--accent-hi); }
+.row.active .coords { color: var(--accent); }
 .coords.new::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
 .where { display: inline-flex; align-items: center; gap: 2px; min-width: 0; }
 .home { flex: none; color: var(--warn); }
 .pn { min-width: 0; color: var(--label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cell-r { text-align: right; font: 12px Consolas, monospace; color: var(--quiet); white-space: nowrap; overflow: hidden; }
+.cell-r { text-align: right; font: condensed 13px var(--display); color: var(--quiet); white-space: nowrap; overflow: hidden; }
 .cols .cell-r { font: inherit; color: inherit; }
 .cell-r.has { color: var(--text-2); }
 .cell-r.big { color: var(--warn); font-weight: 700; }
@@ -5551,20 +5550,20 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .pname { all: unset; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); font-weight: 700; cursor: pointer; }
 .pname:hover, .pname:focus-visible { color: var(--accent); }
 .pnote { color: var(--label); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.rank { color: var(--label); font: 11px Consolas, monospace; }
+.rank { color: var(--label); font: condensed 12px var(--display); }
 .pline { display: flex; align-items: baseline; gap: 5px; min-width: 0; }
 .pline .pname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pst { flex: none; font: 11px Consolas, monospace; color: var(--label); }
-.act { display: inline-flex; align-items: center; justify-content: flex-end; gap: 2px; height: 22px; padding: 0 2px; border-radius: 4px; font: 700 12px Consolas, monospace; text-decoration: none; color: var(--quiet); }
+.pst { flex: none; font: condensed 12px var(--display); color: var(--label); }
+.act { display: inline-flex; align-items: center; justify-content: flex-end; gap: 2px; height: 22px; padding: 0 2px; border-radius: 3px; font: 600 condensed 13px var(--display); text-decoration: none; color: var(--quiet); }
 .act svg { color: var(--quiet); flex: none; }
 a.act:hover { background: var(--hover); }
 .act.on { color: var(--old); } .act.mid { color: var(--warm); } .act.off { color: var(--fresh); } .act.unknown { color: var(--quiet); font-weight: 400; }
-.age { text-align: right; font: 12px Consolas, monospace; }
+.age { text-align: right; font: condensed 13px var(--display); }
 .age.fresh { color: var(--fresh); } .age.warm { color: var(--warm); } .age.old { color: var(--old); } .age.none { color: var(--quiet); }
-.st-inactive { color: #9BE36D !important; } .st-longinactive { color: var(--label) !important; } .st-vacation { color: var(--accent-hi) !important; } .st-banned { color: var(--bad) !important; text-decoration: line-through; }
+.st-inactive { color: var(--fresh) !important; } .st-longinactive { color: var(--label) !important; } .st-vacation { color: var(--accent-hi) !important; } .st-banned { color: var(--bad) !important; text-decoration: line-through; }
 .foot { display: flex; justify-content: space-between; gap: 6px; margin: 6px 0 0; color: var(--label); font-size: 11px; flex: none; }
-kbd { padding: 0 4px; border: 1px solid var(--line-strong); border-radius: 3px; background: var(--surface); color: var(--text-2); font: 11px Consolas, monospace; }
-.empty { margin: 4px 0; padding: 14px 10px; border: 1px dashed var(--line); border-radius: 7px; color: var(--label); text-align: center; line-height: 1.4; }
+kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface); color: var(--text-2); font: 600 condensed 12px var(--display); }
+.empty { margin: 4px 0; padding: 14px 10px; border-radius: 4px; background: var(--surface); color: var(--label); text-align: center; line-height: 1.4; }
 .err { color: var(--old); }
 .fut-mk { margin: 0; }
 /* Narrow screens: the planet's name and the row number give their room to the numbers. */
@@ -5863,7 +5862,6 @@ kbd { padding: 0 4px; border: 1px solid var(--line-strong); border-radius: 3px; 
       ic.style.color = color;
       k.append(ic, doc.createTextNode(label));
       const b = h(doc, "b", "", value);
-      b.style.color = color;
       cell.append(k, b, h(doc, "i", "", rankText));
       scores.append(cell);
     };
