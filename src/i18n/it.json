@@ -145,6 +145,8 @@
   "fleet.expeditionShip": "Nave da carico",
   "fleet.bestShip": "La migliore disponibile",
   "fleet.expeditionValue": "Carico da coprire",
+  "fleet.expCalcUnknown": "Apri la pagina flotta per vedere il valore del gioco",
+  "fleet.expCalc": "Massimo del gioco: {value}",
   "fleet.auto": "automatico",
   "fleet.expeditionExtras": "Aggiungi 1 sonda e 1 pathfinder",
   "settings.expBigHint": "Una nave da battaglia in più nella spedizione. Automatica = la più grossa che hai; se quella scelta manca, si usa la più grossa.",

@@ -225,6 +225,20 @@ export function prepareDelivery(
   return finish(fd, TRANSPORT, count, cargo);
 }
 
+/** The most one expedition can bring back for this player: universe, class, its booster, lifeforms, items. */
+export function expeditionLimits(fd: FleetDispatcher, universe: { economySpeed: number; topScore?: number; lfBooster?: number; itemBoost?: number }) {
+  const cls = fd.apiDataJson?.characterClassId ?? 0;
+  const booster = fd.apiDataJson?.bonuses?.characterClassBooster?.[String(cls)] ?? 0;
+  return expeditionMax({
+    topScore: universe.topScore,
+    characterClass: cls,
+    economySpeed: universe.economySpeed,
+    classBooster: booster,
+    lfBooster: universe.lfBooster,
+    itemBoost: universe.itemBoost,
+  });
+}
+
 export function prepareExpedition(
   fd: FleetDispatcher,
   doc: Document,
@@ -235,16 +249,7 @@ export function prepareExpedition(
   // Expeditions never keep a reserve back (Nicola): every ship here can go.
   profile = { ...profile, reserve: EMPTY_RESERVE };
   // No free-slot check (Nicola): the fleet is prepared anyway, the game refuses the send if no slot is free.
-  const cls = fd.apiDataJson?.characterClassId ?? 0;
-  const booster = fd.apiDataJson?.bonuses?.characterClassBooster?.[String(cls)] ?? 0;
-  const limits = expeditionMax({
-    topScore: universe.topScore,
-    characterClass: cls,
-    economySpeed: universe.economySpeed,
-    classBooster: booster,
-    lfBooster: universe.lfBooster,
-    itemBoost: universe.itemBoost,
-  });
+  const limits = expeditionLimits(fd, universe);
   const target = expeditionTarget(limits.max, settings.expeditionValue);
   // As in OGLight: the minimum fleet size only applies to the calculated value, not to a value the player typed.
   const base = settings.expeditionValue.trim() ? 0 : limits.base;

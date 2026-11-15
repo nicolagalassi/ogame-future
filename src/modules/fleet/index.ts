@@ -52,6 +52,8 @@ import {
   type SendTarget,
   pickedLoad,
   resolveSend,
+  EXPEDITION_MAX_KEY,
+  type ExpeditionMaxSeen,
 } from '../../engines/fleet';
 import { originCoords, readShipSlots } from '../../data/fleet-page';
 import { getDispatcher, readShipsInfo, shipCapacity as shipCapacityOf, shipsOnPlanet, SHIPS_INFO_KEY, whenDispatcherReady, type FleetDispatcher } from '../../data/fleet-dispatcher';
@@ -61,6 +63,7 @@ import {
   prepareDeploy,
   prepareDelivery,
   prepareExpedition,
+  expeditionLimits,
   prepareFleetsave,
   prepareSend,
   aimSend,
@@ -1145,6 +1148,19 @@ export function renderFleetTools(o: FleetOptions): void {
     r.ok
       ? say(t(okKey, { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), ...vars }))
       : say(t(r.reason ?? 'fleet.err.noShips'), true);
+  const expUniverse = () => ({
+    economySpeed: universeSpeed(doc),
+    topScore: topScore(o.store),
+    lfBooster: o.store.get<LfBonuses | null>(LF_BONUS_KEY, null)?.expedition ?? 0,
+    itemBoost: expeditionItemBoost(o.store.get<ActiveItems | null>(ITEMS_KEY, null)),
+  });
+  // What the game allows one expedition to bring back, kept for the settings ("Carico da coprire").
+  // Read from the page already loaded: no request.
+  if (fleet1)
+    void whenDispatcherReady().then((fd) => {
+      const max = fd ? expeditionLimits(fd, expUniverse()).max : 0;
+      if (max > 0) o.store.set(EXPEDITION_MAX_KEY, { max, at: Date.now() } satisfies ExpeditionMaxSeen);
+    });
   const withDispatcher = (fn: (fd: FleetDispatcher) => void) => {
     const fd = getDispatcher();
     if (!fd || fd.currentPage !== 'fleet1') {
@@ -1227,12 +1243,7 @@ export function renderFleetTools(o: FleetOptions): void {
     expedition: () =>
       withDispatcher((fd) => {
         begin('expedition');
-        const r = prepareExpedition(fd, doc, profile, settings, {
-          economySpeed: universeSpeed(doc),
-          topScore: topScore(o.store),
-          lfBooster: o.store.get<LfBonuses | null>(LF_BONUS_KEY, null)?.expedition ?? 0,
-          itemBoost: expeditionItemBoost(o.store.get<ActiveItems | null>(ITEMS_KEY, null)),
-        });
+        const r = prepareExpedition(fd, doc, profile, settings, expUniverse());
         report(r, 'fleet.ok.expedition', { target: r.target.toLocaleString(o.locale) });
       }),
     fleetsave: () =>

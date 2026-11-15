@@ -145,6 +145,8 @@
   "fleet.expeditionShip": "Frachtschiff",
   "fleet.bestShip": "Bestes verfügbares",
   "fleet.expeditionValue": "Abzudeckende Ladung",
+  "fleet.expCalcUnknown": "Öffne die Flottenseite, um den Wert des Spiels zu sehen",
+  "fleet.expCalc": "Maximum des Spiels: {value}",
   "fleet.auto": "automatisch",
   "fleet.expeditionExtras": "1 Spionagesonde und 1 Pathfinder hinzufügen",
   "settings.expBigHint": "Ein zusätzliches Kampfschiff in der Expedition. Automatisch = das größte, das du hast; fehlt das gewählte, wird das größte genommen.",
