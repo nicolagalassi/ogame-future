@@ -499,7 +499,13 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
     };
     const input = details.amountInput;
     /** Ours → the game's field, capped: the queue never gets more than 99,999 nor more than the game allows. */
+    // Big amounts stay whole in the narrow field: the figure gets smaller instead of being cut.
+    const fit = () => {
+      const len = amount.value.length;
+      amount.style.fontSize = len > 11 ? '11px' : len > 9 ? '12px' : len > 7 ? '13px' : '';
+    };
     const push = () => {
+      fit();
       if (!input) return;
       const cap = Math.min(QUEUE_MAX, Number(input.max) > 0 ? Number(input.max) : QUEUE_MAX);
       input.value = String(Math.min(amountOf(), cap));
