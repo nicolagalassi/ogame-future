@@ -705,6 +705,8 @@
   "planetMenu.fleetHint": "Value of the ships on this body (cost in resources, 1:1:1), as of its last data update",
   "settings.fleetPill": "Fleet value",
   "settings.fleetPillHint": "A pill under the resources with the value of the ships sitting on that planet or moon (cost in resources, 1:1:1).",
+  "settings.gameTipsHint": "The card with data and links the game opens when the pointer rests on a planet or moon. Off, the planet still opens with a click.",
+  "settings.gameTips": "Game's card on planets",
   "totals.sum": "Total",
   "settings.totalView": "Sum in the totals",
   "settings.totalViewHint": "The sum row under the planets: in MSU (metal:crystal:deuterium 3:2:1) or the three resources added as equals.",

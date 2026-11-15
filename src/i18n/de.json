@@ -705,6 +705,8 @@
   "planetMenu.fleetHint": "Wert der Schiffe auf diesem Körper (Kosten in Rohstoffen, 1:1:1), Stand der letzten Datenaktualisierung",
   "settings.fleetPill": "Flottenwert",
   "settings.fleetPillHint": "Eine Pille unter den Rohstoffen mit dem Wert der Schiffe auf diesem Planeten oder Mond (Kosten in Rohstoffen, 1:1:1).",
+  "settings.gameTipsHint": "Die Karte mit Daten und Links, die das Spiel öffnet, wenn der Mauszeiger auf einem Planeten oder Mond ruht. Aus: Der Planet öffnet sich weiterhin per Klick.",
+  "settings.gameTips": "Spielkarte auf Planeten",
   "totals.sum": "Summe",
   "settings.totalView": "Summe in der Übersicht",
   "settings.totalViewHint": "Die Summenzeile unter den Planeten: in MSU (Metall:Kristall:Deuterium 3:2:1) oder die drei Rohstoffe gleich gewichtet addiert.",
