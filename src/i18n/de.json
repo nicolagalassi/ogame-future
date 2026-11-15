@@ -218,6 +218,7 @@
   "tech.res.deuterium": "Deuterium",
   "tech.res.energy": "Energie",
   "tech.time": "Dauer",
+  "tech.planBtn": "Plan",
   "tech.addOne": "St. {level} planen",
   "tech.addRange": "St. {from}–{to} planen",
   "tech.inPlan": "Geplant ✓",
