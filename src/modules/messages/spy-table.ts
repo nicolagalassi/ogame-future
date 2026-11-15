@@ -19,7 +19,8 @@ import { SERVER_DATA_KEY, type ServerData } from '../../data/server-data';
 import type { LfBonuses } from '../../data/bonuses';
 import { raidWaves, SPY_BOARD_KEY, targetRows, type Base, type SpyBoard, type TargetRow, type Universe } from '../../engines/raids';
 import { SIM_KEY, SIM_TOOLS, simLink, simPrefill, simTool } from '../../engines/sim-links';
-import { shipIcon, shipName, type T } from './index';
+import { shipIcon, shipName } from '../../data/ship-icons';
+import type { T } from '../../core/i18n';
 import { ensureMarksStyle, flagButton } from '../marks/picker';
 
 export const SPY_PANEL_ID = 'fut-spypanel';

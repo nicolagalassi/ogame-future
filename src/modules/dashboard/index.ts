@@ -25,8 +25,7 @@ import {
   DEFENCES, MINES, MOON_FACILITIES, PLANET_FACILITIES, RESEARCH, SHIPS, SPECIES, speciesOf, techName, type TechNames,
 } from '../../data/tech-names';
 import { activeLfBuildings, activeLfResearch, type ActiveTech, type LfLocked, type LfSlots } from '../../data/lf-slots';
-import { shipIcon } from '../messages';
-import { SHIP_ICONS } from '../../data/ship-icons';
+import { SHIP_ICONS, shipIcon } from '../../data/ship-icons';
 import { techIconEl, type TechIcon } from '../../data/tech-icons';
 import { DASHBOARD_CSS } from './style';
 
