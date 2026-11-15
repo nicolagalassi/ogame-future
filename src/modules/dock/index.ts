@@ -36,45 +36,46 @@ const CSS = `
 #${DOCK_ID} { ${WINDOW_TOKENS} }
 #${DOCK_ID} {
   box-sizing: border-box; clear: both; display: flex; flex-direction: column; gap: 6px; width: 150px; margin: 10px 0 0 13px;
-  font: 12px/1.3 Arial, Helvetica, sans-serif; color: var(--text-2); font-variant-numeric: tabular-nums; text-align: left;
+  font: 12px/1.3 var(--body); color: var(--text-2); font-variant-numeric: tabular-nums; text-align: left;
 }
 #${DOCK_ID} * { box-sizing: border-box; }
 #${DOCK_ID} button { margin: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; }
 #${DOCK_ID} button:focus-visible { outline: 1px solid var(--accent); outline-offset: -2px; }
-#${DOCK_ID} .card { border: 1px solid var(--line); border-radius: 7px; background: var(--raised); overflow: hidden; }
-/* Head: what the card is and, on the right, its one number or the arrow that opens it. */
-#${DOCK_ID} .head { display: flex; align-items: center; gap: 6px; width: 100%; height: 28px; padding: 0 8px; border: 0; border-bottom: 1px solid var(--line); background: var(--bg); }
-#${DOCK_ID} .head b { flex: 1; min-width: 0; color: var(--text); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#${DOCK_ID} .head svg { flex: none; color: var(--accent); }
-#${DOCK_ID} .head .n { color: var(--label); font: 12px Consolas, "JetBrains Mono", monospace; }
-#${DOCK_ID} .head:hover, #${DOCK_ID} .line:hover { background: var(--line); }
+#${DOCK_ID} .card { border: 0; border-radius: 6px; background: var(--raised); overflow: hidden; }
+/* Head: on the board's band, like a window's; what the card is and, on the right, its one number. */
+#${DOCK_ID} .head { display: flex; align-items: center; gap: 6px; width: 100%; height: 28px; padding: 0 8px; border: 0; background: var(--band); }
+#${DOCK_ID} .head b { flex: 1; min-width: 0; color: var(--text); font: 600 condensed 14px var(--display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#${DOCK_ID} .head svg { flex: none; color: var(--on-band); }
+#${DOCK_ID} .head .n { color: var(--on-band); font: condensed 13px var(--display); }
+#${DOCK_ID} .head:hover { background: var(--band-2); }
+#${DOCK_ID} .line:hover { background: var(--hover); }
 /* Journal: today's net gain large, the last 7 days as small columns (today lit), then the week. */
 #${DOCK_ID} .jtoday { display: flex; flex-direction: column; gap: 1px; width: 100%; padding: 7px 8px 6px; border: 0; background: none; }
-#${DOCK_ID} .jtoday:hover { background: var(--line); }
+#${DOCK_ID} .jtoday:hover { background: var(--hover); }
 #${DOCK_ID} .jtoday .k { color: var(--label); font-size: 11px; }
-#${DOCK_ID} .jtoday .v { font: 700 18px/22px Consolas, "JetBrains Mono", monospace; color: var(--text); }
-#${DOCK_ID} .jtoday .v.neg { color: #FF8A7A; } #${DOCK_ID} .jtoday .v.none { color: var(--quiet); font-weight: 400; }
-#${DOCK_ID} .jtoday .v small { margin-left: 4px; font: 11px Arial, Helvetica, sans-serif; color: var(--label); }
+#${DOCK_ID} .jtoday .v { font: 600 condensed 20px/22px var(--display); color: var(--text); }
+#${DOCK_ID} .jtoday .v.neg { color: var(--bad); } #${DOCK_ID} .jtoday .v.none { color: var(--quiet); font-weight: 400; }
+#${DOCK_ID} .jtoday .v small { margin-left: 4px; font: 11px var(--body); color: var(--label); }
 #${DOCK_ID} .jtoday .c { color: var(--label); font-size: 11px; }
 #${DOCK_ID} .days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: end; gap: 3px; height: 30px; margin-top: 6px; }
-#${DOCK_ID} .days i { display: block; min-height: 2px; border-radius: 2px 2px 0 0; background: var(--accent-line); }
-#${DOCK_ID} .days i.zero { background: var(--line); }
+#${DOCK_ID} .days i { display: block; min-height: 2px; background: var(--faint); }
+#${DOCK_ID} .days i.zero { background: var(--line-soft); }
 #${DOCK_ID} .days i.today { background: var(--accent); }
 /* One line per period. */
 #${DOCK_ID} .line { display: grid; grid-template-columns: minmax(0, 1fr) auto 52px; align-items: baseline; gap: 6px; width: 100%; min-height: 24px; padding: 3px 8px; border: 0; background: none; }
-#${DOCK_ID} .line + .line { border-top: 1px solid var(--line-soft); }
+#${DOCK_ID} .line + .line { margin-top: 2px; }
 #${DOCK_ID} .line .k { color: var(--label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#${DOCK_ID} .line .c { color: var(--label); font: 11px Consolas, "JetBrains Mono", monospace; }
-#${DOCK_ID} .line .v { color: var(--text); font: 700 12px Consolas, "JetBrains Mono", monospace; text-align: right; }
-#${DOCK_ID} .line .v.pos { color: var(--d); } #${DOCK_ID} .line .v.neg { color: var(--warn); } #${DOCK_ID} .line .v.none { color: var(--quiet); font-weight: 400; }
+#${DOCK_ID} .line .c { color: var(--label); font: condensed 13px var(--display); }
+#${DOCK_ID} .line .v { color: var(--text); font: 600 condensed 14px var(--display); text-align: right; }
+#${DOCK_ID} .line .v.pos { color: var(--ok); } #${DOCK_ID} .line .v.neg { color: var(--warn); } #${DOCK_ID} .line .v.none { color: var(--quiet); font-weight: 400; }
 #${DOCK_ID} .cols { display: grid; grid-template-columns: minmax(0, 1fr) auto 52px; gap: 6px; padding: 3px 8px 0; color: var(--quiet); font-size: 11px; }
 #${DOCK_ID} .cols span:last-child { text-align: right; }
 /* Targets: one chip per flag in use. */
 #${DOCK_ID} .flags { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 6px; }
-#${DOCK_ID} .flag { display: flex; align-items: center; justify-content: center; gap: 4px; height: 26px; padding: 0; border: 1px solid var(--line); border-radius: 5px; background: var(--bg); }
-#${DOCK_ID} .flag:hover { border-color: currentColor; }
-#${DOCK_ID} .flag i { font: normal 12px Consolas, "JetBrains Mono", monospace; color: var(--text); }
-#${DOCK_ID} .hint { margin: 0; padding: 8px; color: var(--label); font-size: 11px; line-height: 1.4; }
+#${DOCK_ID} .flag { display: flex; align-items: center; justify-content: center; gap: 4px; height: 26px; padding: 0; border: 0; border-radius: 4px; background: var(--surface); }
+#${DOCK_ID} .flag:hover { background: var(--hover); box-shadow: inset 0 0 0 1px currentColor; }
+#${DOCK_ID} .flag i { font: normal condensed 13px var(--display); color: var(--text); }
+#${DOCK_ID} .hint { margin: 0; padding: 8px; color: var(--label); font-size: 12px; line-height: 1.4; }
 `;
 
 function el<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, cls = '', text?: string): HTMLElementTagNameMap[K] {
