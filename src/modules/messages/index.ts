@@ -11,7 +11,8 @@ import { formatUnits } from '../../core/format';
 import { ARCHIVE_KEY, loadArchive, noteBattle, type Archive } from '../../engines/orion';
 import { readMessage, type ExpeditionMessage, type ParsedMessage, type Res, type SpyMessage } from '../../data/messages';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
-import { SHIP_ICONS } from '../../data/ship-icons';
+import { shipIcon, shipName } from '../../data/ship-icons';
+import type { T } from '../../core/i18n';
 import { dedupe, JOURNAL_KEY, record, recordCombat, recordDebris, trim, unitsValue, msu, type Journal, type JournalEntry } from '../../engines/expeditions';
 import { rememberSpies, SPY_BOARD_KEY, type SpyBoard, type Universe } from '../../engines/raids';
 import { MESSAGES_CSS } from './style';
@@ -20,7 +21,6 @@ import { showFreshExpeditions } from './exp-fresh';
 import { SERVER_DATA_KEY, type ServerData } from '../../data/server-data';
 import { converterLink, SIM_KEY, simTool, type SimTool } from '../../engines/sim-links';
 
-export type T = (key: string, vars?: Record<string, string | number>) => string;
 
 export const FOLD_KEY = 'msg.fold';
 
@@ -87,26 +87,6 @@ function h<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, cls = '
   if (cls) node.className = cls;
   if (text !== undefined) node.textContent = text;
   return node;
-}
-
-/** The ship's picture (the game's own image), or its name when there is none. */
-export function shipIcon(doc: Document, id: number, name: string, cls: string): HTMLElement {
-  const url = SHIP_ICONS[id];
-  if (!url) return h(doc, 'span', `${cls} ${cls}-none`, name.slice(0, 3));
-  const img = h(doc, 'img', cls);
-  img.src = url;
-  img.alt = name;
-  img.title = name;
-  img.loading = 'lazy';
-  return img;
-}
-
-export function shipName(id: number, ships: ShipsInfo, t: T): string {
-  const name = ships[String(id)]?.name;
-  if (name) return name;
-  const key = `ship.${id}`;
-  const fallback = t(key);
-  return fallback === key ? `#${id}` : fallback;
 }
 
 /** What a summary line needs besides the report. */

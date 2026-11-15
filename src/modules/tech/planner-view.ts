@@ -30,7 +30,7 @@ let view: 'body' | 'tech' = 'body';
 const picked = new Map<number, Set<number>>();
 /** Planets opened onto their rows in the planet view (only those with more than one thing planned). */
 const opened = new Set<number>();
-import type { T } from './index';
+import type { T } from '../../core/i18n';
 
 export const PLANNER_ID = 'fut-planner';
 

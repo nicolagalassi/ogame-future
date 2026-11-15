@@ -1,3 +1,6 @@
+import type { T } from '../core/i18n';
+import type { ShipsInfo } from './fleet-dispatcher';
+
 /** Ship pictures from the game's own CDN (the same images OGLight uses, MIT, © 2019 Oz). */
 export const SHIP_ICONS: Record<number, string> = {
   202: 'https://gf2.geo.gfsrv.net/cdnd9/60555c3c87b9eb3b5ddf76780b5712.jpg',
@@ -17,3 +20,30 @@ export const SHIP_ICONS: Record<number, string> = {
   218: 'https://gf1.geo.gfsrv.net/cdn39/12d016c8bb0d71e053b901560c17cc.jpg',
   219: 'https://gf3.geo.gfsrv.net/cdne2/b8d8d18f2baf674acedb7504c7cc83.jpg',
 };
+
+/** The ship's picture (the game's own image), or its name when there is none. */
+export function shipIcon(doc: Document, id: number, name: string, cls: string): HTMLElement {
+  const url = SHIP_ICONS[id];
+  if (!url) {
+    const span = doc.createElement('span');
+    span.className = `${cls} ${cls}-none`;
+    span.textContent = name.slice(0, 3);
+    return span;
+  }
+  const img = doc.createElement('img');
+  img.className = cls;
+  img.src = url;
+  img.alt = name;
+  img.title = name;
+  img.loading = 'lazy';
+  return img;
+}
+
+/** The ship's name as the game gives it, else our translation, else its id. */
+export function shipName(id: number, ships: ShipsInfo, t: T): string {
+  const name = ships[String(id)]?.name;
+  if (name) return name;
+  const key = `ship.${id}`;
+  const fallback = t(key);
+  return fallback === key ? `#${id}` : fallback;
+}

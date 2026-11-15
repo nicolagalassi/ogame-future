@@ -8,7 +8,8 @@ import { formatUnits } from '../../core/format';
 import { icon } from '../../core/icons';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { periodStats, type JournalEntry } from '../../engines/expeditions';
-import { shipIcon, shipName, type T } from './index';
+import { shipIcon, shipName } from '../../data/ship-icons';
+import type { T } from '../../core/i18n';
 
 export const FRESH_ID = 'fut-expfresh';
 /** How long the "just read" panel stays (paused while the pointer or focus is on it). */
