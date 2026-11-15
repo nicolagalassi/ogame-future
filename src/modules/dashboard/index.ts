@@ -108,6 +108,11 @@ const level = (b: OwnBody, id: number): number => b.levels[String(id)] ?? 0;
 /** The mine each ROI key stands for. */
 /** Unit counts: exact up to a million, then short. */
 let numLocale = 'it';
+/** Rounds up to 1, 2 or 5 times a power of ten: the top of a track's printed scale. */
+const niceCeil = (v: number): number => {
+  const p = 10 ** Math.floor(Math.log10(v));
+  return [1, 2, 5, 10].map((k) => k * p).find((x) => x >= v) ?? 10 * p;
+};
 const count = (n: number): string => (n < 1e6 ? n.toLocaleString(numLocale) : formatUnits(n, numLocale));
 
 /** Value of a set of units (ships or defences): their cost, the three resources summed 1:1:1. */
@@ -353,56 +358,67 @@ function summaryTab(parent: HTMLElement, ctx: Ctx): void {
   const rows = bodyRows(o.snapshot, o.entries, o.now, o.queues ?? null);
   const sum = summarize(rows);
   const alerts = accountAlerts(rows, o.snapshot, o.entries);
+  const plural = new Intl.PluralRules(o.locale);
 
-  const kpis = h('div', 'kpis');
-  const kpi = (label: string, value: string, note: string, cls = '') => {
-    const box = h('div', `kpi ${cls}`);
-    box.append(h('span', 'label', label), h('span', 'value', value), h('span', 'note', note));
-    kpis.append(box);
+  // The account's figures, each printed once on one line under the tabs (the board's score strip).
+  const facts = h('p', 'facts');
+  const fact = (value: string, label: string, title?: string) => {
+    const f = h('span', 'fact');
+    f.append(h('b', '', value), document.createTextNode(` ${label}`));
+    if (title) f.title = title;
+    facts.append(f);
   };
-  if (o.score) {
-    const rank = o.score.rank !== null ? t('dash.rank', { rank: o.score.rank, of: o.score.of ?? '?' }) : '';
-    kpi(t('dash.points'), o.score.points.toLocaleString(o.locale), rank);
-  } else kpi(t('dash.points'), '—', t('dash.pointsHint'));
-  kpi(t('dash.stock'), fmt(msu(sum.stock)), `${fmt(sum.stock.metal)} · ${fmt(sum.stock.crystal)} · ${fmt(sum.stock.deuterium)}`, 'accent');
-  kpi(t('dash.prodDayK'), `+${fmt(msu(sum.perHour) * 24)}`, t('dash.prodHourNote', { value: fmt(msu(sum.perHour)) }), 'accent');
+  if (o.score) fact(o.score.points.toLocaleString(o.locale), t('dash.factPoints'));
+  if (o.score?.rank != null) fact(`${o.score.rank}°`, t('dash.factRank', { of: o.score.of ?? '?' }));
+  fact(fmt(msu(sum.stock)), t('dash.factStock'), `${fmt(sum.stock.metal)} · ${fmt(sum.stock.crystal)} · ${fmt(sum.stock.deuterium)}`);
   const fleet = fleetValueOf(ctx.bodies);
   let def = { value: 0, count: 0 };
   for (const b of ctx.bodies) {
     const d = unitsValue(b, DEFENCES.filter((id) => id < 500));
     def = { value: def.value + d.value, count: def.count + d.count };
   }
-  kpi(t('dash.fleetValue'), fmt(fleet.value), t('dash.unitsNote', { n: fmt(fleet.count) }));
-  kpi(t('dash.defValue'), fmt(def.value), t('dash.unitsNote', { n: fmt(def.count) }));
-  const running = new Map<string, number>();
-  let busy = 0;
-  for (const r of rows) {
-    const items = activeItems(o.queues?.bodies[String(r.id)], o.now);
-    if (items.length) busy++;
-    for (const k of new Set(items.map((i) => i.kind))) running.set(k, (running.get(k) ?? 0) + 1);
-  }
-  const breakdown = QUEUE_KINDS.filter((k) => running.has(k)).map((k) => `${running.get(k)} ${t(`queue.${k}`).toLowerCase()}`).join(' · ');
-  kpi(t('dash.queues'), o.queues ? String(busy) : '—', o.queues ? breakdown || t('dash.queuesNone') : t('dash.queuesUnknown'), 'accent');
-  parent.append(kpis);
+  fact(fmt(fleet.value), t('dash.factFleet'), t('dash.unitsNote', { n: fmt(fleet.count) }));
+  fact(fmt(def.value), t('dash.factDefence'), t('dash.unitsNote', { n: fmt(def.count) }));
+  parent.append(facts);
 
   const cols = h('div', 'cols');
   const prod = h('div', 'card');
   prod.append(h('h3', '', t('dash.production')));
-  const maxRate = Math.max(1, sum.perHour.metal, sum.perHour.crystal * 1.5, sum.perHour.deuterium * 3);
-  const bar = (label: string, perHour: number, weight: number, cls: string) => {
+  // Income tracks, like a board game's: 20 cells on one scale for all three, the pawn on today's income,
+  // an outline where the next investment would take it.
+  const next = groupSteps(buildOrder(ctx, 15))[0];
+  const nextGain = next ? next.steps.reduce((g, st) => ({ metal: g.metal + st.gain.metal, crystal: g.crystal + st.gain.crystal, deuterium: g.deuterium + st.gain.deuterium }), { metal: 0, crystal: 0, deuterium: 0 }) : null;
+  const scaleTop = niceCeil(Math.max(1, sum.perHour.metal, sum.perHour.crystal, sum.perHour.deuterium) * 24 * 1.15);
+  const CELLS = 20;
+  const cellOf = (perDay: number) => Math.min(CELLS - 1, Math.max(0, Math.ceil((perDay / scaleTop) * CELLS) - 1));
+  const bar = (label: string, perHour: number, gainHour: number, cls: string) => {
     const line = h('div', `prod ${cls}`);
     const top = h('div', 'prod-top');
-    top.append(h('span', '', label), h('span', 'mono', `+${fmt(perHour * 24)}/${t('dash.dayShort')}`));
+    const name = h('span', 'prod-name');
+    name.append(h('i', `tok ${cls}`), document.createTextNode(label));
+    const value = h('span', 'prod-val', `+${fmt(perHour * 24)}`);
+    value.append(h('small', '', `/${t('dash.dayShort')}`));
+    if (gainHour > 0) value.append(h('small', 'next', `→ +${fmt(gainHour * 24)}`));
+    top.append(name, value);
     const track = h('div', 'track');
-    const fill = h('div', 'fill');
-    fill.style.width = `${Math.round(((perHour * weight) / maxRate) * 100)}%`;
-    track.append(fill);
+    track.setAttribute('role', 'img');
+    const here = cellOf(perHour * 24);
+    const ghost = gainHour > 0 ? cellOf((perHour + gainHour) * 24) : -1;
+    track.setAttribute('aria-label', `${label}: +${fmt(perHour * 24)}/${t('dash.dayShort')}`);
+    if (gainHour > 0) track.title = t('dash.nextRung', { value: `+${fmt(gainHour * 24)}` });
+    for (let i = 0; i < CELLS; i++) track.append(h('i', i < here ? 'f' : i === here ? 'me' : i === ghost && ghost > here ? 'gh' : ''));
     line.append(top, track);
     prod.append(line);
   };
-  bar(t('res.metal'), sum.perHour.metal, 1, 'm');
-  bar(t('res.crystal'), sum.perHour.crystal, 1.5, 'c');
-  bar(t('res.deuterium'), sum.perHour.deuterium, 3, 'd');
+  bar(t('res.metal'), sum.perHour.metal, nextGain?.metal ?? 0, 'm');
+  bar(t('res.crystal'), sum.perHour.crystal, nextGain?.crystal ?? 0, 'c');
+  bar(t('res.deuterium'), sum.perHour.deuterium, nextGain?.deuterium ?? 0, 'd');
+  const scale = h('div', 'scale');
+  scale.append(h('span', '', '0'), h('span', '', fmt(scaleTop / 2)), h('span', '', fmt(scaleTop)));
+  prod.append(scale);
+  const total = h('p', 'prod-total');
+  total.append(h('b', '', `+${fmt(msu(sum.perHour) * 24)}`), document.createTextNode(` ${t('dash.factProdDay')} · ${t('dash.prodHourNote', { value: fmt(msu(sum.perHour)) })}`));
+  prod.append(total);
   // Lifeforms in use: how many planets per species.
   const bySpecies = new Map<number, number>();
   for (const b of ctx.bodies) if (b.type === 'planet' && b.species) bySpecies.set(b.species, (bySpecies.get(b.species) ?? 0) + 1);
@@ -421,8 +437,9 @@ function summaryTab(parent: HTMLElement, ctx: Ctx): void {
     const item = h('div', `alert ${a.level}`);
     item.append(h('span', 'dot'));
     const text = h('div', '');
-    text.append(h('strong', '', t(a.key, { count: a.count })));
-    text.append(h('span', '', a.names.slice(0, 6).join(', ') + (a.names.length > 6 ? ` +${a.names.length - 6}` : '')));
+    text.append(h('strong', '', t(plural.select(a.count) === 'one' ? `${a.key}.one` : a.key, { count: a.count })));
+    const named = a.names.map((n, i) => (a.moons[i] ? `${n} ${t('dash.moon').toLowerCase()}` : n));
+    text.append(h('span', '', named.slice(0, 6).join(', ') + (named.length > 6 ? ` +${named.length - 6}` : '')));
     item.append(text);
     checks.append(item);
   }
@@ -434,9 +451,20 @@ function summaryTab(parent: HTMLElement, ctx: Ctx): void {
   for (const b of ctx.bodies) for (const item of activeItems(o.queues?.bodies[String(b.id)], o.now)) inQueue.push({ body: b, item });
   if (inQueue.length) {
     inQueue.sort((a, b) => a.item.end - b.item.end);
+    // One hour scale for every queue: a bar's length is the time it still needs.
+    const span = Math.max(12, Math.ceil(Math.max(...inQueue.map((q) => (q.item.end - o.now) / 3_600_000)) / 12) * 12);
     const qs = section(parent, t('dash.queuesTitle'), o.bell ? t('dash.queuesHint') : undefined);
     const wrap = h('div', 'table-wrap');
     const table = h('table', 'queues');
+    const thead = h('thead');
+    const hr = h('tr');
+    const scaleTh = h('th', 'left');
+    const marks = h('div', 'hours');
+    for (const v of [0, span / 3, (span * 2) / 3, span]) marks.append(h('span', '', v ? `${Math.round(v)} h` : t('dash.now')));
+    scaleTh.append(marks);
+    hr.append(h('th'), h('th'), h('th'), scaleTh, h('th'), h('th'));
+    thead.append(hr);
+    table.append(thead);
     const tbody = h('tbody');
     for (const { body: b, item } of inQueue) {
       const tr = h('tr', b.type === 'moon' ? 'moon' : '');
@@ -447,7 +475,13 @@ function summaryTab(parent: HTMLElement, ctx: Ctx): void {
       end.title = new Date(item.end).toLocaleString(o.locale);
       const bell = h('td', 'acts');
       if (o.bell) bell.append(o.bell({ id: `q:${b.id}:${item.kind}:${item.name}:${item.level}:${Math.round(item.end / 60_000)}`, label: `${b.name}: ${what}`, at: item.end }));
-      tr.append(name, h('td', 'kind', t(`queue.${item.kind}`)), h('td', '', what), end, bell);
+      const left = h('td', 'left');
+      const tape = h('div', `tape q-${item.kind}`);
+      const fill = h('i');
+      fill.style.width = `${Math.max(1, Math.min(100, ((item.end - o.now) / 3_600_000 / span) * 100))}%`;
+      tape.append(fill);
+      left.append(tape);
+      tr.append(name, h('td', 'kind', t(`queue.${item.kind}`)), h('td', '', what), left, end, bell);
       tbody.append(tr);
     }
     table.append(tbody);
@@ -707,12 +741,26 @@ function groupLine(ctx: Ctx, g: StepGroup, i: number, numbered: boolean): HTMLEl
   text.append(h('strong', '', `${what} ${m.from} → ${to}${m.kind === 'astro' ? ` · ${t('dash.newColony')}` : ''}`));
   const total = g.steps.reduce((sum, s) => ({ metal: sum.metal + s.cost.metal, crystal: sum.crystal + s.cost.crystal, deuterium: sum.deuterium + s.cost.deuterium }), { metal: 0, crystal: 0, deuterium: 0 });
   const cost = [`${ctx.fmt(total.metal)} M`, `${ctx.fmt(total.crystal)} C`, ...(total.deuterium ? [`${ctx.fmt(total.deuterium)} D`] : [])].join(' · ');
+  // The cost printed in resource tokens, as on a board game's upgrade track.
+  const tokens = h('span', 'cost');
+  tokens.setAttribute('aria-label', cost);
+  for (const [k, v] of [['m', total.metal], ['c', total.crystal], ['d', total.deuterium]] as const) {
+    if (!v) continue;
+    const tk = h('span', '');
+    tk.append(h('i', `tok ${k}`), document.createTextNode(ctx.fmt(v)));
+    tokens.append(tk);
+  }
   if (m.planetId) {
     // One chip per planet (its last level in the group), linking to the page where it is built; done ones are struck through.
     const chips = h('div', 'pls');
     const perPlanet = [...new Map(g.steps.map((s) => [s.planetId, s])).values()];
     let done = 0;
+    const shown = numbered ? perPlanet : perPlanet.slice(0, 5);
     for (const s of perPlanet) {
+      if (!shown.includes(s)) {
+        if (stepDone(ctx, s)) done++;
+        continue;
+      }
       const a = h('a', 'pl', s.name || `[${s.coords}]`);
       a.setAttribute('href', stepPage(s));
       const guessed = g.steps.some((x) => x.planetId === s.planetId && x.guessed);
@@ -725,16 +773,35 @@ function groupLine(ctx: Ctx, g: StepGroup, i: number, numbered: boolean): HTMLEl
       }
       chips.append(a);
     }
+    if (shown.length < perPlanet.length) {
+      const more = h('button', 'pl more', `+${perPlanet.length - shown.length}`);
+      more.type = 'button';
+      more.title = t('dash.movesOpen');
+      more.addEventListener('click', () => {
+        tab = 'investments';
+        ctx.redraw();
+      });
+      chips.append(more);
+    }
     if (done === perPlanet.length) line.classList.add('done');
-    const sub = h('span', '', perPlanet.length > 1 ? `${t('dash.planetsCount', { count: perPlanet.length })} · ${cost}` : cost);
+    const sub = h('span', 'meta');
+    if (perPlanet.length > shown.length) sub.append(document.createTextNode(`${t('dash.planetsCount', { count: perPlanet.length })} `));
+    sub.append(tokens);
     if (done) sub.append(h('em', 'ok', ` · ${t('dash.doneCount', { done, count: perPlanet.length })}`));
     text.append(chips, sub);
   } else {
-    text.append(h('span', '', `${t('dash.account')} · ${cost}`));
+    const sub = h('span', 'meta', `${t('dash.account')} `);
+    sub.append(tokens);
+    text.append(sub);
   }
   const days = g.steps.map((s) => s.days);
   const lo = Math.min(...days), hi = Math.max(...days);
-  line.append(text, h('span', 'roi mono', hi - lo >= 0.05 ? `${daysText(ctx, lo)}–${daysText(ctx, hi)}`.replace(` ${t('dash.daysShort')}–`, '–') : daysText(ctx, lo)));
+  const roi = h('span', 'roi');
+  const span = hi - lo >= 0.05 ? `${daysText(ctx, lo)}–${daysText(ctx, hi)}`.replace(` ${t('dash.daysShort')}–`, '–') : daysText(ctx, lo);
+  // The payback, large; its unit printed once beside it.
+  const unit = ` ${t('dash.daysShort')}`;
+  roi.append(document.createTextNode(span.endsWith(unit) ? span.slice(0, -unit.length) : span), h('small', '', t('dash.daysShort')));
+  line.append(text, roi);
   return line;
 }
 
