@@ -145,6 +145,8 @@
   "fleet.expeditionShip": "Cargo ship",
   "fleet.bestShip": "Best available",
   "fleet.expeditionValue": "Cargo to cover",
+  "fleet.expCalcUnknown": "Open the fleet page to see the game's value",
+  "fleet.expCalc": "Game maximum: {value}",
   "fleet.auto": "automatic",
   "fleet.expeditionExtras": "Add 1 probe and 1 pathfinder",
   "settings.expBigHint": "One extra combat ship in the expedition. Automatic = the biggest you have; if the chosen one is missing, the biggest is used.",

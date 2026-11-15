@@ -11,7 +11,7 @@ import { SIM_KEY, SIM_TOOLS, simTool, type SimTool } from '../../engines/sim-lin
 import { EXP_STYLE_KEY, FOLD_KEY, type ExpStyle } from '../messages';
 import { SPY_SHARED_KEY } from '../messages/spy-table';
 import type { MenuSettings } from '../planet-menu';
-import { CARGO_SHIPS, EXPEDITION_FILLERS, LOAD_ORDERS, parseAmount, SETTINGS_KEY as FLEET_SETTINGS_KEY, settingsFrom, validOrder, type FleetSettings } from '../../engines/fleet';
+import { CARGO_SHIPS, EXPEDITION_FILLERS, EXPEDITION_MAX_KEY, type ExpeditionMaxSeen, LOAD_ORDERS, parseAmount, SETTINGS_KEY as FLEET_SETTINGS_KEY, settingsFrom, validOrder, type FleetSettings } from '../../engines/fleet';
 import { formatUnits } from '../../core/format';
 import { BIG_DEBRIS, BIG_DEBRIS_KEY } from '../marks/side';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
@@ -60,6 +60,9 @@ const CSS = `
 .row .name { color: var(--text); font-size: 12px; font-weight: 700; }
 .row .desc { grid-column: 1; color: var(--muted); font-size: 11px; line-height: 1.4; }
 .row .control { grid-column: 2; grid-row: 1 / span 2; display: inline-flex; }
+/* A field with a small note under it (the value the game works out). */
+.row .control:has(.calc) { flex-direction: column; align-items: flex-end; gap: 4px; }
+.calc { color: var(--muted); font-size: 12px; }
 .seg { height: 26px; padding: 0 12px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); font: 12px Arial, sans-serif; cursor: pointer; white-space: nowrap; }
 .seg:first-child { border-radius: 13px 0 0 13px; }
 .seg:last-child { border-radius: 0 13px 13px 0; }
@@ -233,6 +236,11 @@ export function openSettings(o: SettingsOptions): void {
     input.setAttribute('aria-label', t('fleet.expeditionValue'));
     input.addEventListener('change', () => set({ expeditionValue: input.value.trim() }));
     value.append(input);
+    // What the game allows, as worked out on the fleet page last time (it needs the class data there).
+    const seen = store.get<ExpeditionMaxSeen | null>(EXPEDITION_MAX_KEY, null);
+    const calc = el('small', 'calc', seen ? t('fleet.expCalc', { value: formatUnits(seen.max, doc.documentElement.lang || 'it') }) : t('fleet.expCalcUnknown'));
+    if (seen) calc.title = new Date(seen.at).toLocaleString(doc.documentElement.lang || undefined);
+    value.append(calc);
     return [
       group(t('fleet.transportTitle'), fleetGlyph('transport')),
       row(t('fleet.mainShip'), t('settings.mainShipHint'), select(cargo, String(f.mainShip), (v) => set({ mainShip: Number(v) }))),

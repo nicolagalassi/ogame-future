@@ -417,6 +417,13 @@ export function expeditionMax(o: {
   return { base: row.base, max: Math.round(row.max * factor * bonus) };
 }
 
+/** The last expedition limit worked out on the fleet page (needs the game's class data), for the settings. */
+export const EXPEDITION_MAX_KEY = 'fleet.expeditionMax';
+export interface ExpeditionMaxSeen {
+  max: number;
+  at: number;
+}
+
 /** Applies the player's expedition value: '' = calculated, '50%' = share, number = fixed. */
 export function expeditionTarget(calculated: number, value: string): number {
   const v = value.trim();
