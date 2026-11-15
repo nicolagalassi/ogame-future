@@ -4,12 +4,14 @@ import { WINDOW_TOKENS } from '../../core/sheet';
  *
  * COMPLIANCE (AGENTS.md §1.4, §1.2): the player sets each reminder by hand on one specific event
  * (a bell on a queue item or on a fleet of the game's event list). When it is due, Future shows a
- * message on the page, nothing else: no sound, no desktop or external notification, no game action,
- * no network call. The one timer below only waits to draw that message; it never talks to the server.
+ * message on the page; only if the player turned it on in the settings (off by default, Nicola's
+ * choice pending a ToolDev confirmation of the "external channel"), the same message also goes to the
+ * browser's own notification on the computer. No sound, no e-mail or webhook, no game action, no
+ * network call. The one timer below only waits to draw that message; it never talks to the server.
  */
 import { icon } from '../../core/icons';
 import type { Store } from '../../core/storage';
-import { dueReminders, hasReminder, markFired, nextReminder, REMINDERS_KEY, toggleReminder, type Reminder } from '../../engines/reminders';
+import { dueReminders, hasReminder, markFired, nextReminder, REMIND_DESKTOP_KEY, REMINDERS_KEY, toggleReminder, type Reminder } from '../../engines/reminders';
 
 type T = (key: string, vars?: Record<string, string | number>) => string;
 
@@ -76,6 +78,23 @@ function show(o: RemindersOptions, r: Reminder, late: boolean): void {
   ok.addEventListener('click', () => box.remove());
   box.append(icon(doc, 'bell', 16), text, ok);
   stack.append(box);
+  desktop(o, r.label, when.textContent ?? '', r.id);
+}
+
+/** The same message as a browser notification, when the player turned it on and the browser allows it. */
+function desktop(o: RemindersOptions, title: string, body: string, tag: string): void {
+  const view = o.doc.defaultView as (Window & { Notification?: typeof Notification }) | null;
+  const N = view?.Notification;
+  if (!N || N.permission !== 'granted' || !o.store.get<boolean>(REMIND_DESKTOP_KEY, false)) return;
+  try {
+    const n = new N(title, { body, tag });
+    n.onclick = () => {
+      view.focus();
+      n.close();
+    };
+  } catch {
+    // Some browsers only allow notifications from a service worker: the page message is still there.
+  }
 }
 
 /** Shows what is due, then waits for the next one. Call again after the list changes. */

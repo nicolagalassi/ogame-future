@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.96
+// @version      0.3.97
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -994,6 +994,11 @@
     "remind.now": "Adesso ({time})",
     "remind.late": "Finito alle {time}",
     "remind.ok": "OK",
+    "settings.remindNoSupport": "Questo browser non mostra notifiche dalle pagine: resta l'avviso nella pagina.",
+    "settings.remindBlocked": "Il browser ha bloccato le notifiche per questo sito: riattivale dalle impostazioni del sito (icona a sinistra dell'indirizzo).",
+    "settings.remindDesktopHint": "Quando scade una campanella che hai messo tu, oltre all'avviso nella pagina arriva la notifica del browser sul computer. Solo con la pagina del gioco aperta; il browser chiede il permesso la prima volta.",
+    "settings.remindDesktop": "Avvisa anche con una notifica del PC",
+    "settings.remindGroup": "Promemoria",
     "remind.return": "(ritorno)",
     "msg.combat.converter": "Convertitore",
     "msg.combat.converterHint": "Apre il rapporto nel convertitore Ogotcha (nuova scheda)",
@@ -1934,6 +1939,11 @@
     "remind.now": "Now ({time})",
     "remind.late": "Ended at {time}",
     "remind.ok": "OK",
+    "settings.remindNoSupport": "This browser shows no notifications from pages: the message on the page stays.",
+    "settings.remindBlocked": "The browser blocked notifications for this site: turn them back on in the site settings (icon left of the address).",
+    "settings.remindDesktopHint": "When a bell you set is due, the browser's notification on the computer comes too, besides the message on the page. Only while the game page is open; the browser asks for permission the first time.",
+    "settings.remindDesktop": "Also notify on the computer",
+    "settings.remindGroup": "Reminders",
     "remind.return": "(return)",
     "msg.combat.converter": "Converter",
     "msg.combat.converterHint": "Opens the report in the Ogotcha converter (new tab)",
@@ -2874,6 +2884,11 @@
     "remind.now": "Maintenant ({time})",
     "remind.late": "Termin\xE9 \xE0 {time}",
     "remind.ok": "OK",
+    "settings.remindNoSupport": "Ce navigateur n'affiche pas de notifications depuis les pages : le message dans la page reste.",
+    "settings.remindBlocked": "Le navigateur a bloqu\xE9 les notifications pour ce site : r\xE9activez-les dans les param\xE8tres du site (ic\xF4ne \xE0 gauche de l'adresse).",
+    "settings.remindDesktopHint": "Quand une cloche que vous avez pos\xE9e arrive \xE0 \xE9ch\xE9ance, la notification du navigateur s'affiche aussi sur l'ordinateur, en plus du message dans la page. Seulement avec la page du jeu ouverte ; le navigateur demande l'autorisation la premi\xE8re fois.",
+    "settings.remindDesktop": "Avertir aussi par une notification de l'ordinateur",
+    "settings.remindGroup": "Rappels",
     "remind.return": "(retour)",
     "msg.combat.converter": "Convertisseur",
     "msg.combat.converterHint": "Ouvre le rapport dans le convertisseur Ogotcha (nouvel onglet)",
@@ -3814,6 +3829,11 @@
     "remind.now": "Jetzt ({time})",
     "remind.late": "Fertig um {time}",
     "remind.ok": "OK",
+    "settings.remindNoSupport": "Dieser Browser zeigt keine Benachrichtigungen von Seiten: die Meldung auf der Seite bleibt.",
+    "settings.remindBlocked": "Der Browser hat Benachrichtigungen f\xFCr diese Seite blockiert: schalte sie in den Website-Einstellungen wieder ein (Symbol links neben der Adresse).",
+    "settings.remindDesktopHint": "Wenn eine von dir gesetzte Glocke f\xE4llig ist, kommt neben der Meldung auf der Seite auch die Browser-Benachrichtigung am Computer. Nur bei ge\xF6ffneter Spielseite; der Browser fragt beim ersten Mal nach der Erlaubnis.",
+    "settings.remindDesktop": "Auch als Benachrichtigung am PC",
+    "settings.remindGroup": "Erinnerungen",
     "remind.return": "(R\xFCckflug)",
     "msg.combat.converter": "Konverter",
     "msg.combat.converterHint": "\xD6ffnet den Bericht im Ogotcha-Konverter (neuer Tab)",
@@ -6685,6 +6705,24 @@ kbd { padding: 0 4px; border: 1px solid var(--line-strong); border-radius: 3px; 
   }
   function expeditionItemBoost(items) {
     return (items?.uuids ?? []).reduce((sum, u) => sum + (EXPEDITION_ITEMS[u] ?? 0), 0);
+  }
+
+  // src/engines/reminders.ts
+  var REMINDERS_KEY = "reminders";
+  var REMIND_DESKTOP_KEY = "remind.desktop";
+  var KEEP_AFTER = 24 * 36e5;
+  var REMINDERS_MAX = 50;
+  var hasReminder = (list, id) => list.some((r) => r.id === id);
+  function toggleReminder(list, r) {
+    if (hasReminder(list, r.id)) return list.filter((x) => x.id !== r.id);
+    return [...list, r].sort((a, b) => a.at - b.at).slice(0, REMINDERS_MAX);
+  }
+  var dueReminders = (list, now) => list.filter((r) => !r.fired && r.at <= now);
+  function nextReminder(list, now) {
+    return list.filter((r) => !r.fired && r.at > now).sort((a, b) => a.at - b.at)[0] ?? null;
+  }
+  function markFired(list, ids, now) {
+    return list.map((r) => ids.includes(r.id) ? { ...r, fired: true } : r).filter((r) => !r.fired || now - r.at < KEEP_AFTER);
   }
 
   // src/core/body-picker.ts
@@ -9667,6 +9705,26 @@ input.field { width: 190px; }
           row(t("settings.totals"), t("settings.totalsHint"), yesNo(menu.showTotals, (v) => setMenu({ showTotals: v }))),
           row(t("settings.totalView"), t("settings.totalViewHint"), choice([["msu", "MSU 3:2:1"], ["sum", "1:1:1"]], menu.totalView ?? "msu", (v) => setMenu({ totalView: v }), !menu.showTotals)),
           row(t("settings.fleetPill"), t("settings.fleetPillHint"), yesNo(menu.showFleet === true, (v) => setMenu({ showFleet: v })))
+        );
+        const N = doc.defaultView?.Notification;
+        const desktopOn = store.get(REMIND_DESKTOP_KEY, false) && N?.permission === "granted";
+        body.append(
+          group(t("settings.remindGroup"), icon(doc, "bell", 16)),
+          row(
+            t("settings.remindDesktop"),
+            !N ? t("settings.remindNoSupport") : N.permission === "denied" ? t("settings.remindBlocked") : t("settings.remindDesktopHint"),
+            yesNo(desktopOn, (v) => {
+              if (!v || !N) {
+                store.set(REMIND_DESKTOP_KEY, false);
+                return;
+              }
+              store.set(REMIND_DESKTOP_KEY, true);
+              if (N.permission !== "granted") void N.requestPermission().then((p) => {
+                if (p !== "granted") store.set(REMIND_DESKTOP_KEY, false);
+                draw();
+              });
+            })
+          )
         );
       } else if (section2 === "mail") {
         const set = (key, v) => {
@@ -16855,23 +16913,6 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     sync();
   }
 
-  // src/engines/reminders.ts
-  var REMINDERS_KEY = "reminders";
-  var KEEP_AFTER = 24 * 36e5;
-  var REMINDERS_MAX = 50;
-  var hasReminder = (list, id) => list.some((r) => r.id === id);
-  function toggleReminder(list, r) {
-    if (hasReminder(list, r.id)) return list.filter((x) => x.id !== r.id);
-    return [...list, r].sort((a, b) => a.at - b.at).slice(0, REMINDERS_MAX);
-  }
-  var dueReminders = (list, now) => list.filter((r) => !r.fired && r.at <= now);
-  function nextReminder(list, now) {
-    return list.filter((r) => !r.fired && r.at > now).sort((a, b) => a.at - b.at)[0] ?? null;
-  }
-  function markFired(list, ids, now) {
-    return list.map((r) => ids.includes(r.id) ? { ...r, fired: true } : r).filter((r) => !r.fired || now - r.at < KEEP_AFTER);
-  }
-
   // src/modules/reminders/index.ts
   var HOST_ID2 = "fut-reminders";
   var timer = null;
@@ -16922,6 +16963,20 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     ok.addEventListener("click", () => box.remove());
     box.append(icon(doc, "bell", 16), text, ok);
     stack.append(box);
+    desktop(o, r.label, when.textContent ?? "", r.id);
+  }
+  function desktop(o, title, body, tag) {
+    const view2 = o.doc.defaultView;
+    const N = view2?.Notification;
+    if (!N || N.permission !== "granted" || !o.store.get(REMIND_DESKTOP_KEY, false)) return;
+    try {
+      const n = new N(title, { body, tag });
+      n.onclick = () => {
+        view2.focus();
+        n.close();
+      };
+    } catch {
+    }
   }
   function startReminders(o, late = true) {
     current2 = o;

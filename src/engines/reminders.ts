@@ -13,6 +13,8 @@ export interface Reminder {
 }
 
 export const REMINDERS_KEY = 'reminders';
+/** Also show a due reminder as a browser notification on the computer (off by default; the page message stays). */
+export const REMIND_DESKTOP_KEY = 'remind.desktop';
 const KEEP_AFTER = 24 * 3_600_000;
 export const REMINDERS_MAX = 50;
 
