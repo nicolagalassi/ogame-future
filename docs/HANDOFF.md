@@ -129,7 +129,10 @@ Lo script compilato (non minificato) è `dist/future.user.js`.
     attività aprono la pagina flotta su pianeta/luna (come OGLight). Migrazione una tantum: vecchi bersagli →
     pianeti rossi, rivali → "Da controllare".
 12. **Promemoria** (2026-11-06, `src/modules/reminders`): campanelle su Code in corso (Dashboard) e sulle
-    flotte della lista eventi; avviso nella pagina. **Da verificare**: le campanelle sulla lista eventi,
+    flotte della lista eventi; avviso nella pagina. Dal 2026-11-15 (0.3.97), su scelta di Nicola, opzione
+    «Avvisa anche con una notifica del PC» (Impostazioni › Menu pianeti › Promemoria), **spenta di default**:
+    stessa campanella messa a mano, in più la notifica del browser. **Da confermare con un ToolDev** (AGENTS.md
+    §1.4: un canale esterno richiede conferma). **Da verificare**: le campanelle sulla lista eventi,
     scritte sul markup noto di OGame (`tr.eventFleet[data-arrival-time]`, `td.arrivalTime`) senza flotte
     in volo da guardare.
 

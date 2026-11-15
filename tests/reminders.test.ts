@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { dueReminders, markFired, nextReminder, REMINDERS_KEY, toggleReminder, type Reminder } from '../src/engines/reminders';
+import { dueReminders, markFired, nextReminder, REMIND_DESKTOP_KEY, REMINDERS_KEY, toggleReminder, type Reminder } from '../src/engines/reminders';
 import { clockOffset, decorateEventList, startReminders } from '../src/modules/reminders';
 import { MemoryStore, Store } from '../src/core/storage';
 import { translator } from '../src/core/i18n';
@@ -21,6 +21,34 @@ describe('reminders', () => {
     const fired = markFired(list, ['a'], 150);
     expect(dueReminders(fired, 150)).toEqual([]);
     expect(markFired(fired, [], 100 + 25 * 3_600_000).map((x) => x.id)).toEqual(['b']);
+  });
+
+  it('also sends the browser notification only when the player turned it on and the browser allows it', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1_000_000);
+    const shown: { title: string; body?: string }[] = [];
+    class FakeNotification {
+      static permission = 'granted';
+      onclick: (() => void) | null = null;
+      constructor(title: string, opts?: { body?: string }) {
+        shown.push({ title, body: opts?.body });
+      }
+      close() {}
+    }
+    vi.stubGlobal('Notification', FakeNotification);
+    const store = new Store(new MemoryStore(), 'n');
+    store.set(REMINDERS_KEY, [r('Cantiere Ashyn', 990_000)]);
+    startReminders({ doc: document, store, t, locale: 'it', offset: 0 });
+    expect(shown).toHaveLength(0); // off by default: only the page message
+    store.set(REMIND_DESKTOP_KEY, true);
+    store.set(REMINDERS_KEY, [r('Flotta Roshar', 995_000)]);
+    startReminders({ doc: document, store, t, locale: 'it', offset: 0 });
+    expect(shown.map((n) => n.title)).toEqual(['Flotta Roshar']);
+    FakeNotification.permission = 'denied';
+    store.set(REMINDERS_KEY, [r('Altro', 996_000)]);
+    startReminders({ doc: document, store, t, locale: 'it', offset: 0 });
+    expect(shown).toHaveLength(1);
+    vi.unstubAllGlobals();
   });
 
   it('reads the server clock offset from the page', () => {
