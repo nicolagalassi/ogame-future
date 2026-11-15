@@ -168,6 +168,13 @@ describe('fleet engine, round 2', () => {
     ];
     expect(expeditionFleet(s, { ship: 0, target: 100_000, base: 10, extras: true })).toEqual({ 203: 100, 218: 1, 210: 1, 219: 1 });
     expect(expeditionFleet(s, { ship: 219, target: 10_000, base: 10, extras: false })).toEqual({ 219: 2 });
+    // The big ship is its own choice: a given one, none, or the biggest when the given one is missing.
+    expect(expeditionFleet(s, { ship: 0, target: 100_000, base: 10, extras: true, big: -1 })).toEqual({ 203: 100, 210: 1, 219: 1 });
+    expect(expeditionFleet(s, { ship: 219, target: 10_000, base: 10, extras: false, big: 0 })).toEqual({ 219: 2, 218: 1 });
+    expect(expeditionFleet(s, { ship: 219, target: 10_000, base: 10, extras: false, big: 207 })).toEqual({ 219: 2, 218: 1 });
+    // Old saves: the single switch off meant no big ship either.
+    expect(settingsFrom({ expeditionExtras: false }).expeditionBig).toBe(-1);
+    expect(settingsFrom({}).expeditionBig).toBe(0);
   });
 
   it('finds the next body for the repeat', () => {

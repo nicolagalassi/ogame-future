@@ -269,8 +269,8 @@ async function bootstrap(): Promise<void> {
       notes: [menuCtx.colonies, snapshot ? t('toolbar.lastSync', { time: new Date(snapshot.fetchedAt).toLocaleString(locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) }) : ''].filter(Boolean),
       onMailChange: () => refreshInbox?.(),
       bodies: readPlanetList(document).flatMap((b) => [
-        ...(b.planetId ? [{ id: b.planetId, label: `${b.name} [${b.coords}]` }] : []),
-        ...(b.moonId ? [{ id: b.moonId, label: `${b.name} [${b.coords}] · ${t('fleet.typeMoon')}` }] : []),
+        ...(b.planetId ? [{ id: b.planetId, name: b.name, coords: b.coords, moon: false }] : []),
+        ...(b.moonId ? [{ id: b.moonId, name: b.name, coords: b.coords, moon: true }] : []),
       ]),
       onFleetChange: () => {
         refreshFleet?.();

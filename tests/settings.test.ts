@@ -61,11 +61,13 @@ describe('fleet and keys sections', () => {
   it('saves a fleet choice and changes a key by pressing it', () => {
     const store = new Store(new MemoryStore(), 'fk');
     const onFleetChange = vi.fn();
-    const w = open(store, { onFleetChange, bodies: [{ id: 5, label: 'Casa [1:2:3]' }], section: 'fleet' });
-    const fav = Array.from(w.root.querySelectorAll('.row')).find((r) => r.querySelector('.name')!.textContent === '1 · Trasporto verso')!.querySelector('select')!;
-    fav.value = '5';
-    fav.dispatchEvent(new Event('change'));
-    expect(store.get<{ favTransport: number }>('fleet.settings', { favTransport: 0 }).favTransport).toBe(5);
+    const w = open(store, { onFleetChange, bodies: [{ id: 5, name: 'Casa', coords: '1:2:3', moon: false }, { id: 6, name: 'Casa', coords: '1:2:3', moon: true }], section: 'fleet' });
+    // The destination is the planet / moon list used everywhere in Future: planet left, its moon beside it.
+    const fav = Array.from(w.root.querySelectorAll('.row')).find((r) => r.querySelector('.name')!.textContent === '1 · Trasporto verso')!;
+    fav.querySelector<HTMLButtonElement>('.bpick-btn')!.click();
+    fav.querySelector<HTMLButtonElement>('.bmenu button.moon')!.click();
+    expect(store.get<{ favTransport: number }>('fleet.settings', { favTransport: 0 }).favTransport).toBe(6);
+    expect(fav.querySelector('.bpick-btn')!.getAttribute('aria-label')).toContain('Casa');
     expect(onFleetChange).toHaveBeenCalled();
     w.tab('Tasti').click();
     const cap = () => w.root.querySelector<HTMLButtonElement>('.keycap[data-id="fleet.transport"]')!;

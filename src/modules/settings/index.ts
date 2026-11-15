@@ -3,6 +3,7 @@
  * spy table, fleet, keys and touch bar, data). The gear in the toolbar opens it. Each choice applies at once and is saved
  * locally; nothing here reaches the server.
  */
+import { bodyPicker, type PickBody } from '../../core/body-picker';
 import { icon } from '../../core/icons';
 import type { Store } from '../../core/storage';
 import { WINDOW_SHEET } from '../../core/sheet';
@@ -10,7 +11,7 @@ import { SIM_KEY, SIM_TOOLS, simTool, type SimTool } from '../../engines/sim-lin
 import { EXP_STYLE_KEY, FOLD_KEY, type ExpStyle } from '../messages';
 import { SPY_SHARED_KEY } from '../messages/spy-table';
 import type { MenuSettings } from '../planet-menu';
-import { CARGO_SHIPS, LOAD_ORDERS, parseAmount, SETTINGS_KEY as FLEET_SETTINGS_KEY, settingsFrom, validOrder, type FleetSettings } from '../../engines/fleet';
+import { CARGO_SHIPS, EXPEDITION_FILLERS, LOAD_ORDERS, parseAmount, SETTINGS_KEY as FLEET_SETTINGS_KEY, settingsFrom, validOrder, type FleetSettings } from '../../engines/fleet';
 import { formatUnits } from '../../core/format';
 import { BIG_DEBRIS, BIG_DEBRIS_KEY } from '../marks/side';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
@@ -39,7 +40,7 @@ export interface SettingsOptions {
   /** Called after an inbox choice, so the open inbox redraws. */
   onMailChange?: () => void;
   /** The player's planets and moons, for the fleet favourites. */
-  bodies?: { id: number; label: string }[];
+  bodies?: PickBody[];
   /** Called after a fleet or key choice, so the fleet bar and the touch bar redraw. */
   onFleetChange?: () => void;
   /** Section to open on, instead of the last one used. */
@@ -218,7 +219,12 @@ export function openSettings(o: SettingsOptions): void {
     const shipName = (id: number) => ships[String(id)]?.name || (t(`ship.${id}`) !== `ship.${id}` ? t(`ship.${id}`) : `#${id}`);
     const cargo = CARGO_SHIPS.map((id) => [String(id), shipName(id)] as [string, string]);
     const speeds = Array.from({ length: 10 }, (_, i) => [String((i + 1) * 10), `${(i + 1) * 10}%`] as [string, string]);
-    const dest: [string, string][] = [['0', t('fleet.none')], ...(o.bodies ?? []).map((b) => [String(b.id), b.label] as [string, string])];
+    // The same planet / moon list as everywhere else in Future (core/body-picker.ts).
+    const dest = (current: number | null, onPick: (id: number | null) => void) => {
+      const box = el('span', 'control');
+      box.append(bodyPicker(o.doc, { bodies: o.bodies ?? [], current, moonWord: t('fleet.typeMoon'), none: t('fleet.none'), label: t('fleet.none'), onPick }));
+      return box;
+    };
     const value = el('span', 'control');
     const input = el('input', 'field');
     input.type = 'text';
@@ -233,8 +239,8 @@ export function openSettings(o: SettingsOptions): void {
       row(t('fleet.secondShip'), t('settings.secondShipHint'), select([['0', t('fleet.none')], ...cargo], String(f.secondShip), (v) => set({ secondShip: Number(v) }))),
       row(t('fleet.speed'), t('settings.speedHint'), select(speeds, String(f.transportSpeed), (v) => set({ transportSpeed: Number(v) }))),
       group(t('fleet.favTitle'), fleetGlyph('collect')),
-      row(t('fleet.favTransport'), t('settings.favHint'), select(dest, String(f.favTransport ?? 0), (v) => set({ favTransport: Number(v) || null }))),
-      row(t('fleet.favDeploy'), t('settings.favHint'), select(dest, String(f.favDeploy ?? 0), (v) => set({ favDeploy: Number(v) || null }))),
+      row(t('fleet.favTransport'), t('settings.favHint'), dest(f.favTransport ?? null, (id) => set({ favTransport: id }))),
+      row(t('fleet.favDeploy'), t('settings.favHint'), dest(f.favDeploy ?? null, (id) => set({ favDeploy: id }))),
       row(t('fleet.collectIgnoreShips'), t('settings.collectIgnoreShipsHint'), yesNo(f.collectIgnoreShips, (v) => set({ collectIgnoreShips: v }))),
       row(t('fleet.collectDeployRes'), t('settings.collectDeployResHint'), yesNo(f.collectDeployRes, (v) => set({ collectDeployRes: v }))),
       row(
@@ -249,6 +255,7 @@ export function openSettings(o: SettingsOptions): void {
       group(t('fleet.expeditionTitle'), fleetGlyph('expedition')),
       row(t('fleet.expeditionShip'), t('settings.expShipHint'), select([['0', t('fleet.bestShip')], ...[219, 203, 202].map((id) => [String(id), shipName(id)] as [string, string])], String(f.expeditionShip), (v) => set({ expeditionShip: Number(v) }))),
       row(t('fleet.expeditionValue'), t('settings.expValueHint'), value),
+      row(t('fleet.expeditionBig'), t('settings.expBigHint'), select([['0', t('fleet.biggestShip')], ['-1', t('fleet.none')], ...EXPEDITION_FILLERS.map((id) => [String(id), shipName(id)] as [string, string])], String(f.expeditionBig), (v) => set({ expeditionBig: Number(v) }))),
       row(t('fleet.expeditionExtras'), t('settings.extrasHint'), yesNo(f.expeditionExtras, (v) => set({ expeditionExtras: v }))),
       group(t('fleet.repeatTitle'), fleetGlyph('repeat')),
       row(t('fleet.repeat'), t('fleet.repeatHint'), yesNo(f.repeat, (v) => set({ repeat: v }))),
