@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.99
+// @version      0.3.100
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -726,6 +726,7 @@
     "tech.res.deuterium": "Deuterio",
     "tech.res.energy": "Energia",
     "tech.time": "Tempo",
+    "tech.planBtn": "Piano",
     "tech.addOne": "Pianifica liv. {level}",
     "tech.addRange": "Pianifica liv. {from}\u2013{to}",
     "tech.inPlan": "Nel piano \u2713",
@@ -1671,6 +1672,7 @@
     "tech.res.deuterium": "Deuterium",
     "tech.res.energy": "Energy",
     "tech.time": "Time",
+    "tech.planBtn": "Plan",
     "tech.addOne": "Plan lv. {level}",
     "tech.addRange": "Plan lv. {from}\u2013{to}",
     "tech.inPlan": "In plan \u2713",
@@ -2616,6 +2618,7 @@
     "tech.res.deuterium": "Deut\xE9rium",
     "tech.res.energy": "\xC9nergie",
     "tech.time": "Dur\xE9e",
+    "tech.planBtn": "Plan",
     "tech.addOne": "Planifier niv. {level}",
     "tech.addRange": "Planifier niv. {from}\u2013{to}",
     "tech.inPlan": "Planifi\xE9 \u2713",
@@ -3561,6 +3564,7 @@
     "tech.res.deuterium": "Deuterium",
     "tech.res.energy": "Energie",
     "tech.time": "Dauer",
+    "tech.planBtn": "Plan",
     "tech.addOne": "St. {level} planen",
     "tech.addRange": "St. {from}\u2013{to} planen",
     "tech.inPlan": "Geplant \u2713",
@@ -14910,17 +14914,29 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 .fut-tp-sat:hover { border-color: var(--energy); background: #1E1A0C; }
 .fut-tp-lab { border-color: var(--accent-line); color: var(--text, var(--text-2)); }
 .fut-tp-sat-link { display: inline-flex; max-width: 100%; text-decoration: none; }
-/* Tools over the picture, like OGLight. */
+/* Tools over the picture: one stepper (\u2212 / the jump printed large / +) and the plan button with its word,
+   as the board's rung track. Filled pawn yellow to add; outlined with a tick once it is in the plan. */
 .fut-tp-tools { position: absolute; top: 4px; left: 4px; right: 4px; display: flex; gap: 4px; z-index: 2; }
-#technologydetails .fut-tp-btn { flex: 1; height: 24px; display: flex; align-items: center; justify-content: center; padding: 0;
-  border: 1px solid var(--line-strong); border-radius: 5px; background: rgba(10,17,28,0.88); color: var(--text-2); cursor: pointer; }
-#technologydetails .fut-tp-btn:hover:not(:disabled) { border-color: var(--accent); color: #fff; }
-#technologydetails .fut-tp-btn:disabled { opacity: 0.4; cursor: default; }
-#technologydetails .fut-tp-plan.on { border-color: #2E7D5B; background: rgba(16,41,31,0.92); color: var(--d); }
+#technologydetails .fut-tp-btn { height: 26px; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 0 6px; margin: 0;
+  border: 0; border-radius: 4px; background: rgba(21,28,38,0.92); color: var(--text-2); font: 600 condensed 13px var(--display); cursor: pointer; }
+#technologydetails .fut-tp-btn:hover:not(:disabled) { background: rgba(33,43,58,0.96); color: var(--text); }
+#technologydetails .fut-tp-btn:disabled { color: var(--quiet); cursor: default; }
+#technologydetails .fut-tp-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+#technologydetails .fut-tp-stepper { flex: 1; min-width: 0; display: flex; gap: 2px; }
+#technologydetails .fut-tp-step { flex: none; width: 26px; padding: 0; }
+#technologydetails .fut-tp-range { flex: 1; min-width: 0; gap: 5px; color: var(--text); }
+#technologydetails .fut-tp-range:disabled { color: var(--text); }
+#technologydetails .fut-tp-range b { font: 600 condensed 15px var(--display); }
+#technologydetails .fut-tp-range .fut-tp-arrow { color: var(--label); font-weight: 400; }
+#technologydetails .fut-tp-range .fut-tp-to { color: var(--accent); }
+#technologydetails .fut-tp-plan { flex: none; padding: 0 9px 0 7px; background: var(--accent); color: var(--on-accent); }
+#technologydetails .fut-tp-plan:hover:not(:disabled) { background: var(--accent-hi); color: var(--on-accent); }
+#technologydetails .fut-tp-plan.on { background: rgba(21,28,38,0.92); box-shadow: inset 0 0 0 1px var(--accent); color: var(--accent); }
+#technologydetails .fut-tp-plan.on:hover { background: rgba(33,43,58,0.96); color: var(--accent); }
 /* Our amount (for the plan) over the picture: same dark field as the game's one, beating the game's input skin. */
-#technologydetails .fut-tp-tools .fut-tp-amount { flex: 3; min-width: 0; height: 24px; box-sizing: border-box; margin: 0; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 5px;
-  background: rgba(9,15,24,0.92) none; color: var(--text); font: 700 13px var(--mono); text-align: right; box-shadow: none; }
-#technologydetails .fut-tp-tools .fut-tp-amount:focus { outline: none; border-color: var(--accent); }
+#technologydetails .fut-tp-tools .fut-tp-amount { flex: 1; min-width: 0; height: 26px; box-sizing: border-box; margin: 0; padding: 0 6px; border: 0; border-radius: 4px;
+  background: rgba(21,28,38,0.92) none; color: var(--text); font: 600 condensed 15px var(--display); text-align: right; box-shadow: none; }
+#technologydetails .fut-tp-tools .fut-tp-amount:focus { outline: none; box-shadow: inset 0 0 0 1px var(--accent); }
 `;
   var PLANNER_CSS = `
 :host { --panel-w: 820px; }
@@ -15061,10 +15077,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     return b;
   }
   var ICON = {
-    prev: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
-    next: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
-    reset: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
-    plan: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h1M4 12h1M4 18h1"/></svg>',
+    minus: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 12h12"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 12h12M12 6v12"/></svg>',
+    check: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
     time: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
     energy: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>',
     start: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v5h5"/></svg>',
@@ -15233,21 +15248,27 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         const ms = (l) => details.durationMs ? scaleDuration(details.id, start.level, details.durationMs, l) : 0;
         let sumMs = 0;
         for (let l = start.level; l <= to; l++) sumMs += ms(l);
-        const prev = button2(doc, "fut-tp-btn", ICON.prev, t("tech.prev"), () => {
+        const prev = button2(doc, "fut-tp-btn fut-tp-step", ICON.minus, t("tech.prev"), () => {
           to = Math.max(start.level, to - 1);
           draw();
         });
         prev.disabled = to <= start.level;
-        const reset = button2(doc, "fut-tp-btn", ICON.reset, t("tech.reset"), () => {
+        prev.setAttribute("aria-label", t("tech.prev"));
+        const range = button2(doc, "fut-tp-btn fut-tp-range", "", to > start.level ? t("tech.reset") : "", () => {
           to = start.level;
           draw();
         });
-        reset.disabled = to <= start.level;
-        const next = button2(doc, "fut-tp-btn", ICON.next, t("tech.next"), () => {
+        range.append(el5(doc, "b", "", String(start.level - 1)), el5(doc, "span", "fut-tp-arrow", "\u2192"), el5(doc, "b", "fut-tp-to", String(to)));
+        range.disabled = to <= start.level;
+        range.setAttribute("aria-label", `${start.level - 1} \u2192 ${to}${to > start.level ? ` \xB7 ${t("tech.reset")}` : ""}`);
+        const next = button2(doc, "fut-tp-btn fut-tp-step", ICON.plus, t("tech.next"), () => {
           to += 1;
           draw();
         });
-        const add = button2(doc, planned ? "fut-tp-btn fut-tp-plan on" : "fut-tp-btn fut-tp-plan", ICON.plan, "", () => {
+        next.setAttribute("aria-label", t("tech.next"));
+        const stepper = el5(doc, "span", "fut-tp-stepper");
+        stepper.append(prev, range, next);
+        const add = button2(doc, planned ? "fut-tp-btn fut-tp-plan on" : "fut-tp-btn fut-tp-plan", planned ? ICON.check : ICON.plus, "", () => {
           let current3 = loadPlan(o.store);
           if (planned) {
             for (let l = to; l >= start.level; l--) {
@@ -15266,8 +15287,11 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           o.onPlanChange?.();
           draw();
         });
+        add.append(el5(doc, "span", "", t("tech.planBtn")));
         add.title = planned ? `${t("tech.inPlan")} \xB7 ${t("tech.removeHint")}` : to > start.level ? t("tech.addRange", { from: start.level, to }) : t("tech.addOne", { level: to });
-        tools.replaceChildren(prev, reset, next, add);
+        add.setAttribute("aria-label", add.title);
+        add.setAttribute("aria-pressed", String(planned));
+        tools.replaceChildren(stepper, add);
         if (levelLabel) levelLabel.textContent = `${start.level - 1} \u2192 ${to}`;
         const view2 = {
           heads: [t("tech.colLevel", { level: to }), t("tech.rangeShort", { from: start.level - 1, to }), t("tech.colMissing")],
@@ -15325,14 +15349,16 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         const total = scaleCost(one, n);
         const have = o.have();
         const gap = missing(total, have ?? { metal: 0, crystal: 0, deuterium: 0 });
-        const add = button2(doc, added ? "fut-tp-btn fut-tp-plan on" : "fut-tp-btn fut-tp-plan", ICON.plan, t("tech.addUnits", { n: n.toLocaleString(locale) }), () => {
+        const add = button2(doc, added ? "fut-tp-btn fut-tp-plan on" : "fut-tp-btn fut-tp-plan", added ? ICON.check : ICON.plus, t("tech.addUnits", { n: n.toLocaleString(locale) }), () => {
           const item = { id: details.id, amount: n, name: details.name, cost: total, added: Date.now() };
           o.store.set(PLAN_KEY, addToPlan(loadPlan(o.store), o.bodyId, [item]));
           o.onPlanChange?.();
           added = true;
           draw();
         });
+        add.append(el5(doc, "span", "", t("tech.planBtn")));
         if (added) add.title = t("tech.added");
+        add.setAttribute("aria-label", add.title);
         tools.replaceChildren(amount, add);
         const view2 = {
           heads: [t("tech.colOne"), `\xD7${n.toLocaleString(locale)}`, t("tech.colMissing")],
