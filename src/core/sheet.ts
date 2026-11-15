@@ -128,6 +128,24 @@ input:checked + .sw-track::after, [aria-checked="true"] > .sw-track::after { tra
 input.sw { position: absolute; opacity: 0; pointer-events: none; }
 input.sw:focus-visible + .sw-track { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+/* Planet / moon picker (core/body-picker.ts): the chosen body on a button, a list with each planet and its moon beside it. */
+.bpick { position: relative; display: inline-block; }
+.bpick-btn { display: inline-flex; align-items: center; gap: 8px; height: 30px; min-width: 220px; padding: 0 8px 0 10px; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--surface); color: var(--text); font: 13px var(--body); cursor: pointer; }
+.bpick-btn b { font-weight: 600; }
+.bpick-btn b.none { font-weight: 400; color: var(--muted); }
+.bpick-btn small { margin-left: auto; color: var(--muted); font: condensed 12px var(--display); }
+.bpick-btn:hover, .bpick-btn[aria-expanded="true"] { border-color: var(--line-hover); }
+.bmenu { position: absolute; z-index: 5; top: 34px; right: 0; min-width: 260px; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; display: grid; grid-template-columns: minmax(0, 1fr) 40px; gap: 2px; padding: 4px; border-radius: 4px; background: var(--bg); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+.bmenu[hidden] { display: none; }
+.bmenu button { display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 8px; border: 0; border-radius: 3px; background: var(--surface); color: var(--text-2); font: 13px var(--body); text-align: left; white-space: nowrap; cursor: pointer; }
+.bmenu button.clear { grid-column: 1 / -1; color: var(--muted); }
+.bmenu button small { margin-left: auto; color: var(--muted); font: condensed 12px var(--display); }
+.bmenu button.moon { justify-content: center; padding: 0; color: var(--muted); }
+.bmenu button:hover { background: var(--hover); color: var(--text); }
+.bmenu button.on { box-shadow: inset 0 0 0 1px var(--accent); color: var(--text); }
+.bmenu button.moon.on { color: var(--accent); }
+.bmenu button:disabled { background: none; color: var(--faint); cursor: default; }
+
 /* Browser surfaces. */
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .backdrop, .scroll, .table-wrap { scrollbar-color: var(--line-strong) var(--raised); scrollbar-width: thin; }

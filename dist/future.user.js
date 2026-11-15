@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.90
+// @version      0.3.91
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -654,7 +654,10 @@
     "fleet.bestShip": "La migliore disponibile",
     "fleet.expeditionValue": "Carico da coprire",
     "fleet.auto": "automatico",
-    "fleet.expeditionExtras": "Aggiungi 1 nave grande, 1 sonda e 1 pathfinder",
+    "fleet.expeditionExtras": "Aggiungi 1 sonda e 1 pathfinder",
+    "settings.expBigHint": "Una nave da battaglia in pi\xF9 nella spedizione. Automatica = la pi\xF9 grossa che hai; se quella scelta manca, si usa la pi\xF9 grossa.",
+    "fleet.biggestShip": "Automatica: la pi\xF9 grossa",
+    "fleet.expeditionBig": "Nave grande",
     "fleet.expeditionHint": "Automatico = il massimo che una spedizione pu\xF2 riportare (classe, velocit\xE0 universo, bonus classe). Puoi scrivere un valore fisso (es. 150M) o una percentuale (es. 50%).",
     "fleet.repeatTitle": "Ripeti",
     "fleet.repeat": "Dopo l'invio passa al pianeta o luna successivo, gi\xE0 pronto",
@@ -1149,7 +1152,7 @@
     "settings.speedHint": "Velocit\xE0 di Trasporto, Schiera e Su luna.",
     "settings.favHint": "Dove la Raccolta spedizioni porta flotta e risorse in eccesso, con i limiti delle riserve.",
     "settings.expValueHint": "Vuoto = calcolato; 50% = met\xE0 del calcolato; un numero = carico fisso.",
-    "settings.extrasHint": "Aggiunge una grande nave da battaglia, una sonda e un pathfinder, come OGLight.",
+    "settings.extrasHint": "Aggiunge una sonda e un pathfinder, come OGLight.",
     "settings.touch": "Barra da toccare",
     "settings.touchHint": "In basso sullo schermo: le scorciatoie di questa pagina e, in Flotta, il pulsante Avanti / Invia del gioco.",
     "settings.touchAuto": "Su touch",
@@ -1589,7 +1592,10 @@
     "fleet.bestShip": "Best available",
     "fleet.expeditionValue": "Cargo to cover",
     "fleet.auto": "automatic",
-    "fleet.expeditionExtras": "Add 1 big ship, 1 probe and 1 pathfinder",
+    "fleet.expeditionExtras": "Add 1 probe and 1 pathfinder",
+    "settings.expBigHint": "One extra combat ship in the expedition. Automatic = the biggest you have; if the chosen one is missing, the biggest is used.",
+    "fleet.biggestShip": "Automatic: the biggest",
+    "fleet.expeditionBig": "Big ship",
     "fleet.expeditionHint": "Automatic = the most an expedition can bring back (class, universe speed, class bonus). You can type a fixed value (e.g. 150M) or a percentage (e.g. 50%).",
     "fleet.repeatTitle": "Repeat",
     "fleet.repeat": "After sending, open the next planet or moon already prepared",
@@ -2084,7 +2090,7 @@
     "settings.speedHint": "Speed of Transport, Deploy and To moon.",
     "settings.favHint": "Where the Expedition collection brings the spare fleet and resources, within the reserves.",
     "settings.expValueHint": "Empty = calculated; 50% = half of it; a number = fixed cargo.",
-    "settings.extrasHint": "Adds one big battleship, one probe and one pathfinder, like OGLight.",
+    "settings.extrasHint": "Adds one probe and one pathfinder, like OGLight.",
     "settings.touch": "Touch bar",
     "settings.touchHint": "At the bottom of the screen: this page\u2019s shortcuts and, on the Fleet page, the game\u2019s Next / Send button.",
     "settings.touchAuto": "On touch",
@@ -2524,7 +2530,10 @@
     "fleet.bestShip": "Le meilleur disponible",
     "fleet.expeditionValue": "Fret \xE0 couvrir",
     "fleet.auto": "automatique",
-    "fleet.expeditionExtras": "Ajouter 1 gros vaisseau, 1 sonde et 1 \xE9claireur",
+    "fleet.expeditionExtras": "Ajouter 1 sonde et 1 \xE9claireur",
+    "settings.expBigHint": "Un vaisseau de combat en plus dans l'exp\xE9dition. Automatique = le plus gros que vous avez ; si celui choisi manque, le plus gros est utilis\xE9.",
+    "fleet.biggestShip": "Automatique : le plus gros",
+    "fleet.expeditionBig": "Gros vaisseau",
     "fleet.expeditionHint": "Automatique = le maximum qu'une exp\xE9dition peut rapporter (classe, vitesse de l'univers, bonus de classe). Vous pouvez saisir une valeur fixe (ex. 150M) ou un pourcentage (ex. 50%).",
     "fleet.repeatTitle": "R\xE9p\xE9ter",
     "fleet.repeat": "Apr\xE8s l'envoi, ouvrir la plan\xE8te ou lune suivante d\xE9j\xE0 pr\xEAte",
@@ -3019,7 +3028,7 @@
     "settings.speedHint": "Vitesse de Transport, Stationner et Vers la lune.",
     "settings.favHint": "O\xF9 la Collecte des exp\xE9ditions am\xE8ne la flotte et les ressources en trop, dans les limites des r\xE9serves.",
     "settings.expValueHint": "Vide = calcul\xE9 ; 50% = la moiti\xE9 ; un nombre = chargement fixe.",
-    "settings.extrasHint": "Ajoute un grand vaisseau de combat, une sonde et un \xE9claireur, comme OGLight.",
+    "settings.extrasHint": "Ajoute une sonde et un \xE9claireur, comme OGLight.",
     "settings.touch": "Barre tactile",
     "settings.touchHint": "En bas de l\u2019\xE9cran : les raccourcis de cette page et, sur Flotte, le bouton Suivant / Envoyer du jeu.",
     "settings.touchAuto": "Sur tactile",
@@ -3459,7 +3468,10 @@
     "fleet.bestShip": "Bestes verf\xFCgbares",
     "fleet.expeditionValue": "Abzudeckende Ladung",
     "fleet.auto": "automatisch",
-    "fleet.expeditionExtras": "1 gro\xDFes Schiff, 1 Sonde und 1 Pathfinder dazu",
+    "fleet.expeditionExtras": "1 Spionagesonde und 1 Pathfinder hinzuf\xFCgen",
+    "settings.expBigHint": "Ein zus\xE4tzliches Kampfschiff in der Expedition. Automatisch = das gr\xF6\xDFte, das du hast; fehlt das gew\xE4hlte, wird das gr\xF6\xDFte genommen.",
+    "fleet.biggestShip": "Automatisch: das gr\xF6\xDFte",
+    "fleet.expeditionBig": "Gro\xDFes Schiff",
     "fleet.expeditionHint": "Automatisch = das Maximum, das eine Expedition bringen kann (Klasse, Universumsgeschwindigkeit, Klassenbonus). Du kannst einen festen Wert (z. B. 150M) oder Prozent (z. B. 50%) eingeben.",
     "fleet.repeatTitle": "Wiederholen",
     "fleet.repeat": "Nach dem Senden den n\xE4chsten Planeten oder Mond vorbereitet \xF6ffnen",
@@ -3954,7 +3966,7 @@
     "settings.speedHint": "Geschwindigkeit von Transport, Stationieren und Zum Mond.",
     "settings.favHint": "Wohin die Expeditionssammlung \xFCbersch\xFCssige Flotte und Rohstoffe bringt, innerhalb der Reserven.",
     "settings.expValueHint": "Leer = berechnet; 50% = die H\xE4lfte; eine Zahl = feste Ladung.",
-    "settings.extrasHint": "F\xFCgt ein gro\xDFes Kampfschiff, eine Sonde und einen Pathfinder hinzu, wie OGLight.",
+    "settings.extrasHint": "F\xFCgt eine Spionagesonde und einen Pathfinder hinzu, wie OGLight.",
     "settings.touch": "Touch-Leiste",
     "settings.touchHint": "Unten am Bildschirm: die Kurzbefehle dieser Seite und auf der Flottenseite der Weiter-/Senden-Knopf des Spiels.",
     "settings.touchAuto": "Bei Touch",
@@ -4818,6 +4830,24 @@ input:checked + .sw-track::after, [aria-checked="true"] > .sw-track::after { tra
 /* A checkbox drawn as the switch: the input stays for keyboard and screen readers, the track shows. */
 input.sw { position: absolute; opacity: 0; pointer-events: none; }
 input.sw:focus-visible + .sw-track { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Planet / moon picker (core/body-picker.ts): the chosen body on a button, a list with each planet and its moon beside it. */
+.bpick { position: relative; display: inline-block; }
+.bpick-btn { display: inline-flex; align-items: center; gap: 8px; height: 30px; min-width: 220px; padding: 0 8px 0 10px; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--surface); color: var(--text); font: 13px var(--body); cursor: pointer; }
+.bpick-btn b { font-weight: 600; }
+.bpick-btn b.none { font-weight: 400; color: var(--muted); }
+.bpick-btn small { margin-left: auto; color: var(--muted); font: condensed 12px var(--display); }
+.bpick-btn:hover, .bpick-btn[aria-expanded="true"] { border-color: var(--line-hover); }
+.bmenu { position: absolute; z-index: 5; top: 34px; right: 0; min-width: 260px; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; display: grid; grid-template-columns: minmax(0, 1fr) 40px; gap: 2px; padding: 4px; border-radius: 4px; background: var(--bg); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+.bmenu[hidden] { display: none; }
+.bmenu button { display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 8px; border: 0; border-radius: 3px; background: var(--surface); color: var(--text-2); font: 13px var(--body); text-align: left; white-space: nowrap; cursor: pointer; }
+.bmenu button.clear { grid-column: 1 / -1; color: var(--muted); }
+.bmenu button small { margin-left: auto; color: var(--muted); font: condensed 12px var(--display); }
+.bmenu button.moon { justify-content: center; padding: 0; color: var(--muted); }
+.bmenu button:hover { background: var(--hover); color: var(--text); }
+.bmenu button.on { box-shadow: inset 0 0 0 1px var(--accent); color: var(--text); }
+.bmenu button.moon.on { color: var(--accent); }
+.bmenu button:disabled { background: none; color: var(--faint); cursor: default; }
 
 /* Browser surfaces. */
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -6644,6 +6674,89 @@ kbd { padding: 0 4px; border: 1px solid var(--line-strong); border-radius: 3px; 
   }
   function expeditionItemBoost(items) {
     return (items?.uuids ?? []).reduce((sum, u) => sum + (EXPEDITION_ITEMS[u] ?? 0), 0);
+  }
+
+  // src/core/body-picker.ts
+  function bodyPicker(doc, o) {
+    const h8 = (tag, cls = "", text) => {
+      const n = doc.createElement(tag);
+      if (cls) n.className = cls;
+      if (text !== void 0) n.textContent = text;
+      return n;
+    };
+    const name = (b) => `${b.name}${b.moon ? ` (${o.moonWord})` : ""} [${b.coords}]`;
+    const wrap = h8("div", "bpick");
+    const button3 = h8("button", "bpick-btn");
+    button3.type = "button";
+    button3.setAttribute("aria-haspopup", "listbox");
+    button3.setAttribute("aria-expanded", "false");
+    const menu = h8("div", "bmenu");
+    menu.setAttribute("role", "listbox");
+    menu.hidden = true;
+    let current3 = o.current;
+    const drawButton = () => {
+      const b = o.bodies.find((x) => x.id === current3);
+      button3.replaceChildren();
+      button3.setAttribute("aria-label", b ? name(b) : o.label);
+      if (b?.moon) button3.append(icon(doc, "moon", 13));
+      if (b) button3.append(h8("b", "", b.name), h8("small", "mono", b.coords));
+      else button3.append(h8("b", "none", o.none ?? o.label));
+      button3.append(icon(doc, "chevron", 14));
+    };
+    const set = (open2) => {
+      menu.hidden = !open2;
+      button3.setAttribute("aria-expanded", String(open2));
+    };
+    const choose = (id) => {
+      current3 = id;
+      drawButton();
+      drawMenu();
+      set(false);
+      button3.focus();
+      o.onPick(id);
+    };
+    const cell = (b) => {
+      if (!b) return h8("span");
+      const item = h8("button", `${b.moon ? "moon" : "planet"}${b.id === current3 ? " on" : ""}`);
+      item.type = "button";
+      item.setAttribute("role", "option");
+      item.setAttribute("aria-selected", String(b.id === current3));
+      item.setAttribute("aria-label", name(b));
+      if (b.moon) {
+        item.append(icon(doc, "moon", 14));
+        item.title = name(b);
+      } else item.append(h8("span", "", b.name), h8("small", "mono", b.coords));
+      item.disabled = o.enabled ? !o.enabled.has(b.id) : false;
+      item.addEventListener("click", () => choose(b.id));
+      return item;
+    };
+    const drawMenu = () => {
+      menu.replaceChildren();
+      if (o.none !== void 0) {
+        const clear = h8("button", `clear${current3 === null ? " on" : ""}`, o.none);
+        clear.type = "button";
+        clear.setAttribute("role", "option");
+        clear.setAttribute("aria-selected", String(current3 === null));
+        clear.addEventListener("click", () => choose(null));
+        menu.append(clear);
+      }
+      const moons = new Map(o.bodies.filter((b) => b.moon).map((m) => [m.coords, m]));
+      for (const p of o.bodies.filter((b) => !b.moon)) menu.append(cell(p), cell(moons.get(p.coords)));
+    };
+    drawButton();
+    drawMenu();
+    button3.addEventListener("click", () => set(menu.hidden));
+    wrap.addEventListener("focusout", (e) => {
+      if (!wrap.contains(e.relatedTarget)) set(false);
+    });
+    wrap.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape" || menu.hidden) return;
+      e.stopPropagation();
+      set(false);
+      button3.focus();
+    });
+    wrap.append(button3, menu);
+    return wrap;
   }
 
   // src/engines/sim-links.ts
@@ -8731,6 +8844,7 @@ td.spark-cell { width: 90px; }
     expeditionShip: 0,
     expeditionValue: "",
     expeditionExtras: true,
+    expeditionBig: 0,
     repeat: false,
     shipsOn: true,
     resourcesOn: true,
@@ -8747,7 +8861,8 @@ td.spark-cell { width: 90px; }
   function settingsFrom(stored) {
     const { reserveOn, ...rest } = stored;
     const legacy = reserveOn === void 0 ? {} : { shipsOn: reserveOn, resourcesOn: reserveOn };
-    return { ...DEFAULT_SETTINGS, ...legacy, ...rest };
+    const big = rest.expeditionBig === void 0 && rest.expeditionExtras === false ? { expeditionBig: -1 } : {};
+    return { ...DEFAULT_SETTINGS, ...legacy, ...big, ...rest };
   }
   function pickedLoad(onPlanet2, pick, fuel, capacity) {
     const want = (k, have) => Math.max(0, Math.floor(Math.min(have, pick[k] ?? 0)));
@@ -8867,9 +8982,12 @@ td.spark-cell { width: 90px; }
     }
     const out = {};
     if (ship && has(ship)) out[ship] = Math.min(stock2.find((s) => s.id === ship).available, need(ship));
-    if (o.extras) {
-      const filler = EXPEDITION_FILLERS.find((id) => id !== ship && has(id));
+    const big = o.big ?? (o.extras ? 0 : -1);
+    if (big !== -1) {
+      const filler = big > 0 && big !== ship && has(big) ? big : EXPEDITION_FILLERS.find((id) => id !== ship && has(id));
       if (filler) out[filler] = 1;
+    }
+    if (o.extras) {
       if (ship !== 210 && has(210)) out[210] = 1;
       if (ship !== 219 && has(219)) out[219] = 1;
     }
@@ -9347,7 +9465,11 @@ input.field { width: 190px; }
       const shipName2 = (id) => ships[String(id)]?.name || (t(`ship.${id}`) !== `ship.${id}` ? t(`ship.${id}`) : `#${id}`);
       const cargo = CARGO_SHIPS.map((id) => [String(id), shipName2(id)]);
       const speeds = Array.from({ length: 10 }, (_, i) => [String((i + 1) * 10), `${(i + 1) * 10}%`]);
-      const dest = [["0", t("fleet.none")], ...(o.bodies ?? []).map((b) => [String(b.id), b.label])];
+      const dest = (current3, onPick) => {
+        const box = el6("span", "control");
+        box.append(bodyPicker(o.doc, { bodies: o.bodies ?? [], current: current3, moonWord: t("fleet.typeMoon"), none: t("fleet.none"), label: t("fleet.none"), onPick }));
+        return box;
+      };
       const value = el6("span", "control");
       const input = el6("input", "field");
       input.type = "text";
@@ -9362,8 +9484,8 @@ input.field { width: 190px; }
         row(t("fleet.secondShip"), t("settings.secondShipHint"), select([["0", t("fleet.none")], ...cargo], String(f.secondShip), (v) => set({ secondShip: Number(v) }))),
         row(t("fleet.speed"), t("settings.speedHint"), select(speeds, String(f.transportSpeed), (v) => set({ transportSpeed: Number(v) }))),
         group(t("fleet.favTitle"), fleetGlyph("collect")),
-        row(t("fleet.favTransport"), t("settings.favHint"), select(dest, String(f.favTransport ?? 0), (v) => set({ favTransport: Number(v) || null }))),
-        row(t("fleet.favDeploy"), t("settings.favHint"), select(dest, String(f.favDeploy ?? 0), (v) => set({ favDeploy: Number(v) || null }))),
+        row(t("fleet.favTransport"), t("settings.favHint"), dest(f.favTransport ?? null, (id) => set({ favTransport: id }))),
+        row(t("fleet.favDeploy"), t("settings.favHint"), dest(f.favDeploy ?? null, (id) => set({ favDeploy: id }))),
         row(t("fleet.collectIgnoreShips"), t("settings.collectIgnoreShipsHint"), yesNo(f.collectIgnoreShips, (v) => set({ collectIgnoreShips: v }))),
         row(t("fleet.collectDeployRes"), t("settings.collectDeployResHint"), yesNo(f.collectDeployRes, (v) => set({ collectDeployRes: v }))),
         row(
@@ -9378,6 +9500,7 @@ input.field { width: 190px; }
         group(t("fleet.expeditionTitle"), fleetGlyph("expedition")),
         row(t("fleet.expeditionShip"), t("settings.expShipHint"), select([["0", t("fleet.bestShip")], ...[219, 203, 202].map((id) => [String(id), shipName2(id)])], String(f.expeditionShip), (v) => set({ expeditionShip: Number(v) }))),
         row(t("fleet.expeditionValue"), t("settings.expValueHint"), value),
+        row(t("fleet.expeditionBig"), t("settings.expBigHint"), select([["0", t("fleet.biggestShip")], ["-1", t("fleet.none")], ...EXPEDITION_FILLERS.map((id) => [String(id), shipName2(id)])], String(f.expeditionBig), (v) => set({ expeditionBig: Number(v) }))),
         row(t("fleet.expeditionExtras"), t("settings.extrasHint"), yesNo(f.expeditionExtras, (v) => set({ expeditionExtras: v }))),
         group(t("fleet.repeatTitle"), fleetGlyph("repeat")),
         row(t("fleet.repeat"), t("fleet.repeatHint"), yesNo(f.repeat, (v) => set({ repeat: v })))
@@ -9836,16 +9959,19 @@ ${L} .fut-queue { position: absolute; left: 2px; bottom: 2px; z-index: 2; displa
 ${L} .fut-plancol { flex-shrink: 0; display: flex; flex-direction: column; width: 20px; border-left: 1px solid var(--line); background: var(--surface); }
 ${L} .fut-plancol > span { flex: 1; min-height: 0; }
 ${L} .fut-plancol > :last-child { border-top: 1px solid var(--line); }
-${L} .fut-plan { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-  font: 700 12px/12px Arial, sans-serif; cursor: pointer; background: color-mix(in srgb, currentColor 18%, var(--surface)); outline: none; }
-${L} .fut-plan:hover, ${L} .fut-plan:focus-visible { background: color-mix(in srgb, currentColor 32%, var(--surface)); }
-${L} .fut-plan svg { display: block; }
+/* The number of planned items in the board's figures, a pip under it in the state's colour:
+   orange = resources missing, blue = on their way, amber = landed (not read yet), green = all there, grey = unknown. */
+${L} .fut-plan { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font: 600 condensed 12px/1 var(--display); color: var(--text); cursor: pointer; outline: none; --st: var(--muted); }
+${L} .fut-plan::after { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--st); }
+${L} .fut-plan:hover, ${L} .fut-plan:focus-visible { background: var(--hover); }
+${L} .fut-plan:focus-visible { box-shadow: inset 0 0 0 1px var(--accent); }
 ${L}.fut-mode-compact .fut-plancol { display: none; }
-${L} .fut-plan-missing { color: var(--old); }
-${L} .fut-plan-arriving { color: var(--accent); }
-${L} .fut-plan-arrived { color: var(--warm); }
-${L} .fut-plan-ready { color: var(--fresh); }
-${L} .fut-plan-unknown { color: var(--muted); }
+${L} .fut-plan-missing { --st: var(--warn); }
+${L} .fut-plan-arriving { --st: var(--link); }
+${L} .fut-plan-arrived { --st: var(--warm); }
+${L} .fut-plan-ready { --st: var(--fresh); }
+${L} .fut-plan-unknown { --st: var(--muted); }
 ${L} .fut-q { display: block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 ${L} a.moonlink .fut-queue { left: 2px; bottom: auto; top: 1px; padding: 1px 2px; }
 ${L} a.moonlink .fut-q { width: 5px; height: 5px; }
@@ -9951,8 +10077,8 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 .fut-plan-tip .fut-pt-items li::before { content: ""; position: absolute; left: 0; top: 7px; width: 3px; height: 3px; border-radius: 50%; background: var(--line-hover); }
 .fut-plan-tip .fut-pt-status { padding-top: 5px; border-top: 1px solid var(--line-strong); }
 .fut-plan-tip .fut-pt-say { font-weight: 700; }
-.fut-plan-tip.fut-plan-missing .fut-pt-say { color: var(--old); }
-.fut-plan-tip.fut-plan-arriving .fut-pt-say, .fut-plan-tip .fut-pt-sent { color: var(--accent) !important; }
+.fut-plan-tip.fut-plan-missing .fut-pt-say { color: var(--warn); }
+.fut-plan-tip.fut-plan-arriving .fut-pt-say, .fut-plan-tip .fut-pt-sent { color: var(--link) !important; }
 .fut-plan-tip.fut-plan-arrived .fut-pt-say { color: var(--warm); }
 .fut-plan-tip.fut-plan-ready .fut-pt-say { color: var(--fresh); }
 .fut-plan-tip.fut-plan-unknown .fut-pt-say { color: var(--muted); }
@@ -10094,8 +10220,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
   function planBadge(doc, mark, o, where) {
     if (!mark) return null;
     const b = el3(doc, "span", `fut-plan fut-plan-${mark.state}`);
-    b.innerHTML = `<svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" fill="currentColor">${PLAN_ICON}</svg>`;
-    b.append(doc.createTextNode(String(mark.items.length)));
+    b.textContent = String(mark.items.length);
     b.tabIndex = 0;
     b.setAttribute("role", "button");
     b.setAttribute("aria-label", `${o.t("plan.title")}: ${where.name} [${where.coords}] \xB7 ${mark.items.join(", ")}`);
@@ -11161,19 +11286,6 @@ td.guess { font-style: italic; opacity: 0.7; }
 .seg .seg-ico { flex: none; color: var(--muted); }
 .seg button[aria-pressed="true"] .seg-ico { color: var(--text); }
 
-/* Body picker: the same two columns as the fleet bar's destination list. */
-.bpick { position: relative; }
-.bpick-btn { display: inline-flex; align-items: center; gap: 8px; height: 28px; min-width: 200px; padding: 0 8px 0 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text); font: 12px var(--body); cursor: pointer; }
-.bpick-btn small { margin-left: auto; color: var(--muted); font-size: 11px; }
-.bpick-btn:hover, .bpick-btn[aria-expanded="true"] { border-color: var(--accent); }
-.bmenu { position: absolute; z-index: 5; top: 32px; left: 0; min-width: 250px; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; display: grid; grid-template-columns: minmax(0, 1fr) 40px; gap: 2px; padding: 4px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-.bmenu[hidden] { display: none; }
-.bmenu button { display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 8px; border: 1px solid transparent; border-radius: 4px; background: var(--surface); color: var(--text-2); font: 12px var(--body); text-align: left; white-space: nowrap; cursor: pointer; }
-.bmenu button small { margin-left: auto; color: var(--muted); font-size: 11px; }
-.bmenu button.moon { justify-content: center; padding: 0; color: var(--muted); }
-.bmenu button:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
-.bmenu button.on { border-color: var(--warn); color: var(--warn); }
-.bmenu button:disabled { background: none; border-color: transparent; color: var(--faint); cursor: default; }
 
 /* Scrap calculator */
 .scrap-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
@@ -12052,54 +12164,18 @@ table.queues td.acts { width: 1%; text-align: right; }
     }
     s.append(bodyMatrix(ctx, bodies, shown2, { units: true, foot: "sum", extra: [{ label: t("dash.valueMsu"), value: (b) => ctx.fmt(unitsValue2(b, shown2).value) }] }));
   }
-  function bodyPicker(ctx, ids, current3, onPick) {
+  function bodyPicker2(ctx, ids, current3, onPick) {
     const { doc, t } = ctx.o;
-    const wrap = h3("div", "bpick");
-    const label = (b) => `${b.name}${b.type === "moon" ? ` (${t("dash.moon")})` : ""} [${b.coords}]`;
-    const button3 = h3("button", "bpick-btn");
-    button3.type = "button";
-    button3.setAttribute("aria-haspopup", "listbox");
-    button3.setAttribute("aria-expanded", "false");
-    button3.setAttribute("aria-label", label(current3));
-    if (current3.type === "moon") button3.append(icon(doc, "moon", 13));
-    button3.append(h3("b", "", current3.name), h3("small", "mono", current3.coords), icon(doc, "chevron", 14));
-    const menu = h3("div", "bmenu");
-    menu.setAttribute("role", "listbox");
-    menu.hidden = true;
-    const cell = (b, moon) => {
-      if (!b) return h3("span");
-      const item = h3("button", `${moon ? "moon" : "planet"}${b.id === current3.id ? " on" : ""}`);
-      item.type = "button";
-      item.setAttribute("role", "option");
-      item.setAttribute("aria-selected", String(b.id === current3.id));
-      item.setAttribute("aria-label", label(b));
-      if (moon) {
-        item.append(icon(doc, "moon", 14));
-        item.title = label(b);
-      } else item.append(h3("span", "", b.name), h3("small", "mono", b.coords));
-      item.disabled = !ids.has(b.id);
-      item.addEventListener("click", () => onPick(b.id));
-      return item;
-    };
-    const planets = ctx.bodies.filter((b) => b.type === "planet");
-    const moons = new Map(ctx.bodies.filter((b) => b.type === "moon").map((m) => [m.coords, m]));
-    for (const p of planets) menu.append(cell(p, false), cell(moons.get(p.coords), true));
-    const set = (open2) => {
-      menu.hidden = !open2;
-      button3.setAttribute("aria-expanded", String(open2));
-    };
-    button3.addEventListener("click", () => set(menu.hidden));
-    wrap.addEventListener("focusout", (e) => {
-      if (!wrap.contains(e.relatedTarget)) set(false);
+    return bodyPicker(doc, {
+      bodies: ctx.bodies.map((b) => ({ id: b.id, name: b.name, coords: b.coords, moon: b.type === "moon" })),
+      current: current3.id,
+      enabled: ids,
+      moonWord: t("dash.moon"),
+      label: t("dash.moon"),
+      onPick: (id) => {
+        if (id !== null) onPick(id);
+      }
     });
-    wrap.addEventListener("keydown", (e) => {
-      if (e.key !== "Escape" || menu.hidden) return;
-      e.stopPropagation();
-      set(false);
-      button3.focus();
-    });
-    wrap.append(button3, menu);
-    return wrap;
   }
   function scrapTab(parent, ctx) {
     const { t } = ctx.o;
@@ -12113,7 +12189,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (!owners.some((b) => b.id === scrapBody)) scrapBody = owners[0].id;
     const body = owners.find((b) => b.id === scrapBody);
     const bar = h3("div", "scrap-bar");
-    const pick = bodyPicker(ctx, new Set(owners.map((b) => b.id)), body, (id) => {
+    const pick = bodyPicker2(ctx, new Set(owners.map((b) => b.id)), body, (id) => {
       scrapBody = id;
       ctx.redraw();
     });
@@ -12677,7 +12753,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     });
     const target = expeditionTarget(limits.max, settings.expeditionValue);
     const base2 = settings.expeditionValue.trim() ? 0 : limits.base;
-    const ships = expeditionFleet(stock(fd, profile), { ship: settings.expeditionShip, target, base: base2, extras: settings.expeditionExtras });
+    const ships = expeditionFleet(stock(fd, profile), { ship: settings.expeditionShip, target, base: base2, extras: settings.expeditionExtras, big: settings.expeditionBig });
     const count2 = selectShips(fd, ships);
     const here = fd.currentPlanet;
     setTarget(fd, doc, { galaxy: here.galaxy, system: here.system, position: 16, type: 1 });
@@ -17691,8 +17767,8 @@ ${waves2.map((w) => `${t("orion.waveN", { n: w.n })}: ${fmt(w.cap)}`).join("\n")
       notes: [menuCtx.colonies, snapshot ? t("toolbar.lastSync", { time: new Date(snapshot.fetchedAt).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) }) : ""].filter(Boolean),
       onMailChange: () => refreshInbox?.(),
       bodies: readPlanetList(document).flatMap((b) => [
-        ...b.planetId ? [{ id: b.planetId, label: `${b.name} [${b.coords}]` }] : [],
-        ...b.moonId ? [{ id: b.moonId, label: `${b.name} [${b.coords}] \xB7 ${t("fleet.typeMoon")}` }] : []
+        ...b.planetId ? [{ id: b.planetId, name: b.name, coords: b.coords, moon: false }] : [],
+        ...b.moonId ? [{ id: b.moonId, name: b.name, coords: b.coords, moon: true }] : []
       ]),
       onFleetChange: () => {
         refreshFleet?.();

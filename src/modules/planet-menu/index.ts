@@ -232,9 +232,9 @@ function queueDots(doc: Document, items: QueueItem[], building: HTMLAnchorElemen
 }
 
 /**
- * The plan on a body: a list icon and the number of planned items, on a tile coloured by where its
- * resources stand (red: missing, cyan: on their way, amber: landed but not read yet, green: all
- * there, grey: stock unknown). Hovering shows a card in the game's own style; a click opens the plan.
+ * The plan on a body: the number of planned items and a pip coloured by where its resources stand
+ * (orange: missing, blue: on their way, amber: landed but not read yet, green: all there, grey:
+ * stock unknown). Hovering shows a card in the game's own style; a click opens the plan.
  */
 const PLAN_ICON = '<path d="M3 4h4v4H3zM3 10h4v4H3zM3 16h4v4H3z"/><path d="M9 4.8h12v2.4H9zM9 10.8h12v2.4H9zM9 16.8h12v2.4H9z" opacity=".7"/>';
 const TIP_ID = 'fut-plan-tip';
@@ -242,8 +242,7 @@ const TIP_ID = 'fut-plan-tip';
 function planBadge(doc: Document, mark: PlanMark | undefined, o: PlanetMenuOptions, where: { id: number | null; name: string; coords: string; moon: boolean }): HTMLElement | null {
   if (!mark) return null;
   const b = el(doc, 'span', `fut-plan fut-plan-${mark.state}`);
-  b.innerHTML = `<svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" fill="currentColor">${PLAN_ICON}</svg>`;
-  b.append(doc.createTextNode(String(mark.items.length)));
+  b.textContent = String(mark.items.length);
   b.tabIndex = 0;
   b.setAttribute('role', 'button');
   b.setAttribute('aria-label', `${o.t('plan.title')}: ${where.name} [${where.coords}] · ${mark.items.join(', ')}`);
