@@ -127,6 +127,9 @@ function button(doc: Document, cls: string, html: string, title: string, onClick
   return b;
 }
 
+/** Most units one shipyard order can take (the game's field has five digits). */
+const QUEUE_MAX = 99_999;
+
 const ICON = {
   minus: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 12h12"/></svg>',
   plus: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 12h12M12 6v12"/></svg>',
@@ -447,8 +450,9 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
     };
     draw();
   } else {
-    // Ships and defences: our own amount, free from what can be paid now (the game's field
-    // stops at what the resources allow, the plan does not).
+    // Ships and defences: one field only, ours, in the game's place next to Costruisci. It takes any
+    // amount for the plan; the game's own field (hidden, still the one the game reads to build) gets
+    // the same number capped to what the queue accepts (99,999) and to the game's own maximum.
     const unit = matchShownLevel(details.id, [1], details.shown);
     const discount = unit?.discount ?? 0;
     const amount = el(doc, 'input', 'fut-tp-amount');
@@ -477,9 +481,10 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
       add.append(el(doc, 'span', '', t('tech.planBtn')));
       if (added) add.title = t('tech.added');
       add.setAttribute('aria-label', add.title);
-      tools.replaceChildren(amount, add);
+      if (details.amountInput) tools.replaceChildren(add);
+      else tools.replaceChildren(amount, add);
       const view: View = {
-        heads: [t('tech.colOne'), `×${n.toLocaleString(locale)}`, t('tech.colMissing')],
+        heads: [t('tech.colOne'), `×${n < 10_000 ? n.toLocaleString(locale) : formatUnits(n, locale)}`, t('tech.colMissing')],
         cols: [{ cost: one }, { cost: total, cls: 'fut-tp-sum' }, { cost: gap, short: true }],
       };
       const row = el(doc, 'div', 'fut-tp-chips');
@@ -492,8 +497,16 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
       }
       box.replaceChildren(grid(o, view, have !== null), row);
     };
+    const input = details.amountInput;
+    /** Ours → the game's field, capped: the queue never gets more than 99,999 nor more than the game allows. */
+    const push = () => {
+      if (!input) return;
+      const cap = Math.min(QUEUE_MAX, Number(input.max) > 0 ? Number(input.max) : QUEUE_MAX);
+      input.value = String(Math.min(amountOf(), cap));
+    };
     amount.addEventListener('input', () => {
       added = false;
+      push();
       // Redraw only the panel: the field keeps its focus.
       const keep = amount.selectionStart;
       draw();
@@ -501,8 +514,12 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
       if (keep !== null) amount.setSelectionRange(keep, keep);
     });
     draw();
-    // The game's own field (and its max button) still drives ours.
-    const input = details.amountInput;
+    // The game's own field (its max button, the satellite chip) still drives ours.
+    if (input) {
+      input.classList.add('fut-tp-gamefield');
+      input.before(amount);
+      push();
+    }
     const follow = () =>
       setTimeout(() => {
         amount.value = groupInt(Math.max(1, Math.floor(Number(input?.value) || 1)), locale);

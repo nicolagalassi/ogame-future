@@ -94,9 +94,11 @@ export const TECH_CSS = `
 #technologydetails .fut-tp-plan.on { background: rgba(21,28,38,0.92); box-shadow: inset 0 0 0 1px var(--accent); color: var(--accent); }
 #technologydetails .fut-tp-plan.on:hover { background: rgba(33,43,58,0.96); color: var(--accent); }
 /* Our amount (for the plan) over the picture: same dark field as the game's one, beating the game's input skin. */
-#technologydetails .fut-tp-tools .fut-tp-amount { flex: 1; min-width: 0; height: 26px; box-sizing: border-box; margin: 0; padding: 0 6px; border: 0; border-radius: 4px;
+/* The game's field stays (it is what the game reads to build) but ours is the one shown. */
+#technologydetails .fut-tp-gamefield { display: none !important; }
+#technologydetails .fut-tp-tools .fut-tp-amount, #technologydetails .build_amount .fut-tp-amount { flex: 1; min-width: 0; height: 26px; box-sizing: border-box; margin: 0; padding: 0 6px; border: 0; border-radius: 4px;
   background: rgba(21,28,38,0.92) none; color: var(--text); font: 600 condensed 15px var(--display); text-align: right; box-shadow: none; }
-#technologydetails .fut-tp-tools .fut-tp-amount:focus { outline: none; box-shadow: inset 0 0 0 1px var(--accent); }
+#technologydetails .fut-tp-tools .fut-tp-amount:focus, #technologydetails .build_amount .fut-tp-amount:focus { outline: none; box-shadow: inset 0 0 0 1px var(--accent); }
 `;
 
 export const PLANNER_CSS = `
