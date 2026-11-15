@@ -148,19 +148,6 @@ td.guess { font-style: italic; opacity: 0.7; }
 .seg .seg-ico { flex: none; color: var(--muted); }
 .seg button[aria-pressed="true"] .seg-ico { color: var(--text); }
 
-/* Body picker: the same two columns as the fleet bar's destination list. */
-.bpick { position: relative; }
-.bpick-btn { display: inline-flex; align-items: center; gap: 8px; height: 28px; min-width: 200px; padding: 0 8px 0 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text); font: 12px var(--body); cursor: pointer; }
-.bpick-btn small { margin-left: auto; color: var(--muted); font-size: 11px; }
-.bpick-btn:hover, .bpick-btn[aria-expanded="true"] { border-color: var(--accent); }
-.bmenu { position: absolute; z-index: 5; top: 32px; left: 0; min-width: 250px; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; display: grid; grid-template-columns: minmax(0, 1fr) 40px; gap: 2px; padding: 4px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-.bmenu[hidden] { display: none; }
-.bmenu button { display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 8px; border: 1px solid transparent; border-radius: 4px; background: var(--surface); color: var(--text-2); font: 12px var(--body); text-align: left; white-space: nowrap; cursor: pointer; }
-.bmenu button small { margin-left: auto; color: var(--muted); font-size: 11px; }
-.bmenu button.moon { justify-content: center; padding: 0; color: var(--muted); }
-.bmenu button:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
-.bmenu button.on { border-color: var(--warn); color: var(--warn); }
-.bmenu button:disabled { background: none; border-color: transparent; color: var(--faint); cursor: default; }
 
 /* Scrap calculator */
 .scrap-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }

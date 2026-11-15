@@ -6,6 +6,7 @@
  * game's own planet pages (a normal click = one navigation, AGENTS.md §1). The scrap tab
  * only calculates: selling stays on the game's own merchant page.
  */
+import { bodyPicker as sharedPicker } from '../../core/body-picker';
 import { icon } from '../../core/icons';
 import { WINDOW_SHEET } from '../../core/sheet';
 import type { AccountSnapshot, OwnBody } from '../../data/account-info';
@@ -1019,52 +1020,16 @@ function unitsTab(parent: HTMLElement, ctx: Ctx, ids: readonly number[], ships: 
  */
 function bodyPicker(ctx: Ctx, ids: Set<number>, current: OwnBody, onPick: (id: number) => void): HTMLElement {
   const { doc, t } = ctx.o;
-  const wrap = h('div', 'bpick');
-  const label = (b: OwnBody) => `${b.name}${b.type === 'moon' ? ` (${t('dash.moon')})` : ''} [${b.coords}]`;
-  const button = h('button', 'bpick-btn');
-  button.type = 'button';
-  button.setAttribute('aria-haspopup', 'listbox');
-  button.setAttribute('aria-expanded', 'false');
-  button.setAttribute('aria-label', label(current));
-  if (current.type === 'moon') button.append(icon(doc, 'moon', 13));
-  button.append(h('b', '', current.name), h('small', 'mono', current.coords), icon(doc, 'chevron', 14));
-  const menu = h('div', 'bmenu');
-  menu.setAttribute('role', 'listbox');
-  menu.hidden = true;
-  const cell = (b: OwnBody | undefined, moon: boolean) => {
-    if (!b) return h('span');
-    const item = h('button', `${moon ? 'moon' : 'planet'}${b.id === current.id ? ' on' : ''}`);
-    item.type = 'button';
-    item.setAttribute('role', 'option');
-    item.setAttribute('aria-selected', String(b.id === current.id));
-    item.setAttribute('aria-label', label(b));
-    if (moon) {
-      item.append(icon(doc, 'moon', 14));
-      item.title = label(b);
-    } else item.append(h('span', '', b.name), h('small', 'mono', b.coords));
-    item.disabled = !ids.has(b.id);
-    item.addEventListener('click', () => onPick(b.id));
-    return item;
-  };
-  const planets = ctx.bodies.filter((b) => b.type === 'planet');
-  const moons = new Map(ctx.bodies.filter((b) => b.type === 'moon').map((m) => [m.coords, m]));
-  for (const p of planets) menu.append(cell(p, false), cell(moons.get(p.coords), true));
-  const set = (open: boolean) => {
-    menu.hidden = !open;
-    button.setAttribute('aria-expanded', String(open));
-  };
-  button.addEventListener('click', () => set(menu.hidden));
-  wrap.addEventListener('focusout', (e) => {
-    if (!wrap.contains(e.relatedTarget as Node | null)) set(false);
+  return sharedPicker(doc, {
+    bodies: ctx.bodies.map((b) => ({ id: b.id, name: b.name, coords: b.coords, moon: b.type === 'moon' })),
+    current: current.id,
+    enabled: ids,
+    moonWord: t('dash.moon'),
+    label: t('dash.moon'),
+    onPick: (id) => {
+      if (id !== null) onPick(id);
+    },
   });
-  wrap.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape' || menu.hidden) return;
-    e.stopPropagation();
-    set(false);
-    button.focus();
-  });
-  wrap.append(button, menu);
-  return wrap;
 }
 
 function scrapTab(parent: HTMLElement, ctx: Ctx): void {

@@ -248,7 +248,7 @@ export function prepareExpedition(
   const target = expeditionTarget(limits.max, settings.expeditionValue);
   // As in OGLight: the minimum fleet size only applies to the calculated value, not to a value the player typed.
   const base = settings.expeditionValue.trim() ? 0 : limits.base;
-  const ships = expeditionFleet(stock(fd, profile), { ship: settings.expeditionShip, target, base, extras: settings.expeditionExtras });
+  const ships = expeditionFleet(stock(fd, profile), { ship: settings.expeditionShip, target, base, extras: settings.expeditionExtras, big: settings.expeditionBig });
   const count = selectShips(fd, ships);
   const here = fd.currentPlanet;
   setTarget(fd, doc, { galaxy: here.galaxy, system: here.system, position: 16, type: 1 });
