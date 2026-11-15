@@ -30,7 +30,7 @@ export const ORION_CSS = `
 .otable th { cursor: pointer; white-space: nowrap; }
 .otable td { white-space: nowrap; }
 .otable td.num, .otable th.num { text-align: right; font-family: var(--mono); }
-.otag { padding: 0 5px; border-radius: 3px; background: #2A3542; color: #fff; }
+.otag { padding: 0 5px; border-radius: 3px; background: var(--line); color: #fff; }
 .otag.pvp { background: #7A2A22; } .otag.pve { background: #24563A; }
 .ost-running { color: #E0B25A; } .ost-collected { color: var(--ok); } .ost-expired { color: var(--muted); }
 .odel { padding: 0 6px; border: 0; background: none; color: #C06050; font-weight: 700; cursor: pointer; }

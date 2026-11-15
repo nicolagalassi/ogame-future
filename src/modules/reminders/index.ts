@@ -1,3 +1,4 @@
+import { WINDOW_TOKENS } from '../../core/sheet';
 /**
  * Manual reminders on the page.
  *
@@ -140,10 +141,12 @@ export function decorateEventList(o: RemindersOptions): void {
 }
 
 const EVENT_CSS = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+#eventContent { ${WINDOW_TOKENS} }
 #eventContent .fut-bell { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-left: 4px; padding: 0;
-  border: 1px solid #1F2C40; border-radius: 4px; background: #0A111C; color: #8A9BB0; cursor: pointer; vertical-align: middle; }
-#eventContent .fut-bell:hover, #eventContent .fut-bell:focus-visible { border-color: #4FD1E8; color: #E6EDF5; }
-#eventContent .fut-bell.on { border-color: #4FD1E8; background: #12283A; color: #4FD1E8; }`;
+  border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--muted); cursor: pointer; vertical-align: middle; }
+#eventContent .fut-bell:hover, #eventContent .fut-bell:focus-visible { border-color: var(--accent); color: var(--text); }
+#eventContent .fut-bell.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }`;
 
 export function watchEventList(o: RemindersOptions): void {
   if (!o.doc.getElementById('fut-bell-style')) {

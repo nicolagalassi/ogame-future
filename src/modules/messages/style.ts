@@ -40,7 +40,7 @@ export const MESSAGES_CSS = `
 /* One set of tokens for the summaries, the "just read" panel and the spy table. Text tokens keep
    at least 4.5:1 on every background they sit on; --faint is for decoration only (ticks, tracks). */
 .fut-msg, .fut-fresh, #fut-spypanel {
-  ${PAGE_TOKENS} --faint: #4E5B6A; --line: #2E4356;
+  ${PAGE_TOKENS} --faint: #4E5B6A; --line: var(--line-strong);
   --link: #6F9FC8; --ship: #4FE0B0; --on-tone: #0D1116;
   --loot: #F0A35A; --name: #E8D27A; --on-accent: #CFF5FC; --attack: #FF9B8A; --attack-line: #C0533F; --sim: #8FB6D8; --chip: #1A2733;
 }
@@ -53,7 +53,7 @@ export const MESSAGES_CSS = `
 .fut-msg-pillcell { display: flex; min-width: 0; }
 /* "Just read": what the reports read a moment ago brought, above the reports, gone after a countdown. */
 .fut-fresh { box-sizing: border-box; margin: 0 0 10px; padding: 0 16px 10px; border-radius: 0; overflow: hidden;
-  background: #0E151C; font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums; }
+  background: var(--bg); font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums; }
 .fut-fresh-timer { height: 3px; margin: 0 -16px 8px; background: #1A2530; }
 .fut-fresh-timer i { display: block; height: 100%; background: #F5A623; transform-origin: left center; animation: fut-fresh-countdown linear forwards; }
 .fut-fresh:hover .fut-fresh-timer i, .fut-fresh:focus-within .fut-fresh-timer i { animation-play-state: paused; }
