@@ -220,6 +220,16 @@ describe('tech panel', () => {
     expect(Array.from(box.querySelectorAll('.fut-tp-short:not(.fut-tp-msu)')).map((x) => x.getAttribute('title'))).toEqual([(-1000000).toLocaleString('it'), (-5000000).toLocaleString('it')]);
     btn(0).click();
     expect(store.get<Plan>('planner', {})['10']![0]).toMatchObject({ id: 203, amount: 1000, cost: { metal: 6000000 } });
+    // One field only: ours sits in the game's place, the game's stays (hidden) and gets the amount capped for the queue.
+    expect(details.amountInput!.classList.contains('fut-tp-gamefield')).toBe(true);
+    expect(amount.parentElement!.classList.contains('build_amount')).toBe(true);
+    expect(details.amountInput!.value).toBe('1000');
+    amount.value = '250000';
+    amount.dispatchEvent(new Event('input'));
+    expect(details.amountInput!.value).toBe('99999');
+    details.amountInput!.max = '4';
+    amount.dispatchEvent(new Event('input'));
+    expect(details.amountInput!.value).toBe('4');
     // The game's own field still drives ours.
     details.amountInput!.value = '7';
     details.amountInput!.dispatchEvent(new Event('input'));

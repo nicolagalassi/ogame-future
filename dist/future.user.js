@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.101
+// @version      0.3.102
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -758,7 +758,7 @@
     "fleet.err.noDelivery": "Nessuna consegna del piano in corso.",
     "fleet.ok.delivery": "Consegna pronta: {ships} navi con {cargo} risorse (mancavano {left}). Premi Avanti e Invia flotta.",
     "tech.timeHint": "Tempo del liv. {level} \xB7 totale da {from} a {to}",
-    "tech.amountHint": "Quantit\xE0 da pianificare: anche pi\xF9 di quelle che puoi pagare adesso",
+    "tech.amountHint": "Quante unit\xE0: per il piano vale qualsiasi numero; per costruire ne vanno in coda al massimo 99.999, e non pi\xF9 di quante il gioco ne permette (max).",
     "plan.items": "{n} voci",
     "plan.levels": "liv. {from}\u2013{to}",
     "plan.bring": "Porta qui le risorse",
@@ -1704,7 +1704,7 @@
     "fleet.err.noDelivery": "No plan delivery in progress.",
     "fleet.ok.delivery": "Delivery ready: {ships} ships with {cargo} resources ({left} were missing). Press Next and Send fleet.",
     "tech.timeHint": "Time of lv. {level} \xB7 total {from} to {to}",
-    "tech.amountHint": "Amount to plan: also more than you can pay for now",
+    "tech.amountHint": "How many: any number for the plan; for building, at most 99,999 go into the queue, and no more than the game allows (max).",
     "plan.items": "{n} items",
     "plan.levels": "lv. {from}\u2013{to}",
     "plan.bring": "Bring resources here",
@@ -2650,7 +2650,7 @@
     "fleet.err.noDelivery": "Aucune livraison du plan en cours.",
     "fleet.ok.delivery": "Livraison pr\xEAte : {ships} vaisseaux avec {cargo} ressources (il manquait {left}). Appuyez sur Suivant puis Envoyer.",
     "tech.timeHint": "Dur\xE9e du niv. {level} \xB7 total de {from} \xE0 {to}",
-    "tech.amountHint": "Quantit\xE9 \xE0 planifier : m\xEAme plus que ce que vous pouvez payer maintenant",
+    "tech.amountHint": "Combien : n'importe quel nombre pour le plan ; pour construire, au plus 99 999 vont en file, et pas plus que le jeu n'en permet (max).",
     "plan.items": "{n} \xE9l\xE9ments",
     "plan.levels": "niv. {from}\u2013{to}",
     "plan.bring": "Amener les ressources ici",
@@ -3596,7 +3596,7 @@
     "fleet.err.noDelivery": "Keine Plan-Lieferung aktiv.",
     "fleet.ok.delivery": "Lieferung bereit: {ships} Schiffe mit {cargo} Ressourcen (es fehlten {left}). Weiter und Flotte senden dr\xFCcken.",
     "tech.timeHint": "Dauer St. {level} \xB7 gesamt {from} bis {to}",
-    "tech.amountHint": "Zu planende Anzahl: auch mehr, als du jetzt bezahlen kannst",
+    "tech.amountHint": "Wie viele: f\xFCr den Plan jede Zahl; zum Bauen kommen h\xF6chstens 99.999 in die Warteschlange, und nicht mehr, als das Spiel erlaubt (max).",
     "plan.items": "{n} Eintr\xE4ge",
     "plan.levels": "St. {from}\u2013{to}",
     "plan.bring": "Ressourcen hierher bringen",
@@ -14931,9 +14931,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 #technologydetails .fut-tp-plan.on { background: rgba(21,28,38,0.92); box-shadow: inset 0 0 0 1px var(--accent); color: var(--accent); }
 #technologydetails .fut-tp-plan.on:hover { background: rgba(33,43,58,0.96); color: var(--accent); }
 /* Our amount (for the plan) over the picture: same dark field as the game's one, beating the game's input skin. */
-#technologydetails .fut-tp-tools .fut-tp-amount { flex: 1; min-width: 0; height: 26px; box-sizing: border-box; margin: 0; padding: 0 6px; border: 0; border-radius: 4px;
+/* The game's field stays (it is what the game reads to build) but ours is the one shown. */
+#technologydetails .fut-tp-gamefield { display: none !important; }
+#technologydetails .fut-tp-tools .fut-tp-amount, #technologydetails .build_amount .fut-tp-amount { flex: 1; min-width: 0; height: 26px; box-sizing: border-box; margin: 0; padding: 0 6px; border: 0; border-radius: 4px;
   background: rgba(21,28,38,0.92) none; color: var(--text); font: 600 condensed 15px var(--display); text-align: right; box-shadow: none; }
-#technologydetails .fut-tp-tools .fut-tp-amount:focus { outline: none; box-shadow: inset 0 0 0 1px var(--accent); }
+#technologydetails .fut-tp-tools .fut-tp-amount:focus, #technologydetails .build_amount .fut-tp-amount:focus { outline: none; box-shadow: inset 0 0 0 1px var(--accent); }
 `;
   var PLANNER_CSS = `
 :host { --panel-w: 820px; }
@@ -15073,6 +15075,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     });
     return b;
   }
+  var QUEUE_MAX = 99999;
   var ICON = {
     minus: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 12h12"/></svg>',
     plus: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 12h12M12 6v12"/></svg>',
@@ -15356,9 +15359,10 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         add.append(el5(doc, "span", "", t("tech.planBtn")));
         if (added) add.title = t("tech.added");
         add.setAttribute("aria-label", add.title);
-        tools.replaceChildren(amount, add);
+        if (details.amountInput) tools.replaceChildren(add);
+        else tools.replaceChildren(amount, add);
         const view2 = {
-          heads: [t("tech.colOne"), `\xD7${n.toLocaleString(locale)}`, t("tech.colMissing")],
+          heads: [t("tech.colOne"), `\xD7${n < 1e4 ? n.toLocaleString(locale) : formatUnits(n, locale)}`, t("tech.colMissing")],
           cols: [{ cost: one }, { cost: total, cls: "fut-tp-sum" }, { cost: gap, short: true }]
         };
         const row = el5(doc, "div", "fut-tp-chips");
@@ -15370,15 +15374,26 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         }
         box.replaceChildren(grid(o, view2, have !== null), row);
       };
+      const input = details.amountInput;
+      const push = () => {
+        if (!input) return;
+        const cap = Math.min(QUEUE_MAX, Number(input.max) > 0 ? Number(input.max) : QUEUE_MAX);
+        input.value = String(Math.min(amountOf(), cap));
+      };
       amount.addEventListener("input", () => {
         added = false;
+        push();
         const keep = amount.selectionStart;
         draw();
         amount.focus();
         if (keep !== null) amount.setSelectionRange(keep, keep);
       });
       draw();
-      const input = details.amountInput;
+      if (input) {
+        input.classList.add("fut-tp-gamefield");
+        input.before(amount);
+        push();
+      }
       const follow = () => setTimeout(() => {
         amount.value = groupInt(Math.max(1, Math.floor(Number(input?.value) || 1)), locale);
         draw();
