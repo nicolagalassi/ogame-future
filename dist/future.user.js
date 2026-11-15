@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.102
+// @version      0.3.103
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -14867,7 +14867,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 #technologydetails.fut-tp-unit .content .build_amount input, #technologydetails.fut-tp-unit #build_amount { position: static; float: none; flex: 1; min-width: 0; width: auto; height: 26px; margin: 0; padding: 0 6px; box-sizing: border-box;
   border: 0; border-radius: 4px; background: rgba(21,28,38,0.92) none; color: var(--text); font: 600 condensed 15px var(--display); text-align: right; box-shadow: none; }
 #technologydetails.fut-tp-unit #build_amount:focus { outline: none; box-shadow: inset 0 0 0 1px var(--accent); }
-#technologydetails.fut-tp-unit .content .build_amount .maximum { position: static; float: none; flex: none; width: auto; height: 26px; margin: 0; padding: 0 6px;
+#technologydetails.fut-tp-unit .content .build_amount .maximum { position: static; float: none; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: auto; height: 26px; margin: 0; padding: 0 4px;
   background: rgba(21,28,38,0.92) none !important; border: 0; border-radius: 4px; color: var(--label); font: 12px var(--body); cursor: pointer; }
 #technologydetails.fut-tp-unit .content .build_amount .maximum::before, #technologydetails.fut-tp-unit .content .build_amount .maximum::after { display: none !important; }
 #technologydetails.fut-tp-unit .content .build_amount .maximum:hover { background: rgba(33,43,58,0.96) none !important; color: var(--text); }
@@ -14933,7 +14933,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 /* Our amount (for the plan) over the picture: same dark field as the game's one, beating the game's input skin. */
 /* The game's field stays (it is what the game reads to build) but ours is the one shown. */
 #technologydetails .fut-tp-gamefield { display: none !important; }
-#technologydetails .fut-tp-tools .fut-tp-amount, #technologydetails .build_amount .fut-tp-amount { flex: 1; min-width: 0; height: 26px; box-sizing: border-box; margin: 0; padding: 0 6px; border: 0; border-radius: 4px;
+#technologydetails .fut-tp-tools .fut-tp-amount { flex: 1; min-width: 0; }
+#technologydetails .fut-tp-tools .fut-tp-amount, #technologydetails .build_amount .fut-tp-amount { flex: 1 0 84px; min-width: 84px; height: 26px; box-sizing: border-box; margin: 0; padding: 0 5px; border: 0; border-radius: 4px;
   background: rgba(21,28,38,0.92) none; color: var(--text); font: 600 condensed 15px var(--display); text-align: right; box-shadow: none; }
 #technologydetails .fut-tp-tools .fut-tp-amount:focus, #technologydetails .build_amount .fut-tp-amount:focus { outline: none; box-shadow: inset 0 0 0 1px var(--accent); }
 `;
@@ -15375,7 +15376,12 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         box.replaceChildren(grid(o, view2, have !== null), row);
       };
       const input = details.amountInput;
+      const fit = () => {
+        const len = amount.value.length;
+        amount.style.fontSize = len > 11 ? "11px" : len > 9 ? "12px" : len > 7 ? "13px" : "";
+      };
       const push = () => {
+        fit();
         if (!input) return;
         const cap = Math.min(QUEUE_MAX, Number(input.max) > 0 ? Number(input.max) : QUEUE_MAX);
         input.value = String(Math.min(amountOf(), cap));
