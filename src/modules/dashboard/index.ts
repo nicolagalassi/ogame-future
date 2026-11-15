@@ -838,15 +838,18 @@ function investmentsTab(parent: HTMLElement, ctx: Ctx): void {
   const rates = loadRates(o);
   const label = h('label', 'field-label', t('dash.rates'));
   (['metal', 'crystal', 'deuterium'] as const).forEach((k, i) => {
+    // A plain field (decimal keyboard on phones): the browser's up/down arrows only got in the way.
     const input = h('input', 'field rate');
-    input.type = 'number';
-    input.min = '0.1';
-    input.step = '0.1';
+    input.type = 'text';
+    input.inputMode = 'decimal';
     input.value = String(rates[k]);
     input.setAttribute('aria-label', `${t('dash.rates')}: ${t(`res.${k}`)}`);
     input.addEventListener('change', () => {
-      const v = Number(input.value);
-      if (!(v > 0)) return;
+      const v = Number(input.value.replace(',', '.'));
+      if (!(v > 0)) {
+        input.value = String(loadRates(o)[k]);
+        return;
+      }
       const next = { ...loadRates(o), [k]: v };
       if (o.store) o.store.set(RATES_KEY, next);
       else sessionRates = next;
@@ -880,7 +883,10 @@ function investmentsTab(parent: HTMLElement, ctx: Ctx): void {
   if (missing) s.append(missing);
   const groups = groupSteps(buildOrder(ctx, 60));
   if (!groups.length) s.append(h('p', 'hint', t('dash.movesNone')));
-  groups.forEach((g, i) => s.append(groupLine(ctx, g, i, true)));
+  // Two columns of rungs, read row by row (1 2 / 3 4 …): half the height for the same list.
+  const ladder = h('div', 'ladder');
+  groups.forEach((g, i) => ladder.append(groupLine(ctx, g, i, true)));
+  s.append(ladder);
 }
 
 function minesTab(parent: HTMLElement, ctx: Ctx): void {
