@@ -147,6 +147,9 @@ input.sw:focus-visible + .sw-track { outline: 2px solid var(--accent); outline-o
 .bmenu button:disabled { background: none; color: var(--faint); cursor: default; }
 
 /* Browser surfaces. */
+/* Number fields without the browser's spin arrows (the keyboard's up / down still step). */
+input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
+input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .backdrop, .scroll, .table-wrap { scrollbar-color: var(--line-strong) var(--raised); scrollbar-width: thin; }
 ::selection { background: #5A4E1A; color: var(--text); }
