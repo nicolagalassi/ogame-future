@@ -3,6 +3,7 @@
  * spy table, fleet, keys and touch bar, data). The gear in the toolbar opens it. Each choice applies at once and is saved
  * locally; nothing here reaches the server.
  */
+import { REMIND_DESKTOP_KEY } from '../../engines/reminders';
 import { bodyPicker, type PickBody } from '../../core/body-picker';
 import { icon } from '../../core/icons';
 import type { Store } from '../../core/storage';
@@ -408,6 +409,28 @@ export function openSettings(o: SettingsOptions): void {
         row(t('settings.totals'), t('settings.totalsHint'), yesNo(menu.showTotals, (v) => setMenu({ showTotals: v }))),
         row(t('settings.totalView'), t('settings.totalViewHint'), choice([['msu', 'MSU 3:2:1'], ['sum', '1:1:1']], menu.totalView ?? 'msu', (v) => setMenu({ totalView: v as MenuSettings['totalView'] }), !menu.showTotals)),
         row(t('settings.fleetPill'), t('settings.fleetPillHint'), yesNo(menu.showFleet === true, (v) => setMenu({ showFleet: v }))),
+      );
+      // Reminders: the bells set by hand also as the computer's notification (opt-in, see modules/reminders).
+      const N = (doc.defaultView as (Window & { Notification?: typeof Notification }) | null)?.Notification;
+      const desktopOn = store.get<boolean>(REMIND_DESKTOP_KEY, false) && N?.permission === 'granted';
+      body.append(
+        group(t('settings.remindGroup'), icon(doc, 'bell', 16)),
+        row(
+          t('settings.remindDesktop'),
+          !N ? t('settings.remindNoSupport') : N.permission === 'denied' ? t('settings.remindBlocked') : t('settings.remindDesktopHint'),
+          yesNo(desktopOn, (v) => {
+            if (!v || !N) {
+              store.set(REMIND_DESKTOP_KEY, false);
+              return;
+            }
+            store.set(REMIND_DESKTOP_KEY, true);
+            // The browser asks once, on this click.
+            if (N.permission !== 'granted') void N.requestPermission().then((p) => {
+              if (p !== 'granted') store.set(REMIND_DESKTOP_KEY, false);
+              draw();
+            });
+          }),
+        ),
       );
     } else if (section === 'mail') {
       const set = (key: string, v: unknown) => {
