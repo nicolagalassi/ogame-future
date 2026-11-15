@@ -115,8 +115,9 @@ export const FLEET_CSS = `
 .fut-finfo.err { color: var(--neg); }
 
 /* Trasporto / Schiera on: the tile stays lit until pressed again. */
-.fut-fact[aria-pressed="true"] { background: var(--tile-hi); box-shadow: inset 0 3px 0 var(--accent); color: var(--ico-hi); }
-.fut-fact[aria-pressed="true"] kbd { color: var(--accent); }
+.fut-fact[aria-pressed="true"], .fut-fact.used { background: var(--tile-hi); box-shadow: inset 0 3px 0 var(--accent); color: var(--ico-hi); }
+.fut-fsecond .fut-fact.used { box-shadow: inset 0 3px 0 var(--accent), inset 0 0 0 1px var(--line-strong); }
+.fut-fact[aria-pressed="true"] kbd, .fut-fact.used kbd { color: var(--accent); }
 
 /* Their panel: destination over resources, labels in one column; CL / CP on the right, as tall as both rows. */
 .fut-fsend {
@@ -141,7 +142,7 @@ export const FLEET_CSS = `
 .fut-fseg button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 30px; height: 24px; padding: 0 7px; border: 0; background: none; color: var(--dim); }
 .fut-fseg button + button { border-left: 1px solid var(--line); }
 .fut-fseg button:hover { color: var(--txt); }
-.fut-fseg button[aria-pressed="true"] { background: var(--tile-hi); color: var(--hi); }
+.fut-fseg button[aria-pressed="true"] { background: var(--tile-hi); box-shadow: inset 0 2px 0 var(--accent); color: var(--hi); font-weight: bold; }
 .fut-fresin { display: inline-flex; align-items: center; gap: 2px; }
 .fut-fresin .sym { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 26px; padding: 0; border: 1px solid transparent; border-radius: 5px; background: none; }
 .fut-fresin .sym:hover { border-color: var(--line); background: var(--tile); }
