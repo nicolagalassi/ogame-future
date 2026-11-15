@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.103
+// @version      0.3.104
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1213,6 +1213,8 @@
     "planetMenu.fleetHint": "Valore delle navi su questo corpo (costo in risorse, 1:1:1), all\u2019ultimo aggiornamento dei suoi dati",
     "settings.fleetPill": "Valore della flotta",
     "settings.fleetPillHint": "Una pillola sotto le risorse con il valore delle navi ferme su quel pianeta o luna (costo in risorse, 1:1:1).",
+    "settings.gameTipsHint": "La scheda con dati e collegamenti che il gioco apre quando il mouse si ferma su un pianeta o una luna. Spenta, il pianeta si apre sempre con un clic.",
+    "settings.gameTips": "Scheda del gioco sui pianeti",
     "totals.sum": "Totale",
     "settings.totalView": "Totale nel riepilogo",
     "settings.totalViewHint": "La riga di somma sotto i pianeti: in MSU (metallo:cristallo:deuterio 3:2:1) oppure le tre risorse sommate alla pari.",
@@ -2159,6 +2161,8 @@
     "planetMenu.fleetHint": "Value of the ships on this body (cost in resources, 1:1:1), as of its last data update",
     "settings.fleetPill": "Fleet value",
     "settings.fleetPillHint": "A pill under the resources with the value of the ships sitting on that planet or moon (cost in resources, 1:1:1).",
+    "settings.gameTipsHint": "The card with data and links the game opens when the pointer rests on a planet or moon. Off, the planet still opens with a click.",
+    "settings.gameTips": "Game's card on planets",
     "totals.sum": "Total",
     "settings.totalView": "Sum in the totals",
     "settings.totalViewHint": "The sum row under the planets: in MSU (metal:crystal:deuterium 3:2:1) or the three resources added as equals.",
@@ -3105,6 +3109,8 @@
     "planetMenu.fleetHint": "Valeur des vaisseaux sur ce corps (co\xFBt en ressources, 1:1:1), \xE0 la derni\xE8re mise \xE0 jour de ses donn\xE9es",
     "settings.fleetPill": "Valeur de la flotte",
     "settings.fleetPillHint": "Une pastille sous les ressources avec la valeur des vaisseaux stationn\xE9s sur cette plan\xE8te ou lune (co\xFBt en ressources, 1:1:1).",
+    "settings.gameTipsHint": "La fiche avec donn\xE9es et liens que le jeu ouvre quand la souris s'arr\xEAte sur une plan\xE8te ou une lune. D\xE9sactiv\xE9e, la plan\xE8te s'ouvre toujours d'un clic.",
+    "settings.gameTips": "Fiche du jeu sur les plan\xE8tes",
     "totals.sum": "Total",
     "settings.totalView": "Somme dans les totaux",
     "settings.totalViewHint": "La ligne de somme sous les plan\xE8tes : en MSU (m\xE9tal:cristal:deut\xE9rium 3:2:1) ou les trois ressources additionn\xE9es \xE0 parts \xE9gales.",
@@ -4051,6 +4057,8 @@
     "planetMenu.fleetHint": "Wert der Schiffe auf diesem K\xF6rper (Kosten in Rohstoffen, 1:1:1), Stand der letzten Datenaktualisierung",
     "settings.fleetPill": "Flottenwert",
     "settings.fleetPillHint": "Eine Pille unter den Rohstoffen mit dem Wert der Schiffe auf diesem Planeten oder Mond (Kosten in Rohstoffen, 1:1:1).",
+    "settings.gameTipsHint": "Die Karte mit Daten und Links, die das Spiel \xF6ffnet, wenn der Mauszeiger auf einem Planeten oder Mond ruht. Aus: Der Planet \xF6ffnet sich weiterhin per Klick.",
+    "settings.gameTips": "Spielkarte auf Planeten",
     "totals.sum": "Summe",
     "settings.totalView": "Summe in der \xDCbersicht",
     "settings.totalViewHint": "Die Summenzeile unter den Planeten: in MSU (Metall:Kristall:Deuterium 3:2:1) oder die drei Rohstoffe gleich gewichtet addiert.",
@@ -9716,7 +9724,8 @@ input.field { width: 190px; }
           row(t("settings.view"), t(o.menu.canSide ? "settings.viewHint" : "settings.viewNarrow"), choice([["side", t("planetMenu.side")], ["compact", t("planetMenu.compact")]], o.menu.canSide ? menu.mode : "compact", (v) => setMenu({ mode: v }), !o.menu.canSide)),
           row(t("settings.totals"), t("settings.totalsHint"), yesNo(menu.showTotals, (v) => setMenu({ showTotals: v }))),
           row(t("settings.totalView"), t("settings.totalViewHint"), choice([["msu", "MSU 3:2:1"], ["sum", "1:1:1"]], menu.totalView ?? "msu", (v) => setMenu({ totalView: v }), !menu.showTotals)),
-          row(t("settings.fleetPill"), t("settings.fleetPillHint"), yesNo(menu.showFleet === true, (v) => setMenu({ showFleet: v })))
+          row(t("settings.fleetPill"), t("settings.fleetPillHint"), yesNo(menu.showFleet === true, (v) => setMenu({ showFleet: v }))),
+          row(t("settings.gameTips"), t("settings.gameTipsHint"), yesNo(menu.gameTips !== false, (v) => setMenu({ gameTips: v })))
         );
         const N = doc.defaultView?.Notification;
         const desktopOn = store.get(REMIND_DESKTOP_KEY, false) && N?.permission === "granted";
@@ -10193,6 +10202,26 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 `;
 
   // src/modules/planet-menu/index.ts
+  function setGameTip(link, on) {
+    if (!link) return;
+    const apply = () => {
+      const tip = link._tippy;
+      if (!tip) return;
+      if (on) tip.enable();
+      else {
+        tip.hide();
+        tip.disable();
+      }
+    };
+    apply();
+    if (!on && !link.dataset.futNoTip) {
+      link.dataset.futNoTip = "1";
+      link.addEventListener("mouseover", () => {
+        if (link.dataset.futNoTip === "1") apply();
+      }, true);
+    }
+    if (on) delete link.dataset.futNoTip;
+  }
   var STYLE_ID2 = "fut-planet-menu-style";
   var ICONS2 = {
     journal: '<path d="M5 3.5h11a3 3 0 0 1 3 3V20.5H8a3 3 0 0 1-3-3z" fill="none" stroke-width="2"/><path d="M5 17.5a3 3 0 0 1 3-3h11" fill="none" stroke-width="2"/><path stroke="none" d="M9.5 6.5l1 2.2 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3L6.2 9l2.3-.3z"/>',
@@ -10507,7 +10536,10 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     const view2 = { fleet: o.settings.showFleet === true, t: o.t };
     list.style.removeProperty("--fut-row-h");
     const planned = Object.keys(o.planMarks ?? {}).length > 0;
+    const gameTips = o.settings.gameTips !== false;
     for (const entry of o.entries) {
+      setGameTip(entry.planetLink, gameTips);
+      setGameTip(entry.moonLink, gameTips);
       entry.element.classList.add("fut-row");
       if (entry.current) entry.element.classList.add("fut-current");
       const link = entry.planetLink;

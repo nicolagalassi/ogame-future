@@ -28,6 +28,34 @@ export interface MenuSettings {
   showFleet?: boolean;
   /** The sum row of the totals: MSU (metal 1, crystal 1.5, deuterium 3) or the plain sum 1:1:1. */
   totalView?: 'msu' | 'sum';
+  /** The game's own card when the pointer rests on a planet or moon (default on). */
+  gameTips?: boolean;
+}
+
+/**
+ * The game's hover card on the planet and moon links (a tippy tooltip with links that stays open):
+ * switched off or back on as the player chose. Only that card: the link itself and its click stay.
+ */
+function setGameTip(link: HTMLElement | null, on: boolean): void {
+  if (!link) return;
+  const apply = () => {
+    const tip = (link as HTMLElement & { _tippy?: { enable(): void; disable(): void; hide(): void } })._tippy;
+    if (!tip) return;
+    if (on) tip.enable();
+    else {
+      tip.hide();
+      tip.disable();
+    }
+  };
+  apply();
+  // The game may build the card only on the first hover: catch it there too.
+  if (!on && !link.dataset.futNoTip) {
+    link.dataset.futNoTip = '1';
+    link.addEventListener('mouseover', () => {
+      if (link.dataset.futNoTip === '1') apply();
+    }, true);
+  }
+  if (on) delete link.dataset.futNoTip;
 }
 
 export interface PlanetMenuOptions {
@@ -468,7 +496,10 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
   list.style.removeProperty('--fut-row-h');
 
   const planned = Object.keys(o.planMarks ?? {}).length > 0;
+  const gameTips = o.settings.gameTips !== false;
   for (const entry of o.entries) {
+    setGameTip(entry.planetLink, gameTips);
+    setGameTip(entry.moonLink, gameTips);
     entry.element.classList.add('fut-row');
     if (entry.current) entry.element.classList.add('fut-current');
 
