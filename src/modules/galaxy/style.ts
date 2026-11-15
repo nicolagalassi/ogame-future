@@ -16,17 +16,17 @@ export const GALAXY_CSS = `
 #galaxycomponent #galaxyHeader .galaxy_icons.solarsystem { margin-left: 6px !important; }
 #galaxycomponent #galaxyHeader input {
   box-sizing: border-box; float: none !important; width: 46px !important; height: 24px !important; margin: 0 !important; padding: 0 4px !important;
-  border: 1px solid #24344B !important; border-radius: 5px !important; background: #0A111C !important; color: var(--text) !important;
+  border: 1px solid var(--line) !important; border-radius: 5px !important; background: var(--bg) !important; color: var(--text) !important;
   font: 700 13px/22px Consolas, "JetBrains Mono", monospace !important; text-align: center; box-shadow: none !important;
 }
 #galaxycomponent #galaxyHeader input:focus { outline: none; border-color: var(--accent) !important; }
 #galaxycomponent #galaxyHeader .btn_blue {
   box-sizing: border-box; float: none !important; display: inline-flex !important; align-items: center; gap: 5px; height: 24px !important; margin: 0 !important; padding: 0 10px !important;
-  border: 1px solid #2C5A73 !important; border-radius: 5px !important; background: var(--accent-soft) !important; box-shadow: none !important; text-shadow: none !important;
+  border: 1px solid var(--accent-line) !important; border-radius: 5px !important; background: var(--accent-soft) !important; box-shadow: none !important; text-shadow: none !important;
   color: var(--text) !important; font: 700 11px/22px Verdana, Arial, sans-serif !important; white-space: nowrap; cursor: pointer;
 }
 #galaxycomponent #galaxyHeader .btn_blue:hover { border-color: var(--accent) !important; background: #16344A !important; }
-#galaxycomponent #galaxyHeader .btn_blue[disabled] { border-color: var(--line) !important; background: var(--bg) !important; color: #8592A1 !important; font-weight: 400 !important; cursor: default; }
+#galaxycomponent #galaxyHeader .btn_blue[disabled] { border-color: var(--line) !important; background: var(--bg) !important; color: var(--muted) !important; font-weight: 400 !important; cursor: default; }
 #galaxycomponent #galaxyHeader .btn_blue img { height: 14px; width: auto; margin: 0 !important; }
 #galaxycomponent #galaxyHeader form > .btn_blue { flex: none; }
 #galaxycomponent #galaxyHeader .systembuttons { float: none !important; display: flex; align-items: center; gap: 3px; min-width: 0; margin: 0 0 0 auto !important; position: static !important; }
@@ -38,21 +38,21 @@ export const GALAXY_CSS = `
 }
 /* The game's rows under the table (fleets in the system, colonised planets, legend): the same quiet strip. */
 #galaxyContent .galaxyRow.ctGalaxyFleetInfo, #galaxyContent .galaxyRow.ctGalaxyFooter {
-  box-sizing: border-box; background: var(--bg) !important; border: 1px solid var(--line) !important; color: #A3AFBD !important;
+  box-sizing: border-box; background: var(--bg) !important; border: 1px solid var(--line) !important; color: var(--label) !important;
 }
 #galaxyContent .galaxyRow.ctGalaxyFleetInfo { border-bottom: 0 !important; border-radius: 7px 7px 0 0; margin-top: 6px; }
 #galaxyContent .galaxyRow.ctGalaxyFooter { border-radius: 0 0 7px 7px; }
-#galaxyContent .galaxyRow.ctGalaxyFooter #colonized { color: #A3AFBD !important; }
+#galaxyContent .galaxyRow.ctGalaxyFooter #colonized { color: var(--label) !important; }
 .fut-g-bar b { color: var(--text); font-family: Consolas, "JetBrains Mono", monospace; }
 .fut-g-muted { color: var(--muted); }
 .fut-g-inact { color: #9BE36D; }
-.fut-g-vac { color: #7FB8FF; }
+.fut-g-vac { color: var(--c); }
 .fut-g-deb { color: var(--warn); }
 /* Dark table, as OGLight: flat dark cells on an almost black table, empty positions darker still.
    Row marks are inset shadows, so they sit over the cell's own background. */
-#galaxycomponent .galaxyTable, #galaxyContent .expeditionDebrisSlotBox { background: #0C1117 !important; }
-#galaxyContent .ctContentRow .galaxyCell { background: linear-gradient(192deg, #1C2430, #131920 70%) !important; border-radius: 2px !important; }
-#galaxyContent .ctContentRow[class*="filtered_filter_empty"] .galaxyCell { background: #10151B !important; }
+#galaxycomponent .galaxyTable, #galaxyContent .expeditionDebrisSlotBox { background: var(--bg) !important; }
+#galaxyContent .ctContentRow .galaxyCell { background: linear-gradient(192deg, var(--line-soft), var(--bg) 70%) !important; border-radius: 2px !important; }
+#galaxyContent .ctContentRow[class*="filtered_filter_empty"] .galaxyCell { background: var(--bg) !important; }
 #galaxyContent .ctContentRow .cellPlanetName { justify-content: flex-start !important; padding: 0 5px; box-sizing: border-box; }
 #galaxyContent .galaxyRow.fut-g-inactive .galaxyCell { box-shadow: inset 0 0 0 100px rgba(155,227,109,0.06); }
 #galaxyContent .galaxyRow.fut-g-own .galaxyCell { box-shadow: inset 0 0 0 100px rgba(79,209,232,0.07); }
@@ -60,7 +60,7 @@ export const GALAXY_CSS = `
 /* The position the side bar (or the link) asked for: the planet menu's cyan frame. */
 /* On the cells, not the row: a frame on the row showed between the cells as odd blue brackets. */
 #galaxyContent .galaxyRow.fut-g-hl .galaxyCell { box-shadow: inset 0 0 0 100px rgba(79,209,232,0.10); }
-#galaxyContent .galaxyRow.fut-g-hl .cellPosition { box-shadow: inset 3px 0 0 var(--accent), inset 0 0 0 100px rgba(79,209,232,0.18); color: #8BE4F2; }
+#galaxyContent .galaxyRow.fut-g-hl .cellPosition { box-shadow: inset 3px 0 0 var(--accent), inset 0 0 0 100px rgba(79,209,232,0.18); color: var(--accent-hi); }
 
 #galaxyContent .cellPlanetName { position: relative; }
 /* Planet colour: at the right of the name, faint until the row is pointed at or the planet has one. */
@@ -77,7 +77,7 @@ export const GALAXY_CSS = `
   margin-left: auto; flex: none; padding: 0 2px; border: 0; border-radius: 3px; background: none;
   color: var(--muted); font: 10px/14px Consolas, "JetBrains Mono", monospace; cursor: help;
 }
-.fut-g-rank:hover { background: #16243A; color: var(--text); }
+.fut-g-rank:hover { background: var(--line); color: var(--text); }
 /* The flag stays out of the way until the row is pointed at, or the player has one. */
 #galaxyContent .cellPlayerName .fut-mk-flag { flex: none; width: 16px; height: 16px; margin: 0; border-color: transparent; background: none; opacity: 0; transition: opacity 120ms ease-out; }
 #galaxyContent .galaxyRow:hover .fut-mk-flag, #galaxyContent .fut-mk-flag:focus-visible { opacity: 1; }
@@ -93,8 +93,8 @@ export const GALAXY_CSS = `
 .fut-g-dval.deep { position: static; display: inline-flex; margin-left: 6px; font-size: 12px; }
 
 .fut-g-card {
-  position: fixed; z-index: 1000002; width: 250px; padding: 10px 12px; border: 1px solid #2C3E57; border-radius: 8px;
-  background: #0A111C; box-shadow: 0 10px 30px rgba(0,0,0,0.6); font: 12px/16px Arial, Helvetica, sans-serif; color: var(--text-2);
+  position: fixed; z-index: 1000002; width: 250px; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: 8px;
+  background: var(--bg); box-shadow: 0 10px 30px rgba(0,0,0,0.6); font: 12px/16px Arial, Helvetica, sans-serif; color: var(--text-2);
   text-align: left; pointer-events: none;
 }
 .fut-g-card h4 { margin: 0 0 6px; font-size: 12px; font-weight: 700; color: var(--text); }
