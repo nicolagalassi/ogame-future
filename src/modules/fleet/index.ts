@@ -1181,10 +1181,16 @@ export function renderFleetTools(o: FleetOptions): void {
   // The "Salta" tile, drawn in the page 1 bar; shown while a skippable round is on.
   let drawSkip = () => {};
   let skipTile: HTMLButtonElement | null = null;
+  /** The action that prepared the fleet on this page, marked on its button (both collection sends mark the collection's). */
+  const markUsed = (mode: FleetMode | null) => {
+    const key = mode === 'collectDeploy' ? 'collect' : mode;
+    for (const b of Array.from(doc.querySelectorAll<HTMLElement>('.fut-fbar .fut-fact[data-mode]'))) b.classList.toggle('used', b.dataset.mode === key);
+  };
   const begin = (mode: FleetMode, dest: number | null = null) => {
     const prev = state.active;
     const same = prev && prev.mode === mode;
     state.active = REPEATABLE.includes(mode) ? { mode, first: same ? prev.first : o.bodyId, dest, ...(same && prev.speed ? { speed: prev.speed } : {}) } : null;
+    markUsed(mode);
     drawSkip();
   };
   /** Fleetsave round: the speed the player chose for the rest of it, if any (in place of the preset, only for this round). */
@@ -1356,6 +1362,7 @@ export function renderFleetTools(o: FleetOptions): void {
     /** One action: icon-only tile, described in the readout while pointed at. */
     const act = (ico: IconName, id: string, name: string, where: string, tip: string, onClick: () => void, dim = false) => {
       const b = tile(doc, ico, where ? `${name} ${where}` : name, onClick, dim ? 'dim' : '', k(id), name);
+      b.dataset.mode = id.replace(/^fleet\./, '');
       out.peek(b, where ? `${name} ${where}` : name, tip);
       return b;
     };
@@ -1367,6 +1374,7 @@ export function renderFleetTools(o: FleetOptions): void {
         dest ? run[mode](dest) : say(t('fleet.err.noDefault'), true),
       ), 'more', '', t('fleet.btn.collectShort'));
     collect.setAttribute('aria-haspopup', 'menu');
+    collect.dataset.mode = 'collect';
     collect.append(el(doc, 'i', 'more-mark'));
     out.peek(collect, t('fleet.btn.collect'), t('fleet.tip.collect'));
     const zone = (text: string) => {
@@ -1515,6 +1523,8 @@ export function renderFleetTools(o: FleetOptions): void {
     if (focusRes) doc.querySelector<HTMLInputElement>('.fut-fsend .fut-fresin.metal input')?.focus();
     bar.append(bottom);
     anchor1.before(bar);
+    // A redraw (or a page opened by "Ripeti") keeps the mark on the action in use.
+    markUsed(state.active?.mode ?? null);
     // Reserves and the round live under the ships, apart from the actions: what is kept back is a
     // different question from what to send. Same cleanup as the bar (class fut-fbar).
     const strip = el(doc, 'div', 'fut-fbar fut-freserves');
