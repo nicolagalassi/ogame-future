@@ -125,6 +125,8 @@ export interface AccountAlert {
   key: 'alert.missing' | 'alert.full' | 'alert.soonFull' | 'alert.idle' | 'alert.stale';
   count: number;
   names: string[];
+  /** Per name: whether that body is a moon (a moon shares its planet's name and coordinates). */
+  moons: boolean[];
 }
 
 /** Hours ahead for the "storage full soon" warning. */
@@ -147,8 +149,8 @@ export function accountAlerts(rows: BodyRow[], snapshot: AccountSnapshot | null,
   const stale = rows.filter((r) => r.ageMinutes > STALE_MINUTES);
 
   const out: AccountAlert[] = [];
-  const push = (level: AccountAlert['level'], key: AccountAlert['key'], list: { name: string; coords: string }[]) => {
-    if (list.length) out.push({ level, key, count: list.length, names: list.map(label) });
+  const push = (level: AccountAlert['level'], key: AccountAlert['key'], list: { name: string; coords: string; type?: string }[]) => {
+    if (list.length) out.push({ level, key, count: list.length, names: list.map(label), moons: list.map((r) => r.type === 'moon') });
   };
   push('warn', 'alert.missing', missing);
   push('warn', 'alert.full', full);
