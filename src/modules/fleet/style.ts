@@ -6,14 +6,15 @@ export const FLEET_CSS = `
 .fut-fbar, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fclear, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
 /* The fleet bar speaks the inbox's language: Verdana 11px, tabular numbers, one set of tokens. */
 .fut-fbar, .fut-fmenu {
-  ${PAGE_TOKENS} --line: var(--line-strong); --line-soft: var(--accent-soft);
-  --tile: #152234; --tile-hi: #1C2D44; --tile-line: #2A3B53; --ico: #C2CCD8; --ico-hi: #F1F4F7;
-  --on-accent: #DCEAF0;
-  --track: #3A4A60; --knob-on: #0B1A22; --on-line: #35576A; --on-bg: #17293A; --field: #0D1522;
+  ${PAGE_TOKENS} --line: var(--line-strong); --line-soft: #1D2531;
+  /* The player's board (DESIGN.md): buttons are fields printed on the board, the one in use marked by the pawn's edge. */
+  --tile: var(--surface); --tile-hi: var(--hover); --tile-line: var(--line-strong); --ico: var(--txt); --ico-hi: var(--hi);
+  --track: var(--faint); --knob-on: var(--on-accent); --on-line: var(--accent-line); --on-bg: var(--accent-soft); --field: var(--bg);
+  --display: Bahnschrift, "DIN Alternate", "Roboto Condensed", "sans-serif-condensed", "Liberation Sans Narrow", "Arial Narrow", "DejaVu Sans Condensed", sans-serif;
 }
 .fut-fbar {
   display: flex; flex-direction: column; gap: 8px; margin: 6px 10px; padding: 8px;
-  border: 1px solid var(--line-soft); border-radius: 6px; background: var(--bg);
+  border: 0; border-radius: 6px; background: var(--raised);
   font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums;
 }
 .fut-fbar button { font: inherit; cursor: pointer; }
@@ -27,25 +28,25 @@ export const FLEET_CSS = `
 .fut-facts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .fut-fact {
   position: relative; flex: none; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 62px; height: 48px; padding: 4px 8px 3px;
-  border: 1px solid var(--tile-line); border-radius: 6px; background: var(--tile); color: var(--ico);
+  border: 0; border-radius: 4px; background: var(--tile); color: var(--ico);
 }
-.fut-fact:hover { border-color: var(--line-hover); background: var(--tile-hi); color: var(--ico-hi); }
+.fut-fact:hover { background: var(--tile-hi); color: var(--ico-hi); }
 .fut-fact:active { transform: translateY(1px); }
 .fut-fact .ico { display: inline-flex; }
 /* The name under the icon: what the button does, readable without pointing at it. */
-.fut-fact .name { font: 11px/1 Verdana, Arial, sans-serif; white-space: nowrap; color: inherit; }
+.fut-fact .name { font: 600 condensed 12px/1 var(--display); white-space: nowrap; color: inherit; }
 /* Zone labels: what a group of buttons is for, printed once at its head. */
-.fut-fzone { color: var(--mute); font: bold 11px Verdana, Arial, sans-serif; white-space: nowrap; }
+.fut-fzone { color: var(--label); font: 600 condensed 13px var(--display); white-space: nowrap; }
 .fut-fzonebox { display: inline-flex; flex-direction: column; gap: 4px; }
 .fut-ftiles { display: inline-flex; gap: 4px; }
 .fut-fgroup .fut-fzone { margin-right: 4px; }
 .fut-fact kbd { position: absolute; top: 3px; right: 4px; color: var(--dim); font: 11px/11px Verdana, Arial, sans-serif; }
 .fut-fact:hover kbd { color: var(--mute); }
-.fut-fact.dim { border-style: dashed; background: none; color: var(--dim); }
+.fut-fact.dim { background: none; box-shadow: none; outline: 1px dashed var(--line-strong); outline-offset: -1px; color: var(--dim); }
 /* Secondary tools (moon, expedition collection): set apart and quieter. */
-.fut-fsecond { display: inline-flex; gap: 4px; margin-left: 6px; padding-left: 10px; border-left: 1px solid var(--line); }
-.fut-fsecond .fut-fact { background: none; border-color: var(--line); color: var(--mute); }
-.fut-fsecond .fut-fact:hover { background: var(--tile); border-color: var(--line-hover); color: var(--ico-hi); }
+.fut-fsecond { display: inline-flex; gap: 4px; margin-left: 6px; padding-left: 12px; border-left: 2px solid var(--bg); }
+.fut-fsecond .fut-fact { background: none; box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--mute); }
+.fut-fsecond .fut-fact:hover { background: var(--tile); color: var(--ico-hi); }
 .fut-fskip[hidden] { display: none; }
 /* Main cargo ship, picked on the ship itself (top right; the game keeps the top left). */
 #fleet1 #technologies li[data-technology] { position: relative; }
@@ -75,7 +76,7 @@ export const FLEET_CSS = `
 /* A rule as a printed chip: pip filled when on, its name, what it keeps back. Off = outline only. */
 .fut-fchip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 8px; border: 1px solid var(--tile-line); border-radius: 4px; background: none; color: var(--mute); }
 .fut-fchip .ico { display: inline-flex; opacity: 0.8; }
-.fut-fchip b { font-weight: bold; }
+.fut-fchip b { font: 600 condensed 12px var(--display); }
 .fut-fchip .val { color: var(--dim); }
 .fut-fchip .pip { flex: none; width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; }
 .fut-fchip:hover { border-color: var(--line-hover); color: var(--hi); }
@@ -114,8 +115,8 @@ export const FLEET_CSS = `
 .fut-finfo.err { color: var(--neg); }
 
 /* Trasporto / Schiera on: the tile stays lit until pressed again. */
-.fut-fact[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--ico-hi); }
-.fut-fact[aria-pressed="true"] kbd { color: var(--on-accent); }
+.fut-fact[aria-pressed="true"] { background: var(--tile-hi); box-shadow: inset 0 3px 0 var(--accent); color: var(--ico-hi); }
+.fut-fact[aria-pressed="true"] kbd { color: var(--accent); }
 
 /* Their panel: destination over resources, labels in one column; CL / CP on the right, as tall as both rows. */
 .fut-fsend {
