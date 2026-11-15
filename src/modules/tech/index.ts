@@ -37,8 +37,8 @@ import { extraConsumption, perSatellite, satellitesFor, type SatelliteBook } fro
 import { addToPlan, holdQueued, inPlan, PLAN_KEY, prune, QUEUED_KEY, queuedLevel, queueKindOf, releaseQueued, removeFromPlan, startBuild, type Plan, type PlanItem, type Queued, type QueueKind } from '../../engines/planner';
 import { QUEUES_KEY, type QueueSnapshot } from '../../data/queues';
 import { TECH_CSS } from './style';
+import type { T } from '../../core/i18n';
 
-export type T = (key: string, vars?: Record<string, string | number>) => string;
 
 export interface TechOptions {
   doc: Document;

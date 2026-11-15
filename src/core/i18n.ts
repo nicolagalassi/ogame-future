@@ -5,6 +5,8 @@ import de from '../i18n/de.json';
 
 export type Locale = 'it' | 'en' | 'fr' | 'de';
 type Dictionary = Record<string, string>;
+/** A translator: key plus optional {placeholders}. */
+export type T = (key: string, vars?: Record<string, string | number>) => string;
 
 const dictionaries: Record<Locale, Dictionary> = { it, en, fr, de };
 
@@ -16,7 +18,7 @@ export function detectLocale(doc: Document): Locale {
 }
 
 /** Returns a translator; missing keys fall back to English, then to the key itself. */
-export function translator(locale: Locale) {
+export function translator(locale: Locale): T {
   const dict = dictionaries[locale];
   return (key: string, vars: Record<string, string | number> = {}): string => {
     const text = dict[key] ?? dictionaries.en[key] ?? key;
