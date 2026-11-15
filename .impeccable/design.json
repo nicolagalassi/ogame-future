@@ -1,0 +1,930 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-15T21:14:39+00:00",
+  "title": "Design System: Future",
+  "extensions": {
+    "colorMeta": {
+      "bg": {
+        "role": "neutral",
+        "displayName": "Ground",
+        "canonical": "#0F141B",
+        "cssVar": "--bg",
+        "oklch": "oklch(18.9% 0.016 256.8)",
+        "tonalRamp": [
+          "#0A0B0D",
+          "#232529",
+          "#3E4248",
+          "#5C626A",
+          "#7C838C",
+          "#9FA6AE",
+          "#C5CAD0",
+          "#EBEFF4"
+        ]
+      },
+      "raised": {
+        "role": "neutral",
+        "displayName": "Board",
+        "canonical": "#151C26",
+        "cssVar": "--raised",
+        "oklch": "oklch(22.4% 0.022 257.3)",
+        "tonalRamp": [
+          "#0A0B0E",
+          "#22252A",
+          "#3D424A",
+          "#5A626D",
+          "#7A8390",
+          "#9DA6B2",
+          "#C3CAD3",
+          "#EAEFF5"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Field",
+        "canonical": "#1A2230",
+        "cssVar": "--surface",
+        "oklch": "oklch(25.1% 0.029 261.4)",
+        "tonalRamp": [
+          "#090B0F",
+          "#21252C",
+          "#3C424D",
+          "#596271",
+          "#798394",
+          "#9CA6B6",
+          "#C2CAD6",
+          "#EAEFF8"
+        ]
+      },
+      "hover": {
+        "role": "neutral",
+        "displayName": "Row Hover",
+        "canonical": "#212B3A",
+        "cssVar": "--hover",
+        "oklch": "oklch(28.7% 0.031 258.3)",
+        "tonalRamp": [
+          "#090B0F",
+          "#21252C",
+          "#3B434E",
+          "#586271",
+          "#778395",
+          "#9BA6B7",
+          "#C1CAD7",
+          "#E9EFF8"
+        ]
+      },
+      "band": {
+        "role": "secondary",
+        "displayName": "Board Blue",
+        "canonical": "#1B2A44",
+        "cssVar": "--band",
+        "oklch": "oklch(28.5% 0.052 260.9)",
+        "tonalRamp": [
+          "#080B11",
+          "#1E2532",
+          "#374256",
+          "#52627C",
+          "#7183A2",
+          "#95A6C2",
+          "#BDCAE1",
+          "#E6EFFF"
+        ]
+      },
+      "band-2": {
+        "role": "secondary",
+        "displayName": "Board Blue Raised",
+        "canonical": "#22314D",
+        "cssVar": "--band-2",
+        "oklch": "oklch(31.4% 0.054 262.2)",
+        "tonalRamp": [
+          "#080B12",
+          "#1E2532",
+          "#374256",
+          "#52627E",
+          "#7183A4",
+          "#95A6C4",
+          "#BDCAE2",
+          "#E6EFFF"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#263142",
+        "cssVar": "--line",
+        "oklch": "oklch(31.1% 0.034 258.9)",
+        "tonalRamp": [
+          "#090B0F",
+          "#20252D",
+          "#3A424F",
+          "#576273",
+          "#768397",
+          "#9AA6B8",
+          "#C0CAD8",
+          "#E8EFF9"
+        ]
+      },
+      "line-soft": {
+        "role": "neutral",
+        "displayName": "Soft Hairline",
+        "canonical": "#1D2531",
+        "cssVar": "--line-soft",
+        "oklch": "oklch(26.2% 0.025 258.3)",
+        "tonalRamp": [
+          "#090B0E",
+          "#21252B",
+          "#3C424C",
+          "#59626F",
+          "#798392",
+          "#9DA6B3",
+          "#C3CAD4",
+          "#EAEFF6"
+        ]
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Strong Hairline",
+        "canonical": "#33415A",
+        "cssVar": "--line-strong",
+        "oklch": "oklch(37.4% 0.047 261.7)",
+        "tonalRamp": [
+          "#080B11",
+          "#1F2530",
+          "#384254",
+          "#54627A",
+          "#73839F",
+          "#97A6C0",
+          "#BECADE",
+          "#E7EFFD"
+        ]
+      },
+      "line-hover": {
+        "role": "neutral",
+        "displayName": "Hover Hairline",
+        "canonical": "#56657C",
+        "cssVar": "--line-hover",
+        "oklch": "oklch(50.3% 0.041 258.8)",
+        "tonalRamp": [
+          "#080B10",
+          "#1F252F",
+          "#394351",
+          "#556277",
+          "#74839B",
+          "#98A6BC",
+          "#BFCADC",
+          "#E7EFFC"
+        ]
+      },
+      "faint": {
+        "role": "neutral",
+        "displayName": "Spent Cell",
+        "canonical": "#4A5566",
+        "cssVar": "--faint",
+        "oklch": "oklch(44.7% 0.031 259.0)",
+        "tonalRamp": [
+          "#090B0F",
+          "#21252D",
+          "#3B424E",
+          "#586272",
+          "#778396",
+          "#9BA6B7",
+          "#C1CAD7",
+          "#E9EFF8"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Print Ink",
+        "canonical": "#ECE6D6",
+        "cssVar": "--text",
+        "oklch": "oklch(92.5% 0.022 89.8)",
+        "tonalRamp": [
+          "#0C0B08",
+          "#27251F",
+          "#454239",
+          "#666154",
+          "#878274",
+          "#AAA598",
+          "#CDC9BE",
+          "#F1EEE7"
+        ]
+      },
+      "text-2": {
+        "role": "neutral",
+        "displayName": "Print Ink Second",
+        "canonical": "#D2CCBE",
+        "cssVar": "--text-2",
+        "oklch": "oklch(84.6% 0.020 87.5)",
+        "tonalRamp": [
+          "#0C0B09",
+          "#272520",
+          "#45423A",
+          "#666156",
+          "#878275",
+          "#AAA599",
+          "#CDC9BF",
+          "#F1EEE8"
+        ]
+      },
+      "label": {
+        "role": "neutral",
+        "displayName": "Label Grey",
+        "canonical": "#A9B2BE",
+        "cssVar": "--label",
+        "oklch": "oklch(76.0% 0.020 255.6)",
+        "tonalRamp": [
+          "#0A0B0D",
+          "#22252A",
+          "#3D4249",
+          "#5B626C",
+          "#7B838E",
+          "#9EA6B0",
+          "#C4CAD2",
+          "#EAEFF5"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Grey",
+        "canonical": "#9AA3AE",
+        "cssVar": "--muted",
+        "oklch": "oklch(71.2% 0.019 253.4)",
+        "tonalRamp": [
+          "#0A0B0D",
+          "#22252A",
+          "#3D4349",
+          "#5B626B",
+          "#7B838E",
+          "#9EA6B0",
+          "#C4CAD1",
+          "#EAEFF4"
+        ]
+      },
+      "quiet": {
+        "role": "neutral",
+        "displayName": "Quiet Grey",
+        "canonical": "#8A95A3",
+        "cssVar": "--quiet",
+        "oklch": "oklch(66.6% 0.024 254.5)",
+        "tonalRamp": [
+          "#090B0E",
+          "#21252B",
+          "#3C434B",
+          "#59626E",
+          "#798391",
+          "#9CA6B3",
+          "#C2CAD4",
+          "#E9EFF6"
+        ]
+      },
+      "on-band": {
+        "role": "secondary",
+        "displayName": "Band Ink",
+        "canonical": "#D3DAE4",
+        "cssVar": "--on-band",
+        "oklch": "oklch(88.6% 0.016 257.2)",
+        "tonalRamp": [
+          "#0A0B0D",
+          "#232529",
+          "#3E4248",
+          "#5C6269",
+          "#7C838C",
+          "#A0A5AE",
+          "#C5C9D0",
+          "#EBEFF3"
+        ]
+      },
+      "link": {
+        "role": "neutral",
+        "displayName": "Link Blue",
+        "canonical": "#8FB4D8",
+        "cssVar": "--link",
+        "oklch": "oklch(75.6% 0.066 248.0)",
+        "tonalRamp": [
+          "#060C12",
+          "#182634",
+          "#2E4459",
+          "#466482",
+          "#6386A8",
+          "#89A9C8",
+          "#B3CCE5",
+          "#DFF1FF"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Pawn Yellow",
+        "canonical": "#F2D04A",
+        "cssVar": "--accent",
+        "oklch": "oklch(86.3% 0.152 94.6)",
+        "tonalRamp": [
+          "#110A00",
+          "#312300",
+          "#543F00",
+          "#7A5E00",
+          "#A07F00",
+          "#C0A32E",
+          "#DEC97A",
+          "#FDEFBA"
+        ]
+      },
+      "accent-hi": {
+        "role": "primary",
+        "displayName": "Pawn Yellow Lit",
+        "canonical": "#F7DF7A",
+        "cssVar": "--accent-hi",
+        "oklch": "oklch(90.3% 0.124 96.3)",
+        "tonalRamp": [
+          "#0F0B00",
+          "#2E2400",
+          "#504100",
+          "#746000",
+          "#988103",
+          "#B9A54F",
+          "#D9CA8B",
+          "#F9EFC4"
+        ]
+      },
+      "on-accent": {
+        "role": "primary",
+        "displayName": "Pawn Ink",
+        "canonical": "#1A1606",
+        "cssVar": "--on-accent",
+        "oklch": "oklch(20.0% 0.029 96.0)",
+        "tonalRamp": [
+          "#0C0B08",
+          "#27251D",
+          "#454236",
+          "#656150",
+          "#87836F",
+          "#AAA593",
+          "#CDC9BB",
+          "#F1EFE5"
+        ]
+      },
+      "accent-soft": {
+        "role": "primary",
+        "displayName": "Pawn Wash",
+        "canonical": "#2A2614",
+        "cssVar": "--accent-soft",
+        "oklch": "oklch(26.8% 0.031 97.2)",
+        "tonalRamp": [
+          "#0C0B07",
+          "#27251D",
+          "#454235",
+          "#656250",
+          "#87836E",
+          "#A9A592",
+          "#CDC9BB",
+          "#F1EFE4"
+        ]
+      },
+      "accent-line": {
+        "role": "primary",
+        "displayName": "Pawn Rule",
+        "canonical": "#8A7420",
+        "cssVar": "--accent-line",
+        "oklch": "oklch(56.4% 0.103 93.7)",
+        "tonalRamp": [
+          "#0F0B01",
+          "#2D2403",
+          "#4F410A",
+          "#736014",
+          "#97812F",
+          "#B8A461",
+          "#D8C996",
+          "#F9EFCB"
+        ]
+      },
+      "ok": {
+        "role": "tertiary",
+        "displayName": "Field Green",
+        "canonical": "#7BC47F",
+        "cssVar": "--ok",
+        "oklch": "oklch(75.5% 0.122 145.5)",
+        "tonalRamp": [
+          "#030F04",
+          "#0F2C12",
+          "#204D24",
+          "#327138",
+          "#4D9553",
+          "#78B77B",
+          "#A8D8A9",
+          "#D8F9D8"
+        ]
+      },
+      "warn": {
+        "role": "tertiary",
+        "displayName": "Signal Orange",
+        "canonical": "#F08A3C",
+        "cssVar": "--warn",
+        "oklch": "oklch(73.0% 0.153 54.5)",
+        "tonalRamp": [
+          "#180600",
+          "#3F1800",
+          "#6B2E00",
+          "#9A4500",
+          "#C66400",
+          "#E58C4C",
+          "#FEB789",
+          "#FFE3C2"
+        ]
+      },
+      "bad": {
+        "role": "tertiary",
+        "displayName": "Loss Red",
+        "canonical": "#EF6A60",
+        "cssVar": "--bad",
+        "oklch": "oklch(68.5% 0.166 26.7)",
+        "tonalRamp": [
+          "#1B0303",
+          "#44100E",
+          "#73211E",
+          "#A6342F",
+          "#D35149",
+          "#F37D73",
+          "#FFADA2",
+          "#FFDCD3"
+        ]
+      },
+      "metal": {
+        "role": "product-truth",
+        "displayName": "Metal",
+        "canonical": "#B8C2CC",
+        "cssVar": "--m",
+        "oklch": "oklch(80.9% 0.018 248.0)",
+        "tonalRamp": [
+          "#0A0B0D",
+          "#222529",
+          "#3D4348",
+          "#5A626A",
+          "#7A848D",
+          "#9EA6AF",
+          "#C3CAD1",
+          "#EAEFF4"
+        ]
+      },
+      "crystal": {
+        "role": "product-truth",
+        "displayName": "Crystal",
+        "canonical": "#7FB8FF",
+        "cssVar": "--c",
+        "oklch": "oklch(77.2% 0.119 254.5)",
+        "tonalRamp": [
+          "#030B19",
+          "#102640",
+          "#20436D",
+          "#33629D",
+          "#4D84C8",
+          "#77A8E5",
+          "#A6CCFC",
+          "#D6F1FF"
+        ]
+      },
+      "deuterium": {
+        "role": "product-truth",
+        "displayName": "Deuterium",
+        "canonical": "#4FE0B0",
+        "cssVar": "--d",
+        "oklch": "oklch(81.7% 0.142 167.2)",
+        "tonalRamp": [
+          "#001008",
+          "#002F1E",
+          "#005237",
+          "#007752",
+          "#009C70",
+          "#43BE95",
+          "#89DDBC",
+          "#C5FDE6"
+        ]
+      },
+      "dark-matter": {
+        "role": "product-truth",
+        "displayName": "Dark Matter",
+        "canonical": "#B58CDB",
+        "cssVar": "--dm",
+        "oklch": "oklch(70.8% 0.120 307.4)",
+        "tonalRamp": [
+          "#0F0716",
+          "#2D1D3B",
+          "#4E3564",
+          "#724F91",
+          "#966DBA",
+          "#B793D9",
+          "#D7BCF2",
+          "#F8E5FF"
+        ]
+      },
+      "q-building": {
+        "role": "product-truth",
+        "displayName": "Queue: Building",
+        "canonical": "#FF8200",
+        "cssVar": "--q-building",
+        "oklch": "oklch(73.5% 0.185 53.8)",
+        "tonalRamp": [
+          "#1A0400",
+          "#441300",
+          "#722600",
+          "#A53B00",
+          "#D25900",
+          "#F1842F",
+          "#FFB37A",
+          "#FFE0B9"
+        ]
+      },
+      "q-research": {
+        "role": "product-truth",
+        "displayName": "Queue: Research",
+        "canonical": "#32FB2F",
+        "cssVar": "--q-research",
+        "oklch": "oklch(86.1% 0.276 142.6)",
+        "tonalRamp": [
+          "#001200",
+          "#003200",
+          "#005700",
+          "#007E00",
+          "#00A500",
+          "#0BC80D",
+          "#7AE773",
+          "#BCFFB6"
+        ]
+      },
+      "q-ship": {
+        "role": "product-truth",
+        "displayName": "Queue: Shipyard",
+        "canonical": "#FFEB00",
+        "cssVar": "--q-ship",
+        "oklch": "oklch(92.7% 0.195 103.3)",
+        "tonalRamp": [
+          "#100B00",
+          "#2E2500",
+          "#504200",
+          "#756100",
+          "#998300",
+          "#B9A800",
+          "#D8CD61",
+          "#F9F2AB"
+        ]
+      },
+      "q-lfbuilding": {
+        "role": "product-truth",
+        "displayName": "Queue: Lifeform Building",
+        "canonical": "#FF79BD",
+        "cssVar": "--q-lfbuilding",
+        "oklch": "oklch(75.1% 0.178 350.6)",
+        "tonalRamp": [
+          "#19030E",
+          "#420E2A",
+          "#6F1D4A",
+          "#9F2E6D",
+          "#CC4B90",
+          "#EC78B2",
+          "#FFA9D3",
+          "#FFD9F6"
+        ]
+      },
+      "q-lfresearch": {
+        "role": "product-truth",
+        "displayName": "Queue: Lifeform Research",
+        "canonical": "#42AFFF",
+        "cssVar": "--q-lfresearch",
+        "oklch": "oklch(72.8% 0.152 244.6)",
+        "tonalRamp": [
+          "#000C1B",
+          "#002746",
+          "#004575",
+          "#0066A9",
+          "#0089D6",
+          "#53ADF2",
+          "#8FD1FF",
+          "#C8F4FF"
+        ]
+      },
+      "fresh": {
+        "role": "product-truth",
+        "displayName": "Age: Fresh",
+        "canonical": "#38C56E",
+        "cssVar": "--fresh",
+        "oklch": "oklch(72.9% 0.172 151.7)",
+        "tonalRamp": [
+          "#001003",
+          "#00300E",
+          "#00531E",
+          "#00782F",
+          "#009E49",
+          "#4DBF74",
+          "#8EDFA4",
+          "#C8FED5"
+        ]
+      },
+      "warm": {
+        "role": "product-truth",
+        "displayName": "Age: Warm",
+        "canonical": "#E3BB28",
+        "cssVar": "--warm",
+        "oklch": "oklch(80.5% 0.155 92.1)",
+        "tonalRamp": [
+          "#120A00",
+          "#322300",
+          "#563E00",
+          "#7E5C00",
+          "#A47D00",
+          "#C4A128",
+          "#E1C778",
+          "#FFEEB8"
+        ]
+      },
+      "old": {
+        "role": "product-truth",
+        "displayName": "Age: Old",
+        "canonical": "#EF7676",
+        "cssVar": "--old",
+        "oklch": "oklch(70.6% 0.150 21.6)",
+        "tonalRamp": [
+          "#190404",
+          "#421315",
+          "#6F2628",
+          "#A03A3D",
+          "#CC5759",
+          "#EC8180",
+          "#FFAFAC",
+          "#FFDDDA"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Window title on the band."
+      },
+      "figure-lg": {
+        "displayName": "Figure Large",
+        "purpose": "Payback days on an investment rung."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Key figures, score line, income values, daily total (18-19px)."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Zone heads."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Rung names, track names, to-check headlines, research levels, chart captions."
+      },
+      "control": {
+        "displayName": "Control",
+        "purpose": "Tabs (13px), buttons, rung number and table heads (12px)."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default window text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "The label printed once after a figure; hints, chips, meta lines."
+      },
+      "small": {
+        "displayName": "Small",
+        "purpose": "Scale marks, tags, queue badges; 10px is the absolute floor (chart axes, matrix column names)."
+      }
+    },
+    "shadows": [
+      {
+        "name": "window-lift",
+        "value": "0 24px 64px rgba(0,0,0,0.6)",
+        "purpose": "The window sheet over the dimmed game page."
+      },
+      {
+        "name": "popover-lift",
+        "value": "0 10px 30px rgba(0,0,0,0.6)",
+        "purpose": "Popover menus (body picker)."
+      },
+      {
+        "name": "backdrop",
+        "value": "rgba(4,6,10,0.74)",
+        "purpose": "Background of the full-page backdrop behind a window (not a shadow; recorded for completeness)."
+      },
+      {
+        "name": "printed-top-edge",
+        "value": "inset 0 3px 0 <state colour>",
+        "purpose": "Active tab (pawn), to-check item and needs strip (orange). A printed mark, not depth."
+      },
+      {
+        "name": "printed-underline",
+        "value": "inset 0 -2px 0 #F2D04A",
+        "purpose": "Selected segment, selected matrix column."
+      },
+      {
+        "name": "printed-outline",
+        "value": "inset 0 0 0 1px <colour>",
+        "purpose": "Empty track cells (#33415A), next-rung cell (1.5px pawn), queue tape fill, tags."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "The one easing for window entry and press feedback (--ease-out)."
+      },
+      {
+        "name": "window-in",
+        "value": "200ms ease-out; from opacity 0, translateY(6px) scale(0.985)",
+        "purpose": "The window settles in from just below; closing is instant. Reduced motion: fade only."
+      },
+      {
+        "name": "backdrop-in",
+        "value": "160ms ease-out; from opacity 0",
+        "purpose": "The page dims behind the window."
+      },
+      {
+        "name": "press",
+        "value": "140ms ease-out; scale(0.97) on :active",
+        "purpose": "Buttons, tabs, close, segments give under the pointer. Removed under reduced motion."
+      },
+      {
+        "name": "switch",
+        "value": "120ms ease-out",
+        "purpose": "Switch track colour and knob slide (14px). Removed under reduced motion."
+      },
+      {
+        "name": "rung-focus",
+        "value": "140ms ease; siblings to opacity 0.72",
+        "purpose": "On the investment ladder, the rung under a fine pointer stays full, the others step down a tone."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "board-narrow",
+        "value": "1100px",
+        "purpose": "Key figures fall to three columns."
+      },
+      {
+        "name": "board-stack",
+        "value": "900px",
+        "purpose": "Key figures to two columns; the three board columns stack into one."
+      }
+    ],
+    "rollout": {
+      "complete": [
+        "Dashboard window"
+      ],
+      "tokensOnly": [
+        "Plan",
+        "Journal",
+        "Settings",
+        "fleet rules windows",
+        "planet menu",
+        "fleet bar",
+        "inbox",
+        "galaxy",
+        "side bar",
+        "Orion"
+      ],
+      "note": "Shared tokens and window chrome are inherited everywhere; income tracks, investment ladder, queue tapes and the score line exist only on the Dashboard. Several in-page surfaces still set figures in a Consolas / JetBrains Mono stack."
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one action on a view, filled in pawn yellow.",
+      "html": "<button class=\"ds-act\">Sincronizza</button>",
+      "css": ".ds-act { height: 26px; padding: 0 12px; border: 1px solid #F2D04A; border-radius: 4px; background: #F2D04A; color: #1A1606; font: 600 condensed 12px Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Liberation Sans Narrow\", \"Arial Narrow\", sans-serif; cursor: pointer; transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1); } .ds-act:hover { background: #F7DF7A; border-color: #F7DF7A; } .ds-act:focus-visible { outline: 2px solid #F2D04A; outline-offset: 2px; } .ds-act:active { transform: scale(0.97); }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Every other action: a 1px printed outline; disabled is struck through.",
+      "html": "<div class=\"ds-row\"><button class=\"ds-ghost\">Esporta</button><button class=\"ds-ghost\" disabled>Importa</button></div>",
+      "css": ".ds-row { display: flex; gap: 8px; padding: 12px; background: #151C26; } .ds-ghost { height: 26px; padding: 0 12px; border: 1px solid #33415A; border-radius: 4px; background: none; color: #D2CCBE; font: 500 condensed 12px Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Liberation Sans Narrow\", \"Arial Narrow\", sans-serif; cursor: pointer; transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1); } .ds-ghost:hover { border-color: #56657C; color: #ECE6D6; } .ds-ghost:focus-visible { outline: 2px solid #F2D04A; outline-offset: 2px; } .ds-ghost:active { transform: scale(0.97); } .ds-ghost:disabled { border-color: #263142; color: #8A95A3; text-decoration: line-through; cursor: default; transform: none; }"
+    },
+    {
+      "name": "Window Head and Tabs",
+      "kind": "nav",
+      "refersTo": "tab-active",
+      "description": "The board-blue band: title, subtitle, close, and printed tabs; the tab in use is cut from the board with a pawn top edge.",
+      "html": "<div class=\"ds-win\"><div class=\"ds-head\"><h2 class=\"ds-h2\">Dashboard</h2><span class=\"ds-sub\">Dalinar · Singularity</span><button class=\"ds-close\" aria-label=\"Chiudi\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"><path d=\"M4 4l8 8M12 4l-8 8\"/></svg></button></div><div class=\"ds-tabs\"><button class=\"ds-tab\" aria-pressed=\"true\">Riepilogo</button><button class=\"ds-tab\" aria-pressed=\"false\">Investimenti</button><button class=\"ds-tab\" aria-pressed=\"false\">Storico</button></div><div class=\"ds-board\"></div></div>",
+      "css": ".ds-win { border-radius: 6px; overflow: hidden; background: #151C26; } .ds-head { display: flex; align-items: baseline; gap: 14px; min-height: 48px; padding: 8px 10px 8px 18px; background: #1B2A44; align-items: center; } .ds-h2 { margin: 0; font: 600 condensed 19px/1.2 Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Liberation Sans Narrow\", \"Arial Narrow\", sans-serif; color: #ECE6D6; } .ds-sub { flex: 1; color: #D3DAE4; font: 12px \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif; } .ds-close { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 4px; background: none; color: #D3DAE4; cursor: pointer; } .ds-close:hover { background: #22314D; color: #ECE6D6; } .ds-tabs { display: flex; gap: 2px; padding: 0 14px; background: #1B2A44; } .ds-tab { height: 34px; padding: 0 16px; border: 0; border-radius: 5px 5px 0 0; background: #22314D; color: #D3DAE4; font: 600 condensed 13px Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Liberation Sans Narrow\", \"Arial Narrow\", sans-serif; cursor: pointer; transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1); } .ds-tab:hover { color: #ECE6D6; background: #29395A; } .ds-tab[aria-pressed=\"true\"] { background: #151C26; color: #ECE6D6; box-shadow: inset 0 3px 0 #F2D04A; } .ds-tab:focus-visible, .ds-close:focus-visible { outline: 2px solid #F2D04A; outline-offset: 2px; } .ds-tab:active { transform: scale(0.97); } .ds-board { height: 24px; }"
+    },
+    {
+      "name": "Planet Chip",
+      "kind": "chip",
+      "refersTo": "planet-chip",
+      "description": "A planet a step applies to, linking to its build page; estimated is dashed amber, done is struck.",
+      "html": "<div class=\"ds-pls\"><a class=\"ds-pl\" href=\"#\">Nalthis</a><a class=\"ds-pl ds-guess\" href=\"#\">Lumar</a><a class=\"ds-pl ds-done\" href=\"#\">Sel</a><button class=\"ds-pl\">+5</button></div>",
+      "css": ".ds-pls { display: flex; flex-wrap: wrap; gap: 4px; padding: 10px; background: #151C26; } .ds-pl { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border: 1px solid #33415A; border-radius: 3px; background: none; color: #D2CCBE; font: 12px \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif; text-decoration: none; white-space: nowrap; cursor: pointer; } .ds-pl:hover, .ds-pl:focus-visible { border-color: #F2D04A; color: #ECE6D6; outline: none; } .ds-guess { border-style: dashed; border-color: #8A7420; } .ds-done { color: #8A95A3; text-decoration: line-through; border-style: dashed; }"
+    },
+    {
+      "name": "Income Track",
+      "kind": "custom",
+      "refersTo": "track-cell-pawn",
+      "description": "Twenty printed cells on one shared scale: spent cells, the pawn on today's income, an outline on the next rung.",
+      "html": "<div class=\"ds-prod\"><div class=\"ds-top\"><span class=\"ds-name\"><i class=\"ds-tok\"></i>Metallo</span><span class=\"ds-val\">+763M<small>/g</small><small class=\"ds-next\">→ +655k</small></span></div><div class=\"ds-track\" role=\"img\" aria-label=\"Metallo: +763M/g\"><i class=\"f\"></i><i class=\"f\"></i><i class=\"f\"></i><i class=\"f\"></i><i class=\"f\"></i><i class=\"f\"></i><i class=\"f\"></i><i class=\"f\"></i><i class=\"f\"></i><i class=\"f\"></i><i class=\"f\"></i><i class=\"f\"></i><i class=\"f\"></i><i class=\"f\"></i><i class=\"f\"></i><i class=\"me\"></i><i class=\"gh\"></i><i></i><i></i><i></i></div><div class=\"ds-scale\"><span>0</span><span>500M</span><span>1,0G</span></div></div>",
+      "css": ".ds-prod { padding: 12px 14px; background: #1A2230; } .ds-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; } .ds-name { display: inline-flex; align-items: center; gap: 7px; font: 600 condensed 14px Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Liberation Sans Narrow\", \"Arial Narrow\", sans-serif; color: #ECE6D6; } .ds-tok { width: 11px; height: 11px; border-radius: 50%; background: #B8C2CC; } .ds-val { font: 600 condensed 18px Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Liberation Sans Narrow\", \"Arial Narrow\", sans-serif; color: #ECE6D6; font-variant-numeric: tabular-nums; } .ds-val small { margin-left: 2px; font: 12px \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif; color: #A9B2BE; } .ds-val small.ds-next { margin-left: 8px; } .ds-track { display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); gap: 2px; height: 18px; } .ds-track i { background: #151C26; box-shadow: inset 0 0 0 1px #33415A; } .ds-track i.f { background: #4A5566; box-shadow: none; } .ds-track i.me { background: #F2D04A; box-shadow: none; } .ds-track i.gh { box-shadow: inset 0 0 0 1.5px #F2D04A; } .ds-scale { display: flex; justify-content: space-between; margin-top: 4px; color: #8A95A3; font: 11px \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif; }"
+    },
+    {
+      "name": "Investment Rung",
+      "kind": "custom",
+      "refersTo": "investment-rung",
+      "description": "One step of the ladder: number, name and levels, planet chips, cost in resource tokens, payback days large on the right.",
+      "html": "<div class=\"ds-ladder\"><div class=\"ds-move\"><span class=\"ds-n\">1</span><div class=\"ds-text\"><strong>Psychoharmoniser 7 → 9</strong><span class=\"ds-meta\"><span><i class=\"ds-tk m\"></i>34,8M</span><span><i class=\"ds-tk c\"></i>13,9M</span><span><i class=\"ds-tk d\"></i>10,4M</span></span></div><span class=\"ds-roi\">63,0<small>g</small></span></div><div class=\"ds-move\"><span class=\"ds-n\">2</span><div class=\"ds-text\"><strong>Depth Sounding 10 → 11</strong><span class=\"ds-meta\"><span><i class=\"ds-tk m\"></i>421M</span><span><i class=\"ds-tk c\"></i>240M</span><span><i class=\"ds-tk d\"></i>120M</span></span></div><span class=\"ds-roi\">261,6<small>g</small></span></div></div>",
+      "css": ".ds-ladder { padding: 12px 14px; background: #1A2230; } .ds-move { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #151C26; transition: opacity 140ms ease; } .ds-move + .ds-move { margin-top: 2px; } .ds-ladder:hover > .ds-move:not(:hover) { opacity: 0.72; } .ds-n { width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; background: #F2D04A; color: #1A1606; font: 600 condensed 12px Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Liberation Sans Narrow\", \"Arial Narrow\", sans-serif; display: flex; align-items: center; justify-content: center; } .ds-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; } .ds-text strong { font: 600 condensed 14px Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Liberation Sans Narrow\", \"Arial Narrow\", sans-serif; color: #ECE6D6; } .ds-meta { display: flex; flex-wrap: wrap; gap: 4px 10px; color: #D2CCBE; font: 12px \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif; } .ds-meta > span { display: inline-flex; align-items: center; gap: 4px; } .ds-tk { width: 11px; height: 11px; border-radius: 50%; } .ds-tk.m { background: #B8C2CC; } .ds-tk.c { background: #7FB8FF; } .ds-tk.d { background: #4FE0B0; } .ds-roi { font: 600 condensed 22px/1 Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Liberation Sans Narrow\", \"Arial Narrow\", sans-serif; color: #ECE6D6; white-space: nowrap; font-variant-numeric: tabular-nums; } .ds-roi small { margin-left: 3px; font: 12px \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif; color: #A9B2BE; }"
+    },
+    {
+      "name": "To-Check Item",
+      "kind": "card",
+      "refersTo": "check-item",
+      "description": "A finding on the board, its kind printed as a 3px top edge (orange = act on it).",
+      "html": "<div class=\"ds-checks\"><div class=\"ds-alert\"><strong>Depositi pieni su 1 pianeta</strong><span>Trenodia [4:235:8]</span></div></div>",
+      "css": ".ds-checks { padding: 12px 14px; background: #1A2230; } .ds-alert { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; background: #151C26; box-shadow: inset 0 3px 0 #F08A3C; } .ds-alert strong { font: 600 condensed 14px Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Liberation Sans Narrow\", \"Arial Narrow\", sans-serif; color: #ECE6D6; } .ds-alert span { color: #A9B2BE; font: 12px \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif; }"
+    },
+    {
+      "name": "Queue Tape",
+      "kind": "custom",
+      "refersTo": "queue-tape",
+      "description": "A running queue on the one shared hour scale: length is the time still needed, in the game's queue colour.",
+      "html": "<div class=\"ds-q\"><div class=\"ds-hours\"><span>ora</span><span>12 h</span><span>24 h</span><span>36 h</span></div><div class=\"ds-tape\"><i style=\"width:74%\"></i></div></div>",
+      "css": ".ds-q { padding: 12px 14px; background: #1A2230; } .ds-hours { display: flex; justify-content: space-between; margin-bottom: 6px; color: #8A95A3; font: 11px \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif; } .ds-tape { height: 12px; background: #1D2531; color: #FFEB00; } .ds-tape i { display: block; height: 100%; background: color-mix(in srgb, currentColor 30%, transparent); box-shadow: inset 0 0 0 1px currentColor; }"
+    },
+    {
+      "name": "Score Line",
+      "kind": "custom",
+      "refersTo": "key-figure",
+      "description": "The account's figures on one line, each printed once with its label after it.",
+      "html": "<p class=\"ds-facts\"><span><b>2.055.716.233</b> punti</span><span><b>1076°</b> su 2777</span><span><b>32,8G</b> sui corpi</span><span><b>873G</b> flotta</span></p>",
+      "css": ".ds-facts { display: flex; flex-wrap: wrap; gap: 4px 22px; margin: 0; padding: 10px 14px; background: #151C26; color: #A9B2BE; font: 12px \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif; } .ds-facts b { font: 600 condensed 18px Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Liberation Sans Narrow\", \"Arial Narrow\", sans-serif; color: #ECE6D6; font-variant-numeric: tabular-nums; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Plancia del giocatore (the player's board)",
+    "overview": "**Creative North Star: \"Plancia del giocatore\" (the player's board)**\n\nFuture draws an OGame account as the player's own board from a strategy board game. Income is read on numbered tracks, every investment is a rung with its cost printed in resource tokens and its payback in days, and the queues run as tapes on one shared hour scale. The board is a dark printed sheet laid on a darker ground; its head and tab strip sit on a board-blue band; the ink is warm, like print on card, and the one yellow pawn says \"you are here\" or \"this one\".\n\nThe density is a player's, not a dashboard's: dozens of planets, many figures at once, nothing slower to read than the game itself. Zones are fields of flat colour separated by 2px seams of the board beneath them, never bordered boxes, and states are printed marks (a 3px edge, an outline, a strike-through) rather than glows or fills. The world refuses the equal-card SaaS grid and refuses sci-fi costume (HUD frames, neon glow, scanlines) even though the game around it is a space game: Future's identity coexists with OGame's art by being quieter than it.\n\nRollout status, recorded honestly: the world is complete only on the Dashboard window. The tokens are shared through `WINDOW_TOKENS` / `PAGE_TOKENS`, so every other window (Plan, Journal, Settings, fleet rules) and the in-page surfaces (planet menu, fleet bar, inbox, galaxy, side bar) already inherit the palette and the window chrome, but not yet the Dashboard's components: income tracks, investment ladder, queue tapes and the score line exist only on the Dashboard. Several in-page surfaces still set figures in a Consolas / JetBrains Mono stack instead of the board's condensed face. Treat those surfaces as not yet migrated, not as alternative rules.",
+    "keyCharacteristics": [
+      "Dark printed board on a darker ground; a board-blue band for heads and tab strips.",
+      "Warm print ink for text; one pawn yellow for position, selection, focus and the single primary action.",
+      "Zones as flat colour fields on 2px seams; no bordered boxes, no card shadows.",
+      "Condensed display face for heads and figures, system sans for prose; tabular numerals everywhere a number lines up.",
+      "Bars measure real quantities on shared scales; each figure is printed and labelled once.",
+      "Resource, queue and age colours are the game's own and never re-meant."
+    ],
+    "rules": [
+      {
+        "name": "The One Pawn Rule",
+        "body": "Pawn yellow marks where the player stands, what is chosen, what has focus, or the one action on a view. If it is a warning, it is orange; if it is decoration, it is nothing.",
+        "section": "colors"
+      },
+      {
+        "name": "The Product Truth Rule",
+        "body": "Resource, queue and age colours belong to the game. Never restyle them, never borrow one to mean something else, and never introduce a new hue that could be mistaken for one.",
+        "section": "colors"
+      },
+      {
+        "name": "The Warm Ink Rule",
+        "body": "Text is printed in the warm ink ramp (`text`, `text-2`) and the grey ramp down to `quiet`; every text colour holds 4.5:1 on the surface it sits on. `faint` never carries text that must be read.",
+        "section": "colors"
+      },
+      {
+        "name": "The Printed Once Rule",
+        "body": "Each figure appears once, in the display face, with its label in body sans at 12px in label grey after or above it. No figure is repeated in a second tile, chart or caption on the same view.",
+        "section": "typography"
+      },
+      {
+        "name": "The Ten Pixel Floor",
+        "body": "No text below 10px, anywhere.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Board Rule",
+        "body": "Zones, rungs, tiles and tabs never cast shadows. Only the window and its popovers float.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Printed Edge Rule",
+        "body": "A state on a field is printed as an edge (3px top, 2px bottom) or a 1px outline, not as a full border, a glow or a coloured fill.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do take every colour from the shared tokens (`WINDOW_TOKENS`, `PAGE_TOKENS`, `STATE_COLORS`, `RES_COLORS`); a new role gets a new token, not a literal.",
+      "Do divide zones with the 2px seam and tonal steps (`bg` / `raised` / `surface`), and print states as a 3px top edge, 2px underline or 1px outline.",
+      "Do keep pawn yellow to position, selection, focus and the single primary action.",
+      "Do set heads, figures, tabs and buttons in the condensed display stack at weight 600, prose in the system sans, and numbers with tabular numerals.",
+      "Do make every bar's length an exact quantity on a scale shared with its neighbours (20-cell income tracks, one hour scale for queues).",
+      "Do print each figure once with its label beside it in label grey.",
+      "Do show disabled and done as struck through in quiet grey.",
+      "Do honour reduced motion: the window fades instead of rising, press feedback and switch slides are removed."
+    ],
+    "donts": [
+      "Don't draw bordered boxes or cast shadows on zones, rungs or tiles; only the window and its popovers float.",
+      "Don't build an equal-card dashboard grid; the board's columns are weighted by what they carry.",
+      "Don't dress the board in sci-fi costume: no HUD frames, neon glows, scanlines or gradients.",
+      "Don't load web fonts or any font over the network; system stacks only.",
+      "Don't restyle or borrow the resource, game-queue or age colours for any other meaning.",
+      "Don't use pawn yellow for warnings (orange) or decoration.",
+      "Don't set text below 10px or below 4.5:1 on its surface; `faint` is a fill, not a text colour.",
+      "Don't use pure white or a cool grey for main text; the ink is warm (`text`)."
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.87
+// @version      0.3.88
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -546,6 +546,19 @@
     "dash.production": "Produzione",
     "dash.dayShort": "g",
     "dash.daysShort": "g",
+    "alert.stale.one": "Dati vecchi pi\xF9 di un'ora su 1 corpo",
+    "alert.idle.one": "1 pianeta senza costruzioni",
+    "alert.soonFull.one": "1 pianeta pieno entro 6 ore",
+    "alert.full.one": "Depositi pieni su 1 pianeta",
+    "alert.missing.one": "Dati mancanti su 1 pianeta",
+    "dash.factProdDay": "MSU al giorno",
+    "dash.factDefence": "difese",
+    "dash.factFleet": "flotta",
+    "dash.factStock": "sui corpi",
+    "dash.factRank": "su {of}",
+    "dash.factPoints": "punti",
+    "dash.nextRung": "Dopo il prossimo investimento: {value} al giorno",
+    "dash.now": "ora",
     "dash.msuHint": "Barre in MSU (3:2:1): metallo, cristallo \xD71,5, deuterio \xD73.",
     "dash.checks": "Da controllare",
     "dash.allGood": "Tutto a posto.",
@@ -1459,6 +1472,19 @@
     "dash.production": "Production",
     "dash.dayShort": "d",
     "dash.daysShort": "d",
+    "alert.stale.one": "Data older than an hour on 1 body",
+    "alert.idle.one": "1 planet with nothing under construction",
+    "alert.soonFull.one": "1 planet full within 6 hours",
+    "alert.full.one": "Storage full on 1 planet",
+    "alert.missing.one": "Missing data on 1 planet",
+    "dash.factProdDay": "MSU a day",
+    "dash.factDefence": "defence",
+    "dash.factFleet": "fleet",
+    "dash.factStock": "on bodies",
+    "dash.factRank": "of {of}",
+    "dash.factPoints": "points",
+    "dash.nextRung": "After the next investment: {value} a day",
+    "dash.now": "now",
     "dash.msuHint": "Bars in MSU (3:2:1): metal, crystal \xD71.5, deuterium \xD73.",
     "dash.checks": "To check",
     "dash.allGood": "All good.",
@@ -2372,6 +2398,19 @@
     "dash.production": "Production",
     "dash.dayShort": "j",
     "dash.daysShort": "j",
+    "alert.stale.one": "Donn\xE9es de plus d'une heure sur 1 corps",
+    "alert.idle.one": "1 plan\xE8te sans construction",
+    "alert.soonFull.one": "1 plan\xE8te pleine d'ici 6 heures",
+    "alert.full.one": "Hangars pleins sur 1 plan\xE8te",
+    "alert.missing.one": "Donn\xE9es manquantes sur 1 plan\xE8te",
+    "dash.factProdDay": "MSU par jour",
+    "dash.factDefence": "d\xE9fense",
+    "dash.factFleet": "flotte",
+    "dash.factStock": "sur les corps",
+    "dash.factRank": "sur {of}",
+    "dash.factPoints": "points",
+    "dash.nextRung": "Apr\xE8s le prochain investissement : {value} par jour",
+    "dash.now": "maint.",
     "dash.msuHint": "Barres en MSU (3:2:1) : m\xE9tal, cristal \xD71,5, deut\xE9rium \xD73.",
     "dash.checks": "\xC0 v\xE9rifier",
     "dash.allGood": "Tout va bien.",
@@ -3285,6 +3324,19 @@
     "dash.production": "Produktion",
     "dash.dayShort": "T",
     "dash.daysShort": "T",
+    "alert.stale.one": "Daten \xE4lter als eine Stunde auf 1 K\xF6rper",
+    "alert.idle.one": "1 Planet ohne Bau",
+    "alert.soonFull.one": "1 Planet in 6 Stunden voll",
+    "alert.full.one": "Speicher voll auf 1 Planeten",
+    "alert.missing.one": "Fehlende Daten auf 1 Planeten",
+    "dash.factProdDay": "MSU pro Tag",
+    "dash.factDefence": "Verteidigung",
+    "dash.factFleet": "Flotte",
+    "dash.factStock": "auf den K\xF6rpern",
+    "dash.factRank": "von {of}",
+    "dash.factPoints": "Punkte",
+    "dash.nextRung": "Nach der n\xE4chsten Investition: {value} pro Tag",
+    "dash.now": "jetzt",
     "dash.msuHint": "Balken in MSU (3:2:1): Metall, Kristall \xD71,5, Deuterium \xD73.",
     "dash.checks": "Zu pr\xFCfen",
     "dash.allGood": "Alles in Ordnung.",
@@ -4630,19 +4682,21 @@
 
   // src/core/sheet.ts
   var RES_COLORS = { metal: "#B8C2CC", crystal: "#7FB8FF", deuterium: "#4FE0B0", darkMatter: "#B58CDB", food: "#D6A8C8" };
-  var STATE_COLORS = { accent: "#4FD1E8", ok: "#7BC47F", warn: "#F5B547", bad: "#F07A6E" };
+  var STATE_COLORS = { accent: "#F2D04A", ok: "#7BC47F", warn: "#F08A3C", bad: "#EF6A60" };
   var PAGE_TOKENS = `--hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1;
   --accent: ${STATE_COLORS.accent}; --ok: ${STATE_COLORS.ok}; --warn: ${STATE_COLORS.warn}; --neg: ${STATE_COLORS.bad};`;
-  var SURFACE_TOKENS = "--bg: #0B121D; --surface: #0D1522; --raised: #111B2A;";
-  var LINE_TOKENS = "--line: #1F2C40; --line-soft: #16202F; --faint: #4A5B72;";
-  var STRONG_LINE = "--line-strong: #2C3E57; --line-hover: #47607D; --accent-line: #2C5A73; --hover: #1D3350;";
-  var TEXT_TOKENS = `--text: #E6EDF5; --text-2: #C9D4E2; --label: #9AA9BC; --muted: #8A9BB0; --quiet: #708A9D;
-  --accent-hi: #8BE4F2; --link: #6F9FC8;
+  var SURFACE_TOKENS = "--bg: #0F141B; --surface: #1A2230; --raised: #151C26; --band: #1B2A44; --band-2: #22314D;";
+  var LINE_TOKENS = "--line: #263142; --line-soft: #1D2531; --faint: #4A5566;";
+  var STRONG_LINE = "--line-strong: #33415A; --line-hover: #56657C; --accent-line: #8A7420; --hover: #212B3A;";
+  var TEXT_TOKENS = `--text: #ECE6D6; --text-2: #D2CCBE; --label: #A9B2BE; --muted: #9AA3AE; --quiet: #8A95A3; --on-band: #D3DAE4;
+  --accent-hi: #F7DF7A; --on-accent: #1A1606; --link: #8FB4D8;
   --q-building: #FF8200; --q-research: #32FB2F; --q-ship: #FFEB00; --q-lfbuilding: #FF79BD; --q-lfresearch: #42AFFF;
   --m: ${RES_COLORS.metal}; --c: ${RES_COLORS.crystal}; --d: ${RES_COLORS.deuterium}; --dm: ${RES_COLORS.darkMatter};
   --fresh: #38C56E; --warm: #E3BB28; --old: #EF7676;
-  --accent: ${STATE_COLORS.accent}; --accent-soft: #12283A; --warn: ${STATE_COLORS.warn}; --ok: ${STATE_COLORS.ok}; --bad: ${STATE_COLORS.bad};
-  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);`;
+  --accent: ${STATE_COLORS.accent}; --accent-soft: #2A2614; --warn: ${STATE_COLORS.warn}; --ok: ${STATE_COLORS.ok}; --bad: ${STATE_COLORS.bad};
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --display: Bahnschrift, "DIN Alternate", "Roboto Condensed", "sans-serif-condensed", "Liberation Sans Narrow", "Arial Narrow", "Open Sans Condensed", "Fira Sans Condensed", "DejaVu Sans Condensed", sans-serif;
+  --body: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;`;
   var WINDOW_TOKENS = `${SURFACE_TOKENS} ${LINE_TOKENS} ${STRONG_LINE}
   ${TEXT_TOKENS}`;
   var WINDOW_TOKENS_NO_LINES = `${SURFACE_TOKENS} ${STRONG_LINE}
@@ -4651,74 +4705,76 @@
 :host {
   all: initial;
   ${WINDOW_TOKENS}
-  --mono: Consolas, "JetBrains Mono", monospace;
+  --mono: var(--display);
   --panel-w: 860px;
 }
 * { box-sizing: border-box; }
 .backdrop {
   position: fixed; inset: 0; z-index: 1000001; display: flex; justify-content: center; align-items: flex-start;
-  padding: 40px 16px; background: rgba(3,6,12,0.72); overflow-y: auto;
-  font: 12px/1.35 Arial, Helvetica, sans-serif; color: var(--text-2);
+  padding: 40px 16px; background: rgba(4,6,10,0.74); overflow-y: auto;
+  font: 13px/1.4 var(--body); color: var(--text-2);
 }
-/* The planet menu's language: a dark column of tiles (#111B2A, hairline #1F2C40, 6-7px corners),
-   small grey labels, monospace numbers, cyan for what is selected. */
+/* The board: one printed sheet, its head and tab strip on the board-blue band, the zones below as fields of colour. */
 .panel {
-  width: min(var(--panel-w), 100%); display: flex; flex-direction: column; gap: 8px; padding: 8px;
-  border: 1px solid var(--line); border-radius: 9px; background: var(--bg); box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  width: min(var(--panel-w), 100%); display: flex; flex-direction: column; gap: 10px; padding: 0 0 14px;
+  border-radius: 6px; background: var(--raised); box-shadow: 0 24px 64px rgba(0,0,0,0.6); overflow: hidden;
   animation: fut-panel-in 200ms var(--ease-out);
 }
+.panel > :not(.head):not(.tabs) { margin-left: 14px; margin-right: 14px; }
 /* Opening: the window settles in from just below, the page dims behind it. Closing is instant. */
 .backdrop { animation: fut-fade-in 160ms var(--ease-out); }
 @keyframes fut-panel-in { from { opacity: 0; transform: translateY(6px) scale(0.985); } }
 @keyframes fut-fade-in { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .panel { animation-name: fut-fade-in; } }
-.head { display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 4px 4px 4px 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); }
-.titles { flex: 1; display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; min-width: 0; }
-h2 { margin: 0; font-size: 14px; font-weight: 700; color: var(--text); }
-h3 { margin: 0 0 6px; font-size: 12px; font-weight: 700; color: var(--text); }
-h4 { margin: 10px 0 4px; font-size: 11px; font-weight: 700; color: var(--text-2); }
-.sub { color: var(--muted); font-size: 11px; }
+.head { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 8px 10px 8px 18px; background: var(--band); }
+.head + .tabs { margin-top: -10px; }
+.titles { flex: 1; display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 14px; min-width: 0; }
+h2 { margin: 0; font: 600 condensed 19px/1.2 var(--display); color: var(--text); }
+h3 { margin: 0 0 8px; font: 600 condensed 15px/1.2 var(--display); color: var(--text); }
+h4 { margin: 12px 0 4px; font: 600 condensed 13px/1.2 var(--display); color: var(--text-2); }
+.sub { color: var(--on-band); font-size: 12px; }
 .close {
-  flex: none; width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 5px; border: 0; background: none; color: var(--muted); line-height: 1; cursor: pointer;
+  flex: none; width: 30px; height: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 4px; border: 0; background: none; color: var(--on-band); line-height: 1; cursor: pointer;
 }
-.close:hover { background: #16243A; color: var(--text); }
+.close:hover { background: var(--band-2); color: var(--text); }
 .mono { font-family: var(--mono); }
 .m { color: var(--m); } .c { color: var(--c); } .d { color: var(--d); } .dm { color: var(--dm); }
 .neg { color: var(--bad); } .pos { color: var(--ok); }
 
-/* Tabs: one segmented strip, the one in use lit like the selected planet. */
-.tabs { display: flex; flex-wrap: wrap; gap: 0; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); overflow: hidden; }
-.tab { flex: 1 0 auto; height: 28px; padding: 0 12px; border: 0; border-right: 1px solid var(--line); background: none; color: var(--muted); font: 12px Arial, sans-serif; cursor: pointer; }
-.tab:last-child { border-right: 0; }
-.tab:hover { background: #111D2D; color: var(--text); }
-.tab[aria-pressed="true"] { background: var(--accent-soft); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
+/* Tabs: printed tabs on the band; the one in use is cut from the board itself, its top edge in pawn yellow. */
+.tabs { display: flex; flex-wrap: wrap; gap: 2px; padding: 0 14px; background: var(--band); }
+.tab { flex: 0 1 auto; height: 34px; padding: 0 16px; border: 0; border-radius: 5px 5px 0 0; background: var(--band-2); color: var(--on-band); font: 600 condensed 13px var(--display); cursor: pointer; }
+.tab:hover { color: var(--text); background: #29395A; }
+.tab[aria-pressed="true"] { background: var(--raised); color: var(--text); box-shadow: inset 0 3px 0 var(--accent); }
 
-/* Key numbers: the planet menu toolbar, one cell each. */
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); overflow: hidden; }
-.kpi { display: flex; flex-direction: column; gap: 1px; padding: 6px 10px 7px; min-width: 0; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
-.kpi .label { color: var(--muted); font-size: 11px; }
-.kpi .value { font: 700 15px/18px var(--mono); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kpi .note, .kpi .detail { color: var(--muted); font-size: 11px; }
-.kpi.accent .value { color: var(--accent); }
+/* Key numbers: each one printed once, label above, figure in the board's display face. */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 2px; }
+.kpi { display: flex; flex-direction: column; gap: 2px; padding: 8px 12px 9px; min-width: 0; background: var(--surface); }
+.kpi .label { color: var(--label); font-size: 12px; }
+.kpi .value { font: 600 condensed 19px/22px var(--display); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi .note, .kpi .detail { color: var(--muted); font-size: 12px; }
+.kpi.accent .value { color: var(--text); }
 .kpi.warn .value { color: var(--warn); }
 
-/* Sections: tiles, like the planet rows. */
-.card { padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); min-width: 0; }
+/* Zones: fields of colour on the board, never bordered boxes. */
+.card { padding: 12px 14px; background: var(--surface); min-width: 0; }
 /* On/off switch: a track with a knob, lit and to the right when on (a checked input before it, or aria-checked on its button). */
 .sw-track { position: relative; flex: none; width: 30px; height: 16px; border-radius: 8px; background: var(--faint); transition: background-color 120ms ease-out; }
 .sw-track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--text-2); transition: transform 120ms ease-out; }
 input:checked + .sw-track, [aria-checked="true"] > .sw-track { background: var(--accent); }
-input:checked + .sw-track::after, [aria-checked="true"] > .sw-track::after { transform: translateX(14px); background: var(--bg); }
+input:checked + .sw-track::after, [aria-checked="true"] > .sw-track::after { transform: translateX(14px); background: var(--on-accent); }
 @media (prefers-reduced-motion: reduce) { .sw-track, .sw-track::after { transition: none; } }
-.hint { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
-.empty { margin: 0; padding: 14px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 7px; }
+.hint { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+.empty { margin: 0; padding: 16px; text-align: center; color: var(--muted); background: var(--surface); }
 
-/* Buttons: the settings chips. One filled action, ghost for the rest. */
-.act { height: 24px; padding: 0 10px; border: 1px solid #2B6F7D; border-radius: 5px; background: var(--accent-soft); color: var(--text); font: 700 11px Arial, sans-serif; cursor: pointer; }
-.act:hover { border-color: var(--accent); }
-.act.ghost { border-color: var(--line); background: #0A111C; color: #B4C2D3; font-weight: 400; }
-.act.ghost:hover, .act.danger { border-color: var(--bad); color: var(--bad); }
+/* Buttons as printed marks: the one action filled in pawn yellow, the rest a 1px outline; pressed fills, disabled is struck. */
+.act { height: 26px; padding: 0 12px; border: 1px solid var(--accent); border-radius: 4px; background: var(--accent); color: var(--on-accent); font: 600 condensed 12px var(--display); cursor: pointer; }
+.act:hover { background: var(--accent-hi); border-color: var(--accent-hi); }
+.act.ghost { border-color: var(--line-strong); background: none; color: var(--text-2); font-weight: 500; }
+.act.ghost:hover { border-color: var(--line-hover); color: var(--text); }
+.act.danger, .act.ghost.danger:hover { border-color: var(--bad); background: none; color: var(--bad); }
+.act:disabled { border-color: var(--line); background: none; color: var(--quiet); text-decoration: line-through; cursor: default; }
 /* Press feedback: anything pressable gives a little under the pointer. */
 .act, .tab, .close, .seg button { transition: transform 140ms var(--ease-out); }
 .act:active, .tab:active, .close:active, .seg button:active { transform: scale(0.97); }
@@ -4729,9 +4785,9 @@ input.sw:focus-visible + .sw-track { outline: 2px solid var(--accent); outline-o
 
 /* Browser surfaces. */
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.backdrop, .scroll, .table-wrap { scrollbar-color: #2A3B55 var(--bg); scrollbar-width: thin; }
-::selection { background: #2B6F7D; color: #fff; }
-.num, td, .value, .kpi-line { font-variant-numeric: tabular-nums; }
+.backdrop, .scroll, .table-wrap { scrollbar-color: var(--line-strong) var(--raised); scrollbar-width: thin; }
+::selection { background: #5A4E1A; color: var(--text); }
+.num, td, .value, .kpi-line, .roi, .prod-val, .cost, .scale, .hours, .facts { font-variant-numeric: tabular-nums; }
 `;
 
   // src/core/icons.ts
@@ -9604,7 +9660,7 @@ input.field { width: 190px; }
     const stale = rows.filter((r) => r.ageMinutes > STALE_MINUTES);
     const out = [];
     const push = (level2, key, list) => {
-      if (list.length) out.push({ level: level2, key, count: list.length, names: list.map(label) });
+      if (list.length) out.push({ level: level2, key, count: list.length, names: list.map(label), moons: list.map((r) => r.type === "moon") });
     };
     push("warn", "alert.missing", missing2);
     push("warn", "alert.full", full);
@@ -10925,55 +10981,77 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 .moon-ico { margin-right: 4px; vertical-align: -1px; color: var(--muted); }
 .kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 
-.cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.prod { margin-bottom: 10px; }
-.prod-top { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 4px; font-size: 12px; }
-.track { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
-.fill { height: 100%; border-radius: 3px; background: currentColor; }
-.prod.m { color: var(--m); } .prod.c { color: var(--c); } .prod.d { color: var(--d); }
-.prod .prod-top span:first-child { color: var(--text); }
+.cols { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr) minmax(0, 0.9fr); gap: 2px; }
+/* Resource tokens: discs in the game's resource colours, the way a board game prints costs. */
+.tok { display: inline-block; flex: none; width: 11px; height: 11px; border-radius: 50%; background: currentColor; vertical-align: -1px; }
+.tok.m { color: var(--m); } .tok.c { color: var(--c); } .tok.d { color: var(--d); }
+/* Income tracks: 20 printed cells on one scale, the pawn on today's income, an outline on the next rung. */
+.prod { margin-bottom: 14px; }
+.prod-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.prod-name { display: inline-flex; align-items: center; gap: 7px; font: 600 condensed 14px var(--display); color: var(--text); }
+.prod-val { font: 600 condensed 18px var(--display); color: var(--text); }
+.prod-val small { margin-left: 2px; font: 12px var(--body); color: var(--label); }
+.prod-val small.next { margin-left: 8px; }
+.prod-total { margin: 14px 0 0; color: var(--label); font-size: 12px; }
+.prod-total b { font: 600 condensed 18px var(--display); color: var(--text); margin-right: 2px; }
+/* The account's figures as one printed score line, each labelled once. */
+.facts { display: flex; flex-wrap: wrap; gap: 4px 22px; margin-top: 2px; margin-bottom: 0; color: var(--label); font-size: 12px; }
+.facts b { font: 600 condensed 18px var(--display); color: var(--text); }
+.fact { cursor: default; }
+.track { display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); gap: 2px; height: 18px; }
+.track i { background: var(--raised); box-shadow: inset 0 0 0 1px var(--line-strong); }
+.track i.f { background: var(--faint); box-shadow: none; }
+.track i.me { background: var(--accent); }
+.track i.gh { box-shadow: inset 0 0 0 1.5px var(--accent); }
+.scale { display: flex; justify-content: space-between; margin-top: -8px; color: var(--quiet); font-size: 11px; }
 .ok { margin: 0; color: var(--ok); }
-.alert { display: flex; gap: 8px; padding: 6px 0; border-top: 1px solid var(--line); }
-.alert:first-of-type { border-top: 0; }
-.alert .dot { flex-shrink: 0; width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; background: var(--c); }
-.alert.warn .dot { background: var(--warn); }
-.alert div { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.alert strong { font-size: 13px; }
-.alert span { color: var(--muted); font-size: 12px; }
+/* To check: a field each, its kind printed as the top edge (orange = act on it, blue = worth a look). */
+.alert { display: flex; flex-direction: column; gap: 2px; margin-bottom: 2px; padding: 10px 12px; background: var(--raised); box-shadow: inset 0 3px 0 var(--c); }
+.alert.warn { box-shadow: inset 0 3px 0 var(--warn); }
+.alert .dot { display: none; }
+.alert div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.alert strong { font: 600 condensed 14px var(--display); color: var(--text); }
+.alert span { color: var(--label); font-size: 12px; }
 
 .table-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .table-head h3 { margin: 0; }
 .chip {
-  height: 26px; padding: 0 10px; border-radius: 7px; border: 1px solid var(--line); background: var(--bg);
-  color: var(--text-2); font: 12px Arial, sans-serif; cursor: pointer;
+  height: 26px; padding: 0 10px; border-radius: 4px; border: 1px solid var(--line-strong); background: none;
+  color: var(--text-2); font: 12px var(--body); cursor: pointer;
 }
 .chip:hover { border-color: var(--accent); color: var(--text); }
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
-th { text-align: left; padding: 6px 8px; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { text-align: left; padding: 6px 8px; color: var(--label); font: 600 condensed 12px var(--display); border-bottom: 1px solid var(--line); white-space: nowrap; }
 th.num, td.num { text-align: right; }
 .sort { all: unset; cursor: pointer; }
 .sort:hover { color: var(--text); }
 td { padding: 5px 8px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
-tr.moon td { background: rgba(22,36,58,0.5); color: var(--text-2); }
-tbody tr:hover td { background: rgba(79,209,232,0.07); }
+tr.moon td { background: rgba(15,20,27,0.35); color: var(--text-2); }
+tbody tr:hover td { background: var(--hover); }
 td.name a { color: var(--text); text-decoration: none; font-weight: 700; }
 td.name a:hover { color: var(--accent-hi); }
 tr.moon td.name a { font-weight: 400; color: var(--text-2); }
-.coords { margin-left: 6px; color: var(--muted); font-family: "JetBrains Mono", Consolas, monospace; font-size: 11px; }
-.tag { margin-left: 6px; padding: 0 5px; border-radius: 4px; background: rgba(245,181,71,0.15); color: var(--warn); font-size: 10px; }
+.coords { margin-left: 6px; color: var(--muted); font: condensed 12px var(--display); }
+.tag { margin-left: 6px; padding: 0 5px; border-radius: 3px; box-shadow: inset 0 0 0 1px var(--warn); color: var(--warn); font-size: 11px; }
 td.m { color: var(--m); } td.c { color: var(--c); } td.d { color: var(--d); }
 td.full { color: var(--warn) !important; font-weight: 700; }
 .age.fresh { color: var(--fresh); } .age.warm { color: var(--warm); } .age.old { color: var(--old); }
 tfoot td { border-top: 1px solid var(--line); border-bottom: 0; font-weight: 700; }
 
-.move { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-top: 1px solid var(--line); }
-.move:first-of-type { border-top: 0; }
-.move .n { width: 20px; height: 20px; flex-shrink: 0; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-.move-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.move-text strong { font-size: 13px; }
-.move-text span { color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.roi { color: var(--accent); font-weight: 700; white-space: nowrap; }
+/* The investment ladder: one printed rung per step, its cost in tokens, the payback large on the right.
+   The rung under the pointer stays full, the others step down a tone. */
+.move { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--raised); transition: opacity 140ms ease; }
+.move + .move { margin-top: 2px; }
+@media (hover: hover) and (pointer: fine) { .card:hover > .move:not(:hover) { opacity: 0.72; } }
+.move .n { width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; background: var(--accent); color: var(--on-accent); font: 600 condensed 12px var(--display); display: flex; align-items: center; justify-content: center; }
+.move-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.move-text strong { font: 600 condensed 14px var(--display); color: var(--text); }
+.move-text .meta { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; color: var(--label); font-size: 12px; white-space: nowrap; }
+.cost { display: inline-flex; flex-wrap: wrap; gap: 4px 10px; }
+.cost > span { display: inline-flex; align-items: center; gap: 4px; color: var(--text-2); }
+.roi { flex: none; font: 600 condensed 22px/1 var(--display); color: var(--text); white-space: nowrap; text-align: right; }
+.roi small { margin-left: 3px; font: 12px var(--body); color: var(--label); }
 td.queue { white-space: nowrap; }
 .q { display: inline-block; margin-right: 4px; padding: 1px 6px; border-radius: 4px; font-size: 11px; border: 1px solid color-mix(in srgb, currentColor 45%, transparent); background: none; }
 .q-building { color: var(--q-building); } .q-research { color: var(--q-research); } .q-ship { color: var(--q-ship); }
@@ -11012,31 +11090,32 @@ td.guess { font-style: italic; opacity: 0.7; }
 .matrix.lf td.tech { max-width: none; }
 
 /* Research: one tile per technology, its picture over its level. */
-.levels { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px; }
-.lv { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px 2px 4px; border: 1px solid var(--line-soft); border-radius: 6px; background: var(--surface); min-width: 0; }
-.lv b { font-size: 13px; color: var(--text); }
+.levels { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 2px; }
+.lv { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 2px 5px; background: var(--raised); min-width: 0; }
+.lv b { font: 600 condensed 14px var(--display); color: var(--text); }
 .lv .lv-name { height: 40px; display: flex; align-items: center; text-align: center; color: var(--text-2); font-size: 10px; line-height: 1.15; overflow: hidden; }
 .lv.zero { opacity: 0.45; } .lv.zero b { color: var(--muted); }
 .move .pic { border-radius: 5px; }
 .head-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
 .head-toggle:hover, .head-toggle:focus-visible { color: var(--accent); }
-.needs { margin: 0 0 8px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--text-2); font-size: 12px; }
+.needs { margin: 0 0 8px; padding: 10px 12px; background: var(--surface); box-shadow: inset 0 3px 0 var(--warn); color: var(--text-2); font-size: 12px; }
 .needs p { margin: 4px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .needs .chip { display: inline-flex; align-items: center; height: 22px; text-decoration: none; }
 .move-text .guess { color: var(--warm); font-style: normal; }
 .move-text .ok { color: var(--fresh); font-style: normal; }
 .move.done { opacity: 0.55; }
 .pls { display: flex; flex-wrap: wrap; gap: 4px; margin: 3px 0 2px; }
-.pl { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border: 1px solid var(--line); border-radius: 5px; background: var(--bg); color: var(--text-2); font-size: 11px; text-decoration: none; white-space: nowrap; }
+.pl { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border: 1px solid var(--line-strong); border-radius: 3px; background: none; color: var(--text-2); font-size: 12px; text-decoration: none; white-space: nowrap; }
+.pl.more { cursor: pointer; font: inherit; font-size: 12px; }
 .pl:hover, .pl:focus-visible { border-color: var(--accent); color: var(--text); }
 /* Estimated levels: a dashed amber edge (the title says why), the name stays readable. */
-.move-text .pl.guess:not(.done) { border-style: dashed; border-color: #6B5618; color: var(--text-2); }
+.move-text .pl.guess:not(.done) { border-style: dashed; border-color: var(--accent-line); color: var(--text-2); }
 .move-text .pl.guess:not(.done):hover, .move-text .pl.guess:not(.done):focus-visible { border-color: var(--accent); color: var(--text); }
-.pl.done { color: #5F7189; text-decoration: line-through; border-style: dashed; }
+.pl.done { color: var(--quiet); text-decoration: line-through; border-style: dashed; }
 
 /* Planets | moons switch on the ships and defence pages. */
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
-.seg button { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border: 0; background: var(--bg); color: var(--muted); font: 12px Arial, sans-serif; cursor: pointer; }
+.seg button { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border: 0; background: var(--bg); color: var(--muted); font: 12px var(--body); cursor: pointer; }
 .seg button + button { border-left: 1px solid var(--line); }
 .seg button i { font-style: normal; font-size: 11px; color: var(--muted); }
 .seg button:hover { color: var(--text); }
@@ -11048,12 +11127,12 @@ td.guess { font-style: italic; opacity: 0.7; }
 
 /* Body picker: the same two columns as the fleet bar's destination list. */
 .bpick { position: relative; }
-.bpick-btn { display: inline-flex; align-items: center; gap: 8px; height: 28px; min-width: 200px; padding: 0 8px 0 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text); font: 12px Arial, sans-serif; cursor: pointer; }
+.bpick-btn { display: inline-flex; align-items: center; gap: 8px; height: 28px; min-width: 200px; padding: 0 8px 0 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text); font: 12px var(--body); cursor: pointer; }
 .bpick-btn small { margin-left: auto; color: var(--muted); font-size: 11px; }
 .bpick-btn:hover, .bpick-btn[aria-expanded="true"] { border-color: var(--accent); }
 .bmenu { position: absolute; z-index: 5; top: 32px; left: 0; min-width: 250px; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; display: grid; grid-template-columns: minmax(0, 1fr) 40px; gap: 2px; padding: 4px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
 .bmenu[hidden] { display: none; }
-.bmenu button { display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 8px; border: 1px solid transparent; border-radius: 4px; background: var(--surface); color: var(--text-2); font: 12px Arial, sans-serif; text-align: left; white-space: nowrap; cursor: pointer; }
+.bmenu button { display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 8px; border: 1px solid transparent; border-radius: 4px; background: var(--surface); color: var(--text-2); font: 12px var(--body); text-align: left; white-space: nowrap; cursor: pointer; }
 .bmenu button small { margin-left: auto; color: var(--muted); font-size: 11px; }
 .bmenu button.moon { justify-content: center; padding: 0; color: var(--muted); }
 .bmenu button:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
@@ -11062,13 +11141,13 @@ td.guess { font-style: italic; opacity: 0.7; }
 
 /* Scrap calculator */
 .scrap-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
-.field { height: 28px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text); font: 12px Arial, sans-serif; }
+.field { height: 28px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text); font: 12px var(--body); }
 .field:focus { border-color: var(--accent); outline: none; }
 .field-label { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
 .field.rate { width: 64px; text-align: right; }
 .field.qty { width: 110px; text-align: right; font-family: "JetBrains Mono", Consolas, monospace; }
 table.scrap td.unit { padding: 2px 8px 2px 2px; }
-table.scrap .unit-label { display: flex; align-items: center; gap: 8px; width: 100%; padding: 2px 8px 2px 2px; border: 1px solid transparent; border-radius: 6px; background: none; color: var(--text-2); font: 12px Arial, sans-serif; text-align: left; cursor: pointer; }
+table.scrap .unit-label { display: flex; align-items: center; gap: 8px; width: 100%; padding: 2px 8px 2px 2px; border: 1px solid transparent; border-radius: 6px; background: none; color: var(--text-2); font: 12px var(--body); text-align: left; cursor: pointer; }
 table.scrap .unit-label:hover { border-color: var(--line); color: var(--text); }
 table.scrap .unit-label[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
 .msu { color: var(--accent); margin-left: 4px; }
@@ -11078,8 +11157,8 @@ table.scrap .unit-label[aria-pressed="true"] { border-color: var(--accent); back
   .cols { grid-template-columns: 1fr; }
     }
 .charts { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 12px; }
-.chart { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
-.chart figcaption { margin-bottom: 6px; color: var(--text); font-weight: 700; font-size: 13px; }
+.chart { margin: 0; padding: 12px 14px; background: var(--surface); }
+.chart figcaption { margin-bottom: 6px; color: var(--text); font: 600 condensed 14px var(--display); }
 .plot { position: relative; }
 .chart svg { display: block; width: 100%; height: auto; overflow: visible; }
 .chart .grid { stroke: var(--line-soft); stroke-width: 1; }
@@ -11087,10 +11166,17 @@ table.scrap .unit-label[aria-pressed="true"] { border-color: var(--accent); back
 .chart .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .chart .cross { stroke: var(--faint); stroke-width: 1; }
 .chart .dot { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
-.chart .tip { position: absolute; top: -4px; transform: translateX(-50%); padding: 3px 7px; border-radius: 6px; background: var(--raised); border: 1px solid var(--line); color: var(--text); font: 11px var(--mono); white-space: nowrap; pointer-events: none; }
+.chart .tip { position: absolute; top: -4px; transform: translateX(-50%); padding: 3px 7px; border-radius: 3px; background: var(--raised); border: 1px solid var(--line); color: var(--text); font: 11px var(--mono); white-space: nowrap; pointer-events: none; }
 .kpi .value.neg, td.neg { color: var(--bad); }
 td.pos { color: var(--ok); }
 table.queues td.kind { color: var(--muted); }
+/* Queues on one hour scale: the tape's length is the time still needed, in the game's queue colour. */
+table.queues td.left, table.queues th.left { width: 38%; }
+.tape { height: 12px; background: var(--line-soft); }
+.tape i { display: block; height: 100%; background: color-mix(in srgb, currentColor 30%, transparent); box-shadow: inset 0 0 0 1px currentColor; }
+.tape.q-building { color: var(--q-building); } .tape.q-research { color: var(--q-research); } .tape.q-ship { color: var(--q-ship); }
+.tape.q-lfbuilding { color: var(--q-lfbuilding); } .tape.q-lfresearch { color: var(--q-lfresearch); }
+.hours { display: flex; justify-content: space-between; color: var(--quiet); font: 11px var(--body); }
 table.queues td.acts { width: 1%; text-align: right; }
 .fut-bell { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); cursor: pointer; }
 .fut-bell:hover, .fut-bell:focus-visible { border-color: var(--accent); color: var(--text); }
@@ -11132,6 +11218,10 @@ table.queues td.acts { width: 1%; text-align: right; }
   }
   var level = (b, id) => b.levels[String(id)] ?? 0;
   var numLocale = "it";
+  var niceCeil = (v) => {
+    const p = 10 ** Math.floor(Math.log10(v));
+    return [1, 2, 5, 10].map((k) => k * p).find((x) => x >= v) ?? 10 * p;
+  };
   var count = (n) => n < 1e6 ? n.toLocaleString(numLocale) : formatUnits(n, numLocale);
   function unitsValue2(b, ids) {
     let total = 0;
@@ -11335,54 +11425,62 @@ table.queues td.acts { width: 1%; text-align: right; }
     const rows = bodyRows(o.snapshot, o.entries, o.now, o.queues ?? null);
     const sum = summarize(rows);
     const alerts = accountAlerts(rows, o.snapshot, o.entries);
-    const kpis = h3("div", "kpis");
-    const kpi = (label, value, note, cls = "") => {
-      const box = h3("div", `kpi ${cls}`);
-      box.append(h3("span", "label", label), h3("span", "value", value), h3("span", "note", note));
-      kpis.append(box);
+    const plural = new Intl.PluralRules(o.locale);
+    const facts = h3("p", "facts");
+    const fact = (value, label, title) => {
+      const f = h3("span", "fact");
+      f.append(h3("b", "", value), document.createTextNode(` ${label}`));
+      if (title) f.title = title;
+      facts.append(f);
     };
-    if (o.score) {
-      const rank = o.score.rank !== null ? t("dash.rank", { rank: o.score.rank, of: o.score.of ?? "?" }) : "";
-      kpi(t("dash.points"), o.score.points.toLocaleString(o.locale), rank);
-    } else kpi(t("dash.points"), "\u2014", t("dash.pointsHint"));
-    kpi(t("dash.stock"), fmt(msu2(sum.stock)), `${fmt(sum.stock.metal)} \xB7 ${fmt(sum.stock.crystal)} \xB7 ${fmt(sum.stock.deuterium)}`, "accent");
-    kpi(t("dash.prodDayK"), `+${fmt(msu2(sum.perHour) * 24)}`, t("dash.prodHourNote", { value: fmt(msu2(sum.perHour)) }), "accent");
+    if (o.score) fact(o.score.points.toLocaleString(o.locale), t("dash.factPoints"));
+    if (o.score?.rank != null) fact(`${o.score.rank}\xB0`, t("dash.factRank", { of: o.score.of ?? "?" }));
+    fact(fmt(msu2(sum.stock)), t("dash.factStock"), `${fmt(sum.stock.metal)} \xB7 ${fmt(sum.stock.crystal)} \xB7 ${fmt(sum.stock.deuterium)}`);
     const fleet = fleetValueOf(ctx.bodies);
     let def = { value: 0, count: 0 };
     for (const b of ctx.bodies) {
       const d = unitsValue2(b, DEFENCES.filter((id) => id < 500));
       def = { value: def.value + d.value, count: def.count + d.count };
     }
-    kpi(t("dash.fleetValue"), fmt(fleet.value), t("dash.unitsNote", { n: fmt(fleet.count) }));
-    kpi(t("dash.defValue"), fmt(def.value), t("dash.unitsNote", { n: fmt(def.count) }));
-    const running = /* @__PURE__ */ new Map();
-    let busy = 0;
-    for (const r of rows) {
-      const items = activeItems(o.queues?.bodies[String(r.id)], o.now);
-      if (items.length) busy++;
-      for (const k of new Set(items.map((i) => i.kind))) running.set(k, (running.get(k) ?? 0) + 1);
-    }
-    const breakdown = QUEUE_KINDS.filter((k) => running.has(k)).map((k) => `${running.get(k)} ${t(`queue.${k}`).toLowerCase()}`).join(" \xB7 ");
-    kpi(t("dash.queues"), o.queues ? String(busy) : "\u2014", o.queues ? breakdown || t("dash.queuesNone") : t("dash.queuesUnknown"), "accent");
-    parent.append(kpis);
+    fact(fmt(fleet.value), t("dash.factFleet"), t("dash.unitsNote", { n: fmt(fleet.count) }));
+    fact(fmt(def.value), t("dash.factDefence"), t("dash.unitsNote", { n: fmt(def.count) }));
+    parent.append(facts);
     const cols = h3("div", "cols");
     const prod = h3("div", "card");
     prod.append(h3("h3", "", t("dash.production")));
-    const maxRate = Math.max(1, sum.perHour.metal, sum.perHour.crystal * 1.5, sum.perHour.deuterium * 3);
-    const bar = (label, perHour, weight, cls) => {
+    const next = groupSteps(buildOrder(ctx, 15))[0];
+    const nextGain = next ? next.steps.reduce((g, st) => ({ metal: g.metal + st.gain.metal, crystal: g.crystal + st.gain.crystal, deuterium: g.deuterium + st.gain.deuterium }), { metal: 0, crystal: 0, deuterium: 0 }) : null;
+    const scaleTop = niceCeil(Math.max(1, sum.perHour.metal, sum.perHour.crystal, sum.perHour.deuterium) * 24 * 1.15);
+    const CELLS = 20;
+    const cellOf = (perDay) => Math.min(CELLS - 1, Math.max(0, Math.ceil(perDay / scaleTop * CELLS) - 1));
+    const bar = (label, perHour, gainHour, cls) => {
       const line = h3("div", `prod ${cls}`);
       const top = h3("div", "prod-top");
-      top.append(h3("span", "", label), h3("span", "mono", `+${fmt(perHour * 24)}/${t("dash.dayShort")}`));
+      const name = h3("span", "prod-name");
+      name.append(h3("i", `tok ${cls}`), document.createTextNode(label));
+      const value = h3("span", "prod-val", `+${fmt(perHour * 24)}`);
+      value.append(h3("small", "", `/${t("dash.dayShort")}`));
+      if (gainHour > 0) value.append(h3("small", "next", `\u2192 +${fmt(gainHour * 24)}`));
+      top.append(name, value);
       const track = h3("div", "track");
-      const fill = h3("div", "fill");
-      fill.style.width = `${Math.round(perHour * weight / maxRate * 100)}%`;
-      track.append(fill);
+      track.setAttribute("role", "img");
+      const here = cellOf(perHour * 24);
+      const ghost = gainHour > 0 ? cellOf((perHour + gainHour) * 24) : -1;
+      track.setAttribute("aria-label", `${label}: +${fmt(perHour * 24)}/${t("dash.dayShort")}`);
+      if (gainHour > 0) track.title = t("dash.nextRung", { value: `+${fmt(gainHour * 24)}` });
+      for (let i = 0; i < CELLS; i++) track.append(h3("i", i < here ? "f" : i === here ? "me" : i === ghost && ghost > here ? "gh" : ""));
       line.append(top, track);
       prod.append(line);
     };
-    bar(t("res.metal"), sum.perHour.metal, 1, "m");
-    bar(t("res.crystal"), sum.perHour.crystal, 1.5, "c");
-    bar(t("res.deuterium"), sum.perHour.deuterium, 3, "d");
+    bar(t("res.metal"), sum.perHour.metal, nextGain?.metal ?? 0, "m");
+    bar(t("res.crystal"), sum.perHour.crystal, nextGain?.crystal ?? 0, "c");
+    bar(t("res.deuterium"), sum.perHour.deuterium, nextGain?.deuterium ?? 0, "d");
+    const scale = h3("div", "scale");
+    scale.append(h3("span", "", "0"), h3("span", "", fmt(scaleTop / 2)), h3("span", "", fmt(scaleTop)));
+    prod.append(scale);
+    const total = h3("p", "prod-total");
+    total.append(h3("b", "", `+${fmt(msu2(sum.perHour) * 24)}`), document.createTextNode(` ${t("dash.factProdDay")} \xB7 ${t("dash.prodHourNote", { value: fmt(msu2(sum.perHour)) })}`));
+    prod.append(total);
     const bySpecies = /* @__PURE__ */ new Map();
     for (const b of ctx.bodies) if (b.type === "planet" && b.species) bySpecies.set(b.species, (bySpecies.get(b.species) ?? 0) + 1);
     if (bySpecies.size) {
@@ -11398,8 +11496,9 @@ table.queues td.acts { width: 1%; text-align: right; }
       const item = h3("div", `alert ${a.level}`);
       item.append(h3("span", "dot"));
       const text = h3("div", "");
-      text.append(h3("strong", "", t(a.key, { count: a.count })));
-      text.append(h3("span", "", a.names.slice(0, 6).join(", ") + (a.names.length > 6 ? ` +${a.names.length - 6}` : "")));
+      text.append(h3("strong", "", t(plural.select(a.count) === "one" ? `${a.key}.one` : a.key, { count: a.count })));
+      const named = a.names.map((n, i) => a.moons[i] ? `${n} ${t("dash.moon").toLowerCase()}` : n);
+      text.append(h3("span", "", named.slice(0, 6).join(", ") + (named.length > 6 ? ` +${named.length - 6}` : "")));
       item.append(text);
       checks.append(item);
     }
@@ -11409,9 +11508,19 @@ table.queues td.acts { width: 1%; text-align: right; }
     for (const b of ctx.bodies) for (const item of activeItems(o.queues?.bodies[String(b.id)], o.now)) inQueue.push({ body: b, item });
     if (inQueue.length) {
       inQueue.sort((a, b) => a.item.end - b.item.end);
+      const span = Math.max(12, Math.ceil(Math.max(...inQueue.map((q) => (q.item.end - o.now) / 36e5)) / 12) * 12);
       const qs = section(parent, t("dash.queuesTitle"), o.bell ? t("dash.queuesHint") : void 0);
       const wrap = h3("div", "table-wrap");
       const table = h3("table", "queues");
+      const thead = h3("thead");
+      const hr = h3("tr");
+      const scaleTh = h3("th", "left");
+      const marks = h3("div", "hours");
+      for (const v of [0, span / 3, span * 2 / 3, span]) marks.append(h3("span", "", v ? `${Math.round(v)} h` : t("dash.now")));
+      scaleTh.append(marks);
+      hr.append(h3("th"), h3("th"), h3("th"), scaleTh, h3("th"), h3("th"));
+      thead.append(hr);
+      table.append(thead);
       const tbody = h3("tbody");
       for (const { body: b, item } of inQueue) {
         const tr = h3("tr", b.type === "moon" ? "moon" : "");
@@ -11422,7 +11531,13 @@ table.queues td.acts { width: 1%; text-align: right; }
         end.title = new Date(item.end).toLocaleString(o.locale);
         const bell = h3("td", "acts");
         if (o.bell) bell.append(o.bell({ id: `q:${b.id}:${item.kind}:${item.name}:${item.level}:${Math.round(item.end / 6e4)}`, label: `${b.name}: ${what}`, at: item.end }));
-        tr.append(name, h3("td", "kind", t(`queue.${item.kind}`)), h3("td", "", what), end, bell);
+        const left = h3("td", "left");
+        const tape = h3("div", `tape q-${item.kind}`);
+        const fill = h3("i");
+        fill.style.width = `${Math.max(1, Math.min(100, (item.end - o.now) / 36e5 / span * 100))}%`;
+        tape.append(fill);
+        left.append(tape);
+        tr.append(name, h3("td", "kind", t(`queue.${item.kind}`)), h3("td", "", what), left, end, bell);
         tbody.append(tr);
       }
       table.append(tbody);
@@ -11649,11 +11764,24 @@ table.queues td.acts { width: 1%; text-align: right; }
     text.append(h3("strong", "", `${what} ${m.from} \u2192 ${to}${m.kind === "astro" ? ` \xB7 ${t("dash.newColony")}` : ""}`));
     const total = g.steps.reduce((sum, s) => ({ metal: sum.metal + s.cost.metal, crystal: sum.crystal + s.cost.crystal, deuterium: sum.deuterium + s.cost.deuterium }), { metal: 0, crystal: 0, deuterium: 0 });
     const cost = [`${ctx.fmt(total.metal)} M`, `${ctx.fmt(total.crystal)} C`, ...total.deuterium ? [`${ctx.fmt(total.deuterium)} D`] : []].join(" \xB7 ");
+    const tokens = h3("span", "cost");
+    tokens.setAttribute("aria-label", cost);
+    for (const [k, v] of [["m", total.metal], ["c", total.crystal], ["d", total.deuterium]]) {
+      if (!v) continue;
+      const tk = h3("span", "");
+      tk.append(h3("i", `tok ${k}`), document.createTextNode(ctx.fmt(v)));
+      tokens.append(tk);
+    }
     if (m.planetId) {
       const chips = h3("div", "pls");
       const perPlanet = [...new Map(g.steps.map((s) => [s.planetId, s])).values()];
       let done = 0;
+      const shown2 = numbered ? perPlanet : perPlanet.slice(0, 5);
       for (const s of perPlanet) {
+        if (!shown2.includes(s)) {
+          if (stepDone(ctx, s)) done++;
+          continue;
+        }
         const a = h3("a", "pl", s.name || `[${s.coords}]`);
         a.setAttribute("href", stepPage(s));
         const guessed = g.steps.some((x) => x.planetId === s.planetId && x.guessed);
@@ -11666,16 +11794,34 @@ table.queues td.acts { width: 1%; text-align: right; }
         }
         chips.append(a);
       }
+      if (shown2.length < perPlanet.length) {
+        const more = h3("button", "pl more", `+${perPlanet.length - shown2.length}`);
+        more.type = "button";
+        more.title = t("dash.movesOpen");
+        more.addEventListener("click", () => {
+          tab = "investments";
+          ctx.redraw();
+        });
+        chips.append(more);
+      }
       if (done === perPlanet.length) line.classList.add("done");
-      const sub = h3("span", "", perPlanet.length > 1 ? `${t("dash.planetsCount", { count: perPlanet.length })} \xB7 ${cost}` : cost);
+      const sub = h3("span", "meta");
+      if (perPlanet.length > shown2.length) sub.append(document.createTextNode(`${t("dash.planetsCount", { count: perPlanet.length })} `));
+      sub.append(tokens);
       if (done) sub.append(h3("em", "ok", ` \xB7 ${t("dash.doneCount", { done, count: perPlanet.length })}`));
       text.append(chips, sub);
     } else {
-      text.append(h3("span", "", `${t("dash.account")} \xB7 ${cost}`));
+      const sub = h3("span", "meta", `${t("dash.account")} `);
+      sub.append(tokens);
+      text.append(sub);
     }
     const days2 = g.steps.map((s) => s.days);
     const lo = Math.min(...days2), hi = Math.max(...days2);
-    line.append(text, h3("span", "roi mono", hi - lo >= 0.05 ? `${daysText(ctx, lo)}\u2013${daysText(ctx, hi)}`.replace(` ${t("dash.daysShort")}\u2013`, "\u2013") : daysText(ctx, lo)));
+    const roi = h3("span", "roi");
+    const span = hi - lo >= 0.05 ? `${daysText(ctx, lo)}\u2013${daysText(ctx, hi)}`.replace(` ${t("dash.daysShort")}\u2013`, "\u2013") : daysText(ctx, lo);
+    const unit = ` ${t("dash.daysShort")}`;
+    roi.append(document.createTextNode(span.endsWith(unit) ? span.slice(0, -unit.length) : span), h3("small", "", t("dash.daysShort")));
+    line.append(text, roi);
     return line;
   }
   function buildOrderCard(ctx) {
