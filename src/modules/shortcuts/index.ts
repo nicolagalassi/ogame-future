@@ -1,3 +1,4 @@
+import { WINDOW_TOKENS } from '../../core/sheet';
 /**
  * Shortcuts, as in OGLight: one key or one tap = one action of the player (switch planet, prepare a
  * fleet, the game's own Avanti / Invia, move in the galaxy). The keys can be changed in the
@@ -195,24 +196,26 @@ export function touchWanted(doc: Document, store: Pick<Store, 'get'>): boolean {
 }
 
 const TOUCH_CSS = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+#${TOUCH_ID}, .fut-touch-pad { ${WINDOW_TOKENS} }
 #${TOUCH_ID} { position: fixed; left: 0; top: 0; z-index: 1000000; box-sizing: border-box; transform-origin: 0 0;
   display: flex; align-items: center; gap: 6px; padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
-  background: rgba(8, 13, 20, 0.94); border-top: 1px solid #1F2C40; box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.45);
-  font: 11px/1.2 Verdana, Arial, sans-serif; color: #C9D4E2; }
+  background: rgba(8, 13, 20, 0.94); border-top: 1px solid var(--line); box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.45);
+  font: 11px/1.2 Verdana, Arial, sans-serif; color: var(--text-2); }
 #${TOUCH_ID} .keys { flex: 1; display: flex; gap: 6px; min-width: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
 #${TOUCH_ID} .keys::-webkit-scrollbar { display: none; }
-#${TOUCH_ID} .sep { flex: none; width: 1px; align-self: stretch; margin: 4px 2px; background: #1F2C40; }
+#${TOUCH_ID} .sep { flex: none; width: 1px; align-self: stretch; margin: 4px 2px; background: var(--line); }
 #${TOUCH_ID} button { flex: none; position: relative; display: inline-flex; align-items: center; justify-content: center;
-  width: 48px; height: 48px; padding: 0; border: 1px solid #24344B; border-radius: 6px; background: #0D1522; color: #4FD1E8;
+  width: 48px; height: 48px; padding: 0; border: 1px solid #24344B; border-radius: 6px; background: var(--surface); color: var(--accent);
   font: inherit; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-#${TOUCH_ID} button:active { background: #12283A; border-color: #4FD1E8; transform: translateY(1px); }
-#${TOUCH_ID} button:focus-visible { outline: 2px solid #4FD1E8; outline-offset: 1px; }
+#${TOUCH_ID} button:active { background: var(--accent-soft); border-color: var(--accent); transform: translateY(1px); }
+#${TOUCH_ID} button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 /* The key in the corner, as on the fleet bar; fingers do not need it. */
 #${TOUCH_ID} button .k { position: absolute; top: 3px; right: 4px; color: #8592A1; font-size: 11px; line-height: 11px; }
 #${TOUCH_ID} button:has(.k) .fut-tb-glyph { margin: 6px 6px 0 0; }
 @media (pointer: coarse) { #${TOUCH_ID} button .k { display: none; } #${TOUCH_ID} button:has(.k) .fut-tb-glyph { margin: 0; } }
 #${TOUCH_ID} button.planet { color: #C9D2DC; }
-#${TOUCH_ID} button.galaxy { color: #7BC47F; }
+#${TOUCH_ID} button.galaxy { color: var(--ok); }
 #${TOUCH_ID}[data-page="fleet2"] button.fleet, #${TOUCH_ID}[data-page="fleet2"] .sep.fleet { display: none; }
 #${TOUCH_ID} .send { width: auto; min-width: 104px; padding: 0 16px; gap: 8px; border-color: #2B8A5E; background: #12352A; color: #E6F7EE; font-weight: 700; font-size: 13px; }
 #${TOUCH_ID} .send:active { background: #1A4A3A; border-color: #4FE0B0; }
