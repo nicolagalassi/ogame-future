@@ -4,7 +4,7 @@
  * The game positions everything absolutely with its own rules, so ours use two ids
  * plus !important on layout properties to win reliably.
  */
-import { RES_COLORS } from '../../core/sheet';
+import { RES_COLORS, WINDOW_TOKENS } from '../../core/sheet';
 /** Width of the side-by-side menu (tolerated OGLight uses 208px; ours is a bit wider for larger text). */
 export const MENU_WIDTH = 247;
 /** Native width of the planet column (#rechts) in OGame 13. */
@@ -14,6 +14,8 @@ const L = '#planetbarcomponent #planetList.fut-menu';
 const MOON_W = 68;
 
 export const PLANET_MENU_CSS = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+#planetbarcomponent, .fut-totals, .fut-plan-tip { ${WINDOW_TOKENS} }
 #planetbarcomponent.fut-wide #rechts,
 #planetbarcomponent.fut-wide #cutty,
 #planetbarcomponent.fut-wide #myPlanets { width: ${MENU_WIDTH}px !important; }
@@ -35,7 +37,7 @@ ${L} { width: 100% !important; display: flex !important; flex-direction: column;
 ${L} .smallplanet.fut-row {
   position: relative !important; display: flex !important; flex-direction: row; align-items: stretch;
   width: 100% !important; height: var(--fut-row-h, 40px) !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important;
-  border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A !important; overflow: hidden; box-sizing: border-box;
+  border: 1px solid var(--line); border-radius: 7px; background: var(--raised) !important; overflow: hidden; box-sizing: border-box;
 }
 ${L} .smallplanet.fut-current { border-color: #2C5A73; }
 
@@ -63,8 +65,8 @@ ${L} .fut-name .planet-koords {
   width: auto !important; max-width: none !important; height: auto !important; line-height: 1.15 !important;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left !important; background: none !important;
 }
-${L} .fut-name .planet-name { font: 700 11px Arial, sans-serif !important; color: #E6EDF5 !important; }
-${L} .fut-name .planet-koords { font: 10px monospace !important; color: #C9D4E2 !important; }
+${L} .fut-name .planet-name { font: 700 11px Arial, sans-serif !important; color: var(--text) !important; }
+${L} .fut-name .planet-koords { font: 10px monospace !important; color: var(--text-2) !important; }
 
 /* Resources: one per line (metal, crystal, deuterium). */
 ${L} .fut-res {
@@ -80,15 +82,15 @@ ${L} .fut-cell.fut-has-fill {
 ${L} .fut-m, .fut-totals .fut-m .fut-tname { color: ${RES_COLORS.metal}; }
 ${L} .fut-c, .fut-totals .fut-c .fut-tname { color: ${RES_COLORS.crystal}; }
 ${L} .fut-d, .fut-totals .fut-d .fut-tname { color: ${RES_COLORS.deuterium}; }
-${L} .fut-full { color: #F5B547 !important; font-weight: 700; }
-${L} .fut-missing { color: #8A9BB0; }
+${L} .fut-full { color: var(--warn) !important; font-weight: 700; }
+${L} .fut-missing { color: var(--muted); }
 /* Fleet: what the ships are worth (planet, then moon), a third line under name and coordinates. */
 ${L} .fut-fleet { display: flex; align-items: center; gap: 5px; min-width: 0; margin-top: 1px; font: 10px/11px monospace; color: #F2A3A3; white-space: nowrap; overflow: hidden; }
 ${L} .fut-fleet-m { display: inline-flex; align-items: center; gap: 2px; color: #D8A0A0; }
 ${L} .fut-fleet-m svg { flex: none; opacity: 0.8; }
 ${L}.fut-mode-compact .fut-fleet-m { display: none; }
 .fut-totals .fut-fleetrow .fut-tname { color: #FFA0A0; }
-.fut-totals .fut-flyrow, .fut-totals .fut-flyrow .fut-tname { color: #8A9BB0; font-size: 0.92em; }
+.fut-totals .fut-flyrow, .fut-totals .fut-flyrow .fut-tname { color: var(--muted); font-size: 0.92em; }
 
 /* Moon: its own tile on the right of the same row. */
 ${L} a.moonlink {
@@ -104,17 +106,17 @@ ${L} a.moonlink .planetBarSpaceObjectContainer {
 }
 ${L} a.moonlink img.icon-moon { position: static !important; width: 16px !important; height: 16px !important; margin: 0 !important; }
 ${L} a.moonlink .fut-res { width: 46px; }
-${L} .fut-nomoon { flex-shrink: 0; width: ${MOON_W}px; border-left: 1px solid #1A2638; background: #0D1522; }
+${L} .fut-nomoon { flex-shrink: 0; width: ${MOON_W}px; border-left: 1px solid #1A2638; background: var(--surface); }
 
 /* Skin that failed to load (game CDN 502): a plain sphere keeps the row's shape. */
 ${L} img.fut-noskin { visibility: hidden; }
 ${L} .planetBarSpaceObjectContainer:has(img.fut-noskin) {
-  border-radius: 50%; background: radial-gradient(circle at 35% 35%, #8A9BB0, #2A3A50 65%, #0A111C) !important;
+  border-radius: 50%; background: radial-gradient(circle at 35% 35%, var(--muted), #2A3A50 65%, #0A111C) !important;
 }
 
 /* Selection: the body you are on (planet OR moon) gets a cyan frame and a bar on the left. */
 ${L} a.planetlink.active, ${L} a.moonlink.active {
-  background: rgba(79,209,232,0.18) !important; box-shadow: inset 0 0 0 1px #4FD1E8, inset 3px 0 0 #4FD1E8 !important;
+  background: rgba(79,209,232,0.18) !important; box-shadow: inset 0 0 0 1px var(--accent), inset 3px 0 0 var(--accent) !important;
 }
 ${L} a.planetlink.active .planet-name { color: #8BE4F2 !important; }
 
@@ -133,16 +135,16 @@ ${L} .smallplanet .constructionIcon { display: none !important; }
 ${L} .fut-queue { position: absolute; left: 2px; bottom: 2px; z-index: 2; display: flex; gap: 2px; padding: 2px; border-radius: 6px; background: rgba(5,10,18,0.85); }
 /* The plan: a slim column at the outer end of each row, right of the moon; one tile per planned body
    (planet on top, moon below), coloured by where its resources stand. */
-${L} .fut-plancol { flex-shrink: 0; display: flex; flex-direction: column; width: 20px; border-left: 1px solid #1A2638; background: #0D1522; }
+${L} .fut-plancol { flex-shrink: 0; display: flex; flex-direction: column; width: 20px; border-left: 1px solid #1A2638; background: var(--surface); }
 ${L} .fut-plancol > span { flex: 1; min-height: 0; }
 ${L} .fut-plancol > :last-child { border-top: 1px solid #1A2638; }
 ${L} .fut-plan { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-  font: 700 12px/12px Arial, sans-serif; cursor: pointer; background: color-mix(in srgb, currentColor 18%, #0D1522); outline: none; }
-${L} .fut-plan:hover, ${L} .fut-plan:focus-visible { background: color-mix(in srgb, currentColor 32%, #0D1522); }
+  font: 700 12px/12px Arial, sans-serif; cursor: pointer; background: color-mix(in srgb, currentColor 18%, var(--surface)); outline: none; }
+${L} .fut-plan:hover, ${L} .fut-plan:focus-visible { background: color-mix(in srgb, currentColor 32%, var(--surface)); }
 ${L} .fut-plan svg { display: block; }
 ${L}.fut-mode-compact .fut-plancol { display: none; }
 ${L} .fut-plan-missing { color: #EF7676; }
-${L} .fut-plan-arriving { color: #4FD1E8; }
+${L} .fut-plan-arriving { color: var(--accent); }
 ${L} .fut-plan-arrived { color: #E3BB28; }
 ${L} .fut-plan-ready { color: #38C56E; }
 ${L} .fut-plan-unknown { color: #8592A1; }
@@ -154,7 +156,7 @@ ${L} .fut-q-research { color: #32FB2F; }
 ${L} .fut-q-ship { color: #FFEB00; }
 ${L} .fut-q-lfbuilding { color: #FF79BD; }
 ${L} .fut-q-lfresearch { color: #42AFFF; }
-${L} .fut-q-unknown { color: #4FD1E8; }
+${L} .fut-q-unknown { color: var(--accent); }
 /* The game's attack alert keeps its place on the skin. */
 ${L} .smallplanet a.alert {
   position: absolute !important; left: 1px !important; top: auto !important; bottom: 1px !important; right: auto !important; z-index: 3;
@@ -165,7 +167,7 @@ ${L} .smallplanet a.alert {
 ${L}.fut-mode-compact a.planetlink { padding: 0 2px 0 3px !important; gap: 2px; }
 ${L}.fut-mode-compact a.planetlink .planetBarSpaceObjectContainer { left: -10px !important; opacity: 0.4; }
 ${L}.fut-mode-compact .fut-name .planet-name { display: none !important; }
-${L}.fut-mode-compact .fut-name .planet-koords { font-size: 11px !important; letter-spacing: -0.4px; color: #E6EDF5 !important; text-overflow: clip; }
+${L}.fut-mode-compact .fut-name .planet-koords { font-size: 11px !important; letter-spacing: -0.4px; color: var(--text) !important; text-overflow: clip; }
 ${L}.fut-mode-compact .fut-res { width: 38px; }
 ${L}.fut-mode-compact .fut-cell { padding: 0 1px; }
 ${L}.fut-mode-compact .fut-nomoon { width: 22px; }
@@ -177,34 +179,34 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
    name on top and number below; sync and settings stacked on the right. */
 #planetbarcomponent .fut-toolbar {
   box-sizing: border-box; display: grid !important; height: auto !important; padding: 0 !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 26px; margin: 0 0 3px;
-  border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 7px; background: var(--raised); overflow: hidden;
 }
 #planetbarcomponent .fut-toolbar .fut-cell {
   box-sizing: border-box !important; height: 40px !important; width: auto !important; box-shadow: none !important; border-radius: 0 !important; font: inherit;
   display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 3px; min-width: 0; padding: 0 6px 0 8px; margin: 0;
-  border: 0 !important; border-right: 1px solid #1F2C40 !important; background: none !important; color: inherit; text-align: left; cursor: pointer;
+  border: 0 !important; border-right: 1px solid var(--line) !important; background: none !important; color: inherit; text-align: left; cursor: pointer;
 }
 #planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) { background: #16243A !important; }
-#planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) .fut-cell-k { color: #E6EDF5; }
-#planetbarcomponent .fut-toolbar .fut-cell:focus-visible, #planetbarcomponent .fut-tool:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -2px; }
+#planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) .fut-cell-k { color: var(--text); }
+#planetbarcomponent .fut-toolbar .fut-cell:focus-visible, #planetbarcomponent .fut-tool:focus-visible { outline: 1px solid var(--accent); outline-offset: -2px; }
 #planetbarcomponent .fut-toolbar .fut-cell:disabled { cursor: default; }
 #planetbarcomponent .fut-cell-t { display: flex; align-items: center; gap: 5px; min-width: 0; }
-#planetbarcomponent .fut-cell-i { flex: none; display: inline-flex; color: #8A9BB0; }
+#planetbarcomponent .fut-cell-i { flex: none; display: inline-flex; color: var(--muted); }
 #planetbarcomponent .fut-cell-k { min-width: 0; font: 11px/12px Arial, sans-serif; color: #9AA9BC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#planetbarcomponent .fut-cell-v { min-width: 0; font: 700 12px/14px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#planetbarcomponent .fut-cell-v small { font: 10px/14px Arial, sans-serif; letter-spacing: -0.2px; color: #8A9BB0; font-weight: 400; }
-#planetbarcomponent .fut-cell-v.fut-warn { color: #F5B547; } #planetbarcomponent .fut-cell-v.fut-ok { color: #4FE0B0; }
+#planetbarcomponent .fut-cell-v { min-width: 0; font: 700 12px/14px Consolas, "JetBrains Mono", monospace; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#planetbarcomponent .fut-cell-v small { font: 10px/14px Arial, sans-serif; letter-spacing: -0.2px; color: var(--muted); font-weight: 400; }
+#planetbarcomponent .fut-cell-v.fut-warn { color: var(--warn); } #planetbarcomponent .fut-cell-v.fut-ok { color: #4FE0B0; }
 #planetbarcomponent .fut-side { display: flex; flex-direction: column; grid-column: 3; grid-row: 1; }
 #planetbarcomponent .fut-tool {
   position: relative; flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; padding: 0;
-  border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; color: #8A9BB0; cursor: pointer; height: auto !important; min-height: 0 !important;
+  border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; color: var(--muted); cursor: pointer; height: auto !important; min-height: 0 !important;
 }
-#planetbarcomponent .fut-tool + .fut-tool { border-top: 1px solid #1F2C40 !important; }
+#planetbarcomponent .fut-tool + .fut-tool { border-top: 1px solid var(--line) !important; }
 #planetbarcomponent .fut-tool svg { width: 13px; height: 13px; }
-#planetbarcomponent .fut-tool:hover { background: #16243A !important; color: #E6EDF5; }
+#planetbarcomponent .fut-tool:hover { background: #16243A !important; color: var(--text); }
 #planetbarcomponent .fut-tool:disabled { opacity: 0.35; cursor: default; background: none; }
-#planetbarcomponent .fut-tool[aria-expanded="true"] { background: #12283A !important; color: #4FD1E8; }
-#planetbarcomponent .fut-tool.fut-stale { color: #F5B547; }
+#planetbarcomponent .fut-tool[aria-expanded="true"] { background: var(--accent-soft) !important; color: var(--accent); }
+#planetbarcomponent .fut-tool.fut-stale { color: var(--warn); }
 #planetbarcomponent .fut-tool.fut-failed { color: #E5534B; }
 #planetbarcomponent .fut-tool.fut-busy svg { animation: fut-spin 1s linear infinite; }
 /* Game width: no room for the names, the icon and the tooltip say what the number is. */
@@ -216,23 +218,23 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 
 /* Totals: a table, resource by resource: in stock now, made in a day. Numbers in one bright colour, right-aligned. */
 .fut-totals {
-  box-sizing: border-box; margin-top: 4px; padding: 2px 8px 4px; border-radius: 7px; border: 1px solid #1F2C40; background: #111B2A;
+  box-sizing: border-box; margin-top: 4px; padding: 2px 8px 4px; border-radius: 7px; border: 1px solid var(--line); background: var(--raised);
   font: 12px/1.3 Arial, Helvetica, sans-serif; font-variant-numeric: tabular-nums;
 }
 .fut-totals .fut-trow { display: grid; grid-template-columns: minmax(0, 1fr) 58px 62px; align-items: center; gap: 6px; min-height: 20px; padding: 2px 0; }
-.fut-totals .fut-trow + .fut-trow { border-top: 1px solid #16202F; }
+.fut-totals .fut-trow + .fut-trow { border-top: 1px solid var(--line-soft); }
 .fut-totals .fut-thead { min-height: 0; color: #9AA9BC; font-size: 11px; }
-.fut-totals .fut-thead + .fut-trow { border-top-color: #1F2C40; }
+.fut-totals .fut-thead + .fut-trow { border-top-color: var(--line); }
 .fut-totals .fut-tname { display: flex; align-items: center; gap: 6px; min-width: 0; white-space: nowrap; overflow: hidden; }
 .fut-totals .fut-tico { flex: none; display: inline-flex; }
-.fut-totals .fut-tlabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: #C9D4E2; }
-.fut-totals .fut-msu .fut-tlabel { color: #4FD1E8; }
-.fut-totals .fut-tnum { text-align: right; white-space: nowrap; color: #E6EDF5; font: 700 12px Consolas, "JetBrains Mono", monospace; }
+.fut-totals .fut-tlabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); }
+.fut-totals .fut-msu .fut-tlabel { color: var(--accent); }
+.fut-totals .fut-tnum { text-align: right; white-space: nowrap; color: var(--text); font: 700 12px Consolas, "JetBrains Mono", monospace; }
 .fut-totals .fut-tnum:last-child { color: #B4C2D3; font-weight: 400; }
 .fut-totals .fut-thead .fut-tnum { color: inherit; font: inherit; }
 .fut-totals .fut-msu { border-top-color: #2C3E57 !important; }
-.fut-totals .fut-msu .fut-tname { color: #4FD1E8; font-weight: 700; }
-.fut-totals .fut-msu .fut-tnum:last-child { color: #E6EDF5; }
+.fut-totals .fut-msu .fut-tname { color: var(--accent); font-weight: 700; }
+.fut-totals .fut-msu .fut-tnum:last-child { color: var(--text); }
 #planetbarcomponent:not(.fut-wide) .fut-totals { padding: 2px 4px 4px; }
 #planetbarcomponent:not(.fut-wide) .fut-totals .fut-trow { grid-template-columns: 13px minmax(0, 1fr) minmax(0, 1fr); gap: 3px; }
 #planetbarcomponent:not(.fut-wide) .fut-totals .fut-tlabel { display: none; }
@@ -241,7 +243,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 /* The plan's hover card, in the game's tooltip style (dark blue gradient, thin frame, centred title). */
 .fut-plan-tip { position: fixed; z-index: 100000; min-width: 170px; max-width: 260px; padding: 10px 12px; box-sizing: border-box;
   border: 1px solid #2C3E57; border-radius: 6px; background: linear-gradient(180deg, #1C2A3A 0%, #0F1923 100%);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.6); color: #C9D4E2; font: 11px/1.45 Verdana, Arial, sans-serif; pointer-events: none; }
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6); color: var(--text-2); font: 11px/1.45 Verdana, Arial, sans-serif; pointer-events: none; }
 .fut-plan-tip .fut-pt-head { display: flex; flex-direction: column; align-items: center; margin-bottom: 6px; }
 .fut-plan-tip .fut-pt-head b { color: #fff; font-size: 13px; }
 .fut-plan-tip .fut-pt-head span { color: #8592A1; font-size: 10px; }
@@ -252,7 +254,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 .fut-plan-tip .fut-pt-status { padding-top: 5px; border-top: 1px solid #2C3E57; }
 .fut-plan-tip .fut-pt-say { font-weight: 700; }
 .fut-plan-tip.fut-plan-missing .fut-pt-say { color: #EF7676; }
-.fut-plan-tip.fut-plan-arriving .fut-pt-say, .fut-plan-tip .fut-pt-sent { color: #4FD1E8 !important; }
+.fut-plan-tip.fut-plan-arriving .fut-pt-say, .fut-plan-tip .fut-pt-sent { color: var(--accent) !important; }
 .fut-plan-tip.fut-plan-arrived .fut-pt-say { color: #E3BB28; }
 .fut-plan-tip.fut-plan-ready .fut-pt-say { color: #38C56E; }
 .fut-plan-tip.fut-plan-unknown .fut-pt-say { color: #8592A1; }

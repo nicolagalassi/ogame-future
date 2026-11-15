@@ -1,3 +1,4 @@
+import { WINDOW_TOKENS } from '../../core/sheet';
 /**
  * Targets side bar, after OGLight's side panel: it stays open on the left while the player moves in
  * the galaxy, and across pages. Lists the flagged players (one tab per flag, plus the ones opened
@@ -73,84 +74,86 @@ const SCORE_LOOK: [ScoreType, IconName, string][] = [
 ];
 
 const CSS = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+:host { ${WINDOW_TOKENS} }
 :host { all: initial; }
 * { box-sizing: border-box; }
 /* As wide as the room left of the game's page allows, between 300 and ${SIDE_W}px (--w, set from the page). */
 .side {
   container-type: inline-size;
   position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000000; width: var(--w, ${SIDE_W}px); max-width: 100vw; display: flex; flex-direction: column; gap: 6px;
-  padding: 8px; background: #0B121D; border-right: 1px solid #1F2C40; box-shadow: 6px 0 24px rgba(0,0,0,0.45);
-  font: 12px/1.3 Arial, Helvetica, sans-serif; color: #C9D4E2; font-variant-numeric: tabular-nums; overflow: hidden;
+  padding: 8px; background: var(--bg); border-right: 1px solid var(--line); box-shadow: 6px 0 24px rgba(0,0,0,0.45);
+  font: 12px/1.3 Arial, Helvetica, sans-serif; color: var(--text-2); font-variant-numeric: tabular-nums; overflow: hidden;
 }
 button, input, textarea { font: inherit; color: inherit; }
-button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -1px; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; }
 .mono, .coords, .num { font-family: Consolas, "JetBrains Mono", monospace; }
 
 /* Head: back, who or what, close. */
-.head { display: flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 2px 0 4px; border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; }
-.title { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; font: 700 14px Arial, sans-serif; color: #E6EDF5; white-space: nowrap; overflow: hidden; }
+.head { display: flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 2px 0 4px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); }
+.title { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; font: 700 14px Arial, sans-serif; color: var(--text); white-space: nowrap; overflow: hidden; }
 .title .name { overflow: hidden; text-overflow: ellipsis; }
 .title a { color: #9AA9BC; font-weight: 400; font-size: 12px; text-decoration: none; }
-.title a:hover { color: #4FD1E8; }
+.title a:hover { color: var(--accent); }
 .ib { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 5px; background: none; color: #9AA9BC; cursor: pointer; flex: none; text-decoration: none; }
-.ib:hover { background: #16243A; color: #E6EDF5; }
+.ib:hover { background: #16243A; color: var(--text); }
 
 /* Tabs and filters. */
 .chips { display: flex; flex-wrap: wrap; gap: 3px; }
-.chip { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: 1 0 auto; min-width: 30px; height: 26px; padding: 0 6px; border-radius: 5px; border: 1px solid #1F2C40; background: #0A111C; color: #B4C2D3; cursor: pointer; }
+.chip { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: 1 0 auto; min-width: 30px; height: 26px; padding: 0 6px; border-radius: 5px; border: 1px solid var(--line); background: #0A111C; color: #B4C2D3; cursor: pointer; }
 .chip:hover { border-color: #2C5A73; }
-.chip[aria-pressed="true"] { border-color: currentColor; background: #12283A; color: #E6EDF5; font-weight: 700; }
+.chip[aria-pressed="true"] { border-color: currentColor; background: var(--accent-soft); color: var(--text); font-weight: 700; }
 .chip .n { font: 12px Consolas, monospace; color: #9AA9BC; }
 
 /* Scores: what the number is, the number, the rank. Three per line. */
-.scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden; flex: none; }
-.score { display: flex; flex-direction: column; gap: 1px; min-width: 0; padding: 5px 8px 6px; box-shadow: 1px 0 0 #1F2C40, 0 1px 0 #1F2C40; }
+.scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 7px; background: var(--raised); overflow: hidden; flex: none; }
+.score { display: flex; flex-direction: column; gap: 1px; min-width: 0; padding: 5px 8px 6px; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
 .score .k { display: flex; align-items: center; gap: 4px; color: #9AA9BC; font-size: 11px; white-space: nowrap; overflow: hidden; }
 .score b { font: 700 14px/16px Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .score i { font: normal 11px Consolas, monospace; color: #9AA9BC; }
 /* The game's own pages about this player. */
-.actions { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid #1F2C40; border-radius: 7px; background: #0B121D; overflow: hidden; flex: none; }
+.actions { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); overflow: hidden; flex: none; }
 .actions a { display: flex; align-items: center; justify-content: center; gap: 6px; height: 28px; padding: 0 4px; color: #B4C2D3; text-decoration: none; white-space: nowrap; overflow: hidden; }
-.actions > * + * { border-left: 1px solid #1F2C40; }
-.actions a:hover { background: #111D2D; color: #E6EDF5; }
+.actions > * + * { border-left: 1px solid var(--line); }
+.actions a:hover { background: #111D2D; color: var(--text); }
 /* The player's note. */
-.note { display: flex; align-items: flex-start; gap: 6px; padding: 5px 8px; border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; flex: none; }
-.note svg { flex: none; margin-top: 3px; color: #F5B547; }
-.note textarea { flex: 1; min-width: 0; min-height: 20px; max-height: 120px; padding: 2px 0; border: 0; background: none; color: #E6EDF5; resize: vertical; line-height: 1.4; field-sizing: content; }
+.note { display: flex; align-items: flex-start; gap: 6px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); flex: none; }
+.note svg { flex: none; margin-top: 3px; color: var(--warn); }
+.note textarea { flex: 1; min-width: 0; min-height: 20px; max-height: 120px; padding: 2px 0; border: 0; background: none; color: var(--text); resize: vertical; line-height: 1.4; field-sizing: content; }
 .note textarea::placeholder { color: #617C8D; }
 .note textarea:focus { outline: none; }
-.note:focus-within { border-color: #4FD1E8; }
+.note:focus-within { border-color: var(--accent); }
 .note.off { color: #9AA9BC; }
 
 
 /* Lists: one card, a hairline between rows, the cyan bar on the system on screen. */
-.scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: #2A3B55 #0B121D; scrollbar-width: thin; }
-.pl, .ps { border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden; }
+.scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: #2A3B55 var(--bg); scrollbar-width: thin; }
+.pl, .ps { border: 1px solid var(--line); border-radius: 7px; background: var(--raised); overflow: hidden; }
 .cols, .row { display: grid; align-items: center; gap: 6px; min-height: 28px; padding: 0 6px; }
-.cols { min-height: 22px; color: #9AA9BC; font-size: 11px; background: #0B121D; border-bottom: 1px solid #1F2C40; }
-.row + .row { border-top: 1px solid #16202F; }
+.cols { min-height: 22px; color: #9AA9BC; font-size: 11px; background: var(--bg); border-bottom: 1px solid var(--line); }
+.row + .row { border-top: 1px solid var(--line-soft); }
 .row.gap { border-top-color: #2C3E57; }
 .row:hover { background: #16243A; }
-.row.active { background: rgba(79,209,232,0.12); box-shadow: inset 3px 0 0 #4FD1E8; }
+.row.active { background: rgba(79,209,232,0.12); box-shadow: inset 3px 0 0 var(--accent); }
 .pl .cols, .pl .row { grid-template-columns: 18px 84px minmax(0, 1fr) 46px 40px 40px 34px; }
 .ps .row { grid-template-columns: 18px minmax(0, 1fr) auto 30px auto; min-height: 30px; }
 .idx { color: #617C8D; font: 11px Consolas, monospace; text-align: right; }
-.coords { all: unset; display: inline-flex; align-items: center; gap: 3px; padding: 2px 3px; border-radius: 4px; color: #E6EDF5; font: 12px Consolas, monospace; cursor: pointer; white-space: nowrap; }
+.coords { all: unset; display: inline-flex; align-items: center; gap: 3px; padding: 2px 3px; border-radius: 4px; color: var(--text); font: 12px Consolas, monospace; cursor: pointer; white-space: nowrap; }
 .coords:hover { background: #1D3350; color: #8BE4F2; }
 .row.active .coords { color: #8BE4F2; }
-.coords.new::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #4FD1E8; }
+.coords.new::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
 .where { display: inline-flex; align-items: center; gap: 2px; min-width: 0; }
-.home { flex: none; color: #F5B547; }
+.home { flex: none; color: var(--warn); }
 .pn { min-width: 0; color: #9AA9BC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cell-r { text-align: right; font: 12px Consolas, monospace; color: #617C8D; white-space: nowrap; overflow: hidden; }
 .cols .cell-r { font: inherit; color: inherit; }
-.cell-r.has { color: #C9D4E2; }
-.cell-r.big { color: #F5B547; font-weight: 700; }
-.txt { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E6EDF5; }
+.cell-r.has { color: var(--text-2); }
+.cell-r.big { color: var(--warn); font-weight: 700; }
+.txt { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
 .txt .who { color: #9AA9BC; }
 .who2 { display: flex; flex-direction: column; min-width: 0; padding: 3px 0; }
-.pname { all: unset; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E6EDF5; font-weight: 700; cursor: pointer; }
-.pname:hover, .pname:focus-visible { color: #4FD1E8; }
+.pname { all: unset; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); font-weight: 700; cursor: pointer; }
+.pname:hover, .pname:focus-visible { color: var(--accent); }
 .pnote { color: #9AA9BC; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rank { color: #9AA9BC; font: 11px Consolas, monospace; }
 .pline { display: flex; align-items: baseline; gap: 5px; min-width: 0; }
@@ -162,10 +165,10 @@ a.act:hover { background: #1D3350; }
 .act.on { color: #EF7676; } .act.mid { color: #E3BB28; } .act.off { color: #38C56E; } .act.unknown { color: #617C8D; font-weight: 400; }
 .age { text-align: right; font: 12px Consolas, monospace; }
 .age.fresh { color: #38C56E; } .age.warm { color: #E3BB28; } .age.old { color: #EF7676; } .age.none { color: #617C8D; }
-.st-inactive { color: #9BE36D !important; } .st-longinactive { color: #9AA9BC !important; } .st-vacation { color: #7FDBFF !important; } .st-banned { color: #FF7A7A !important; text-decoration: line-through; }
+.st-inactive { color: #9BE36D !important; } .st-longinactive { color: #9AA9BC !important; } .st-vacation { color: #7FDBFF !important; } .st-banned { color: var(--bad) !important; text-decoration: line-through; }
 .foot { display: flex; justify-content: space-between; gap: 6px; margin: 6px 0 0; color: #9AA9BC; font-size: 11px; flex: none; }
-kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background: #0D1522; color: #C9D4E2; font: 11px Consolas, monospace; }
-.empty { margin: 4px 0; padding: 14px 10px; border: 1px dashed #1F2C40; border-radius: 7px; color: #9AA9BC; text-align: center; line-height: 1.4; }
+kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background: var(--surface); color: var(--text-2); font: 11px Consolas, monospace; }
+.empty { margin: 4px 0; padding: 14px 10px; border: 1px dashed var(--line); border-radius: 7px; color: #9AA9BC; text-align: center; line-height: 1.4; }
 .err { color: #EF7676; }
 .fut-mk { margin: 0; }
 /* Narrow screens: the planet's name and the row number give their room to the numbers. */

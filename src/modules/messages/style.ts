@@ -1,5 +1,5 @@
 /** Inbox summaries (global classes, all prefixed) and expedition journal (Shadow DOM). */
-import { PAGE_TOKENS, RES_COLORS } from '../../core/sheet';
+import { PAGE_TOKENS, RES_COLORS, WINDOW_TOKENS_NO_LINES } from '../../core/sheet';
 
 /** Outcome colours, shared by the inbox chips and the journal. */
 export const OUTCOME_COLORS: Record<string, string> = {
@@ -35,6 +35,8 @@ const outcomeCss = Object.entries(OUTCOME_COLORS)
  * tabular figures: [pill] [what it holds] [value in MSU, right-aligned] [actions].
  */
 export const MESSAGES_CSS = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+.fut-msg, .fut-fresh, #fut-spypanel, .fut-msg-pillcell, .fut-fresh-timer, .fut-fresh-head, .fut-fresh-count, .fut-rar-chip, .fut-fresh-total, .fut-fresh-close, .fut-fresh-res, .fut-fresh-name, .fut-fresh-tile, .fut-fresh-ships, .fut-fresh-ship, .fut-msg-b, .msg, .fut-pill { ${WINDOW_TOKENS_NO_LINES} }
 /* One set of tokens for the summaries, the "just read" panel and the spy table. Text tokens keep
    at least 4.5:1 on every background they sit on; --faint is for decoration only (ticks, tracks). */
 .fut-msg, .fut-fresh, #fut-spypanel {
@@ -116,7 +118,7 @@ export const MESSAGES_CSS = `
 .fut-msg-b .fut-msg-val small { font-size: 10px; }
 .msg.fut-msgrar .fut-msg-b .fut-r, .msg.fut-msgrar .fut-msg-b .fut-u { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rar) 55%, transparent); }
 .msg.fut-msgrar-0 .fut-msg-b .fut-msg-val b { font-size: 17px; }
-.fut-pill { --tone: #8A9BB0; display: inline-block; max-width: 100%; box-sizing: border-box; padding: 1px 8px; border-radius: 9px;
+.fut-pill { --tone: var(--muted); display: inline-block; max-width: 100%; box-sizing: border-box; padding: 1px 8px; border-radius: 9px;
   border: 1px solid color-mix(in srgb, var(--tone) 55%, transparent); background: color-mix(in srgb, var(--tone) 9%, transparent);
   color: color-mix(in srgb, var(--tone) 78%, #fff); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Expedition size as game rarity. Normal finds keep the game's look; big (rare, blue) and huge (epic,

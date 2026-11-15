@@ -1,37 +1,39 @@
-import { RES_COLORS, STATE_COLORS } from '../../core/sheet';
+import { RES_COLORS, STATE_COLORS, WINDOW_TOKENS } from '../../core/sheet';
 
 /** Cost panel (inside the game's details panel, prefixed classes) and planner window (Shadow DOM). */
 export const TECH_CSS = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+#technologydetails, .fut-tp, .fut-tp-tools, .fut-tp-grid, .fut-tp-h, .fut-tp-k, .fut-tp-v, .fut-tp-sum, .fut-tp-short, .fut-tp-ok, .fut-tp-miss, .fut-tp-chips, .fut-tp-chip, .fut-tp-energy, .fut-tp-start, .fut-tp-disc, .fut-tp-pop, .fut-tp-lack, .fut-tp-sat, .fut-tp-lab, .fut-tp-sat-link { ${WINDOW_TOKENS} }
 /* The game's own cost list and detail lines give way to the panel (their data is in it). */
 #technologydetails.fut-tp-on .content .costs,
 #technologydetails.fut-tp-on .content .information > ul { display: none !important; }
 /* The game's dark matter button ("Inizia con MO") is much bigger than the normal one. */
 #technologydetails.fut-tp-on .build-it_wrap .build-it_premium { transform: scale(0.72); transform-origin: right bottom; }
-#technologydetails.fut-tp-on .content .information .level { color: #4FD1E8; font-weight: 700; }
+#technologydetails.fut-tp-on .content .information .level { color: var(--accent); font-weight: 700; }
 /* Units: shipyard choice on one line under the title, amount field over the build button. */
 /* Shipyard choice: a two-way switch (the game's radios stay, hidden but focusable; the labels are the buttons). */
 #technologydetails.fut-tp-unit .content .shipyardSelection { position: absolute; top: 26px; left: 6px; right: 158px; width: auto; height: 20px;
   display: flex; align-items: stretch; gap: 0; margin: 0; padding: 0; white-space: nowrap; overflow: hidden; }
 #technologydetails.fut-tp-unit .content .shipyardSelection input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
 #technologydetails.fut-tp-unit .content .shipyardSelection label { float: none; display: flex; align-items: center; margin: 0; padding: 0 10px; width: auto;
-  border: 1px solid #2A3B55; background: rgba(9,15,24,0.82); color: #8A9BB0; font: 11px/18px Arial, Helvetica, sans-serif; cursor: pointer; }
+  border: 1px solid #2A3B55; background: rgba(9,15,24,0.82); color: var(--muted); font: 11px/18px Arial, Helvetica, sans-serif; cursor: pointer; }
 #technologydetails.fut-tp-unit .content .shipyardSelection label::before, #technologydetails.fut-tp-unit .content .shipyardSelection label::after { display: none !important; }
 #technologydetails.fut-tp-unit .content .shipyardSelection label:first-of-type { border-radius: 10px 0 0 10px; }
 #technologydetails.fut-tp-unit .content .shipyardSelection label:last-of-type { border-radius: 0 10px 10px 0; }
 #technologydetails.fut-tp-unit .content .shipyardSelection label + input + label { border-left: 0; }
-#technologydetails.fut-tp-unit .content .shipyardSelection label:hover { color: #E6EDF5; }
-#technologydetails.fut-tp-unit .content .shipyardSelection input:checked + label { background: #12283A; color: #E6EDF5; font-weight: 700; box-shadow: inset 0 -2px 0 #4FD1E8; }
-#technologydetails.fut-tp-unit .content .shipyardSelection input:focus-visible + label { outline: 1px solid #4FD1E8; outline-offset: -1px; }
+#technologydetails.fut-tp-unit .content .shipyardSelection label:hover { color: var(--text); }
+#technologydetails.fut-tp-unit .content .shipyardSelection input:checked + label { background: var(--accent-soft); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
+#technologydetails.fut-tp-unit .content .shipyardSelection input:focus-visible + label { outline: 1px solid var(--accent); outline-offset: -1px; }
 #technologydetails.fut-tp-unit .content .build_amount { position: absolute; top: 104px; right: 6px; width: 146px; height: 28px; margin: 0; padding: 0;
   display: flex; align-items: center; gap: 4px; }
 #technologydetails.fut-tp-unit .content .build_amount label { display: none; }
 #technologydetails.fut-tp-unit .content .build_amount input, #technologydetails.fut-tp-unit #build_amount { position: static; float: none; flex: 1; min-width: 0; width: auto; height: 26px; margin: 0; padding: 0 6px; box-sizing: border-box;
-  border: 1px solid #2A3B55; border-radius: 5px; background: rgba(9,15,24,0.92) none; color: #E6EDF5; font: 700 13px Consolas, "JetBrains Mono", "DejaVu Sans Mono", monospace; text-align: right; box-shadow: none; }
-#technologydetails.fut-tp-unit #build_amount:focus { outline: none; border-color: #4FD1E8; }
+  border: 1px solid #2A3B55; border-radius: 5px; background: rgba(9,15,24,0.92) none; color: var(--text); font: 700 13px Consolas, "JetBrains Mono", "DejaVu Sans Mono", monospace; text-align: right; box-shadow: none; }
+#technologydetails.fut-tp-unit #build_amount:focus { outline: none; border-color: var(--accent); }
 #technologydetails.fut-tp-unit .content .build_amount .maximum { position: static; float: none; flex: none; width: auto; height: 26px; margin: 0; padding: 0 6px;
-  background: #16202E none !important; border: 1px solid #2A3B55; border-radius: 5px; color: #C9D4E2; font-size: 11px; cursor: pointer; }
+  background: #16202E none !important; border: 1px solid #2A3B55; border-radius: 5px; color: var(--text-2); font-size: 11px; cursor: pointer; }
 #technologydetails.fut-tp-unit .content .build_amount .maximum::before, #technologydetails.fut-tp-unit .content .build_amount .maximum::after { display: none !important; }
-#technologydetails.fut-tp-unit .content .build_amount .maximum:hover { border-color: #4FD1E8; color: #fff; }
+#technologydetails.fut-tp-unit .content .build_amount .maximum:hover { border-color: var(--accent); color: #fff; }
 #technologydetails.fut-tp-unit .fut-tp { right: 158px; }
 #technologydetails.fut-tp-unit:has(.shipyardSelection) .fut-tp { top: 52px; }
 .fut-tp, .fut-tp-tools {
@@ -78,14 +80,14 @@ export const TECH_CSS = `
 /* Tools over the picture, like OGLight. */
 .fut-tp-tools { position: absolute; top: 4px; left: 4px; right: 4px; display: flex; gap: 4px; z-index: 2; }
 #technologydetails .fut-tp-btn { flex: 1; height: 24px; display: flex; align-items: center; justify-content: center; padding: 0;
-  border: 1px solid #2A3B55; border-radius: 5px; background: rgba(10,17,28,0.88); color: #C9D4E2; cursor: pointer; }
-#technologydetails .fut-tp-btn:hover:not(:disabled) { border-color: #4FD1E8; color: #fff; }
+  border: 1px solid #2A3B55; border-radius: 5px; background: rgba(10,17,28,0.88); color: var(--text-2); cursor: pointer; }
+#technologydetails .fut-tp-btn:hover:not(:disabled) { border-color: var(--accent); color: #fff; }
 #technologydetails .fut-tp-btn:disabled { opacity: 0.4; cursor: default; }
 #technologydetails .fut-tp-plan.on { border-color: #2E7D5B; background: rgba(16,41,31,0.92); color: #4FE0B0; }
 /* Our amount (for the plan) over the picture: same dark field as the game's one, beating the game's input skin. */
 #technologydetails .fut-tp-tools .fut-tp-amount { flex: 3; min-width: 0; height: 24px; box-sizing: border-box; margin: 0; padding: 0 6px; border: 1px solid #2A3B55; border-radius: 5px;
   background: rgba(9,15,24,0.92) none; color: var(--text); font: 700 13px var(--mono); text-align: right; box-shadow: none; }
-#technologydetails .fut-tp-tools .fut-tp-amount:focus { outline: none; border-color: #4FD1E8; }
+#technologydetails .fut-tp-tools .fut-tp-amount:focus { outline: none; border-color: var(--accent); }
 `;
 
 export const PLANNER_CSS = `
@@ -110,7 +112,7 @@ export const PLANNER_CSS = `
 .gbody > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lv { color: var(--accent); font-size: 11px; white-space: nowrap; }
 .num { text-align: right; font-family: var(--mono); white-space: nowrap; }
-.num.short { color: var(--bad) !important; }
+.num.short { color: var(--warn) !important; }
 .acts { display: flex; justify-content: flex-end; align-items: center; gap: 2px; }
 .ib, .x { width: 22px; height: 22px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 5px; background: none; color: var(--muted); cursor: pointer; font: 11px Arial, sans-serif; }
 .ib:hover { border-color: var(--accent); color: var(--text); }
