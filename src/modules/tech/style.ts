@@ -77,17 +77,29 @@ export const TECH_CSS = `
 .fut-tp-sat:hover { border-color: var(--energy); background: #1E1A0C; }
 .fut-tp-lab { border-color: var(--accent-line); color: var(--text, var(--text-2)); }
 .fut-tp-sat-link { display: inline-flex; max-width: 100%; text-decoration: none; }
-/* Tools over the picture, like OGLight. */
+/* Tools over the picture: one stepper (− / the jump printed large / +) and the plan button with its word,
+   as the board's rung track. Filled pawn yellow to add; outlined with a tick once it is in the plan. */
 .fut-tp-tools { position: absolute; top: 4px; left: 4px; right: 4px; display: flex; gap: 4px; z-index: 2; }
-#technologydetails .fut-tp-btn { flex: 1; height: 24px; display: flex; align-items: center; justify-content: center; padding: 0;
-  border: 1px solid var(--line-strong); border-radius: 5px; background: rgba(10,17,28,0.88); color: var(--text-2); cursor: pointer; }
-#technologydetails .fut-tp-btn:hover:not(:disabled) { border-color: var(--accent); color: #fff; }
-#technologydetails .fut-tp-btn:disabled { opacity: 0.4; cursor: default; }
-#technologydetails .fut-tp-plan.on { border-color: #2E7D5B; background: rgba(16,41,31,0.92); color: var(--d); }
+#technologydetails .fut-tp-btn { height: 26px; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 0 6px; margin: 0;
+  border: 0; border-radius: 4px; background: rgba(21,28,38,0.92); color: var(--text-2); font: 600 condensed 13px var(--display); cursor: pointer; }
+#technologydetails .fut-tp-btn:hover:not(:disabled) { background: rgba(33,43,58,0.96); color: var(--text); }
+#technologydetails .fut-tp-btn:disabled { color: var(--quiet); cursor: default; }
+#technologydetails .fut-tp-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+#technologydetails .fut-tp-stepper { flex: 1; min-width: 0; display: flex; gap: 2px; }
+#technologydetails .fut-tp-step { flex: none; width: 26px; padding: 0; }
+#technologydetails .fut-tp-range { flex: 1; min-width: 0; gap: 5px; color: var(--text); }
+#technologydetails .fut-tp-range:disabled { color: var(--text); }
+#technologydetails .fut-tp-range b { font: 600 condensed 15px var(--display); }
+#technologydetails .fut-tp-range .fut-tp-arrow { color: var(--label); font-weight: 400; }
+#technologydetails .fut-tp-range .fut-tp-to { color: var(--accent); }
+#technologydetails .fut-tp-plan { flex: none; padding: 0 9px 0 7px; background: var(--accent); color: var(--on-accent); }
+#technologydetails .fut-tp-plan:hover:not(:disabled) { background: var(--accent-hi); color: var(--on-accent); }
+#technologydetails .fut-tp-plan.on { background: rgba(21,28,38,0.92); box-shadow: inset 0 0 0 1px var(--accent); color: var(--accent); }
+#technologydetails .fut-tp-plan.on:hover { background: rgba(33,43,58,0.96); color: var(--accent); }
 /* Our amount (for the plan) over the picture: same dark field as the game's one, beating the game's input skin. */
-#technologydetails .fut-tp-tools .fut-tp-amount { flex: 3; min-width: 0; height: 24px; box-sizing: border-box; margin: 0; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 5px;
-  background: rgba(9,15,24,0.92) none; color: var(--text); font: 700 13px var(--mono); text-align: right; box-shadow: none; }
-#technologydetails .fut-tp-tools .fut-tp-amount:focus { outline: none; border-color: var(--accent); }
+#technologydetails .fut-tp-tools .fut-tp-amount { flex: 1; min-width: 0; height: 26px; box-sizing: border-box; margin: 0; padding: 0 6px; border: 0; border-radius: 4px;
+  background: rgba(21,28,38,0.92) none; color: var(--text); font: 600 condensed 15px var(--display); text-align: right; box-shadow: none; }
+#technologydetails .fut-tp-tools .fut-tp-amount:focus { outline: none; box-shadow: inset 0 0 0 1px var(--accent); }
 `;
 
 export const PLANNER_CSS = `
