@@ -1,4 +1,4 @@
-import { RES_COLORS } from '../../core/sheet';
+import { RES_COLORS, STATE_COLORS } from '../../core/sheet';
 
 /** Cost panel (inside the game's details panel, prefixed classes) and planner window (Shadow DOM). */
 export const TECH_CSS = `
@@ -37,7 +37,7 @@ export const TECH_CSS = `
 .fut-tp, .fut-tp-tools {
   /* Future's window tokens (core/sheet.ts), here outside the Shadow DOM. */
   --line: #1F2C40; --line-soft: #16202F; --text: #E6EDF5; --text-2: #C9D4E2; --muted: #8A9BB0;
-  --accent: #4FD1E8; --ok: #4FE0B0; --bad: #FF7A7A; --energy: #F5D547;
+  --accent: ${STATE_COLORS.accent}; --ok: ${STATE_COLORS.ok}; --bad: ${STATE_COLORS.bad}; --energy: #F5D547;
   --m: ${RES_COLORS.metal}; --c: ${RES_COLORS.crystal}; --d: ${RES_COLORS.deuterium};
   --mono: Consolas, "JetBrains Mono", "DejaVu Sans Mono", monospace;
 }
