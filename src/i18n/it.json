@@ -218,6 +218,7 @@
   "tech.res.deuterium": "Deuterio",
   "tech.res.energy": "Energia",
   "tech.time": "Tempo",
+  "tech.planBtn": "Piano",
   "tech.addOne": "Pianifica liv. {level}",
   "tech.addRange": "Pianifica liv. {from}–{to}",
   "tech.inPlan": "Nel piano ✓",

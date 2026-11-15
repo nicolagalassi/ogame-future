@@ -128,10 +128,9 @@ function button(doc: Document, cls: string, html: string, title: string, onClick
 }
 
 const ICON = {
-  prev: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
-  next: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
-  reset: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
-  plan: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h1M4 12h1M4 18h1"/></svg>',
+  minus: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 12h12"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 12h12M12 6v12"/></svg>',
+  check: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
   time: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
   energy: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>',
   start: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v5h5"/></svg>',
@@ -351,21 +350,29 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
       let sumMs = 0;
       for (let l = start.level; l <= to; l++) sumMs += ms(l);
 
-      const prev = button(doc, 'fut-tp-btn', ICON.prev, t('tech.prev'), () => {
+      // One stepper, as a board's rung track: − / the jump printed large (a click goes back to the next level) / +,
+      // then the plan button with its word: filled to add, outlined with a tick once it is in the plan.
+      const prev = button(doc, 'fut-tp-btn fut-tp-step', ICON.minus, t('tech.prev'), () => {
         to = Math.max(start.level, to - 1);
         draw();
       });
       prev.disabled = to <= start.level;
-      const reset = button(doc, 'fut-tp-btn', ICON.reset, t('tech.reset'), () => {
+      prev.setAttribute('aria-label', t('tech.prev'));
+      const range = button(doc, 'fut-tp-btn fut-tp-range', '', to > start.level ? t('tech.reset') : '', () => {
         to = start.level;
         draw();
       });
-      reset.disabled = to <= start.level;
-      const next = button(doc, 'fut-tp-btn', ICON.next, t('tech.next'), () => {
+      range.append(el(doc, 'b', '', String(start.level - 1)), el(doc, 'span', 'fut-tp-arrow', '→'), el(doc, 'b', 'fut-tp-to', String(to)));
+      range.disabled = to <= start.level;
+      range.setAttribute('aria-label', `${start.level - 1} → ${to}${to > start.level ? ` · ${t('tech.reset')}` : ''}`);
+      const next = button(doc, 'fut-tp-btn fut-tp-step', ICON.plus, t('tech.next'), () => {
         to += 1;
         draw();
       });
-      const add = button(doc, planned ? 'fut-tp-btn fut-tp-plan on' : 'fut-tp-btn fut-tp-plan', ICON.plan, '', () => {
+      next.setAttribute('aria-label', t('tech.next'));
+      const stepper = el(doc, 'span', 'fut-tp-stepper');
+      stepper.append(prev, range, next);
+      const add = button(doc, planned ? 'fut-tp-btn fut-tp-plan on' : 'fut-tp-btn fut-tp-plan', planned ? ICON.check : ICON.plus, '', () => {
         let current = loadPlan(o.store);
         if (planned) {
           for (let l = to; l >= start.level; l--) {
@@ -384,12 +391,15 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
         o.onPlanChange?.();
         draw();
       });
+      add.append(el(doc, 'span', '', t('tech.planBtn')));
       add.title = planned
         ? `${t('tech.inPlan')} · ${t('tech.removeHint')}`
         : to > start.level
           ? t('tech.addRange', { from: start.level, to })
           : t('tech.addOne', { level: to });
-      tools.replaceChildren(prev, reset, next, add);
+      add.setAttribute('aria-label', add.title);
+      add.setAttribute('aria-pressed', String(planned));
+      tools.replaceChildren(stepper, add);
 
       // The game's "Livello 45" becomes the range, as OGLight does.
       if (levelLabel) levelLabel.textContent = `${start.level - 1} → ${to}`;
@@ -457,14 +467,16 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
       const total = scaleCost(one, n);
       const have = o.have();
       const gap = missing(total, have ?? { metal: 0, crystal: 0, deuterium: 0 });
-      const add = button(doc, added ? 'fut-tp-btn fut-tp-plan on' : 'fut-tp-btn fut-tp-plan', ICON.plan, t('tech.addUnits', { n: n.toLocaleString(locale) }), () => {
+      const add = button(doc, added ? 'fut-tp-btn fut-tp-plan on' : 'fut-tp-btn fut-tp-plan', added ? ICON.check : ICON.plus, t('tech.addUnits', { n: n.toLocaleString(locale) }), () => {
         const item: PlanItem = { id: details.id, amount: n, name: details.name, cost: total, added: Date.now() };
         o.store.set(PLAN_KEY, addToPlan(loadPlan(o.store), o.bodyId, [item]));
         o.onPlanChange?.();
         added = true;
         draw();
       });
+      add.append(el(doc, 'span', '', t('tech.planBtn')));
       if (added) add.title = t('tech.added');
+      add.setAttribute('aria-label', add.title);
       tools.replaceChildren(amount, add);
       const view: View = {
         heads: [t('tech.colOne'), `×${n.toLocaleString(locale)}`, t('tech.colMissing')],
