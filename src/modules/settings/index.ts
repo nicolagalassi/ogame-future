@@ -409,6 +409,7 @@ export function openSettings(o: SettingsOptions): void {
         row(t('settings.totals'), t('settings.totalsHint'), yesNo(menu.showTotals, (v) => setMenu({ showTotals: v }))),
         row(t('settings.totalView'), t('settings.totalViewHint'), choice([['msu', 'MSU 3:2:1'], ['sum', '1:1:1']], menu.totalView ?? 'msu', (v) => setMenu({ totalView: v as MenuSettings['totalView'] }), !menu.showTotals)),
         row(t('settings.fleetPill'), t('settings.fleetPillHint'), yesNo(menu.showFleet === true, (v) => setMenu({ showFleet: v }))),
+        row(t('settings.gameTips'), t('settings.gameTipsHint'), yesNo(menu.gameTips !== false, (v) => setMenu({ gameTips: v }))),
       );
       // Reminders: the bells set by hand also as the computer's notification (opt-in, see modules/reminders).
       const N = (doc.defaultView as (Window & { Notification?: typeof Notification }) | null)?.Notification;
