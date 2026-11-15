@@ -67,6 +67,12 @@ tfoot td { border-top: 1px solid var(--line); border-bottom: 0; font-weight: 700
    The rung under the pointer stays full, the others step down a tone. */
 .move { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--raised); transition: opacity 140ms ease; }
 .move + .move { margin-top: 2px; }
+/* The full list (Investimenti): two columns, rungs packed, 2px seams. */
+.ladder { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; }
+.ladder .move { margin: 0; padding: 7px 10px; }
+.ladder .move .pic { width: 24px !important; height: 24px !important; }
+.ladder .roi { font-size: 19px; }
+@media (max-width: 900px) { .ladder { grid-template-columns: 1fr; } }
 @media (hover: hover) and (pointer: fine) { .card:hover > .move:not(:hover) { opacity: 0.72; } }
 .move .n { width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; background: var(--accent); color: var(--on-accent); font: 600 condensed 12px var(--display); display: flex; align-items: center; justify-content: center; }
 .move-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -155,7 +161,7 @@ td.guess { font-style: italic; opacity: 0.7; }
 .field { height: 28px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text); font: 12px var(--body); }
 .field:focus { border-color: var(--accent); outline: none; }
 .field-label { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
-.field.rate { width: 64px; text-align: right; }
+.field.rate { width: 44px; text-align: center; }
 .field.qty { width: 110px; text-align: right; font-family: "JetBrains Mono", Consolas, monospace; }
 table.scrap td.unit { padding: 2px 8px 2px 2px; }
 table.scrap .unit-label { display: flex; align-items: center; gap: 8px; width: 100%; padding: 2px 8px 2px 2px; border: 1px solid transparent; border-radius: 6px; background: none; color: var(--text-2); font: 12px var(--body); text-align: left; cursor: pointer; }
