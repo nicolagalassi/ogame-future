@@ -56,6 +56,8 @@ import {
   EXPEDITION_MAX_KEY,
   type ExpeditionMaxSeen,
 } from '../../engines/fleet';
+import { SNAPSHOT_KEY, type AccountSnapshot } from '../../data/account-info';
+import { applyPageResources, leftAfterSend } from '../../engines/resources';
 import { originCoords, readShipSlots } from '../../data/fleet-page';
 import { getDispatcher, readShipsInfo, shipCapacity as shipCapacityOf, shipsOnPlanet, SHIPS_INFO_KEY, whenDispatcherReady, type FleetDispatcher } from '../../data/fleet-dispatcher';
 import {
@@ -1606,6 +1608,7 @@ export function renderFleetTools(o: FleetOptions): void {
       // Remember what was sent, for "Ultima flotta".
       try {
         o.store.set(LAST_FLEET_KEY, snapshotFleet(fd));
+        recordLeft(o, fd);
         recordShipment(o, fd);
         recordOrionFuel(o.store, fd);
       } catch {
@@ -1688,6 +1691,19 @@ export function holdContinue(doc: Document, maxMs = 8000): () => void {
  * Resources sent to a body that has a construction plan are marked as sent in the planner,
  * whether they left from "Porta qui le risorse" or from any other transport.
  */
+/**
+ * The body the fleet left: its resources minus the cargo and the fuel, in the stored account snapshot,
+ * so the planet menu and the totals are right on the next page too. The page's own figures (the game's
+ * dispatcher), no request.
+ */
+function recordLeft(o: FleetOptions, fd: FleetDispatcher): void {
+  const snapshot = o.store.get<AccountSnapshot | null>(SNAPSHOT_KEY, null);
+  if (!snapshot) return;
+  const onPlanet = { metal: Number(fd.metalOnPlanet) || 0, crystal: Number(fd.crystalOnPlanet) || 0, deuterium: Number(fd.deuteriumOnPlanet) || 0 };
+  const cargo = { metal: Number(fd.cargoMetal) || 0, crystal: Number(fd.cargoCrystal) || 0, deuterium: Number(fd.cargoDeuterium) || 0 };
+  if (applyPageResources(snapshot, o.bodyId, leftAfterSend(onPlanet, cargo, Number(fd.getConsumption()) || 0), Date.now())) o.store.set(SNAPSHOT_KEY, snapshot);
+}
+
 function recordShipment(o: FleetOptions, fd: FleetDispatcher): void {
   if (fd.mission !== 3 && fd.mission !== 4) return;
   const cargo = { metal: Math.floor(fd.cargoMetal || 0), crystal: Math.floor(fd.cargoCrystal || 0), deuterium: Math.floor(fd.cargoDeuterium || 0) };

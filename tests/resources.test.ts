@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { formatUnits } from '../src/core/format';
-import { applyPageResources, estimateResources, mergeNewerResources, storageCapacity, storageFill, totals } from '../src/engines/resources';
+import { applyPageResources, estimateResources, mergeNewerResources, storageCapacity, storageFill, totals, leftAfterSend } from '../src/engines/resources';
 import { SNAPSHOT, body } from './fixtures';
 
 describe('formatUnits', () => {
@@ -73,5 +73,12 @@ describe('mergeNewerResources', () => {
     const out = mergeNewerResources(stored, mine);
     expect(out.bodies.find((x) => x.id === a)!.resources.metal).toBe(5);
     expect(out.bodies.find((x) => x.id === b)!.resources.metal).toBe(9);
+  });
+});
+
+describe('after a send', () => {
+  it('leaves on the body what was there minus the cargo and the deuterium burnt, never below zero', () => {
+    expect(leftAfterSend({ metal: 1000, crystal: 500, deuterium: 300 }, { metal: 800, crystal: 500, deuterium: 100 }, 50)).toEqual({ metal: 200, crystal: 0, deuterium: 150 });
+    expect(leftAfterSend({ metal: 10, crystal: 0, deuterium: 20 }, { metal: 0, crystal: 0, deuterium: 15 }, 30)).toEqual({ metal: 10, crystal: 0, deuterium: 0 });
   });
 });
