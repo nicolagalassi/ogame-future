@@ -250,7 +250,7 @@
   "fleet.err.noDelivery": "No plan delivery in progress.",
   "fleet.ok.delivery": "Delivery ready: {ships} ships with {cargo} resources ({left} were missing). Press Next and Send fleet.",
   "tech.timeHint": "Time of lv. {level} · total {from} to {to}",
-  "tech.amountHint": "Amount to plan: also more than you can pay for now",
+  "tech.amountHint": "How many: any number for the plan; for building, at most 99,999 go into the queue, and no more than the game allows (max).",
   "plan.items": "{n} items",
   "plan.levels": "lv. {from}–{to}",
   "plan.bring": "Bring resources here",
