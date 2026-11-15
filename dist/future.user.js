@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.85
+// @version      0.3.86
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -4628,6 +4628,108 @@
     return { n: Math.floor(min / 1440), unit: "d" };
   }
 
+  // src/core/sheet.ts
+  var RES_COLORS = { metal: "#B8C2CC", crystal: "#7FB8FF", deuterium: "#4FE0B0", darkMatter: "#B58CDB", food: "#D6A8C8" };
+  var STATE_COLORS = { accent: "#4FD1E8", ok: "#7BC47F", warn: "#F5B547", bad: "#F07A6E" };
+  var PAGE_TOKENS = `--hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1;
+  --accent: ${STATE_COLORS.accent}; --ok: ${STATE_COLORS.ok}; --warn: ${STATE_COLORS.warn}; --neg: ${STATE_COLORS.bad};`;
+  var SURFACE_TOKENS = "--bg: #0B121D; --surface: #0D1522; --raised: #111B2A;";
+  var LINE_TOKENS = "--line: #1F2C40; --line-soft: #16202F; --faint: #4A5B72;";
+  var TEXT_TOKENS = `--text: #E6EDF5; --text-2: #C9D4E2; --muted: #8A9BB0;
+  --accent: ${STATE_COLORS.accent}; --accent-soft: #12283A; --warn: ${STATE_COLORS.warn}; --ok: ${STATE_COLORS.ok}; --bad: ${STATE_COLORS.bad};
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);`;
+  var WINDOW_TOKENS = `${SURFACE_TOKENS} ${LINE_TOKENS}
+  ${TEXT_TOKENS}`;
+  var WINDOW_TOKENS_NO_LINES = `${SURFACE_TOKENS}
+  ${TEXT_TOKENS}`;
+  var WINDOW_SHEET = `
+:host {
+  all: initial;
+  ${WINDOW_TOKENS}
+  --m: ${RES_COLORS.metal}; --c: ${RES_COLORS.crystal}; --d: ${RES_COLORS.deuterium}; --dm: ${RES_COLORS.darkMatter};
+  --mono: Consolas, "JetBrains Mono", monospace;
+  --panel-w: 860px;
+}
+* { box-sizing: border-box; }
+.backdrop {
+  position: fixed; inset: 0; z-index: 1000001; display: flex; justify-content: center; align-items: flex-start;
+  padding: 40px 16px; background: rgba(3,6,12,0.72); overflow-y: auto;
+  font: 12px/1.35 Arial, Helvetica, sans-serif; color: var(--text-2);
+}
+/* The planet menu's language: a dark column of tiles (#111B2A, hairline #1F2C40, 6-7px corners),
+   small grey labels, monospace numbers, cyan for what is selected. */
+.panel {
+  width: min(var(--panel-w), 100%); display: flex; flex-direction: column; gap: 8px; padding: 8px;
+  border: 1px solid var(--line); border-radius: 9px; background: var(--bg); box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  animation: fut-panel-in 200ms var(--ease-out);
+}
+/* Opening: the window settles in from just below, the page dims behind it. Closing is instant. */
+.backdrop { animation: fut-fade-in 160ms var(--ease-out); }
+@keyframes fut-panel-in { from { opacity: 0; transform: translateY(6px) scale(0.985); } }
+@keyframes fut-fade-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .panel { animation-name: fut-fade-in; } }
+.head { display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 4px 4px 4px 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); }
+.titles { flex: 1; display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; min-width: 0; }
+h2 { margin: 0; font-size: 14px; font-weight: 700; color: var(--text); }
+h3 { margin: 0 0 6px; font-size: 12px; font-weight: 700; color: var(--text); }
+h4 { margin: 10px 0 4px; font-size: 11px; font-weight: 700; color: var(--text-2); }
+.sub { color: var(--muted); font-size: 11px; }
+.close {
+  flex: none; width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 5px; border: 0; background: none; color: var(--muted); line-height: 1; cursor: pointer;
+}
+.close:hover { background: #16243A; color: var(--text); }
+.mono { font-family: var(--mono); }
+.m { color: var(--m); } .c { color: var(--c); } .d { color: var(--d); } .dm { color: var(--dm); }
+.neg { color: var(--bad); } .pos { color: var(--ok); }
+
+/* Tabs: one segmented strip, the one in use lit like the selected planet. */
+.tabs { display: flex; flex-wrap: wrap; gap: 0; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); overflow: hidden; }
+.tab { flex: 1 0 auto; height: 28px; padding: 0 12px; border: 0; border-right: 1px solid var(--line); background: none; color: var(--muted); font: 12px Arial, sans-serif; cursor: pointer; }
+.tab:last-child { border-right: 0; }
+.tab:hover { background: #111D2D; color: var(--text); }
+.tab[aria-pressed="true"] { background: var(--accent-soft); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
+
+/* Key numbers: the planet menu toolbar, one cell each. */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); overflow: hidden; }
+.kpi { display: flex; flex-direction: column; gap: 1px; padding: 6px 10px 7px; min-width: 0; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
+.kpi .label { color: var(--muted); font-size: 11px; }
+.kpi .value { font: 700 15px/18px var(--mono); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi .note, .kpi .detail { color: var(--muted); font-size: 11px; }
+.kpi.accent .value { color: var(--accent); }
+.kpi.warn .value { color: var(--warn); }
+
+/* Sections: tiles, like the planet rows. */
+.card { padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); min-width: 0; }
+/* On/off switch: a track with a knob, lit and to the right when on (a checked input before it, or aria-checked on its button). */
+.sw-track { position: relative; flex: none; width: 30px; height: 16px; border-radius: 8px; background: var(--faint); transition: background-color 120ms ease-out; }
+.sw-track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--text-2); transition: transform 120ms ease-out; }
+input:checked + .sw-track, [aria-checked="true"] > .sw-track { background: var(--accent); }
+input:checked + .sw-track::after, [aria-checked="true"] > .sw-track::after { transform: translateX(14px); background: var(--bg); }
+@media (prefers-reduced-motion: reduce) { .sw-track, .sw-track::after { transition: none; } }
+.hint { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
+.empty { margin: 0; padding: 14px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 7px; }
+
+/* Buttons: the settings chips. One filled action, ghost for the rest. */
+.act { height: 24px; padding: 0 10px; border: 1px solid #2B6F7D; border-radius: 5px; background: var(--accent-soft); color: var(--text); font: 700 11px Arial, sans-serif; cursor: pointer; }
+.act:hover { border-color: var(--accent); }
+.act.ghost { border-color: var(--line); background: #0A111C; color: #B4C2D3; font-weight: 400; }
+.act.ghost:hover, .act.danger { border-color: var(--bad); color: var(--bad); }
+/* Press feedback: anything pressable gives a little under the pointer. */
+.act, .tab, .close, .seg button { transition: transform 140ms var(--ease-out); }
+.act:active, .tab:active, .close:active, .seg button:active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) { .act:active, .tab:active, .close:active, .seg button:active { transform: none; } }
+/* A checkbox drawn as the switch: the input stays for keyboard and screen readers, the track shows. */
+input.sw { position: absolute; opacity: 0; pointer-events: none; }
+input.sw:focus-visible + .sw-track { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Browser surfaces. */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.backdrop, .scroll, .table-wrap { scrollbar-color: #2A3B55 var(--bg); scrollbar-width: thin; }
+::selection { background: #2B6F7D; color: #fff; }
+.num, td, .value, .kpi-line { font-variant-numeric: tabular-nums; }
+`;
+
   // src/core/icons.ts
   var PATHS = {
     close: '<path d="M6 6l12 12M18 6L6 18"/>',
@@ -4696,19 +4798,21 @@
   }
   var POP_ID = "fut-mk-pop";
   var MARKS_CSS = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+.fut-mk, #fut-mk-pop { ${WINDOW_TOKENS} }
 .fut-mk { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin: 0 2px; padding: 0;
   border: 0; border-radius: 4px; background: none; color: #6B7F94; cursor: pointer; vertical-align: middle; }
 .fut-mk .fut-mk-ico { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7)); transition: transform 120ms ease-out; }
-.fut-mk:hover, .fut-mk:focus-visible { color: #C9D4E2; outline: none; }
+.fut-mk:hover, .fut-mk:focus-visible { color: var(--text-2); outline: none; }
 .fut-mk:hover .fut-mk-ico, .fut-mk:focus-visible .fut-mk-ico { transform: scale(1.15); }
 .fut-mk:focus-visible { box-shadow: 0 0 0 1px #617C8D; }
 .fut-mk.on { background: none; }
 #fut-mk-pop { position: fixed; z-index: 1000003; display: flex; gap: 3px; padding: 5px; border: 1px solid #2E4356; border-radius: 8px;
-  background: #111B2A; box-shadow: 0 8px 22px rgba(0,0,0,0.55); font: 11px Verdana, Arial, sans-serif; }
-#fut-mk-pop button { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; padding: 0; border: 1px solid #1F2C40;
-  border-radius: 6px; background: #0A111C; color: #8A9BB0; cursor: pointer; }
+  background: var(--raised); box-shadow: 0 8px 22px rgba(0,0,0,0.55); font: 11px Verdana, Arial, sans-serif; }
+#fut-mk-pop button { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; padding: 0; border: 1px solid var(--line);
+  border-radius: 6px; background: #0A111C; color: var(--muted); cursor: pointer; }
 #fut-mk-pop button:hover, #fut-mk-pop button:focus-visible { border-color: currentColor; outline: none; }
-#fut-mk-pop button[aria-pressed="true"] { background: #12283A; border-color: currentColor; }`;
+#fut-mk-pop button[aria-pressed="true"] { background: var(--accent-soft); border-color: currentColor; }`;
   function ensureMarksStyle(doc) {
     if (doc.getElementById("fut-mk-style")) return;
     const style = doc.createElement("style");
@@ -4966,51 +5070,53 @@
 
   // src/modules/galaxy/style.ts
   var GALAXY_CSS = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+.fut-g-name, #galaxycomponent, .fut-g-bar, #galaxyContent, .fut-g-muted, .fut-g-inact, .fut-g-vac, .fut-g-deb, .fut-g-rank, #expeditionDebrisSlotDebrisContainer, .fut-g-dval, .fut-g-card { ${WINDOW_TOKENS} }
 .fut-g-name { cursor: pointer; }
-.fut-g-name:hover { text-decoration: underline; text-decoration-color: #4FD1E8; text-underline-offset: 2px; }
+.fut-g-name:hover { text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 2px; }
 /* The game's own header, drawn as the first row of one card with Future's summary under it:
    same surface, dark fields, flat buttons. Nothing is moved or hidden, only its look changes. */
 #galaxycomponent #galaxyHeader {
   box-sizing: border-box; display: flex !important; align-items: center; height: 36px !important; margin: 0 !important; padding: 0 8px !important;
-  border: 1px solid #1F2C40 !important; border-radius: 7px 7px 0 0 !important; background: #111B2A !important;
+  border: 1px solid var(--line) !important; border-radius: 7px 7px 0 0 !important; background: var(--raised) !important;
 }
 #galaxycomponent #galaxyHeader form { display: flex; align-items: center; gap: 3px; width: 100%; margin: 0; }
 #galaxycomponent #galaxyHeader .galaxy_icons { flex: none; float: none !important; margin: 0 !important; }
 #galaxycomponent #galaxyHeader .galaxy_icons.solarsystem { margin-left: 6px !important; }
 #galaxycomponent #galaxyHeader input {
   box-sizing: border-box; float: none !important; width: 46px !important; height: 24px !important; margin: 0 !important; padding: 0 4px !important;
-  border: 1px solid #24344B !important; border-radius: 5px !important; background: #0A111C !important; color: #E6EDF5 !important;
+  border: 1px solid #24344B !important; border-radius: 5px !important; background: #0A111C !important; color: var(--text) !important;
   font: 700 13px/22px Consolas, "JetBrains Mono", monospace !important; text-align: center; box-shadow: none !important;
 }
-#galaxycomponent #galaxyHeader input:focus { outline: none; border-color: #4FD1E8 !important; }
+#galaxycomponent #galaxyHeader input:focus { outline: none; border-color: var(--accent) !important; }
 #galaxycomponent #galaxyHeader .btn_blue {
   box-sizing: border-box; float: none !important; display: inline-flex !important; align-items: center; gap: 5px; height: 24px !important; margin: 0 !important; padding: 0 10px !important;
-  border: 1px solid #2C5A73 !important; border-radius: 5px !important; background: #12283A !important; box-shadow: none !important; text-shadow: none !important;
-  color: #E6EDF5 !important; font: 700 11px/22px Verdana, Arial, sans-serif !important; white-space: nowrap; cursor: pointer;
+  border: 1px solid #2C5A73 !important; border-radius: 5px !important; background: var(--accent-soft) !important; box-shadow: none !important; text-shadow: none !important;
+  color: var(--text) !important; font: 700 11px/22px Verdana, Arial, sans-serif !important; white-space: nowrap; cursor: pointer;
 }
-#galaxycomponent #galaxyHeader .btn_blue:hover { border-color: #4FD1E8 !important; background: #16344A !important; }
-#galaxycomponent #galaxyHeader .btn_blue[disabled] { border-color: #1F2C40 !important; background: #0B121D !important; color: #8592A1 !important; font-weight: 400 !important; cursor: default; }
+#galaxycomponent #galaxyHeader .btn_blue:hover { border-color: var(--accent) !important; background: #16344A !important; }
+#galaxycomponent #galaxyHeader .btn_blue[disabled] { border-color: var(--line) !important; background: var(--bg) !important; color: #8592A1 !important; font-weight: 400 !important; cursor: default; }
 #galaxycomponent #galaxyHeader .btn_blue img { height: 14px; width: auto; margin: 0 !important; }
 #galaxycomponent #galaxyHeader form > .btn_blue { flex: none; }
 #galaxycomponent #galaxyHeader .systembuttons { float: none !important; display: flex; align-items: center; gap: 3px; min-width: 0; margin: 0 0 0 auto !important; position: static !important; }
 #galaxycomponent #galaxyHeader .systembuttons .btn_blue { min-width: 0; padding: 0 6px !important; font-weight: 400 !important; overflow: hidden; }
 .fut-g-bar {
   box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 14px; min-height: 28px; margin: 0 0 6px; padding: 4px 10px;
-  border: 1px solid #1F2C40; border-top: 0; border-radius: 0 0 7px 7px; background: #0B121D;
-  font: 11px/16px Verdana, Arial, sans-serif; color: #C9D4E2; text-align: left;
+  border: 1px solid var(--line); border-top: 0; border-radius: 0 0 7px 7px; background: var(--bg);
+  font: 11px/16px Verdana, Arial, sans-serif; color: var(--text-2); text-align: left;
 }
 /* The game's rows under the table (fleets in the system, colonised planets, legend): the same quiet strip. */
 #galaxyContent .galaxyRow.ctGalaxyFleetInfo, #galaxyContent .galaxyRow.ctGalaxyFooter {
-  box-sizing: border-box; background: #0B121D !important; border: 1px solid #1F2C40 !important; color: #A3AFBD !important;
+  box-sizing: border-box; background: var(--bg) !important; border: 1px solid var(--line) !important; color: #A3AFBD !important;
 }
 #galaxyContent .galaxyRow.ctGalaxyFleetInfo { border-bottom: 0 !important; border-radius: 7px 7px 0 0; margin-top: 6px; }
 #galaxyContent .galaxyRow.ctGalaxyFooter { border-radius: 0 0 7px 7px; }
 #galaxyContent .galaxyRow.ctGalaxyFooter #colonized { color: #A3AFBD !important; }
-.fut-g-bar b { color: #E6EDF5; font-family: Consolas, "JetBrains Mono", monospace; }
-.fut-g-muted { color: #8A9BB0; }
+.fut-g-bar b { color: var(--text); font-family: Consolas, "JetBrains Mono", monospace; }
+.fut-g-muted { color: var(--muted); }
 .fut-g-inact { color: #9BE36D; }
 .fut-g-vac { color: #7FB8FF; }
-.fut-g-deb { color: #F5B547; }
+.fut-g-deb { color: var(--warn); }
 /* Dark table, as OGLight: flat dark cells on an almost black table, empty positions darker still.
    Row marks are inset shadows, so they sit over the cell's own background. */
 #galaxycomponent .galaxyTable, #galaxyContent .expeditionDebrisSlotBox { background: #0C1117 !important; }
@@ -5023,11 +5129,11 @@
 /* The position the side bar (or the link) asked for: the planet menu's cyan frame. */
 /* On the cells, not the row: a frame on the row showed between the cells as odd blue brackets. */
 #galaxyContent .galaxyRow.fut-g-hl .galaxyCell { box-shadow: inset 0 0 0 100px rgba(79,209,232,0.10); }
-#galaxyContent .galaxyRow.fut-g-hl .cellPosition { box-shadow: inset 3px 0 0 #4FD1E8, inset 0 0 0 100px rgba(79,209,232,0.18); color: #8BE4F2; }
+#galaxyContent .galaxyRow.fut-g-hl .cellPosition { box-shadow: inset 3px 0 0 var(--accent), inset 0 0 0 100px rgba(79,209,232,0.18); color: #8BE4F2; }
 
 #galaxyContent .cellPlanetName { position: relative; }
 /* Planet colour: at the right of the name, faint until the row is pointed at or the planet has one. */
-.fut-g-rank:focus-visible { outline: 2px solid #4FD1E8; outline-offset: 1px; }
+.fut-g-rank:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 /* Player column, as OGLight lays it out: status first, the name with all the room left, rank and
    flag on the right. The planet name gives up some width to the player name. */
@@ -5038,9 +5144,9 @@
 #galaxyContent .cellPlayerName > .playerName { flex: 0 1 auto; min-width: 0; }
 .fut-g-rank {
   margin-left: auto; flex: none; padding: 0 2px; border: 0; border-radius: 3px; background: none;
-  color: #8A9BB0; font: 10px/14px Consolas, "JetBrains Mono", monospace; cursor: help;
+  color: var(--muted); font: 10px/14px Consolas, "JetBrains Mono", monospace; cursor: help;
 }
-.fut-g-rank:hover { background: #16243A; color: #E6EDF5; }
+.fut-g-rank:hover { background: #16243A; color: var(--text); }
 /* The flag stays out of the way until the row is pointed at, or the player has one. */
 #galaxyContent .cellPlayerName .fut-mk-flag { flex: none; width: 16px; height: 16px; margin: 0; border-color: transparent; background: none; opacity: 0; transition: opacity 120ms ease-out; }
 #galaxyContent .galaxyRow:hover .fut-mk-flag, #galaxyContent .fut-mk-flag:focus-visible { opacity: 1; }
@@ -5051,22 +5157,22 @@
 #galaxyContent .cellDebris .microdebris, #expeditionDebrisSlotDebrisContainer .microdebris { background-image: none !important; }
 #galaxyContent .cellDebris > a, #galaxyContent .cellDebris .microdebris { position: absolute !important; inset: 0; width: auto !important; height: auto !important; margin: 0 !important; }
 .fut-g-dval { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  color: #C9D4E2; font: 11px/12px Consolas, "JetBrains Mono", monospace; white-space: nowrap; pointer-events: none; }
-.fut-g-dval.big { color: #F5B547; font-weight: 700; text-shadow: 0 0 6px rgba(245, 181, 71, 0.45); }
+  color: var(--text-2); font: 11px/12px Consolas, "JetBrains Mono", monospace; white-space: nowrap; pointer-events: none; }
+.fut-g-dval.big { color: var(--warn); font-weight: 700; text-shadow: 0 0 6px rgba(245, 181, 71, 0.45); }
 .fut-g-dval.deep { position: static; display: inline-flex; margin-left: 6px; font-size: 12px; }
 
 .fut-g-card {
   position: fixed; z-index: 1000002; width: 250px; padding: 10px 12px; border: 1px solid #2C3E57; border-radius: 8px;
-  background: #0A111C; box-shadow: 0 10px 30px rgba(0,0,0,0.6); font: 12px/16px Arial, Helvetica, sans-serif; color: #C9D4E2;
+  background: #0A111C; box-shadow: 0 10px 30px rgba(0,0,0,0.6); font: 12px/16px Arial, Helvetica, sans-serif; color: var(--text-2);
   text-align: left; pointer-events: none;
 }
-.fut-g-card h4 { margin: 0 0 6px; font-size: 12px; font-weight: 700; color: #E6EDF5; }
+.fut-g-card h4 { margin: 0 0 6px; font-size: 12px; font-weight: 700; color: var(--text); }
 .fut-g-card table { width: 100%; border-collapse: collapse; }
-.fut-g-card td { padding: 2px 0; border-bottom: 1px solid #16202F; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fut-g-card td { padding: 2px 0; border-bottom: 1px solid var(--line-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .fut-g-card td + td { text-align: right; font-family: Consolas, "JetBrains Mono", monospace; }
-.fut-g-card td.r { color: #4FD1E8; padding-left: 10px; }
-.fut-g-card p { margin: 6px 0 0; color: #8A9BB0; font-size: 11px; }
-.fut-g-card .err { color: #FF7A7A; }
+.fut-g-card td.r { color: var(--accent); padding-left: 10px; }
+.fut-g-card p { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
+.fut-g-card .err { color: var(--bad); }
 `;
 
   // src/data/fleet-dispatcher.ts
@@ -5188,84 +5294,86 @@
     ["military", "fleet", "#FF7A7A"]
   ];
   var CSS = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+:host { ${WINDOW_TOKENS} }
 :host { all: initial; }
 * { box-sizing: border-box; }
 /* As wide as the room left of the game's page allows, between 300 and ${SIDE_W}px (--w, set from the page). */
 .side {
   container-type: inline-size;
   position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000000; width: var(--w, ${SIDE_W}px); max-width: 100vw; display: flex; flex-direction: column; gap: 6px;
-  padding: 8px; background: #0B121D; border-right: 1px solid #1F2C40; box-shadow: 6px 0 24px rgba(0,0,0,0.45);
-  font: 12px/1.3 Arial, Helvetica, sans-serif; color: #C9D4E2; font-variant-numeric: tabular-nums; overflow: hidden;
+  padding: 8px; background: var(--bg); border-right: 1px solid var(--line); box-shadow: 6px 0 24px rgba(0,0,0,0.45);
+  font: 12px/1.3 Arial, Helvetica, sans-serif; color: var(--text-2); font-variant-numeric: tabular-nums; overflow: hidden;
 }
 button, input, textarea { font: inherit; color: inherit; }
-button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -1px; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; }
 .mono, .coords, .num { font-family: Consolas, "JetBrains Mono", monospace; }
 
 /* Head: back, who or what, close. */
-.head { display: flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 2px 0 4px; border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; }
-.title { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; font: 700 14px Arial, sans-serif; color: #E6EDF5; white-space: nowrap; overflow: hidden; }
+.head { display: flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 2px 0 4px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); }
+.title { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; font: 700 14px Arial, sans-serif; color: var(--text); white-space: nowrap; overflow: hidden; }
 .title .name { overflow: hidden; text-overflow: ellipsis; }
 .title a { color: #9AA9BC; font-weight: 400; font-size: 12px; text-decoration: none; }
-.title a:hover { color: #4FD1E8; }
+.title a:hover { color: var(--accent); }
 .ib { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 5px; background: none; color: #9AA9BC; cursor: pointer; flex: none; text-decoration: none; }
-.ib:hover { background: #16243A; color: #E6EDF5; }
+.ib:hover { background: #16243A; color: var(--text); }
 
 /* Tabs and filters. */
 .chips { display: flex; flex-wrap: wrap; gap: 3px; }
-.chip { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: 1 0 auto; min-width: 30px; height: 26px; padding: 0 6px; border-radius: 5px; border: 1px solid #1F2C40; background: #0A111C; color: #B4C2D3; cursor: pointer; }
+.chip { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: 1 0 auto; min-width: 30px; height: 26px; padding: 0 6px; border-radius: 5px; border: 1px solid var(--line); background: #0A111C; color: #B4C2D3; cursor: pointer; }
 .chip:hover { border-color: #2C5A73; }
-.chip[aria-pressed="true"] { border-color: currentColor; background: #12283A; color: #E6EDF5; font-weight: 700; }
+.chip[aria-pressed="true"] { border-color: currentColor; background: var(--accent-soft); color: var(--text); font-weight: 700; }
 .chip .n { font: 12px Consolas, monospace; color: #9AA9BC; }
 
 /* Scores: what the number is, the number, the rank. Three per line. */
-.scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden; flex: none; }
-.score { display: flex; flex-direction: column; gap: 1px; min-width: 0; padding: 5px 8px 6px; box-shadow: 1px 0 0 #1F2C40, 0 1px 0 #1F2C40; }
+.scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 7px; background: var(--raised); overflow: hidden; flex: none; }
+.score { display: flex; flex-direction: column; gap: 1px; min-width: 0; padding: 5px 8px 6px; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
 .score .k { display: flex; align-items: center; gap: 4px; color: #9AA9BC; font-size: 11px; white-space: nowrap; overflow: hidden; }
 .score b { font: 700 14px/16px Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .score i { font: normal 11px Consolas, monospace; color: #9AA9BC; }
 /* The game's own pages about this player. */
-.actions { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid #1F2C40; border-radius: 7px; background: #0B121D; overflow: hidden; flex: none; }
+.actions { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); overflow: hidden; flex: none; }
 .actions a { display: flex; align-items: center; justify-content: center; gap: 6px; height: 28px; padding: 0 4px; color: #B4C2D3; text-decoration: none; white-space: nowrap; overflow: hidden; }
-.actions > * + * { border-left: 1px solid #1F2C40; }
-.actions a:hover { background: #111D2D; color: #E6EDF5; }
+.actions > * + * { border-left: 1px solid var(--line); }
+.actions a:hover { background: #111D2D; color: var(--text); }
 /* The player's note. */
-.note { display: flex; align-items: flex-start; gap: 6px; padding: 5px 8px; border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; flex: none; }
-.note svg { flex: none; margin-top: 3px; color: #F5B547; }
-.note textarea { flex: 1; min-width: 0; min-height: 20px; max-height: 120px; padding: 2px 0; border: 0; background: none; color: #E6EDF5; resize: vertical; line-height: 1.4; field-sizing: content; }
+.note { display: flex; align-items: flex-start; gap: 6px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); flex: none; }
+.note svg { flex: none; margin-top: 3px; color: var(--warn); }
+.note textarea { flex: 1; min-width: 0; min-height: 20px; max-height: 120px; padding: 2px 0; border: 0; background: none; color: var(--text); resize: vertical; line-height: 1.4; field-sizing: content; }
 .note textarea::placeholder { color: #617C8D; }
 .note textarea:focus { outline: none; }
-.note:focus-within { border-color: #4FD1E8; }
+.note:focus-within { border-color: var(--accent); }
 .note.off { color: #9AA9BC; }
 
 
 /* Lists: one card, a hairline between rows, the cyan bar on the system on screen. */
-.scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: #2A3B55 #0B121D; scrollbar-width: thin; }
-.pl, .ps { border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden; }
+.scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: #2A3B55 var(--bg); scrollbar-width: thin; }
+.pl, .ps { border: 1px solid var(--line); border-radius: 7px; background: var(--raised); overflow: hidden; }
 .cols, .row { display: grid; align-items: center; gap: 6px; min-height: 28px; padding: 0 6px; }
-.cols { min-height: 22px; color: #9AA9BC; font-size: 11px; background: #0B121D; border-bottom: 1px solid #1F2C40; }
-.row + .row { border-top: 1px solid #16202F; }
+.cols { min-height: 22px; color: #9AA9BC; font-size: 11px; background: var(--bg); border-bottom: 1px solid var(--line); }
+.row + .row { border-top: 1px solid var(--line-soft); }
 .row.gap { border-top-color: #2C3E57; }
 .row:hover { background: #16243A; }
-.row.active { background: rgba(79,209,232,0.12); box-shadow: inset 3px 0 0 #4FD1E8; }
+.row.active { background: rgba(79,209,232,0.12); box-shadow: inset 3px 0 0 var(--accent); }
 .pl .cols, .pl .row { grid-template-columns: 18px 84px minmax(0, 1fr) 46px 40px 40px 34px; }
 .ps .row { grid-template-columns: 18px minmax(0, 1fr) auto 30px auto; min-height: 30px; }
 .idx { color: #617C8D; font: 11px Consolas, monospace; text-align: right; }
-.coords { all: unset; display: inline-flex; align-items: center; gap: 3px; padding: 2px 3px; border-radius: 4px; color: #E6EDF5; font: 12px Consolas, monospace; cursor: pointer; white-space: nowrap; }
+.coords { all: unset; display: inline-flex; align-items: center; gap: 3px; padding: 2px 3px; border-radius: 4px; color: var(--text); font: 12px Consolas, monospace; cursor: pointer; white-space: nowrap; }
 .coords:hover { background: #1D3350; color: #8BE4F2; }
 .row.active .coords { color: #8BE4F2; }
-.coords.new::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #4FD1E8; }
+.coords.new::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
 .where { display: inline-flex; align-items: center; gap: 2px; min-width: 0; }
-.home { flex: none; color: #F5B547; }
+.home { flex: none; color: var(--warn); }
 .pn { min-width: 0; color: #9AA9BC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cell-r { text-align: right; font: 12px Consolas, monospace; color: #617C8D; white-space: nowrap; overflow: hidden; }
 .cols .cell-r { font: inherit; color: inherit; }
-.cell-r.has { color: #C9D4E2; }
-.cell-r.big { color: #F5B547; font-weight: 700; }
-.txt { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E6EDF5; }
+.cell-r.has { color: var(--text-2); }
+.cell-r.big { color: var(--warn); font-weight: 700; }
+.txt { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
 .txt .who { color: #9AA9BC; }
 .who2 { display: flex; flex-direction: column; min-width: 0; padding: 3px 0; }
-.pname { all: unset; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E6EDF5; font-weight: 700; cursor: pointer; }
-.pname:hover, .pname:focus-visible { color: #4FD1E8; }
+.pname { all: unset; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); font-weight: 700; cursor: pointer; }
+.pname:hover, .pname:focus-visible { color: var(--accent); }
 .pnote { color: #9AA9BC; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rank { color: #9AA9BC; font: 11px Consolas, monospace; }
 .pline { display: flex; align-items: baseline; gap: 5px; min-width: 0; }
@@ -5277,10 +5385,10 @@ a.act:hover { background: #1D3350; }
 .act.on { color: #EF7676; } .act.mid { color: #E3BB28; } .act.off { color: #38C56E; } .act.unknown { color: #617C8D; font-weight: 400; }
 .age { text-align: right; font: 12px Consolas, monospace; }
 .age.fresh { color: #38C56E; } .age.warm { color: #E3BB28; } .age.old { color: #EF7676; } .age.none { color: #617C8D; }
-.st-inactive { color: #9BE36D !important; } .st-longinactive { color: #9AA9BC !important; } .st-vacation { color: #7FDBFF !important; } .st-banned { color: #FF7A7A !important; text-decoration: line-through; }
+.st-inactive { color: #9BE36D !important; } .st-longinactive { color: #9AA9BC !important; } .st-vacation { color: #7FDBFF !important; } .st-banned { color: var(--bad) !important; text-decoration: line-through; }
 .foot { display: flex; justify-content: space-between; gap: 6px; margin: 6px 0 0; color: #9AA9BC; font-size: 11px; flex: none; }
-kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background: #0D1522; color: #C9D4E2; font: 11px Consolas, monospace; }
-.empty { margin: 4px 0; padding: 14px 10px; border: 1px dashed #1F2C40; border-radius: 7px; color: #9AA9BC; text-align: center; line-height: 1.4; }
+kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background: var(--surface); color: var(--text-2); font: 11px Consolas, monospace; }
+.empty { margin: 4px 0; padding: 14px 10px; border: 1px dashed var(--line); border-radius: 7px; color: #9AA9BC; text-align: center; line-height: 1.4; }
 .err { color: #EF7676; }
 .fut-mk { margin: 0; }
 /* Narrow screens: the planet's name and the row number give their room to the numbers. */
@@ -6440,102 +6548,6 @@ kbd { padding: 0 4px; border: 1px solid #2E4356; border-radius: 3px; background:
     return (items?.uuids ?? []).reduce((sum, u) => sum + (EXPEDITION_ITEMS[u] ?? 0), 0);
   }
 
-  // src/core/sheet.ts
-  var RES_COLORS = { metal: "#B8C2CC", crystal: "#7FB8FF", deuterium: "#4FE0B0", darkMatter: "#B58CDB", food: "#D6A8C8" };
-  var STATE_COLORS = { accent: "#4FD1E8", ok: "#7BC47F", warn: "#F5B547", bad: "#F07A6E" };
-  var PAGE_TOKENS = `--hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1;
-  --accent: ${STATE_COLORS.accent}; --ok: ${STATE_COLORS.ok}; --warn: ${STATE_COLORS.warn}; --neg: ${STATE_COLORS.bad};`;
-  var WINDOW_SHEET = `
-:host {
-  all: initial;
-  --bg: #0B121D; --surface: #0D1522; --raised: #111B2A; --line: #1F2C40; --line-soft: #16202F;
-  --text: #E6EDF5; --text-2: #C9D4E2; --muted: #8A9BB0; --faint: #4A5B72;
-  --accent: ${STATE_COLORS.accent}; --accent-soft: #12283A; --warn: ${STATE_COLORS.warn}; --ok: ${STATE_COLORS.ok}; --bad: ${STATE_COLORS.bad};
-  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --m: ${RES_COLORS.metal}; --c: ${RES_COLORS.crystal}; --d: ${RES_COLORS.deuterium}; --dm: ${RES_COLORS.darkMatter};
-  --mono: Consolas, "JetBrains Mono", monospace;
-  --panel-w: 860px;
-}
-* { box-sizing: border-box; }
-.backdrop {
-  position: fixed; inset: 0; z-index: 1000001; display: flex; justify-content: center; align-items: flex-start;
-  padding: 40px 16px; background: rgba(3,6,12,0.72); overflow-y: auto;
-  font: 12px/1.35 Arial, Helvetica, sans-serif; color: var(--text-2);
-}
-/* The planet menu's language: a dark column of tiles (#111B2A, hairline #1F2C40, 6-7px corners),
-   small grey labels, monospace numbers, cyan for what is selected. */
-.panel {
-  width: min(var(--panel-w), 100%); display: flex; flex-direction: column; gap: 8px; padding: 8px;
-  border: 1px solid var(--line); border-radius: 9px; background: var(--bg); box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-  animation: fut-panel-in 200ms var(--ease-out);
-}
-/* Opening: the window settles in from just below, the page dims behind it. Closing is instant. */
-.backdrop { animation: fut-fade-in 160ms var(--ease-out); }
-@keyframes fut-panel-in { from { opacity: 0; transform: translateY(6px) scale(0.985); } }
-@keyframes fut-fade-in { from { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .panel { animation-name: fut-fade-in; } }
-.head { display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 4px 4px 4px 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); }
-.titles { flex: 1; display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; min-width: 0; }
-h2 { margin: 0; font-size: 14px; font-weight: 700; color: var(--text); }
-h3 { margin: 0 0 6px; font-size: 12px; font-weight: 700; color: var(--text); }
-h4 { margin: 10px 0 4px; font-size: 11px; font-weight: 700; color: var(--text-2); }
-.sub { color: var(--muted); font-size: 11px; }
-.close {
-  flex: none; width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 5px; border: 0; background: none; color: var(--muted); line-height: 1; cursor: pointer;
-}
-.close:hover { background: #16243A; color: var(--text); }
-.mono { font-family: var(--mono); }
-.m { color: var(--m); } .c { color: var(--c); } .d { color: var(--d); } .dm { color: var(--dm); }
-.neg { color: var(--bad); } .pos { color: var(--ok); }
-
-/* Tabs: one segmented strip, the one in use lit like the selected planet. */
-.tabs { display: flex; flex-wrap: wrap; gap: 0; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); overflow: hidden; }
-.tab { flex: 1 0 auto; height: 28px; padding: 0 12px; border: 0; border-right: 1px solid var(--line); background: none; color: var(--muted); font: 12px Arial, sans-serif; cursor: pointer; }
-.tab:last-child { border-right: 0; }
-.tab:hover { background: #111D2D; color: var(--text); }
-.tab[aria-pressed="true"] { background: var(--accent-soft); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
-
-/* Key numbers: the planet menu toolbar, one cell each. */
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); overflow: hidden; }
-.kpi { display: flex; flex-direction: column; gap: 1px; padding: 6px 10px 7px; min-width: 0; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
-.kpi .label { color: var(--muted); font-size: 11px; }
-.kpi .value { font: 700 15px/18px var(--mono); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kpi .note, .kpi .detail { color: var(--muted); font-size: 11px; }
-.kpi.accent .value { color: var(--accent); }
-.kpi.warn .value { color: var(--warn); }
-
-/* Sections: tiles, like the planet rows. */
-.card { padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); min-width: 0; }
-/* On/off switch: a track with a knob, lit and to the right when on (a checked input before it, or aria-checked on its button). */
-.sw-track { position: relative; flex: none; width: 30px; height: 16px; border-radius: 8px; background: var(--faint); transition: background-color 120ms ease-out; }
-.sw-track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--text-2); transition: transform 120ms ease-out; }
-input:checked + .sw-track, [aria-checked="true"] > .sw-track { background: var(--accent); }
-input:checked + .sw-track::after, [aria-checked="true"] > .sw-track::after { transform: translateX(14px); background: var(--bg); }
-@media (prefers-reduced-motion: reduce) { .sw-track, .sw-track::after { transition: none; } }
-.hint { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
-.empty { margin: 0; padding: 14px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 7px; }
-
-/* Buttons: the settings chips. One filled action, ghost for the rest. */
-.act { height: 24px; padding: 0 10px; border: 1px solid #2B6F7D; border-radius: 5px; background: var(--accent-soft); color: var(--text); font: 700 11px Arial, sans-serif; cursor: pointer; }
-.act:hover { border-color: var(--accent); }
-.act.ghost { border-color: var(--line); background: #0A111C; color: #B4C2D3; font-weight: 400; }
-.act.ghost:hover, .act.danger { border-color: var(--bad); color: var(--bad); }
-/* Press feedback: anything pressable gives a little under the pointer. */
-.act, .tab, .close, .seg button { transition: transform 140ms var(--ease-out); }
-.act:active, .tab:active, .close:active, .seg button:active { transform: scale(0.97); }
-@media (prefers-reduced-motion: reduce) { .act:active, .tab:active, .close:active, .seg button:active { transform: none; } }
-/* A checkbox drawn as the switch: the input stays for keyboard and screen readers, the track shows. */
-input.sw { position: absolute; opacity: 0; pointer-events: none; }
-input.sw:focus-visible + .sw-track { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-/* Browser surfaces. */
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.backdrop, .scroll, .table-wrap { scrollbar-color: #2A3B55 var(--bg); scrollbar-width: thin; }
-::selection { background: #2B6F7D; color: #fff; }
-.num, td, .value, .kpi-line { font-variant-numeric: tabular-nums; }
-`;
-
   // src/engines/sim-links.ts
   var OSIMS = "https://www.ogameutilities.it/Osims/";
   var OGAME_TOOLS_SIM = "https://simulator.ogame-tools.com/";
@@ -7375,6 +7387,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   var RARITY = ["#B57BFF", "#4AA3FF", "#8A9BB0"];
   var outcomeCss = Object.entries(OUTCOME_COLORS).map(([k, c]) => `.fut-out-${k} { --tone: ${c}; }`).join("\n");
   var MESSAGES_CSS = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+.fut-msg, .fut-fresh, #fut-spypanel, .fut-msg-pillcell, .fut-fresh-timer, .fut-fresh-head, .fut-fresh-count, .fut-rar-chip, .fut-fresh-total, .fut-fresh-close, .fut-fresh-res, .fut-fresh-name, .fut-fresh-tile, .fut-fresh-ships, .fut-fresh-ship, .fut-msg-b, .msg, .fut-pill { ${WINDOW_TOKENS_NO_LINES} }
 /* One set of tokens for the summaries, the "just read" panel and the spy table. Text tokens keep
    at least 4.5:1 on every background they sit on; --faint is for decoration only (ticks, tracks). */
 .fut-msg, .fut-fresh, #fut-spypanel {
@@ -7456,7 +7470,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .fut-msg-b .fut-msg-val small { font-size: 10px; }
 .msg.fut-msgrar .fut-msg-b .fut-r, .msg.fut-msgrar .fut-msg-b .fut-u { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rar) 55%, transparent); }
 .msg.fut-msgrar-0 .fut-msg-b .fut-msg-val b { font-size: 17px; }
-.fut-pill { --tone: #8A9BB0; display: inline-block; max-width: 100%; box-sizing: border-box; padding: 1px 8px; border-radius: 9px;
+.fut-pill { --tone: var(--muted); display: inline-block; max-width: 100%; box-sizing: border-box; padding: 1px 8px; border-radius: 9px;
   border: 1px solid color-mix(in srgb, var(--tone) 55%, transparent); background: color-mix(in srgb, var(--tone) 9%, transparent);
   color: color-mix(in srgb, var(--tone) 78%, #fff); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Expedition size as game rarity. Normal finds keep the game's look; big (rare, blue) and huge (epic,
@@ -8937,24 +8951,26 @@ td.spark-cell { width: 90px; }
     return !!doc.defaultView?.matchMedia?.("(pointer: coarse)").matches;
   }
   var TOUCH_CSS = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+#${TOUCH_ID}, .fut-touch-pad { ${WINDOW_TOKENS} }
 #${TOUCH_ID} { position: fixed; left: 0; top: 0; z-index: 1000000; box-sizing: border-box; transform-origin: 0 0;
   display: flex; align-items: center; gap: 6px; padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
-  background: rgba(8, 13, 20, 0.94); border-top: 1px solid #1F2C40; box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.45);
-  font: 11px/1.2 Verdana, Arial, sans-serif; color: #C9D4E2; }
+  background: rgba(8, 13, 20, 0.94); border-top: 1px solid var(--line); box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.45);
+  font: 11px/1.2 Verdana, Arial, sans-serif; color: var(--text-2); }
 #${TOUCH_ID} .keys { flex: 1; display: flex; gap: 6px; min-width: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
 #${TOUCH_ID} .keys::-webkit-scrollbar { display: none; }
-#${TOUCH_ID} .sep { flex: none; width: 1px; align-self: stretch; margin: 4px 2px; background: #1F2C40; }
+#${TOUCH_ID} .sep { flex: none; width: 1px; align-self: stretch; margin: 4px 2px; background: var(--line); }
 #${TOUCH_ID} button { flex: none; position: relative; display: inline-flex; align-items: center; justify-content: center;
-  width: 48px; height: 48px; padding: 0; border: 1px solid #24344B; border-radius: 6px; background: #0D1522; color: #4FD1E8;
+  width: 48px; height: 48px; padding: 0; border: 1px solid #24344B; border-radius: 6px; background: var(--surface); color: var(--accent);
   font: inherit; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-#${TOUCH_ID} button:active { background: #12283A; border-color: #4FD1E8; transform: translateY(1px); }
-#${TOUCH_ID} button:focus-visible { outline: 2px solid #4FD1E8; outline-offset: 1px; }
+#${TOUCH_ID} button:active { background: var(--accent-soft); border-color: var(--accent); transform: translateY(1px); }
+#${TOUCH_ID} button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 /* The key in the corner, as on the fleet bar; fingers do not need it. */
 #${TOUCH_ID} button .k { position: absolute; top: 3px; right: 4px; color: #8592A1; font-size: 11px; line-height: 11px; }
 #${TOUCH_ID} button:has(.k) .fut-tb-glyph { margin: 6px 6px 0 0; }
 @media (pointer: coarse) { #${TOUCH_ID} button .k { display: none; } #${TOUCH_ID} button:has(.k) .fut-tb-glyph { margin: 0; } }
 #${TOUCH_ID} button.planet { color: #C9D2DC; }
-#${TOUCH_ID} button.galaxy { color: #7BC47F; }
+#${TOUCH_ID} button.galaxy { color: var(--ok); }
 #${TOUCH_ID}[data-page="fleet2"] button.fleet, #${TOUCH_ID}[data-page="fleet2"] .sep.fleet { display: none; }
 #${TOUCH_ID} .send { width: auto; min-width: 104px; padding: 0 16px; gap: 8px; border-color: #2B8A5E; background: #12352A; color: #E6F7EE; font-weight: 700; font-size: 13px; }
 #${TOUCH_ID} .send:active { background: #1A4A3A; border-color: #4FE0B0; }
@@ -9598,6 +9614,8 @@ input.field { width: 190px; }
   var L = "#planetbarcomponent #planetList.fut-menu";
   var MOON_W = 68;
   var PLANET_MENU_CSS = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+#planetbarcomponent, .fut-totals, .fut-plan-tip { ${WINDOW_TOKENS} }
 #planetbarcomponent.fut-wide #rechts,
 #planetbarcomponent.fut-wide #cutty,
 #planetbarcomponent.fut-wide #myPlanets { width: ${MENU_WIDTH}px !important; }
@@ -9619,7 +9637,7 @@ ${L} { width: 100% !important; display: flex !important; flex-direction: column;
 ${L} .smallplanet.fut-row {
   position: relative !important; display: flex !important; flex-direction: row; align-items: stretch;
   width: 100% !important; height: var(--fut-row-h, 40px) !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important;
-  border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A !important; overflow: hidden; box-sizing: border-box;
+  border: 1px solid var(--line); border-radius: 7px; background: var(--raised) !important; overflow: hidden; box-sizing: border-box;
 }
 ${L} .smallplanet.fut-current { border-color: #2C5A73; }
 
@@ -9647,8 +9665,8 @@ ${L} .fut-name .planet-koords {
   width: auto !important; max-width: none !important; height: auto !important; line-height: 1.15 !important;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left !important; background: none !important;
 }
-${L} .fut-name .planet-name { font: 700 11px Arial, sans-serif !important; color: #E6EDF5 !important; }
-${L} .fut-name .planet-koords { font: 10px monospace !important; color: #C9D4E2 !important; }
+${L} .fut-name .planet-name { font: 700 11px Arial, sans-serif !important; color: var(--text) !important; }
+${L} .fut-name .planet-koords { font: 10px monospace !important; color: var(--text-2) !important; }
 
 /* Resources: one per line (metal, crystal, deuterium). */
 ${L} .fut-res {
@@ -9664,15 +9682,15 @@ ${L} .fut-cell.fut-has-fill {
 ${L} .fut-m, .fut-totals .fut-m .fut-tname { color: ${RES_COLORS.metal}; }
 ${L} .fut-c, .fut-totals .fut-c .fut-tname { color: ${RES_COLORS.crystal}; }
 ${L} .fut-d, .fut-totals .fut-d .fut-tname { color: ${RES_COLORS.deuterium}; }
-${L} .fut-full { color: #F5B547 !important; font-weight: 700; }
-${L} .fut-missing { color: #8A9BB0; }
+${L} .fut-full { color: var(--warn) !important; font-weight: 700; }
+${L} .fut-missing { color: var(--muted); }
 /* Fleet: what the ships are worth (planet, then moon), a third line under name and coordinates. */
 ${L} .fut-fleet { display: flex; align-items: center; gap: 5px; min-width: 0; margin-top: 1px; font: 10px/11px monospace; color: #F2A3A3; white-space: nowrap; overflow: hidden; }
 ${L} .fut-fleet-m { display: inline-flex; align-items: center; gap: 2px; color: #D8A0A0; }
 ${L} .fut-fleet-m svg { flex: none; opacity: 0.8; }
 ${L}.fut-mode-compact .fut-fleet-m { display: none; }
 .fut-totals .fut-fleetrow .fut-tname { color: #FFA0A0; }
-.fut-totals .fut-flyrow, .fut-totals .fut-flyrow .fut-tname { color: #8A9BB0; font-size: 0.92em; }
+.fut-totals .fut-flyrow, .fut-totals .fut-flyrow .fut-tname { color: var(--muted); font-size: 0.92em; }
 
 /* Moon: its own tile on the right of the same row. */
 ${L} a.moonlink {
@@ -9688,17 +9706,17 @@ ${L} a.moonlink .planetBarSpaceObjectContainer {
 }
 ${L} a.moonlink img.icon-moon { position: static !important; width: 16px !important; height: 16px !important; margin: 0 !important; }
 ${L} a.moonlink .fut-res { width: 46px; }
-${L} .fut-nomoon { flex-shrink: 0; width: ${MOON_W}px; border-left: 1px solid #1A2638; background: #0D1522; }
+${L} .fut-nomoon { flex-shrink: 0; width: ${MOON_W}px; border-left: 1px solid #1A2638; background: var(--surface); }
 
 /* Skin that failed to load (game CDN 502): a plain sphere keeps the row's shape. */
 ${L} img.fut-noskin { visibility: hidden; }
 ${L} .planetBarSpaceObjectContainer:has(img.fut-noskin) {
-  border-radius: 50%; background: radial-gradient(circle at 35% 35%, #8A9BB0, #2A3A50 65%, #0A111C) !important;
+  border-radius: 50%; background: radial-gradient(circle at 35% 35%, var(--muted), #2A3A50 65%, #0A111C) !important;
 }
 
 /* Selection: the body you are on (planet OR moon) gets a cyan frame and a bar on the left. */
 ${L} a.planetlink.active, ${L} a.moonlink.active {
-  background: rgba(79,209,232,0.18) !important; box-shadow: inset 0 0 0 1px #4FD1E8, inset 3px 0 0 #4FD1E8 !important;
+  background: rgba(79,209,232,0.18) !important; box-shadow: inset 0 0 0 1px var(--accent), inset 3px 0 0 var(--accent) !important;
 }
 ${L} a.planetlink.active .planet-name { color: #8BE4F2 !important; }
 
@@ -9717,16 +9735,16 @@ ${L} .smallplanet .constructionIcon { display: none !important; }
 ${L} .fut-queue { position: absolute; left: 2px; bottom: 2px; z-index: 2; display: flex; gap: 2px; padding: 2px; border-radius: 6px; background: rgba(5,10,18,0.85); }
 /* The plan: a slim column at the outer end of each row, right of the moon; one tile per planned body
    (planet on top, moon below), coloured by where its resources stand. */
-${L} .fut-plancol { flex-shrink: 0; display: flex; flex-direction: column; width: 20px; border-left: 1px solid #1A2638; background: #0D1522; }
+${L} .fut-plancol { flex-shrink: 0; display: flex; flex-direction: column; width: 20px; border-left: 1px solid #1A2638; background: var(--surface); }
 ${L} .fut-plancol > span { flex: 1; min-height: 0; }
 ${L} .fut-plancol > :last-child { border-top: 1px solid #1A2638; }
 ${L} .fut-plan { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-  font: 700 12px/12px Arial, sans-serif; cursor: pointer; background: color-mix(in srgb, currentColor 18%, #0D1522); outline: none; }
-${L} .fut-plan:hover, ${L} .fut-plan:focus-visible { background: color-mix(in srgb, currentColor 32%, #0D1522); }
+  font: 700 12px/12px Arial, sans-serif; cursor: pointer; background: color-mix(in srgb, currentColor 18%, var(--surface)); outline: none; }
+${L} .fut-plan:hover, ${L} .fut-plan:focus-visible { background: color-mix(in srgb, currentColor 32%, var(--surface)); }
 ${L} .fut-plan svg { display: block; }
 ${L}.fut-mode-compact .fut-plancol { display: none; }
 ${L} .fut-plan-missing { color: #EF7676; }
-${L} .fut-plan-arriving { color: #4FD1E8; }
+${L} .fut-plan-arriving { color: var(--accent); }
 ${L} .fut-plan-arrived { color: #E3BB28; }
 ${L} .fut-plan-ready { color: #38C56E; }
 ${L} .fut-plan-unknown { color: #8592A1; }
@@ -9738,7 +9756,7 @@ ${L} .fut-q-research { color: #32FB2F; }
 ${L} .fut-q-ship { color: #FFEB00; }
 ${L} .fut-q-lfbuilding { color: #FF79BD; }
 ${L} .fut-q-lfresearch { color: #42AFFF; }
-${L} .fut-q-unknown { color: #4FD1E8; }
+${L} .fut-q-unknown { color: var(--accent); }
 /* The game's attack alert keeps its place on the skin. */
 ${L} .smallplanet a.alert {
   position: absolute !important; left: 1px !important; top: auto !important; bottom: 1px !important; right: auto !important; z-index: 3;
@@ -9749,7 +9767,7 @@ ${L} .smallplanet a.alert {
 ${L}.fut-mode-compact a.planetlink { padding: 0 2px 0 3px !important; gap: 2px; }
 ${L}.fut-mode-compact a.planetlink .planetBarSpaceObjectContainer { left: -10px !important; opacity: 0.4; }
 ${L}.fut-mode-compact .fut-name .planet-name { display: none !important; }
-${L}.fut-mode-compact .fut-name .planet-koords { font-size: 11px !important; letter-spacing: -0.4px; color: #E6EDF5 !important; text-overflow: clip; }
+${L}.fut-mode-compact .fut-name .planet-koords { font-size: 11px !important; letter-spacing: -0.4px; color: var(--text) !important; text-overflow: clip; }
 ${L}.fut-mode-compact .fut-res { width: 38px; }
 ${L}.fut-mode-compact .fut-cell { padding: 0 1px; }
 ${L}.fut-mode-compact .fut-nomoon { width: 22px; }
@@ -9761,34 +9779,34 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
    name on top and number below; sync and settings stacked on the right. */
 #planetbarcomponent .fut-toolbar {
   box-sizing: border-box; display: grid !important; height: auto !important; padding: 0 !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 26px; margin: 0 0 3px;
-  border: 1px solid #1F2C40; border-radius: 7px; background: #111B2A; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 7px; background: var(--raised); overflow: hidden;
 }
 #planetbarcomponent .fut-toolbar .fut-cell {
   box-sizing: border-box !important; height: 40px !important; width: auto !important; box-shadow: none !important; border-radius: 0 !important; font: inherit;
   display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 3px; min-width: 0; padding: 0 6px 0 8px; margin: 0;
-  border: 0 !important; border-right: 1px solid #1F2C40 !important; background: none !important; color: inherit; text-align: left; cursor: pointer;
+  border: 0 !important; border-right: 1px solid var(--line) !important; background: none !important; color: inherit; text-align: left; cursor: pointer;
 }
 #planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) { background: #16243A !important; }
-#planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) .fut-cell-k { color: #E6EDF5; }
-#planetbarcomponent .fut-toolbar .fut-cell:focus-visible, #planetbarcomponent .fut-tool:focus-visible { outline: 1px solid #4FD1E8; outline-offset: -2px; }
+#planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) .fut-cell-k { color: var(--text); }
+#planetbarcomponent .fut-toolbar .fut-cell:focus-visible, #planetbarcomponent .fut-tool:focus-visible { outline: 1px solid var(--accent); outline-offset: -2px; }
 #planetbarcomponent .fut-toolbar .fut-cell:disabled { cursor: default; }
 #planetbarcomponent .fut-cell-t { display: flex; align-items: center; gap: 5px; min-width: 0; }
-#planetbarcomponent .fut-cell-i { flex: none; display: inline-flex; color: #8A9BB0; }
+#planetbarcomponent .fut-cell-i { flex: none; display: inline-flex; color: var(--muted); }
 #planetbarcomponent .fut-cell-k { min-width: 0; font: 11px/12px Arial, sans-serif; color: #9AA9BC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#planetbarcomponent .fut-cell-v { min-width: 0; font: 700 12px/14px Consolas, "JetBrains Mono", monospace; color: #E6EDF5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#planetbarcomponent .fut-cell-v small { font: 10px/14px Arial, sans-serif; letter-spacing: -0.2px; color: #8A9BB0; font-weight: 400; }
-#planetbarcomponent .fut-cell-v.fut-warn { color: #F5B547; } #planetbarcomponent .fut-cell-v.fut-ok { color: #4FE0B0; }
+#planetbarcomponent .fut-cell-v { min-width: 0; font: 700 12px/14px Consolas, "JetBrains Mono", monospace; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#planetbarcomponent .fut-cell-v small { font: 10px/14px Arial, sans-serif; letter-spacing: -0.2px; color: var(--muted); font-weight: 400; }
+#planetbarcomponent .fut-cell-v.fut-warn { color: var(--warn); } #planetbarcomponent .fut-cell-v.fut-ok { color: #4FE0B0; }
 #planetbarcomponent .fut-side { display: flex; flex-direction: column; grid-column: 3; grid-row: 1; }
 #planetbarcomponent .fut-tool {
   position: relative; flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; padding: 0;
-  border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; color: #8A9BB0; cursor: pointer; height: auto !important; min-height: 0 !important;
+  border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; color: var(--muted); cursor: pointer; height: auto !important; min-height: 0 !important;
 }
-#planetbarcomponent .fut-tool + .fut-tool { border-top: 1px solid #1F2C40 !important; }
+#planetbarcomponent .fut-tool + .fut-tool { border-top: 1px solid var(--line) !important; }
 #planetbarcomponent .fut-tool svg { width: 13px; height: 13px; }
-#planetbarcomponent .fut-tool:hover { background: #16243A !important; color: #E6EDF5; }
+#planetbarcomponent .fut-tool:hover { background: #16243A !important; color: var(--text); }
 #planetbarcomponent .fut-tool:disabled { opacity: 0.35; cursor: default; background: none; }
-#planetbarcomponent .fut-tool[aria-expanded="true"] { background: #12283A !important; color: #4FD1E8; }
-#planetbarcomponent .fut-tool.fut-stale { color: #F5B547; }
+#planetbarcomponent .fut-tool[aria-expanded="true"] { background: var(--accent-soft) !important; color: var(--accent); }
+#planetbarcomponent .fut-tool.fut-stale { color: var(--warn); }
 #planetbarcomponent .fut-tool.fut-failed { color: #E5534B; }
 #planetbarcomponent .fut-tool.fut-busy svg { animation: fut-spin 1s linear infinite; }
 /* Game width: no room for the names, the icon and the tooltip say what the number is. */
@@ -9800,23 +9818,23 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 
 /* Totals: a table, resource by resource: in stock now, made in a day. Numbers in one bright colour, right-aligned. */
 .fut-totals {
-  box-sizing: border-box; margin-top: 4px; padding: 2px 8px 4px; border-radius: 7px; border: 1px solid #1F2C40; background: #111B2A;
+  box-sizing: border-box; margin-top: 4px; padding: 2px 8px 4px; border-radius: 7px; border: 1px solid var(--line); background: var(--raised);
   font: 12px/1.3 Arial, Helvetica, sans-serif; font-variant-numeric: tabular-nums;
 }
 .fut-totals .fut-trow { display: grid; grid-template-columns: minmax(0, 1fr) 58px 62px; align-items: center; gap: 6px; min-height: 20px; padding: 2px 0; }
-.fut-totals .fut-trow + .fut-trow { border-top: 1px solid #16202F; }
+.fut-totals .fut-trow + .fut-trow { border-top: 1px solid var(--line-soft); }
 .fut-totals .fut-thead { min-height: 0; color: #9AA9BC; font-size: 11px; }
-.fut-totals .fut-thead + .fut-trow { border-top-color: #1F2C40; }
+.fut-totals .fut-thead + .fut-trow { border-top-color: var(--line); }
 .fut-totals .fut-tname { display: flex; align-items: center; gap: 6px; min-width: 0; white-space: nowrap; overflow: hidden; }
 .fut-totals .fut-tico { flex: none; display: inline-flex; }
-.fut-totals .fut-tlabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: #C9D4E2; }
-.fut-totals .fut-msu .fut-tlabel { color: #4FD1E8; }
-.fut-totals .fut-tnum { text-align: right; white-space: nowrap; color: #E6EDF5; font: 700 12px Consolas, "JetBrains Mono", monospace; }
+.fut-totals .fut-tlabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); }
+.fut-totals .fut-msu .fut-tlabel { color: var(--accent); }
+.fut-totals .fut-tnum { text-align: right; white-space: nowrap; color: var(--text); font: 700 12px Consolas, "JetBrains Mono", monospace; }
 .fut-totals .fut-tnum:last-child { color: #B4C2D3; font-weight: 400; }
 .fut-totals .fut-thead .fut-tnum { color: inherit; font: inherit; }
 .fut-totals .fut-msu { border-top-color: #2C3E57 !important; }
-.fut-totals .fut-msu .fut-tname { color: #4FD1E8; font-weight: 700; }
-.fut-totals .fut-msu .fut-tnum:last-child { color: #E6EDF5; }
+.fut-totals .fut-msu .fut-tname { color: var(--accent); font-weight: 700; }
+.fut-totals .fut-msu .fut-tnum:last-child { color: var(--text); }
 #planetbarcomponent:not(.fut-wide) .fut-totals { padding: 2px 4px 4px; }
 #planetbarcomponent:not(.fut-wide) .fut-totals .fut-trow { grid-template-columns: 13px minmax(0, 1fr) minmax(0, 1fr); gap: 3px; }
 #planetbarcomponent:not(.fut-wide) .fut-totals .fut-tlabel { display: none; }
@@ -9825,7 +9843,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 /* The plan's hover card, in the game's tooltip style (dark blue gradient, thin frame, centred title). */
 .fut-plan-tip { position: fixed; z-index: 100000; min-width: 170px; max-width: 260px; padding: 10px 12px; box-sizing: border-box;
   border: 1px solid #2C3E57; border-radius: 6px; background: linear-gradient(180deg, #1C2A3A 0%, #0F1923 100%);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.6); color: #C9D4E2; font: 11px/1.45 Verdana, Arial, sans-serif; pointer-events: none; }
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6); color: var(--text-2); font: 11px/1.45 Verdana, Arial, sans-serif; pointer-events: none; }
 .fut-plan-tip .fut-pt-head { display: flex; flex-direction: column; align-items: center; margin-bottom: 6px; }
 .fut-plan-tip .fut-pt-head b { color: #fff; font-size: 13px; }
 .fut-plan-tip .fut-pt-head span { color: #8592A1; font-size: 10px; }
@@ -9836,7 +9854,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 .fut-plan-tip .fut-pt-status { padding-top: 5px; border-top: 1px solid #2C3E57; }
 .fut-plan-tip .fut-pt-say { font-weight: 700; }
 .fut-plan-tip.fut-plan-missing .fut-pt-say { color: #EF7676; }
-.fut-plan-tip.fut-plan-arriving .fut-pt-say, .fut-plan-tip .fut-pt-sent { color: #4FD1E8 !important; }
+.fut-plan-tip.fut-plan-arriving .fut-pt-say, .fut-plan-tip .fut-pt-sent { color: var(--accent) !important; }
 .fut-plan-tip.fut-plan-arrived .fut-pt-say { color: #E3BB28; }
 .fut-plan-tip.fut-plan-ready .fut-pt-say { color: #38C56E; }
 .fut-plan-tip.fut-plan-unknown .fut-pt-say { color: #8592A1; }
@@ -10907,49 +10925,49 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 .track { height: 6px; border-radius: 3px; background: #1A2638; overflow: hidden; }
 .fill { height: 100%; border-radius: 3px; background: currentColor; }
 .prod.m { color: #B8C2CC; } .prod.c { color: #7FB8FF; } .prod.d { color: #4FE0B0; }
-.prod .prod-top span:first-child { color: #E6EDF5; }
+.prod .prod-top span:first-child { color: var(--text); }
 .ok { margin: 0; color: var(--ok); }
 .alert { display: flex; gap: 8px; padding: 6px 0; border-top: 1px solid #1A2638; }
 .alert:first-of-type { border-top: 0; }
 .alert .dot { flex-shrink: 0; width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; background: #7FB8FF; }
-.alert.warn .dot { background: #F5B547; }
+.alert.warn .dot { background: var(--warn); }
 .alert div { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .alert strong { font-size: 13px; }
-.alert span { color: #8A9BB0; font-size: 12px; }
+.alert span { color: var(--muted); font-size: 12px; }
 
 .table-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .table-head h3 { margin: 0; }
 .chip {
-  height: 26px; padding: 0 10px; border-radius: 7px; border: 1px solid #1F2C40; background: #0A111C;
+  height: 26px; padding: 0 10px; border-radius: 7px; border: 1px solid var(--line); background: #0A111C;
   color: #B4C2D3; font: 12px Arial, sans-serif; cursor: pointer;
 }
-.chip:hover { border-color: #4FD1E8; color: #E6EDF5; }
+.chip:hover { border-color: var(--accent); color: var(--text); }
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
-th { text-align: left; padding: 6px 8px; color: #8A9BB0; font-weight: 600; border-bottom: 1px solid #1F2C40; white-space: nowrap; }
+th { text-align: left; padding: 6px 8px; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--line); white-space: nowrap; }
 th.num, td.num { text-align: right; }
 .sort { all: unset; cursor: pointer; }
-.sort:hover { color: #E6EDF5; }
-td { padding: 5px 8px; border-bottom: 1px solid #16202F; white-space: nowrap; }
-tr.moon td { background: rgba(22,36,58,0.5); color: #C9D4E2; }
+.sort:hover { color: var(--text); }
+td { padding: 5px 8px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
+tr.moon td { background: rgba(22,36,58,0.5); color: var(--text-2); }
 tbody tr:hover td { background: rgba(79,209,232,0.07); }
-td.name a { color: #E6EDF5; text-decoration: none; font-weight: 700; }
+td.name a { color: var(--text); text-decoration: none; font-weight: 700; }
 td.name a:hover { color: #8BE4F2; }
-tr.moon td.name a { font-weight: 400; color: #C9D4E2; }
-.coords { margin-left: 6px; color: #8A9BB0; font-family: "JetBrains Mono", Consolas, monospace; font-size: 11px; }
-.tag { margin-left: 6px; padding: 0 5px; border-radius: 4px; background: rgba(245,181,71,0.15); color: #F5B547; font-size: 10px; }
+tr.moon td.name a { font-weight: 400; color: var(--text-2); }
+.coords { margin-left: 6px; color: var(--muted); font-family: "JetBrains Mono", Consolas, monospace; font-size: 11px; }
+.tag { margin-left: 6px; padding: 0 5px; border-radius: 4px; background: rgba(245,181,71,0.15); color: var(--warn); font-size: 10px; }
 td.m { color: #B8C2CC; } td.c { color: #7FB8FF; } td.d { color: #4FE0B0; }
-td.full { color: #F5B547 !important; font-weight: 700; }
+td.full { color: var(--warn) !important; font-weight: 700; }
 .age.fresh { color: #38C56E; } .age.warm { color: #E3BB28; } .age.old { color: #EF7676; }
-tfoot td { border-top: 1px solid #1F2C40; border-bottom: 0; font-weight: 700; }
+tfoot td { border-top: 1px solid var(--line); border-bottom: 0; font-weight: 700; }
 
 .move { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-top: 1px solid #1A2638; }
 .move:first-of-type { border-top: 0; }
-.move .n { width: 20px; height: 20px; flex-shrink: 0; border-radius: 50%; background: #12283A; color: #4FD1E8; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.move .n { width: 20px; height: 20px; flex-shrink: 0; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
 .move-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .move-text strong { font-size: 13px; }
-.move-text span { color: #8A9BB0; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.roi { color: #4FD1E8; font-weight: 700; white-space: nowrap; }
+.move-text span { color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.roi { color: var(--accent); font-weight: 700; white-space: nowrap; }
 td.queue { white-space: nowrap; }
 .q { display: inline-block; margin-right: 4px; padding: 1px 6px; border-radius: 4px; font-size: 11px; border: 1px solid color-mix(in srgb, currentColor 45%, transparent); background: none; }
 .q-building { color: #FF8200; } .q-research { color: #32FB2F; } .q-ship { color: #FFEB00; }
@@ -10965,20 +10983,20 @@ span.pic { display: inline-block !important; }
 .tech-label { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .tech-label span:not(.pic) { overflow: hidden; text-overflow: ellipsis; }
 .tech-label small { color: var(--muted); font-size: 11px; }
-.matrix .col-name { display: block; font-size: 10px; font-weight: 600; color: #8A9BB0; text-decoration: none; overflow-wrap: normal; hyphens: auto; }
-.matrix a.col-name:hover { color: #E6EDF5; }
-.matrix th.col.on .col-name { color: #4FD1E8; }
-.matrix th.col.on { box-shadow: inset 0 -2px 0 #4FD1E8; }
+.matrix .col-name { display: block; font-size: 10px; font-weight: 600; color: var(--muted); text-decoration: none; overflow-wrap: normal; hyphens: auto; }
+.matrix a.col-name:hover { color: var(--text); }
+.matrix th.col.on .col-name { color: var(--accent); }
+.matrix th.col.on { box-shadow: inset 0 -2px 0 var(--accent); }
 .matrix td { padding: 4px 6px; }
 .matrix th.name, .matrix td.name { position: sticky; left: 0; z-index: 1; background: var(--raised); }
 .matrix tr.moon td.name { background: #0F1828; }
-.matrix td.tech { color: #C9D4E2; font-weight: 400; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+.matrix td.tech { color: var(--text-2); font-weight: 400; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
 td.zero { color: #3A4A60; }
-td.top { color: #4FD1E8; }
+td.top { color: var(--accent); }
 td.off { opacity: 0.55; }
 td.guess { font-style: italic; opacity: 0.7; }
 .unit-ico { width: 28px; height: 28px; border-radius: 4px; object-fit: cover; display: block; margin: 0 auto; background: #16202E; }
-.unit-ico-none { display: flex; align-items: center; justify-content: center; color: #8A9BB0; font-size: 10px; }
+.unit-ico-none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 10px; }
 
 /* Lifeforms: same width for every planet, whatever its name; long names wrap on two lines at most. */
 .matrix.lf { table-layout: fixed; min-width: calc(230px + var(--cols, 1) * 52px); }
@@ -10995,19 +11013,19 @@ td.guess { font-style: italic; opacity: 0.7; }
 .lv.zero { opacity: 0.45; } .lv.zero b { color: var(--muted); }
 .move .pic { border-radius: 5px; }
 .head-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
-.head-toggle:hover, .head-toggle:focus-visible { color: #4FD1E8; }
-.needs { margin: 0 0 8px; padding: 8px 10px; border: 1px solid #1F2C40; border-radius: 7px; background: #0D1522; color: #B4C2D3; font-size: 12px; }
+.head-toggle:hover, .head-toggle:focus-visible { color: var(--accent); }
+.needs { margin: 0 0 8px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: #B4C2D3; font-size: 12px; }
 .needs p { margin: 4px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .needs .chip { display: inline-flex; align-items: center; height: 22px; text-decoration: none; }
 .move-text .guess { color: #E3BB28; font-style: normal; }
 .move-text .ok { color: #38C56E; font-style: normal; }
 .move.done { opacity: 0.55; }
 .pls { display: flex; flex-wrap: wrap; gap: 4px; margin: 3px 0 2px; }
-.pl { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border: 1px solid #1F2C40; border-radius: 5px; background: #0A111C; color: #B4C2D3; font-size: 11px; text-decoration: none; white-space: nowrap; }
-.pl:hover, .pl:focus-visible { border-color: #4FD1E8; color: #E6EDF5; }
+.pl { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border: 1px solid var(--line); border-radius: 5px; background: #0A111C; color: #B4C2D3; font-size: 11px; text-decoration: none; white-space: nowrap; }
+.pl:hover, .pl:focus-visible { border-color: var(--accent); color: var(--text); }
 /* Estimated levels: a dashed amber edge (the title says why), the name stays readable. */
 .move-text .pl.guess:not(.done) { border-style: dashed; border-color: #6B5618; color: #B4C2D3; }
-.move-text .pl.guess:not(.done):hover, .move-text .pl.guess:not(.done):focus-visible { border-color: #4FD1E8; color: #E6EDF5; }
+.move-text .pl.guess:not(.done):hover, .move-text .pl.guess:not(.done):focus-visible { border-color: var(--accent); color: var(--text); }
 .pl.done { color: #5F7189; text-decoration: line-through; border-style: dashed; }
 
 /* Planets | moons switch on the ships and defence pages. */
@@ -11038,16 +11056,16 @@ td.guess { font-style: italic; opacity: 0.7; }
 
 /* Scrap calculator */
 .scrap-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
-.field { height: 28px; padding: 0 8px; border: 1px solid #1F2C40; border-radius: 6px; background: #0D1522; color: #E6EDF5; font: 12px Arial, sans-serif; }
-.field:focus { border-color: #4FD1E8; outline: none; }
-.field-label { display: inline-flex; align-items: center; gap: 6px; color: #8A9BB0; font-size: 12px; }
+.field { height: 28px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text); font: 12px Arial, sans-serif; }
+.field:focus { border-color: var(--accent); outline: none; }
+.field-label { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
 .field.rate { width: 64px; text-align: right; }
 .field.qty { width: 110px; text-align: right; font-family: "JetBrains Mono", Consolas, monospace; }
 table.scrap td.unit { padding: 2px 8px 2px 2px; }
 table.scrap .unit-label { display: flex; align-items: center; gap: 8px; width: 100%; padding: 2px 8px 2px 2px; border: 1px solid transparent; border-radius: 6px; background: none; color: var(--text-2); font: 12px Arial, sans-serif; text-align: left; cursor: pointer; }
 table.scrap .unit-label:hover { border-color: var(--line); color: var(--text); }
 table.scrap .unit-label[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
-.msu { color: #4FD1E8; margin-left: 4px; }
+.msu { color: var(--accent); margin-left: 4px; }
 @media (max-width: 1100px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 900px) {
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -12613,6 +12631,8 @@ table.queues td.acts { width: 1%; text-align: right; }
 
   // src/modules/fleet/style.ts
   var FLEET_CSS = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+.fut-fbar, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fclear, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
 /* The fleet bar speaks the inbox's language: Verdana 11px, tabular numbers, one set of tokens. */
 .fut-fbar, .fut-fmenu {
   ${PAGE_TOKENS} --line: #24344B; --line-soft: #1A2738;
@@ -12655,7 +12675,7 @@ table.queues td.acts { width: 1%; text-align: right; }
 #fleet1 #technologies li[data-technology] { position: relative; }
 .fut-mainship { position: absolute; top: 2px; right: 2px; z-index: 2; width: 20px; height: 20px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #1F2C40; border-radius: 5px; background: rgba(13, 21, 34, 0.85); color: #8A9BB4; cursor: pointer; opacity: 0.75; }
 .fut-mainship:hover { opacity: 1; color: #F1F4F7; border-color: #6FB6C8; }
-.fut-mainship.on { opacity: 1; color: #0D1522; background: #6FB6C8; border-color: #6FB6C8; cursor: default; }
+.fut-mainship.on { opacity: 1; color: var(--surface); background: #6FB6C8; border-color: #6FB6C8; cursor: default; }
 /* "Opens a list" mark, in the corner where the others have their key. */
 .fut-fact .more-mark { position: absolute; right: 3px; bottom: 3px; width: 0; height: 0; border-left: 5px solid transparent; border-bottom: 5px solid currentColor; opacity: 0.7; }
 
@@ -12690,10 +12710,10 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fask { flex: none; display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 4px 0 10px; border: 1px solid #6B5A1E; border-radius: 8px; background: rgba(245,181,71,0.08); }
 .fut-fask[hidden] { display: none; }
 .fut-fask-q { color: #F5D9A0; white-space: nowrap; }
-.fut-fask-b { height: 22px; padding: 0 10px; border: 1px solid #2A3B55; border-radius: 5px; background: #0D1522; color: #C9D4E2; font: 12px Arial, Helvetica, sans-serif; cursor: pointer; }
-.fut-fask-b.yes { border-color: #F5B547; color: #F5B547; font-weight: 700; }
-.fut-fask-b:hover { color: #fff; border-color: #4FD1E8; }
-.fut-fask-b:focus-visible { outline: 1px solid #4FD1E8; outline-offset: 1px; }
+.fut-fask-b { height: 22px; padding: 0 10px; border: 1px solid #2A3B55; border-radius: 5px; background: var(--surface); color: var(--text-2); font: 12px Arial, Helvetica, sans-serif; cursor: pointer; }
+.fut-fask-b.yes { border-color: var(--warn); color: var(--warn); font-weight: 700; }
+.fut-fask-b:hover { color: #fff; border-color: var(--accent); }
+.fut-fask-b:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
 .fut-fread .tip b { color: var(--hi); }
 .fut-fread .tip:empty { display: none; }
 .fut-fread .tip:not(:empty) + .fut-finfo { display: none; }
@@ -12814,8 +12834,8 @@ table.queues td.acts { width: 1%; text-align: right; }
 }
 .fut-fbtn:hover { border-color: var(--accent); }
 .fut-fbtn.primary { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
-.fut-feditor h4 { margin: 0 0 4px; font-size: 14px; color: #E6EDF5; }
-.fut-feditor h5 { margin: 16px 0 6px; font-size: 12px; font-weight: 700; color: #C9D4E2; }
+.fut-feditor h4 { margin: 0 0 4px; font-size: 14px; color: var(--text); }
+.fut-feditor h5 { margin: 16px 0 6px; font-size: 12px; font-weight: 700; color: var(--text-2); }
 .fut-feditor > h5:first-child { margin-top: 0; }
 .fut-fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 4px 14px; }
 .fut-ffield { display: grid; grid-template-columns: minmax(0, 1fr) 96px; align-items: center; gap: 8px; min-height: 28px; color: var(--text-2); font-size: 11px; }
@@ -12825,10 +12845,10 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fgrid.wide .fut-ffield select { width: 130px; }
 .fut-ffield input { text-align: right; font-variant-numeric: tabular-nums; }
 .fut-ffield input, .fut-ffield select {
-  height: 26px; padding: 0 6px; border-radius: 6px; border: 1px solid #2C3E57; background: #0D1522; color: #E6EDF5; font: 12px Arial, sans-serif;
+  height: 26px; padding: 0 6px; border-radius: 6px; border: 1px solid #2C3E57; background: var(--surface); color: var(--text); font: 12px Arial, sans-serif;
 }
-.fut-ffield input:focus, .fut-ffield select:focus { outline: none; border-color: #4FD1E8; }
-.fut-fcheck { display: flex; align-items: center; gap: 6px; color: #C9D4E2; font-size: 12px; align-self: end; min-height: 26px; }
+.fut-ffield input:focus, .fut-ffield select:focus { outline: none; border-color: var(--accent); }
+.fut-fcheck { display: flex; align-items: center; gap: 6px; color: var(--text-2); font-size: 12px; align-self: end; min-height: 26px; }
 .fut-freserve { margin-top: 6px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); }
 .fut-freserve[open] { padding-bottom: 10px; }
 .fut-frulebody { padding: 0 12px; }
@@ -12844,14 +12864,14 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fswitch input { position: absolute; opacity: 0; pointer-events: none; }
 .fut-fswitch input:focus-visible + .sw-track { outline: 2px solid var(--accent); outline-offset: 2px; }
 input[type="checkbox"] { accent-color: var(--accent); }
-.fut-fbadge { padding: 1px 7px; border-radius: 9px; border: 1px solid #2C3E57; color: #8A9BB0; font-size: 11px; cursor: default; }
+.fut-fbadge { padding: 1px 7px; border-radius: 9px; border: 1px solid #2C3E57; color: var(--muted); font-size: 11px; cursor: default; }
 .fut-fbadge.on { border-color: #38C56E; color: #38C56E; }
 .fut-fbadge.off { border-color: #C9853A; color: #FFB15C; }
 .fut-fchecks { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 2px 12px; }
 .fut-fchecks .fut-fcheck { align-self: auto; min-height: 22px; }
 .fut-fcopy .fut-factions { margin-top: 6px; }
-.fut-feditor h6 { margin: 10px 0 4px; font-size: 11px; font-weight: 400; color: #8A9BB0; }
-.fut-fnote { margin: 6px 0 0; color: #8A9BB0; font-size: 11px; }
+.fut-feditor h6 { margin: 10px 0 4px; font-size: 11px; font-weight: 400; color: var(--muted); }
+.fut-fnote { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
 .fut-factions { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
 .fut-feditor > .fut-factions { position: sticky; bottom: 0; z-index: 1; margin: 10px -8px -8px; padding: 10px 8px; border-top: 1px solid var(--line); background: var(--bg); }
 `;
@@ -14335,36 +14355,38 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 
   // src/modules/tech/style.ts
   var TECH_CSS = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+#technologydetails, .fut-tp, .fut-tp-tools, .fut-tp-grid, .fut-tp-h, .fut-tp-k, .fut-tp-v, .fut-tp-sum, .fut-tp-short, .fut-tp-ok, .fut-tp-miss, .fut-tp-chips, .fut-tp-chip, .fut-tp-energy, .fut-tp-start, .fut-tp-disc, .fut-tp-pop, .fut-tp-lack, .fut-tp-sat, .fut-tp-lab, .fut-tp-sat-link { ${WINDOW_TOKENS} }
 /* The game's own cost list and detail lines give way to the panel (their data is in it). */
 #technologydetails.fut-tp-on .content .costs,
 #technologydetails.fut-tp-on .content .information > ul { display: none !important; }
 /* The game's dark matter button ("Inizia con MO") is much bigger than the normal one. */
 #technologydetails.fut-tp-on .build-it_wrap .build-it_premium { transform: scale(0.72); transform-origin: right bottom; }
-#technologydetails.fut-tp-on .content .information .level { color: #4FD1E8; font-weight: 700; }
+#technologydetails.fut-tp-on .content .information .level { color: var(--accent); font-weight: 700; }
 /* Units: shipyard choice on one line under the title, amount field over the build button. */
 /* Shipyard choice: a two-way switch (the game's radios stay, hidden but focusable; the labels are the buttons). */
 #technologydetails.fut-tp-unit .content .shipyardSelection { position: absolute; top: 26px; left: 6px; right: 158px; width: auto; height: 20px;
   display: flex; align-items: stretch; gap: 0; margin: 0; padding: 0; white-space: nowrap; overflow: hidden; }
 #technologydetails.fut-tp-unit .content .shipyardSelection input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
 #technologydetails.fut-tp-unit .content .shipyardSelection label { float: none; display: flex; align-items: center; margin: 0; padding: 0 10px; width: auto;
-  border: 1px solid #2A3B55; background: rgba(9,15,24,0.82); color: #8A9BB0; font: 11px/18px Arial, Helvetica, sans-serif; cursor: pointer; }
+  border: 1px solid #2A3B55; background: rgba(9,15,24,0.82); color: var(--muted); font: 11px/18px Arial, Helvetica, sans-serif; cursor: pointer; }
 #technologydetails.fut-tp-unit .content .shipyardSelection label::before, #technologydetails.fut-tp-unit .content .shipyardSelection label::after { display: none !important; }
 #technologydetails.fut-tp-unit .content .shipyardSelection label:first-of-type { border-radius: 10px 0 0 10px; }
 #technologydetails.fut-tp-unit .content .shipyardSelection label:last-of-type { border-radius: 0 10px 10px 0; }
 #technologydetails.fut-tp-unit .content .shipyardSelection label + input + label { border-left: 0; }
-#technologydetails.fut-tp-unit .content .shipyardSelection label:hover { color: #E6EDF5; }
-#technologydetails.fut-tp-unit .content .shipyardSelection input:checked + label { background: #12283A; color: #E6EDF5; font-weight: 700; box-shadow: inset 0 -2px 0 #4FD1E8; }
-#technologydetails.fut-tp-unit .content .shipyardSelection input:focus-visible + label { outline: 1px solid #4FD1E8; outline-offset: -1px; }
+#technologydetails.fut-tp-unit .content .shipyardSelection label:hover { color: var(--text); }
+#technologydetails.fut-tp-unit .content .shipyardSelection input:checked + label { background: var(--accent-soft); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
+#technologydetails.fut-tp-unit .content .shipyardSelection input:focus-visible + label { outline: 1px solid var(--accent); outline-offset: -1px; }
 #technologydetails.fut-tp-unit .content .build_amount { position: absolute; top: 104px; right: 6px; width: 146px; height: 28px; margin: 0; padding: 0;
   display: flex; align-items: center; gap: 4px; }
 #technologydetails.fut-tp-unit .content .build_amount label { display: none; }
 #technologydetails.fut-tp-unit .content .build_amount input, #technologydetails.fut-tp-unit #build_amount { position: static; float: none; flex: 1; min-width: 0; width: auto; height: 26px; margin: 0; padding: 0 6px; box-sizing: border-box;
-  border: 1px solid #2A3B55; border-radius: 5px; background: rgba(9,15,24,0.92) none; color: #E6EDF5; font: 700 13px Consolas, "JetBrains Mono", "DejaVu Sans Mono", monospace; text-align: right; box-shadow: none; }
-#technologydetails.fut-tp-unit #build_amount:focus { outline: none; border-color: #4FD1E8; }
+  border: 1px solid #2A3B55; border-radius: 5px; background: rgba(9,15,24,0.92) none; color: var(--text); font: 700 13px Consolas, "JetBrains Mono", "DejaVu Sans Mono", monospace; text-align: right; box-shadow: none; }
+#technologydetails.fut-tp-unit #build_amount:focus { outline: none; border-color: var(--accent); }
 #technologydetails.fut-tp-unit .content .build_amount .maximum { position: static; float: none; flex: none; width: auto; height: 26px; margin: 0; padding: 0 6px;
-  background: #16202E none !important; border: 1px solid #2A3B55; border-radius: 5px; color: #C9D4E2; font-size: 11px; cursor: pointer; }
+  background: #16202E none !important; border: 1px solid #2A3B55; border-radius: 5px; color: var(--text-2); font-size: 11px; cursor: pointer; }
 #technologydetails.fut-tp-unit .content .build_amount .maximum::before, #technologydetails.fut-tp-unit .content .build_amount .maximum::after { display: none !important; }
-#technologydetails.fut-tp-unit .content .build_amount .maximum:hover { border-color: #4FD1E8; color: #fff; }
+#technologydetails.fut-tp-unit .content .build_amount .maximum:hover { border-color: var(--accent); color: #fff; }
 #technologydetails.fut-tp-unit .fut-tp { right: 158px; }
 #technologydetails.fut-tp-unit:has(.shipyardSelection) .fut-tp { top: 52px; }
 .fut-tp, .fut-tp-tools {
@@ -14411,14 +14433,14 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 /* Tools over the picture, like OGLight. */
 .fut-tp-tools { position: absolute; top: 4px; left: 4px; right: 4px; display: flex; gap: 4px; z-index: 2; }
 #technologydetails .fut-tp-btn { flex: 1; height: 24px; display: flex; align-items: center; justify-content: center; padding: 0;
-  border: 1px solid #2A3B55; border-radius: 5px; background: rgba(10,17,28,0.88); color: #C9D4E2; cursor: pointer; }
-#technologydetails .fut-tp-btn:hover:not(:disabled) { border-color: #4FD1E8; color: #fff; }
+  border: 1px solid #2A3B55; border-radius: 5px; background: rgba(10,17,28,0.88); color: var(--text-2); cursor: pointer; }
+#technologydetails .fut-tp-btn:hover:not(:disabled) { border-color: var(--accent); color: #fff; }
 #technologydetails .fut-tp-btn:disabled { opacity: 0.4; cursor: default; }
 #technologydetails .fut-tp-plan.on { border-color: #2E7D5B; background: rgba(16,41,31,0.92); color: #4FE0B0; }
 /* Our amount (for the plan) over the picture: same dark field as the game's one, beating the game's input skin. */
 #technologydetails .fut-tp-tools .fut-tp-amount { flex: 3; min-width: 0; height: 24px; box-sizing: border-box; margin: 0; padding: 0 6px; border: 1px solid #2A3B55; border-radius: 5px;
   background: rgba(9,15,24,0.92) none; color: var(--text); font: 700 13px var(--mono); text-align: right; box-shadow: none; }
-#technologydetails .fut-tp-tools .fut-tp-amount:focus { outline: none; border-color: #4FD1E8; }
+#technologydetails .fut-tp-tools .fut-tp-amount:focus { outline: none; border-color: var(--accent); }
 `;
   var PLANNER_CSS = `
 :host { --panel-w: 820px; }
@@ -14442,7 +14464,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 .gbody > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lv { color: var(--accent); font-size: 11px; white-space: nowrap; }
 .num { text-align: right; font-family: var(--mono); white-space: nowrap; }
-.num.short { color: var(--bad) !important; }
+.num.short { color: var(--warn) !important; }
 .acts { display: flex; justify-content: flex-end; align-items: center; gap: 2px; }
 .ib, .x { width: 22px; height: 22px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 5px; background: none; color: var(--muted); cursor: pointer; font: 11px Arial, sans-serif; }
 .ib:hover { border-color: var(--accent); color: var(--text); }
@@ -16721,6 +16743,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   // src/modules/orion/index.ts
   var STYLE_ID4 = "fut-orion-style";
   var CSS5 = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+.fut-or, .fut-or-box, .fut-or-tiles, .fut-or-t, .fut-or-m, .fut-or-c, .fut-or-d, .fut-or-li, .fut-or-val, .fut-or-x, .fut-or-cap, .fut-or-sim, .fut-or-best, .fut-or-line, .fut-or-dot, .fut-or-sw, .fut-or-head, .fut-or-kpis, .fut-or-kpi, .fut-or-rows, .fut-or-row, .fut-or-empty, .fut-or-warn { ${WINDOW_TOKENS_NO_LINES} }
 .fut-or, .fut-or-box {
   ${PAGE_TOKENS} --line: rgba(120, 150, 180, 0.14);
   --gold: #F5C542; --tile: rgba(120, 150, 180, 0.09);
@@ -16742,7 +16766,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
 .fut-or-val small.fut-or-risk { color: var(--warn); }
 .fut-or-x { color: #4FE0B0; }
 .fut-or-cap { flex-basis: 100%; color: var(--mute); font-size: 10px; }
-.fut-or-sim { display: inline-flex; align-items: center; justify-content: center; color: #4FD1E8; }
+.fut-or-sim { display: inline-flex; align-items: center; justify-content: center; color: var(--accent); }
 .fut-or-sim:hover { color: #CFF5FC; }
 .fut-or-best { outline: 1px solid var(--gold, #F5C542); outline-offset: -1px; border-radius: 4px; }
 .fut-or-best .fut-or-val b { color: #F5C542; }
@@ -16779,7 +16803,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
 .fut-or-row .v.partial { color: var(--warn); }
 .fut-or-row .e { color: var(--mute); text-align: right; white-space: nowrap; }
 .fut-or-empty { margin-top: 6px; color: var(--mute); }
-.fut-or-warn { margin: 6px 0; padding: 8px 12px; border-radius: 4px; background: color-mix(in srgb, var(--neg, #F07A6E) 16%, #141C26); box-shadow: inset 0 0 0 1px #F07A6E; color: #FFD7D2; font: 12px/16px Verdana, Arial, sans-serif; }
+.fut-or-warn { margin: 6px 0; padding: 8px 12px; border-radius: 4px; background: color-mix(in srgb, var(--neg, var(--bad)) 16%, #141C26); box-shadow: inset 0 0 0 1px var(--bad); color: #FFD7D2; font: 12px/16px Verdana, Arial, sans-serif; }
 .fut-or-warn b { color: #fff; }
 @media (max-width: 640px) { .fut-or { grid-template-columns: 1fr; } .fut-or-val { align-items: flex-start; padding: 6px 0 0; border-left: 0; border-top: 1px solid var(--line); } .fut-or-row { grid-template-columns: minmax(0, 1fr) auto; } }
 `;

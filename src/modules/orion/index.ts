@@ -16,7 +16,7 @@ import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
 import { resIconSvg } from '../../core/res-icons';
 import { icon } from '../../core/icons';
-import { PAGE_TOKENS, RES_COLORS } from '../../core/sheet';
+import { PAGE_TOKENS, RES_COLORS, WINDOW_TOKENS_NO_LINES } from '../../core/sheet';
 import { pageWindow, SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { prefillLink, SIM_TOOLS, waveSimPrefill, type Attacker, type SimTool } from '../../engines/sim-links';
 import { COLLECT_DIALOG, depletionHours, isCombat, isDisabled, readMissionWaves, readWaveFleet, WAVE_API, WAVE_SIM, lithiumNow, lithiumPerHour, MISSION_CARD, readCollectDialog, readMissionCard, readScanCard, SCAN_CARD, scanCost, storageCap, type MissionCard } from '../../data/orion';
@@ -41,6 +41,8 @@ const STYLE_ID = 'fut-orion-style';
 /* The tokens and shapes of the inbox summaries (messages/style.ts): tiles on a faint panel, the value
    on the right after a rule, mono-width numbers, cyan for what is chosen. */
 const CSS = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+.fut-or, .fut-or-box, .fut-or-tiles, .fut-or-t, .fut-or-m, .fut-or-c, .fut-or-d, .fut-or-li, .fut-or-val, .fut-or-x, .fut-or-cap, .fut-or-sim, .fut-or-best, .fut-or-line, .fut-or-dot, .fut-or-sw, .fut-or-head, .fut-or-kpis, .fut-or-kpi, .fut-or-rows, .fut-or-row, .fut-or-empty, .fut-or-warn { ${WINDOW_TOKENS_NO_LINES} }
 .fut-or, .fut-or-box {
   ${PAGE_TOKENS} --line: rgba(120, 150, 180, 0.14);
   --gold: #F5C542; --tile: rgba(120, 150, 180, 0.09);
@@ -62,7 +64,7 @@ const CSS = `
 .fut-or-val small.fut-or-risk { color: var(--warn); }
 .fut-or-x { color: #4FE0B0; }
 .fut-or-cap { flex-basis: 100%; color: var(--mute); font-size: 10px; }
-.fut-or-sim { display: inline-flex; align-items: center; justify-content: center; color: #4FD1E8; }
+.fut-or-sim { display: inline-flex; align-items: center; justify-content: center; color: var(--accent); }
 .fut-or-sim:hover { color: #CFF5FC; }
 .fut-or-best { outline: 1px solid var(--gold, #F5C542); outline-offset: -1px; border-radius: 4px; }
 .fut-or-best .fut-or-val b { color: #F5C542; }
@@ -99,7 +101,7 @@ const CSS = `
 .fut-or-row .v.partial { color: var(--warn); }
 .fut-or-row .e { color: var(--mute); text-align: right; white-space: nowrap; }
 .fut-or-empty { margin-top: 6px; color: var(--mute); }
-.fut-or-warn { margin: 6px 0; padding: 8px 12px; border-radius: 4px; background: color-mix(in srgb, var(--neg, #F07A6E) 16%, #141C26); box-shadow: inset 0 0 0 1px #F07A6E; color: #FFD7D2; font: 12px/16px Verdana, Arial, sans-serif; }
+.fut-or-warn { margin: 6px 0; padding: 8px 12px; border-radius: 4px; background: color-mix(in srgb, var(--neg, var(--bad)) 16%, #141C26); box-shadow: inset 0 0 0 1px var(--bad); color: #FFD7D2; font: 12px/16px Verdana, Arial, sans-serif; }
 .fut-or-warn b { color: #fff; }
 @media (max-width: 640px) { .fut-or { grid-template-columns: 1fr; } .fut-or-val { align-items: flex-start; padding: 6px 0 0; border-left: 0; border-top: 1px solid var(--line); } .fut-or-row { grid-template-columns: minmax(0, 1fr) auto; } }
 `;

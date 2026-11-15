@@ -1,3 +1,4 @@
+import { WINDOW_TOKENS } from '../../core/sheet';
 /**
  * Mark picker shared by every page: a flag next to a player. Click opens the choice, shift+click
  * repeats the last one used (as OGLight). Every picker for the same player on the page is repainted together.
@@ -42,19 +43,21 @@ export function markIcon(doc: Document, flag: Flag | 'none', size = 14): SVGSVGE
 const POP_ID = 'fut-mk-pop';
 
 export const MARKS_CSS = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+.fut-mk, #fut-mk-pop { ${WINDOW_TOKENS} }
 .fut-mk { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin: 0 2px; padding: 0;
   border: 0; border-radius: 4px; background: none; color: #6B7F94; cursor: pointer; vertical-align: middle; }
 .fut-mk .fut-mk-ico { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7)); transition: transform 120ms ease-out; }
-.fut-mk:hover, .fut-mk:focus-visible { color: #C9D4E2; outline: none; }
+.fut-mk:hover, .fut-mk:focus-visible { color: var(--text-2); outline: none; }
 .fut-mk:hover .fut-mk-ico, .fut-mk:focus-visible .fut-mk-ico { transform: scale(1.15); }
 .fut-mk:focus-visible { box-shadow: 0 0 0 1px #617C8D; }
 .fut-mk.on { background: none; }
 #fut-mk-pop { position: fixed; z-index: 1000003; display: flex; gap: 3px; padding: 5px; border: 1px solid #2E4356; border-radius: 8px;
-  background: #111B2A; box-shadow: 0 8px 22px rgba(0,0,0,0.55); font: 11px Verdana, Arial, sans-serif; }
-#fut-mk-pop button { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; padding: 0; border: 1px solid #1F2C40;
-  border-radius: 6px; background: #0A111C; color: #8A9BB0; cursor: pointer; }
+  background: var(--raised); box-shadow: 0 8px 22px rgba(0,0,0,0.55); font: 11px Verdana, Arial, sans-serif; }
+#fut-mk-pop button { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; padding: 0; border: 1px solid var(--line);
+  border-radius: 6px; background: #0A111C; color: var(--muted); cursor: pointer; }
 #fut-mk-pop button:hover, #fut-mk-pop button:focus-visible { border-color: currentColor; outline: none; }
-#fut-mk-pop button[aria-pressed="true"] { background: #12283A; border-color: currentColor; }`;
+#fut-mk-pop button[aria-pressed="true"] { background: var(--accent-soft); border-color: currentColor; }`;
 
 export function ensureMarksStyle(doc: Document): void {
   if (doc.getElementById('fut-mk-style')) return;

@@ -1,7 +1,7 @@
 /**
  * Construction plan window, one line per technology: "Miniera di metallo × 13 pianeti" with the
  * sum, opening onto one row per planet. On top: the plan's cost, what the whole account holds and
- * what the account still misses (that is what the plan is for). Each number is shown once; red
+ * what the account still misses (that is what the plan is for). Each number is shown once; amber
  * where that planet lacks it. The game's picture next to each name.
  * Shadow DOM, like the dashboard. Data already stored only: no network, no game action.
  */
@@ -128,7 +128,7 @@ export function openPlanner(o: PlannerOptions): void {
   const byList = (a: TechRow, b: TechRow) => (order.get(a.bodyId) ?? 1e9) - (order.get(b.bodyId) ?? 1e9);
   const refs = o.entries.map((e) => ({ planetId: e.planetId, moonId: e.moonId }));
 
-  /** Three numbers; red (with the amount in the tooltip) where `short` says this planet lacks it. */
+  /** Three numbers; amber (with the amount in the tooltip) where `short` says this planet lacks it. */
   const triple = (cost: Cost, short?: Cost | null) => {
     const out: HTMLElement[] = [];
     for (const [key, c] of RES) {
