@@ -16,7 +16,7 @@ import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
 import { resIconSvg } from '../../core/res-icons';
 import { icon } from '../../core/icons';
-import { RES_COLORS } from '../../core/sheet';
+import { PAGE_TOKENS, RES_COLORS } from '../../core/sheet';
 import { pageWindow, SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { prefillLink, SIM_TOOLS, waveSimPrefill, type Attacker, type SimTool } from '../../engines/sim-links';
 import { COLLECT_DIALOG, depletionHours, isCombat, isDisabled, readMissionWaves, readWaveFleet, WAVE_API, WAVE_SIM, lithiumNow, lithiumPerHour, MISSION_CARD, readCollectDialog, readMissionCard, readScanCard, SCAN_CARD, scanCost, storageCap, type MissionCard } from '../../data/orion';
@@ -42,8 +42,8 @@ const STYLE_ID = 'fut-orion-style';
    on the right after a rule, mono-width numbers, cyan for what is chosen. */
 const CSS = `
 .fut-or, .fut-or-box {
-  --hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1; --line: rgba(120, 150, 180, 0.14);
-  --accent: #4FD1E8; --neg: #F07A6E; --warn: #E3B341; --ok: #7BC47F; --gold: #F5C542; --tile: rgba(120, 150, 180, 0.09);
+  ${PAGE_TOKENS} --line: rgba(120, 150, 180, 0.14);
+  --gold: #F5C542; --tile: rgba(120, 150, 180, 0.09);
   box-sizing: border-box; font: 11px/16px Verdana, Arial, Helvetica, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums; text-align: left;
 }
 .fut-or { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; row-gap: 6px; margin: 8px 0 4px; padding: 8px 12px; border-radius: 4px; background: rgba(13, 21, 34, 0.72); }

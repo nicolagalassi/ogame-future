@@ -493,9 +493,11 @@ export function openJournal(o: JournalOptions): void {
     const opt = h('label', 'opt');
     const box = h('input');
     box.type = 'checkbox';
+    box.className = 'sw';
+    box.setAttribute('role', 'switch');
     box.checked = store.get<boolean>(FOLD_KEY, true);
     box.addEventListener('change', () => store.set(FOLD_KEY, box.checked));
-    opt.append(box, document.createTextNode(t('exp.fold')));
+    opt.append(box, h('i', 'sw-track'), document.createTextNode(t('exp.fold')));
     const acts = h('div', 'acts');
     const exp = h('button', 'act', t('exp.export'));
     exp.title = t('exp.exportHint');
