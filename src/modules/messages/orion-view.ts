@@ -10,7 +10,7 @@ import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { SHIPS, TECH_NAMES_KEY, techName, type TechNames } from '../../data/tech-names';
 import { dayStart, periodRange, type Period } from '../../engines/expeditions';
 import { ARCHIVE_KEY, balance, emptyArchive, loadArchive, orionEvents, orionTotals, otherSummary, shipMatcher, type Archive, type Entry, type OrionEvent, type OrionTotals } from '../../engines/orion';
-import type { T } from './index';
+import type { T } from '../../core/i18n';
 
 export const ORION_CSS = `
 .och { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 6px; height: 200px; }

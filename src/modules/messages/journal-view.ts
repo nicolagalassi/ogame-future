@@ -11,7 +11,9 @@ import type { Outcome } from '../../data/messages';
 import { byDay, dedupe, daySeries, entriesIn, hourSeries, JOURNAL_KEY, msu, periodRange, periodStats, raidStats, valueMix, type Bucket, type Journal, type Period, type PeriodStats } from '../../engines/expeditions';
 import { resIconSvg } from '../../core/res-icons';
 import { iconSvg } from '../fleet/icons';
-import { FOLD_KEY, shipIcon, shipName, type T } from './index';
+import { FOLD_KEY } from './index';
+import { shipIcon, shipName } from '../../data/ship-icons';
+import type { T } from '../../core/i18n';
 import { JOURNAL_CSS, OUTCOME_COLORS } from './style';
 import { clearOrion, hasOrion, loadOrion, ORION_CSS, orionCount, orionCsv, orionData, orionState, orionView } from './orion-view';
 

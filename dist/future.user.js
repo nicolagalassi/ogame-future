@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.83
+// @version      0.3.84
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -7220,6 +7220,29 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     218: "https://gf1.geo.gfsrv.net/cdn39/12d016c8bb0d71e053b901560c17cc.jpg",
     219: "https://gf3.geo.gfsrv.net/cdne2/b8d8d18f2baf674acedb7504c7cc83.jpg"
   };
+  function shipIcon(doc, id, name, cls) {
+    const url = SHIP_ICONS[id];
+    if (!url) {
+      const span = doc.createElement("span");
+      span.className = `${cls} ${cls}-none`;
+      span.textContent = name.slice(0, 3);
+      return span;
+    }
+    const img = doc.createElement("img");
+    img.className = cls;
+    img.src = url;
+    img.alt = name;
+    img.title = name;
+    img.loading = "lazy";
+    return img;
+  }
+  function shipName(id, ships, t) {
+    const name = ships[String(id)]?.name;
+    if (name) return name;
+    const key = `ship.${id}`;
+    const fallback = t(key);
+    return fallback === key ? `#${id}` : fallback;
+  }
 
   // src/engines/raids.ts
   var SPY_BOARD_KEY = "spy.board";
@@ -8130,23 +8153,6 @@ td.spark-cell { width: 90px; }
     if (cls) node.className = cls;
     if (text !== void 0) node.textContent = text;
     return node;
-  }
-  function shipIcon(doc, id, name, cls) {
-    const url = SHIP_ICONS[id];
-    if (!url) return h2(doc, "span", `${cls} ${cls}-none`, name.slice(0, 3));
-    const img = h2(doc, "img", cls);
-    img.src = url;
-    img.alt = name;
-    img.title = name;
-    img.loading = "lazy";
-    return img;
-  }
-  function shipName(id, ships, t) {
-    const name = ships[String(id)]?.name;
-    if (name) return name;
-    const key = `ship.${id}`;
-    const fallback = t(key);
-    return fallback === key ? `#${id}` : fallback;
   }
   function summaryLine(doc, cls, o) {
     const { t, locale } = o;
