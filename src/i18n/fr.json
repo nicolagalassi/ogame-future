@@ -145,6 +145,8 @@
   "fleet.expeditionShip": "Vaisseau cargo",
   "fleet.bestShip": "Le meilleur disponible",
   "fleet.expeditionValue": "Fret à couvrir",
+  "fleet.expCalcUnknown": "Ouvrez la page flotte pour voir la valeur du jeu",
+  "fleet.expCalc": "Maximum du jeu : {value}",
   "fleet.auto": "automatique",
   "fleet.expeditionExtras": "Ajouter 1 sonde et 1 éclaireur",
   "settings.expBigHint": "Un vaisseau de combat en plus dans l'expédition. Automatique = le plus gros que vous avez ; si celui choisi manque, le plus gros est utilisé.",
