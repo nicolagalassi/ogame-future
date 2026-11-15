@@ -250,7 +250,7 @@
   "fleet.err.noDelivery": "Nessuna consegna del piano in corso.",
   "fleet.ok.delivery": "Consegna pronta: {ships} navi con {cargo} risorse (mancavano {left}). Premi Avanti e Invia flotta.",
   "tech.timeHint": "Tempo del liv. {level} · totale da {from} a {to}",
-  "tech.amountHint": "Quantità da pianificare: anche più di quelle che puoi pagare adesso",
+  "tech.amountHint": "Quante unità: per il piano vale qualsiasi numero; per costruire ne vanno in coda al massimo 99.999, e non più di quante il gioco ne permette (max).",
   "plan.items": "{n} voci",
   "plan.levels": "liv. {from}–{to}",
   "plan.bring": "Porta qui le risorse",

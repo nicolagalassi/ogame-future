@@ -250,7 +250,7 @@
   "fleet.err.noDelivery": "Keine Plan-Lieferung aktiv.",
   "fleet.ok.delivery": "Lieferung bereit: {ships} Schiffe mit {cargo} Ressourcen (es fehlten {left}). Weiter und Flotte senden drücken.",
   "tech.timeHint": "Dauer St. {level} · gesamt {from} bis {to}",
-  "tech.amountHint": "Zu planende Anzahl: auch mehr, als du jetzt bezahlen kannst",
+  "tech.amountHint": "Wie viele: für den Plan jede Zahl; zum Bauen kommen höchstens 99.999 in die Warteschlange, und nicht mehr, als das Spiel erlaubt (max).",
   "plan.items": "{n} Einträge",
   "plan.levels": "St. {from}–{to}",
   "plan.bring": "Ressourcen hierher bringen",

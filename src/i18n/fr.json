@@ -250,7 +250,7 @@
   "fleet.err.noDelivery": "Aucune livraison du plan en cours.",
   "fleet.ok.delivery": "Livraison prête : {ships} vaisseaux avec {cargo} ressources (il manquait {left}). Appuyez sur Suivant puis Envoyer.",
   "tech.timeHint": "Durée du niv. {level} · total de {from} à {to}",
-  "tech.amountHint": "Quantité à planifier : même plus que ce que vous pouvez payer maintenant",
+  "tech.amountHint": "Combien : n'importe quel nombre pour le plan ; pour construire, au plus 99 999 vont en file, et pas plus que le jeu n'en permet (max).",
   "plan.items": "{n} éléments",
   "plan.levels": "niv. {from}–{to}",
   "plan.bring": "Amener les ressources ici",
