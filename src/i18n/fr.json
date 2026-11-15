@@ -705,6 +705,8 @@
   "planetMenu.fleetHint": "Valeur des vaisseaux sur ce corps (coût en ressources, 1:1:1), à la dernière mise à jour de ses données",
   "settings.fleetPill": "Valeur de la flotte",
   "settings.fleetPillHint": "Une pastille sous les ressources avec la valeur des vaisseaux stationnés sur cette planète ou lune (coût en ressources, 1:1:1).",
+  "settings.gameTipsHint": "La fiche avec données et liens que le jeu ouvre quand la souris s'arrête sur une planète ou une lune. Désactivée, la planète s'ouvre toujours d'un clic.",
+  "settings.gameTips": "Fiche du jeu sur les planètes",
   "totals.sum": "Total",
   "settings.totalView": "Somme dans les totaux",
   "settings.totalViewHint": "La ligne de somme sous les planètes : en MSU (métal:cristal:deutérium 3:2:1) ou les trois ressources additionnées à parts égales.",

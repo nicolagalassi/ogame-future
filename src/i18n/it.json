@@ -705,6 +705,8 @@
   "planetMenu.fleetHint": "Valore delle navi su questo corpo (costo in risorse, 1:1:1), all’ultimo aggiornamento dei suoi dati",
   "settings.fleetPill": "Valore della flotta",
   "settings.fleetPillHint": "Una pillola sotto le risorse con il valore delle navi ferme su quel pianeta o luna (costo in risorse, 1:1:1).",
+  "settings.gameTipsHint": "La scheda con dati e collegamenti che il gioco apre quando il mouse si ferma su un pianeta o una luna. Spenta, il pianeta si apre sempre con un clic.",
+  "settings.gameTips": "Scheda del gioco sui pianeti",
   "totals.sum": "Totale",
   "settings.totalView": "Totale nel riepilogo",
   "settings.totalViewHint": "La riga di somma sotto i pianeti: in MSU (metallo:cristallo:deuterio 3:2:1) oppure le tre risorse sommate alla pari.",
