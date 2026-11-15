@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.92
+// @version      0.3.93
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -13027,8 +13027,9 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-finfo.err { color: var(--neg); }
 
 /* Trasporto / Schiera on: the tile stays lit until pressed again. */
-.fut-fact[aria-pressed="true"] { background: var(--tile-hi); box-shadow: inset 0 3px 0 var(--accent); color: var(--ico-hi); }
-.fut-fact[aria-pressed="true"] kbd { color: var(--accent); }
+.fut-fact[aria-pressed="true"], .fut-fact.used { background: var(--tile-hi); box-shadow: inset 0 3px 0 var(--accent); color: var(--ico-hi); }
+.fut-fsecond .fut-fact.used { box-shadow: inset 0 3px 0 var(--accent), inset 0 0 0 1px var(--line-strong); }
+.fut-fact[aria-pressed="true"] kbd, .fut-fact.used kbd { color: var(--accent); }
 
 /* Their panel: destination over resources, labels in one column; CL / CP on the right, as tall as both rows. */
 .fut-fsend {
@@ -13053,7 +13054,7 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fseg button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 30px; height: 24px; padding: 0 7px; border: 0; background: none; color: var(--dim); }
 .fut-fseg button + button { border-left: 1px solid var(--line); }
 .fut-fseg button:hover { color: var(--txt); }
-.fut-fseg button[aria-pressed="true"] { background: var(--tile-hi); color: var(--hi); }
+.fut-fseg button[aria-pressed="true"] { background: var(--tile-hi); box-shadow: inset 0 2px 0 var(--accent); color: var(--hi); font-weight: bold; }
 .fut-fresin { display: inline-flex; align-items: center; gap: 2px; }
 .fut-fresin .sym { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 26px; padding: 0; border: 1px solid transparent; border-radius: 5px; background: none; }
 .fut-fresin .sym:hover { border-color: var(--line); background: var(--tile); }
@@ -14063,10 +14064,15 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     let drawSkip = () => {
     };
     let skipTile = null;
+    const markUsed = (mode) => {
+      const key = mode === "collectDeploy" ? "collect" : mode;
+      for (const b of Array.from(doc.querySelectorAll(".fut-fbar .fut-fact[data-mode]"))) b.classList.toggle("used", b.dataset.mode === key);
+    };
     const begin = (mode, dest = null) => {
       const prev = state.active;
       const same = prev && prev.mode === mode;
       state.active = REPEATABLE.includes(mode) ? { mode, first: same ? prev.first : o.bodyId, dest, ...same && prev.speed ? { speed: prev.speed } : {} } : null;
+      markUsed(mode);
       drawSkip();
     };
     const roundSpeed = () => state.active?.speed;
@@ -14214,6 +14220,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const here = o.bodies.find((b) => b.planetId === o.bodyId);
       const act2 = (ico, id, name, where, tip, onClick, dim = false) => {
         const b = tile(doc, ico, where ? `${name} ${where}` : name, onClick, dim ? "dim" : "", k(id), name);
+        b.dataset.mode = id.replace(/^fleet\./, "");
         out.peek(b, where ? `${name} ${where}` : name, tip);
         return b;
       };
@@ -14227,6 +14234,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         (mode, dest2) => dest2 ? run[mode](dest2) : say(t("fleet.err.noDefault"), true)
       ), "more", "", t("fleet.btn.collectShort"));
       collect.setAttribute("aria-haspopup", "menu");
+      collect.dataset.mode = "collect";
       collect.append(el4(doc, "i", "more-mark"));
       out.peek(collect, t("fleet.btn.collect"), t("fleet.tip.collect"));
       const zone = (text) => {
@@ -14364,6 +14372,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       if (focusRes) doc.querySelector(".fut-fsend .fut-fresin.metal input")?.focus();
       bar.append(bottom);
       anchor1.before(bar);
+      markUsed(state.active?.mode ?? null);
       const strip = el4(doc, "div", "fut-fbar fut-freserves");
       const stripRow = el4(doc, "div", "fut-frow");
       stripRow.append(rules, rulesTool);
