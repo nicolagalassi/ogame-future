@@ -232,7 +232,6 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 .fut-totals .fut-thead { min-height: 0; padding-top: 5px; padding-bottom: 5px; background: var(--band); color: var(--on-band); font-size: 11px; }
 .fut-totals .fut-tname { display: flex; align-items: center; gap: 7px; min-width: 0; white-space: nowrap; overflow: hidden; }
 .fut-totals .fut-tico { flex: none; display: inline-flex; width: 13px; justify-content: center; }
-.fut-totals .fut-ttok { width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
 .fut-totals .fut-tlabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); }
 .fut-totals .fut-tnum { text-align: right; white-space: nowrap; color: var(--text); font: 600 condensed 14px var(--display); }
 .fut-totals .fut-tnum:last-child { color: var(--label); font: 400 condensed 13px var(--display); }

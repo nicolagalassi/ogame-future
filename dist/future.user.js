@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.94
+// @version      0.3.95
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -6834,12 +6834,14 @@ kbd { padding: 0 4px; border: 1px solid var(--line-strong); border-radius: 3px; 
 
   // src/core/res-icons.ts
   var RES_PATHS = {
-    // Metal: three ingots stacked, the top one in front.
-    metal: '<path d="M1.8 21 3.6 15.6h7.3L12.7 21z" opacity=".7"/><path d="M11.3 21l1.8-5.4h7.3l1.8 5.4z" opacity=".7"/><path d="M6.5 14 8.3 8.6h7.4L17.5 14z"/><path d="M8.3 8.6h7.4l-.6 1.6H8.9z" opacity=".55"/>',
-    // Crystal: a tall cut gem, the left facets darker.
-    crystal: '<path d="M12 1.8 18.6 9 12 22.2 5.4 9z"/><path d="M12 1.8 5.4 9 12 22.2 9.6 9z" opacity=".55"/><path d="M5.4 9h13.2" fill="none" stroke="currentColor" stroke-width="1" opacity=".35"/>',
-    // Deuterium: a drop, a lighter bubble inside.
-    deuterium: '<path fill-rule="evenodd" d="M12 2c4 4.8 6.8 8.7 6.8 12.4a6.8 6.8 0 0 1-13.6 0C5.2 10.7 8 6.8 12 2zm-2.3 11.2a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4z"/>',
+    // The player's board pieces (DESIGN.md): flat shapes lit from the top left, the same three tones on each
+    // (lit face full, side .72, shade .5), so they read at 10px and stay one family.
+    // Metal: the board game's resource cube.
+    metal: '<path d="M12 2.5 21 7.5 12 12.5 3 7.5z"/><path d="M3 7.5 12 12.5V22L3 17z" opacity=".72"/><path d="M21 7.5 12 12.5V22l9-5z" opacity=".5"/>',
+    // Crystal: a cut gem, its table on top.
+    crystal: '<path d="M7.2 3h9.6L21 8.4H3z"/><path d="M3 8.4h9V22z" opacity=".72"/><path d="M21 8.4h-9V22z" opacity=".5"/>',
+    // Deuterium: a drop, its lit half on the left.
+    deuterium: '<path d="M12 1.8c4.6 5.2 8 9.3 8 13.2a8 8 0 0 1-8 7.2z" opacity=".5"/><path d="M12 1.8C7.4 7 4 11.1 4 15a8 8 0 0 0 8 7.2z" opacity=".85"/>',
     // Food: a leaf, its vein in the second tone.
     food: '<path fill-rule="evenodd" d="M20.5 3.5C11 3.5 4.5 8.6 4.5 15.6c0 1.5.4 2.8 1 3.9l-2 2 1.4 1.4 2-2c1.1.6 2.4 1 3.9 1 7 0 9.7-8.4 9.7-18.4zM7.3 18.5l8.1-9.4.9.8-8.1 9.4z"/>',
     // Dark matter: a dark core inside a faint halo.
@@ -6847,6 +6849,13 @@ kbd { padding: 0 4px; border: 1px solid var(--line-strong); border-radius: 3px; 
   };
   function resIconSvg(key, size = 14) {
     return `<svg class="fut-res-ico" viewBox="0 0 24 24" width="${size}" height="${size}" fill="currentColor" aria-hidden="true">${RES_PATHS[key]}</svg>`;
+  }
+  var TOKEN_KEY = { m: "metal", c: "crystal", d: "deuterium" };
+  function resToken(doc, key, size = 12) {
+    const i = doc.createElement("i");
+    i.className = `tok ${key}`;
+    i.innerHTML = resIconSvg(TOKEN_KEY[key], size);
+    return i;
   }
 
   // src/engines/orion.ts
@@ -10069,7 +10078,6 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 .fut-totals .fut-thead { min-height: 0; padding-top: 5px; padding-bottom: 5px; background: var(--band); color: var(--on-band); font-size: 11px; }
 .fut-totals .fut-tname { display: flex; align-items: center; gap: 7px; min-width: 0; white-space: nowrap; overflow: hidden; }
 .fut-totals .fut-tico { flex: none; display: inline-flex; width: 13px; justify-content: center; }
-.fut-totals .fut-ttok { width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
 .fut-totals .fut-tlabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); }
 .fut-totals .fut-tnum { text-align: right; white-space: nowrap; color: var(--text); font: 600 condensed 14px var(--display); }
 .fut-totals .fut-tnum:last-child { color: var(--label); font: 400 condensed 13px var(--display); }
@@ -10489,8 +10497,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
           c.setAttribute("role", cls === "fut-thead" ? "columnheader" : "cell");
           if (!i && glyph2) {
             const ico = el3(doc, "span", "fut-tico");
-            if (glyph2 === "metal" || glyph2 === "crystal" || glyph2 === "deuterium") ico.append(el3(doc, "i", "fut-ttok"));
-            else ico.innerHTML = iconSvg(glyph2, 13);
+            ico.innerHTML = iconSvg(glyph2, 13);
             c.append(ico);
           }
           c.append(el3(doc, "span", "fut-tlabel", text));
@@ -11167,7 +11174,8 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 
 .cols { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr) minmax(0, 0.9fr); gap: 2px; }
 /* Resource tokens: discs in the game's resource colours, the way a board game prints costs. */
-.tok { display: inline-block; flex: none; width: 11px; height: 11px; border-radius: 50%; background: currentColor; vertical-align: -1px; }
+.tok { display: inline-flex; flex: none; vertical-align: -2px; }
+.tok svg { display: block; }
 .tok.m { color: var(--m); } .tok.c { color: var(--c); } .tok.d { color: var(--d); }
 /* Income tracks: 20 printed cells on one scale, the pawn on today's income, an outline on the next rung. */
 .prod { margin-bottom: 14px; }
@@ -11628,7 +11636,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       const line = h3("div", `prod ${cls}`);
       const top = h3("div", "prod-top");
       const name = h3("span", "prod-name");
-      name.append(h3("i", `tok ${cls}`), document.createTextNode(label));
+      name.append(resToken(document, cls, 14), document.createTextNode(label));
       const value = h3("span", "prod-val", `+${fmt(perHour * 24)}`);
       value.append(h3("small", "", `/${t("dash.dayShort")}`));
       if (gainHour > 0) value.append(h3("small", "next", `\u2192 +${fmt(gainHour * 24)}`));
@@ -11940,7 +11948,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     for (const [k, v] of [["m", total.metal], ["c", total.crystal], ["d", total.deuterium]]) {
       if (!v) continue;
       const tk = h3("span", "");
-      tk.append(h3("i", `tok ${k}`), document.createTextNode(ctx.fmt(v)));
+      tk.append(resToken(document, k, 12), document.createTextNode(ctx.fmt(v)));
       tokens.append(tk);
     }
     if (m.planetId) {
@@ -13004,7 +13012,8 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fchip[aria-checked="true"] .val { color: var(--txt); }
 .fut-fchip .toks { display: inline-flex; gap: 8px; }
 .fut-fchip .toks > span { display: inline-flex; align-items: center; gap: 3px; }
-.fut-fbar .tok { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.fut-fbar .tok { display: inline-flex; flex: none; vertical-align: -2px; }
+.fut-fbar .tok svg { display: block; }
 .fut-fbar .tok.m { color: var(--m); } .fut-fbar .tok.c { color: var(--c); } .fut-fbar .tok.d { color: var(--d); }
 .fut-fsw { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 7px 0 8px; border: 1px solid var(--line-soft); border-radius: 14px; background: none; color: var(--dim); }
 .fut-fsw .ico { display: inline-flex; }
@@ -14321,7 +14330,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       for (const [cls, v] of [["m", res.metal], ["c", res.crystal], ["d", res.deuterium]]) {
         if (!v) continue;
         const tk = el4(doc, "span", "");
-        tk.append(el4(doc, "i", `tok ${cls}`), doc.createTextNode(fmtN(v)));
+        tk.append(resToken(doc, cls, 11), doc.createTextNode(fmtN(v)));
         resValue.append(tk);
       }
       const unset = t("fleet.rule.unset");

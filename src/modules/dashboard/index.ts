@@ -7,6 +7,7 @@
  * only calculates: selling stays on the game's own merchant page.
  */
 import { bodyPicker as sharedPicker } from '../../core/body-picker';
+import { resToken } from '../../core/res-icons';
 import { icon } from '../../core/icons';
 import { WINDOW_SHEET } from '../../core/sheet';
 import type { AccountSnapshot, OwnBody } from '../../data/account-info';
@@ -396,7 +397,7 @@ function summaryTab(parent: HTMLElement, ctx: Ctx): void {
     const line = h('div', `prod ${cls}`);
     const top = h('div', 'prod-top');
     const name = h('span', 'prod-name');
-    name.append(h('i', `tok ${cls}`), document.createTextNode(label));
+    name.append(resToken(document, cls as 'm' | 'c' | 'd', 14), document.createTextNode(label));
     const value = h('span', 'prod-val', `+${fmt(perHour * 24)}`);
     value.append(h('small', '', `/${t('dash.dayShort')}`));
     if (gainHour > 0) value.append(h('small', 'next', `→ +${fmt(gainHour * 24)}`));
@@ -748,7 +749,7 @@ function groupLine(ctx: Ctx, g: StepGroup, i: number, numbered: boolean): HTMLEl
   for (const [k, v] of [['m', total.metal], ['c', total.crystal], ['d', total.deuterium]] as const) {
     if (!v) continue;
     const tk = h('span', '');
-    tk.append(h('i', `tok ${k}`), document.createTextNode(ctx.fmt(v)));
+    tk.append(resToken(document, k, 12), document.createTextNode(ctx.fmt(v)));
     tokens.append(tk);
   }
   if (m.planetId) {
