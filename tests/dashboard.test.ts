@@ -71,7 +71,9 @@ describe('dashboard panel', () => {
   it('opens on the summary in a shadow root, without the old bodies table, and closes with Escape', () => {
     open();
     expect(shadow().querySelector('.tab[aria-pressed="true"]')?.textContent).toBe('Riepilogo');
-    expect(shadow().querySelectorAll('.kpi')).toHaveLength(6);
+    // The account's figures are one printed score line, each labelled once (no tile grid).
+    expect(shadow().querySelectorAll('.kpi')).toHaveLength(0);
+    expect(shadow().querySelectorAll('.facts .fact').length).toBeGreaterThanOrEqual(3);
     expect(shadow().textContent).not.toMatch(/NaN|undefined/);
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     expect(isDashboardOpen(document)).toBe(false);
