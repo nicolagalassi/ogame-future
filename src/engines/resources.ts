@@ -59,6 +59,19 @@ export function applyPageResources(snapshot: AccountSnapshot, bodyId: number, re
 }
 
 /**
+ * What stays on a body after a fleet the game accepted: what was on it, minus the cargo and the
+ * deuterium burnt by the flight (never below zero). Stored at once, so the next page (another body
+ * opened by "Ripeti") already shows this one emptied, without waiting for a visit or a sync.
+ */
+export function leftAfterSend(onPlanet: Resources, cargo: Resources, fuel: number): Resources {
+  return {
+    metal: Math.max(0, Math.floor(onPlanet.metal - cargo.metal)),
+    crystal: Math.max(0, Math.floor(onPlanet.crystal - cargo.crystal)),
+    deuterium: Math.max(0, Math.floor(onPlanet.deuterium - cargo.deuterium - fuel)),
+  };
+}
+
+/**
  * Copies into `target` every body amount of `source` that is newer, and returns `target`.
  * Saving merges into the stored snapshot instead of replacing it: another tab may have read
  * other bodies since this page loaded, and those newer amounts must survive.
