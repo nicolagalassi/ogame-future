@@ -206,19 +206,19 @@ const TOUCH_CSS = `
 #${TOUCH_ID} .keys::-webkit-scrollbar { display: none; }
 #${TOUCH_ID} .sep { flex: none; width: 1px; align-self: stretch; margin: 4px 2px; background: var(--line); }
 #${TOUCH_ID} button { flex: none; position: relative; display: inline-flex; align-items: center; justify-content: center;
-  width: 48px; height: 48px; padding: 0; border: 1px solid #24344B; border-radius: 6px; background: var(--surface); color: var(--accent);
+  width: 48px; height: 48px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--accent);
   font: inherit; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 #${TOUCH_ID} button:active { background: var(--accent-soft); border-color: var(--accent); transform: translateY(1px); }
 #${TOUCH_ID} button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 /* The key in the corner, as on the fleet bar; fingers do not need it. */
-#${TOUCH_ID} button .k { position: absolute; top: 3px; right: 4px; color: #8592A1; font-size: 11px; line-height: 11px; }
+#${TOUCH_ID} button .k { position: absolute; top: 3px; right: 4px; color: var(--muted); font-size: 11px; line-height: 11px; }
 #${TOUCH_ID} button:has(.k) .fut-tb-glyph { margin: 6px 6px 0 0; }
 @media (pointer: coarse) { #${TOUCH_ID} button .k { display: none; } #${TOUCH_ID} button:has(.k) .fut-tb-glyph { margin: 0; } }
-#${TOUCH_ID} button.planet { color: #C9D2DC; }
+#${TOUCH_ID} button.planet { color: var(--text-2); }
 #${TOUCH_ID} button.galaxy { color: var(--ok); }
 #${TOUCH_ID}[data-page="fleet2"] button.fleet, #${TOUCH_ID}[data-page="fleet2"] .sep.fleet { display: none; }
 #${TOUCH_ID} .send { width: auto; min-width: 104px; padding: 0 16px; gap: 8px; border-color: #2B8A5E; background: #12352A; color: #E6F7EE; font-weight: 700; font-size: 13px; }
-#${TOUCH_ID} .send:active { background: #1A4A3A; border-color: #4FE0B0; }
+#${TOUCH_ID} .send:active { background: #1A4A3A; border-color: var(--d); }
 @media (prefers-reduced-motion: reduce) { #${TOUCH_ID} button:active { transform: none; } }
 #${TOUCH_ID} .send[aria-disabled="true"] { opacity: 0.45; }
 .fut-touch-pad { height: 72px; }

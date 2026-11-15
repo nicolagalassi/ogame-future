@@ -16,7 +16,7 @@ export const TECH_CSS = `
   display: flex; align-items: stretch; gap: 0; margin: 0; padding: 0; white-space: nowrap; overflow: hidden; }
 #technologydetails.fut-tp-unit .content .shipyardSelection input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
 #technologydetails.fut-tp-unit .content .shipyardSelection label { float: none; display: flex; align-items: center; margin: 0; padding: 0 10px; width: auto;
-  border: 1px solid #2A3B55; background: rgba(9,15,24,0.82); color: var(--muted); font: 11px/18px Arial, Helvetica, sans-serif; cursor: pointer; }
+  border: 1px solid var(--line-strong); background: rgba(9,15,24,0.82); color: var(--muted); font: 11px/18px Arial, Helvetica, sans-serif; cursor: pointer; }
 #technologydetails.fut-tp-unit .content .shipyardSelection label::before, #technologydetails.fut-tp-unit .content .shipyardSelection label::after { display: none !important; }
 #technologydetails.fut-tp-unit .content .shipyardSelection label:first-of-type { border-radius: 10px 0 0 10px; }
 #technologydetails.fut-tp-unit .content .shipyardSelection label:last-of-type { border-radius: 0 10px 10px 0; }
@@ -28,10 +28,10 @@ export const TECH_CSS = `
   display: flex; align-items: center; gap: 4px; }
 #technologydetails.fut-tp-unit .content .build_amount label { display: none; }
 #technologydetails.fut-tp-unit .content .build_amount input, #technologydetails.fut-tp-unit #build_amount { position: static; float: none; flex: 1; min-width: 0; width: auto; height: 26px; margin: 0; padding: 0 6px; box-sizing: border-box;
-  border: 1px solid #2A3B55; border-radius: 5px; background: rgba(9,15,24,0.92) none; color: var(--text); font: 700 13px Consolas, "JetBrains Mono", "DejaVu Sans Mono", monospace; text-align: right; box-shadow: none; }
+  border: 1px solid var(--line-strong); border-radius: 5px; background: rgba(9,15,24,0.92) none; color: var(--text); font: 700 13px Consolas, "JetBrains Mono", "DejaVu Sans Mono", monospace; text-align: right; box-shadow: none; }
 #technologydetails.fut-tp-unit #build_amount:focus { outline: none; border-color: var(--accent); }
 #technologydetails.fut-tp-unit .content .build_amount .maximum { position: static; float: none; flex: none; width: auto; height: 26px; margin: 0; padding: 0 6px;
-  background: #16202E none !important; border: 1px solid #2A3B55; border-radius: 5px; color: var(--text-2); font-size: 11px; cursor: pointer; }
+  background: var(--line-soft) none !important; border: 1px solid var(--line-strong); border-radius: 5px; color: var(--text-2); font-size: 11px; cursor: pointer; }
 #technologydetails.fut-tp-unit .content .build_amount .maximum::before, #technologydetails.fut-tp-unit .content .build_amount .maximum::after { display: none !important; }
 #technologydetails.fut-tp-unit .content .build_amount .maximum:hover { border-color: var(--accent); color: #fff; }
 #technologydetails.fut-tp-unit .fut-tp { right: 158px; }
@@ -75,17 +75,17 @@ export const TECH_CSS = `
 .fut-tp-lack { border-color: var(--bad); color: var(--bad); } .fut-tp-lack svg { color: var(--bad); }
 .fut-tp-sat { border-color: #6B5A1E; color: var(--energy); cursor: pointer; } .fut-tp-sat svg { color: var(--energy); }
 .fut-tp-sat:hover { border-color: var(--energy); background: #1E1A0C; }
-.fut-tp-lab { border-color: #35576A; color: var(--text, #C9D2DC); }
+.fut-tp-lab { border-color: var(--accent-line); color: var(--text, var(--text-2)); }
 .fut-tp-sat-link { display: inline-flex; max-width: 100%; text-decoration: none; }
 /* Tools over the picture, like OGLight. */
 .fut-tp-tools { position: absolute; top: 4px; left: 4px; right: 4px; display: flex; gap: 4px; z-index: 2; }
 #technologydetails .fut-tp-btn { flex: 1; height: 24px; display: flex; align-items: center; justify-content: center; padding: 0;
-  border: 1px solid #2A3B55; border-radius: 5px; background: rgba(10,17,28,0.88); color: var(--text-2); cursor: pointer; }
+  border: 1px solid var(--line-strong); border-radius: 5px; background: rgba(10,17,28,0.88); color: var(--text-2); cursor: pointer; }
 #technologydetails .fut-tp-btn:hover:not(:disabled) { border-color: var(--accent); color: #fff; }
 #technologydetails .fut-tp-btn:disabled { opacity: 0.4; cursor: default; }
-#technologydetails .fut-tp-plan.on { border-color: #2E7D5B; background: rgba(16,41,31,0.92); color: #4FE0B0; }
+#technologydetails .fut-tp-plan.on { border-color: #2E7D5B; background: rgba(16,41,31,0.92); color: var(--d); }
 /* Our amount (for the plan) over the picture: same dark field as the game's one, beating the game's input skin. */
-#technologydetails .fut-tp-tools .fut-tp-amount { flex: 3; min-width: 0; height: 24px; box-sizing: border-box; margin: 0; padding: 0 6px; border: 1px solid #2A3B55; border-radius: 5px;
+#technologydetails .fut-tp-tools .fut-tp-amount { flex: 3; min-width: 0; height: 24px; box-sizing: border-box; margin: 0; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 5px;
   background: rgba(9,15,24,0.92) none; color: var(--text); font: 700 13px var(--mono); text-align: right; box-shadow: none; }
 #technologydetails .fut-tp-tools .fut-tp-amount:focus { outline: none; border-color: var(--accent); }
 `;
@@ -132,7 +132,7 @@ export const PLANNER_CSS = `
 .group.body { border: 0; border-radius: 0; }
 .group.body + .group.body { border-top: 1px solid var(--line-soft); }
 .group.body .ghead, .group.body .grow { grid-template-columns: minmax(130px, 1fr) minmax(0, 1.1fr) 62px 62px 62px 158px; min-height: 32px; padding: 2px 6px 2px 10px; }
-.group.body .ghead:hover { background: #16243A; }
+.group.body .ghead:hover { background: var(--line); }
 .group.body .gtitle { display: flex; align-items: center; gap: 5px; font-weight: 700; }
 .group.body .gtitle svg { flex: none; color: var(--muted); }
 .pchips { display: flex; flex-wrap: wrap; align-items: center; gap: 3px; min-width: 0; }

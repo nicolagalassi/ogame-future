@@ -18,24 +18,34 @@ export const STATE_COLORS = { accent: '#4FD1E8', ok: '#7BC47F', warn: '#F5B547',
 export const PAGE_TOKENS = `--hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1;
   --accent: ${STATE_COLORS.accent}; --ok: ${STATE_COLORS.ok}; --warn: ${STATE_COLORS.warn}; --neg: ${STATE_COLORS.bad};`;
 
-/** The window palette: the planet menu's dark tiles, grey labels, cyan for what is chosen. */
+/**
+ * The window palette: the planet menu's dark tiles, grey labels, cyan for what is chosen.
+ * Text greys from bright to quiet: --text, --text-2, --label, --muted, --quiet (every one 4.5:1 or more on --raised).
+ * Age of a reading (galaxy, targets, planets): --fresh, --warm, --old.
+ * Queue kinds use the game's own queue colours (--q-*), so they read as they do in OGame.
+ */
 const SURFACE_TOKENS = '--bg: #0B121D; --surface: #0D1522; --raised: #111B2A;';
 const LINE_TOKENS = '--line: #1F2C40; --line-soft: #16202F; --faint: #4A5B72;';
-const TEXT_TOKENS = `--text: #E6EDF5; --text-2: #C9D4E2; --muted: #8A9BB0;
+/** Hairline a step stronger, for tooltips and badges that sit on a tile. */
+const STRONG_LINE = '--line-strong: #2C3E57; --line-hover: #47607D; --accent-line: #2C5A73; --hover: #1D3350;';
+const TEXT_TOKENS = `--text: #E6EDF5; --text-2: #C9D4E2; --label: #9AA9BC; --muted: #8A9BB0; --quiet: #708A9D;
+  --accent-hi: #8BE4F2; --link: #6F9FC8;
+  --q-building: #FF8200; --q-research: #32FB2F; --q-ship: #FFEB00; --q-lfbuilding: #FF79BD; --q-lfresearch: #42AFFF;
+  --m: ${RES_COLORS.metal}; --c: ${RES_COLORS.crystal}; --d: ${RES_COLORS.deuterium}; --dm: ${RES_COLORS.darkMatter};
+  --fresh: #38C56E; --warm: #E3BB28; --old: #EF7676;
   --accent: ${STATE_COLORS.accent}; --accent-soft: #12283A; --warn: ${STATE_COLORS.warn}; --ok: ${STATE_COLORS.ok}; --bad: ${STATE_COLORS.bad};
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);`;
 /** Every window token, for surfaces outside the windows that speak the same language (planet menu, galaxy, side bar). */
-export const WINDOW_TOKENS = `${SURFACE_TOKENS} ${LINE_TOKENS}
+export const WINDOW_TOKENS = `${SURFACE_TOKENS} ${LINE_TOKENS} ${STRONG_LINE}
   ${TEXT_TOKENS}`;
 /** The same without the hairline tokens, for surfaces that keep their own --line (inbox, fleet bar, Orion). */
-export const WINDOW_TOKENS_NO_LINES = `${SURFACE_TOKENS}
+export const WINDOW_TOKENS_NO_LINES = `${SURFACE_TOKENS} ${STRONG_LINE}
   ${TEXT_TOKENS}`;
 
 export const WINDOW_SHEET = `
 :host {
   all: initial;
   ${WINDOW_TOKENS}
-  --m: ${RES_COLORS.metal}; --c: ${RES_COLORS.crystal}; --d: ${RES_COLORS.deuterium}; --dm: ${RES_COLORS.darkMatter};
   --mono: Consolas, "JetBrains Mono", monospace;
   --panel-w: 860px;
 }

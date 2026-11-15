@@ -39,7 +39,7 @@ ${L} .smallplanet.fut-row {
   width: 100% !important; height: var(--fut-row-h, 40px) !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important;
   border: 1px solid var(--line); border-radius: 7px; background: var(--raised) !important; overflow: hidden; box-sizing: border-box;
 }
-${L} .smallplanet.fut-current { border-color: #2C5A73; }
+${L} .smallplanet.fut-current { border-color: var(--accent-line); }
 
 /* Planet: small skin behind name and coords, resources in a column on the right. */
 ${L} a.planetlink {
@@ -97,28 +97,28 @@ ${L} a.moonlink {
   position: relative !important; display: flex !important; align-items: center; justify-content: flex-end;
   left: auto !important; top: auto !important; right: auto !important; bottom: auto !important;
   flex-shrink: 0; width: ${MOON_W}px !important; height: 100% !important; margin: 0 !important; padding: 0 2px 0 0 !important;
-  box-sizing: border-box; background: #16243A !important; border-left: 1px solid #22344F; text-decoration: none !important;
+  box-sizing: border-box; background: var(--line) !important; border-left: 1px solid var(--line-strong); text-decoration: none !important;
 }
-${L} a.moonlink:hover { background: #1D3350 !important; }
+${L} a.moonlink:hover { background: var(--hover) !important; }
 ${L} a.moonlink .planetBarSpaceObjectContainer {
   position: absolute !important; left: 3px !important; top: 6px !important; width: 16px !important; height: 16px !important;
   display: flex !important; align-items: center; justify-content: center; margin: 0 !important;
 }
 ${L} a.moonlink img.icon-moon { position: static !important; width: 16px !important; height: 16px !important; margin: 0 !important; }
 ${L} a.moonlink .fut-res { width: 46px; }
-${L} .fut-nomoon { flex-shrink: 0; width: ${MOON_W}px; border-left: 1px solid #1A2638; background: var(--surface); }
+${L} .fut-nomoon { flex-shrink: 0; width: ${MOON_W}px; border-left: 1px solid var(--line); background: var(--surface); }
 
 /* Skin that failed to load (game CDN 502): a plain sphere keeps the row's shape. */
 ${L} img.fut-noskin { visibility: hidden; }
 ${L} .planetBarSpaceObjectContainer:has(img.fut-noskin) {
-  border-radius: 50%; background: radial-gradient(circle at 35% 35%, var(--muted), #2A3A50 65%, #0A111C) !important;
+  border-radius: 50%; background: radial-gradient(circle at 35% 35%, var(--muted), var(--line-strong) 65%, var(--bg)) !important;
 }
 
 /* Selection: the body you are on (planet OR moon) gets a cyan frame and a bar on the left. */
 ${L} a.planetlink.active, ${L} a.moonlink.active {
   background: rgba(79,209,232,0.18) !important; box-shadow: inset 0 0 0 1px var(--accent), inset 3px 0 0 var(--accent) !important;
 }
-${L} a.planetlink.active .planet-name { color: #8BE4F2 !important; }
+${L} a.planetlink.active .planet-name { color: var(--accent-hi) !important; }
 
 /* Data age: minutes since this body's numbers were last read (green < 15, amber < 30, red after). */
 ${L} .fut-age {
@@ -126,41 +126,41 @@ ${L} .fut-age {
   font: 700 11px/13px Arial, sans-serif; text-align: center; background: rgba(5,10,18,0.85); pointer-events: none;
 }
 ${L} a.moonlink .fut-age { left: 1px; top: auto; bottom: 1px; }
-${L} .fut-age-fresh { color: #38C56E; }
-${L} .fut-age-warm { color: #E3BB28; }
-${L} .fut-age-old { color: #EF7676; }
+${L} .fut-age-fresh { color: var(--fresh); }
+${L} .fut-age-warm { color: var(--warm); }
+${L} .fut-age-old { color: var(--old); }
 
 /* What is being built: one dot per queue kind (OGLight colours) where the game's wrench was; details in the tooltip. */
 ${L} .smallplanet .constructionIcon { display: none !important; }
 ${L} .fut-queue { position: absolute; left: 2px; bottom: 2px; z-index: 2; display: flex; gap: 2px; padding: 2px; border-radius: 6px; background: rgba(5,10,18,0.85); }
 /* The plan: a slim column at the outer end of each row, right of the moon; one tile per planned body
    (planet on top, moon below), coloured by where its resources stand. */
-${L} .fut-plancol { flex-shrink: 0; display: flex; flex-direction: column; width: 20px; border-left: 1px solid #1A2638; background: var(--surface); }
+${L} .fut-plancol { flex-shrink: 0; display: flex; flex-direction: column; width: 20px; border-left: 1px solid var(--line); background: var(--surface); }
 ${L} .fut-plancol > span { flex: 1; min-height: 0; }
-${L} .fut-plancol > :last-child { border-top: 1px solid #1A2638; }
+${L} .fut-plancol > :last-child { border-top: 1px solid var(--line); }
 ${L} .fut-plan { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
   font: 700 12px/12px Arial, sans-serif; cursor: pointer; background: color-mix(in srgb, currentColor 18%, var(--surface)); outline: none; }
 ${L} .fut-plan:hover, ${L} .fut-plan:focus-visible { background: color-mix(in srgb, currentColor 32%, var(--surface)); }
 ${L} .fut-plan svg { display: block; }
 ${L}.fut-mode-compact .fut-plancol { display: none; }
-${L} .fut-plan-missing { color: #EF7676; }
+${L} .fut-plan-missing { color: var(--old); }
 ${L} .fut-plan-arriving { color: var(--accent); }
-${L} .fut-plan-arrived { color: #E3BB28; }
-${L} .fut-plan-ready { color: #38C56E; }
-${L} .fut-plan-unknown { color: #8592A1; }
+${L} .fut-plan-arrived { color: var(--warm); }
+${L} .fut-plan-ready { color: var(--fresh); }
+${L} .fut-plan-unknown { color: var(--muted); }
 ${L} .fut-q { display: block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 ${L} a.moonlink .fut-queue { left: 2px; bottom: auto; top: 1px; padding: 1px 2px; }
 ${L} a.moonlink .fut-q { width: 5px; height: 5px; }
-${L} .fut-q-building { color: #FF8200; }
-${L} .fut-q-research { color: #32FB2F; }
-${L} .fut-q-ship { color: #FFEB00; }
-${L} .fut-q-lfbuilding { color: #FF79BD; }
-${L} .fut-q-lfresearch { color: #42AFFF; }
+${L} .fut-q-building { color: var(--q-building); }
+${L} .fut-q-research { color: var(--q-research); }
+${L} .fut-q-ship { color: var(--q-ship); }
+${L} .fut-q-lfbuilding { color: var(--q-lfbuilding); }
+${L} .fut-q-lfresearch { color: var(--q-lfresearch); }
 ${L} .fut-q-unknown { color: var(--accent); }
 /* The game's attack alert keeps its place on the skin. */
 ${L} .smallplanet a.alert {
   position: absolute !important; left: 1px !important; top: auto !important; bottom: 1px !important; right: auto !important; z-index: 3;
-  width: 12px !important; height: 12px !important; border-radius: 50%; box-shadow: 0 0 0 1px #0A111C;
+  width: 12px !important; height: 12px !important; border-radius: 50%; box-shadow: 0 0 0 1px var(--bg);
 }
 
 /* Compact: the game's width. Coordinates over the planet's skin (no name), the numbers, the moon as a square button. */
@@ -186,16 +186,16 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
   display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 3px; min-width: 0; padding: 0 6px 0 8px; margin: 0;
   border: 0 !important; border-right: 1px solid var(--line) !important; background: none !important; color: inherit; text-align: left; cursor: pointer;
 }
-#planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) { background: #16243A !important; }
+#planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) { background: var(--line) !important; }
 #planetbarcomponent .fut-toolbar .fut-cell:hover:not(:disabled) .fut-cell-k { color: var(--text); }
 #planetbarcomponent .fut-toolbar .fut-cell:focus-visible, #planetbarcomponent .fut-tool:focus-visible { outline: 1px solid var(--accent); outline-offset: -2px; }
 #planetbarcomponent .fut-toolbar .fut-cell:disabled { cursor: default; }
 #planetbarcomponent .fut-cell-t { display: flex; align-items: center; gap: 5px; min-width: 0; }
 #planetbarcomponent .fut-cell-i { flex: none; display: inline-flex; color: var(--muted); }
-#planetbarcomponent .fut-cell-k { min-width: 0; font: 11px/12px Arial, sans-serif; color: #9AA9BC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#planetbarcomponent .fut-cell-k { min-width: 0; font: 11px/12px Arial, sans-serif; color: var(--label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #planetbarcomponent .fut-cell-v { min-width: 0; font: 700 12px/14px Consolas, "JetBrains Mono", monospace; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #planetbarcomponent .fut-cell-v small { font: 10px/14px Arial, sans-serif; letter-spacing: -0.2px; color: var(--muted); font-weight: 400; }
-#planetbarcomponent .fut-cell-v.fut-warn { color: var(--warn); } #planetbarcomponent .fut-cell-v.fut-ok { color: #4FE0B0; }
+#planetbarcomponent .fut-cell-v.fut-warn { color: var(--warn); } #planetbarcomponent .fut-cell-v.fut-ok { color: var(--d); }
 #planetbarcomponent .fut-side { display: flex; flex-direction: column; grid-column: 3; grid-row: 1; }
 #planetbarcomponent .fut-tool {
   position: relative; flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; padding: 0;
@@ -203,7 +203,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 }
 #planetbarcomponent .fut-tool + .fut-tool { border-top: 1px solid var(--line) !important; }
 #planetbarcomponent .fut-tool svg { width: 13px; height: 13px; }
-#planetbarcomponent .fut-tool:hover { background: #16243A !important; color: var(--text); }
+#planetbarcomponent .fut-tool:hover { background: var(--line) !important; color: var(--text); }
 #planetbarcomponent .fut-tool:disabled { opacity: 0.35; cursor: default; background: none; }
 #planetbarcomponent .fut-tool[aria-expanded="true"] { background: var(--accent-soft) !important; color: var(--accent); }
 #planetbarcomponent .fut-tool.fut-stale { color: var(--warn); }
@@ -223,16 +223,16 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 }
 .fut-totals .fut-trow { display: grid; grid-template-columns: minmax(0, 1fr) 58px 62px; align-items: center; gap: 6px; min-height: 20px; padding: 2px 0; }
 .fut-totals .fut-trow + .fut-trow { border-top: 1px solid var(--line-soft); }
-.fut-totals .fut-thead { min-height: 0; color: #9AA9BC; font-size: 11px; }
+.fut-totals .fut-thead { min-height: 0; color: var(--label); font-size: 11px; }
 .fut-totals .fut-thead + .fut-trow { border-top-color: var(--line); }
 .fut-totals .fut-tname { display: flex; align-items: center; gap: 6px; min-width: 0; white-space: nowrap; overflow: hidden; }
 .fut-totals .fut-tico { flex: none; display: inline-flex; }
 .fut-totals .fut-tlabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); }
 .fut-totals .fut-msu .fut-tlabel { color: var(--accent); }
 .fut-totals .fut-tnum { text-align: right; white-space: nowrap; color: var(--text); font: 700 12px Consolas, "JetBrains Mono", monospace; }
-.fut-totals .fut-tnum:last-child { color: #B4C2D3; font-weight: 400; }
+.fut-totals .fut-tnum:last-child { color: var(--text-2); font-weight: 400; }
 .fut-totals .fut-thead .fut-tnum { color: inherit; font: inherit; }
-.fut-totals .fut-msu { border-top-color: #2C3E57 !important; }
+.fut-totals .fut-msu { border-top-color: var(--line-strong) !important; }
 .fut-totals .fut-msu .fut-tname { color: var(--accent); font-weight: 700; }
 .fut-totals .fut-msu .fut-tnum:last-child { color: var(--text); }
 #planetbarcomponent:not(.fut-wide) .fut-totals { padding: 2px 4px 4px; }
@@ -242,24 +242,24 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 
 /* The plan's hover card, in the game's tooltip style (dark blue gradient, thin frame, centred title). */
 .fut-plan-tip { position: fixed; z-index: 100000; min-width: 170px; max-width: 260px; padding: 10px 12px; box-sizing: border-box;
-  border: 1px solid #2C3E57; border-radius: 6px; background: linear-gradient(180deg, #1C2A3A 0%, #0F1923 100%);
+  border: 1px solid var(--line-strong); border-radius: 6px; background: linear-gradient(180deg, var(--accent-soft) 0%, var(--surface) 100%);
   box-shadow: 0 6px 18px rgba(0,0,0,0.6); color: var(--text-2); font: 11px/1.45 Verdana, Arial, sans-serif; pointer-events: none; }
 .fut-plan-tip .fut-pt-head { display: flex; flex-direction: column; align-items: center; margin-bottom: 6px; }
 .fut-plan-tip .fut-pt-head b { color: #fff; font-size: 13px; }
-.fut-plan-tip .fut-pt-head span { color: #8592A1; font-size: 10px; }
-.fut-plan-tip .fut-pt-title { display: flex; align-items: center; gap: 5px; padding: 4px 0 3px; border-top: 1px solid #2C3E57; color: #9AA9BC; font-weight: 700; }
+.fut-plan-tip .fut-pt-head span { color: var(--muted); font-size: 10px; }
+.fut-plan-tip .fut-pt-title { display: flex; align-items: center; gap: 5px; padding: 4px 0 3px; border-top: 1px solid var(--line-strong); color: var(--label); font-weight: 700; }
 .fut-plan-tip .fut-pt-items { margin: 0 0 6px; padding: 0; list-style: none; }
-.fut-plan-tip .fut-pt-items li { padding: 1px 0 1px 8px; color: #6F9FC8; position: relative; }
-.fut-plan-tip .fut-pt-items li::before { content: ""; position: absolute; left: 0; top: 7px; width: 3px; height: 3px; border-radius: 50%; background: #4A6683; }
-.fut-plan-tip .fut-pt-status { padding-top: 5px; border-top: 1px solid #2C3E57; }
+.fut-plan-tip .fut-pt-items li { padding: 1px 0 1px 8px; color: var(--link); position: relative; }
+.fut-plan-tip .fut-pt-items li::before { content: ""; position: absolute; left: 0; top: 7px; width: 3px; height: 3px; border-radius: 50%; background: var(--line-hover); }
+.fut-plan-tip .fut-pt-status { padding-top: 5px; border-top: 1px solid var(--line-strong); }
 .fut-plan-tip .fut-pt-say { font-weight: 700; }
-.fut-plan-tip.fut-plan-missing .fut-pt-say { color: #EF7676; }
+.fut-plan-tip.fut-plan-missing .fut-pt-say { color: var(--old); }
 .fut-plan-tip.fut-plan-arriving .fut-pt-say, .fut-plan-tip .fut-pt-sent { color: var(--accent) !important; }
-.fut-plan-tip.fut-plan-arrived .fut-pt-say { color: #E3BB28; }
-.fut-plan-tip.fut-plan-ready .fut-pt-say { color: #38C56E; }
-.fut-plan-tip.fut-plan-unknown .fut-pt-say { color: #8592A1; }
+.fut-plan-tip.fut-plan-arrived .fut-pt-say { color: var(--warm); }
+.fut-plan-tip.fut-plan-ready .fut-pt-say { color: var(--fresh); }
+.fut-plan-tip.fut-plan-unknown .fut-pt-say { color: var(--muted); }
 .fut-plan-tip .fut-pt-sent { margin-top: 4px; }
 .fut-plan-tip .fut-pt-res { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 2px; font: 700 11px Consolas, monospace; }
 .fut-plan-tip .fut-pt-res span { display: inline-flex; align-items: center; gap: 3px; }
-.fut-plan-tip .fut-pt-metal { color: #B8C2CC; } .fut-plan-tip .fut-pt-crystal { color: #7FB8FF; } .fut-plan-tip .fut-pt-deuterium { color: #4FE0B0; }
+.fut-plan-tip .fut-pt-metal { color: var(--m); } .fut-plan-tip .fut-pt-crystal { color: var(--c); } .fut-plan-tip .fut-pt-deuterium { color: var(--d); }
 `;
