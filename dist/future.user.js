@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.95
+// @version      0.3.96
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -4858,6 +4858,9 @@ input.sw:focus-visible + .sw-track { outline: 2px solid var(--accent); outline-o
 .bmenu button:disabled { background: none; color: var(--faint); cursor: default; }
 
 /* Browser surfaces. */
+/* Number fields without the browser's spin arrows (the keyboard's up / down still step). */
+input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
+input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .backdrop, .scroll, .table-wrap { scrollbar-color: var(--line-strong) var(--raised); scrollbar-width: thin; }
 ::selection { background: #5A4E1A; color: var(--text); }
@@ -11235,6 +11238,12 @@ tfoot td { border-top: 1px solid var(--line); border-bottom: 0; font-weight: 700
    The rung under the pointer stays full, the others step down a tone. */
 .move { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--raised); transition: opacity 140ms ease; }
 .move + .move { margin-top: 2px; }
+/* The full list (Investimenti): two columns, rungs packed, 2px seams. */
+.ladder { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; }
+.ladder .move { margin: 0; padding: 7px 10px; }
+.ladder .move .pic { width: 24px !important; height: 24px !important; }
+.ladder .roi { font-size: 19px; }
+@media (max-width: 900px) { .ladder { grid-template-columns: 1fr; } }
 @media (hover: hover) and (pointer: fine) { .card:hover > .move:not(:hover) { opacity: 0.72; } }
 .move .n { width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; background: var(--accent); color: var(--on-accent); font: 600 condensed 12px var(--display); display: flex; align-items: center; justify-content: center; }
 .move-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -11323,7 +11332,7 @@ td.guess { font-style: italic; opacity: 0.7; }
 .field { height: 28px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text); font: 12px var(--body); }
 .field:focus { border-color: var(--accent); outline: none; }
 .field-label { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
-.field.rate { width: 64px; text-align: right; }
+.field.rate { width: 44px; text-align: center; }
 .field.qty { width: 110px; text-align: right; font-family: "JetBrains Mono", Consolas, monospace; }
 table.scrap td.unit { padding: 2px 8px 2px 2px; }
 table.scrap .unit-label { display: flex; align-items: center; gap: 8px; width: 100%; padding: 2px 8px 2px 2px; border: 1px solid transparent; border-radius: 6px; background: none; color: var(--text-2); font: 12px var(--body); text-align: left; cursor: pointer; }
@@ -12032,14 +12041,16 @@ table.queues td.acts { width: 1%; text-align: right; }
     const label = h3("label", "field-label", t("dash.rates"));
     ["metal", "crystal", "deuterium"].forEach((k, i) => {
       const input = h3("input", "field rate");
-      input.type = "number";
-      input.min = "0.1";
-      input.step = "0.1";
+      input.type = "text";
+      input.inputMode = "decimal";
       input.value = String(rates[k]);
       input.setAttribute("aria-label", `${t("dash.rates")}: ${t(`res.${k}`)}`);
       input.addEventListener("change", () => {
-        const v = Number(input.value);
-        if (!(v > 0)) return;
+        const v = Number(input.value.replace(",", "."));
+        if (!(v > 0)) {
+          input.value = String(loadRates(o)[k]);
+          return;
+        }
         const next = { ...loadRates(o), [k]: v };
         if (o.store) o.store.set(RATES_KEY, next);
         else sessionRates = next;
@@ -12072,7 +12083,9 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (missing2) s.append(missing2);
     const groups = groupSteps(buildOrder(ctx, 60));
     if (!groups.length) s.append(h3("p", "hint", t("dash.movesNone")));
-    groups.forEach((g, i) => s.append(groupLine(ctx, g, i, true)));
+    const ladder = h3("div", "ladder");
+    groups.forEach((g, i) => ladder.append(groupLine(ctx, g, i, true)));
+    s.append(ladder);
   }
   function minesTab(parent, ctx) {
     const { t } = ctx.o;
