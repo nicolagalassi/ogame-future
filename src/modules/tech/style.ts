@@ -1,4 +1,4 @@
-import { RES_COLORS, STATE_COLORS, WINDOW_TOKENS } from '../../core/sheet';
+import { WINDOW_TOKENS } from '../../core/sheet';
 
 /** Cost panel (inside the game's details panel, prefixed classes) and planner window (Shadow DOM). */
 export const TECH_CSS = `
@@ -16,65 +16,62 @@ export const TECH_CSS = `
   display: flex; align-items: stretch; gap: 0; margin: 0; padding: 0; white-space: nowrap; overflow: hidden; }
 #technologydetails.fut-tp-unit .content .shipyardSelection input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
 #technologydetails.fut-tp-unit .content .shipyardSelection label { float: none; display: flex; align-items: center; margin: 0; padding: 0 10px; width: auto;
-  border: 1px solid var(--line-strong); background: rgba(9,15,24,0.82); color: var(--muted); font: 11px/18px Arial, Helvetica, sans-serif; cursor: pointer; }
+  border: 0; background: rgba(21,28,38,0.92); color: var(--label); font: 600 condensed 13px/20px var(--display); cursor: pointer; }
 #technologydetails.fut-tp-unit .content .shipyardSelection label::before, #technologydetails.fut-tp-unit .content .shipyardSelection label::after { display: none !important; }
-#technologydetails.fut-tp-unit .content .shipyardSelection label:first-of-type { border-radius: 10px 0 0 10px; }
-#technologydetails.fut-tp-unit .content .shipyardSelection label:last-of-type { border-radius: 0 10px 10px 0; }
-#technologydetails.fut-tp-unit .content .shipyardSelection label + input + label { border-left: 0; }
+#technologydetails.fut-tp-unit .content .shipyardSelection label:first-of-type { border-radius: 4px 0 0 4px; }
+#technologydetails.fut-tp-unit .content .shipyardSelection label:last-of-type { border-radius: 0 4px 4px 0; }
+#technologydetails.fut-tp-unit .content .shipyardSelection label + input + label { margin-left: 2px; }
 #technologydetails.fut-tp-unit .content .shipyardSelection label:hover { color: var(--text); }
-#technologydetails.fut-tp-unit .content .shipyardSelection input:checked + label { background: var(--accent-soft); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
-#technologydetails.fut-tp-unit .content .shipyardSelection input:focus-visible + label { outline: 1px solid var(--accent); outline-offset: -1px; }
+#technologydetails.fut-tp-unit .content .shipyardSelection input:checked + label { background: rgba(33,43,58,0.96); color: var(--text); box-shadow: inset 0 2px 0 var(--accent); }
+#technologydetails.fut-tp-unit .content .shipyardSelection input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: -2px; }
 #technologydetails.fut-tp-unit .content .build_amount { position: absolute; top: 104px; right: 6px; width: 146px; height: 28px; margin: 0; padding: 0;
   display: flex; align-items: center; gap: 4px; }
 #technologydetails.fut-tp-unit .content .build_amount label { display: none; }
 #technologydetails.fut-tp-unit .content .build_amount input, #technologydetails.fut-tp-unit #build_amount { position: static; float: none; flex: 1; min-width: 0; width: auto; height: 26px; margin: 0; padding: 0 6px; box-sizing: border-box;
-  border: 1px solid var(--line-strong); border-radius: 5px; background: rgba(9,15,24,0.92) none; color: var(--text); font: 700 13px Consolas, "JetBrains Mono", "DejaVu Sans Mono", monospace; text-align: right; box-shadow: none; }
-#technologydetails.fut-tp-unit #build_amount:focus { outline: none; border-color: var(--accent); }
+  border: 0; border-radius: 4px; background: rgba(21,28,38,0.92) none; color: var(--text); font: 600 condensed 15px var(--display); text-align: right; box-shadow: none; }
+#technologydetails.fut-tp-unit #build_amount:focus { outline: none; box-shadow: inset 0 0 0 1px var(--accent); }
 #technologydetails.fut-tp-unit .content .build_amount .maximum { position: static; float: none; flex: none; width: auto; height: 26px; margin: 0; padding: 0 6px;
-  background: var(--line-soft) none !important; border: 1px solid var(--line-strong); border-radius: 5px; color: var(--text-2); font-size: 11px; cursor: pointer; }
+  background: rgba(21,28,38,0.92) none !important; border: 0; border-radius: 4px; color: var(--label); font: 12px var(--body); cursor: pointer; }
 #technologydetails.fut-tp-unit .content .build_amount .maximum::before, #technologydetails.fut-tp-unit .content .build_amount .maximum::after { display: none !important; }
-#technologydetails.fut-tp-unit .content .build_amount .maximum:hover { border-color: var(--accent); color: #fff; }
+#technologydetails.fut-tp-unit .content .build_amount .maximum:hover { background: rgba(33,43,58,0.96) none !important; color: var(--text); }
 #technologydetails.fut-tp-unit .fut-tp { right: 158px; }
 #technologydetails.fut-tp-unit:has(.shipyardSelection) .fut-tp { top: 52px; }
 .fut-tp, .fut-tp-tools {
-  /* Future's window tokens (core/sheet.ts), here outside the Shadow DOM. */
-  --line: #1F2C40; --line-soft: #16202F; --text: #E6EDF5; --text-2: #C9D4E2; --muted: #8A9BB0;
-  --accent: ${STATE_COLORS.accent}; --ok: ${STATE_COLORS.ok}; --bad: ${STATE_COLORS.bad}; --energy: #F5D547;
-  --m: ${RES_COLORS.metal}; --c: ${RES_COLORS.crystal}; --d: ${RES_COLORS.deuterium};
-  --mono: Consolas, "JetBrains Mono", "DejaVu Sans Mono", monospace;
+  /* The window tokens come from the block at the top (core/sheet.ts); only energy is the tech page's own. */
+  --energy: #F5D547; --mono: var(--display);
 }
 .fut-tp { position: absolute; top: 24px; left: 6px; right: 138px; bottom: 6px; display: flex; flex-direction: column; gap: 6px;
-  font: 11px/14px Arial, Helvetica, sans-serif; color: var(--text); text-align: left; }
-/* The ledger: no boxes per cell, hairlines between rows, numbers right-aligned in one mono face. */
-.fut-tp-grid { display: grid; align-content: start; border-radius: 6px; background: rgba(9,15,24,0.82); padding: 2px 0; }
+  font: 12px/15px var(--body); color: var(--text); text-align: left; }
+/* The ledger, printed on the board: hairlines between rows, figures right-aligned in the board's face. */
+.fut-tp-grid { display: grid; align-content: start; border-radius: 4px; background: rgba(21,28,38,0.92); padding: 2px 0; }
 .fut-tp-grid > span { min-width: 0; padding: 3px 8px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fut-tp-h { color: var(--muted); font: 11px/14px Arial, Helvetica, sans-serif; text-align: right; }
+.fut-tp-h { color: var(--label); font: 12px/15px var(--body); text-align: right; }
 .fut-tp-h:first-child { text-align: left; }
-.fut-tp-k { display: flex; align-items: center; gap: 5px; font: 700 12px/16px Arial, Helvetica, sans-serif; color: var(--text-2); }
+.fut-tp-k { display: flex; align-items: center; gap: 6px; font: 600 condensed 14px/16px var(--display); color: var(--text-2); }
 .fut-tp-k svg { flex: none; }
 .fut-tp-k > span { overflow: hidden; text-overflow: ellipsis; }
 .fut-tp-k.fut-m { color: var(--m); } .fut-tp-k.fut-c { color: var(--c); } .fut-tp-k.fut-d { color: var(--d); } .fut-tp-k.fut-e { color: var(--energy); }
-.fut-tp-v { font: 700 13px/16px var(--mono); font-variant-numeric: tabular-nums; color: var(--text); text-align: right; }
-.fut-tp-sum { color: var(--accent); }
-.fut-tp-short { color: var(--bad); }
+.fut-tp-v { font: 600 condensed 14px/16px var(--display); font-variant-numeric: tabular-nums; color: var(--text-2); text-align: right; }
+.fut-tp-sum { color: var(--text); }
+.fut-tp-short { color: var(--warn); }
 .fut-tp-ok { color: var(--ok); display: flex; align-items: center; justify-content: flex-end; }
 /* The total row closes the ledger: a firmer rule above, no rule below. */
 .fut-tp-grid > .fut-tp-total { border-top: 1px solid var(--line); border-bottom: 0; }
-.fut-tp-k.fut-tp-msu { color: var(--muted); }
-/* What is missing: a column band, red when something lacks, green when nothing does. */
-.fut-tp-miss { background: rgba(255,122,122,0.08); }
-.fut-tp-miss.fut-tp-none { background: rgba(79,224,176,0.06); }
-.fut-tp-h.fut-tp-miss { color: var(--bad); } .fut-tp-h.fut-tp-none { color: var(--ok); }
+.fut-tp-k.fut-tp-msu { color: var(--label); }
+/* What is missing: a column band, orange when something lacks (to do, as in the Plan), green when nothing does. */
+.fut-tp-miss { background: rgba(240,138,60,0.08); }
+.fut-tp-miss.fut-tp-none { background: rgba(123,196,127,0.07); }
+.fut-tp-h.fut-tp-miss { color: var(--warn); } .fut-tp-h.fut-tp-none { color: var(--ok); }
 .fut-tp-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: auto; }
-.fut-tp-chip { display: inline-flex; align-items: center; gap: 5px; height: 20px; box-sizing: border-box; padding: 0 8px; border: 1px solid var(--line); border-radius: 10px;
-  background: rgba(9,15,24,0.82); color: var(--text-2); font: 12px/18px Arial, Helvetica, sans-serif; font-variant-numeric: tabular-nums; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.fut-tp-chip { display: inline-flex; align-items: center; gap: 5px; height: 22px; box-sizing: border-box; padding: 0 8px; border: 1px solid transparent; border-radius: 4px;
+  background: rgba(21,28,38,0.92); color: var(--text-2); font: 12px/20px var(--body); font-variant-numeric: tabular-nums; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .fut-tp-chip svg { flex: none; color: var(--muted); }
 .fut-tp-energy svg { color: var(--energy); } .fut-tp-start svg { color: var(--accent); }
 .fut-tp-disc { color: var(--muted); }
 .fut-tp-pop svg { color: #E58CDB; }
-.fut-tp-lack { border-color: var(--bad); color: var(--bad); } .fut-tp-lack svg { color: var(--bad); }
-.fut-tp-sat { border-color: #6B5A1E; color: var(--energy); cursor: pointer; } .fut-tp-sat svg { color: var(--energy); }
-.fut-tp-sat:hover { border-color: var(--energy); background: #1E1A0C; }
+.fut-tp-lack { border-color: var(--warn); color: var(--warn); } .fut-tp-lack svg { color: var(--warn); }
+.fut-tp-sat { border-color: rgba(245,213,71,0.35); color: var(--energy); cursor: pointer; } .fut-tp-sat svg { color: var(--energy); }
+.fut-tp-sat:hover { border-color: var(--energy); }
 .fut-tp-lab { border-color: var(--accent-line); color: var(--text, var(--text-2)); }
 .fut-tp-sat-link { display: inline-flex; max-width: 100%; text-decoration: none; }
 /* Tools over the picture: one stepper (− / the jump printed large / +) and the plan button with its word,
