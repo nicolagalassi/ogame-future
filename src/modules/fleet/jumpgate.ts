@@ -1,3 +1,4 @@
+import { WINDOW_TOKENS } from '../../core/sheet';
 /**
  * Jump gate ("portale"): the game's own dialog keeps the moon's gate rule at home, as
  * OGLight's limiter does. We lower each ship's maximum (the game's `rel` attribute) and
@@ -15,20 +16,22 @@ import { loadProfiles, loadSettings } from './index';
 type T = (k: string, v?: Record<string, string | number>) => string;
 
 const STYLE = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+.fut-jgkeep, .fut-jgbar { ${WINDOW_TOKENS} }
 .fut-jgkeep { color: #FF9A6B; font: 11px Arial, sans-serif; text-align: right; }
-.fut-jgkeep input { box-sizing: border-box; display: block; width: 100%; max-width: 84px; margin: 2px 0 0 auto; height: 20px; padding: 0 4px; border: 1px solid #2C3E57; border-radius: 4px; background: #0A111C; color: #E6EDF5; font: 11px Arial, sans-serif; text-align: right; }
-.fut-jgkeep input:focus { outline: none; border-color: #4FD1E8; }
-.fut-jgbar { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin: 4px 0; font: 11px Arial, sans-serif; color: #A3AFBD; }
+.fut-jgkeep input { box-sizing: border-box; display: block; width: 100%; max-width: 84px; margin: 2px 0 0 auto; height: 20px; padding: 0 4px; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--bg); color: var(--text); font: 11px Arial, sans-serif; text-align: right; }
+.fut-jgkeep input:focus { outline: none; border-color: var(--accent); }
+.fut-jgbar { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin: 4px 0; font: 11px Arial, sans-serif; color: var(--label); }
 .fut-jgbar > span { margin-right: auto; }
-.fut-jgbar button { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 8px; border: 1px solid #24344B; border-radius: 13px; background: #0A111C; color: #8592A1; font: 11px Arial, sans-serif; cursor: pointer; }
-.fut-jgbar button:hover { color: #E6EDF5; border-color: #4FD1E8; }
-.fut-jgbar button:focus-visible { outline: 2px solid #4FD1E8; outline-offset: 1px; }
-.fut-jgbar .track { position: relative; width: 20px; height: 12px; border-radius: 6px; background: #3A4A60; }
-.fut-jgbar .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 8px; height: 8px; border-radius: 50%; background: #C9D2DC; }
-.fut-jgbar button[aria-checked="true"] { border-color: #1F5A68; color: #CFF5FC; }
-.fut-jgbar button[aria-checked="true"] .track { background: #4FD1E8; }
+.fut-jgbar button { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 8px; border: 1px solid var(--line); border-radius: 13px; background: var(--bg); color: var(--muted); font: 11px Arial, sans-serif; cursor: pointer; }
+.fut-jgbar button:hover { color: var(--text); border-color: var(--accent); }
+.fut-jgbar button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.fut-jgbar .track { position: relative; width: 20px; height: 12px; border-radius: 6px; background: var(--faint); }
+.fut-jgbar .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 8px; height: 8px; border-radius: 50%; background: var(--text-2); }
+.fut-jgbar button[aria-checked="true"] { border-color: #1F5A68; color: var(--text); }
+.fut-jgbar button[aria-checked="true"] .track { background: var(--accent); }
 .fut-jgbar button[aria-checked="true"] .track::after { transform: translateX(8px); background: #06222A; }
-.fut-jgbar button[aria-pressed="true"] { border-color: #4FD1E8; color: #CFF5FC; background: #12283A; }
+.fut-jgbar button[aria-pressed="true"] { border-color: var(--accent); color: var(--text); background: var(--accent-soft); }
 `;
 
 /** Whether the gate's rule is being edited in the dialog (ships to keep, one field per ship). */

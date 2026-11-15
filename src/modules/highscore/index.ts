@@ -1,3 +1,4 @@
+import { WINDOW_TOKENS } from '../../core/sheet';
 /**
  * Highscore page (players): on the total points, under each score the difference from PTRE's last
  * snapshot (green up, red down) with its age in the column header, as OGLight shows it; a cleaner
@@ -33,8 +34,10 @@ const ptreSeen = new WeakMap<Store, PtreRanks | null>();
 export const isHighscorePage = (doc: Document) => new URL(doc.location?.href ?? 'http://x/').searchParams.get('component') === 'highscore';
 
 const CSS = `
-#ranks { --fut-up: #7BC47F; --fut-down: #E57B70; --fut-mute: #8592A1; --fut-line: #3A4A5C; --fut-btn: #0F1822; --fut-txt: #C9D6E3; --fut-hi: #FFFFFF; --fut-link: #6F9FC8; }
-#fut-hs-top { --fut-line: #3A4A5C; --fut-btn: #0F1822; --fut-txt: #C9D6E3; --fut-hi: #FFFFFF; --fut-link: #6F9FC8; }
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+#ranks, #fut-hs-top { ${WINDOW_TOKENS} }
+#ranks { --fut-up: var(--ok); --fut-down: #E57B70; --fut-mute: var(--muted); --fut-line: var(--faint); --fut-btn: var(--surface); --fut-txt: var(--text-2); --fut-hi: #FFFFFF; --fut-link: var(--link); }
+#fut-hs-top { --fut-line: var(--faint); --fut-btn: var(--surface); --fut-txt: var(--text-2); --fut-hi: #FFFFFF; --fut-link: var(--link); }
 #ranks .fut-hs-gap { display: block; font-size: 11px; line-height: 1.2; font-variant-numeric: tabular-nums; }
 #ranks .fut-hs-gap.up { color: var(--fut-up); } #ranks .fut-hs-gap.down { color: var(--fut-down); }
 #ranks .fut-hs-age { margin-left: 4px; color: var(--fut-mute); font-weight: 400; }
@@ -42,7 +45,7 @@ const CSS = `
    (own, alliance) kept but quieter, every row compact with a small picture. */
 #ranks tbody tr > td { border: 0 !important; border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important; box-shadow: inset 0 0 0 9999px rgba(6, 10, 16, 0.45); padding-top: 2px !important; padding-bottom: 2px !important; line-height: 1.25; vertical-align: middle; }
 #ranks tbody tr.myrank > td { box-shadow: inset 0 0 0 9999px rgba(6, 10, 16, 0.55); }
-#ranks tbody tr.myrank > td:first-child { box-shadow: inset 3px 0 0 #6F9FC8, inset 0 0 0 9999px rgba(6, 10, 16, 0.55); }
+#ranks tbody tr.myrank > td:first-child { box-shadow: inset 3px 0 0 var(--link), inset 0 0 0 9999px rgba(6, 10, 16, 0.55); }
 #ranks tbody tr:hover > td { box-shadow: inset 0 0 0 9999px rgba(6, 10, 16, 0.25); }
 #ranks .highscoreNameFieldWrapper { height: 34px !important; align-items: center; }
 #ranks .highscoreNameFieldWrapper profile-picture { zoom: .6; }
