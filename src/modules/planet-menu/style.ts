@@ -138,16 +138,19 @@ ${L} .fut-queue { position: absolute; left: 2px; bottom: 2px; z-index: 2; displa
 ${L} .fut-plancol { flex-shrink: 0; display: flex; flex-direction: column; width: 20px; border-left: 1px solid var(--line); background: var(--surface); }
 ${L} .fut-plancol > span { flex: 1; min-height: 0; }
 ${L} .fut-plancol > :last-child { border-top: 1px solid var(--line); }
-${L} .fut-plan { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-  font: 700 12px/12px Arial, sans-serif; cursor: pointer; background: color-mix(in srgb, currentColor 18%, var(--surface)); outline: none; }
-${L} .fut-plan:hover, ${L} .fut-plan:focus-visible { background: color-mix(in srgb, currentColor 32%, var(--surface)); }
-${L} .fut-plan svg { display: block; }
+/* The number of planned items in the board's figures, a pip under it in the state's colour:
+   orange = resources missing, blue = on their way, amber = landed (not read yet), green = all there, grey = unknown. */
+${L} .fut-plan { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font: 600 condensed 12px/1 var(--display); color: var(--text); cursor: pointer; outline: none; --st: var(--muted); }
+${L} .fut-plan::after { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--st); }
+${L} .fut-plan:hover, ${L} .fut-plan:focus-visible { background: var(--hover); }
+${L} .fut-plan:focus-visible { box-shadow: inset 0 0 0 1px var(--accent); }
 ${L}.fut-mode-compact .fut-plancol { display: none; }
-${L} .fut-plan-missing { color: var(--old); }
-${L} .fut-plan-arriving { color: var(--accent); }
-${L} .fut-plan-arrived { color: var(--warm); }
-${L} .fut-plan-ready { color: var(--fresh); }
-${L} .fut-plan-unknown { color: var(--muted); }
+${L} .fut-plan-missing { --st: var(--warn); }
+${L} .fut-plan-arriving { --st: var(--link); }
+${L} .fut-plan-arrived { --st: var(--warm); }
+${L} .fut-plan-ready { --st: var(--fresh); }
+${L} .fut-plan-unknown { --st: var(--muted); }
 ${L} .fut-q { display: block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 ${L} a.moonlink .fut-queue { left: 2px; bottom: auto; top: 1px; padding: 1px 2px; }
 ${L} a.moonlink .fut-q { width: 5px; height: 5px; }
@@ -253,8 +256,8 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
 .fut-plan-tip .fut-pt-items li::before { content: ""; position: absolute; left: 0; top: 7px; width: 3px; height: 3px; border-radius: 50%; background: var(--line-hover); }
 .fut-plan-tip .fut-pt-status { padding-top: 5px; border-top: 1px solid var(--line-strong); }
 .fut-plan-tip .fut-pt-say { font-weight: 700; }
-.fut-plan-tip.fut-plan-missing .fut-pt-say { color: var(--old); }
-.fut-plan-tip.fut-plan-arriving .fut-pt-say, .fut-plan-tip .fut-pt-sent { color: var(--accent) !important; }
+.fut-plan-tip.fut-plan-missing .fut-pt-say { color: var(--warn); }
+.fut-plan-tip.fut-plan-arriving .fut-pt-say, .fut-plan-tip .fut-pt-sent { color: var(--link) !important; }
 .fut-plan-tip.fut-plan-arrived .fut-pt-say { color: var(--warm); }
 .fut-plan-tip.fut-plan-ready .fut-pt-say { color: var(--fresh); }
 .fut-plan-tip.fut-plan-unknown .fut-pt-say { color: var(--muted); }

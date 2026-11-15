@@ -181,8 +181,10 @@ export interface FleetSettings {
   expeditionShip: number;
   /** Expedition cargo: '' = calculated, '50%' = share of the calculated one, '2000000' = fixed. */
   expeditionValue: string;
-  /** Add one big combat ship, one probe and one pathfinder, like OGLight. */
+  /** Add one probe and one pathfinder, like OGLight. */
   expeditionExtras: boolean;
+  /** The one big combat ship added to an expedition: 0 = the biggest available, -1 = none, else that ship (the biggest if missing). */
+  expeditionBig: number;
   /** After a send from a Future button, open the next planet or moon ready with the same action. */
   repeat: boolean;
   /** Each rule on or off, without forgetting it: ships, resources, jump gate. Not the fleetsave's. */
@@ -231,6 +233,7 @@ export const DEFAULT_SETTINGS: FleetSettings = {
   expeditionShip: 0,
   expeditionValue: '',
   expeditionExtras: true,
+  expeditionBig: 0,
   repeat: false,
   shipsOn: true,
   resourcesOn: true,
@@ -249,7 +252,9 @@ export const DEFAULT_SETTINGS: FleetSettings = {
 export function settingsFrom(stored: Partial<FleetSettings> & { reserveOn?: boolean }): FleetSettings {
   const { reserveOn, ...rest } = stored;
   const legacy = reserveOn === undefined ? {} : { shipsOn: reserveOn, resourcesOn: reserveOn };
-  return { ...DEFAULT_SETTINGS, ...legacy, ...rest };
+  // Before the big ship had its own choice, one switch added it with the probe and the pathfinder.
+  const big = rest.expeditionBig === undefined && rest.expeditionExtras === false ? { expeditionBig: -1 } : {};
+  return { ...DEFAULT_SETTINGS, ...legacy, ...big, ...rest };
 }
 
 /**
@@ -423,11 +428,11 @@ export function expeditionTarget(calculated: number, value: string): number {
 /** Structure points factor of the base cargo ships, used for the minimum expedition size. */
 const EXPEDITION_FACTOR: Record<number, number> = { 202: 1, 203: 3, 219: 5.75 };
 /** Biggest combat ship first: one of them makes the expedition fleet count as strong. */
-const EXPEDITION_FILLERS = [218, 213, 211, 215, 207, 206, 205, 204];
+export const EXPEDITION_FILLERS = [218, 213, 211, 215, 207, 206, 205, 204];
 
 export function expeditionFleet(
   stock: ShipStock[],
-  o: { ship: number; target: number; base: number; extras: boolean },
+  o: { ship: number; target: number; base: number; extras: boolean; big?: number },
 ): Record<number, number> {
   const has = (id: number) => (stock.find((s) => s.id === id)?.available ?? 0) > 0;
   const need = (id: number) => {
@@ -453,9 +458,12 @@ export function expeditionFleet(
   }
   const out: Record<number, number> = {};
   if (ship && has(ship)) out[ship] = Math.min(stock.find((s) => s.id === ship)!.available, need(ship));
-  if (o.extras) {
-    const filler = EXPEDITION_FILLERS.find((id) => id !== ship && has(id));
+  const big = o.big ?? (o.extras ? 0 : -1);
+  if (big !== -1) {
+    const filler = big > 0 && big !== ship && has(big) ? big : EXPEDITION_FILLERS.find((id) => id !== ship && has(id));
     if (filler) out[filler] = 1;
+  }
+  if (o.extras) {
     if (ship !== 210 && has(210)) out[210] = 1;
     if (ship !== 219 && has(219)) out[219] = 1;
   }
