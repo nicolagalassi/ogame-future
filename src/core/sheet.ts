@@ -37,7 +37,7 @@ const TEXT_TOKENS = `--text: #ECE6D6; --text-2: #D2CCBE; --label: #A9B2BE; --mut
   --fresh: #38C56E; --warm: #E3BB28; --old: #EF7676;
   --accent: ${STATE_COLORS.accent}; --accent-soft: #2A2614; --warn: ${STATE_COLORS.warn}; --ok: ${STATE_COLORS.ok}; --bad: ${STATE_COLORS.bad};
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --display: Bahnschrift, "DIN Alternate", "Roboto Condensed", "sans-serif-condensed", "Liberation Sans Narrow", "Arial Narrow", "Open Sans Condensed", "Fira Sans Condensed", "DejaVu Sans Condensed", sans-serif;
+  --display: 'Future Barlow', Bahnschrift, "DIN Alternate", "Roboto Condensed", "sans-serif-condensed", "Liberation Sans Narrow", "Arial Narrow", "Open Sans Condensed", "Fira Sans Condensed", "DejaVu Sans Condensed", sans-serif;
   --body: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;`;
 /** Every window token, for surfaces outside the windows that speak the same language (planet menu, galaxy, side bar). */
 export const WINDOW_TOKENS = `${SURFACE_TOKENS} ${LINE_TOKENS} ${STRONG_LINE}

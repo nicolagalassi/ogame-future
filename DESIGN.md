@@ -42,32 +42,32 @@ colors:
   old: "#EF7676"
 typography:
   display:
-    fontFamily: "Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"sans-serif-condensed\", \"Liberation Sans Narrow\", \"Arial Narrow\", \"Open Sans Condensed\", \"Fira Sans Condensed\", \"DejaVu Sans Condensed\", sans-serif"
+    fontFamily: "\"Future Barlow\", Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"sans-serif-condensed\", \"Liberation Sans Narrow\", \"Arial Narrow\", \"Open Sans Condensed\", \"Fira Sans Condensed\", \"DejaVu Sans Condensed\", sans-serif"
     fontSize: "19px"
     fontWeight: 600
     lineHeight: 1.2
   figure-lg:
-    fontFamily: "Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Arial Narrow\", sans-serif"
+    fontFamily: "\"Future Barlow\", Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Arial Narrow\", sans-serif"
     fontSize: "22px"
     fontWeight: 600
     lineHeight: 1
     fontFeature: "tnum"
   figure:
-    fontFamily: "Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Arial Narrow\", sans-serif"
+    fontFamily: "\"Future Barlow\", Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Arial Narrow\", sans-serif"
     fontSize: "18px"
     fontWeight: 600
     fontFeature: "tnum"
   headline:
-    fontFamily: "Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Arial Narrow\", sans-serif"
+    fontFamily: "\"Future Barlow\", Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Arial Narrow\", sans-serif"
     fontSize: "15px"
     fontWeight: 600
     lineHeight: 1.2
   title:
-    fontFamily: "Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Arial Narrow\", sans-serif"
+    fontFamily: "\"Future Barlow\", Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Arial Narrow\", sans-serif"
     fontSize: "14px"
     fontWeight: 600
   control:
-    fontFamily: "Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Arial Narrow\", sans-serif"
+    fontFamily: "\"Future Barlow\", Bahnschrift, \"DIN Alternate\", \"Roboto Condensed\", \"Arial Narrow\", sans-serif"
     fontSize: "13px"
     fontWeight: 600
   body:
@@ -251,11 +251,13 @@ A low-chroma blue-black board with warm ink, one saturated yellow, and the game'
 
 ## Typography
 
-**Display Font:** Bahnschrift (with DIN Alternate, Roboto Condensed, Liberation Sans Narrow, Arial Narrow and other installed condensed faces, then sans-serif), set with `font-stretch: condensed`
+**Display Font:** Barlow Semi Condensed, carried inside the script as `Future Barlow` (weights 400 and 600, latin, base64 in `src/core/fonts.ts`, SIL OFL 1.1), then Bahnschrift, DIN Alternate and the installed condensed faces as fallback for glyphs it lacks
 **Body Font:** Segoe UI (with Roboto, Helvetica Neue, Arial, sans-serif)
 **Label/Mono Font:** none distinct inside windows: `--mono` resolves to the display stack and alignment comes from `font-variant-numeric: tabular-nums`
 
-**Character:** A condensed engineering face for everything printed on the board (heads, figures, tabs, buttons) against a plain system sans for the words around them. Fonts are system stacks only, by product constraint: no network may be used for fonts, so the face varies by OS (Bahnschrift on Windows, Roboto Condensed or Liberation Sans Narrow on Linux) and every rule must survive the fallback.
+**Character:** A condensed engineering face for everything printed on the board (heads, figures, tabs, buttons) against a plain system sans for the words around them. No font may come over the network, by product constraint; so the board's face travels inside the script and is declared once on the page (Chrome ignores `@font-face` inside a shadow root, but a document font reaches every window). Every player sees the same figures, whatever the system (before 2026-11-17 it was Bahnschrift on Windows, DIN on Mac, whatever was installed on Linux). Body prose stays on the system sans.
+
+In the planet menu the whole row is in the board's face: the name 600 13px, coordinates and the fleet line 400 12px, the resource figures 600 12px, all tabular, three lines of 13 + 12 + 12px in the 40px row.
 
 ### Hierarchy
 - **Display** (600 condensed, 19px, 1.2): the window title on the band.
@@ -380,7 +382,7 @@ The account's figures (points, rank, stock, fleet, defence) on one wrapping line
 - **Don't** draw bordered boxes or cast shadows on zones, rungs or tiles; only the window and its popovers float.
 - **Don't** build an equal-card dashboard grid; the board's columns are weighted by what they carry.
 - **Don't** dress the board in sci-fi costume: no HUD frames, neon glows, scanlines or gradients.
-- **Don't** load web fonts or any font over the network; system stacks only.
+- **Don't** load any font over the network. The board's face travels inside the script (base64, OFL); any other face is a system stack. A new embedded face or weight has to fit the size budget in CONSTRAINTS.md.
 - **Don't** restyle or borrow the resource, game-queue or age colours for any other meaning.
 - **Don't** use pawn yellow for warnings (orange) or decoration.
 - **Don't** set text below 10px or below 4.5:1 on its surface; `faint` is a fill, not a text colour.
