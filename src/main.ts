@@ -53,12 +53,14 @@ import { renderPlanetMenu, watchPlanetBar, type MenuMode, type MenuSettings, typ
 import { techIcons } from './data/tech-icons';
 import { isOrionPage } from './data/orion';
 import { watchOrion } from './modules/orion';
+import { installFonts } from './core/fonts';
 import { SIM_KEY, simTool } from './engines/sim-links';
 import { ARCHIVE_KEY as ORION_ARCHIVE_KEY, IGNORED_KEY as ORION_IGNORED_KEY, IMPORTED_KEY as ORION_IMPORTED_KEY, LEDGER_KEY as ORION_LEDGER_KEY, importLegacy, loadArchive, type Archive as OrionArchive, type Ignored as OrionIgnored, type Ledger as OrionLedger } from './engines/orion';
 
 async function bootstrap(): Promise<void> {
   const namespace = serverNamespace(document);
   if (!namespace) return; // not a logged-in game page
+  installFonts(document);
 
   const guard = new NetworkGuard((input, init) => fetch(input, init), window.location.origin);
   const gm = new GMStore();

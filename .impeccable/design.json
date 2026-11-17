@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-17T18:27:45+00:00",
+  "generatedAt": "2026-11-17T19:10:40+00:00",
   "title": "Design System: Future",
   "extensions": {
     "colorMeta": {
@@ -953,7 +953,7 @@
       "Don't draw bordered boxes or cast shadows on zones, rungs or tiles; only the window and its popovers float.",
       "Don't build an equal-card dashboard grid; the board's columns are weighted by what they carry.",
       "Don't dress the board in sci-fi costume: no HUD frames, neon glows, scanlines or gradients.",
-      "Don't load web fonts or any font over the network; system stacks only.",
+      "Don't load any font over the network. The board's face travels inside the script (base64, OFL); any other face is a system stack. A new embedded face or weight has to fit the size budget in CONSTRAINTS.md.",
       "Don't restyle or borrow the resource, game-queue or age colours for any other meaning.",
       "Don't use pawn yellow for warnings (orange) or decoration.",
       "Don't set text below 10px or below 4.5:1 on its surface; `faint` is a fill, not a text colour.",

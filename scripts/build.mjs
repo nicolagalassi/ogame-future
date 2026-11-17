@@ -25,6 +25,7 @@ const headerFor = (pkg) => `// ==UserScript==
 // @run-at       document-start
 // ==/UserScript==
 // Portions derived from OGLight, Copyright (c) 2019 Oz, MIT License.
+// Includes Barlow Semi Condensed (base64, src/assets/fonts), Copyright 2017 The Barlow Project Authors, SIL Open Font License 1.1.
 `;
 
 const ctx = await context({
@@ -34,6 +35,8 @@ const ctx = await context({
   target: 'es2020',
   minify: false,
   legalComments: 'inline',
+  // The board's font travels inside the script (src/core/fonts.ts): no network.
+  loader: { '.woff2': 'base64' },
   outfile: 'dist/future.user.js',
   write: false,
   logLevel: 'info',
