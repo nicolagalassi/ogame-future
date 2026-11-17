@@ -138,8 +138,8 @@ ${L} .fut-age-old { color: var(--old); }
 /* What is being built: one dot per queue kind (OGLight colours) where the game's wrench was; details in the tooltip. */
 ${L} .smallplanet .constructionIcon { display: none !important; }
 ${L} .fut-queue { position: absolute; left: 2px; bottom: 2px; z-index: 2; display: flex; gap: 2px; padding: 2px; border-radius: 6px; background: rgba(5,10,18,0.85); }
-/* The plan: a slim column at the outer end of each row, right of the moon; one tile per planned body
-   (planet on top, moon below), coloured by where its resources stand. */
+/* The plan: a slim column at the outer end of each row, right of the moon; one tile per body
+   (planet on top, moon below), coloured by where its resources stand, an empty square when nothing is planned. */
 ${L} .fut-plancol { flex-shrink: 0; display: flex; flex-direction: column; width: 20px; border-left: 1px solid var(--line); background: var(--surface); }
 ${L} .fut-plancol > span { flex: 1; min-height: 0; }
 ${L} .fut-plancol > :last-child { border-top: 1px solid var(--line); }
@@ -149,6 +149,9 @@ ${L} .fut-plan { display: flex; flex-direction: column; align-items: center; jus
   font: 600 condensed 12px/1 var(--display); color: var(--text); cursor: pointer; outline: none; --st: var(--muted); }
 ${L} .fut-plan::after { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--st); }
 ${L} .fut-plan:hover, ${L} .fut-plan:focus-visible { background: var(--hover); }
+/* Nothing planned on this body: an empty white square holds its place. */
+${L} .fut-plan-empty { display: flex; align-items: center; justify-content: center; }
+${L} .fut-plan-empty::after { content: ""; width: 6px; height: 6px; box-sizing: border-box; border: 1px solid rgba(255,255,255,0.7); border-radius: 1px; }
 ${L} .fut-plan:focus-visible { box-shadow: inset 0 0 0 1px var(--accent); }
 ${L}.fut-mode-compact .fut-plancol { display: none; }
 ${L} .fut-plan-missing { --st: var(--warn); }

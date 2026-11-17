@@ -502,7 +502,6 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
   const view = { fleet: o.settings.showFleet === true, t: o.t };
   list.style.removeProperty('--fut-row-h');
 
-  const planned = Object.keys(o.planMarks ?? {}).length > 0;
   const gameTips = o.settings.gameTips !== false;
   for (const entry of o.entries) {
     setGameTip(entry.planetLink, gameTips);
@@ -541,8 +540,9 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       gap = el(doc, 'span', 'fut-nomoon');
       link?.after(gap);
     }
-    // The plan, in a slim column at the row's outer end (only when something is planned somewhere).
-    if (planned) {
+    // The plan, in a slim column at the row's outer end, on every row: a body with nothing planned
+    // keeps an empty white square, so the column always shows where planned levels will appear.
+    {
       const col = el(doc, 'span', 'fut-plancol');
       const pb = planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : undefined, o, { id: entry.planetId, name: entry.name, coords: entry.coords, moon: false });
       const moonName = entry.moonLink?.querySelector('img')?.getAttribute('alt') || entry.name;
@@ -550,7 +550,12 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       if (pb) pb.classList.add('fut-plan-p');
       if (mb) mb.classList.add('fut-plan-m');
       // Planet on top, moon below: each keeps its half even when the other has nothing planned.
-      col.append(pb ?? el(doc, 'span', ''), mb ?? el(doc, 'span', ''));
+      const empty = () => {
+        const slot = el(doc, 'span', 'fut-plan-empty');
+        slot.setAttribute('aria-hidden', 'true');
+        return slot;
+      };
+      col.append(pb ?? (entry.planetId ? empty() : el(doc, 'span', '')), mb ?? (moon ? empty() : el(doc, 'span', '')));
       const after = moon ?? gap;
       if (after) after.after(col);
       else entry.element.append(col);
