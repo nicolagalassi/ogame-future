@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.106
+// @version      0.3.107
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -9952,6 +9952,10 @@ input.field { width: 190px; }
    component). The banner is never hidden, resized, faded or covered. */
 body.fut-banner-shift #bannerskyscrapercomponent { margin-left: ${MENU_WIDTH - NATIVE_WIDTH + 8}px !important; }
 
+/* Phones lay the page out at 980px and the banner reaches past it; the game paints its background on
+   body only, so Chrome on Android leaves that overflow white. A dark root, as OGLight does (html,body). */
+html { background-color: #030408 !important; }
+
 /* The colony counter makes room for Future's toolbar, as OGLight does (#countColonies hidden);
    the count stays available in the toolbar tooltip and in the settings panel. */
 body.fut-on #planetbarcomponent #countColonies { display: none !important; }
@@ -10441,40 +10445,6 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     const right = rect.right - offset;
     return left >= view2 || right + extra <= view2;
   }
-  var EDGE_ID = "fut-page-edge";
-  function fillPageEdge(doc) {
-    const root = doc.documentElement;
-    const view2 = doc.defaultView;
-    if (!view2) return;
-    let edge = doc.getElementById(EDGE_ID);
-    const fit = () => {
-      if (edge) edge.style.width = "0";
-      const extra = root.scrollWidth - root.clientWidth;
-      if (extra <= 0) {
-        edge?.remove();
-        edge = null;
-        return;
-      }
-      if (!edge) {
-        edge = doc.createElement("div");
-        edge.id = EDGE_ID;
-        edge.setAttribute("aria-hidden", "true");
-        edge.style.cssText = "position:absolute;top:0;z-index:-1;background:#000;pointer-events:none;";
-        doc.body.append(edge);
-      }
-      edge.style.left = `${root.clientWidth}px`;
-      edge.style.width = `${extra}px`;
-      edge.style.height = `${root.scrollHeight}px`;
-    };
-    fit();
-    const banner = doc.getElementById("bannerskyscrapercomponent");
-    if (banner && "ResizeObserver" in view2 && !banner.dataset.futEdge) {
-      banner.dataset.futEdge = "1";
-      const ro = new view2.ResizeObserver(() => view2.requestAnimationFrame(fit));
-      ro.observe(banner);
-      ro.observe(doc.body);
-    }
-  }
   function formatTime(at, locale) {
     return new Date(at).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
   }
@@ -10568,7 +10538,6 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     list.classList.add("fut-menu");
     list.classList.toggle("fut-mode-compact", mode === "compact");
     list.classList.toggle("fut-mode-side", mode === "side");
-    fillPageEdge(doc);
     const byId = new Map((o.snapshot?.bodies ?? []).map((b) => [b.id, b]));
     const view2 = { fleet: o.settings.showFleet === true, t: o.t };
     list.style.removeProperty("--fut-row-h");

@@ -26,6 +26,10 @@ export const PLANET_MENU_CSS = `
    component). The banner is never hidden, resized, faded or covered. */
 body.fut-banner-shift #bannerskyscrapercomponent { margin-left: ${MENU_WIDTH - NATIVE_WIDTH + 8}px !important; }
 
+/* Phones lay the page out at 980px and the banner reaches past it; the game paints its background on
+   body only, so Chrome on Android leaves that overflow white. A dark root, as OGLight does (html,body). */
+html { background-color: #030408 !important; }
+
 /* The colony counter makes room for Future's toolbar, as OGLight does (#countColonies hidden);
    the count stays available in the toolbar tooltip and in the settings panel. */
 body.fut-on #planetbarcomponent #countColonies { display: none !important; }
