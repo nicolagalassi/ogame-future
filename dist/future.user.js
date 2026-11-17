@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.109
+// @version      0.3.110
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -12547,7 +12547,7 @@ table.queues td.acts { width: 1%; text-align: right; }
 
   // src/engines/planner.ts
   var PLAN_KEY = "planner";
-  var isResearch = (id) => id > 100 && id < 200 || Math.floor(id % 1e3 / 100) === 2;
+  var isResearch = (id) => id > 100 && id < 200;
   function addToPlan(plan, bodyId, items) {
     const key = String(bodyId);
     const list = [...plan[key] ?? []];

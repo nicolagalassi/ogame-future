@@ -7,3 +7,9 @@
   `pruneByQueues`, `releaseQueued`: nessun percorso toglie voci di altre tecnologie; sospetti (non confermati): livello
   di partenza gonfiato da un livello "in coda" vecchio (`queuedLevel`) che toglie più livelli della stessa struttura.
   In attesa di dettagli (pagina, cosa era in costruzione, voci sparite).
+
+## Bug trovato (0.3.110)
+- Causa: `isResearch` in `src/engines/planner.ts` contava come ricerca dell'account anche le ricerche delle forme di vita
+  (id xx2xx), che invece sono per pianeta. Avviando lo stesso livello su un pianeta, `startBuild` / `prune` /
+  `pruneByQueues` lo toglievano dal piano di tutti gli altri pianeti. (Contava anche le navi 202–219, senza effetti.)
+- Ora solo gli id 101–199 valgono su tutto l'account. Test di regressione in `tests/tech.test.ts`.

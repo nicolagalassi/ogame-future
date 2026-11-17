@@ -447,6 +447,19 @@ describe('started builds leave the plan', () => {
     expect(plan['10']!.map((x) => x.id)).toEqual([1]);
   });
 
+  it('lifeform research stays per planet, account research is done everywhere', () => {
+    // The same lifeform research level planned on two planets: starting it on one leaves the other.
+    let plan = addToPlan({}, 10, [{ id: 11201, level: 5, name: 'Intergalactic Envoys', cost, added: 1 }]);
+    plan = addToPlan(plan, 20, [{ id: 11201, level: 5, name: 'Intergalactic Envoys', cost, added: 1 }, { id: 113, level: 12, name: 'Tecnologia energetica', cost, added: 1 }]);
+    plan = startBuild(plan, 10, 11201, { level: 5 }).plan;
+    expect(plan['10']).toBeUndefined();
+    expect(plan['20']!.map((x) => x.id)).toEqual([113, 11201]);
+    expect(prune(plan, 10, { 11201: 5 }).changed).toBe(false);
+    expect(pruneByQueues(plan, { 10: [{ name: 'Intergalactic Envoys', level: 5 }] }).changed).toBe(false);
+    // Account research started on planet 10 leaves the plan of planet 20 too.
+    expect(startBuild(plan, 10, 113, { level: 12 }).plan['20']!.map((x) => x.id)).toEqual([11201]);
+  });
+
   it('from the construction queues, on any page', () => {
     const plan = addToPlan({}, 10, [
       { id: 1, level: 46, name: 'Miniera di Metallo', cost, added: 1 },
