@@ -84,3 +84,16 @@ describe('fleet and keys sections', () => {
     closeSettings(document);
   });
 });
+
+describe('expedition share calculator', () => {
+  it('one line per cargo ship under the row, not in the switch column', () => {
+    const store = new Store(new MemoryStore(), 'split');
+    store.set('fleet.expeditionMax', { max: 1, at: 0, cargo: { 202: 4643, 203: 4445, 219: 0 }, free: 6 });
+    const w = open(store, { section: 'fleet' });
+    const row = [...w.root.querySelectorAll<HTMLElement>('.row')].find((r) => r.querySelector('.name')?.textContent === 'Dividi i cargo tra gli slot')!;
+    const lines = [...row.querySelectorAll(':scope > .calc.wide > div')].map((d) => d.textContent);
+    expect(lines).toHaveLength(2);
+    expect(lines[0]).toContain('4643 ÷ 6 slot = 773');
+    expect(row.querySelector('.control .calc')).toBeNull();
+  });
+});

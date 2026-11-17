@@ -21,3 +21,7 @@
 - `expeditionSplit` ("Dividi i cargo tra gli slot"): cargo per spedizione = cargo del corpo ÷ slot liberi (`expeditionShare`);
   in Impostazioni il calcolo con i dati visti sull'ultima pagina Flotta (`EXPEDITION_MAX_KEY` ora salva anche cargo e slot).
 - Tutto spento di default. Non provato in gioco (serve il login di Nicola).
+
+## Calcolo divisione cargo (0.3.112)
+- Il calcolo stava nella colonna dell'interruttore e schiacciava nome e descrizione a una parola per riga:
+  ora è sotto la riga, a tutta larghezza, una riga per nave (`.calc.wide`). Verificato con screenshot di prova.

@@ -64,6 +64,7 @@ const CSS = `
 /* A field with a small note under it (the value the game works out). */
 .row .control:has(.calc) { flex-direction: column; align-items: flex-end; gap: 4px; }
 .calc { color: var(--muted); font-size: 12px; }
+.row .calc.wide { grid-column: 1 / -1; margin-top: 4px; line-height: 1.5; }
 .seg { height: 26px; padding: 0 12px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); font: 12px Arial, sans-serif; cursor: pointer; white-space: nowrap; }
 .seg:first-child { border-radius: 13px 0 0 13px; }
 .seg:last-child { border-radius: 0 13px 13px 0; }
@@ -260,7 +261,10 @@ export function openSettings(o: SettingsOptions): void {
           .filter(([, n]) => n > 0)
           .map(([id, n]) => t('fleet.expSplitCalc', { ship: shipName(Number(id)), n: n.toLocaleString(lang), slots: seen.free!, each: expeditionShare(n, seen.free!).toLocaleString(lang) }))
       : [];
-    split.append(el('small', 'calc', shares.length ? shares.join(' · ') : t('fleet.expSplitUnknown')));
+    // Under the row, across its whole width, one line per ship: in the switch's column it squeezed the text.
+    const splitCalc = el('div', 'calc wide');
+    if (shares.length) for (const line of shares) splitCalc.append(el('div', '', line));
+    else splitCalc.textContent = t('fleet.expSplitUnknown');
     return [
       group(t('fleet.transportTitle'), fleetGlyph('transport')),
       row(t('fleet.mainShip'), t('settings.mainShipHint'), select(cargo, String(f.mainShip), (v) => set({ mainShip: Number(v) }))),
@@ -286,7 +290,11 @@ export function openSettings(o: SettingsOptions): void {
       row(t('fleet.expeditionBig'), t('settings.expBigHint'), select([['0', t('fleet.biggestShip')], ['-1', t('fleet.none')], ...EXPEDITION_FILLERS.map((id) => [String(id), shipName(id)] as [string, string])], String(f.expeditionBig), (v) => set({ expeditionBig: Number(v) }))),
       row(t('fleet.expeditionExtras'), t('settings.extrasHint'), yesNo(f.expeditionExtras, (v) => set({ expeditionExtras: v }))),
       row(t('fleet.expeditionSpread'), t('settings.expSpreadHint'), spread),
-      row(t('fleet.expeditionSplit'), t('settings.expSplitHint'), split),
+      (() => {
+        const r = row(t('fleet.expeditionSplit'), t('settings.expSplitHint'), split);
+        r.append(splitCalc);
+        return r;
+      })(),
       group(t('fleet.repeatTitle'), fleetGlyph('repeat')),
       row(t('fleet.repeat'), t('fleet.repeatHint'), yesNo(f.repeat, (v) => set({ repeat: v }))),
       row(t('fleet.expeditionStay'), t('settings.expStayHint'), yesNo(f.expeditionStay, (v) => set({ expeditionStay: v }))),
