@@ -152,6 +152,16 @@ for (const r of removedRules) {
   if (verdict) flag(verdict, r.file, r.text + '  ->  ' + a.text);
 }
 
+// A change to CONSTRAINTS.md that lowers the bar passes only when a commit of the branch carries a
+// `Constraints-Approved: <who and why>` trailer: the decision is the owner's, and it stays in the history.
+// Code findings are never approved this way. Approved findings are still printed: loosening stays loud.
+const approval = (git(['log', '--format=%B', mergeBase + '..HEAD']) ?? '').match(/^Constraints-Approved: *(.+)$/m)?.[1];
+if (approval) {
+  const approved = findings.filter((f) => isConstraints(f.file));
+  for (const f of approved) console.error(`floor-guard: approvato (${approval}): [${f.rule}] ${f.file}: ${f.text}`);
+  findings.splice(0, findings.length, ...findings.filter((f) => !isConstraints(f.file)));
+}
+
 if (findings.length === 0) { console.log('floor-guard: clean'); process.exit(0); }
 console.error('floor-guard: ' + findings.length + ' floor violation(s):');
 for (const f of findings) console.error(`  [${f.rule}] ${f.file}: ${f.text}`);
