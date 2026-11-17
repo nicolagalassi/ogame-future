@@ -376,48 +376,6 @@ export function canWiden(doc: Document): boolean {
   return left >= view || right + extra <= view;
 }
 
-const EDGE_ID = 'fut-page-edge';
-
-/**
- * Phones lay the page out at 980px, but the skyscraper banner (and the side menu's shift) reach past
- * that edge; Chrome on Android leaves the area beyond it white around the banner. A dark filler,
- * painted behind everything (the banner stays on top, untouched), covers exactly the overflow.
- */
-export function fillPageEdge(doc: Document): void {
-  const root = doc.documentElement;
-  const view = doc.defaultView;
-  if (!view) return;
-  let edge = doc.getElementById(EDGE_ID);
-  const fit = () => {
-    if (edge) edge.style.width = '0';
-    const extra = root.scrollWidth - root.clientWidth;
-    if (extra <= 0) {
-      edge?.remove();
-      edge = null;
-      return;
-    }
-    if (!edge) {
-      edge = doc.createElement('div');
-      edge.id = EDGE_ID;
-      edge.setAttribute('aria-hidden', 'true');
-      edge.style.cssText = 'position:absolute;top:0;z-index:-1;background:#000;pointer-events:none;';
-      doc.body.append(edge);
-    }
-    edge.style.left = `${root.clientWidth}px`;
-    edge.style.width = `${extra}px`;
-    edge.style.height = `${root.scrollHeight}px`;
-  };
-  fit();
-  // The banner fills in after load (an ad), and pages grow: measure again when either changes size.
-  const banner = doc.getElementById('bannerskyscrapercomponent');
-  if (banner && 'ResizeObserver' in view && !banner.dataset.futEdge) {
-    banner.dataset.futEdge = '1';
-    const ro = new view.ResizeObserver(() => view.requestAnimationFrame(fit));
-    ro.observe(banner);
-    ro.observe(doc.body);
-  }
-}
-
 function formatTime(at: number, locale: string): string {
   return new Date(at).toLocaleString(locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
@@ -539,7 +497,6 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
   list.classList.add('fut-menu');
   list.classList.toggle('fut-mode-compact', mode === 'compact');
   list.classList.toggle('fut-mode-side', mode === 'side');
-  fillPageEdge(doc);
 
   const byId = new Map((o.snapshot?.bodies ?? []).map((b) => [b.id, b]));
   const view = { fleet: o.settings.showFleet === true, t: o.t };
