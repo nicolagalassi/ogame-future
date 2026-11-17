@@ -14,6 +14,8 @@ import {
   deliveryLoad,
   expeditionFleet,
   expeditionMax,
+  expeditionSystem,
+  freeExpeditionSlots,
   expeditionTarget,
   pickedLoad,
   resolveTarget,
@@ -244,8 +246,9 @@ export function prepareExpedition(
   doc: Document,
   profile: FleetProfile,
   settings: FleetSettings,
-  universe: { economySpeed: number; topScore?: number; lfBooster?: number; itemBoost?: number },
-): PrepareResult & { target: number } {
+  universe: { economySpeed: number; topScore?: number; lfBooster?: number; itemBoost?: number; systems?: number; donutSystem?: boolean },
+  rand: () => number = Math.random,
+): PrepareResult & { target: number; system: number; slots: number } {
   // Expeditions never keep a reserve back (Nicola): every ship here can go.
   profile = { ...profile, reserve: EMPTY_RESERVE };
   // No free-slot check (Nicola): the fleet is prepared anyway, the game refuses the send if no slot is free.
@@ -253,10 +256,14 @@ export function prepareExpedition(
   const target = expeditionTarget(limits.max, settings.expeditionValue);
   // As in OGLight: the minimum fleet size only applies to the calculated value, not to a value the player typed.
   const base = settings.expeditionValue.trim() ? 0 : limits.base;
-  const ships = expeditionFleet(stock(fd, profile), { ship: settings.expeditionShip, target, base, extras: settings.expeditionExtras, big: settings.expeditionBig });
+  // Young universes: the cargo ships here are shared out over the expedition slots still free (this one included).
+  const slots = settings.expeditionSplit ? freeExpeditionSlots(fd.expeditionCount, fd.maxExpeditionCount) : 0;
+  const ships = expeditionFleet(stock(fd, profile), { ship: settings.expeditionShip, target, base, extras: settings.expeditionExtras, big: settings.expeditionBig, slots });
   const count = selectShips(fd, ships);
   const here = fd.currentPlanet;
-  setTarget(fd, doc, { galaxy: here.galaxy, system: here.system, position: 16, type: 1 });
+  // OGLight's random system (±N around the origin): the form is only filled, the player still sends.
+  const system = expeditionSystem(here.system, settings.expeditionSpread, { systems: universe.systems ?? 499, donut: universe.donutSystem ?? true }, rand);
+  setTarget(fd, doc, { galaxy: here.galaxy, system, position: 16, type: 1 });
   setSpeedBar(fd, 100);
   fd.expeditionTime = 1;
   const $ = pageWindow().jQuery as ((s: string) => { val(v: string): unknown }) | undefined;
@@ -265,7 +272,7 @@ export function prepareExpedition(
   } catch {
     /* expeditionTime is already set on the dispatcher */
   }
-  return { ...finish(fd, EXPEDITION, count, 0), target };
+  return { ...finish(fd, EXPEDITION, count, 0), target, system, slots };
 }
 
 /** "Ripeti ultima flotta": the same ships (within what is here after the ships rule), target, mission, speed. */
