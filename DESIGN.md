@@ -194,7 +194,7 @@ Future draws an OGame account as the player's own board from a strategy board ga
 
 The density is a player's, not a dashboard's: dozens of planets, many figures at once, nothing slower to read than the game itself. Zones are fields of flat colour separated by 2px seams of the board beneath them, never bordered boxes, and states are printed marks (a 3px edge, an outline, a strike-through) rather than glows or fills. The world refuses the equal-card SaaS grid and refuses sci-fi costume (HUD frames, neon glow, scanlines) even though the game around it is a space game: Future's identity coexists with OGame's art by being quieter than it.
 
-Rollout status, recorded honestly: the world is complete only on the Dashboard window. The tokens are shared through `WINDOW_TOKENS` / `PAGE_TOKENS`, so every other window (Plan, Journal, Settings, fleet rules) and the in-page surfaces (planet menu, fleet bar, inbox, galaxy, side bar) already inherit the palette and the window chrome, but not yet the Dashboard's components: income tracks, investment ladder, queue tapes and the score line exist only on the Dashboard. Several in-page surfaces still set figures in a Consolas / JetBrains Mono stack instead of the board's condensed face. Treat those surfaces as not yet migrated, not as alternative rules.
+Rollout status, recorded honestly (2026-11-17): the world is complete on the Dashboard window and has been carried into the in-page surfaces drawn since: the planet menu's totals and plan column, the production / plan bar, the dock under the game menu (Journal and Targets cards), the targets side bar, the tech pages (cost panel, level stepper, shipyard switch, amount field) and the touch shortcut bar. They use the band for heads, condensed figures in print ink, borderless fields and the state colours. Every other window (Plan, Journal, Settings, fleet rules) inherits the palette and chrome through `WINDOW_TOKENS`, but not the Dashboard's components: income tracks, investment ladder, queue tapes and the score line exist only on the Dashboard. The galaxy, the inbox tables, the plan hover card and the Dashboard's amount field still set figures in a Consolas / JetBrains Mono stack, and the inbox, fleet bar and Orion still speak the game's Verdana world through `PAGE_TOKENS`. Treat those as not yet migrated, not as alternative rules.
 
 **Key Characteristics:**
 - Dark printed board on a darker ground; a board-blue band for heads and tab strips.
@@ -330,6 +330,8 @@ Printed marks: one filled, the rest outlined.
 ### Inputs / Fields
 - **Style:** 28px, 1px `line` outline, 6px corners, `surface` fill, 12px body text.
 - **Focus:** outline turns pawn yellow.
+- **In-page fields** (tech pages, plan bar, side bar): borderless, 26px, 4px corners, the board colour laid over the game's art (`rgba(21,28,38,0.92)`, hover `rgba(33,43,58,0.96)`), figures in display 600 condensed 15px right-aligned; focus is a 1px pawn inset outline. Over the game's pictures a field needs that near-opaque board, not a hairline.
+- **Two-way switch** (Spaziale / Mecha shipyard): two board-coloured halves 2px apart, 4px outer corners; the chosen half takes `hover` with a 2px pawn top edge.
 - **Switch:** 30 x 16px pill on `faint`, knob in `text-2`; on, the track is pawn yellow and the knob pawn ink, sliding 14px over 120ms.
 
 ### Navigation
@@ -348,6 +350,15 @@ A board-coloured item per finding, its kind printed as a 3px top edge: orange fo
 ### Queue Tapes
 One hour scale shared by every running queue (0, a third, two thirds, the span), printed in quiet 11px above the tapes. Each tape is a 12px `line-soft` trough; the fill's length is the time still needed, washed at 30% of the game's queue colour with a 1px outline in the full colour.
 
+### Level Stepper (tech pages)
+Over the building's picture: `−`, the jump printed large (display 15px, "from → to" with the target level in pawn yellow), `+`, then the plan button. 26px board-coloured keys 2px apart, like a rung track. The plan button is filled pawn yellow to add (the one primary action) and turns to a pawn outline with a tick once the step is in the plan.
+
+### Dock (under the game menu)
+A 150px column of cards on `raised`, 6px corners, 6px apart. Each head sits on the band (28px, title 14px, its one count in band ink on the right). The Journal card prints today's net gain as a Figure (18px) beside its label, the net per resource under it as three resource-letter columns (letter in its resource colour, figure condensed 12px, a loss with the same − sign as the totals), then yesterday at 14px in `text-2` to compare. The Targets card prints one 26px chip per flag in use, in the flag's colour.
+
+### Touch Bar (phones)
+Fixed at the bottom on coarse pointers: `raised` with a 2px `line-strong` top edge, 46px flat keys on `surface` with ink icons, 2px apart, scrolling sideways under a 22px faded right edge. The one action (Next / Send) is pawn yellow; when it is not ready it is struck through in quiet grey on an outline, like every disabled button. Pressing changes the key's background; no hover.
+
 ### Score Line
 The account's figures (points, rank, stock, fleet, defence) on one wrapping line under the tabs, 22px apart: the figure in Figure type, its label once after it in label grey 12px, detail in the title tooltip.
 
@@ -362,6 +373,8 @@ The account's figures (points, rank, stock, fleet, defence) on one wrapping line
 - **Do** print each figure once with its label beside it in label grey.
 - **Do** show disabled and done as struck through in quiet grey.
 - **Do** honour reduced motion: the window fades instead of rising, press feedback and switch slides are removed.
+- **Do** put hover behind `@media (hover: hover) and (pointer: fine)` on surfaces a phone can reach, and show pressing with `:active` (background step, or scale 0.97 on small keys), so a tap never leaves a stuck highlight.
+- **Do** keep figures on the type ramp (22 / 18 / 15 / 14 / 13 / 12 / 11px); a size off the ramp is a new step that needs a reason here first.
 
 ### Don't:
 - **Don't** draw bordered boxes or cast shadows on zones, rungs or tiles; only the window and its popovers float.
