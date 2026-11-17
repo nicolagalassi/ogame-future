@@ -2,7 +2,8 @@
 
 ```bash
 npm ci              # install
-npm run check       # typecheck + vitest + build (run before every push)
+npm run check       # typecheck + rules + vitest with coverage + build (run before every push), see CONSTRAINTS.md
+npm run hooks       # once per clone: pre-push hook running npm run check:push (check + npm audit)
 npm test            # tests only (vitest + jsdom, fixtures in tests/)
 npm run build       # writes dist/future.user.js (readable, not minified)
 ```
