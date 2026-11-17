@@ -114,9 +114,15 @@ describe('renderPlanetMenu', () => {
     expect(moon.className).toBe('fut-plan fut-plan-missing fut-plan-m');
     expect(moon.textContent).toBe('2');
     expect(document.querySelectorAll('#planet-1 .fut-plan')).toHaveLength(1);
-    // Redrawn: still one column per row.
+    // Nothing planned on the planet: an empty square keeps its place; no moon: no square.
+    expect(document.querySelectorAll('#planet-1 > .fut-plancol > .fut-plan-empty')).toHaveLength(1);
+    expect(document.querySelectorAll('#planet-3 > .fut-plancol > .fut-plan-empty')).toHaveLength(0);
+    // Redrawn with nothing planned: still one column per row, with empty squares only.
+    const rows = document.querySelectorAll('#planetList > div').length;
     draw('side');
-    expect(document.querySelectorAll('.fut-plancol')).toHaveLength(0);
+    expect(document.querySelectorAll('.fut-plancol')).toHaveLength(rows);
+    expect(document.querySelectorAll('.fut-plancol .fut-plan')).toHaveLength(0);
+    expect(document.querySelectorAll('.fut-plancol .fut-plan-empty').length).toBeGreaterThan(0);
   });
 
   it('paints storage fill behind planet numbers only, never on moons', () => {
