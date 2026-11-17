@@ -169,11 +169,27 @@ function checkAudit() {
   let out;
   try { out = execFileSync('npm', ['audit', '--json'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); }
   catch (e) { out = e.stdout; }
-  let v;
-  try { v = JSON.parse(out).metadata.vulnerabilities; } catch { return cannot('npm audit non ha risposto (offline?)'); }
-  const n = (v.high ?? 0) + (v.critical ?? 0);
-  if (n) numeric('dipendenze', 'package-lock.json', `${v.high} alte e ${v.critical} critiche (npm audit per i dettagli)`);
-  else console.log('  nessuna vulnerabilità alta o critica');
+  let vulns;
+  try { vulns = JSON.parse(out).vulnerabilities; } catch { return cannot('npm audit non ha risposto (offline?)'); }
+  if (!vulns) return cannot('npm audit senza elenco delle vulnerabilità');
+  // Exceptions of CONSTRAINTS.md: an advisory, until a date. A package is covered when everything it is
+  // vulnerable through leads back to covered advisories only.
+  const ignored = new Map((cfg.audit.exceptions ?? []).filter((e) => today <= e.until).map((e) => [e.advisory, e.id]));
+  for (const e of cfg.audit.exceptions ?? []) if (today > e.until) warn('eccezione-scaduta', e.id, `${e.advisory} scaduta il ${e.until}: rivedere CONSTRAINTS.md`);
+  const memo = new Map();
+  const covered = (name, seen = new Set()) => {
+    if (memo.has(name)) return memo.get(name);
+    if (seen.has(name) || !vulns[name]) return true;
+    seen.add(name);
+    const ok = vulns[name].via.every((x) => (typeof x === 'string' ? covered(x, seen) : [...ignored.keys()].some((a) => x.url?.endsWith(a))));
+    memo.set(name, ok);
+    return ok;
+  };
+  const severe = Object.entries(vulns).filter(([, v]) => v.severity === 'high' || v.severity === 'critical');
+  const open = severe.filter(([name]) => !covered(name));
+  const excused = severe.length - open.length;
+  if (open.length) numeric('dipendenze', 'package-lock.json', `${open.length} pacchetti high o critical: ${open.map(([n, v]) => `${n} (${v.severity})`).join(', ')} (npm audit per i dettagli)`);
+  else console.log(`  nessuna vulnerabilità alta o critica${excused ? ` fuori dalle eccezioni (${excused} coperte da ${[...new Set(ignored.values())].join(', ')})` : ''}`);
 }
 
 function installHook() {
