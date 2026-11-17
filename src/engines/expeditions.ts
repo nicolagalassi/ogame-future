@@ -277,6 +277,12 @@ export function daySeries(entries: JournalEntry[], last: number, n: number): Buc
   return starts.map((start) => ({ start, stats: periodStats(lists.get(start)!) }));
 }
 
+/** A period's net gain per resource: resources found, plus the cost of the ships found, minus that of the ships lost. In MSU it is `netMsu`. */
+export function netRes(s: PeriodStats): { metal: number; crystal: number; deuterium: number } {
+  const of = (k: 'metal' | 'crystal' | 'deuterium') => s.res[k] + s.shipsValue[k] - s.lostValue[k];
+  return { metal: of('metal'), crystal: of('crystal'), deuterium: of('deuterium') };
+}
+
 /** Where a period's value came from, in MSU: each resource at its rate, then the ships found (dark matter has no MSU). */
 export function valueMix(s: PeriodStats): { metal: number; crystal: number; deuterium: number; ships: number } {
   return { metal: s.res.metal, crystal: s.res.crystal * 1.5, deuterium: s.res.deuterium * 3, ships: msu(s.shipsValue) };
