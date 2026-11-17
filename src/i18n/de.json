@@ -942,5 +942,15 @@
   "orion.nowCost": "für {v} Lithium",
   "orion.cargoNeed": "Lieferung: nur Transporter, mit mindestens der Kapazität der ankommenden Flotte. Die größte: {cap} (Welle {wave}) ≈ {lc} große oder {sc} kleine Transporter",
   "orion.cargoHint": "Kapazität der ankommenden NPC-Flotten (Grundkapazität ihrer Schiffe, mit Bonus), aus den Wellendaten; deine Transporter mit der Kapazität von der Flottenseite. Kriegsschiffe in der Flotte = keine Belohnung.",
-  "orion.waveN": "Welle {n}"
+  "orion.waveN": "Welle {n}",
+  "fleet.expeditionSpread": "Zufälliges System ±",
+  "settings.expSpreadHint": "Wie OGLight: die Expedition fliegt in ein zufälliges System zwischen Start minus N und plus N. 0 = immer das Startsystem.",
+  "fleet.expeditionSplit": "Transporter auf Slots verteilen",
+  "settings.expSplitHint": "Für junge Universen: jede Expedition nimmt höchstens die Transporter hier geteilt durch die noch freien Expeditionsslots, damit die erste nicht alle mitnimmt.",
+  "fleet.expSplitCalc": "{ship}: {n} ÷ {slots} Slots = {each} pro Expedition",
+  "fleet.expSplitUnknown": "Die Berechnung erscheint nach dem Öffnen der Flottenseite.",
+  "fleet.expeditionStay": "Expeditionen vom selben Planeten",
+  "settings.expStayHint": "Mit Wiederholen: nach einer Expedition öffnet sich derselbe Planet oder Mond mit vorbereiteter Expedition, solange Slots frei sind. Aus = nächster Planet.",
+  "fleet.ok.expSystem": "nach {coords} (±{n})",
+  "fleet.ok.expSplit": "Transporter auf {slots} Slots verteilt"
 }

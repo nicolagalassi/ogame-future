@@ -12,7 +12,7 @@ import { SIM_KEY, SIM_TOOLS, simTool, type SimTool } from '../../engines/sim-lin
 import { EXP_STYLE_KEY, FOLD_KEY, type ExpStyle } from '../messages';
 import { SPY_SHARED_KEY } from '../messages/spy-table';
 import type { MenuSettings } from '../planet-menu';
-import { CARGO_SHIPS, EXPEDITION_FILLERS, EXPEDITION_MAX_KEY, type ExpeditionMaxSeen, LOAD_ORDERS, parseAmount, SETTINGS_KEY as FLEET_SETTINGS_KEY, settingsFrom, validOrder, type FleetSettings } from '../../engines/fleet';
+import { CARGO_SHIPS, EXPEDITION_FILLERS, EXPEDITION_MAX_KEY, expeditionShare, type ExpeditionMaxSeen, LOAD_ORDERS, parseAmount, SETTINGS_KEY as FLEET_SETTINGS_KEY, settingsFrom, validOrder, type FleetSettings } from '../../engines/fleet';
 import { formatUnits } from '../../core/format';
 import { BIG_DEBRIS, BIG_DEBRIS_KEY } from '../marks/side';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
@@ -242,6 +242,25 @@ export function openSettings(o: SettingsOptions): void {
     const calc = el('small', 'calc', seen ? t('fleet.expCalc', { value: formatUnits(seen.max, doc.documentElement.lang || 'it') }) : t('fleet.expCalcUnknown'));
     if (seen) calc.title = new Date(seen.at).toLocaleString(doc.documentElement.lang || undefined);
     value.append(calc);
+    // OGLight's random system: ±N systems around the origin (0 = the origin's own system).
+    const spread = el('span', 'control');
+    const spreadIn = el('input', 'field');
+    spreadIn.type = 'text';
+    spreadIn.inputMode = 'numeric';
+    spreadIn.value = f.expeditionSpread ? String(f.expeditionSpread) : '';
+    spreadIn.placeholder = '0';
+    spreadIn.setAttribute('aria-label', t('fleet.expeditionSpread'));
+    spreadIn.addEventListener('change', () => set({ expeditionSpread: Math.min(499, Math.max(0, Math.floor(parseAmount(spreadIn.value) || 0))) }));
+    spread.append(spreadIn);
+    // The share calculator: the cargo ships seen on the fleet page last time, divided by the free slots there.
+    const split = yesNo(f.expeditionSplit, (v) => set({ expeditionSplit: v }));
+    const lang = doc.documentElement.lang || 'it';
+    const shares = seen?.cargo && seen.free
+      ? Object.entries(seen.cargo)
+          .filter(([, n]) => n > 0)
+          .map(([id, n]) => t('fleet.expSplitCalc', { ship: shipName(Number(id)), n: n.toLocaleString(lang), slots: seen.free!, each: expeditionShare(n, seen.free!).toLocaleString(lang) }))
+      : [];
+    split.append(el('small', 'calc', shares.length ? shares.join(' · ') : t('fleet.expSplitUnknown')));
     return [
       group(t('fleet.transportTitle'), fleetGlyph('transport')),
       row(t('fleet.mainShip'), t('settings.mainShipHint'), select(cargo, String(f.mainShip), (v) => set({ mainShip: Number(v) }))),
@@ -266,8 +285,11 @@ export function openSettings(o: SettingsOptions): void {
       row(t('fleet.expeditionValue'), t('settings.expValueHint'), value),
       row(t('fleet.expeditionBig'), t('settings.expBigHint'), select([['0', t('fleet.biggestShip')], ['-1', t('fleet.none')], ...EXPEDITION_FILLERS.map((id) => [String(id), shipName(id)] as [string, string])], String(f.expeditionBig), (v) => set({ expeditionBig: Number(v) }))),
       row(t('fleet.expeditionExtras'), t('settings.extrasHint'), yesNo(f.expeditionExtras, (v) => set({ expeditionExtras: v }))),
+      row(t('fleet.expeditionSpread'), t('settings.expSpreadHint'), spread),
+      row(t('fleet.expeditionSplit'), t('settings.expSplitHint'), split),
       group(t('fleet.repeatTitle'), fleetGlyph('repeat')),
       row(t('fleet.repeat'), t('fleet.repeatHint'), yesNo(f.repeat, (v) => set({ repeat: v }))),
+      row(t('fleet.expeditionStay'), t('settings.expStayHint'), yesNo(f.expeditionStay, (v) => set({ expeditionStay: v }))),
     ];
   };
 

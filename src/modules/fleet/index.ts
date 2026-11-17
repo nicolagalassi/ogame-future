@@ -55,7 +55,10 @@ import {
   resolveSend,
   EXPEDITION_MAX_KEY,
   type ExpeditionMaxSeen,
+  freeExpeditionSlots,
 } from '../../engines/fleet';
+import { SERVER_DATA_KEY, type ServerData } from '../../data/server-data';
+import { universeOf } from '../messages/spy-table';
 import { SNAPSHOT_KEY, type AccountSnapshot } from '../../data/account-info';
 import { applyPageResources, leftAfterSend } from '../../engines/resources';
 import { originCoords, readShipSlots } from '../../data/fleet-page';
@@ -1156,13 +1159,19 @@ export function renderFleetTools(o: FleetOptions): void {
     topScore: topScore(o.store),
     lfBooster: o.store.get<LfBonuses | null>(LF_BONUS_KEY, null)?.expedition ?? 0,
     itemBoost: expeditionItemBoost(o.store.get<ActiveItems | null>(ITEMS_KEY, null)),
+    // Size and donut of the universe, for the random system (public API cache, else the page's meta tags).
+    ...(({ systems, donutSystem }) => ({ systems, donutSystem }))(universeOf(doc, o.store.get<ServerData | null>(SERVER_DATA_KEY, null))),
   });
   // What the game allows one expedition to bring back, kept for the settings ("Carico da coprire").
   // Read from the page already loaded: no request.
   if (fleet1)
     void whenDispatcherReady().then((fd) => {
       const max = fd ? expeditionLimits(fd, expUniverse()).max : 0;
-      if (max > 0) o.store.set(EXPEDITION_MAX_KEY, { max, at: Date.now() } satisfies ExpeditionMaxSeen);
+      if (!fd || max <= 0) return;
+      const here = shipsOnPlanet(fd);
+      const cargo = Object.fromEntries([219, 203, 202].map((id) => [String(id), here[String(id)] ?? 0]));
+      const free = Math.max(0, (fd.maxExpeditionCount || 0) - (fd.expeditionCount || 0));
+      o.store.set(EXPEDITION_MAX_KEY, { max, at: Date.now(), cargo, free } satisfies ExpeditionMaxSeen);
     });
   const withDispatcher = (fn: (fd: FleetDispatcher) => void) => {
     const fd = getDispatcher();
@@ -1253,7 +1262,13 @@ export function renderFleetTools(o: FleetOptions): void {
       withDispatcher((fd) => {
         begin('expedition');
         const r = prepareExpedition(fd, doc, profile, settings, expUniverse());
-        report(r, 'fleet.ok.expedition', { target: r.target.toLocaleString(o.locale) });
+        // Where it goes and how the cargo was shared, after the usual line.
+        const extra = [
+          settings.expeditionSpread > 0 ? t('fleet.ok.expSystem', { coords: `${fd.currentPlanet.galaxy}:${r.system}:16`, n: settings.expeditionSpread }) : '',
+          r.ok && r.slots ? t('fleet.ok.expSplit', { slots: r.slots }) : '',
+        ].filter(Boolean);
+        if (r.ok && extra.length) say(`${t('fleet.ok.expedition', { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), target: r.target.toLocaleString(o.locale) })} · ${extra.join(' · ')}`);
+        else report(r, 'fleet.ok.expedition', { target: r.target.toLocaleString(o.locale) });
       }),
     fleetsave: () =>
       withDispatcher((fd) => {
@@ -1633,6 +1648,14 @@ export function renderFleetTools(o: FleetOptions): void {
         return true;
       }
       if (!current?.active || !loadSettings(current.o.store).repeat) return false;
+      if (current.active.mode === 'expedition' && loadSettings(current.o.store).expeditionStay) {
+        // Expeditions from this same planet or moon: open it again, prepared, while a slot is still free
+        // after this send; then stop here. Same compliance as the round (see ./repeat.ts): a normal page
+        // change after the player's own send, the next fleet is only prepared.
+        if (freeExpeditionSlots(fd.expeditionCount, fd.maxExpeditionCount) <= 1) return false;
+        navigate(repeatUrl(href, current.o.bodyId, current.active));
+        return true;
+      }
       const next = nextInRound(current.active, current.o.bodyId, current.o.bodies, loadSettings(current.o.store).skipBodies);
       if (next === null) return false;
       navigate(repeatUrl(href, next, current.active));

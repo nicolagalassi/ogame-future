@@ -907,3 +907,43 @@ describe('page opened by Ripeti', () => {
     document.removeEventListener('keydown', onKey);
   });
 });
+
+describe('expeditions: random system, cargo shared over the slots, same planet', () => {
+  it('random system within ±N, wrapping on a donut universe and clamped otherwise', async () => {
+    const { expeditionSystem } = await import('../src/engines/fleet');
+    const u = { systems: 499, donut: true };
+    expect(expeditionSystem(185, 0, u, () => 0.99)).toBe(185);
+    expect(expeditionSystem(185, 3, u, () => 0)).toBe(182);
+    expect(expeditionSystem(185, 3, u, () => 0.999)).toBe(188);
+    expect(expeditionSystem(185, 3, u, () => 0.5)).toBe(185);
+    expect(expeditionSystem(1, 3, u, () => 0)).toBe(497);
+    expect(expeditionSystem(498, 3, u, () => 0.999)).toBe(2);
+    expect(expeditionSystem(1, 3, { systems: 499, donut: false }, () => 0)).toBe(1);
+    expect(expeditionSystem(498, 3, { systems: 499, donut: false }, () => 0.999)).toBe(499);
+  });
+
+  it('shares the cargo ships out over the free slots, and knows when the last slot goes', async () => {
+    const { expeditionShare, freeExpeditionSlots } = await import('../src/engines/fleet');
+    expect(expeditionShare(120, 6)).toBe(20);
+    expect(expeditionShare(5, 6)).toBe(1);
+    expect(expeditionShare(0, 6)).toBe(0);
+    expect(freeExpeditionSlots(1, 5)).toBe(4);
+    expect(freeExpeditionSlots(5, 5)).toBe(1);
+  });
+
+  it('prepares the share and the random system on the game form', () => {
+    const fd = fakeDispatcher();
+    // 100 large cargo, 1 of 5 slots used: 4 free, 25 each (the calculated target alone would take more).
+    const r = prepareExpedition(fd, fleetPage(), { reserve: { ships: {}, resources: { metal: 0, crystal: 0, deuterium: 0 } }, save: null }, { ...DEFAULT_SETTINGS, expeditionShip: 203, expeditionValue: '10m', expeditionSplit: true, expeditionSpread: 2 }, { economySpeed: 1, systems: 499, donutSystem: true }, () => 0);
+    expect(fd.selected[203]).toBe(25);
+    expect(r).toMatchObject({ ok: true, slots: 4, system: 183 });
+    expect(fd.targetPlanet).toMatchObject({ galaxy: 5, system: 183, position: 16 });
+  });
+
+  it('off by default: every ship can go, the origin system', () => {
+    const fd = fakeDispatcher();
+    const r = prepareExpedition(fd, fleetPage(), { reserve: { ships: {}, resources: { metal: 0, crystal: 0, deuterium: 0 } }, save: null }, { ...DEFAULT_SETTINGS, expeditionShip: 203, expeditionValue: '10m' }, { economySpeed: 1 });
+    expect(fd.selected[203]).toBe(100);
+    expect(r).toMatchObject({ slots: 0, system: 185 });
+  });
+});
