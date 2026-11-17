@@ -62,6 +62,10 @@ describe('renderPlanetMenu', () => {
     const fleets = document.querySelectorAll('#planet-1 .fut-fleet');
     expect(fleets).toHaveLength(1);
     expect(fleets[0]!.parentElement!.classList.contains('fut-name')).toBe(true);
+    // The moon keeps its own fleet in its tile, shown on hover in place of the figures; one after a redraw too.
+    const peeks = document.querySelectorAll('#planet-1 a.moonlink .fut-fleet-peek');
+    expect(peeks).toHaveLength(1);
+    expect(peeks[0]!.textContent).toMatch(/\d/);
     // Totals: each line with its symbol (the resources as the board's pieces), the fleet included.
     expect(document.querySelectorAll('.fut-totals .fut-tico svg').length).toBe(5);
   });

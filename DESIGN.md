@@ -257,7 +257,7 @@ A low-chroma blue-black board with warm ink, one saturated yellow, and the game'
 
 **Character:** A condensed engineering face for everything printed on the board (heads, figures, tabs, buttons) against a plain system sans for the words around them. No font may come over the network, by product constraint; so the board's face travels inside the script and is declared once on the page (Chrome ignores `@font-face` inside a shadow root, but a document font reaches every window). Every player sees the same figures, whatever the system (before 2026-11-17 it was Bahnschrift on Windows, DIN on Mac, whatever was installed on Linux). Body prose stays on the system sans.
 
-In the planet menu the whole row is in the board's face: the name 600 13px, coordinates and the fleet line 400 12px, the resource figures 600 12px, all tabular, three lines of 13 + 12 + 12px in the 40px row.
+In the planet menu the whole row is in the board's face: the name 600 14px and the coordinates 400 12px on two lines, the resource figures 600 12px, all tabular. Data needed only now and then shows on hover (pointer devices): hovering a planet swaps its coordinates for its fleet value, hovering a moon swaps its three figures for its own, each with the fleet symbol; the body under the pointer lifts to `line-strong`. Touch screens have no hover, so there the fleet stays as a third line (13 + 12 + 12px).
 
 ### Hierarchy
 - **Display** (600 condensed, 19px, 1.2): the window title on the band.
