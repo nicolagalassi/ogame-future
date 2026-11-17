@@ -942,5 +942,15 @@
   "orion.nowCost": "pour {v} de lithium",
   "orion.cargoNeed": "Livraison : uniquement des transporteurs, avec au moins la capacité de la flotte entrante. La plus grande : {cap} (vague {wave}) ≈ {lc} grands ou {sc} petits transporteurs",
   "orion.cargoHint": "Capacité des flottes PNJ entrantes (capacité de base de leurs vaisseaux, avec leur bonus), d’après les données de la vague ; tes transporteurs à la capacité lue sur la page flotte. Vaisseaux de guerre dans la flotte = aucune récompense.",
-  "orion.waveN": "Vague {n}"
+  "orion.waveN": "Vague {n}",
+  "fleet.expeditionSpread": "Système aléatoire ±",
+  "settings.expSpreadHint": "Comme OGLight : l'expédition part vers un système au hasard entre celui de départ moins N et plus N. 0 = toujours le système de départ.",
+  "fleet.expeditionSplit": "Répartir les transporteurs",
+  "settings.expSplitHint": "Pour les univers jeunes : chaque expédition prend au plus les transporteurs de la planète divisés par les emplacements d'expédition encore libres, pour que la première ne les prenne pas tous.",
+  "fleet.expSplitCalc": "{ship} : {n} ÷ {slots} empl. = {each} par expédition",
+  "fleet.expSplitUnknown": "Le calcul apparaît après avoir ouvert la page Flotte.",
+  "fleet.expeditionStay": "Expéditions depuis la même planète",
+  "settings.expStayHint": "Avec Répéter actif, après une expédition la même planète ou lune se rouvre avec l'expédition prête, tant qu'il reste des emplacements. Désactivé = planète suivante.",
+  "fleet.ok.expSystem": "vers {coords} (±{n})",
+  "fleet.ok.expSplit": "transporteurs répartis sur {slots} empl."
 }

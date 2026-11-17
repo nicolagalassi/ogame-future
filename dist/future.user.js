@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.110
+// @version      0.3.111
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1450,7 +1450,17 @@
     "orion.nowCost": "per {v} di litio",
     "orion.cargoNeed": "Consegna: solo cargo, con capacit\xE0 almeno pari alla flotta in arrivo. La pi\xF9 grande: {cap} (ondata {wave}) \u2248 {lc} cargo pesanti o {sc} cargo leggeri",
     "orion.cargoHint": "Capacit\xE0 delle flotte NPC in arrivo (capacit\xE0 base delle loro navi, col loro bonus), dai dati dell\u2019ondata; i cargo del giocatore con la capacit\xE0 letta dalla pagina flotta. Navi da guerra nella flotta = nessuna ricompensa.",
-    "orion.waveN": "Ondata {n}"
+    "orion.waveN": "Ondata {n}",
+    "fleet.expeditionSpread": "Sistema casuale \xB1",
+    "settings.expSpreadHint": "Come OGLight: la spedizione va in un sistema a caso tra quello di partenza meno N e pi\xF9 N. 0 = sempre il sistema di partenza.",
+    "fleet.expeditionSplit": "Dividi i cargo tra gli slot",
+    "settings.expSplitHint": "Per gli universi giovani: ogni spedizione prende al massimo i cargo del pianeta divisi per gli slot spedizione ancora liberi, cos\xEC la prima non li porta via tutti.",
+    "fleet.expSplitCalc": "{ship}: {n} \xF7 {slots} slot = {each} a spedizione",
+    "fleet.expSplitUnknown": "Il calcolo compare dopo aver aperto la pagina Flotta.",
+    "fleet.expeditionStay": "Spedizioni dallo stesso pianeta",
+    "settings.expStayHint": "Con Ripeti attivo, dopo una spedizione riapre lo stesso pianeta o luna con la spedizione gi\xE0 pronta, finch\xE9 restano slot liberi. Spento = passa al pianeta successivo.",
+    "fleet.ok.expSystem": "verso {coords} (\xB1{n})",
+    "fleet.ok.expSplit": "cargo divisi per {slots} slot"
   };
 
   // src/i18n/en.json
@@ -2398,7 +2408,17 @@
     "orion.nowCost": "for {v} lithium",
     "orion.cargoNeed": "Delivery: cargo ships only, with at least the incoming fleet\u2019s capacity. The largest: {cap} (wave {wave}) \u2248 {lc} large or {sc} small cargoes",
     "orion.cargoHint": "Capacity of the incoming NPC fleets (their ships\u2019 base capacity, with their bonus), from the wave data; the player\u2019s cargoes at the capacity read on the fleet page. Warships in the fleet = no reward.",
-    "orion.waveN": "Wave {n}"
+    "orion.waveN": "Wave {n}",
+    "fleet.expeditionSpread": "Random system \xB1",
+    "settings.expSpreadHint": "Like OGLight: the expedition goes to a random system between the origin minus N and plus N. 0 = always the origin system.",
+    "fleet.expeditionSplit": "Share cargo over the slots",
+    "settings.expSplitHint": "For young universes: each expedition takes at most the cargo ships here divided by the expedition slots still free, so the first one does not take them all.",
+    "fleet.expSplitCalc": "{ship}: {n} \xF7 {slots} slots = {each} per expedition",
+    "fleet.expSplitUnknown": "The calculation shows after opening the Fleet page.",
+    "fleet.expeditionStay": "Expeditions from the same planet",
+    "settings.expStayHint": "With Repeat on, after an expedition the same planet or moon opens again with the expedition prepared, while slots are free. Off = the next planet.",
+    "fleet.ok.expSystem": "to {coords} (\xB1{n})",
+    "fleet.ok.expSplit": "cargo shared over {slots} slots"
   };
 
   // src/i18n/fr.json
@@ -3346,7 +3366,17 @@
     "orion.nowCost": "pour {v} de lithium",
     "orion.cargoNeed": "Livraison : uniquement des transporteurs, avec au moins la capacit\xE9 de la flotte entrante. La plus grande : {cap} (vague {wave}) \u2248 {lc} grands ou {sc} petits transporteurs",
     "orion.cargoHint": "Capacit\xE9 des flottes PNJ entrantes (capacit\xE9 de base de leurs vaisseaux, avec leur bonus), d\u2019apr\xE8s les donn\xE9es de la vague ; tes transporteurs \xE0 la capacit\xE9 lue sur la page flotte. Vaisseaux de guerre dans la flotte = aucune r\xE9compense.",
-    "orion.waveN": "Vague {n}"
+    "orion.waveN": "Vague {n}",
+    "fleet.expeditionSpread": "Syst\xE8me al\xE9atoire \xB1",
+    "settings.expSpreadHint": "Comme OGLight : l'exp\xE9dition part vers un syst\xE8me au hasard entre celui de d\xE9part moins N et plus N. 0 = toujours le syst\xE8me de d\xE9part.",
+    "fleet.expeditionSplit": "R\xE9partir les transporteurs",
+    "settings.expSplitHint": "Pour les univers jeunes : chaque exp\xE9dition prend au plus les transporteurs de la plan\xE8te divis\xE9s par les emplacements d'exp\xE9dition encore libres, pour que la premi\xE8re ne les prenne pas tous.",
+    "fleet.expSplitCalc": "{ship} : {n} \xF7 {slots} empl. = {each} par exp\xE9dition",
+    "fleet.expSplitUnknown": "Le calcul appara\xEEt apr\xE8s avoir ouvert la page Flotte.",
+    "fleet.expeditionStay": "Exp\xE9ditions depuis la m\xEAme plan\xE8te",
+    "settings.expStayHint": "Avec R\xE9p\xE9ter actif, apr\xE8s une exp\xE9dition la m\xEAme plan\xE8te ou lune se rouvre avec l'exp\xE9dition pr\xEAte, tant qu'il reste des emplacements. D\xE9sactiv\xE9 = plan\xE8te suivante.",
+    "fleet.ok.expSystem": "vers {coords} (\xB1{n})",
+    "fleet.ok.expSplit": "transporteurs r\xE9partis sur {slots} empl."
   };
 
   // src/i18n/de.json
@@ -4294,7 +4324,17 @@
     "orion.nowCost": "f\xFCr {v} Lithium",
     "orion.cargoNeed": "Lieferung: nur Transporter, mit mindestens der Kapazit\xE4t der ankommenden Flotte. Die gr\xF6\xDFte: {cap} (Welle {wave}) \u2248 {lc} gro\xDFe oder {sc} kleine Transporter",
     "orion.cargoHint": "Kapazit\xE4t der ankommenden NPC-Flotten (Grundkapazit\xE4t ihrer Schiffe, mit Bonus), aus den Wellendaten; deine Transporter mit der Kapazit\xE4t von der Flottenseite. Kriegsschiffe in der Flotte = keine Belohnung.",
-    "orion.waveN": "Welle {n}"
+    "orion.waveN": "Welle {n}",
+    "fleet.expeditionSpread": "Zuf\xE4lliges System \xB1",
+    "settings.expSpreadHint": "Wie OGLight: die Expedition fliegt in ein zuf\xE4lliges System zwischen Start minus N und plus N. 0 = immer das Startsystem.",
+    "fleet.expeditionSplit": "Transporter auf Slots verteilen",
+    "settings.expSplitHint": "F\xFCr junge Universen: jede Expedition nimmt h\xF6chstens die Transporter hier geteilt durch die noch freien Expeditionsslots, damit die erste nicht alle mitnimmt.",
+    "fleet.expSplitCalc": "{ship}: {n} \xF7 {slots} Slots = {each} pro Expedition",
+    "fleet.expSplitUnknown": "Die Berechnung erscheint nach dem \xD6ffnen der Flottenseite.",
+    "fleet.expeditionStay": "Expeditionen vom selben Planeten",
+    "settings.expStayHint": "Mit Wiederholen: nach einer Expedition \xF6ffnet sich derselbe Planet oder Mond mit vorbereiteter Expedition, solange Slots frei sind. Aus = n\xE4chster Planet.",
+    "fleet.ok.expSystem": "nach {coords} (\xB1{n})",
+    "fleet.ok.expSplit": "Transporter auf {slots} Slots verteilt"
   };
 
   // src/core/i18n.ts
@@ -8922,6 +8962,9 @@ td.spark-cell { width: 90px; }
     expeditionExtras: true,
     expeditionBig: 0,
     repeat: false,
+    expeditionStay: false,
+    expeditionSpread: 0,
+    expeditionSplit: false,
     shipsOn: true,
     resourcesOn: true,
     gateOn: true,
@@ -9039,7 +9082,26 @@ td.spark-cell { width: 90px; }
   }
   var EXPEDITION_FACTOR = { 202: 1, 203: 3, 219: 5.75 };
   var EXPEDITION_FILLERS = [218, 213, 211, 215, 207, 206, 205, 204];
+  function expeditionSystem(system, spread, u, rand = Math.random) {
+    const n = Math.max(0, Math.floor(spread || 0));
+    const size = Math.max(1, u.systems);
+    if (!n) return system;
+    const s = system + Math.min(2 * n, Math.floor(rand() * (2 * n + 1))) - n;
+    if (u.donut) return ((s - 1) % size + size) % size + 1;
+    return Math.min(size, Math.max(1, s));
+  }
+  function freeExpeditionSlots(used, max) {
+    return Math.max(1, (max || 0) - (used || 0));
+  }
+  function expeditionShare(available, slots) {
+    if (available <= 0) return 0;
+    return Math.max(1, Math.floor(available / Math.max(1, slots)));
+  }
   function expeditionFleet(stock2, o) {
+    const avail = (id) => {
+      const n = stock2.find((s) => s.id === id)?.available ?? 0;
+      return o.slots && [219, 203, 202].includes(id) ? expeditionShare(n, o.slots) : n;
+    };
     const has = (id) => (stock2.find((s) => s.id === id)?.available ?? 0) > 0;
     const need = (id) => {
       const s = stock2.find((x) => x.id === id);
@@ -9049,16 +9111,13 @@ td.spark-cell { width: 90px; }
     let ship = o.ship;
     if (!ship) {
       const options = [219, 203, 202].filter(has);
-      ship = options.find((id) => (stock2.find((s) => s.id === id)?.available ?? 0) >= need(id)) ?? options.sort((a, b) => {
-        const cap = (id) => {
-          const s = stock2.find((x) => x.id === id);
-          return s.available * s.capacity;
-        };
+      ship = options.find((id) => avail(id) >= need(id)) ?? options.sort((a, b) => {
+        const cap = (id) => avail(id) * stock2.find((x) => x.id === id).capacity;
         return cap(b) - cap(a);
       })[0] ?? 0;
     }
     const out = {};
-    if (ship && has(ship)) out[ship] = Math.min(stock2.find((s) => s.id === ship).available, need(ship));
+    if (ship && has(ship)) out[ship] = Math.min(avail(ship), need(ship));
     const big = o.big ?? (o.extras ? 0 : -1);
     if (big !== -1) {
       const filler = big > 0 && big !== ship && has(big) ? big : EXPEDITION_FILLERS.find((id) => id !== ship && has(id));
@@ -9562,6 +9621,19 @@ input.field { width: 190px; }
       const calc = el6("small", "calc", seen ? t("fleet.expCalc", { value: formatUnits(seen.max, doc.documentElement.lang || "it") }) : t("fleet.expCalcUnknown"));
       if (seen) calc.title = new Date(seen.at).toLocaleString(doc.documentElement.lang || void 0);
       value.append(calc);
+      const spread = el6("span", "control");
+      const spreadIn = el6("input", "field");
+      spreadIn.type = "text";
+      spreadIn.inputMode = "numeric";
+      spreadIn.value = f.expeditionSpread ? String(f.expeditionSpread) : "";
+      spreadIn.placeholder = "0";
+      spreadIn.setAttribute("aria-label", t("fleet.expeditionSpread"));
+      spreadIn.addEventListener("change", () => set({ expeditionSpread: Math.min(499, Math.max(0, Math.floor(parseAmount(spreadIn.value) || 0))) }));
+      spread.append(spreadIn);
+      const split = yesNo(f.expeditionSplit, (v) => set({ expeditionSplit: v }));
+      const lang = doc.documentElement.lang || "it";
+      const shares = seen?.cargo && seen.free ? Object.entries(seen.cargo).filter(([, n]) => n > 0).map(([id, n]) => t("fleet.expSplitCalc", { ship: shipName2(Number(id)), n: n.toLocaleString(lang), slots: seen.free, each: expeditionShare(n, seen.free).toLocaleString(lang) })) : [];
+      split.append(el6("small", "calc", shares.length ? shares.join(" \xB7 ") : t("fleet.expSplitUnknown")));
       return [
         group(t("fleet.transportTitle"), fleetGlyph("transport")),
         row(t("fleet.mainShip"), t("settings.mainShipHint"), select(cargo, String(f.mainShip), (v) => set({ mainShip: Number(v) }))),
@@ -9586,8 +9658,11 @@ input.field { width: 190px; }
         row(t("fleet.expeditionValue"), t("settings.expValueHint"), value),
         row(t("fleet.expeditionBig"), t("settings.expBigHint"), select([["0", t("fleet.biggestShip")], ["-1", t("fleet.none")], ...EXPEDITION_FILLERS.map((id) => [String(id), shipName2(id)])], String(f.expeditionBig), (v) => set({ expeditionBig: Number(v) }))),
         row(t("fleet.expeditionExtras"), t("settings.extrasHint"), yesNo(f.expeditionExtras, (v) => set({ expeditionExtras: v }))),
+        row(t("fleet.expeditionSpread"), t("settings.expSpreadHint"), spread),
+        row(t("fleet.expeditionSplit"), t("settings.expSplitHint"), split),
         group(t("fleet.repeatTitle"), fleetGlyph("repeat")),
-        row(t("fleet.repeat"), t("fleet.repeatHint"), yesNo(f.repeat, (v) => set({ repeat: v })))
+        row(t("fleet.repeat"), t("fleet.repeatHint"), yesNo(f.repeat, (v) => set({ repeat: v }))),
+        row(t("fleet.expeditionStay"), t("settings.expStayHint"), yesNo(f.expeditionStay, (v) => set({ expeditionStay: v })))
       ];
     };
     let listening = null;
@@ -12911,15 +12986,17 @@ table.queues td.acts { width: 1%; text-align: right; }
       itemBoost: universe.itemBoost
     });
   }
-  function prepareExpedition(fd, doc, profile, settings, universe) {
+  function prepareExpedition(fd, doc, profile, settings, universe, rand = Math.random) {
     profile = { ...profile, reserve: EMPTY_RESERVE };
     const limits = expeditionLimits(fd, universe);
     const target = expeditionTarget(limits.max, settings.expeditionValue);
     const base2 = settings.expeditionValue.trim() ? 0 : limits.base;
-    const ships = expeditionFleet(stock(fd, profile), { ship: settings.expeditionShip, target, base: base2, extras: settings.expeditionExtras, big: settings.expeditionBig });
+    const slots = settings.expeditionSplit ? freeExpeditionSlots(fd.expeditionCount, fd.maxExpeditionCount) : 0;
+    const ships = expeditionFleet(stock(fd, profile), { ship: settings.expeditionShip, target, base: base2, extras: settings.expeditionExtras, big: settings.expeditionBig, slots });
     const count2 = selectShips(fd, ships);
     const here = fd.currentPlanet;
-    setTarget(fd, doc, { galaxy: here.galaxy, system: here.system, position: 16, type: 1 });
+    const system = expeditionSystem(here.system, settings.expeditionSpread, { systems: universe.systems ?? 499, donut: universe.donutSystem ?? true }, rand);
+    setTarget(fd, doc, { galaxy: here.galaxy, system, position: 16, type: 1 });
     setSpeedBar(fd, 100);
     fd.expeditionTime = 1;
     const $ = pageWindow().jQuery;
@@ -12927,7 +13004,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       $?.("#expeditiontime").val("1");
     } catch {
     }
-    return { ...finish(fd, EXPEDITION, count2, 0), target };
+    return { ...finish(fd, EXPEDITION, count2, 0), target, system, slots };
   }
   function prepareLast(fd, doc, profile, last2) {
     const left = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
@@ -14184,12 +14261,18 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       economySpeed: universeSpeed(doc),
       topScore: topScore(o.store),
       lfBooster: o.store.get(LF_BONUS_KEY, null)?.expedition ?? 0,
-      itemBoost: expeditionItemBoost(o.store.get(ITEMS_KEY, null))
+      itemBoost: expeditionItemBoost(o.store.get(ITEMS_KEY, null)),
+      // Size and donut of the universe, for the random system (public API cache, else the page's meta tags).
+      ...(({ systems, donutSystem }) => ({ systems, donutSystem }))(universeOf(doc, o.store.get(SERVER_DATA_KEY, null)))
     });
     if (fleet1)
       void whenDispatcherReady().then((fd) => {
         const max = fd ? expeditionLimits(fd, expUniverse()).max : 0;
-        if (max > 0) o.store.set(EXPEDITION_MAX_KEY, { max, at: Date.now() });
+        if (!fd || max <= 0) return;
+        const here = shipsOnPlanet(fd);
+        const cargo = Object.fromEntries([219, 203, 202].map((id) => [String(id), here[String(id)] ?? 0]));
+        const free = Math.max(0, (fd.maxExpeditionCount || 0) - (fd.expeditionCount || 0));
+        o.store.set(EXPEDITION_MAX_KEY, { max, at: Date.now(), cargo, free });
       });
     const withDispatcher = (fn) => {
       const fd = getDispatcher();
@@ -14266,7 +14349,12 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       expedition: () => withDispatcher((fd) => {
         begin("expedition");
         const r = prepareExpedition(fd, doc, profile, settings, expUniverse());
-        report(r, "fleet.ok.expedition", { target: r.target.toLocaleString(o.locale) });
+        const extra = [
+          settings.expeditionSpread > 0 ? t("fleet.ok.expSystem", { coords: `${fd.currentPlanet.galaxy}:${r.system}:16`, n: settings.expeditionSpread }) : "",
+          r.ok && r.slots ? t("fleet.ok.expSplit", { slots: r.slots }) : ""
+        ].filter(Boolean);
+        if (r.ok && extra.length) say(`${t("fleet.ok.expedition", { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), target: r.target.toLocaleString(o.locale) })} \xB7 ${extra.join(" \xB7 ")}`);
+        else report(r, "fleet.ok.expedition", { target: r.target.toLocaleString(o.locale) });
       }),
       fleetsave: () => withDispatcher((fd) => {
         if (!profile.save) return say(t("fleet.err.noFleetsave"), true);
@@ -14609,6 +14697,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           return true;
         }
         if (!current3?.active || !loadSettings(current3.o.store).repeat) return false;
+        if (current3.active.mode === "expedition" && loadSettings(current3.o.store).expeditionStay) {
+          if (freeExpeditionSlots(fd.expeditionCount, fd.maxExpeditionCount) <= 1) return false;
+          navigate(repeatUrl(href, current3.o.bodyId, current3.active));
+          return true;
+        }
         const next = nextInRound(current3.active, current3.o.bodyId, current3.o.bodies, loadSettings(current3.o.store).skipBodies);
         if (next === null) return false;
         navigate(repeatUrl(href, next, current3.active));

@@ -187,6 +187,12 @@ export interface FleetSettings {
   expeditionBig: number;
   /** After a send from a Future button, open the next planet or moon ready with the same action. */
   repeat: boolean;
+  /** Ripeti on expeditions: open this same planet or moon again, prepared, while expedition slots are free (false = the next body). */
+  expeditionStay: boolean;
+  /** OGLight's random system: the expedition goes to a system within ±this many of the origin (0 = the origin's own). */
+  expeditionSpread: number;
+  /** Young universes: each expedition takes at most the cargo ships here divided by the free expedition slots. */
+  expeditionSplit: boolean;
   /** Each rule on or off, without forgetting it: ships, resources, jump gate. Not the fleetsave's. */
   shipsOn: boolean;
   resourcesOn: boolean;
@@ -235,6 +241,9 @@ export const DEFAULT_SETTINGS: FleetSettings = {
   expeditionExtras: true,
   expeditionBig: 0,
   repeat: false,
+  expeditionStay: false,
+  expeditionSpread: 0,
+  expeditionSplit: false,
   shipsOn: true,
   resourcesOn: true,
   gateOn: true,
@@ -422,6 +431,9 @@ export const EXPEDITION_MAX_KEY = 'fleet.expeditionMax';
 export interface ExpeditionMaxSeen {
   max: number;
   at: number;
+  /** Cargo ships on that body (id → count) and the expedition slots free there, for the share shown in the settings. */
+  cargo?: Record<string, number>;
+  free?: number;
 }
 
 /** Applies the player's expedition value: '' = calculated, '50%' = share, number = fixed. */
@@ -437,10 +449,39 @@ const EXPEDITION_FACTOR: Record<number, number> = { 202: 1, 203: 3, 219: 5.75 };
 /** Biggest combat ship first: one of them makes the expedition fleet count as strong. */
 export const EXPEDITION_FILLERS = [218, 213, 211, 215, 207, 206, 205, 204];
 
+/**
+ * OGLight's random system: a system within ±`spread` of the origin's, each equally likely.
+ * Circular universes (donut) wrap around; otherwise it stays between 1 and the last system.
+ */
+export function expeditionSystem(system: number, spread: number, u: { systems: number; donut: boolean }, rand: () => number = Math.random): number {
+  const n = Math.max(0, Math.floor(spread || 0));
+  const size = Math.max(1, u.systems);
+  if (!n) return system;
+  const s = system + Math.min(2 * n, Math.floor(rand() * (2 * n + 1))) - n;
+  if (u.donut) return ((((s - 1) % size) + size) % size) + 1;
+  return Math.min(size, Math.max(1, s));
+}
+
+/** Expedition slots still free, this send included (at least 1). */
+export function freeExpeditionSlots(used: number, max: number): number {
+  return Math.max(1, (max || 0) - (used || 0));
+}
+
+/** Cargo ships one expedition may take when they are shared out over the free slots (at least 1 while any is here). */
+export function expeditionShare(available: number, slots: number): number {
+  if (available <= 0) return 0;
+  return Math.max(1, Math.floor(available / Math.max(1, slots)));
+}
+
 export function expeditionFleet(
   stock: ShipStock[],
-  o: { ship: number; target: number; base: number; extras: boolean; big?: number },
+  o: { ship: number; target: number; base: number; extras: boolean; big?: number; slots?: number },
 ): Record<number, number> {
+  // Shared out over the free slots: each cargo ship counts only for this expedition's share.
+  const avail = (id: number) => {
+    const n = stock.find((s) => s.id === id)?.available ?? 0;
+    return o.slots && [219, 203, 202].includes(id) ? expeditionShare(n, o.slots) : n;
+  };
   const has = (id: number) => (stock.find((s) => s.id === id)?.available ?? 0) > 0;
   const need = (id: number) => {
     const s = stock.find((x) => x.id === id);
@@ -453,18 +494,15 @@ export function expeditionFleet(
     // otherwise the one that carries the most.
     const options = [219, 203, 202].filter(has);
     ship =
-      options.find((id) => (stock.find((s) => s.id === id)?.available ?? 0) >= need(id)) ??
+      options.find((id) => avail(id) >= need(id)) ??
       options.sort((a, b) => {
-        const cap = (id: number) => {
-          const s = stock.find((x) => x.id === id)!;
-          return s.available * s.capacity;
-        };
+        const cap = (id: number) => avail(id) * stock.find((x) => x.id === id)!.capacity;
         return cap(b) - cap(a);
       })[0] ??
       0;
   }
   const out: Record<number, number> = {};
-  if (ship && has(ship)) out[ship] = Math.min(stock.find((s) => s.id === ship)!.available, need(ship));
+  if (ship && has(ship)) out[ship] = Math.min(avail(ship), need(ship));
   const big = o.big ?? (o.extras ? 0 : -1);
   if (big !== -1) {
     const filler = big > 0 && big !== ship && has(big) ? big : EXPEDITION_FILLERS.find((id) => id !== ship && has(id));
