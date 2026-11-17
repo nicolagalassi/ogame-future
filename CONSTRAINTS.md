@@ -13,6 +13,7 @@ Controllato da `node scripts/floor-guard.mjs` sulle righe cambiate rispetto a `o
 - Nessun lavoro lasciato a metà: `throw new Error('not implemented')`, `catch {}` vuoto, `TODO` al posto del codice
 - Nessun test reso più facile: `.skip`, `.only`, `.todo`, file di test cancellato, `expect` tolto da un test che resta
 - Questo file non si indebolisce per far passare una modifica: soglia abbassata, regola tolta o eccezione nuova vengono segnalate
+- Una modifica qui che abbassa la soglia passa solo se decisa da Nicola: in un commit a parte, senza codice, con la riga `Constraints-Approved: Nicola, <motivo>`. Il guard la stampa comunque; non vale mai per il codice
 
 ## Conformità AGENTS.md (sempre, blocca)
 
@@ -47,15 +48,18 @@ Perché questi numeri:
 
 | Metric | Today | Direction |
 |--------|-------|-----------|
-| Copertura righe di `src/engines/` | 97.12% (2026-11-17) | must not fall (tolleranza 0.5) |
-| Copertura righe di tutto `src/` | 78.38% (2026-11-17) | must not fall |
+| Copertura righe di `src/engines/` | 96.38% (2026-11-17, Vitest 5) | must not fall (tolleranza 0.5) |
+| Copertura righe di tutto `src/` | 75.93% (2026-11-17, Vitest 5) | must not fall |
+
+I valori sono misurati con `@vitest/coverage-v8` 5, che conta le righe diversamente dalla 2 (sullo stesso codice la 2 dava 97.12% e 78.38%). Base riregistrata con l'ok di Nicola il 2026-11-17.
 
 ## Exceptions
 
 | ID | Rule | Path | Reason | Owner | Expires |
 |----|------|------|--------|-------|---------|
+| W1 | Dependencies | `picomatch` (GHSA-fc5q-39xc-vjpf) e la sua catena: `fdir`, `tinyglobby`, `vite`, `vitest`, `@vitest/coverage-v8` | ReDoS nei glob: npm dà vulnerabile ogni versione e l'unica "correzione" è tornare a Vitest 3.1.4. Serve solo ai test per leggere i glob della nostra configurazione; non entra nello script pubblicato | Nicola | 2027-02-15 |
 
-Nessuna. Da sapere: oggi `npm audit` trova 1 alta e 3 critiche, tutte nella catena di Vitest 2 (strumenti di sviluppo, mai nello script pubblicato). È un avviso fino al 2026-12-01; prima di quella data va fatto l'aggiornamento a Vitest 5, altrimenti il pre-push si ferma.
+L'audit ignora solo quella segnalazione e solo fino alla scadenza (`audit.exceptions` in `scripts/constraints.json`); ogni altra vulnerabilità alta o critica resta un avviso fino al 2026-12-01, poi blocca. Alla scadenza: se picomatch ha una versione corretta si aggiorna, altrimenti Nicola decide se rinnovare.
 
 ## Dove gira
 

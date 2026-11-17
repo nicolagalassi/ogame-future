@@ -2,9 +2,34 @@
   "_": "Numbers for scripts/constraints.mjs. CONSTRAINTS.md is the source of truth: change a number there first, with its reason, then mirror it here.",
   "warnUntil": "2026-12-01",
   "networkLayer": "src/data/",
-  "notificationFiles": ["src/modules/reminders/index.ts", "src/modules/settings/index.ts"],
-  "intervalFiles": ["src/modules/planet-menu/index.ts"],
-  "coverage": { "scope": "src/engines/", "changedLinesMin": 80, "projectLinesToday": 97.12, "tolerance": 0.5 },
-  "dist": { "path": "dist/future.user.js", "maxBytes": 1050000, "maxLineLength": 2000, "maxAvgLineLength": 120, "credit": "2019 Oz" },
-  "audit": { "level": "high" }
+  "notificationFiles": [
+    "src/modules/reminders/index.ts",
+    "src/modules/settings/index.ts"
+  ],
+  "intervalFiles": [
+    "src/modules/planet-menu/index.ts"
+  ],
+  "coverage": {
+    "scope": "src/engines/",
+    "changedLinesMin": 80,
+    "projectLinesToday": 96.38,
+    "tolerance": 0.5
+  },
+  "dist": {
+    "path": "dist/future.user.js",
+    "maxBytes": 1050000,
+    "maxLineLength": 2000,
+    "maxAvgLineLength": 120,
+    "credit": "2019 Oz"
+  },
+  "audit": {
+    "level": "high",
+    "exceptions": [
+      {
+        "id": "W1",
+        "advisory": "GHSA-fc5q-39xc-vjpf",
+        "until": "2027-02-15"
+      }
+    ]
+  }
 }
