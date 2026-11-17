@@ -70,8 +70,10 @@ ${L} .fut-name .planet-koords {
   width: auto !important; max-width: none !important; height: auto !important; line-height: 1.15 !important;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left !important; background: none !important;
 }
-${L} .fut-name .planet-name { font: 700 11px Arial, sans-serif !important; color: var(--text) !important; }
-${L} .fut-name .planet-koords { font: 10px monospace !important; color: var(--text-2) !important; }
+/* Name, coordinates and fleet in the board's face, like the figures: one row, one font. */
+/* Three lines in the 40px row: 13 + 12 + 12px of line, 1px between. */
+${L} .fut-name .planet-name { font: 600 13px/13px var(--display) !important; color: var(--text) !important; }
+${L} .fut-name .planet-koords { font: 400 12px/12px var(--display) !important; font-variant-numeric: tabular-nums; color: var(--text-2) !important; }
 
 /* Resources: one per line (metal, crystal, deuterium), in the board's condensed figures (DESIGN.md). */
 ${L} .fut-res {
@@ -90,7 +92,7 @@ ${L} .fut-d, .fut-totals .fut-d .fut-tname { color: ${RES_COLORS.deuterium}; }
 ${L} .fut-full { color: var(--warn) !important; font-weight: 700; }
 ${L} .fut-missing { color: var(--muted); }
 /* Fleet: what the ships are worth (planet, then moon), a third line under name and coordinates. */
-${L} .fut-fleet { display: flex; align-items: center; gap: 5px; min-width: 0; margin-top: 1px; font: 10px/11px monospace; color: #F2A3A3; white-space: nowrap; overflow: hidden; }
+${L} .fut-fleet { display: flex; align-items: center; gap: 5px; min-width: 0; margin-top: 1px; font: 400 12px/12px var(--display); font-variant-numeric: tabular-nums; color: #F2A3A3; white-space: nowrap; overflow: hidden; }
 ${L} .fut-fleet-m { display: inline-flex; align-items: center; gap: 2px; color: #D8A0A0; }
 ${L} .fut-fleet-m svg { flex: none; opacity: 0.8; }
 ${L}.fut-mode-compact .fut-fleet-m { display: none; }

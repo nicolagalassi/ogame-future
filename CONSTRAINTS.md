@@ -26,7 +26,7 @@ Controllato da `node scripts/constraints.mjs src` (sorgenti) e `dist` (file pubb
 | Niente `cp=` in una chiamata di rete | §4.2: cambia il pianeta attivo della sessione | riga con `.request(` e `cp=`; i link `cp=` cliccati dal giocatore sono ammessi |
 | Notifiche solo nei promemoria manuali | §1.4: niente avvisi per eventi di gioco | `Notification` solo in `src/modules/reminders/index.ts` e `src/modules/settings/index.ts` |
 | Nessun `setInterval` nuovo | un timer non deve chiamare il server; quelli esistenti aggiornano solo la pagina | ammesso solo in `src/modules/planet-menu/index.ts` (età dei dati) |
-| Build non minificata | il codice pubblicato si legge (AGENTS.md, CLAUDE.md) | `minify: false` in `scripts/build.mjs`; in `dist` riga più lunga ≤ 2000 caratteri e media ≤ 120 (oggi 522 e 51) |
+| Build non minificata | il codice pubblicato si legge (AGENTS.md, CLAUDE.md) | `minify: false` in `scripts/build.mjs`; in `dist` riga più lunga ≤ 2000 caratteri e media ≤ 120 (oggi 522 e 51), escluse le righe che sono solo dati base64 (il font della plancia, `src/core/fonts.ts`) |
 | Credito OGLight | licenza MIT del codice e delle tabelle riprese | `dist/future.user.js` contiene "2019 Oz" |
 | La versione sale | Tampermonkey aggiorna solo se `@version` cresce | se `src/` o `dist/` cambiano rispetto a `origin/main`, la versione in `package.json` è maggiore; `@version` del dist è uguale a `package.json` |
 
