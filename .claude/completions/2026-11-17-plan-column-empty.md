@@ -25,3 +25,8 @@
 ## Calcolo divisione cargo (0.3.112)
 - Il calcolo stava nella colonna dell'interruttore e schiacciava nome e descrizione a una parola per riga:
   ora è sotto la riga, a tutta larghezza, una riga per nave (`.calc.wide`). Verificato con screenshot di prova.
+
+## Readout della pagina Flotta (0.3.113)
+- Nella striscia «riserve e giro» (`.fut-fbar` in colonna) `flex: 1` sostituiva l'altezza di 30px con quella del testo:
+  1 o 2 righe = la pagina saltava di 15px. Ora `.fut-fread` ha altezza e larghezza fisse (`flex: none` in colonna,
+  max-height, overflow hidden, overflow-wrap). Misurato con Playwright: 67/82px prima, 82px fissi dopo.
