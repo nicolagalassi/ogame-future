@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.114
+// @version      0.3.115
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -6197,16 +6197,24 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
 #${DOCK_ID} .head b { flex: 1; min-width: 0; color: var(--text); font: 600 condensed 14px var(--display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #${DOCK_ID} .head svg { flex: none; color: var(--on-band); }
 #${DOCK_ID} .head .n { color: var(--on-band); font: condensed 13px var(--display); }
-#${DOCK_ID} .head:hover { background: var(--band-2); }
-#${DOCK_ID} .line:hover { background: var(--hover); }
+/* Hover only where there is a pointer (a tap would leave it stuck on a phone); pressing shows on touch too. */
+@media (hover: hover) and (pointer: fine) {
+  #${DOCK_ID} .head:hover { background: var(--band-2); }
+  #${DOCK_ID} .jday:hover { background: var(--hover); }
+  #${DOCK_ID} .flag:hover { background: var(--hover); box-shadow: inset 0 0 0 1px currentColor; }
+}
+#${DOCK_ID} .head:active { background: var(--band-2); }
+#${DOCK_ID} .jday:active, #${DOCK_ID} .flag:active { background: var(--hover); }
+#${DOCK_ID} .flag { transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1); }
+#${DOCK_ID} .flag:active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) { #${DOCK_ID} .flag:active { transform: none; } }
 /* Journal: today's net gain on one line, split by resource under it, then yesterday to compare. */
 #${DOCK_ID} .jday { display: flex; flex-direction: column; gap: 3px; width: 100%; padding: 6px 8px; border: 0; background: none; }
-#${DOCK_ID} .jday:hover { background: var(--hover); }
 #${DOCK_ID} .jday + .jday { padding-top: 0; }
 #${DOCK_ID} .jday .row { display: flex; align-items: baseline; gap: 6px; }
 #${DOCK_ID} .jday .k { flex: 1; min-width: 0; color: var(--label); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #${DOCK_ID} .jday .v { font: 600 condensed 14px var(--display); color: var(--text-2); }
-#${DOCK_ID} .jday.today .v { font-size: 17px; color: var(--text); }
+#${DOCK_ID} .jday.today .v { font-size: 18px; line-height: 20px; color: var(--text); }
 #${DOCK_ID} .jday .v.neg { color: var(--bad); } #${DOCK_ID} .jday .v.none { color: var(--quiet); font-weight: 400; }
 #${DOCK_ID} .res { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; font: condensed 12px var(--display); color: var(--text-2); }
 #${DOCK_ID} .res span { white-space: nowrap; overflow: hidden; }
@@ -6214,7 +6222,6 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
 /* Targets: one chip per flag in use. */
 #${DOCK_ID} .flags { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 6px; }
 #${DOCK_ID} .flag { display: flex; align-items: center; justify-content: center; gap: 4px; height: 26px; padding: 0; border: 0; border-radius: 4px; background: var(--surface); }
-#${DOCK_ID} .flag:hover { background: var(--hover); box-shadow: inset 0 0 0 1px currentColor; }
 #${DOCK_ID} .flag i { font: normal condensed 13px var(--display); color: var(--text); }
 #${DOCK_ID} .hint { margin: 0; padding: 8px; color: var(--label); font-size: 12px; line-height: 1.4; }
 `;
@@ -6274,7 +6281,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
         cell.title = `${t(`res.${k}`)}: ${signed(today.res[k])}`;
         const letter = el2(doc, "b", "", t(`res.short.${k}`));
         letter.style.color = RES_COLORS[k];
-        cell.append(letter, fmt(today.res[k]));
+        cell.append(letter, today.res[k] < 0 ? signed(today.res[k]) : fmt(today.res[k]));
         res.append(cell);
       }
       todayBlock.append(res);
