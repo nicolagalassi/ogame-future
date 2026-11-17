@@ -6,12 +6,13 @@
  */
 import { RES_COLORS, WINDOW_TOKENS } from '../../core/sheet';
 /** Width of the side-by-side menu (tolerated OGLight uses 208px; ours is a bit wider for larger text). */
-export const MENU_WIDTH = 247;
+export const MENU_WIDTH = 225;
 /** Native width of the planet column (#rechts) in OGame 13. */
 export const NATIVE_WIDTH = 137;
 
 const L = '#planetbarcomponent #planetList.fut-menu';
-const MOON_W = 68;
+/** Moon tile: 16px picture with the data age under it, then the three figures ("12,3G" fits). */
+const MOON_W = 54;
 
 export const PLANET_MENU_CSS = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
@@ -72,10 +73,10 @@ ${L} .fut-name .planet-koords {
 ${L} .fut-name .planet-name { font: 700 11px Arial, sans-serif !important; color: var(--text) !important; }
 ${L} .fut-name .planet-koords { font: 10px monospace !important; color: var(--text-2) !important; }
 
-/* Resources: one per line (metal, crystal, deuterium). */
+/* Resources: one per line (metal, crystal, deuterium), in the board's condensed figures (DESIGN.md). */
 ${L} .fut-res {
-  position: relative; flex-shrink: 0; width: 50px; display: flex; flex-direction: column; justify-content: center;
-  gap: 0; font: 11px/12px monospace; text-align: right;
+  position: relative; flex-shrink: 0; width: 42px; display: flex; flex-direction: column; justify-content: center;
+  gap: 0; font: 600 condensed 12px/12px var(--display); font-variant-numeric: tabular-nums; text-align: right;
 }
 ${L} .fut-cell { display: block; padding: 0 2px; border-radius: 2px; white-space: nowrap; overflow: hidden; }
 /* Storage fill painted behind the number (planets only): no extra space needed. */
@@ -110,7 +111,7 @@ ${L} a.moonlink .planetBarSpaceObjectContainer {
   display: flex !important; align-items: center; justify-content: center; margin: 0 !important;
 }
 ${L} a.moonlink img.icon-moon { position: static !important; width: 16px !important; height: 16px !important; margin: 0 !important; }
-${L} a.moonlink .fut-res { width: 46px; }
+${L} a.moonlink .fut-res { width: 32px; }
 ${L} .fut-nomoon { flex-shrink: 0; width: ${MOON_W}px; border-left: 1px solid var(--line); background: var(--surface); }
 
 /* Skin that failed to load (game CDN 502): a plain sphere keeps the row's shape. */
