@@ -139,20 +139,18 @@ ${L} .fut-age-old { color: var(--old); }
 ${L} .smallplanet .constructionIcon { display: none !important; }
 ${L} .fut-queue { position: absolute; left: 2px; bottom: 2px; z-index: 2; display: flex; gap: 2px; padding: 2px; border-radius: 6px; background: rgba(5,10,18,0.85); }
 /* The plan: a slim column at the outer end of each row, right of the moon; one tile per body
-   (planet on top, moon below), coloured by where its resources stand, an empty square when nothing is planned. */
+   (planet on top, moon below). Quiet where nothing is planned: the column alone says where a plan would show. */
 ${L} .fut-plancol { flex-shrink: 0; display: flex; flex-direction: column; width: 20px; border-left: 1px solid var(--line); background: var(--surface); }
 ${L} .fut-plancol > span { flex: 1; min-height: 0; }
-${L} .fut-plancol > :last-child { border-top: 1px solid var(--line); }
-/* The number of planned items in the board's figures, a pip under it in the state's colour:
-   orange = resources missing, blue = on their way, amber = landed (not read yet), green = all there, grey = unknown. */
-${L} .fut-plan { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  font: 600 condensed 12px/1 var(--display); color: var(--text); cursor: pointer; outline: none; --st: var(--muted); }
-${L} .fut-plan::after { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--st); }
-${L} .fut-plan:hover, ${L} .fut-plan:focus-visible { background: var(--hover); }
-/* Nothing planned on this body: an empty white square holds its place. */
-${L} .fut-plan-empty { display: flex; align-items: center; justify-content: center; }
-${L} .fut-plan-empty::after { content: ""; width: 6px; height: 6px; box-sizing: border-box; border: 1px solid rgba(255,255,255,0.7); border-radius: 1px; }
-${L} .fut-plan:focus-visible { box-shadow: inset 0 0 0 1px var(--accent); }
+${L} .fut-plancol > :last-child { border-top: 1px solid var(--line-soft); }
+/* The number of planned items in the board's figures, printed in the state's colour with a 2px edge of it:
+   orange = resources missing, blue = on their way, amber = landed (not read yet), green = all there, grey = unknown.
+   The number and the hover card carry the state too, so it is never colour alone. */
+${L} .fut-plan { display: flex; align-items: center; justify-content: center;
+  font: 600 condensed 13px/1 var(--display); color: var(--st); box-shadow: inset 2px 0 0 var(--st); cursor: pointer; outline: none; --st: var(--muted); }
+@media (hover: hover) and (pointer: fine) { ${L} .fut-plan:hover { background: var(--hover); } }
+${L} .fut-plan:active, ${L} .fut-plan:focus-visible { background: var(--hover); }
+${L} .fut-plan:focus-visible { box-shadow: inset 2px 0 0 var(--st), inset 0 0 0 1px var(--accent); }
 ${L}.fut-mode-compact .fut-plancol { display: none; }
 ${L} .fut-plan-missing { --st: var(--warn); }
 ${L} .fut-plan-arriving { --st: var(--link); }
