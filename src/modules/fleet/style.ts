@@ -13,7 +13,7 @@ export const FLEET_CSS = `
   --display: Bahnschrift, "DIN Alternate", "Roboto Condensed", "sans-serif-condensed", "Liberation Sans Narrow", "Arial Narrow", "DejaVu Sans Condensed", sans-serif;
 }
 .fut-fbar {
-  display: flex; flex-direction: column; gap: 8px; margin: 6px 10px; padding: 8px;
+  display: flex; flex-direction: column; gap: 8px; margin: 6px 10px; padding: 8px; min-width: 0; box-sizing: border-box;
   border: 0; border-radius: 6px; background: var(--raised);
   font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums;
 }
@@ -97,9 +97,12 @@ export const FLEET_CSS = `
 .fut-fsw[aria-checked="true"] .track { background: var(--accent); }
 .fut-fsw[aria-checked="true"] .track::after { transform: translateX(8px); background: var(--knob-on); }
 
-/* Readout: the last outcome, or what the control under the pointer does. Two lines at most, fixed height. */
-.fut-fread { flex: 1; min-width: 0; height: 30px; display: flex; align-items: center; }
-.fut-fread span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+/* Readout: the last outcome, or what the control under the pointer does. Two lines at most, in a box of
+   fixed size: one line or two (or a long word) never moves the page. In the reserves strip it sits in a
+   column, where flex: 1 used to replace the height with the text's own (one line or two). */
+.fut-fread { flex: 1 1 0; min-width: 0; width: 100%; max-width: 100%; height: 30px; min-height: 30px; max-height: 30px; box-sizing: border-box; overflow: hidden; display: flex; align-items: center; }
+.fut-fbar > .fut-fread { flex: none; }
+.fut-fread span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; min-width: 0; overflow-wrap: anywhere; }
 .fut-fread .tip { color: var(--mute); }
 /* Speed changed during a round: "also for the next ones?", with its two answers. */
 .fut-fask { flex: none; display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 4px 0 10px; border: 1px solid #6B5A1E; border-radius: 8px; background: rgba(245,181,71,0.08); }
