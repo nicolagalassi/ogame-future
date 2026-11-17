@@ -22,8 +22,12 @@ export interface PlanItem {
 /** Plan per body id. */
 export type Plan = Record<string, PlanItem[]>;
 
-/** Research is the same on every planet: it is done wherever it was planned. */
-export const isResearch = (id: number): boolean => (id > 100 && id < 200) || Math.floor((id % 1000) / 100) === 2;
+/**
+ * Research (ids 106–199) is the same on every planet: it is done wherever it was planned.
+ * Lifeform research (11201, 12201…) is not: each planet researches its own, so it stays per body
+ * like buildings (counting it account-wide dropped the same level planned on other planets).
+ */
+export const isResearch = (id: number): boolean => id > 100 && id < 200;
 
 /** Adds items to a body's plan. A level already planned is replaced, not doubled. */
 export function addToPlan(plan: Plan, bodyId: number, items: PlanItem[]): Plan {
