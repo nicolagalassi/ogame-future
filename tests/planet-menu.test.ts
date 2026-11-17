@@ -230,6 +230,27 @@ describe('width and banner', () => {
     expect(document.getElementById('planetbarcomponent')?.classList.contains('fut-wide')).toBe(false);
     expect(document.body.classList.contains('fut-banner-shift')).toBe(false);
   });
+
+  it('widens unless the shift would push an on-screen banner out of view', async () => {
+    const { canWiden } = await import('../src/modules/planet-menu');
+    document.body.className = '';
+    document.body.innerHTML = '<div id="bannerskyscrapercomponent"></div>';
+    const banner = document.getElementById('bannerskyscrapercomponent')!;
+    const at = (left: number) => (banner.getBoundingClientRect = () => ({ left, right: left + 160, width: 160 }) as DOMRect);
+    Object.defineProperty(document.documentElement, 'clientWidth', { configurable: true, value: 980 });
+    at(600); // fits even after the shift
+    expect(canWiden(document)).toBe(true);
+    at(750); // on screen now, cut off once shifted
+    expect(canWiden(document)).toBe(false);
+    at(991); // phone: already past the 980px page edge without Future
+    expect(canWiden(document)).toBe(true);
+    // A redraw measures where the game put it, not where Future's shift moved it.
+    document.body.classList.add('fut-banner-shift');
+    at(600 + 118);
+    expect(canWiden(document)).toBe(true);
+    delete (document.documentElement as { clientWidth?: number }).clientWidth;
+    document.body.className = '';
+  });
 });
 
 describe('data age badge', () => {
