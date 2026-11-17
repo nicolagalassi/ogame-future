@@ -188,20 +188,20 @@ describe('renderPlanetMenu', () => {
     const marks = loadMarks({
       players: { 1: { flag: 'farm', name: 'A', at: 0 }, 2: { flag: 'farm', name: 'B', at: 0 }, 3: { flag: 'danger', name: 'C', at: 0 } },
     });
-    const days = Array.from({ length: 7 }, (_, i) => ({ start: i, count: i === 6 ? 25 : 0, net: i === 6 ? 4e7 : 0 }));
-    const o = { doc: document, t, locale: 'it', journal: { today: { count: 25, net: 4e7 }, week: { count: 0, net: 0 }, days }, marks, onOpenJournal, onOpenTargets };
+    const today = { count: 25, net: 4e7, res: { metal: 2e7, crystal: 8e6, deuterium: 2e6 } };
+    const yesterday = { count: 0, net: 0, res: { metal: 0, crystal: 0, deuterium: 0 } };
+    const o = { doc: document, t, locale: 'it', journal: { today, yesterday }, marks, onOpenJournal, onOpenTargets };
     renderDock(o);
     renderDock(o);
     expect(document.querySelectorAll(`#${DOCK_ID}`)).toHaveLength(1);
     const dock = links.querySelector(`#${DOCK_ID}`)!;
-    // Today large, then 7 small columns (today lit), then the week and the coloured planets.
-    expect(dock.querySelector('.jtoday .v')!.textContent).toBe('+40,0MMSU');
-    expect(dock.querySelectorAll('.days i')).toHaveLength(7);
-    expect(dock.querySelector('.days i:last-child')!.classList.contains('today')).toBe(true);
-    expect([...dock.querySelectorAll('.line .v')].map((v) => v.textContent)).toEqual(['—']);
-    expect(dock.querySelector('.head .n')!.textContent).toBe('3');
+    // Today's gain with M/C/D under it, yesterday to compare; the counts in the heads.
+    expect(dock.querySelector('.jday.today .v')!.textContent).toBe('+40,0M');
+    expect([...dock.querySelectorAll('.res span')].map((s) => s.textContent)).toEqual(['M20,0M', 'C8,0M', 'D2,0M']);
+    expect(dock.querySelector('.jday.yesterday .v')!.textContent).toBe('—');
+    expect([...dock.querySelectorAll('.head .n')].map((n) => n.textContent)).toEqual(['25', '3']);
     expect([...dock.querySelectorAll('.flag')].map((f) => f.getAttribute('aria-label'))).toEqual(['Frigo: 2', 'Pericolo: 1']);
-    dock.querySelector<HTMLButtonElement>('.jtoday')!.click();
+    dock.querySelector<HTMLButtonElement>('.jday')!.click();
     expect(onOpenJournal).toHaveBeenCalledOnce();
     dock.querySelector<HTMLButtonElement>('.flag')!.click();
     expect(onOpenTargets).toHaveBeenLastCalledWith({ flagTab: 'farm' });

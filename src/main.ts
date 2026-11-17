@@ -43,7 +43,7 @@ import { watchTechPages } from './modules/tech';
 import { accountResources, openPlanner } from './modules/tech/planner-view';
 import { accountGap, lessReserved, PLAN_KEY, pendingFor, planCount, planStatus, pruneByQueues, QUEUED_KEY, releaseQueued, reservedFor, SENT_KEY, withQueued, type Plan, type Queued, type Shipment } from './engines/planner';
 import { estimateResources } from './engines/resources';
-import { daySeries, entriesIn, JOURNAL_KEY, periodRange, periodStats, type Journal } from './engines/expeditions';
+import { entriesIn, JOURNAL_KEY, netRes, periodRange, periodStats, type Journal } from './engines/expeditions';
 import { isMessagesPage, ownPlayerId } from './data/messages';
 import { watchMessages } from './modules/messages';
 import { openJournal } from './modules/messages/journal-view';
@@ -398,19 +398,15 @@ async function bootstrap(): Promise<void> {
   // Dock under the game's menu: journal and targets at a glance; redrawn with the planet menu.
   drawDock = () => {
     const journal = store.get<Journal>(JOURNAL_KEY, {});
-    const stats = (period: 'today' | 'week') => {
+    const stats = (period: 'today' | 'yesterday') => {
       const st = periodStats(entriesIn(journal, periodRange(period, Date.now())));
-      return { count: st.count, net: st.netMsu };
+      return { count: st.count, net: st.netMsu, res: netRes(st) };
     };
     renderDock({
       doc: document,
       t,
       locale,
-      journal: {
-        today: stats('today'),
-        week: stats('week'),
-        days: daySeries(Object.values(journal), Date.now(), 7).map((b) => ({ start: b.start, count: b.stats.count, net: b.stats.netMsu })),
-      },
+      journal: { today: stats('today'), yesterday: stats('yesterday') },
       marks: loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null)),
       onOpenJournal: () => openJournal({ doc: document, store, now: Date.now(), locale, t }),
       onOpenTargets: (view) => (view ? openSide(side, view) : toggleSide(side)),

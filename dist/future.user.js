@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.113
+// @version      0.3.114
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1196,9 +1196,7 @@
     "totals.flying": "di cui in volo",
     "totals.flyingHint": "Carico delle tue flotte in volo (gi\xE0 compreso nelle righe sopra): metallo {metal}, cristallo {crystal}, deuterio {deuterium}. Letto dalla lista eventi del gioco: aprila per aggiornarlo.",
     "dock.journal": "Diario",
-    "dock.count": "sped.",
     "dock.today": "Oggi",
-    "dock.week": "7 giorni",
     "dock.journalHint": "{n} spedizioni lette dalla posta; guadagno netto in MSU. Clic: apre il diario.",
     "dock.targetsEmpty": "Nessun bersaglio: segna giocatori e pianeti dalla galassia.",
     "dash.scrapPick": "Clic: tutte, di nuovo clic: nessuna",
@@ -1308,7 +1306,6 @@
     "exp.focusAll": "Tutto il periodo",
     "exp.noneHere": "Niente qui.",
     "exp.daysTable": "I giorni",
-    "dock.todayCount": "{n} spedizioni",
     "marks.st.vacation": "in vacanza",
     "marks.st.banned": "bannato",
     "marks.st.inactive": "inattivo (7 giorni)",
@@ -2154,9 +2151,7 @@
     "totals.flying": "of which in flight",
     "totals.flyingHint": "Cargo of your fleets in flight (already included in the lines above): metal {metal}, crystal {crystal}, deuterium {deuterium}. Read from the game's event list: open it to update.",
     "dock.journal": "Journal",
-    "dock.count": "exp.",
     "dock.today": "Today",
-    "dock.week": "7 days",
     "dock.journalHint": "{n} expeditions read from the inbox; net gain in MSU. Click: opens the journal.",
     "dock.targetsEmpty": "No targets yet: mark players and planets in the galaxy.",
     "dash.scrapPick": "Click: all of them, click again: none",
@@ -2266,7 +2261,6 @@
     "exp.focusAll": "Whole period",
     "exp.noneHere": "Nothing here.",
     "exp.daysTable": "The days",
-    "dock.todayCount": "{n} expeditions",
     "marks.st.vacation": "on vacation",
     "marks.st.banned": "banned",
     "marks.st.inactive": "inactive (7 days)",
@@ -3112,9 +3106,7 @@
     "totals.flying": "dont en vol",
     "totals.flyingHint": "Cargaison de vos flottes en vol (d\xE9j\xE0 comprise dans les lignes ci-dessus) : m\xE9tal {metal}, cristal {crystal}, deut\xE9rium {deuterium}. Lue dans la liste des \xE9v\xE9nements du jeu : ouvrez-la pour la mettre \xE0 jour.",
     "dock.journal": "Journal",
-    "dock.count": "exp.",
     "dock.today": "Aujourd'hui",
-    "dock.week": "7 jours",
     "dock.journalHint": "{n} exp\xE9ditions lues dans la messagerie ; gain net en MSU. Clic : ouvre le journal.",
     "dock.targetsEmpty": "Aucune cible : marquez joueurs et plan\xE8tes dans la galaxie.",
     "dash.scrapPick": "Clic : tous, nouveau clic : aucun",
@@ -3224,7 +3216,6 @@
     "exp.focusAll": "Toute la p\xE9riode",
     "exp.noneHere": "Rien ici.",
     "exp.daysTable": "Les jours",
-    "dock.todayCount": "{n} exp\xE9ditions",
     "marks.st.vacation": "en vacances",
     "marks.st.banned": "banni",
     "marks.st.inactive": "inactif (7 jours)",
@@ -4070,9 +4061,7 @@
     "totals.flying": "davon unterwegs",
     "totals.flyingHint": "Ladung deiner Flotten unterwegs (schon in den Zeilen oben enthalten): Metall {metal}, Kristall {crystal}, Deuterium {deuterium}. Aus der Ereignisliste des Spiels gelesen: \xF6ffne sie zum Aktualisieren.",
     "dock.journal": "Tagebuch",
-    "dock.count": "Exp.",
     "dock.today": "Heute",
-    "dock.week": "7 Tage",
     "dock.journalHint": "{n} Expeditionen aus dem Postfach; Nettogewinn in MSU. Klick: \xF6ffnet das Tagebuch.",
     "dock.targetsEmpty": "Noch keine Ziele: markiere Spieler und Planeten in der Galaxie.",
     "dash.scrapPick": "Klick: alle, erneut klicken: keine",
@@ -4182,7 +4171,6 @@
     "exp.focusAll": "Ganzer Zeitraum",
     "exp.noneHere": "Nichts hier.",
     "exp.daysTable": "Die Tage",
-    "dock.todayCount": "{n} Expeditionen",
     "marks.st.vacation": "im Urlaub",
     "marks.st.banned": "gesperrt",
     "marks.st.inactive": "inaktiv (7 Tage)",
@@ -6211,27 +6199,18 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
 #${DOCK_ID} .head .n { color: var(--on-band); font: condensed 13px var(--display); }
 #${DOCK_ID} .head:hover { background: var(--band-2); }
 #${DOCK_ID} .line:hover { background: var(--hover); }
-/* Journal: today's net gain large, the last 7 days as small columns (today lit), then the week. */
-#${DOCK_ID} .jtoday { display: flex; flex-direction: column; gap: 1px; width: 100%; padding: 7px 8px 6px; border: 0; background: none; }
-#${DOCK_ID} .jtoday:hover { background: var(--hover); }
-#${DOCK_ID} .jtoday .k { color: var(--label); font-size: 11px; }
-#${DOCK_ID} .jtoday .v { font: 600 condensed 20px/22px var(--display); color: var(--text); }
-#${DOCK_ID} .jtoday .v.neg { color: var(--bad); } #${DOCK_ID} .jtoday .v.none { color: var(--quiet); font-weight: 400; }
-#${DOCK_ID} .jtoday .v small { margin-left: 4px; font: 11px var(--body); color: var(--label); }
-#${DOCK_ID} .jtoday .c { color: var(--label); font-size: 11px; }
-#${DOCK_ID} .days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: end; gap: 3px; height: 30px; margin-top: 6px; }
-#${DOCK_ID} .days i { display: block; min-height: 2px; background: var(--faint); }
-#${DOCK_ID} .days i.zero { background: var(--line-soft); }
-#${DOCK_ID} .days i.today { background: var(--accent); }
-/* One line per period. */
-#${DOCK_ID} .line { display: grid; grid-template-columns: minmax(0, 1fr) auto 52px; align-items: baseline; gap: 6px; width: 100%; min-height: 24px; padding: 3px 8px; border: 0; background: none; }
-#${DOCK_ID} .line + .line { margin-top: 2px; }
-#${DOCK_ID} .line .k { color: var(--label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#${DOCK_ID} .line .c { color: var(--label); font: condensed 13px var(--display); }
-#${DOCK_ID} .line .v { color: var(--text); font: 600 condensed 14px var(--display); text-align: right; }
-#${DOCK_ID} .line .v.pos { color: var(--ok); } #${DOCK_ID} .line .v.neg { color: var(--warn); } #${DOCK_ID} .line .v.none { color: var(--quiet); font-weight: 400; }
-#${DOCK_ID} .cols { display: grid; grid-template-columns: minmax(0, 1fr) auto 52px; gap: 6px; padding: 3px 8px 0; color: var(--quiet); font-size: 11px; }
-#${DOCK_ID} .cols span:last-child { text-align: right; }
+/* Journal: today's net gain on one line, split by resource under it, then yesterday to compare. */
+#${DOCK_ID} .jday { display: flex; flex-direction: column; gap: 3px; width: 100%; padding: 6px 8px; border: 0; background: none; }
+#${DOCK_ID} .jday:hover { background: var(--hover); }
+#${DOCK_ID} .jday + .jday { padding-top: 0; }
+#${DOCK_ID} .jday .row { display: flex; align-items: baseline; gap: 6px; }
+#${DOCK_ID} .jday .k { flex: 1; min-width: 0; color: var(--label); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#${DOCK_ID} .jday .v { font: 600 condensed 14px var(--display); color: var(--text-2); }
+#${DOCK_ID} .jday.today .v { font-size: 17px; color: var(--text); }
+#${DOCK_ID} .jday .v.neg { color: var(--bad); } #${DOCK_ID} .jday .v.none { color: var(--quiet); font-weight: 400; }
+#${DOCK_ID} .res { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; font: condensed 12px var(--display); color: var(--text-2); }
+#${DOCK_ID} .res span { white-space: nowrap; overflow: hidden; }
+#${DOCK_ID} .res b { margin-right: 2px; font-weight: 600; }
 /* Targets: one chip per flag in use. */
 #${DOCK_ID} .flags { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 6px; }
 #${DOCK_ID} .flag { display: flex; align-items: center; justify-content: center; gap: 4px; height: 26px; padding: 0; border: 0; border-radius: 4px; background: var(--surface); }
@@ -6276,32 +6255,31 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
       if (count2) b.append(el2(doc, "span", "n", count2));
       return b;
     };
+    const { today, yesterday } = o.journal;
     const journal = el2(doc, "section", "card");
-    journal.append(head("chart", t("dock.journal"), t("exp.title"), o.onOpenJournal));
+    journal.append(head("chart", t("dock.journal"), t("exp.title"), o.onOpenJournal, today.count ? String(today.count) : ""));
     const signed = (n) => `${n >= 0 ? "+" : "\u2212"}${fmt(Math.abs(n))}`;
-    const today = o.journal.today;
-    const block = button3("jtoday", t("dock.journalHint", { n: today.count }), o.onOpenJournal);
-    const big = el2(doc, "span", `v${today.count ? today.net < 0 ? " neg" : "" : " none"}`, today.count ? signed(today.net) : "\u2014");
-    if (today.count) big.append(el2(doc, "small", "", "MSU"));
-    block.append(el2(doc, "span", "k", t("dock.today")), big, el2(doc, "span", "c", t("dock.todayCount", { n: today.count })));
-    const days2 = o.journal.days ?? [];
-    if (days2.length) {
-      const cols = el2(doc, "span", "days");
-      cols.setAttribute("aria-hidden", "true");
-      const top = Math.max(1, ...days2.map((d) => d.net));
-      days2.forEach((d, i) => {
-        const bar = el2(doc, "i", d.net > 0 ? i === days2.length - 1 ? "today" : "" : "zero");
-        bar.style.height = `${Math.max(0, d.net / top * 100)}%`;
-        bar.title = `${new Date(d.start).toLocaleDateString(o.locale, { weekday: "short", day: "2-digit", month: "2-digit" })} \xB7 ${d.count} \xB7 ${d.count ? signed(d.net) : "\u2014"} MSU`;
-        cols.append(bar);
-      });
-      block.append(cols);
+    const day = (cls, label, d) => {
+      const b = button3(`jday ${cls}`, t("dock.journalHint", { n: d.count }), o.onOpenJournal);
+      const row = el2(doc, "span", "row");
+      row.append(el2(doc, "span", "k", label), el2(doc, "span", `v${d.count ? d.net < 0 ? " neg" : "" : " none"}`, d.count ? signed(d.net) : "\u2014"));
+      b.append(row);
+      return b;
+    };
+    const todayBlock = day("today", t("dock.today"), today);
+    if (today.count) {
+      const res = el2(doc, "span", "res");
+      for (const k of ["metal", "crystal", "deuterium"]) {
+        const cell = el2(doc, "span");
+        cell.title = `${t(`res.${k}`)}: ${signed(today.res[k])}`;
+        const letter = el2(doc, "b", "", t(`res.short.${k}`));
+        letter.style.color = RES_COLORS[k];
+        cell.append(letter, fmt(today.res[k]));
+        res.append(cell);
+      }
+      todayBlock.append(res);
     }
-    journal.append(block);
-    const week = o.journal.week;
-    const line = button3("line", t("dock.journalHint", { n: week.count }), o.onOpenJournal);
-    line.append(el2(doc, "span", "k", t("dock.week")), el2(doc, "span", "c", week.count ? String(week.count) : ""), el2(doc, "span", `v ${week.count ? week.net >= 0 ? "pos" : "neg" : "none"}`, week.count ? signed(week.net) : "\u2014"));
-    journal.append(line);
+    journal.append(todayBlock, day("yesterday", t("exp.period.yesterday"), yesterday));
     const players = Object.values(o.marks.players);
     const targets = el2(doc, "section", "card");
     targets.append(head("target", t("bar.targets"), t("bar.targetsHint"), () => o.onOpenTargets(), String(players.length || "")));
@@ -6513,6 +6491,10 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     const lists = new Map(starts.map((s) => [s, []]));
     for (const e of entries) if (e.kind !== "raid") lists.get(dayStart(e.at))?.push(e);
     return starts.map((start) => ({ start, stats: periodStats(lists.get(start)) }));
+  }
+  function netRes(s) {
+    const of = (k) => s.res[k] + s.shipsValue[k] - s.lostValue[k];
+    return { metal: of("metal"), crystal: of("crystal"), deuterium: of("deuterium") };
   }
   function valueMix(s) {
     return { metal: s.res.metal, crystal: s.res.crystal * 1.5, deuterium: s.res.deuterium * 3, ships: msu(s.shipsValue) };
@@ -18222,17 +18204,13 @@ ${waves2.map((w) => `${t("orion.waveN", { n: w.n })}: ${fmt(w.cap)}`).join("\n")
       const journal = store.get(JOURNAL_KEY, {});
       const stats = (period) => {
         const st = periodStats(entriesIn(journal, periodRange(period, Date.now())));
-        return { count: st.count, net: st.netMsu };
+        return { count: st.count, net: st.netMsu, res: netRes(st) };
       };
       renderDock({
         doc: document,
         t,
         locale,
-        journal: {
-          today: stats("today"),
-          week: stats("week"),
-          days: daySeries(Object.values(journal), Date.now(), 7).map((b) => ({ start: b.start, count: b.stats.count, net: b.stats.netMsu }))
-        },
+        journal: { today: stats("today"), yesterday: stats("yesterday") },
         marks: loadMarks(store.get(MARKS_KEY, null)),
         onOpenJournal: () => openJournal({ doc: document, store, now: Date.now(), locale, t }),
         onOpenTargets: (view2) => view2 ? openSide(side, view2) : toggleSide(side)
