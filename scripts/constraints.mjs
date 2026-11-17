@@ -98,7 +98,9 @@ function checkDist() {
   const d = cfg.dist;
   if (!existsSync(d.path)) return cannot(`${d.path} manca: lanciare npm run build`);
   const text = readFileSync(d.path, 'utf8');
-  const lines = text.split('\n');
+  // Bundled binary data (the board's font, base64 in one string) is data, not code: left out of the readability check.
+  const DATA = /^\s*var \w+ = "[A-Za-z0-9+/=]+";$/;
+  const lines = text.split('\n').filter((l) => !DATA.test(l));
   const longest = Math.max(...lines.map((l) => l.length));
   const avg = text.length / lines.length;
   if (longest > d.maxLineLength || avg > d.maxAvgLineLength) fail('minificazione', d.path, `righe troppo lunghe (max ${longest}, media ${avg.toFixed(0)}): sembra minificato`);
