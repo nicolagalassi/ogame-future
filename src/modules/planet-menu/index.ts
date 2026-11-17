@@ -359,14 +359,63 @@ export function clearPlanetMenu(doc: Document): void {
  * Widens the planet column only when the shifted banner still fits on screen,
  * so the banner is never pushed out of view (AGENTS.md §1.7). Otherwise the menu
  * stays in the game's own width and switches to compact.
+ * A banner that already starts past the screen edge without Future (phones lay the page out at
+ * 980px, the banner begins around 991px) is reached by scrolling either way: the shift hides nothing.
  */
 export function canWiden(doc: Document): boolean {
   const banner = doc.getElementById('bannerskyscrapercomponent');
   const view = doc.documentElement.clientWidth;
   if (!banner) return true;
   const rect = banner.getBoundingClientRect();
-  const shifted = rect.right + (MENU_WIDTH - NATIVE_WIDTH + 8);
-  return rect.width === 0 || shifted <= view;
+  if (rect.width === 0) return true;
+  // Measured where the game puts it: on a redraw the banner may already carry Future's shift.
+  const extra = MENU_WIDTH - NATIVE_WIDTH + 8;
+  const offset = doc.body.classList.contains('fut-banner-shift') ? extra : 0;
+  const left = rect.left - offset;
+  const right = rect.right - offset;
+  return left >= view || right + extra <= view;
+}
+
+const EDGE_ID = 'fut-page-edge';
+
+/**
+ * Phones lay the page out at 980px, but the skyscraper banner (and the side menu's shift) reach past
+ * that edge; Chrome on Android leaves the area beyond it white around the banner. A dark filler,
+ * painted behind everything (the banner stays on top, untouched), covers exactly the overflow.
+ */
+export function fillPageEdge(doc: Document): void {
+  const root = doc.documentElement;
+  const view = doc.defaultView;
+  if (!view) return;
+  let edge = doc.getElementById(EDGE_ID);
+  const fit = () => {
+    if (edge) edge.style.width = '0';
+    const extra = root.scrollWidth - root.clientWidth;
+    if (extra <= 0) {
+      edge?.remove();
+      edge = null;
+      return;
+    }
+    if (!edge) {
+      edge = doc.createElement('div');
+      edge.id = EDGE_ID;
+      edge.setAttribute('aria-hidden', 'true');
+      edge.style.cssText = 'position:absolute;top:0;z-index:-1;background:#000;pointer-events:none;';
+      doc.body.append(edge);
+    }
+    edge.style.left = `${root.clientWidth}px`;
+    edge.style.width = `${extra}px`;
+    edge.style.height = `${root.scrollHeight}px`;
+  };
+  fit();
+  // The banner fills in after load (an ad), and pages grow: measure again when either changes size.
+  const banner = doc.getElementById('bannerskyscrapercomponent');
+  if (banner && 'ResizeObserver' in view && !banner.dataset.futEdge) {
+    banner.dataset.futEdge = '1';
+    const ro = new view.ResizeObserver(() => view.requestAnimationFrame(fit));
+    ro.observe(banner);
+    ro.observe(doc.body);
+  }
 }
 
 function formatTime(at: number, locale: string): string {
@@ -490,6 +539,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
   list.classList.add('fut-menu');
   list.classList.toggle('fut-mode-compact', mode === 'compact');
   list.classList.toggle('fut-mode-side', mode === 'side');
+  fillPageEdge(doc);
 
   const byId = new Map((o.snapshot?.bodies ?? []).map((b) => [b.id, b]));
   const view = { fleet: o.settings.showFleet === true, t: o.t };
