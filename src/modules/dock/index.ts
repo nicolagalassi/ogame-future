@@ -1,8 +1,8 @@
-import { WINDOW_TOKENS } from '../../core/sheet';
+import { RES_COLORS, WINDOW_TOKENS } from '../../core/sheet';
 /**
  * Future's dock: a small panel in the free space under the game's left menu, as OGLight does with
  * its own. Two cards that say something before they are opened: the expedition journal (today and
- * the last 7 days) and the targets (how many players per flag).
+ * yesterday, by resource) and the targets (how many players per flag).
  *
  * COMPLIANCE: page only. It is appended after the game's menu, which is neither moved, resized
  * nor covered (AGENTS.md §1.7: Merchant, Recruit Officers and Shop stay where they are). No
@@ -14,17 +14,20 @@ import { FLAGS, type Flag, type Marks } from '../../engines/marks';
 import { FLAG_COLORS, markIcon } from '../marks/picker';
 
 export const DOCK_ID = 'fut-dock';
+
+export interface DayGain {
+  count: number;
+  net: number;
+  res: { metal: number; crystal: number; deuterium: number };
+}
 const STYLE_ID = 'fut-dock-style';
 
 export interface DockOptions {
   doc: Document;
   t: (key: string, vars?: Record<string, string | number>) => string;
   locale: string;
-  /**
-   * Expeditions read today and in the last 7 days: how many, and the net value in MSU; `days` are
-   * the last 7 days one by one (oldest first, today last) for the small columns.
-   */
-  journal: { today: { count: number; net: number }; week: { count: number; net: number }; days?: { start: number; count: number; net: number }[] };
+  /** Expeditions read today and yesterday: how many, the net value in MSU and, for today, per resource. */
+  journal: { today: DayGain; yesterday: DayGain };
   marks: Marks;
   onOpenJournal: () => void;
   /** Opens or closes the targets side bar; with a view, opens it there. */
@@ -49,27 +52,18 @@ const CSS = `
 #${DOCK_ID} .head .n { color: var(--on-band); font: condensed 13px var(--display); }
 #${DOCK_ID} .head:hover { background: var(--band-2); }
 #${DOCK_ID} .line:hover { background: var(--hover); }
-/* Journal: today's net gain large, the last 7 days as small columns (today lit), then the week. */
-#${DOCK_ID} .jtoday { display: flex; flex-direction: column; gap: 1px; width: 100%; padding: 7px 8px 6px; border: 0; background: none; }
-#${DOCK_ID} .jtoday:hover { background: var(--hover); }
-#${DOCK_ID} .jtoday .k { color: var(--label); font-size: 11px; }
-#${DOCK_ID} .jtoday .v { font: 600 condensed 20px/22px var(--display); color: var(--text); }
-#${DOCK_ID} .jtoday .v.neg { color: var(--bad); } #${DOCK_ID} .jtoday .v.none { color: var(--quiet); font-weight: 400; }
-#${DOCK_ID} .jtoday .v small { margin-left: 4px; font: 11px var(--body); color: var(--label); }
-#${DOCK_ID} .jtoday .c { color: var(--label); font-size: 11px; }
-#${DOCK_ID} .days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: end; gap: 3px; height: 30px; margin-top: 6px; }
-#${DOCK_ID} .days i { display: block; min-height: 2px; background: var(--faint); }
-#${DOCK_ID} .days i.zero { background: var(--line-soft); }
-#${DOCK_ID} .days i.today { background: var(--accent); }
-/* One line per period. */
-#${DOCK_ID} .line { display: grid; grid-template-columns: minmax(0, 1fr) auto 52px; align-items: baseline; gap: 6px; width: 100%; min-height: 24px; padding: 3px 8px; border: 0; background: none; }
-#${DOCK_ID} .line + .line { margin-top: 2px; }
-#${DOCK_ID} .line .k { color: var(--label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#${DOCK_ID} .line .c { color: var(--label); font: condensed 13px var(--display); }
-#${DOCK_ID} .line .v { color: var(--text); font: 600 condensed 14px var(--display); text-align: right; }
-#${DOCK_ID} .line .v.pos { color: var(--ok); } #${DOCK_ID} .line .v.neg { color: var(--warn); } #${DOCK_ID} .line .v.none { color: var(--quiet); font-weight: 400; }
-#${DOCK_ID} .cols { display: grid; grid-template-columns: minmax(0, 1fr) auto 52px; gap: 6px; padding: 3px 8px 0; color: var(--quiet); font-size: 11px; }
-#${DOCK_ID} .cols span:last-child { text-align: right; }
+/* Journal: today's net gain on one line, split by resource under it, then yesterday to compare. */
+#${DOCK_ID} .jday { display: flex; flex-direction: column; gap: 3px; width: 100%; padding: 6px 8px; border: 0; background: none; }
+#${DOCK_ID} .jday:hover { background: var(--hover); }
+#${DOCK_ID} .jday + .jday { padding-top: 0; }
+#${DOCK_ID} .jday .row { display: flex; align-items: baseline; gap: 6px; }
+#${DOCK_ID} .jday .k { flex: 1; min-width: 0; color: var(--label); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#${DOCK_ID} .jday .v { font: 600 condensed 14px var(--display); color: var(--text-2); }
+#${DOCK_ID} .jday.today .v { font-size: 17px; color: var(--text); }
+#${DOCK_ID} .jday .v.neg { color: var(--bad); } #${DOCK_ID} .jday .v.none { color: var(--quiet); font-weight: 400; }
+#${DOCK_ID} .res { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; font: condensed 12px var(--display); color: var(--text-2); }
+#${DOCK_ID} .res span { white-space: nowrap; overflow: hidden; }
+#${DOCK_ID} .res b { margin-right: 2px; font-weight: 600; }
 /* Targets: one chip per flag in use. */
 #${DOCK_ID} .flags { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 6px; }
 #${DOCK_ID} .flag { display: flex; align-items: center; justify-content: center; gap: 4px; height: 26px; padding: 0; border: 0; border-radius: 4px; background: var(--surface); }
@@ -118,33 +112,32 @@ export function renderDock(o: DockOptions): void {
     return b;
   };
 
-  // Journal: expeditions read from the inbox, today and over the last 7 days.
+  // Journal: expeditions read from the inbox; today's net gain (in MSU and per resource), yesterday's to compare.
+  const { today, yesterday } = o.journal;
   const journal = el(doc, 'section', 'card');
-  journal.append(head('chart', t('dock.journal'), t('exp.title'), o.onOpenJournal));
+  journal.append(head('chart', t('dock.journal'), t('exp.title'), o.onOpenJournal, today.count ? String(today.count) : ''));
   const signed = (n: number) => `${n >= 0 ? '+' : '−'}${fmt(Math.abs(n))}`;
-  const today = o.journal.today;
-  const block = button('jtoday', t('dock.journalHint', { n: today.count }), o.onOpenJournal);
-  const big = el(doc, 'span', `v${today.count ? (today.net < 0 ? ' neg' : '') : ' none'}`, today.count ? signed(today.net) : '—');
-  if (today.count) big.append(el(doc, 'small', '', 'MSU'));
-  block.append(el(doc, 'span', 'k', t('dock.today')), big, el(doc, 'span', 'c', t('dock.todayCount', { n: today.count })));
-  const days = o.journal.days ?? [];
-  if (days.length) {
-    const cols = el(doc, 'span', 'days');
-    cols.setAttribute('aria-hidden', 'true');
-    const top = Math.max(1, ...days.map((d) => d.net));
-    days.forEach((d, i) => {
-      const bar = el(doc, 'i', d.net > 0 ? (i === days.length - 1 ? 'today' : '') : 'zero');
-      bar.style.height = `${Math.max(0, (d.net / top) * 100)}%`;
-      bar.title = `${new Date(d.start).toLocaleDateString(o.locale, { weekday: 'short', day: '2-digit', month: '2-digit' })} · ${d.count} · ${d.count ? signed(d.net) : '—'} MSU`;
-      cols.append(bar);
-    });
-    block.append(cols);
+  const day = (cls: string, label: string, d: DayGain) => {
+    const b = button(`jday ${cls}`, t('dock.journalHint', { n: d.count }), o.onOpenJournal);
+    const row = el(doc, 'span', 'row');
+    row.append(el(doc, 'span', 'k', label), el(doc, 'span', `v${d.count ? (d.net < 0 ? ' neg' : '') : ' none'}`, d.count ? signed(d.net) : '—'));
+    b.append(row);
+    return b;
+  };
+  const todayBlock = day('today', t('dock.today'), today);
+  if (today.count) {
+    const res = el(doc, 'span', 'res');
+    for (const k of ['metal', 'crystal', 'deuterium'] as const) {
+      const cell = el(doc, 'span');
+      cell.title = `${t(`res.${k}`)}: ${signed(today.res[k])}`;
+      const letter = el(doc, 'b', '', t(`res.short.${k}`));
+      letter.style.color = RES_COLORS[k];
+      cell.append(letter, fmt(today.res[k]));
+      res.append(cell);
+    }
+    todayBlock.append(res);
   }
-  journal.append(block);
-  const week = o.journal.week;
-  const line = button('line', t('dock.journalHint', { n: week.count }), o.onOpenJournal);
-  line.append(el(doc, 'span', 'k', t('dock.week')), el(doc, 'span', 'c', week.count ? String(week.count) : ''), el(doc, 'span', `v ${week.count ? (week.net >= 0 ? 'pos' : 'neg') : 'none'}`, week.count ? signed(week.net) : '—'));
-  journal.append(line);
+  journal.append(todayBlock, day('yesterday', t('exp.period.yesterday'), yesterday));
 
   // Targets: flagged players per flag; each opens the side bar on its own list.
   const players = Object.values(o.marks.players);
