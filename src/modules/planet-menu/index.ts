@@ -8,6 +8,7 @@
  * Pure DOM work on data already loaded: the only network call is the Sync button,
  * which runs from a real click (see core/guard.ts).
  */
+import { icon } from '../../core/icons';
 import type { AccountSnapshot, OwnBody } from '../../data/account-info';
 import type { PlanetListEntry } from '../../data/planet-list';
 import { activeItems, queueLabel, type QueueItem, type QueueSnapshot } from '../../data/queues';
@@ -159,8 +160,9 @@ function resourceColumn(doc: Document, body: OwnBody | undefined, now: number, l
 }
 
 /**
- * What the ships are worth, planet and moon, as a third line under name and coordinates: the row
- * keeps its height (the old pill under the resources made every row taller).
+ * What the ships are worth, planet and moon. With a mouse it shows only on hover, in the coordinates'
+ * place (style.ts), so the row reads name + coordinates; on touch screens, with no hover, it stays as
+ * a third line, the moon's part included.
  */
 function fleetLine(doc: Document, planet: OwnBody | undefined, moon: OwnBody | undefined, locale: string, t: PlanetMenuOptions['t']): HTMLElement | null {
   const p = planet ? fleetValue(planet) : 0;
@@ -168,6 +170,8 @@ function fleetLine(doc: Document, planet: OwnBody | undefined, moon: OwnBody | u
   if (!p && !m) return null;
   const line = el(doc, 'span', 'fut-fleet');
   line.title = t('planetMenu.fleetHint');
+  // The fleet symbol says what the number is, now that it shows only on hover.
+  if (p || m) line.append(icon(doc, 'fleet', 12));
   if (p) line.append(el(doc, 'span', 'fut-fleet-p', formatUnits(p, locale)));
   if (m) {
     const moonPart = el(doc, 'span', 'fut-fleet-m');
@@ -349,7 +353,7 @@ function showPlanTip(doc: Document, anchor: HTMLElement, mark: PlanMark, o: Plan
 /** Removes everything Future added, so the menu can be redrawn without duplicates. */
 export function clearPlanetMenu(doc: Document): void {
   doc
-    .querySelectorAll('.fut-res, .fut-fleet, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue, .fut-plancol, #fut-plan-tip')
+    .querySelectorAll('.fut-res, .fut-fleet, .fut-fleet-peek, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue, .fut-plancol, #fut-plan-tip')
     .forEach((n) => n.remove());
   doc.querySelectorAll('.fut-name').forEach((wrap) => wrap.replaceWith(...Array.from(wrap.childNodes)));
   doc.querySelectorAll('.fut-row').forEach((n) => n.classList.remove('fut-row', 'fut-current'));
@@ -531,6 +535,14 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
     if (moon) {
       const moonBody = entry.moonId ? byId.get(entry.moonId) : undefined;
       moon.append(resourceColumn(doc, moonBody, o.now, o.locale, false, view));
+      // The moon's fleet: on hover it takes the place of the three figures (pointer devices only).
+      const mf = moonBody && view.fleet ? fleetValue(moonBody) : 0;
+      if (mf) {
+        const peek = el(doc, 'span', 'fut-fleet-peek');
+        peek.append(icon(doc, 'fleet', 12), formatUnits(mf, o.locale));
+        peek.title = o.t('planetMenu.fleetHint');
+        moon.append(peek);
+      }
       const age = ageBadge(doc, entry.moonId, o.visits, o.now, o.t);
       if (age) moon.append(age);
       const mq = queueDots(doc, entry.moonId ? activeItems(o.queues?.bodies[String(entry.moonId)], o.now) : [], entry.construction.moon, o.now, o.t, o.locale);
