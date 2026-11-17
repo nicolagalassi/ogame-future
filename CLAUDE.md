@@ -4,7 +4,7 @@
 - Regole extra ricavate da OGLight: [docs/OGLIGHT-RULES.md](docs/OGLIGHT-RULES.md). API: [docs/API-NOTES.md](docs/API-NOTES.md).
 - Ogni chiamata di rete passa da `src/core/guard.ts`. Mai `fetch` diretto altrove.
 - Il codice pubblicato non si minifica (`scripts/build.mjs`).
-- Prima di ogni push: `npm run check` (typecheck, test, build).
+- Prima di ogni push: `npm run check` (typecheck, regole, test con copertura, build). Leggi [CONSTRAINTS.md](CONSTRAINTS.md) prima di scrivere codice e non indebolirlo per far passare una modifica.
 - Ogni push su main alza `version` in `package.json` (Tampermonkey aggiorna solo se la versione cresce; `@updateURL` punta a `dist/future.user.js` su main).
 - A fine lavoro: push sul branch di sviluppo, PR in bozza, poi merge su main subito, senza chiedere conferma a Nicola.
 - Prova in gioco con il browser dev (`npm run dev`, poi `dev:reload` / `dev:eval` / `dev:shot`): vedi `.claude/QUICK_START.md`.

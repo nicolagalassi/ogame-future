@@ -4,3 +4,4 @@ node_modules/
 devlog.jsonl
 devharness.log
 OGLight-*.user.js
+coverage/
