@@ -541,7 +541,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       link?.after(gap);
     }
     // The plan, in a slim column at the row's outer end, on every row: a body with nothing planned
-    // keeps an empty white square, so the column always shows where planned levels will appear.
+    // keeps an empty slot, so the column always shows where planned levels will appear.
     {
       const col = el(doc, 'span', 'fut-plancol');
       const pb = planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : undefined, o, { id: entry.planetId, name: entry.name, coords: entry.coords, moon: false });
