@@ -942,5 +942,15 @@
   "orion.nowCost": "for {v} lithium",
   "orion.cargoNeed": "Delivery: cargo ships only, with at least the incoming fleet’s capacity. The largest: {cap} (wave {wave}) ≈ {lc} large or {sc} small cargoes",
   "orion.cargoHint": "Capacity of the incoming NPC fleets (their ships’ base capacity, with their bonus), from the wave data; the player’s cargoes at the capacity read on the fleet page. Warships in the fleet = no reward.",
-  "orion.waveN": "Wave {n}"
+  "orion.waveN": "Wave {n}",
+  "fleet.expeditionSpread": "Random system ±",
+  "settings.expSpreadHint": "Like OGLight: the expedition goes to a random system between the origin minus N and plus N. 0 = always the origin system.",
+  "fleet.expeditionSplit": "Share cargo over the slots",
+  "settings.expSplitHint": "For young universes: each expedition takes at most the cargo ships here divided by the expedition slots still free, so the first one does not take them all.",
+  "fleet.expSplitCalc": "{ship}: {n} ÷ {slots} slots = {each} per expedition",
+  "fleet.expSplitUnknown": "The calculation shows after opening the Fleet page.",
+  "fleet.expeditionStay": "Expeditions from the same planet",
+  "settings.expStayHint": "With Repeat on, after an expedition the same planet or moon opens again with the expedition prepared, while slots are free. Off = the next planet.",
+  "fleet.ok.expSystem": "to {coords} (±{n})",
+  "fleet.ok.expSplit": "cargo shared over {slots} slots"
 }

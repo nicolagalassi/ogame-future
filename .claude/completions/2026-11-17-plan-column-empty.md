@@ -13,3 +13,11 @@
   (id xx2xx), che invece sono per pianeta. Avviando lo stesso livello su un pianeta, `startBuild` / `prune` /
   `pruneByQueues` lo toglievano dal piano di tutti gli altri pianeti. (Contava anche le navi 202–219, senza effetti.)
 - Ora solo gli id 101–199 valgono su tutto l'account. Test di regressione in `tests/tech.test.ts`.
+
+## Spedizioni (0.3.111)
+- `expeditionStay` (Ripeti → "Spedizioni dallo stesso pianeta"): dopo l'invio riapre lo stesso corpo con la spedizione pronta
+  finché resta uno slot libero (`hookSend` in `src/modules/fleet/index.ts`); stesso precedente OGLight di Ripeti.
+- `expeditionSpread` ("Sistema casuale ±"): `expeditionSystem` in `src/engines/fleet.ts`, donut/limiti da `universeOf`.
+- `expeditionSplit` ("Dividi i cargo tra gli slot"): cargo per spedizione = cargo del corpo ÷ slot liberi (`expeditionShare`);
+  in Impostazioni il calcolo con i dati visti sull'ultima pagina Flotta (`EXPEDITION_MAX_KEY` ora salva anche cargo e slot).
+- Tutto spento di default. Non provato in gioco (serve il login di Nicola).

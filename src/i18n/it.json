@@ -942,5 +942,15 @@
   "orion.nowCost": "per {v} di litio",
   "orion.cargoNeed": "Consegna: solo cargo, con capacità almeno pari alla flotta in arrivo. La più grande: {cap} (ondata {wave}) ≈ {lc} cargo pesanti o {sc} cargo leggeri",
   "orion.cargoHint": "Capacità delle flotte NPC in arrivo (capacità base delle loro navi, col loro bonus), dai dati dell’ondata; i cargo del giocatore con la capacità letta dalla pagina flotta. Navi da guerra nella flotta = nessuna ricompensa.",
-  "orion.waveN": "Ondata {n}"
+  "orion.waveN": "Ondata {n}",
+  "fleet.expeditionSpread": "Sistema casuale ±",
+  "settings.expSpreadHint": "Come OGLight: la spedizione va in un sistema a caso tra quello di partenza meno N e più N. 0 = sempre il sistema di partenza.",
+  "fleet.expeditionSplit": "Dividi i cargo tra gli slot",
+  "settings.expSplitHint": "Per gli universi giovani: ogni spedizione prende al massimo i cargo del pianeta divisi per gli slot spedizione ancora liberi, così la prima non li porta via tutti.",
+  "fleet.expSplitCalc": "{ship}: {n} ÷ {slots} slot = {each} a spedizione",
+  "fleet.expSplitUnknown": "Il calcolo compare dopo aver aperto la pagina Flotta.",
+  "fleet.expeditionStay": "Spedizioni dallo stesso pianeta",
+  "settings.expStayHint": "Con Ripeti attivo, dopo una spedizione riapre lo stesso pianeta o luna con la spedizione già pronta, finché restano slot liberi. Spento = passa al pianeta successivo.",
+  "fleet.ok.expSystem": "verso {coords} (±{n})",
+  "fleet.ok.expSplit": "cargo divisi per {slots} slot"
 }
