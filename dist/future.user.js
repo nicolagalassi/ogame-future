@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.107
+// @version      0.3.108
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -9247,28 +9247,28 @@ td.spark-cell { width: 90px; }
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
 #${TOUCH_ID}, .fut-touch-pad { ${WINDOW_TOKENS} }
 #${TOUCH_ID} { position: fixed; left: 0; top: 0; z-index: 1000000; box-sizing: border-box; transform-origin: 0 0;
-  display: flex; align-items: center; gap: 6px; padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
-  background: rgba(8, 13, 20, 0.94); border-top: 1px solid var(--line); box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.45);
-  font: 11px/1.2 Verdana, Arial, sans-serif; color: var(--text-2); }
-#${TOUCH_ID} .keys { flex: 1; display: flex; gap: 6px; min-width: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  display: flex; align-items: center; gap: 8px; padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+  background: var(--raised); box-shadow: inset 0 2px 0 var(--line-strong);
+  font: 600 13px/1.2 var(--display); color: var(--text-2); }
+/* The keys scroll sideways: the faded right edge says there are more. */
+#${TOUCH_ID} .keys { flex: 1; display: flex; gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 22px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 22px), transparent); padding-right: 22px; }
 #${TOUCH_ID} .keys::-webkit-scrollbar { display: none; }
-#${TOUCH_ID} .sep { flex: none; width: 1px; align-self: stretch; margin: 4px 2px; background: var(--line); }
+#${TOUCH_ID} .sep { flex: none; width: 2px; align-self: stretch; margin: 0 6px; background: var(--line-strong); }
 #${TOUCH_ID} button { flex: none; position: relative; display: inline-flex; align-items: center; justify-content: center;
-  width: 48px; height: 48px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--accent);
+  width: 46px; height: 46px; padding: 0; border: 0; border-radius: 4px; background: var(--surface); color: var(--text-2);
   font: inherit; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-#${TOUCH_ID} button:active { background: var(--accent-soft); border-color: var(--accent); transform: translateY(1px); }
-#${TOUCH_ID} button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+#${TOUCH_ID} button:active { background: var(--hover); color: var(--text); }
+#${TOUCH_ID} button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 /* The key in the corner, as on the fleet bar; fingers do not need it. */
-#${TOUCH_ID} button .k { position: absolute; top: 3px; right: 4px; color: var(--muted); font-size: 11px; line-height: 11px; }
+#${TOUCH_ID} button .k { position: absolute; top: 3px; right: 4px; color: var(--quiet); font-size: 11px; line-height: 11px; }
 #${TOUCH_ID} button:has(.k) .fut-tb-glyph { margin: 6px 6px 0 0; }
 @media (pointer: coarse) { #${TOUCH_ID} button .k { display: none; } #${TOUCH_ID} button:has(.k) .fut-tb-glyph { margin: 0; } }
-#${TOUCH_ID} button.planet { color: var(--text-2); }
-#${TOUCH_ID} button.galaxy { color: var(--ok); }
 #${TOUCH_ID}[data-page="fleet2"] button.fleet, #${TOUCH_ID}[data-page="fleet2"] .sep.fleet { display: none; }
-#${TOUCH_ID} .send { width: auto; min-width: 104px; padding: 0 16px; gap: 8px; border-color: #2B8A5E; background: #12352A; color: #E6F7EE; font-weight: 700; font-size: 13px; }
-#${TOUCH_ID} .send:active { background: #1A4A3A; border-color: var(--d); }
-@media (prefers-reduced-motion: reduce) { #${TOUCH_ID} button:active { transform: none; } }
-#${TOUCH_ID} .send[aria-disabled="true"] { opacity: 0.45; }
+/* The one primary action: pawn yellow. Not ready: struck through in quiet grey on an outline, as every disabled button. */
+#${TOUCH_ID} .send { width: auto; min-width: 104px; padding: 0 16px; gap: 8px; background: var(--accent); color: var(--on-accent); font-size: 14px; }
+#${TOUCH_ID} .send:active { background: var(--accent-hi); color: var(--on-accent); }
+#${TOUCH_ID} .send[aria-disabled="true"] { background: transparent; box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--quiet); text-decoration: line-through; }
 .fut-touch-pad { height: 72px; }
 `;
   var queued = false;
@@ -9313,7 +9313,7 @@ td.spark-cell { width: 90px; }
       const key = keyLabel(map.get(def.id) ?? null);
       b.title = key && !def.touchOnly ? `${t(def.label)} [${key}]` : t(def.label);
       b.setAttribute("aria-label", t(def.label));
-      b.append(glyph(doc, def, 24));
+      b.append(glyph(doc, def, 22));
       if (key && !def.touchOnly) {
         const k = doc.createElement("span");
         k.className = "k";
