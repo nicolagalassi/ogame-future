@@ -147,3 +147,23 @@ describe('dashboard maths', () => {
     expect(lfResearch(2)).toHaveLength(18);
   });
 });
+
+describe('ships on a body follow the fleet page', () => {
+  it('a send takes its ships away, the fleet page sets what is there', async () => {
+    const { applyPageShips, shipsAfterSend, fleetValue } = await import('../src/engines/account');
+    const snapshot = { fetchedAt: 0, researches: {}, bodies: [{ id: 7, type: 'planet', name: '', coords: '', siblingId: null, production: { metal: 0, crystal: 0, deuterium: 0 }, resources: { metal: 0, crystal: 0, deuterium: 0 }, storage: { metal: 0, crystal: 0, deuterium: 0 }, resourcesAt: 0, levels: { '1': 30, '203': 100, '213': 5, '212': 40 } }] } as never;
+    const left = shipsAfterSend({ '203': 100, '213': 5, '212': 40 }, [{ id: 203, number: 100 }, { id: 213, number: 9 }]);
+    expect(left).toEqual({ '203': 0, '213': 0, '212': 40 });
+    expect(applyPageShips(snapshot, 7, left)).toBe(true);
+    const body = (snapshot as { bodies: { levels: Record<string, number> }[] }).bodies[0]!;
+    // Flying ships gone; buildings and solar satellites untouched.
+    expect(fleetValue(body)).toBe(0);
+    expect(body.levels['1']).toBe(30);
+    expect(body.levels['212']).toBe(40);
+    // Same again: nothing changes. Back home: the value returns. Unknown body: nothing.
+    expect(applyPageShips(snapshot, 7, left)).toBe(false);
+    expect(applyPageShips(snapshot, 7, { '203': 100 })).toBe(true);
+    expect(fleetValue(body)).toBeGreaterThan(0);
+    expect(applyPageShips(snapshot, 99, { '203': 1 })).toBe(false);
+  });
+});

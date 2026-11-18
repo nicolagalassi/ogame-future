@@ -28,6 +28,32 @@ export function fleetValue(body: { levels: Record<string, number> }): number {
   return total;
 }
 
+/**
+ * The ships a body holds now, as the fleet page shows them, written into the stored snapshot so the
+ * planet menu's fleet value follows what is really there (ships that left, ships back home), without
+ * waiting for the next account reading. `ships` lists every ship on the body: a flying ship it does
+ * not list has none there. Returns whether anything changed.
+ */
+export function applyPageShips(snapshot: AccountSnapshot, bodyId: number, ships: Record<string, number>): boolean {
+  const body = snapshot.bodies.find((b) => b.id === bodyId);
+  if (!body) return false;
+  let changed = false;
+  for (const id of FLYING) {
+    const n = Math.max(0, Math.floor(Number(ships[String(id)]) || 0));
+    if ((body.levels[String(id)] ?? 0) === n) continue;
+    body.levels[String(id)] = n;
+    changed = true;
+  }
+  return changed;
+}
+
+/** What stays on a body after a fleet the game accepted: the ships here minus those sent (never below zero). */
+export function shipsAfterSend(onPlanet: Record<string, number>, sent: readonly { id: number; number: number }[]): Record<string, number> {
+  const out: Record<string, number> = { ...onPlanet };
+  for (const s of sent) out[String(s.id)] = Math.max(0, (out[String(s.id)] ?? 0) - (Number(s.number) || 0));
+  return out;
+}
+
 export interface BodyRow {
   id: number;
   type: 'planet' | 'moon';

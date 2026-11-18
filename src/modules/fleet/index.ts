@@ -61,6 +61,7 @@ import { SERVER_DATA_KEY, type ServerData } from '../../data/server-data';
 import { universeOf } from '../messages/spy-table';
 import { SNAPSHOT_KEY, type AccountSnapshot } from '../../data/account-info';
 import { applyPageResources, leftAfterSend } from '../../engines/resources';
+import { applyPageShips, shipsAfterSend } from '../../engines/account';
 import { originCoords, readShipSlots } from '../../data/fleet-page';
 import { getDispatcher, readShipsInfo, shipCapacity as shipCapacityOf, shipsOnPlanet, SHIPS_INFO_KEY, whenDispatcherReady, type FleetDispatcher } from '../../data/fleet-dispatcher';
 import {
@@ -1618,6 +1619,11 @@ export function renderFleetTools(o: FleetOptions): void {
     // Names and capacities for the inbox summaries (spy loot, ships found): kept locally.
     const ships = readShipsInfo(fd);
     if (ships) o.store.set(SHIPS_INFO_KEY, ships);
+    try {
+      recordShipsHere(o, fd);
+    } catch {
+      /* storage full or blocked: only the planet menu's fleet value stays as it was */
+    }
     // "Ripeti": know when the game accepted the send, and move on as OGLight does.
     hookSend(fd, () => {
       // Remember what was sent, for "Ultima flotta".
@@ -1724,7 +1730,16 @@ function recordLeft(o: FleetOptions, fd: FleetDispatcher): void {
   if (!snapshot) return;
   const onPlanet = { metal: Number(fd.metalOnPlanet) || 0, crystal: Number(fd.crystalOnPlanet) || 0, deuterium: Number(fd.deuteriumOnPlanet) || 0 };
   const cargo = { metal: Number(fd.cargoMetal) || 0, crystal: Number(fd.cargoCrystal) || 0, deuterium: Number(fd.cargoDeuterium) || 0 };
-  if (applyPageResources(snapshot, o.bodyId, leftAfterSend(onPlanet, cargo, Number(fd.getConsumption()) || 0), Date.now())) o.store.set(SNAPSHOT_KEY, snapshot);
+  const res = applyPageResources(snapshot, o.bodyId, leftAfterSend(onPlanet, cargo, Number(fd.getConsumption()) || 0), Date.now());
+  // The ships that left are no longer here: the planet menu's fleet value drops at once (fleetsave, expeditions…).
+  const ships = applyPageShips(snapshot, o.bodyId, shipsAfterSend(shipsOnPlanet(fd), fd.shipsToSend ?? []));
+  if (res || ships) o.store.set(SNAPSHOT_KEY, snapshot);
+}
+
+/** The ships the fleet page shows on this body (a fleet back home, ships built), into the stored snapshot. No request. */
+function recordShipsHere(o: FleetOptions, fd: FleetDispatcher): void {
+  const snapshot = o.store.get<AccountSnapshot | null>(SNAPSHOT_KEY, null);
+  if (snapshot && applyPageShips(snapshot, o.bodyId, shipsOnPlanet(fd))) o.store.set(SNAPSHOT_KEY, snapshot);
 }
 
 function recordShipment(o: FleetOptions, fd: FleetDispatcher): void {

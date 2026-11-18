@@ -66,6 +66,8 @@ describe('renderPlanetMenu', () => {
     const peeks = document.querySelectorAll('#planet-1 a.moonlink .fut-fleet-peek');
     expect(peeks).toHaveLength(1);
     expect(peeks[0]!.textContent).toMatch(/\d/);
+    // The planet's own veil (whole planet, on hover): one after a redraw too.
+    expect(document.querySelectorAll('#planet-1 a.planetlink > .fut-fleet-peek.fut-peek-planet')).toHaveLength(1);
     // Totals: each line with its symbol (the resources as the board's pieces), the fleet included.
     expect(document.querySelectorAll('.fut-totals .fut-tico svg').length).toBe(5);
   });
@@ -299,5 +301,15 @@ describe('the game card on planets, switched off', () => {
     link.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
     expect(tip.disable).toHaveBeenCalled();
     expect(tip.enable).not.toHaveBeenCalled();
+  });
+});
+
+describe('fleet on hover', () => {
+  it('no veil on a planet without ships, even when its moon has some (the moon shows its own)', () => {
+    document.body.innerHTML = PLANET_LIST_HTML;
+    const snapshot = { ...SNAPSHOT, bodies: SNAPSHOT.bodies.map((b) => ({ ...b, levels: (b.type === 'moon' ? { 202: 100 } : {}) as Record<string, number> })) };
+    renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot, settings: { mode: 'side', showTotals: true, showFleet: true }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true) });
+    expect(document.querySelector('#planet-1 a.planetlink .fut-fleet-peek')).toBeNull();
+    expect(document.querySelectorAll('#planet-1 a.moonlink .fut-fleet-peek')).toHaveLength(1);
   });
 });
