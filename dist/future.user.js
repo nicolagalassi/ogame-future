@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.126
+// @version      0.3.127
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -10107,17 +10107,23 @@ ${L} .fut-full { color: var(--warn) !important; font-weight: 700; }
 ${L} .fut-missing { color: var(--muted); }
 /* Fleet: what the ships are worth (planet, then moon), a third line under name and coordinates. */
 ${L} .fut-fleet { display: none; align-items: center; gap: 5px; min-width: 0; font: 400 12px/14px var(--display); font-variant-numeric: tabular-nums; color: #F2A3A3; white-space: nowrap; overflow: hidden; }
-/* With a mouse: hovering a planet or a moon lays a veil over the whole body, fading in from its picture
-   on the left, with the fleet symbol and value on the right. The veil lets the pointer through (the link,
-   its click and the game's card stay); the age badge and the queue dots stay on top of it. Keyboard focus
-   does the same. Touch screens keep the third line (below). */
+/* With a mouse: hovering a planet lays a veil over the whole planet, fading in from its picture on the left,
+   with the fleet symbol and value on the right. Hovering the moon shows the moon's fleet on the same veil,
+   over the planet, with the moon mark: on the narrow moon tile the hand cursor covered it. The veil lets the
+   pointer through (the link, its click and the game's card stay); the age badge and the queue dots stay on
+   top of it. Keyboard focus does the same. Touch screens keep the third line (below). */
 ${L} .fut-fleet-peek { display: none; }
+/* The moon's veil leaves its tile to the left: the tile must not clip it (the row still does, at the planet's edge). */
+${L} a.moonlink { overflow: visible !important; }
 @media (hover: hover) and (pointer: fine) {
   /* The body under the pointer: a clear step lighter than both the row (raised) and the moon tile (line). */
   ${L} a.planetlink:hover, ${L} a.moonlink:hover { background: var(--line-strong) !important; }
-  ${L} a.planetlink:hover .fut-fleet-peek, ${L} a.moonlink:hover .fut-fleet-peek { display: flex; }
+  ${L} a.planetlink:hover .fut-peek-planet, ${L} a.moonlink:hover .fut-peek-moon { display: flex; }
+  /* Under the veil the planet's figures step aside, so only the fleet value reads. */
+  ${L} a.planetlink:hover:has(.fut-peek-planet) .fut-res, ${L} .fut-row:has(a.moonlink:hover .fut-peek-moon) a.planetlink .fut-res { visibility: hidden; }
 }
-${L} a.planetlink:focus-visible .fut-fleet-peek, ${L} a.moonlink:focus-visible .fut-fleet-peek { display: flex; }
+${L} a.planetlink:focus-visible .fut-peek-planet, ${L} a.moonlink:focus-visible .fut-peek-moon { display: flex; }
+${L} a.planetlink:focus-visible:has(.fut-peek-planet) .fut-res, ${L} .fut-row:has(a.moonlink:focus-visible .fut-peek-moon) a.planetlink .fut-res { visibility: hidden; }
 ${L} .fut-fleet-peek {
   position: absolute; inset: 0; z-index: 1; align-items: center; justify-content: flex-end; padding: 0 6px 0 0;
   background: linear-gradient(90deg, rgba(13,21,34,0.15) 0%, rgba(13,21,34,0.78) 38%, rgba(13,21,34,0.94) 70%);
@@ -10125,16 +10131,9 @@ ${L} .fut-fleet-peek {
 }
 ${L} .fut-peek-v { display: inline-flex; align-items: center; gap: 5px; font: 600 15px/1 var(--display); font-variant-numeric: tabular-nums;
   color: #F2A3A3; white-space: nowrap; text-shadow: 0 1px 2px #000; }
-/* The moon is narrow: the symbol above the value, the veil darker sooner. */
-${L} .fut-peek-moon { padding-right: 3px; background: linear-gradient(90deg, rgba(13,21,34,0.3) 0%, rgba(13,21,34,0.92) 55%); }
-${L} .fut-peek-moon .fut-peek-v { flex-direction: column; align-items: flex-end; gap: 2px; font-size: 12px; }
-/* Under the veil the body's figures step aside, so only the fleet value reads. */
-@media (hover: hover) and (pointer: fine) {
-  ${L} a.planetlink:hover:has(.fut-fleet-peek) .fut-res, ${L} a.moonlink:hover:has(.fut-fleet-peek) .fut-res { visibility: hidden; }
-}
-${L} a.planetlink:focus-visible:has(.fut-fleet-peek) .fut-res, ${L} a.moonlink:focus-visible:has(.fut-fleet-peek) .fut-res { visibility: hidden; }
-/* Compact view: the moon is a 22px button, too narrow for a value; its fleet shows in the side view only. */
-${L}.fut-mode-compact .fut-peek-moon { display: none !important; }
+${L} .fut-peek-moonmark { display: inline-flex; margin-left: -2px; color: #D8A0A0; }
+/* The moon's veil: right edge on the moon tile's left edge, as wide as the planet (set on hover, see index.ts). */
+${L} .fut-peek-moon { left: auto; right: calc(100% + 1px); width: var(--fut-peek-w, 170px); box-sizing: border-box; }
 @keyframes fut-peek-in { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { ${L} .fut-fleet-peek { animation: none; } }
 ${L} .fut-fleet svg, ${L} .fut-fleet-peek svg { flex: none; }
@@ -10420,11 +10419,18 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     }
     return line;
   }
-  function fleetPeek(doc, value, o, cls) {
+  var MOON_MARK = '<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="currentColor"><path d="M14.6 2.6A9.6 9.6 0 1 0 21.4 16 8 8 0 0 1 14.6 2.6z"/></svg>';
+  function fleetPeek(doc, value, o, cls, moon = false) {
     const peek = el3(doc, "span", `fut-fleet-peek ${cls}`);
     peek.setAttribute("aria-hidden", "true");
     const v = el3(doc, "span", "fut-peek-v");
-    v.append(icon(doc, "fleet", 12), formatUnits(value, o.locale));
+    v.append(icon(doc, "fleet", 12));
+    if (moon) {
+      const mark = el3(doc, "span", "fut-peek-moonmark");
+      mark.innerHTML = MOON_MARK;
+      v.append(mark);
+    }
+    v.append(formatUnits(value, o.locale));
     peek.append(v);
     return peek;
   }
@@ -10707,7 +10713,16 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
         const moonBody = entry.moonId ? byId.get(entry.moonId) : void 0;
         moon.append(resourceColumn(doc, moonBody, o.now, o.locale, false, view2));
         const mf = moonBody && view2.fleet ? fleetValue(moonBody) : 0;
-        if (mf) moon.append(fleetPeek(doc, mf, o, "fut-peek-moon"));
+        if (mf) {
+          const peek = fleetPeek(doc, mf, o, "fut-peek-moon", true);
+          const fit = () => {
+            const w = entry.planetLink?.offsetWidth ?? 0;
+            if (w > 0) peek.style.setProperty("--fut-peek-w", `${w}px`);
+          };
+          moon.addEventListener("mouseenter", fit);
+          moon.addEventListener("focus", fit);
+          moon.append(peek);
+        }
         const age = ageBadge(doc, entry.moonId, o.visits, o.now, o.t);
         if (age) moon.append(age);
         const mq = queueDots(doc, entry.moonId ? activeItems(o.queues?.bodies[String(entry.moonId)], o.now) : [], entry.construction.moon, o.now, o.t, o.locale);
