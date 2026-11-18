@@ -88,10 +88,25 @@ for (const { file, text } of added) {
 }
 
 // 2b. A test file deleted, or an assertion removed from a test file that still exists.
+// An assertion may be replaced when the behaviour it checked changed (CONSTRAINTS.md, Nicola 2026-11-18):
+// only when the file ends with at least as many assertion lines as it had, and a commit of the branch
+// carries `Behavior-Changed: <test file>: <what changed>` naming that file. Each one let through is printed.
+const ASSERTION = /\b(expect|assert|should)\b/;
+const branchLog = git(['log', '--format=%B', mergeBase + '..HEAD']) ?? '';
+const behaviorChanged = [...branchLog.matchAll(/^Behavior-Changed: *([^:\s]+) *: *(.+)$/gm)].map((m) => ({ file: m[1].trim(), why: m[2].trim() }));
+const replacedOk = (file) => {
+  const named = behaviorChanged.find((b) => b.file === file || file.endsWith('/' + b.file));
+  if (!named) return null;
+  const gone = removed.filter((l) => l.file === file && ASSERTION.test(l.text)).length;
+  const come = added.filter((l) => l.file === file && ASSERTION.test(l.text)).length;
+  return come >= gone ? named.why : null;
+};
 for (const f of deleted) if (isTest(f)) flag('test-deleted', f, 'file deleted');
 for (const { file, text } of removed) {
-  if (isTest(file) && !deleted.includes(file) && /\b(expect|assert|should)\b/.test(text)) {
-    flag('assertion-removed', file, text);
+  if (isTest(file) && !deleted.includes(file) && ASSERTION.test(text)) {
+    const why = replacedOk(file);
+    if (why) console.error(`floor-guard: asserzione sostituita (Behavior-Changed: ${why}): ${file}: ${text.trim().slice(0, 120)}`);
+    else flag('assertion-removed', file, text);
   }
 }
 
@@ -155,7 +170,7 @@ for (const r of removedRules) {
 // A change to CONSTRAINTS.md that lowers the bar passes only when a commit of the branch carries a
 // `Constraints-Approved: <who and why>` trailer: the decision is the owner's, and it stays in the history.
 // Code findings are never approved this way. Approved findings are still printed: loosening stays loud.
-const approval = (git(['log', '--format=%B', mergeBase + '..HEAD']) ?? '').match(/^Constraints-Approved: *(.+)$/m)?.[1];
+const approval = branchLog.match(/^Constraints-Approved: *(.+)$/m)?.[1];
 if (approval) {
   const approved = findings.filter((f) => isConstraints(f.file));
   for (const f of approved) console.error(`floor-guard: approvato (${approval}): [${f.rule}] ${f.file}: ${f.text}`);
