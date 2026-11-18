@@ -182,12 +182,24 @@ function fleetLine(doc: Document, planet: OwnBody | undefined, moon: OwnBody | u
   return line;
 }
 
-/** The fleet shown on hover over a planet or a moon: the fleet symbol and the value, on a fading veil (style.ts). */
-function fleetPeek(doc: Document, value: number, o: PlanetMenuOptions, cls: string): HTMLElement {
+const MOON_MARK = '<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="currentColor"><path d="M14.6 2.6A9.6 9.6 0 1 0 21.4 16 8 8 0 0 1 14.6 2.6z"/></svg>';
+
+/**
+ * The fleet shown on hover, on a fading veil over the planet (style.ts): the planet's own when the
+ * planet is hovered, the moon's (with the moon mark) when the moon is. Both are drawn over the planet,
+ * away from the pointer: on the narrow moon tile the hand cursor covered the value.
+ */
+function fleetPeek(doc: Document, value: number, o: PlanetMenuOptions, cls: string, moon = false): HTMLElement {
   const peek = el(doc, 'span', `fut-fleet-peek ${cls}`);
   peek.setAttribute('aria-hidden', 'true');
   const v = el(doc, 'span', 'fut-peek-v');
-  v.append(icon(doc, 'fleet', 12), formatUnits(value, o.locale));
+  v.append(icon(doc, 'fleet', 12));
+  if (moon) {
+    const mark = el(doc, 'span', 'fut-peek-moonmark');
+    mark.innerHTML = MOON_MARK;
+    v.append(mark);
+  }
+  v.append(formatUnits(value, o.locale));
   peek.append(v);
   return peek;
 }
@@ -535,9 +547,10 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true, view));
       // The planet's fleet: on hover a veil over the whole planet, fading in from the planet's picture,
       // with the value on the right (pointer devices; touch screens keep the third line above). Only
-      // when the planet itself has ships: a fleet only on the moon shows on the moon.
+      // when the planet itself has ships.
       const pf = planetBody && view.fleet ? fleetValue(planetBody) : 0;
       if (pf) link.append(fleetPeek(doc, pf, o, 'fut-peek-planet'));
+
       const age = ageBadge(doc, entry.planetId, o.visits, o.now, o.t);
       if (age) link.append(age);
       // The game's wrench is hidden: the dots say what is being built, not only that something is.
@@ -550,9 +563,19 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
     if (moon) {
       const moonBody = entry.moonId ? byId.get(entry.moonId) : undefined;
       moon.append(resourceColumn(doc, moonBody, o.now, o.locale, false, view));
-      // The moon's fleet: on hover it takes the place of the three figures (pointer devices only).
+      // The moon's fleet: its own veil, drawn to the left over the planet (style.ts), away from the pointer
+      // that rests on the narrow moon tile. Sized to the planet when the moon is hovered or focused.
       const mf = moonBody && view.fleet ? fleetValue(moonBody) : 0;
-      if (mf) moon.append(fleetPeek(doc, mf, o, 'fut-peek-moon'));
+      if (mf) {
+        const peek = fleetPeek(doc, mf, o, 'fut-peek-moon', true);
+        const fit = () => {
+          const w = entry.planetLink?.offsetWidth ?? 0;
+          if (w > 0) peek.style.setProperty('--fut-peek-w', `${w}px`);
+        };
+        moon.addEventListener('mouseenter', fit);
+        moon.addEventListener('focus', fit);
+        moon.append(peek);
+      }
       const age = ageBadge(doc, entry.moonId, o.visits, o.now, o.t);
       if (age) moon.append(age);
       const mq = queueDots(doc, entry.moonId ? activeItems(o.queues?.bodies[String(entry.moonId)], o.now) : [], entry.construction.moon, o.now, o.t, o.locale);

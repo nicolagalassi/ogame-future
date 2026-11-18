@@ -313,3 +313,20 @@ describe('fleet on hover', () => {
     expect(document.querySelectorAll('#planet-1 a.moonlink .fut-fleet-peek')).toHaveLength(1);
   });
 });
+
+describe('the moon fleet, away from the pointer', () => {
+  it('lives in the moon tile with the moon mark, drawn over the planet; nothing of the moon inside the planet link', () => {
+    document.body.innerHTML = PLANET_LIST_HTML;
+    const snapshot = { ...SNAPSHOT, bodies: SNAPSHOT.bodies.map((b) => ({ ...b, levels: (b.type === 'moon' ? { 202: 100 } : { 203: 10 }) as Record<string, number> })) };
+    renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot, settings: { mode: 'side', showTotals: true, showFleet: true }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true) });
+    const moon = document.querySelector<HTMLElement>('#planet-1 a.moonlink')!;
+    const peek = moon.querySelector<HTMLElement>('.fut-fleet-peek.fut-peek-moon')!;
+    expect(peek.querySelector('.fut-peek-moonmark svg')).not.toBeNull();
+    expect(document.querySelector('#planet-1 a.planetlink .fut-peek-moon')).toBeNull();
+    expect(document.querySelectorAll('#planet-1 a.planetlink > .fut-peek-planet')).toHaveLength(1);
+    // Sized to the planet when the moon is hovered or focused.
+    Object.defineProperty(document.querySelector('#planet-1 a.planetlink')!, 'offsetWidth', { value: 148 });
+    moon.dispatchEvent(new MouseEvent('mouseenter'));
+    expect(peek.style.getPropertyValue('--fut-peek-w')).toBe('148px');
+  });
+});
