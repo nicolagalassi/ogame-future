@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.124
+// @version      0.3.125
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -18049,7 +18049,9 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
       mode: storedMode === "compact" ? "compact" : "side",
       showTotals: store.get("planetMenu.totals", true),
       showFleet: store.get("planetMenu.fleet", false),
-      totalView: store.get("planetMenu.totalView", "msu") === "sum" ? "sum" : "msu"
+      totalView: store.get("planetMenu.totalView", "msu") === "sum" ? "sum" : "msu",
+      // The game's own card on planets and moons (on unless the player switched it off).
+      gameTips: store.get("planetMenu.gameTips", true)
     };
     const planMarks = () => {
       const plan = store.get(PLAN_KEY, {});
@@ -18115,6 +18117,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
           store.set("planetMenu.totals", next.showTotals);
           store.set("planetMenu.fleet", next.showFleet === true);
           store.set("planetMenu.totalView", next.totalView ?? "msu");
+          store.set("planetMenu.gameTips", next.gameTips !== false);
           draw();
         }
       },

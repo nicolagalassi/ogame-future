@@ -288,3 +288,16 @@ describe('when the game reloads the planet bar', () => {
     expect(document.querySelectorAll('.fut-toolbar')).toHaveLength(1);
   });
 });
+
+describe('the game card on planets, switched off', () => {
+  it('stays off on a fresh page even when the game builds its card only after the menu (first hover)', () => {
+    document.body.innerHTML = PLANET_LIST_HTML;
+    renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { mode: 'side', showTotals: true, gameTips: false }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true) });
+    const link = document.querySelector<HTMLElement>('#planet-1 a.planetlink')!;
+    const tip = { enable: vi.fn(), disable: vi.fn(), hide: vi.fn() };
+    (link as HTMLElement & { _tippy?: typeof tip })._tippy = tip;
+    link.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+    expect(tip.disable).toHaveBeenCalled();
+    expect(tip.enable).not.toHaveBeenCalled();
+  });
+});
