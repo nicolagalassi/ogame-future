@@ -93,26 +93,36 @@ ${L} .fut-full { color: var(--warn) !important; font-weight: 700; }
 ${L} .fut-missing { color: var(--muted); }
 /* Fleet: what the ships are worth (planet, then moon), a third line under name and coordinates. */
 ${L} .fut-fleet { display: none; align-items: center; gap: 5px; min-width: 0; font: 400 12px/14px var(--display); font-variant-numeric: tabular-nums; color: #F2A3A3; white-space: nowrap; overflow: hidden; }
-/* With a mouse: hovering a planet swaps its coordinates for its fleet, a moon swaps its figures for its own;
-   the moon's part of the planet line is not needed there. Keyboard focus does the same. */
+/* With a mouse: hovering a planet or a moon lays a veil over the whole body, fading in from its picture
+   on the left, with the fleet symbol and value on the right. The veil lets the pointer through (the link,
+   its click and the game's card stay); the age badge and the queue dots stay on top of it. Keyboard focus
+   does the same. Touch screens keep the third line (below). */
 ${L} .fut-fleet-peek { display: none; }
 @media (hover: hover) and (pointer: fine) {
-  /* The body under the pointer: a clear step lighter than both the row (raised) and the moon tile (line), so it reads
-     at a glance which body the fleet belongs to. */
+  /* The body under the pointer: a clear step lighter than both the row (raised) and the moon tile (line). */
   ${L} a.planetlink:hover, ${L} a.moonlink:hover { background: var(--line-strong) !important; }
-  ${L} a.planetlink:hover .fut-fleet { display: flex; }
-  ${L} a.planetlink:hover .planet-koords { display: none !important; }
-  ${L} .fut-fleet .fut-fleet-m { display: none; }
-  ${L} a.moonlink:hover .fut-fleet-peek { display: flex; }
-  ${L} a.moonlink:hover .fut-res { visibility: hidden; }
+  ${L} a.planetlink:hover .fut-fleet-peek, ${L} a.moonlink:hover .fut-fleet-peek { display: flex; }
 }
-${L} a.planetlink:focus-visible .fut-fleet { display: flex; }
-${L} a.planetlink:focus-visible .planet-koords { display: none !important; }
-${L} a.moonlink:focus-visible .fut-fleet-peek { display: flex; }
-${L} a.moonlink:focus-visible .fut-res { visibility: hidden; }
-/* In the moon's 32px of figures: the symbol above the value, both right-aligned. */
-${L} .fut-fleet-peek { position: absolute; top: 0; bottom: 0; right: 2px; left: 20px; flex-direction: column; align-items: flex-end; justify-content: center;
-  gap: 2px; font: 600 12px var(--display); font-variant-numeric: tabular-nums; color: #F2A3A3; white-space: nowrap; pointer-events: none; }
+${L} a.planetlink:focus-visible .fut-fleet-peek, ${L} a.moonlink:focus-visible .fut-fleet-peek { display: flex; }
+${L} .fut-fleet-peek {
+  position: absolute; inset: 0; z-index: 1; align-items: center; justify-content: flex-end; padding: 0 6px 0 0;
+  background: linear-gradient(90deg, rgba(13,21,34,0.15) 0%, rgba(13,21,34,0.78) 38%, rgba(13,21,34,0.94) 70%);
+  pointer-events: none; animation: fut-peek-in 140ms ease-out;
+}
+${L} .fut-peek-v { display: inline-flex; align-items: center; gap: 5px; font: 600 15px/1 var(--display); font-variant-numeric: tabular-nums;
+  color: #F2A3A3; white-space: nowrap; text-shadow: 0 1px 2px #000; }
+/* The moon is narrow: the symbol above the value, the veil darker sooner. */
+${L} .fut-peek-moon { padding-right: 3px; background: linear-gradient(90deg, rgba(13,21,34,0.3) 0%, rgba(13,21,34,0.92) 55%); }
+${L} .fut-peek-moon .fut-peek-v { flex-direction: column; align-items: flex-end; gap: 2px; font-size: 12px; }
+/* Under the veil the body's figures step aside, so only the fleet value reads. */
+@media (hover: hover) and (pointer: fine) {
+  ${L} a.planetlink:hover:has(.fut-fleet-peek) .fut-res, ${L} a.moonlink:hover:has(.fut-fleet-peek) .fut-res { visibility: hidden; }
+}
+${L} a.planetlink:focus-visible:has(.fut-fleet-peek) .fut-res, ${L} a.moonlink:focus-visible:has(.fut-fleet-peek) .fut-res { visibility: hidden; }
+/* Compact view: the moon is a 22px button, too narrow for a value; its fleet shows in the side view only. */
+${L}.fut-mode-compact .fut-peek-moon { display: none !important; }
+@keyframes fut-peek-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { ${L} .fut-fleet-peek { animation: none; } }
 ${L} .fut-fleet svg, ${L} .fut-fleet-peek svg { flex: none; }
 /* Touch screens have no hover: the fleet stays as a third line (moon included), in the smaller sizes that fit 40px. */
 @media (hover: none) {
