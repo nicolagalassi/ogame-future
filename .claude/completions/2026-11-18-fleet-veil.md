@@ -7,4 +7,7 @@
   il menu della pagina Flotta stessa si aggiorna alla pagina dopo.
 - Velo: `.fut-fleet-peek` ora copre tutto il pianeta (`.fut-peek-planet`) o la luna (`.fut-peek-moon`), sfumato da sinistra,
   sotto età e code (z-index 1), pointer-events none, anche col focus; niente velo se il corpo non ha navi sue.
-  Telefono invariato (terza riga). DESIGN.md e .impeccable/design.json aggiornati. Versione 0.3.126.
+  Telefono invariato (terza riga). Sotto il velo le cifre del corpo si nascondono; vista compatta: niente velo sulla luna (22px).
+  DESIGN.md aggiornato (.impeccable/design.json non descrive questo hover). Versione 0.3.126.
+- Da chiarire con Nicola: lo storico del giorno (`recordDay`) tiene l'ultima lettura della flotta, quindi una lettura
+  presa durante un fleetsave abbassa il valore di quel giorno.

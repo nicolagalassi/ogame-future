@@ -10128,6 +10128,13 @@ ${L} .fut-peek-v { display: inline-flex; align-items: center; gap: 5px; font: 60
 /* The moon is narrow: the symbol above the value, the veil darker sooner. */
 ${L} .fut-peek-moon { padding-right: 3px; background: linear-gradient(90deg, rgba(13,21,34,0.3) 0%, rgba(13,21,34,0.92) 55%); }
 ${L} .fut-peek-moon .fut-peek-v { flex-direction: column; align-items: flex-end; gap: 2px; font-size: 12px; }
+/* Under the veil the body's figures step aside, so only the fleet value reads. */
+@media (hover: hover) and (pointer: fine) {
+  ${L} a.planetlink:hover:has(.fut-fleet-peek) .fut-res, ${L} a.moonlink:hover:has(.fut-fleet-peek) .fut-res { visibility: hidden; }
+}
+${L} a.planetlink:focus-visible:has(.fut-fleet-peek) .fut-res, ${L} a.moonlink:focus-visible:has(.fut-fleet-peek) .fut-res { visibility: hidden; }
+/* Compact view: the moon is a 22px button, too narrow for a value; its fleet shows in the side view only. */
+${L}.fut-mode-compact .fut-peek-moon { display: none !important; }
 @keyframes fut-peek-in { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { ${L} .fut-fleet-peek { animation: none; } }
 ${L} .fut-fleet svg, ${L} .fut-fleet-peek svg { flex: none; }
