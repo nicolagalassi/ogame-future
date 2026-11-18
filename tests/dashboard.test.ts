@@ -135,9 +135,10 @@ describe('dashboard panel', () => {
 });
 
 describe('dashboard maths', () => {
-  it('scrap return follows the rate and caps at 75%', () => {
+  it('scrap return follows the rate and caps at 90%', () => {
     expect(scrapReturn({ 202: 10 }, 35)).toEqual({ metal: 7000, crystal: 7000, deuterium: 0 });
-    expect(scrapReturn({ 202: 10 }, 90)).toEqual(scrapReturn({ 202: 10 }, 75));
+    expect(scrapReturn({ 202: 10 }, 95)).toEqual(scrapReturn({ 202: 10 }, 90));
+    expect(scrapReturn({ 202: 10 }, 90)).toEqual({ metal: 18000, crystal: 18000, deuterium: 0 });
   });
   it('names: learned beats built-in, lifeforms fall back to English', () => {
     expect(techName(1, 'it')).toBe('Miniera di metallo');
@@ -165,5 +166,26 @@ describe('ships on a body follow the fleet page', () => {
     expect(applyPageShips(snapshot, 7, { '203': 100 })).toBe(true);
     expect(fleetValue(body)).toBeGreaterThan(0);
     expect(applyPageShips(snapshot, 99, { '203': 1 })).toBe(false);
+  });
+});
+
+describe('scrap tab', () => {
+  it('quick rates set the field and the result, the one in use pressed; the body list opens on the left', async () => {
+    const { readPlanetList } = await import('../src/data/planet-list');
+    const { PLANET_LIST_HTML, SNAPSHOT } = await import('./fixtures');
+    const { translator } = await import('../src/core/i18n');
+    document.body.innerHTML = PLANET_LIST_HTML;
+    const snapshot = { ...SNAPSHOT, bodies: SNAPSHOT.bodies.map((b) => ({ ...b, levels: { ...b.levels, 202: 10 } })) };
+    openDashboard({ doc: document, snapshot, entries: readPlanetList(document), score: null, now: 0, locale: 'it', t: translator('it') });
+    document.getElementById('fut-dashboard')!.shadowRoot!.querySelector<HTMLButtonElement>('.tab[data-tab="scrap"]')!.click();
+    // The tab redraws the window: read it again.
+    const root = document.getElementById('fut-dashboard')!.shadowRoot!;
+    const chips = [...root.querySelectorAll<HTMLButtonElement>('.scrap-rates .rate-chip')];
+    expect(chips.map((c) => c.textContent)).toEqual(['75%', '81%', '83%', '85%', '87%', '90%']);
+    chips[5]!.click();
+    expect(root.querySelector<HTMLInputElement>('.scrap-bar input.rate')!.value).toBe('90');
+    expect(chips.filter((c) => c.getAttribute('aria-pressed') === 'true').map((c) => c.textContent)).toEqual(['90%']);
+    expect(root.querySelector('.scrap-bar .bmenu')!.classList.contains('left')).toBe(true);
+    closeDashboard(document);
   });
 });

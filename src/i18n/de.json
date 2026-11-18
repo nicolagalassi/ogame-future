@@ -408,7 +408,7 @@
   "lf.4": "Kaelesh",
   "dash.unitsNone": "Keine Einheiten in den gespeicherten Daten.",
   "dash.valueMsu": "Wert",
-  "dash.scrapHint": "Nur Berechnung: der Schrotthändler gibt 35 % der Kosten zurück, mit Verhandeln bis 75 %. Verkauft wird auf der Händlerseite.",
+  "dash.scrapHint": "Nur Berechnung: der Schrotthändler gibt ab 35 % der Kosten zurück, mit Verhandeln mehr (hier bis 90 %). Verkauft wird auf der Händlerseite.",
   "dash.scrapRate": "Quote",
   "dash.scrapAll": "Alle",
   "dash.scrapNone": "Leeren",

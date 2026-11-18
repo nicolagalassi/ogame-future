@@ -24,6 +24,8 @@ export interface BodyPickerOptions {
   none?: string;
   /** Accessible name of the button when nothing is chosen. */
   label: string;
+  /** Which edge of the button the list lines up with: 'right' (default, for pickers at the right of a row) or 'left' (for one at the left, where a list wider than the button would be cut). */
+  align?: 'left' | 'right';
   onPick: (id: number | null) => void;
 }
 
@@ -40,7 +42,7 @@ export function bodyPicker(doc: Document, o: BodyPickerOptions): HTMLElement {
   button.type = 'button';
   button.setAttribute('aria-haspopup', 'listbox');
   button.setAttribute('aria-expanded', 'false');
-  const menu = h('div', 'bmenu');
+  const menu = h('div', o.align === 'left' ? 'bmenu left' : 'bmenu');
   menu.setAttribute('role', 'listbox');
   menu.hidden = true;
   let current = o.current;
@@ -57,6 +59,8 @@ export function bodyPicker(doc: Document, o: BodyPickerOptions): HTMLElement {
   const set = (open: boolean) => {
     menu.hidden = !open;
     button.setAttribute('aria-expanded', String(open));
+    // Near the bottom of a short window the list would be cut: bring it into view in its scrolling window.
+    if (open) menu.scrollIntoView?.({ block: 'nearest' });
   };
   const choose = (id: number | null) => {
     current = id;

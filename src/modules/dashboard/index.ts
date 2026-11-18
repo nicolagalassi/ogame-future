@@ -150,9 +150,14 @@ export function dayFigures(snapshot: AccountSnapshot | null): { prodDay: number;
 }
 
 /** Resources the scrap merchant gives back for `amounts`, at `rate` percent. */
+/** Highest rate the calculator takes: the highest quick rate Nicola uses (the game's own ceiling is not documented here). */
+export const SCRAP_MAX = 90;
+/** Quick rates, one click each, beside the field that still takes any value. */
+export const SCRAP_RATES = [75, 81, 83, 85, 87, 90] as const;
+
 export function scrapReturn(amounts: Record<number, number>, rate: number): { metal: number; crystal: number; deuterium: number } {
   const out = { metal: 0, crystal: 0, deuterium: 0 };
-  const k = Math.min(75, Math.max(0, rate)) / 100;
+  const k = Math.min(SCRAP_MAX, Math.max(0, rate)) / 100;
   for (const [id, n] of Object.entries(amounts)) {
     if (!n) continue;
     const c = rawCost(Number(id), 1);
@@ -1033,6 +1038,8 @@ function bodyPicker(ctx: Ctx, ids: Set<number>, current: OwnBody, onPick: (id: n
     enabled: ids,
     moonWord: t('dash.moon'),
     label: t('dash.moon'),
+    // The picker opens the row: lined up on its left edge, the list stays inside the window.
+    align: 'left',
     onPick: (id) => {
       if (id !== null) onPick(id);
     },
@@ -1060,15 +1067,29 @@ function scrapTab(parent: HTMLElement, ctx: Ctx): void {
   const rate = h('input', 'field rate');
   rate.type = 'number';
   rate.min = '35';
-  rate.max = '75';
+  rate.max = String(SCRAP_MAX);
   rate.step = '1';
   rate.value = String(scrapRate);
   rateLabel.append(rate, h('span', '', '%'));
+  const quick = h('span', 'scrap-rates');
+  quick.setAttribute('role', 'group');
+  quick.setAttribute('aria-label', t('dash.scrapRate'));
+  const quickBtns = SCRAP_RATES.map((v) => {
+    const b = h('button', 'chip rate-chip', `${v}%`);
+    b.type = 'button';
+    b.dataset.rate = String(v);
+    b.addEventListener('click', () => {
+      rate.value = String(v);
+      update();
+    });
+    return b;
+  });
+  quick.append(...quickBtns);
   const all = h('button', 'chip', t('dash.scrapAll'));
   all.type = 'button';
   const none = h('button', 'chip', t('dash.scrapNone'));
   none.type = 'button';
-  bar.append(pick, rateLabel, all, none);
+  bar.append(pick, rateLabel, quick, all, none);
   s.append(bar);
 
   const wrap = h('div', 'table-wrap');
@@ -1126,7 +1147,8 @@ function scrapTab(parent: HTMLElement, ctx: Ctx): void {
   s.append(wrap);
 
   const update = () => {
-    scrapRate = Math.min(75, Math.max(35, Number(rate.value) || 35));
+    scrapRate = Math.min(SCRAP_MAX, Math.max(35, Number(rate.value) || 35));
+    for (const b of quickBtns) b.setAttribute('aria-pressed', String(Number(b.dataset.rate) === scrapRate));
     const amounts: Record<number, number> = {};
     for (const [id, input] of inputs) {
       const n = Math.min(level(body, id), Math.max(0, Math.floor(Number(input.value) || 0)));

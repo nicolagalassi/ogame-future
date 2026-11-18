@@ -44,6 +44,10 @@ export const DASHBOARD_CSS = `
   color: var(--text-2); font: 12px var(--body); cursor: pointer;
 }
 .chip:hover { border-color: var(--accent); color: var(--text); }
+/* Quick scrap rates: the one in use outlined in pawn yellow, like a pressed filter chip. */
+.scrap-rates { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.rate-chip { padding: 0 8px; font: 600 12px var(--display); font-variant-numeric: tabular-nums; }
+.rate-chip[aria-pressed="true"] { border-color: var(--accent); color: var(--text); background: var(--accent-soft); }
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
 th { text-align: left; padding: 6px 8px; color: var(--label); font: 600 condensed 12px var(--display); border-bottom: 1px solid var(--line); white-space: nowrap; }

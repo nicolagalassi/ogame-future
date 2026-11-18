@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.128
+// @version      0.3.129
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -917,7 +917,7 @@
     "lf.4": "Kaelesh",
     "dash.unitsNone": "Nessuna unit\xE0 nei dati salvati.",
     "dash.valueMsu": "Valore",
-    "dash.scrapHint": "Solo calcolo: il Rottamatore del gioco restituisce il 35% del costo, fino al 75% contrattando. La vendita la fai nella pagina del Mercante.",
+    "dash.scrapHint": "Solo calcolo: il Rottamatore del gioco restituisce dal 35% del costo in su, contrattando (qui fino al 90%). La vendita la fai nella pagina del Mercante.",
     "dash.scrapRate": "Resa",
     "dash.scrapAll": "Tutto",
     "dash.scrapNone": "Azzera",
@@ -1872,7 +1872,7 @@
     "lf.4": "Kaelesh",
     "dash.unitsNone": "No units in the stored data.",
     "dash.valueMsu": "Value",
-    "dash.scrapHint": "Calculation only: the game's scrap merchant gives back 35% of the cost, up to 75% by bargaining. You sell on the Merchant page.",
+    "dash.scrapHint": "Calculation only: the game's scrap merchant gives back from 35% of the cost upwards by bargaining (up to 90% here). You sell on the Merchant page.",
     "dash.scrapRate": "Rate",
     "dash.scrapAll": "All",
     "dash.scrapNone": "Clear",
@@ -2827,7 +2827,7 @@
     "lf.4": "Kaelesh",
     "dash.unitsNone": "Aucune unit\xE9 dans les donn\xE9es.",
     "dash.valueMsu": "Valeur",
-    "dash.scrapHint": "Calcul uniquement : le ferrailleur rend 35 % du co\xFBt, jusqu'\xE0 75 % en n\xE9gociant. La vente se fait sur la page du Marchand.",
+    "dash.scrapHint": "Calcul uniquement : le ferrailleur rend \xE0 partir de 35 % du co\xFBt en n\xE9gociant (jusqu'\xE0 90 % ici). La vente se fait sur la page du Marchand.",
     "dash.scrapRate": "Taux",
     "dash.scrapAll": "Tout",
     "dash.scrapNone": "Vider",
@@ -3782,7 +3782,7 @@
     "lf.4": "Kaelesh",
     "dash.unitsNone": "Keine Einheiten in den gespeicherten Daten.",
     "dash.valueMsu": "Wert",
-    "dash.scrapHint": "Nur Berechnung: der Schrotth\xE4ndler gibt 35 % der Kosten zur\xFCck, mit Verhandeln bis 75 %. Verkauft wird auf der H\xE4ndlerseite.",
+    "dash.scrapHint": "Nur Berechnung: der Schrotth\xE4ndler gibt ab 35 % der Kosten zur\xFCck, mit Verhandeln mehr (hier bis 90 %). Verkauft wird auf der H\xE4ndlerseite.",
     "dash.scrapRate": "Quote",
     "dash.scrapAll": "Alle",
     "dash.scrapNone": "Leeren",
@@ -4916,6 +4916,7 @@ input.sw:focus-visible + .sw-track { outline: 2px solid var(--accent); outline-o
 .bpick-btn:hover, .bpick-btn[aria-expanded="true"] { border-color: var(--line-hover); }
 .bmenu { position: absolute; z-index: 5; top: 34px; right: 0; min-width: 260px; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; display: grid; grid-template-columns: minmax(0, 1fr) 40px; gap: 2px; padding: 4px; border-radius: 4px; background: var(--bg); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
 .bmenu[hidden] { display: none; }
+.bmenu.left { left: 0; right: auto; }
 .bmenu button { display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 8px; border: 0; border-radius: 3px; background: var(--surface); color: var(--text-2); font: 13px var(--body); text-align: left; white-space: nowrap; cursor: pointer; }
 .bmenu button.clear { grid-column: 1 / -1; color: var(--muted); }
 .bmenu button small { margin-left: auto; color: var(--muted); font: condensed 12px var(--display); }
@@ -6787,7 +6788,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     button3.type = "button";
     button3.setAttribute("aria-haspopup", "listbox");
     button3.setAttribute("aria-expanded", "false");
-    const menu = h8("div", "bmenu");
+    const menu = h8("div", o.align === "left" ? "bmenu left" : "bmenu");
     menu.setAttribute("role", "listbox");
     menu.hidden = true;
     let current3 = o.current;
@@ -6803,6 +6804,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     const set = (open2) => {
       menu.hidden = !open2;
       button3.setAttribute("aria-expanded", String(open2));
+      if (open2) menu.scrollIntoView?.({ block: "nearest" });
     };
     const choose = (id) => {
       current3 = id;
@@ -11484,6 +11486,10 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
   color: var(--text-2); font: 12px var(--body); cursor: pointer;
 }
 .chip:hover { border-color: var(--accent); color: var(--text); }
+/* Quick scrap rates: the one in use outlined in pawn yellow, like a pressed filter chip. */
+.scrap-rates { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.rate-chip { padding: 0 8px; font: 600 12px var(--display); font-variant-numeric: tabular-nums; }
+.rate-chip[aria-pressed="true"] { border-color: var(--accent); color: var(--text); background: var(--accent-soft); }
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
 th { text-align: left; padding: 6px 8px; color: var(--label); font: 600 condensed 12px var(--display); border-bottom: 1px solid var(--line); white-space: nowrap; }
@@ -11706,9 +11712,11 @@ table.queues td.acts { width: 1%; text-align: right; }
     const prod = snapshot.bodies.reduce((s, b) => s + msu2(b.production), 0) * 24;
     return { prodDay: Math.round(prod), fleet: Math.round(fleetValueOf(snapshot.bodies).value) };
   }
+  var SCRAP_MAX = 90;
+  var SCRAP_RATES = [75, 81, 83, 85, 87, 90];
   function scrapReturn(amounts, rate) {
     const out = { metal: 0, crystal: 0, deuterium: 0 };
-    const k = Math.min(75, Math.max(0, rate)) / 100;
+    const k = Math.min(SCRAP_MAX, Math.max(0, rate)) / 100;
     for (const [id, n] of Object.entries(amounts)) {
       if (!n) continue;
       const c = rawCost(Number(id), 1);
@@ -12485,6 +12493,8 @@ table.queues td.acts { width: 1%; text-align: right; }
       enabled: ids,
       moonWord: t("dash.moon"),
       label: t("dash.moon"),
+      // The picker opens the row: lined up on its left edge, the list stays inside the window.
+      align: "left",
       onPick: (id) => {
         if (id !== null) onPick(id);
       }
@@ -12510,15 +12520,29 @@ table.queues td.acts { width: 1%; text-align: right; }
     const rate = h3("input", "field rate");
     rate.type = "number";
     rate.min = "35";
-    rate.max = "75";
+    rate.max = String(SCRAP_MAX);
     rate.step = "1";
     rate.value = String(scrapRate);
     rateLabel.append(rate, h3("span", "", "%"));
+    const quick = h3("span", "scrap-rates");
+    quick.setAttribute("role", "group");
+    quick.setAttribute("aria-label", t("dash.scrapRate"));
+    const quickBtns = SCRAP_RATES.map((v) => {
+      const b = h3("button", "chip rate-chip", `${v}%`);
+      b.type = "button";
+      b.dataset.rate = String(v);
+      b.addEventListener("click", () => {
+        rate.value = String(v);
+        update();
+      });
+      return b;
+    });
+    quick.append(...quickBtns);
     const all2 = h3("button", "chip", t("dash.scrapAll"));
     all2.type = "button";
     const none = h3("button", "chip", t("dash.scrapNone"));
     none.type = "button";
-    bar.append(pick, rateLabel, all2, none);
+    bar.append(pick, rateLabel, quick, all2, none);
     s.append(bar);
     const wrap = h3("div", "table-wrap");
     const table = h3("table", "scrap");
@@ -12573,7 +12597,8 @@ table.queues td.acts { width: 1%; text-align: right; }
     wrap.append(table);
     s.append(wrap);
     const update = () => {
-      scrapRate = Math.min(75, Math.max(35, Number(rate.value) || 35));
+      scrapRate = Math.min(SCRAP_MAX, Math.max(35, Number(rate.value) || 35));
+      for (const b of quickBtns) b.setAttribute("aria-pressed", String(Number(b.dataset.rate) === scrapRate));
       const amounts = {};
       for (const [id, input] of inputs) {
         const n = Math.min(level(body, id), Math.max(0, Math.floor(Number(input.value) || 0)));

@@ -408,7 +408,7 @@
   "lf.4": "Kaelesh",
   "dash.unitsNone": "Nessuna unità nei dati salvati.",
   "dash.valueMsu": "Valore",
-  "dash.scrapHint": "Solo calcolo: il Rottamatore del gioco restituisce il 35% del costo, fino al 75% contrattando. La vendita la fai nella pagina del Mercante.",
+  "dash.scrapHint": "Solo calcolo: il Rottamatore del gioco restituisce dal 35% del costo in su, contrattando (qui fino al 90%). La vendita la fai nella pagina del Mercante.",
   "dash.scrapRate": "Resa",
   "dash.scrapAll": "Tutto",
   "dash.scrapNone": "Azzera",
