@@ -408,7 +408,7 @@
   "lf.4": "Kaelesh",
   "dash.unitsNone": "Aucune unité dans les données.",
   "dash.valueMsu": "Valeur",
-  "dash.scrapHint": "Calcul uniquement : le ferrailleur rend 35 % du coût, jusqu'à 75 % en négociant. La vente se fait sur la page du Marchand.",
+  "dash.scrapHint": "Calcul uniquement : le ferrailleur rend à partir de 35 % du coût en négociant (jusqu'à 90 % ici). La vente se fait sur la page du Marchand.",
   "dash.scrapRate": "Taux",
   "dash.scrapAll": "Tout",
   "dash.scrapNone": "Vider",

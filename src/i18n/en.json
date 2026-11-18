@@ -408,7 +408,7 @@
   "lf.4": "Kaelesh",
   "dash.unitsNone": "No units in the stored data.",
   "dash.valueMsu": "Value",
-  "dash.scrapHint": "Calculation only: the game's scrap merchant gives back 35% of the cost, up to 75% by bargaining. You sell on the Merchant page.",
+  "dash.scrapHint": "Calculation only: the game's scrap merchant gives back from 35% of the cost upwards by bargaining (up to 90% here). You sell on the Merchant page.",
   "dash.scrapRate": "Rate",
   "dash.scrapAll": "All",
   "dash.scrapNone": "Clear",

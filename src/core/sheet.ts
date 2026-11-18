@@ -137,6 +137,7 @@ input.sw:focus-visible + .sw-track { outline: 2px solid var(--accent); outline-o
 .bpick-btn:hover, .bpick-btn[aria-expanded="true"] { border-color: var(--line-hover); }
 .bmenu { position: absolute; z-index: 5; top: 34px; right: 0; min-width: 260px; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; display: grid; grid-template-columns: minmax(0, 1fr) 40px; gap: 2px; padding: 4px; border-radius: 4px; background: var(--bg); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
 .bmenu[hidden] { display: none; }
+.bmenu.left { left: 0; right: auto; }
 .bmenu button { display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 8px; border: 0; border-radius: 3px; background: var(--surface); color: var(--text-2); font: 13px var(--body); text-align: left; white-space: nowrap; cursor: pointer; }
 .bmenu button.clear { grid-column: 1 / -1; color: var(--muted); }
 .bmenu button small { margin-left: auto; color: var(--muted); font: condensed 12px var(--display); }
