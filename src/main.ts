@@ -176,6 +176,8 @@ async function bootstrap(): Promise<void> {
     showTotals: store.get<boolean>('planetMenu.totals', true),
     showFleet: store.get<boolean>('planetMenu.fleet', false),
     totalView: store.get<string>('planetMenu.totalView', 'msu') === 'sum' ? 'sum' : 'msu',
+    // The game's own card on planets and moons (on unless the player switched it off).
+    gameTips: store.get<boolean>('planetMenu.gameTips', true),
   };
   /** Per planned body: what is planned and where its resources stand (shown in the planet list). */
   const planMarks = (): Record<string, PlanMark> => {
@@ -250,6 +252,7 @@ async function bootstrap(): Promise<void> {
           store.set('planetMenu.totals', next.showTotals);
           store.set('planetMenu.fleet', next.showFleet === true);
           store.set('planetMenu.totalView', next.totalView ?? 'msu');
+          store.set('planetMenu.gameTips', next.gameTips !== false);
           draw();
         },
       },
