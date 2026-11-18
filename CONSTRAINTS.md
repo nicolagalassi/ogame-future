@@ -1,6 +1,6 @@
 # Constraints
 
-Last reviewed: 2026-11-17 by Nicola (scelte: base e conformità bloccano; copertura, dipendenze e dimensione avvisano fino al 2026-12-01, poi bloccano; tutto in `npm run check` e nell'hook pre-push).
+Last reviewed: 2026-11-18 by Nicola (asserzioni sostituibili quando cambia il comportamento; scelte: base e conformità bloccano; copertura, dipendenze e dimensione avvisano fino al 2026-12-01, poi bloccano; tutto in `npm run check` e nell'hook pre-push).
 
 Questo file è la regola; `scripts/constraints.json` ne copia i numeri per gli script. Se i due divergono vale questo file.
 Un controllo rosso si risolve correggendo il codice, non questo file. Abbassare una soglia o aggiungere un'eccezione è una decisione di Nicola, in un commit a parte.
@@ -12,6 +12,7 @@ Controllato da `node scripts/floor-guard.mjs` sulle righe cambiate rispetto a `o
 - Nessuna soppressione nuova: `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `eslint-disable`, `istanbul ignore`
 - Nessun lavoro lasciato a metà: `throw new Error('not implemented')`, `catch {}` vuoto, `TODO` al posto del codice
 - Nessun test reso più facile: `.skip`, `.only`, `.todo`, file di test cancellato, `expect` tolto da un test che resta
+- Asserzione sostituita quando cambia il comportamento: ammessa solo se il file di test finisce con almeno tante asserzioni quante ne aveva e un commit del branch porta la riga `Behavior-Changed: <file di test>: <comportamento cambiato>`. Il guard stampa ogni asserzione tolta così; `.skip`, `.only`, `.todo`, file cancellati e asserzioni tolte senza sostituto restano bloccati. Chi cambia scrive la riga: il guard la registra ma non può verificarla (deciso da Nicola il 2026-11-18)
 - Questo file non si indebolisce per far passare una modifica: soglia abbassata, regola tolta o eccezione nuova vengono segnalate
 - Una modifica qui che abbassa la soglia passa solo se decisa da Nicola: in un commit a parte, senza codice, con la riga `Constraints-Approved: Nicola, <motivo>`. Il guard la stampa comunque; non vale mai per il codice
 
