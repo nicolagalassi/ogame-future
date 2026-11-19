@@ -438,3 +438,35 @@ describe('reports shared by the alliance', () => {
     expect(Object.keys(store.get<Journal>(JOURNAL_KEY, {}))).toEqual(['557']);
   });
 });
+
+describe('spy reports taken off the table', () => {
+  it('stay off when the inbox is read again (older or same report), come back with a newer one', async () => {
+    const { dismissSpy, rememberSpies } = await import('../src/engines/raids');
+    const report = (at: number) => ({ kind: 'spy', id: String(at), at, coords: '1:2:3', moon: false, playerId: 5, playerName: 'Bob', statuses: [], activity: 60, res: { metal: 1, crystal: 0, deuterium: 0 }, loot: 0.5, fleetValue: 0, defValue: 0, counter: false, apiKey: 'k' }) as never;
+    const now = 1_000_000;
+    let dismissed = dismissSpy({ '9:9:9': now - 80 * 3_600_000 }, '1:2:3', 900_000, now);
+    // An old removal past the board's age is forgotten.
+    expect(dismissed).toEqual({ '1:2:3': 900_000 });
+    const board = {};
+    expect(rememberSpies(board, [report(900_000), report(800_000)], now, false, dismissed)).toBe(0);
+    expect(board).toEqual({});
+    rememberSpies(board, [report(950_000)], now, false, dismissed);
+    expect(Object.keys(board)).toEqual(['1:2:3']);
+    dismissed = dismissSpy(dismissed, '1:2:3', 100, now);
+    expect(dismissed['1:2:3']).toBe(900_000);
+  });
+
+  it('the game delete button of that one message is pressed; shared or not on the page: none', async () => {
+    const { deleteReportInGame } = await import('../src/modules/messages/spy-table');
+    document.body.innerHTML = ['41', '42'].map((id) => `<div class="msg" data-msg-id="${id}"><div class="msgHead"><div class="msgHeadItem delActions"><button class="msgDeleteBtn"></button></div></div></div>`).join('')
+      + '<div class="msg" data-msg-id="43"><div class="msgHead"><div class="msgHeadItem delActions">Condiviso da <span class="player">X</span></div></div></div>';
+    const clicked: string[] = [];
+    document.querySelectorAll('.msgDeleteBtn').forEach((b) => b.addEventListener('click', () => clicked.push(b.closest('.msg')!.getAttribute('data-msg-id')!)));
+    expect(deleteReportInGame(document, '42')).toBe(true);
+    expect(clicked).toEqual(['42']);
+    expect(deleteReportInGame(document, '43')).toBe(false);
+    expect(deleteReportInGame(document, '99')).toBe(false);
+    expect(deleteReportInGame(document, '')).toBe(false);
+    expect(clicked).toEqual(['42']);
+  });
+});
