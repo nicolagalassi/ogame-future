@@ -38,12 +38,30 @@ export const SPY_MAX_AGE = 72 * 3_600_000;
 
 export const spyKey = (coords: string, moon: boolean) => `${coords}${moon ? ':m' : ''}`;
 
+/**
+ * Targets the player took off the table: target key → time of the report removed. A report of that
+ * target no newer than it is not brought back when the inbox is read again (an older report, one on
+ * another page, a shared one or a delete the game refused); a newer probe brings the target back.
+ */
+export const SPY_DISMISSED_KEY = 'spy.dismissed';
+export type SpyDismissed = Record<string, number>;
+
+/** Notes a removed target (the newest removal wins) and forgets removals older than the board keeps reports. */
+export function dismissSpy(dismissed: SpyDismissed, key: string, at: number, now: number): SpyDismissed {
+  const out: SpyDismissed = {};
+  for (const [k, t] of Object.entries(dismissed)) if (now - t <= SPY_MAX_AGE) out[k] = t;
+  out[key] = Math.max(out[key] ?? 0, at);
+  return out;
+}
+
 /** Adds reports (newest per target wins), drops old ones. Returns how many entries changed. */
-export function rememberSpies(board: SpyBoard, reports: SpyMessage[], now: number, shared = false): number {
+export function rememberSpies(board: SpyBoard, reports: SpyMessage[], now: number, shared = false, dismissed: SpyDismissed = {}): number {
   let changed = 0;
   for (const r of reports) {
     if (r.counter || !r.playerId) continue;
     const key = spyKey(r.coords, r.moon);
+    // Taken off the table by the player: only a newer report brings the target back.
+    if ((dismissed[key] ?? -1) >= r.at) continue;
     const known = board[key];
     // The same report met again in the shared tab: it was an alliance member's probe.
     if (known && known.id === r.id && shared && !known.shared) {

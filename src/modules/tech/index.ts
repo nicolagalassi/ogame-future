@@ -458,12 +458,15 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
     const amount = el(doc, 'input', 'fut-tp-amount');
     amount.type = 'text';
     amount.inputMode = 'numeric';
-    amount.value = groupInt(Math.max(1, Math.floor(Number(details.amountInput?.value) || 1)), locale);
+    // Opens empty: typing goes straight in (the field takes the focus below); the costs show one unit meanwhile.
+    amount.value = '';
     groupWhileTyping(amount, locale);
     amount.title = t('tech.amountHint');
-    // Keys typed here are ours: the game must not catch them (shortcuts, Enter = build).
+    // Keys typed here are ours: the game must not catch them (shortcuts, its own Enter).
     for (const type of ['keydown', 'keyup', 'keypress']) amount.addEventListener(type, (e) => e.stopPropagation());
-    const amountOf = () => Math.max(1, Math.floor(Number(amount.value.replace(/\D/g, '')) || 1));
+    /** What is typed (0 = nothing yet). */
+    const typed = () => Math.max(0, Math.floor(Number(amount.value.replace(/\D/g, '')) || 0));
+    const amountOf = () => Math.max(1, typed());
     let added = false;
     const draw = () => {
       const n = amountOf();
@@ -508,8 +511,20 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
       fit();
       if (!input) return;
       const cap = Math.min(QUEUE_MAX, Number(input.max) > 0 ? Number(input.max) : QUEUE_MAX);
-      input.value = String(Math.min(amountOf(), cap));
+      // Nothing typed: the game's field stays empty too, so its build button never builds one by itself.
+      input.value = typed() ? String(Math.min(typed(), cap)) : '';
     };
+    // Enter builds, as Enter in the game's own field does: the amount (capped) goes to the game's field
+    // and the game's own "Costruisci" is pressed once. COMPLIANCE: one key of the player = one build
+    // order (AGENTS.md §1.1); a held key repeats nothing, an empty field builds nothing.
+    amount.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      if (e.repeat || !typed() || !input) return;
+      push();
+      const build = details.root.querySelector<HTMLButtonElement>('.build-it_wrap button');
+      if (build && !build.disabled) build.click();
+    });
     amount.addEventListener('input', () => {
       added = false;
       push();
@@ -528,7 +543,8 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
     }
     const follow = () =>
       setTimeout(() => {
-        amount.value = groupInt(Math.max(1, Math.floor(Number(input?.value) || 1)), locale);
+        const n = Math.max(0, Math.floor(Number(input?.value) || 0));
+        amount.value = n ? groupInt(n, locale) : '';
         draw();
       }, 0);
     if (input) {
@@ -538,6 +554,8 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
       const asked = details.id === SATELLITE ? takeAskedSatellites(doc) : null;
       if (asked) fillAmount(input, asked);
     }
+    // Ready to type, without a click. With a mouse only: on a phone the focus would open the keyboard.
+    if (input && doc.defaultView?.matchMedia?.('(pointer: fine)').matches) amount.focus();
   }
 
   // Like OGLight: tools over the picture, the grid where the game lists costs and details.

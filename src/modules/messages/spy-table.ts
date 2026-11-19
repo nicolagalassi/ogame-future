@@ -17,7 +17,7 @@ import { formatUnits } from '../../core/format';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { SERVER_DATA_KEY, type ServerData } from '../../data/server-data';
 import type { LfBonuses } from '../../data/bonuses';
-import { raidWaves, SPY_BOARD_KEY, targetRows, type Base, type SpyBoard, type TargetRow, type Universe } from '../../engines/raids';
+import { dismissSpy, raidWaves, SPY_BOARD_KEY, SPY_DISMISSED_KEY, targetRows, type Base, type SpyBoard, type SpyDismissed, type TargetRow, type Universe } from '../../engines/raids';
 import { SIM_KEY, SIM_TOOLS, simLink, simPrefill, simTool } from '../../engines/sim-links';
 import { shipIcon, shipName } from '../../data/ship-icons';
 import type { T } from '../../core/i18n';
@@ -122,6 +122,23 @@ export function moveColumn(cols: ColKey[], key: ColKey, to: ColKey): ColKey[] {
 }
 
 const isSpyTab = (doc: Document) => !!doc.querySelector('[data-subtab-id="20"].active, [data-subtab-id="20"][aria-selected="true"]');
+
+/**
+ * The report's own message in the inbox, deleted with the game's own delete button: one click of the
+ * player on the table's bin = that one message, with the game's request (no request of ours, never a
+ * loop over older reports of the target). Not on this page, or shared by the alliance (no button):
+ * nothing to do, the table forgets the target anyway.
+ * GRAY AREA: requires ToolDev approval before publishing — see AGENTS.md §3 (one click doing the table's
+ * removal and the game's delete together; no OGLight precedent recorded in docs/OGLIGHT-RULES.md).
+ */
+export function deleteReportInGame(doc: Document, id: string): boolean {
+  if (!id) return false;
+  const msg = Array.from(doc.querySelectorAll<HTMLElement>('.msg[data-msg-id]')).find((m) => m.getAttribute('data-msg-id') === id);
+  const del = msg?.querySelector<HTMLButtonElement>('.msgHead .delActions .msgDeleteBtn');
+  if (!del) return false;
+  del.click();
+  return true;
+}
 
 /**
  * Draws the panel above the reports when the Espionage tab is open, removes it elsewhere.
@@ -385,10 +402,13 @@ function renderPanel(o: SpyPanelOptions, board: SpyBoard, view: View): HTMLEleme
         doc.defaultView?.open(simLink(tool, key, spy.lang, prefill), '_blank', 'noopener');
       }));
     }
-    acts.append(iconButton('fut-sp-del', 'trash', t('spy.remove'), () => {
+    acts.append(iconButton('fut-sp-del', 'trash', t(e.shared ? 'spy.removeShared' : 'spy.remove'), () => {
+      // First locally, so a re-read of the inbox (the game's delete changes it) cannot bring the row back.
+      store.set(SPY_DISMISSED_KEY, dismissSpy(store.get<SpyDismissed>(SPY_DISMISSED_KEY, {}), e.key, e.at, Date.now()));
       const b = store.get<SpyBoard>(SPY_BOARD_KEY, {});
       delete b[e.key];
       store.set(SPY_BOARD_KEY, b);
+      deleteReportInGame(doc, e.id);
       expanded.delete(e.key);
       // Keep the keyboard in the table: the next target's remove button, else the previous, else the title.
       const near = rows[index + 1] ?? rows[index - 1];

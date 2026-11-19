@@ -145,3 +145,22 @@ describe('combat report summary', () => {
     expect(a.textContent).toBe('Convertitore');
   });
 });
+
+describe('removing a target from the table', () => {
+  it('deletes its report in the inbox with the game button and keeps it off the next reading', async () => {
+    const { SPY_DISMISSED_KEY } = await import('../src/engines/raids');
+    document.body.innerHTML = '<div data-subtab-id="20" class="active"></div><div id="messages"><div class="messagesHolder">'
+      + '<div class="msg" data-msg-id="7"><div class="msgHead"><div class="msgHeadItem delActions"><button class="msgDeleteBtn"></button></div></div></div></div></div>';
+    let deleted = 0;
+    document.querySelector('.msgDeleteBtn')!.addEventListener('click', () => deleted++);
+    const store = new Store(new MemoryStore(), 'del');
+    const entry = { at: 1000, moon: false, playerId: 5, statuses: [], activity: 60, res: { metal: 1e6, crystal: 0, deuterium: 0 }, loot: 0.5, fleetValue: 0, defValue: 0 };
+    store.set(SPY_BOARD_KEY, { '1:1:1': { ...entry, key: '1:1:1', id: '7', coords: '1:1:1', playerName: 'Mine' } });
+    mountSpyPanel({ doc: document, store, t: translator('it'), locale: 'it', now: () => 61_000, spy: { bases: [], researches: {}, classId: 0, server: 's269-it', lang: 'it' } });
+    const del = document.querySelector<HTMLButtonElement>('.fut-sp-list .fut-sp-del')!;
+    expect(del.getAttribute('aria-label') ?? del.title).toContain('cancella il messaggio');
+    del.click();
+    expect(deleted).toBe(1);
+    expect(store.get<Record<string, number>>(SPY_DISMISSED_KEY, {})).toEqual({ '1:1:1': 1000 });
+  });
+});

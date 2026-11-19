@@ -628,3 +628,35 @@ describe('research network', () => {
     expect(lab.getAttribute('title')).toContain('51 = qui 18 + 17 + 16');
   });
 });
+
+describe('shipyard amount field', () => {
+  it('opens empty; Enter puts the amount in the game field and presses its build once; held or empty: nothing', () => {
+    const html = techPage({ id: 204, built: 0, amount: true, shown: { metal: 3000, crystal: 1000 } });
+    const store = new Store(new MemoryStore(), 'yard');
+    store.set('planner', addToPlan({}, 10, [{ id: 204, amount: 100, name: 'Caccia leggero', cost: { metal: 300000, crystal: 100000, deuterium: 0, energy: 0 }, added: 1 }]));
+    watchTechPages({ doc: document, store, bodyId: 10, t, locale: 'it', have: () => null, energy: () => null, maxTemp: null });
+    const content = document.getElementById('technologydetails_content')!;
+    content.innerHTML = html;
+    document.querySelector('#technologydetails .content')!.insertAdjacentHTML('beforeend', '<div class="build-it_wrap"><button class="build-it">Costruisci</button></div>');
+    return new Promise<void>((resolve) =>
+      setTimeout(() => {
+        const field = document.querySelector<HTMLInputElement>('.fut-tp-amount')!;
+        expect(field.value).toBe('');
+        let builds = 0;
+        document.querySelector('#technologydetails .build-it_wrap button')!.addEventListener('click', () => builds++);
+        const enter = (repeat = false) => field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', repeat, bubbles: true, cancelable: true }));
+        enter();
+        expect(builds).toBe(0);
+        field.value = '30';
+        field.dispatchEvent(new Event('input'));
+        const live = document.querySelector<HTMLInputElement>('.fut-tp-amount')!;
+        live.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+        live.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', repeat: true, bubbles: true, cancelable: true }));
+        expect(builds).toBe(1);
+        expect(document.querySelector<HTMLInputElement>('#build_amount')!.value).toBe('30');
+        expect(store.get<Plan>('planner', {})['10']!.map((x) => x.amount)).toEqual([70]);
+        resolve();
+      }, 5),
+    );
+  });
+});

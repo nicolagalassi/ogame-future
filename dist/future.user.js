@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.129
+// @version      0.3.130
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -978,7 +978,8 @@
     "spy.lootHint": "Bottino {pct}%: metallo {m}, cristallo {c}, deuterio {d}. Servono {large} cargo pesanti o {small} leggeri",
     "msg.spy.counterPill": "Spiato",
     "msg.combat.netHint": "bottino meno perdite",
-    "spy.remove": "Togli dalla tabella",
+    "spy.remove": "Togli dalla tabella e cancella il messaggio della spiata",
+    "spy.removeShared": "Togli dalla tabella (spiata condivisa: il messaggio resta)",
     "spy.hint": "Un bersaglio per pianeta o luna, resta 3 giorni anche se cancelli i report. Bottino: risorse che puoi portare via. Nome: apre il report. \u22EF: le 6 razzie del giorno, un clic sulle navi apre Flotta.",
     "spy.status.inactive": "i",
     "spy.status.longinactive": "I",
@@ -1933,7 +1934,8 @@
     "spy.lootHint": "Loot {pct}%: metal {m}, crystal {c}, deuterium {d}. Takes {large} large or {small} small cargo",
     "msg.spy.counterPill": "Spied on",
     "msg.combat.netHint": "loot minus losses",
-    "spy.remove": "Remove from the table",
+    "spy.remove": "Remove from the table and delete the report message",
+    "spy.removeShared": "Remove from the table (shared report: the message stays)",
     "spy.hint": "One target per planet or moon, kept 3 days even if you delete the reports. Loot: resources you can carry away. Name: opens the report. \u22EF: the day\u2019s 6 raids, a click on the ships opens Fleet.",
     "spy.status.inactive": "i",
     "spy.status.longinactive": "I",
@@ -2888,7 +2890,8 @@
     "spy.lootHint": "Butin {pct} % : m\xE9tal {m}, cristal {c}, deut\xE9rium {d}. Il faut {large} grands ou {small} petits transporteurs",
     "msg.spy.counterPill": "Espionn\xE9",
     "msg.combat.netHint": "butin moins pertes",
-    "spy.remove": "Retirer du tableau",
+    "spy.remove": "Retirer du tableau et supprimer le message du rapport",
+    "spy.removeShared": "Retirer du tableau (rapport partag\xE9 : le message reste)",
     "spy.hint": "Une cible par plan\xE8te ou lune, gard\xE9e 3 jours m\xEAme si vous supprimez les rapports. Butin : ressources emportables. Nom : ouvre le rapport. \u22EF : les 6 pillages du jour, un clic sur les vaisseaux ouvre Flotte.",
     "spy.status.inactive": "i",
     "spy.status.longinactive": "I",
@@ -3843,7 +3846,8 @@
     "spy.lootHint": "Beute {pct} %: Metall {m}, Kristall {c}, Deuterium {d}. Ben\xF6tigt {large} gro\xDFe oder {small} kleine Transporter",
     "msg.spy.counterPill": "Ausspioniert",
     "msg.combat.netHint": "Beute minus Verluste",
-    "spy.remove": "Aus der Tabelle entfernen",
+    "spy.remove": "Aus der Tabelle entfernen und die Berichtsnachricht l\xF6schen",
+    "spy.removeShared": "Aus der Tabelle entfernen (geteilter Bericht: die Nachricht bleibt)",
     "spy.hint": "Ein Ziel pro Planet oder Mond, 3 Tage gespeichert, auch wenn du die Berichte l\xF6schst. Beute: Rohstoffe zum Mitnehmen. Name: \xF6ffnet den Bericht. \u22EF: die 6 Raids des Tages, ein Klick auf die Schiffe \xF6ffnet die Flotte.",
     "spy.status.inactive": "i",
     "spy.status.longinactive": "I",
@@ -7596,11 +7600,19 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   var SPY_BOARD_KEY = "spy.board";
   var SPY_MAX_AGE = 72 * 36e5;
   var spyKey = (coords, moon) => `${coords}${moon ? ":m" : ""}`;
-  function rememberSpies(board, reports, now, shared = false) {
+  var SPY_DISMISSED_KEY = "spy.dismissed";
+  function dismissSpy(dismissed, key, at, now) {
+    const out = {};
+    for (const [k, t] of Object.entries(dismissed)) if (now - t <= SPY_MAX_AGE) out[k] = t;
+    out[key] = Math.max(out[key] ?? 0, at);
+    return out;
+  }
+  function rememberSpies(board, reports, now, shared = false, dismissed = {}) {
     let changed = 0;
     for (const r of reports) {
       if (r.counter || !r.playerId) continue;
       const key = spyKey(r.coords, r.moon);
+      if ((dismissed[key] ?? -1) >= r.at) continue;
       const known = board[key];
       if (known && known.id === r.id && shared && !known.shared) {
         known.shared = true;
@@ -8088,6 +8100,14 @@ td.spark-cell { width: 90px; }
     return [...rest.slice(0, at), key, ...rest.slice(at)];
   }
   var isSpyTab = (doc) => !!doc.querySelector('[data-subtab-id="20"].active, [data-subtab-id="20"][aria-selected="true"]');
+  function deleteReportInGame(doc, id) {
+    if (!id) return false;
+    const msg = Array.from(doc.querySelectorAll(".msg[data-msg-id]")).find((m) => m.getAttribute("data-msg-id") === id);
+    const del = msg?.querySelector(".msgHead .delActions .msgDeleteBtn");
+    if (!del) return false;
+    del.click();
+    return true;
+  }
   function mountSpyPanel(o) {
     const { doc } = o;
     ensureMarksStyle(doc);
@@ -8326,10 +8346,12 @@ td.spark-cell { width: 90px; }
           doc.defaultView?.open(simLink(tool, key, spy.lang, prefill), "_blank", "noopener");
         }));
       }
-      acts.append(iconButton3("fut-sp-del", "trash", t("spy.remove"), () => {
+      acts.append(iconButton3("fut-sp-del", "trash", t(e.shared ? "spy.removeShared" : "spy.remove"), () => {
+        store.set(SPY_DISMISSED_KEY, dismissSpy(store.get(SPY_DISMISSED_KEY, {}), e.key, e.at, Date.now()));
         const b = store.get(SPY_BOARD_KEY, {});
         delete b[e.key];
         store.set(SPY_BOARD_KEY, b);
+        deleteReportInGame(doc, e.id);
         expanded.delete(e.key);
         const near = rows[index + 1] ?? rows[index - 1];
         mountSpyPanel(o);
@@ -8801,7 +8823,7 @@ td.spark-cell { width: 90px; }
     }
     if (spies.length) {
       const board = store.get(SPY_BOARD_KEY, {});
-      if (rememberSpies(board, spies, o.now?.() ?? Date.now(), sharedTab)) store.set(SPY_BOARD_KEY, board);
+      if (rememberSpies(board, spies, o.now?.() ?? Date.now(), sharedTab, store.get(SPY_DISMISSED_KEY, {}))) store.set(SPY_BOARD_KEY, board);
     }
     if (o.spy) mountSpyPanel({ doc, store, t, locale, spy: o.spy, now: o.now });
     if (archive && archiveChanged) store.set(ARCHIVE_KEY, archive);
@@ -15592,11 +15614,12 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       const amount = el5(doc, "input", "fut-tp-amount");
       amount.type = "text";
       amount.inputMode = "numeric";
-      amount.value = groupInt(Math.max(1, Math.floor(Number(details.amountInput?.value) || 1)), locale);
+      amount.value = "";
       groupWhileTyping(amount, locale);
       amount.title = t("tech.amountHint");
       for (const type of ["keydown", "keyup", "keypress"]) amount.addEventListener(type, (e) => e.stopPropagation());
-      const amountOf = () => Math.max(1, Math.floor(Number(amount.value.replace(/\D/g, "")) || 1));
+      const typed = () => Math.max(0, Math.floor(Number(amount.value.replace(/\D/g, "")) || 0));
+      const amountOf = () => Math.max(1, typed());
       let added = false;
       const draw = () => {
         const n = amountOf();
@@ -15638,8 +15661,16 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         fit();
         if (!input) return;
         const cap = Math.min(QUEUE_MAX, Number(input.max) > 0 ? Number(input.max) : QUEUE_MAX);
-        input.value = String(Math.min(amountOf(), cap));
+        input.value = typed() ? String(Math.min(typed(), cap)) : "";
       };
+      amount.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter") return;
+        e.preventDefault();
+        if (e.repeat || !typed() || !input) return;
+        push();
+        const build = details.root.querySelector(".build-it_wrap button");
+        if (build && !build.disabled) build.click();
+      });
       amount.addEventListener("input", () => {
         added = false;
         push();
@@ -15655,7 +15686,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         push();
       }
       const follow = () => setTimeout(() => {
-        amount.value = groupInt(Math.max(1, Math.floor(Number(input?.value) || 1)), locale);
+        const n = Math.max(0, Math.floor(Number(input?.value) || 0));
+        amount.value = n ? groupInt(n, locale) : "";
         draw();
       }, 0);
       if (input) {
@@ -15664,6 +15696,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         const asked = details.id === SATELLITE ? takeAskedSatellites(doc) : null;
         if (asked) fillAmount(input, asked);
       }
+      if (input && doc.defaultView?.matchMedia?.("(pointer: fine)").matches) amount.focus();
     }
     details.root.classList.add("fut-tp-on");
     details.root.classList.toggle("fut-tp-unit", !!details.root.querySelector(".build_amount, .shipyardSelection"));

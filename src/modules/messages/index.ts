@@ -14,7 +14,7 @@ import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { shipIcon, shipName } from '../../data/ship-icons';
 import type { T } from '../../core/i18n';
 import { dedupe, JOURNAL_KEY, record, recordCombat, recordDebris, trim, unitsValue, msu, type Journal, type JournalEntry } from '../../engines/expeditions';
-import { rememberSpies, SPY_BOARD_KEY, type SpyBoard, type Universe } from '../../engines/raids';
+import { rememberSpies, SPY_BOARD_KEY, SPY_DISMISSED_KEY, type SpyBoard, type SpyDismissed, type Universe } from '../../engines/raids';
 import { MESSAGES_CSS } from './style';
 import { mountSpyPanel, universeOf, type SpyContext } from './spy-table';
 import { showFreshExpeditions } from './exp-fresh';
@@ -442,7 +442,8 @@ export function processMessages(o: MessagesOptions): number {
   // Spy board: newest report per target, kept locally for the spy table (no network).
   if (spies.length) {
     const board = store.get<SpyBoard>(SPY_BOARD_KEY, {});
-    if (rememberSpies(board, spies, o.now?.() ?? Date.now(), sharedTab)) store.set(SPY_BOARD_KEY, board);
+    // Targets the player took off the table stay off until a newer report of them arrives.
+    if (rememberSpies(board, spies, o.now?.() ?? Date.now(), sharedTab, store.get<SpyDismissed>(SPY_DISMISSED_KEY, {}))) store.set(SPY_BOARD_KEY, board);
   }
   if (o.spy) mountSpyPanel({ doc, store, t, locale, spy: o.spy, now: o.now });
   if (archive && archiveChanged) store.set(ARCHIVE_KEY, archive);
