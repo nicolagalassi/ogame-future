@@ -627,7 +627,12 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       r.setAttribute('role', 'row');
       cells.forEach((text, i) => {
         const c = el(doc, 'span', i ? 'fut-tnum' : 'fut-tname');
-        c.setAttribute('role', cls === 'fut-thead' ? 'columnheader' : 'cell');
+        c.setAttribute('role', 'cell');
+        // No header row (the box stays compact): each figure says what it is on hover and to screen readers.
+        if (i && text) {
+          c.title = o.t(i === 1 ? 'totals.stock' : 'totals.day');
+          c.setAttribute('aria-label', `${c.title}: ${text}`);
+        }
         // Each line's symbol (the same as the fleet page's), in that line's colour.
         if (!i && glyph) {
           const ico = el(doc, 'span', 'fut-tico');
@@ -639,7 +644,6 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       });
       box.append(r);
     };
-    row('fut-thead', ['', o.t('totals.stock'), o.t('totals.day')]);
     const line = (label: string, value: number, rate: number, cls: string, glyph: FleetIcon) => row(cls, [label, formatUnits(value, o.locale), `+${formatUnits(rate * 24, o.locale)}`], glyph);
     line(o.t('res.metal'), stock.metal, perHour.metal, 'fut-m', 'metal');
     line(o.t('res.crystal'), stock.crystal, perHour.crystal, 'fut-c', 'crystal');
