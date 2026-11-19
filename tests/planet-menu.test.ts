@@ -181,8 +181,10 @@ describe('renderPlanetMenu', () => {
     cells[1]!.click();
     expect(onOpenDashboard).toHaveBeenCalledTimes(1);
     expect(onOpenPlanner).toHaveBeenCalledTimes(1);
-    // Totals: a table with a heading row and one row per resource plus MSU.
-    expect(document.querySelectorAll('.fut-totals .fut-trow')).toHaveLength(5);
+    // Totals: one row per resource plus MSU, no heading row; each figure says what it is.
+    expect(document.querySelectorAll('.fut-totals .fut-trow')).toHaveLength(4);
+    const first = document.querySelectorAll<HTMLElement>('.fut-totals .fut-trow')[0]!.querySelectorAll<HTMLElement>('.fut-tnum');
+    expect([first[0]!.title, first[1]!.title]).toEqual(['In cassa', 'Al giorno']);
   });
 
   it('the dock under the game menu shows journal and targets and opens them', () => {

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.130
+// @version      0.3.131
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -10311,13 +10311,11 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
    figures in the board's condensed face, resources as tokens, the total on the band. */
 .fut-totals .fut-trow { display: grid; grid-template-columns: minmax(0, 1fr) 58px 62px; align-items: center; gap: 6px; min-height: 22px; padding: 2px 8px; }
 .fut-totals .fut-trow + .fut-trow { margin-top: 2px; }
-.fut-totals .fut-thead { min-height: 0; padding-top: 5px; padding-bottom: 5px; background: var(--band); color: var(--on-band); font-size: 11px; }
 .fut-totals .fut-tname { display: flex; align-items: center; gap: 7px; min-width: 0; white-space: nowrap; overflow: hidden; }
 .fut-totals .fut-tico { flex: none; display: inline-flex; width: 13px; justify-content: center; }
 .fut-totals .fut-tlabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); }
 .fut-totals .fut-tnum { text-align: right; white-space: nowrap; color: var(--text); font: 600 condensed 14px var(--display); }
 .fut-totals .fut-tnum:last-child { color: var(--label); font: 400 condensed 13px var(--display); }
-.fut-totals .fut-thead .fut-tnum { color: inherit; font: inherit; }
 /* The total: printed on the band, like the board's score line. */
 .fut-totals .fut-msu { margin: 4px 0 2px; padding-top: 4px; padding-bottom: 4px; background: var(--band-2); }
 .fut-totals .fut-msu .fut-tname, .fut-totals .fut-msu .fut-tlabel { color: var(--text); font-weight: 600; }
@@ -10790,7 +10788,11 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
         r.setAttribute("role", "row");
         cells.forEach((text, i) => {
           const c = el3(doc, "span", i ? "fut-tnum" : "fut-tname");
-          c.setAttribute("role", cls === "fut-thead" ? "columnheader" : "cell");
+          c.setAttribute("role", "cell");
+          if (i && text) {
+            c.title = o.t(i === 1 ? "totals.stock" : "totals.day");
+            c.setAttribute("aria-label", `${c.title}: ${text}`);
+          }
           if (!i && glyph2) {
             const ico = el3(doc, "span", "fut-tico");
             ico.innerHTML = iconSvg(glyph2, 13);
@@ -10801,7 +10803,6 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
         });
         box.append(r);
       };
-      row("fut-thead", ["", o.t("totals.stock"), o.t("totals.day")]);
       const line = (label, value, rate, cls, glyph2) => row(cls, [label, formatUnits(value, o.locale), `+${formatUnits(rate * 24, o.locale)}`], glyph2);
       line(o.t("res.metal"), stock2.metal, perHour.metal, "fut-m", "metal");
       line(o.t("res.crystal"), stock2.crystal, perHour.crystal, "fut-c", "crystal");
