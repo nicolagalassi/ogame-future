@@ -148,3 +148,22 @@ describe('targets side bar', () => {
     closeSide(document, store);
   });
 });
+
+describe('player sheet scores', () => {
+  it('fleet and defences under the six scores, worked out from the military one', async () => {
+    resetSideCache();
+    const store = new Store(new MemoryStore(), 'split');
+    const xml = '<?xml version="1.0"?><playerData id="6" name="Ars" timestamp="1"><positions>'
+      + '<position type="0" score="1000000">47</position><position type="1" score="600000">56</position><position type="2" score="300000">59</position>'
+      + '<position type="3" score="150000" ships="40">30</position><position type="8" score="0">40</position></positions><planets></planets></playerData>';
+    const guard = new NetworkGuard(vi.fn(async () => new Response(xml)), 'http://localhost:3000');
+    document.body.innerHTML = '';
+    openSide({ doc: document, store, guard, t, locale: 'it' }, { player: 6 });
+    const root = () => document.getElementById(SIDE_ID)!.shadowRoot!;
+    await vi.waitFor(() => expect(root().querySelectorAll('.scores .score.half')).toHaveLength(2));
+    const half = [...root().querySelectorAll('.scores .score.half')].map((c) => [c.querySelector('.k')!.textContent, c.querySelector('b')!.textContent]);
+    // 600k + 300k + 150k + 0 − 1M = 50k in defences, 100k fleet.
+    expect(half).toEqual([['Flotta', '100k'], ['Difese', '50,0k']]);
+    closeSide(document, store);
+  });
+});

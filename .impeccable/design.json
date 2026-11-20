@@ -75,7 +75,7 @@
       "band": {
         "role": "secondary",
         "displayName": "Board Blue",
-        "canonical": "#1B2A44",
+        "canonical": "#152036",
         "cssVar": "--band",
         "oklch": "oklch(28.5% 0.052 260.9)",
         "tonalRamp": [
@@ -92,7 +92,7 @@
       "band-2": {
         "role": "secondary",
         "displayName": "Board Blue Raised",
-        "canonical": "#22314D",
+        "canonical": "#1C2940",
         "cssVar": "--band-2",
         "oklch": "oklch(31.4% 0.054 262.2)",
         "tonalRamp": [

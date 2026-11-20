@@ -521,6 +521,7 @@
   "marks.profile": "Profil",
   "marks.rank": "Rangliste",
   "marks.ships": "Schiffe",
+  "marks.estimate": "Schätzung",
   "marks.planets": "Planeten {n} · Monde {moons}",
   "marks.keyNext": "nächste Position",
   "marks.footData": "Galaxie + öffentliche API",

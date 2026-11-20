@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.134
+// @version      0.3.135
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1030,6 +1030,7 @@
     "marks.profile": "Profilo",
     "marks.rank": "Classifica",
     "marks.ships": "Navi",
+    "marks.estimate": "stima",
     "marks.planets": "Pianeti {n} \xB7 lune {moons}",
     "marks.keyNext": "prossima posizione",
     "marks.footData": "galassia + API pubblica",
@@ -1990,6 +1991,7 @@
     "marks.profile": "Profile",
     "marks.rank": "Highscore",
     "marks.ships": "Ships",
+    "marks.estimate": "estimate",
     "marks.planets": "Planets {n} \xB7 moons {moons}",
     "marks.keyNext": "next position",
     "marks.footData": "galaxy + public API",
@@ -2950,6 +2952,7 @@
     "marks.profile": "Profil",
     "marks.rank": "Classement",
     "marks.ships": "Vaisseaux",
+    "marks.estimate": "estimation",
     "marks.planets": "Plan\xE8tes {n} \xB7 lunes {moons}",
     "marks.keyNext": "position suivante",
     "marks.footData": "galaxie + API publique",
@@ -3910,6 +3913,7 @@
     "marks.profile": "Profil",
     "marks.rank": "Rangliste",
     "marks.ships": "Schiffe",
+    "marks.estimate": "Sch\xE4tzung",
     "marks.planets": "Planeten {n} \xB7 Monde {moons}",
     "marks.keyNext": "n\xE4chste Position",
     "marks.footData": "Galaxie + \xF6ffentliche API",
@@ -4844,7 +4848,7 @@
   var STATE_COLORS = { accent: "#F2D04A", ok: "#7BC47F", warn: "#F08A3C", bad: "#EF6A60" };
   var PAGE_TOKENS = `--hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1;
   --accent: ${STATE_COLORS.accent}; --ok: ${STATE_COLORS.ok}; --warn: ${STATE_COLORS.warn}; --neg: ${STATE_COLORS.bad};`;
-  var SURFACE_TOKENS = "--bg: #0F141B; --surface: #1A2230; --raised: #151C26; --band: #1B2A44; --band-2: #22314D;";
+  var SURFACE_TOKENS = "--bg: #0F141B; --surface: #1A2230; --raised: #151C26; --band: #152036; --band-2: #1C2940;";
   var LINE_TOKENS = "--line: #263142; --line-soft: #1D2531; --faint: #4A5566;";
   var STRONG_LINE = "--line-strong: #33415A; --line-hover: #56657C; --accent-line: #8A7420; --hover: #212B3A;";
   var TEXT_TOKENS = `--text: #ECE6D6; --text-2: #D2CCBE; --label: #A9B2BE; --muted: #9AA3AE; --quiet: #8A95A3; --on-band: #D3DAE4;
@@ -4994,6 +4998,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     note: '<path d="M5 4h14v11l-5 5H5z"/><path d="M14 20v-5h5M8.5 9h7M8.5 12.5h4"/>',
     chevron: '<path d="M6 9.5l6 6 6-6"/>',
     next: '<path d="M4.5 12h14M13 5.5l6.5 6.5-6.5 6.5"/>',
+    shield: '<path d="M12 3l7 3v5c0 4.4-3 8-7 10-4-2-7-5.6-7-10V6z"/>',
     sword: '<path d="M19.5 4.5L9 15M19.5 4.5V9M19.5 4.5H15"/><path d="M6.5 12.5l5 5M8 16l-3.5 3.5"/>',
     play: '<path d="M8 5.5v13l10.5-6.5z"/>',
     trash: '<path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/>',
@@ -5598,7 +5603,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .chip .n { font: 600 condensed 13px var(--display); color: var(--text); }
 
 /* Scores: what the number is, the number, the rank. Three per line. */
-.scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; flex: none; }
+.scores { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 2px; flex: none; }
+.score { grid-column: span 2; }
+/* Fleet and defences, worked out from the military score: half a row each, under the six scores. */
+.score.half { grid-column: span 3; }
 .score { display: flex; flex-direction: column; gap: 1px; min-width: 0; padding: 6px 8px 7px; background: var(--surface); }
 .score .k { display: flex; align-items: center; gap: 5px; color: var(--label); font-size: 12px; white-space: nowrap; overflow: hidden; }
 .score b { font: 600 condensed 17px/19px var(--display); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -5667,7 +5675,8 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   .pl .cols, .pl .row { grid-template-columns: 84px minmax(0, 1fr) 40px 40px 34px; }
   .pl .idx, .pl .pn { display: none; }
   .pl .cols > :first-child, .pl .cols > :nth-child(3) { display: none; }
-  .scores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .scores { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .score.half { grid-column: span 2; }
   .actions a span { display: none; }
 }
 ` + MARKS_CSS;
@@ -5951,8 +5960,8 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
       return;
     }
     const scores = h(doc, "div", "scores");
-    const score = (ico, color, label, value, rankText) => {
-      const cell = h(doc, "div", "score");
+    const score = (ico, color, label, value, rankText, cls = "") => {
+      const cell = h(doc, "div", `score${cls ? ` ${cls}` : ""}`);
       const k = h(doc, "span", "k");
       const ic = icon(doc, ico, 12);
       ic.style.color = color;
@@ -5960,12 +5969,19 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
       const b = h(doc, "b", "", value);
       cell.append(k, b, h(doc, "i", "", rankText));
       scores.append(cell);
+      return cell;
     };
     for (const [key, ico, color] of SCORE_LOOK) {
       const v = data?.scores[key];
       score(ico, color, t(`galaxy.score.${key}`), v ? formatUnits(v.points, locale) : "\u2014", v ? `#${v.rank.toLocaleString(locale)}` : "");
     }
     score("fleet", "#C9D4E2", t("marks.ships"), data?.ships ? data.ships.toLocaleString(locale) : "\u2014", "");
+    const split = data ? splitMilitary(data.scores) : null;
+    if (split) {
+      for (const [key, ico, value] of [["fleet", "fleet", split.fleet], ["defence", "shield", split.defence]]) {
+        score(ico, "#FF7A7A", t(`galaxy.score.${key}`), formatUnits(value, locale), t("marks.estimate"), "half").title = t("galaxy.splitHint");
+      }
+    }
     side.append(scores);
     const actions = h(doc, "div", "actions");
     const link = (ico, label, href, newTab = false) => {

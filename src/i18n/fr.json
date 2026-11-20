@@ -521,6 +521,7 @@
   "marks.profile": "Profil",
   "marks.rank": "Classement",
   "marks.ships": "Vaisseaux",
+  "marks.estimate": "estimation",
   "marks.planets": "Planètes {n} · lunes {moons}",
   "marks.keyNext": "position suivante",
   "marks.footData": "galaxie + API publique",

@@ -16,6 +16,7 @@ import { WINDOW_TOKENS } from '../../core/sheet';
  * - No probe button (§1.5.1): the activity cells open the game's fleet page on that planet or moon,
  *   where the player picks mission and ships and presses Send, as OGLight's side panel does.
  */
+import { splitMilitary } from '../../engines/military';
 import { highscoreHref } from '../../core/game-links';
 import { ostatsUrl } from '../footer-links';
 import { icon, type IconName } from '../../core/icons';
@@ -108,7 +109,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .chip .n { font: 600 condensed 13px var(--display); color: var(--text); }
 
 /* Scores: what the number is, the number, the rank. Three per line. */
-.scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; flex: none; }
+.scores { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 2px; flex: none; }
+.score { grid-column: span 2; }
+/* Fleet and defences, worked out from the military score: half a row each, under the six scores. */
+.score.half { grid-column: span 3; }
 .score { display: flex; flex-direction: column; gap: 1px; min-width: 0; padding: 6px 8px 7px; background: var(--surface); }
 .score .k { display: flex; align-items: center; gap: 5px; color: var(--label); font-size: 12px; white-space: nowrap; overflow: hidden; }
 .score b { font: 600 condensed 17px/19px var(--display); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -177,7 +181,8 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   .pl .cols, .pl .row { grid-template-columns: 84px minmax(0, 1fr) 40px 40px 34px; }
   .pl .idx, .pl .pn { display: none; }
   .pl .cols > :first-child, .pl .cols > :nth-child(3) { display: none; }
-  .scores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .scores { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .score.half { grid-column: span 2; }
   .actions a span { display: none; }
 }
 ` + MARKS_CSS;
@@ -510,8 +515,8 @@ function playerSheet(o: SideOptions, side: HTMLElement, scroll: HTMLElement, tit
   }
 
   const scores = h(doc, 'div', 'scores');
-  const score = (ico: IconName, color: string, label: string, value: string, rankText: string) => {
-    const cell = h(doc, 'div', 'score');
+  const score = (ico: IconName, color: string, label: string, value: string, rankText: string, cls = '') => {
+    const cell = h(doc, 'div', `score${cls ? ` ${cls}` : ''}`);
     const k = h(doc, 'span', 'k');
     const ic = icon(doc, ico, 12);
     ic.style.color = color;
@@ -520,12 +525,20 @@ function playerSheet(o: SideOptions, side: HTMLElement, scroll: HTMLElement, tit
     // The category's colour on its icon only: the figures are printed in the board's ink.
     cell.append(k, b, h(doc, 'i', '', rankText));
     scores.append(cell);
+    return cell;
   };
   for (const [key, ico, color] of SCORE_LOOK) {
     const v = data?.scores[key];
     score(ico, color, t(`galaxy.score.${key}`), v ? formatUnits(v.points, locale) : '—', v ? `#${v.rank.toLocaleString(locale)}` : '');
   }
   score('fleet', '#C9D4E2', t('marks.ships'), data?.ships ? data.ships.toLocaleString(locale) : '—', '');
+  // Military split into fleet and defences, from the other scores (engines/military): an estimate, no rank.
+  const split = data ? splitMilitary(data.scores) : null;
+  if (split) {
+    for (const [key, ico, value] of [['fleet', 'fleet', split.fleet], ['defence', 'shield', split.defence]] as const) {
+      score(ico, '#FF7A7A', t(`galaxy.score.${key}`), formatUnits(value, locale), t('marks.estimate'), 'half').title = t('galaxy.splitHint');
+    }
+  }
   side.append(scores);
 
   const actions = h(doc, 'div', 'actions');
