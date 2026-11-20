@@ -102,6 +102,9 @@ export const GALAXY_CSS = `
 .fut-g-card td { padding: 2px 0; border-bottom: 1px solid var(--line-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .fut-g-card td + td { text-align: right; font-family: Consolas, "JetBrains Mono", monospace; }
 .fut-g-card td.r { color: var(--accent); padding-left: 10px; }
+/* Fleet and defences under Militare: indented and quieter, an estimate without a rank. */
+.fut-g-card tr.sub td { color: var(--muted); font-size: 11px; }
+.fut-g-card tr.sub td:first-child { padding-left: 12px; }
 .fut-g-card p { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
 .fut-g-card .err { color: var(--bad); }
 `;

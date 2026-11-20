@@ -7,6 +7,7 @@
  * public API card (`playerScores`, reason 'user-view', cached an hour), asked when the player
  * points at a rank badge. No game action, no game request.
  */
+import { splitMilitary } from '../../engines/military';
 import { highscoreHref } from '../../core/game-links';
 import { loadMarks, MARKS_KEY, type Marks } from '../../engines/marks';
 import { POSITIONS_KEY, recordSystem, type Positions } from '../../engines/positions';
@@ -267,6 +268,18 @@ async function openCard(o: GalaxyOptions, anchor: Element, id: number, name: str
     const tr = el(doc, 'tr');
     tr.append(el(doc, 'td', '', t(`galaxy.score.${key}`)), el(doc, 'td', '', formatUnits(v.points, locale)), el(doc, 'td', 'r', `#${v.rank.toLocaleString(locale)}`));
     table.append(tr);
+    // Military split into fleet and defences, worked out from the other scores (engines/military).
+    if (key === 'military') {
+      const split = splitMilitary(data.scores);
+      if (split) {
+        for (const [part, points] of [['fleet', split.fleet], ['defence', split.defence]] as const) {
+          const sub = el(doc, 'tr', 'sub');
+          sub.title = t('galaxy.splitHint');
+          sub.append(el(doc, 'td', '', t(`galaxy.score.${part}`)), el(doc, 'td', '', formatUnits(points, locale)), el(doc, 'td', 'r'));
+          table.append(sub);
+        }
+      }
+    }
   }
   note.before(table);
   const parts = [t('galaxy.apiAge', { time: new Date(data.at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) })];
