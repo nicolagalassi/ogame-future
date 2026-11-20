@@ -16,6 +16,7 @@ import { WINDOW_TOKENS } from '../../core/sheet';
  * - No probe button (§1.5.1): the activity cells open the game's fleet page on that planet or moon,
  *   where the player picks mission and ships and presses Send, as OGLight's side panel does.
  */
+import { ostatsUrl } from '../footer-links';
 import { icon, type IconName } from '../../core/icons';
 import type { NetworkGuard } from '../../core/guard';
 import type { Store } from '../../core/storage';
@@ -527,16 +528,22 @@ function playerSheet(o: SideOptions, side: HTMLElement, scroll: HTMLElement, tit
   side.append(scores);
 
   const actions = h(doc, 'div', 'actions');
-  const link = (ico: IconName, label: string, href: string) => {
+  const link = (ico: IconName, label: string, href: string, newTab = false) => {
     const a = h(doc, 'a');
     a.href = href;
     a.title = label;
+    if (newTab) {
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+    }
     a.append(icon(doc, ico, 13), h(doc, 'span', '', label));
     actions.append(a);
   };
   link('pen', t('marks.writeShort'), `/game/index.php?page=ingame&component=chat&playerId=${id}`);
   link('user', t('marks.profile'), `/game/index.php?page=ingame&component=playerprofile&profileId=${id}`);
   link('chart', t('marks.rank'), `/game/index.php?page=ingame&component=highscore&category=1&searchRelId=${id}${rank ? `&site=${Math.max(1, Math.ceil(rank / 100))}` : ''}`);
+  // The player's page on ostats.eu (asked by Nicola), in a new tab: a plain link, no request of ours.
+  link('eye', 'ostats', ostatsUrl(doc.location?.host ?? '', id), true);
   side.append(actions);
 
   // A note of the player's own on this one: kept with the flag, so it needs one.

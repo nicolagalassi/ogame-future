@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.131
+// @version      0.3.132
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -5385,6 +5385,34 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .fut-g-card .err { color: var(--bad); }
 `;
 
+  // src/modules/footer-links/index.ts
+  var OSTATS = "https://ostats.eu/";
+  function ostatsUniverse(host) {
+    const m = /^(s\d+-[a-z]{2,3})\.ogame\.gameforge\.com$/i.exec(host);
+    return m ? m[1].toLowerCase() : null;
+  }
+  function ostatsUrl(host, playerId) {
+    const uni2 = ostatsUniverse(host);
+    if (!uni2) return OSTATS;
+    return `${OSTATS}universes/${uni2}${playerId ? `/player/${playerId}` : ""}`;
+  }
+  var footerLinks = (host) => [{ label: "ostats.eu", href: ostatsUrl(host) }];
+  function addFooterLinks(doc, links = footerLinks(doc.location?.host ?? "")) {
+    const row = doc.querySelector("#siteFooter .content .fright");
+    if (!row || row.querySelector(".fut-footlink")) return 0;
+    for (const l of links) {
+      row.append(doc.createTextNode("|"));
+      const a = doc.createElement("a");
+      a.className = "fut-footlink";
+      a.href = l.href;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.textContent = l.label;
+      row.append(a);
+    }
+    return links.length;
+  }
+
   // src/data/fleet-dispatcher.ts
   function pageWindow() {
     return typeof unsafeWindow !== "undefined" && unsafeWindow || window;
@@ -5906,16 +5934,21 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     score("fleet", "#C9D4E2", t("marks.ships"), data?.ships ? data.ships.toLocaleString(locale) : "\u2014", "");
     side.append(scores);
     const actions = h(doc, "div", "actions");
-    const link = (ico, label, href) => {
+    const link = (ico, label, href, newTab = false) => {
       const a = h(doc, "a");
       a.href = href;
       a.title = label;
+      if (newTab) {
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+      }
       a.append(icon(doc, ico, 13), h(doc, "span", "", label));
       actions.append(a);
     };
     link("pen", t("marks.writeShort"), `/game/index.php?page=ingame&component=chat&playerId=${id}`);
     link("user", t("marks.profile"), `/game/index.php?page=ingame&component=playerprofile&profileId=${id}`);
     link("chart", t("marks.rank"), `/game/index.php?page=ingame&component=highscore&category=1&searchRelId=${id}${rank ? `&site=${Math.max(1, Math.ceil(rank / 100))}` : ""}`);
+    link("eye", "ostats", ostatsUrl(doc.location?.host ?? "", id), true);
     side.append(actions);
     const flagged = marks.players[String(id)];
     const noteBox = h(doc, "label", `note${flagged ? "" : " off"}`);
@@ -18398,6 +18431,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
       });
     };
     drawDock();
+    addFooterLinks(document);
     onSideNavigate(highlightPosition);
     restoreSide(side);
     registerActions(document, store, t, { "targets.next": () => void nextInSide(document) });
