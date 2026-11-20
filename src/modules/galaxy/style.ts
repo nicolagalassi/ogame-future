@@ -75,7 +75,7 @@ export const GALAXY_CSS = `
 #galaxyContent .cellPlayerName > .playerName { flex: 0 1 auto; min-width: 0; }
 .fut-g-rank {
   margin-left: auto; flex: none; padding: 0 2px; border: 0; border-radius: 3px; background: none;
-  color: var(--muted); font: 10px/14px Consolas, "JetBrains Mono", monospace; cursor: help;
+  color: var(--muted); font: 10px/14px Consolas, "JetBrains Mono", monospace; text-decoration: none; cursor: pointer;
 }
 .fut-g-rank:hover { background: var(--line); color: var(--text); }
 /* The flag stays out of the way until the row is pointed at, or the player has one. */

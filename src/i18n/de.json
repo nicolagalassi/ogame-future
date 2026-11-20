@@ -425,6 +425,7 @@
   "galaxy.noDebris": "Keine Trümmerfelder",
   "galaxy.targets": "Ziele ({count})",
   "galaxy.rankTitle": "Punkte und Ränge von {name}",
+  "galaxy.rankOpen": "Rangliste öffnen",
   "galaxy.score.total": "Gesamt",
   "galaxy.score.economy": "Wirtschaft",
   "galaxy.score.research": "Forschung",

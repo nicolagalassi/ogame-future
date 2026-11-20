@@ -7,6 +7,7 @@
  * public API card (`playerScores`, reason 'user-view', cached an hour), asked when the player
  * points at a rank badge. No game action, no game request.
  */
+import { highscoreHref } from '../../core/game-links';
 import { loadMarks, MARKS_KEY, type Marks } from '../../engines/marks';
 import { POSITIONS_KEY, recordSystem, type Positions } from '../../engines/positions';
 import { ensureMarksStyle, flagButton } from '../marks/picker';
@@ -77,7 +78,8 @@ function el<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, cls = 
 }
 
 /** True for nodes Future added itself, so its own drawing does not wake the watcher again. */
-const isOurs = (n: Node): boolean => n instanceof Element && (/(^|\s)fut-/.test(n.getAttribute('class') ?? '') || !!n.closest('.fut-mk, [class*="fut-g-"]'));
+// nodeType instead of instanceof: no reliance on the window's Element (it may be gone when a late mutation arrives).
+const isOurs = (n: Node): boolean => n.nodeType === 1 && (/(^|\s)fut-/.test((n as Element).getAttribute('class') ?? '') || !!(n as Element).closest('.fut-mk, [class*="fut-g-"]'));
 
 export function watchGalaxy(o: GalaxyOptions): void {
   const { doc } = o;
@@ -173,9 +175,11 @@ function decorate(o: GalaxyOptions, content: Element): void {
     }
     if (playerCell && r.playerId && r.rank && !playerCell.querySelector('.fut-g-rank')) {
       const id = r.playerId;
-      const badge = el(doc, 'button', 'fut-g-rank', `#${r.rank.toLocaleString(locale)}`);
-      badge.type = 'button';
-      badge.setAttribute('aria-label', t('galaxy.rankTitle', { name: r.playerName }));
+      // The rank opens the highscore on the player's page (a plain link: the player's click, one navigation);
+      // pointing at it still shows the card with the points.
+      const badge = el(doc, 'a', 'fut-g-rank', `#${r.rank.toLocaleString(locale)}`);
+      badge.href = highscoreHref(id, r.rank);
+      badge.setAttribute('aria-label', `${t('galaxy.rankTitle', { name: r.playerName })} · ${t('galaxy.rankOpen')}`);
       const show = () => void openCard(o, badge, id, r.playerName);
       badge.addEventListener('mouseenter', show);
       badge.addEventListener('focus', show);

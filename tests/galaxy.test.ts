@@ -96,3 +96,18 @@ describe('public player data', () => {
     expect(guard.log.every((e) => e.reason === 'user-view' && e.allowed)).toBe(true);
   });
 });
+
+describe('rank badge in the galaxy', () => {
+  it('links to the highscore on the page with the player, the row searched by the game', async () => {
+    const { watchGalaxy } = await import('../src/modules/galaxy');
+    const { translator } = await import('../src/core/i18n');
+    const store = new Store(new MemoryStore(), 'g');
+    const guard = new NetworkGuard((async () => new Response('')) as never, 'https://s1-it.ogame.gameforge.com');
+    watchGalaxy({ doc: document, store, guard, ownPlanetIds: new Set([71]), locale: 'it', t: translator('it') });
+    const badge = document.querySelector<HTMLAnchorElement>('#galaxyRow6 .fut-g-rank')!;
+    expect(badge.tagName).toBe('A');
+    expect(badge.textContent).toMatch(/^#1\.?173$/);
+    expect(badge.getAttribute('href')).toBe('/game/index.php?page=ingame&component=highscore&category=1&site=12&searchRelId=9');
+    expect(badge.getAttribute('aria-label')).toContain('apri la classifica');
+  });
+});

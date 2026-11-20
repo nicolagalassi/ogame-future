@@ -425,6 +425,7 @@
   "galaxy.noDebris": "Aucun champ de débris",
   "galaxy.targets": "Cibles ({count})",
   "galaxy.rankTitle": "Points et classements de {name}",
+  "galaxy.rankOpen": "ouvrir le classement",
   "galaxy.score.total": "Général",
   "galaxy.score.economy": "Économie",
   "galaxy.score.research": "Recherche",

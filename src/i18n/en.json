@@ -425,6 +425,7 @@
   "galaxy.noDebris": "No debris fields",
   "galaxy.targets": "Targets ({count})",
   "galaxy.rankTitle": "Points and ranks of {name}",
+  "galaxy.rankOpen": "open the highscore",
   "galaxy.score.total": "Overall",
   "galaxy.score.economy": "Economy",
   "galaxy.score.research": "Research",

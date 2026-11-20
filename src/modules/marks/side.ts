@@ -16,6 +16,7 @@ import { WINDOW_TOKENS } from '../../core/sheet';
  * - No probe button (§1.5.1): the activity cells open the game's fleet page on that planet or moon,
  *   where the player picks mission and ships and presses Send, as OGLight's side panel does.
  */
+import { highscoreHref } from '../../core/game-links';
 import { ostatsUrl } from '../footer-links';
 import { icon, type IconName } from '../../core/icons';
 import type { NetworkGuard } from '../../core/guard';
@@ -485,7 +486,7 @@ function playerSheet(o: SideOptions, side: HTMLElement, scroll: HTMLElement, tit
   const rank = data?.scores.total?.rank;
   if (rank) {
     const a = h(doc, 'a', 'mono', `#${rank.toLocaleString(locale)}`);
-    a.href = `/game/index.php?page=ingame&component=highscore&site=${Math.max(1, Math.ceil(rank / 100))}&category=1&searchRelId=${id}`;
+    a.href = highscoreHref(id, rank);
     a.title = t('marks.rank');
     title.append(a);
   }
@@ -541,7 +542,7 @@ function playerSheet(o: SideOptions, side: HTMLElement, scroll: HTMLElement, tit
   };
   link('pen', t('marks.writeShort'), `/game/index.php?page=ingame&component=chat&playerId=${id}`);
   link('user', t('marks.profile'), `/game/index.php?page=ingame&component=playerprofile&profileId=${id}`);
-  link('chart', t('marks.rank'), `/game/index.php?page=ingame&component=highscore&category=1&searchRelId=${id}${rank ? `&site=${Math.max(1, Math.ceil(rank / 100))}` : ''}`);
+  link('chart', t('marks.rank'), highscoreHref(id, rank));
   // The player's page on ostats.eu (asked by Nicola), in a new tab: a plain link, no request of ours.
   link('eye', 'ostats', ostatsUrl(doc.location?.host ?? '', id), true);
   side.append(actions);

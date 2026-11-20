@@ -425,6 +425,7 @@
   "galaxy.noDebris": "Nessun campo detriti",
   "galaxy.targets": "Bersagli ({count})",
   "galaxy.rankTitle": "Punti e classifiche di {name}",
+  "galaxy.rankOpen": "apri la classifica",
   "galaxy.score.total": "Generale",
   "galaxy.score.economy": "Economia",
   "galaxy.score.research": "Ricerca",

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.132
+// @version      0.3.133
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -934,6 +934,7 @@
     "galaxy.noDebris": "Nessun campo detriti",
     "galaxy.targets": "Bersagli ({count})",
     "galaxy.rankTitle": "Punti e classifiche di {name}",
+    "galaxy.rankOpen": "apri la classifica",
     "galaxy.score.total": "Generale",
     "galaxy.score.economy": "Economia",
     "galaxy.score.research": "Ricerca",
@@ -1890,6 +1891,7 @@
     "galaxy.noDebris": "No debris fields",
     "galaxy.targets": "Targets ({count})",
     "galaxy.rankTitle": "Points and ranks of {name}",
+    "galaxy.rankOpen": "open the highscore",
     "galaxy.score.total": "Overall",
     "galaxy.score.economy": "Economy",
     "galaxy.score.research": "Research",
@@ -2846,6 +2848,7 @@
     "galaxy.noDebris": "Aucun champ de d\xE9bris",
     "galaxy.targets": "Cibles ({count})",
     "galaxy.rankTitle": "Points et classements de {name}",
+    "galaxy.rankOpen": "ouvrir le classement",
     "galaxy.score.total": "G\xE9n\xE9ral",
     "galaxy.score.economy": "\xC9conomie",
     "galaxy.score.research": "Recherche",
@@ -3802,6 +3805,7 @@
     "galaxy.noDebris": "Keine Tr\xFCmmerfelder",
     "galaxy.targets": "Ziele ({count})",
     "galaxy.rankTitle": "Punkte und R\xE4nge von {name}",
+    "galaxy.rankOpen": "Rangliste \xF6ffnen",
     "galaxy.score.total": "Gesamt",
     "galaxy.score.economy": "Wirtschaft",
     "galaxy.score.research": "Forschung",
@@ -4724,6 +4728,12 @@
     return fresh;
   }
 
+  // src/core/game-links.ts
+  function highscoreHref(playerId, rank) {
+    const site = rank && rank > 0 ? `&site=${Math.max(1, Math.ceil(rank / 100))}` : "";
+    return `/game/index.php?page=ingame&component=highscore&category=1${site}&searchRelId=${playerId}`;
+  }
+
   // src/engines/marks.ts
   var FLAGS = ["watch", "target", "farm", "danger", "friend", "trade"];
   var MARKS_KEY = "marks";
@@ -5354,7 +5364,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 #galaxyContent .cellPlayerName > .playerName { flex: 0 1 auto; min-width: 0; }
 .fut-g-rank {
   margin-left: auto; flex: none; padding: 0 2px; border: 0; border-radius: 3px; background: none;
-  color: var(--muted); font: 10px/14px Consolas, "JetBrains Mono", monospace; cursor: help;
+  color: var(--muted); font: 10px/14px Consolas, "JetBrains Mono", monospace; text-decoration: none; cursor: pointer;
 }
 .fut-g-rank:hover { background: var(--line); color: var(--text); }
 /* The flag stays out of the way until the row is pointed at, or the player has one. */
@@ -5897,7 +5907,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     const rank = data?.scores.total?.rank;
     if (rank) {
       const a = h(doc, "a", "mono", `#${rank.toLocaleString(locale)}`);
-      a.href = `/game/index.php?page=ingame&component=highscore&site=${Math.max(1, Math.ceil(rank / 100))}&category=1&searchRelId=${id}`;
+      a.href = highscoreHref(id, rank);
       a.title = t("marks.rank");
       title.append(a);
     }
@@ -5947,7 +5957,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     };
     link("pen", t("marks.writeShort"), `/game/index.php?page=ingame&component=chat&playerId=${id}`);
     link("user", t("marks.profile"), `/game/index.php?page=ingame&component=playerprofile&profileId=${id}`);
-    link("chart", t("marks.rank"), `/game/index.php?page=ingame&component=highscore&category=1&searchRelId=${id}${rank ? `&site=${Math.max(1, Math.ceil(rank / 100))}` : ""}`);
+    link("chart", t("marks.rank"), highscoreHref(id, rank));
     link("eye", "ostats", ostatsUrl(doc.location?.host ?? "", id), true);
     side.append(actions);
     const flagged = marks.players[String(id)];
@@ -6049,7 +6059,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     if (text) n.textContent = text;
     return n;
   }
-  var isOurs = (n) => n instanceof Element && (/(^|\s)fut-/.test(n.getAttribute("class") ?? "") || !!n.closest('.fut-mk, [class*="fut-g-"]'));
+  var isOurs = (n) => n.nodeType === 1 && (/(^|\s)fut-/.test(n.getAttribute("class") ?? "") || !!n.closest('.fut-mk, [class*="fut-g-"]'));
   function watchGalaxy(o) {
     const { doc } = o;
     const component = doc.getElementById("galaxycomponent") ?? doc.getElementById("galaxyContent")?.parentElement;
@@ -6128,9 +6138,9 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
       }
       if (playerCell && r.playerId && r.rank && !playerCell.querySelector(".fut-g-rank")) {
         const id = r.playerId;
-        const badge = el(doc, "button", "fut-g-rank", `#${r.rank.toLocaleString(locale)}`);
-        badge.type = "button";
-        badge.setAttribute("aria-label", t("galaxy.rankTitle", { name: r.playerName }));
+        const badge = el(doc, "a", "fut-g-rank", `#${r.rank.toLocaleString(locale)}`);
+        badge.href = highscoreHref(id, r.rank);
+        badge.setAttribute("aria-label", `${t("galaxy.rankTitle", { name: r.playerName })} \xB7 ${t("galaxy.rankOpen")}`);
         const show2 = () => void openCard(o, badge, id, r.playerName);
         badge.addEventListener("mouseenter", show2);
         badge.addEventListener("focus", show2);
