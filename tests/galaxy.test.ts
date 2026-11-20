@@ -111,3 +111,32 @@ describe('rank badge in the galaxy', () => {
     expect(badge.getAttribute('aria-label')).toContain('apri la classifica');
   });
 });
+
+describe('military split into fleet and defences', () => {
+  it('defences = economy + research + military + lifeform − total, fleet = the rest (real numbers)', async () => {
+    const { splitMilitary } = await import('../src/engines/military');
+    const p = parsePlayerData(XML, 5)!;
+    const s = splitMilitary(p.scores)!;
+    // 220,454,251 + 193,508,884 + 2,763,755 + 457,712,531 − 872,758,779 = 1,680,642 in defences.
+    expect(s.defence).toBe(1_680_642);
+    expect(s.fleet).toBe(2_763_755 - 1_680_642);
+    // Without lifeforms (an older universe), with rounding past the edges, or a score missing.
+    const sc = (total: number, economy: number, research: number, military: number) => ({ total: { points: total }, economy: { points: economy }, research: { points: research }, military: { points: military } });
+    expect(splitMilitary(sc(1000, 600, 300, 150))).toEqual({ fleet: 100, defence: 50 });
+    expect(splitMilitary(sc(1000, 500, 300, 150))).toEqual({ fleet: 150, defence: 0 });
+    expect(splitMilitary(sc(1000, 900, 300, 150))).toEqual({ fleet: 0, defence: 150 });
+    expect(splitMilitary({ total: { points: 1 } })).toBeNull();
+  });
+
+  it('the galaxy card shows Flotta and Difese under Militare', async () => {
+    const { watchGalaxy } = await import('../src/modules/galaxy');
+    const { translator } = await import('../src/core/i18n');
+    const guard = new NetworkGuard((async () => new Response(XML.replace('id="110977"', 'id="9"'))) as never, document.location.origin);
+    guard.closePageLoadWindow();
+    watchGalaxy({ doc: document, store: new Store(new MemoryStore(), 'card'), guard, ownPlanetIds: new Set([71]), locale: 'it', t: translator('it') });
+    document.querySelector('#galaxyRow6 .fut-g-rank')!.dispatchEvent(new MouseEvent('mouseenter'));
+    await new Promise((r) => setTimeout(r, 20));
+    const rows = [...document.querySelectorAll('#fut-galaxy-card tr')].map((r) => [r.className, r.querySelector('td')!.textContent]);
+    expect(rows).toEqual([['', 'Generale'], ['', 'Economia'], ['', 'Ricerca'], ['', 'Militare'], ['sub', 'Flotta'], ['sub', 'Difese'], ['', 'Forme di vita']]);
+  });
+});

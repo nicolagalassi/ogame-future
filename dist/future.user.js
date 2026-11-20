@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.133
+// @version      0.3.134
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -940,6 +940,9 @@
     "galaxy.score.research": "Ricerca",
     "galaxy.score.military": "Militare",
     "galaxy.score.lifeform": "Forme di vita",
+    "galaxy.score.fleet": "Flotta",
+    "galaxy.score.defence": "Difese",
+    "galaxy.splitHint": "Stima dalle classifiche: le difese contano sia in Economia sia in Militare, quindi difese = Economia + Ricerca + Militare + Forme di vita \u2212 Generale; flotta = Militare \u2212 difese.",
     "galaxy.ships": "{count} navi",
     "galaxy.loading": "Lettura dall'API pubblica\u2026",
     "galaxy.apiError": "API pubblica non raggiungibile. Riprova pi\xF9 tardi.",
@@ -1897,6 +1900,9 @@
     "galaxy.score.research": "Research",
     "galaxy.score.military": "Military",
     "galaxy.score.lifeform": "Lifeforms",
+    "galaxy.score.fleet": "Fleet",
+    "galaxy.score.defence": "Defence",
+    "galaxy.splitHint": "Estimate from the highscores: defences count in both Economy and Military, so defences = Economy + Research + Military + Lifeforms \u2212 Total; fleet = Military \u2212 defences.",
     "galaxy.ships": "{count} ships",
     "galaxy.loading": "Reading the public API\u2026",
     "galaxy.apiError": "Public API unreachable. Try again later.",
@@ -2854,6 +2860,9 @@
     "galaxy.score.research": "Recherche",
     "galaxy.score.military": "Militaire",
     "galaxy.score.lifeform": "Formes de vie",
+    "galaxy.score.fleet": "Flotte",
+    "galaxy.score.defence": "D\xE9fense",
+    "galaxy.splitHint": "Estimation \xE0 partir des classements : la d\xE9fense compte \xE0 la fois en \xC9conomie et en Militaire, donc d\xE9fense = \xC9conomie + Recherche + Militaire + Formes de vie \u2212 G\xE9n\xE9ral ; flotte = Militaire \u2212 d\xE9fense.",
     "galaxy.ships": "{count} vaisseaux",
     "galaxy.loading": "Lecture de l'API publique\u2026",
     "galaxy.apiError": "API publique injoignable. R\xE9essayez plus tard.",
@@ -3811,6 +3820,9 @@
     "galaxy.score.research": "Forschung",
     "galaxy.score.military": "Milit\xE4r",
     "galaxy.score.lifeform": "Lebensformen",
+    "galaxy.score.fleet": "Flotte",
+    "galaxy.score.defence": "Verteidigung",
+    "galaxy.splitHint": "Sch\xE4tzung aus den Ranglisten: Verteidigung z\xE4hlt in Wirtschaft und Milit\xE4r, also Verteidigung = Wirtschaft + Forschung + Milit\xE4r + Lebensformen \u2212 Gesamt; Flotte = Milit\xE4r \u2212 Verteidigung.",
     "galaxy.ships": "{count} Schiffe",
     "galaxy.loading": "Lese die \xF6ffentliche API\u2026",
     "galaxy.apiError": "\xD6ffentliche API nicht erreichbar. Sp\xE4ter erneut versuchen.",
@@ -4728,6 +4740,15 @@
     return fresh;
   }
 
+  // src/engines/military.ts
+  function splitMilitary(scores) {
+    const { total, economy, research, military } = scores;
+    if (!total || !economy || !research || !military) return null;
+    const raw = economy.points + research.points + military.points + (scores.lifeform?.points ?? 0) - total.points;
+    const defence = Math.min(military.points, Math.max(0, raw));
+    return { fleet: military.points - defence, defence };
+  }
+
   // src/core/game-links.ts
   function highscoreHref(playerId, rank) {
     const site = rank && rank > 0 ? `&site=${Math.max(1, Math.ceil(rank / 100))}` : "";
@@ -5391,6 +5412,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .fut-g-card td { padding: 2px 0; border-bottom: 1px solid var(--line-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .fut-g-card td + td { text-align: right; font-family: Consolas, "JetBrains Mono", monospace; }
 .fut-g-card td.r { color: var(--accent); padding-left: 10px; }
+/* Fleet and defences under Militare: indented and quieter, an estimate without a rank. */
+.fut-g-card tr.sub td { color: var(--muted); font-size: 11px; }
+.fut-g-card tr.sub td:first-child { padding-left: 12px; }
 .fut-g-card p { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
 .fut-g-card .err { color: var(--bad); }
 `;
@@ -6219,6 +6243,17 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
       const tr = el(doc, "tr");
       tr.append(el(doc, "td", "", t(`galaxy.score.${key}`)), el(doc, "td", "", formatUnits(v.points, locale)), el(doc, "td", "r", `#${v.rank.toLocaleString(locale)}`));
       table.append(tr);
+      if (key === "military") {
+        const split = splitMilitary(data.scores);
+        if (split) {
+          for (const [part, points] of [["fleet", split.fleet], ["defence", split.defence]]) {
+            const sub = el(doc, "tr", "sub");
+            sub.title = t("galaxy.splitHint");
+            sub.append(el(doc, "td", "", t(`galaxy.score.${part}`)), el(doc, "td", "", formatUnits(points, locale)), el(doc, "td", "r"));
+            table.append(sub);
+          }
+        }
+      }
     }
     note.before(table);
     const parts = [t("galaxy.apiAge", { time: new Date(data.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) })];
