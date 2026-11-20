@@ -69,6 +69,9 @@ let scrapBody: number | null = null;
 let scrapRate = 35;
 /** Ships and defences: planets and moons on separate pages. */
 let unitScope: 'planet' | 'moon' = 'planet';
+/** Strutture: planets or moons. Forme di vita: buildings or research. One page each, switched in the title row (kept while the window lives). */
+let facScope: 'planet' | 'moon' = 'planet';
+let lfScope: 'buildings' | 'research' = 'buildings';
 let keyHandler: ((e: KeyboardEvent) => void) | null = null;
 
 function h<K extends keyof HTMLElementTagNameMap>(tag: K, className = '', text?: string): HTMLElementTagNameMap[K] {
@@ -914,8 +917,13 @@ function facilitiesTab(parent: HTMLElement, ctx: Ctx): void {
   const { t } = ctx.o;
   const planets = ctx.bodies.filter((b) => b.type === 'planet');
   const moons = ctx.bodies.filter((b) => b.type === 'moon');
-  section(parent, t('dash.planets')).append(bodyMatrix(ctx, planets, PLANET_FACILITIES, { foot: 'avg' }));
-  if (moons.length) section(parent, t('dash.moons')).append(bodyMatrix(ctx, moons, MOON_FACILITIES, { foot: 'avg' }));
+  // Planets or moons, one at a time (no moons: planets).
+  const scope = moons.length ? facScope : 'planet';
+  const s = scopedCard(parent, ctx, t('dash.tab.facilities'), [
+    { key: 'planet', label: t('dash.planets'), icon: 'planet', note: String(planets.length) },
+    { key: 'moon', label: t('dash.moons'), icon: 'moon', note: String(moons.length), off: !moons.length },
+  ], scope, (k) => { facScope = k; });
+  s.append(scope === 'moon' ? bodyMatrix(ctx, moons, MOON_FACILITIES, { foot: 'avg' }) : bodyMatrix(ctx, planets, PLANET_FACILITIES, { foot: 'avg' }));
 }
 
 function lifeformsTab(parent: HTMLElement, ctx: Ctx): void {
@@ -925,9 +933,14 @@ function lifeformsTab(parent: HTMLElement, ctx: Ctx): void {
   // Lifeforms mix: each planet has its own species (buildings) and its own research per slot.
   const active = new Map(planets.map((p) => [p.id, { b: activeLfBuildings(p), r: activeLfResearch(p, o.lfSlots?.[String(p.id)]) }]));
 
+  // Buildings or research, one at a time, switched in the title row.
+  const s = scopedCard(parent, ctx, t('dash.tab.lifeforms'), [
+    { key: 'buildings', label: t('dash.lfBuildings') },
+    { key: 'research', label: t('dash.lfResearch') },
+  ], lfScope, (k) => { lfScope = k; });
+  s.append(h('p', 'hint', t('dash.lfHint')));
   // Rows = technologies active on at least one planet, columns = planets.
-  const table = (title: string, pick: (p: OwnBody) => ActiveTech[]) => {
-    const s = section(parent, title, t('dash.lfHint'));
+  const table = (pick: (p: OwnBody) => ActiveTech[]) => {
     const ids = [...new Set(planets.flatMap((p) => pick(p).filter((a) => a.level > 0).map((a) => a.id)))].sort(
       (a, b) => a % 100 - b % 100 || a - b,
     );
@@ -962,7 +975,8 @@ function lifeformsTab(parent: HTMLElement, ctx: Ctx): void {
       const cell = h('td', 'name tech');
       const label = h('span', 'tech-label');
       // A picture never seen keeps its square, so the names stay in one column.
-      label.append(ctx.pic(id, 26) ?? techIconEl(doc, undefined, 26, 'pic'));
+      // 22px pictures and tight cells: 18 research rows fit one screen.
+      label.append(ctx.pic(id, 22) ?? techIconEl(doc, undefined, 22, 'pic'));
       label.append(h('span', '', name(id)));
       if (sp) label.append(h('small', '', t(`lf.${sp}`)));
       cell.append(label);
@@ -984,8 +998,47 @@ function lifeformsTab(parent: HTMLElement, ctx: Ctx): void {
     wrap.append(tab);
     s.append(wrap);
   };
-  table(t('dash.lfBuildings'), (p) => active.get(p.id)!.b);
-  table(t('dash.lfResearch'), (p) => active.get(p.id)!.r);
+  table(lfScope === 'research' ? (p) => active.get(p.id)!.r : (p) => active.get(p.id)!.b);
+}
+
+/**
+ * A card whose title row carries a switch between two pages of it (Pianeti / Lune, Edifici / Ricerche):
+ * one page at a time keeps the window within one screen. Returns the card, the switch already in its head.
+ */
+function scopedCard<K extends string>(
+  parent: HTMLElement,
+  ctx: Ctx,
+  title: string,
+  options: { key: K; label: string; icon?: 'planet' | 'moon'; note?: string; off?: boolean }[],
+  current: K,
+  onPick: (key: K) => void,
+): HTMLElement {
+  const s = h('div', 'card');
+  parent.append(s);
+  const head = h('div', 'table-head');
+  head.append(h('h3', '', title));
+  const seg = h('div', 'seg');
+  seg.setAttribute('role', 'group');
+  seg.setAttribute('aria-label', title);
+  for (const opt of options) {
+    const b = h('button', '');
+    b.type = 'button';
+    b.dataset.scope = opt.key;
+    b.disabled = !!opt.off;
+    b.setAttribute('aria-pressed', String(current === opt.key));
+    if (opt.icon) b.append(icon(ctx.o.doc, opt.icon, 14, 'seg-ico'));
+    b.append(h('span', '', opt.label));
+    if (opt.note !== undefined) b.append(h('i', 'mono', opt.note));
+    b.addEventListener('click', () => {
+      if (current === opt.key) return;
+      onPick(opt.key);
+      ctx.redraw();
+    });
+    seg.append(b);
+  }
+  head.append(seg);
+  s.append(head);
+  return s;
 }
 
 /** Ships or defences of the planets, or of the moons: one page each, switched on top. */
@@ -1092,59 +1145,68 @@ function scrapTab(parent: HTMLElement, ctx: Ctx): void {
   bar.append(pick, rateLabel, quick, all, none);
   s.append(bar);
 
-  const wrap = h('div', 'table-wrap');
-  const table = h('table', 'scrap');
-  const hr = h('tr');
-  for (const [label, cls] of [[t('dash.unit'), ''], [t('dash.owned'), 'num'], [t('dash.toScrap'), 'num'], [t('res.metal'), 'num'], [t('res.crystal'), 'num'], [t('res.deuterium'), 'num']] as const) hr.append(h('th', cls, label));
-  const thead = h('thead');
-  thead.append(hr);
-  table.append(thead);
-  const tbody = h('tbody');
+  // Ships on the left, defences on the right (one column on a narrow window): half the height of one long list.
+  // Every typed amount lives in its input and the total below sums both columns.
   const inputs = new Map<number, HTMLInputElement>();
   const outs = new Map<number, HTMLElement[]>();
   const picks = new Map<number, HTMLButtonElement>();
-  for (const id of units) {
-    const owned = level(body, id);
-    if (!owned) continue;
-    const tr = h('tr');
-    const nameCell = h('td', 'unit');
-    // The picture and the name are one button: all of this unit, or none again.
-    const label = h('button', 'unit-label');
-    label.type = 'button';
-    label.title = t('dash.scrapPick');
-    const p = ctx.pic(id, 28);
-    if (p) label.append(p);
-    label.append(h('span', '', ctx.name(id)));
-    picks.set(id, label);
-    nameCell.append(label);
-    tr.append(nameCell, h('td', 'num mono', count(owned)));
-    const qty = h('input', 'field qty');
-    qty.type = 'number';
-    qty.min = '0';
-    qty.max = String(owned);
-    qty.value = '0';
-    qty.setAttribute('aria-label', ctx.name(id));
-    inputs.set(id, qty);
-    const qCell = h('td', 'num');
-    qCell.append(qty);
-    tr.append(qCell);
-    const cells = [h('td', 'num mono m'), h('td', 'num mono c'), h('td', 'num mono d')];
-    outs.set(id, cells);
-    tr.append(...cells);
-    tbody.append(tr);
-  }
-  table.append(tbody);
-  const fr = h('tr');
-  const totalCells = [h('td', 'num mono m'), h('td', 'num mono c'), h('td', 'num mono d')];
-  const msuCell = h('span', 'mono msu');
-  const totalName = h('td', 'name', `${t('dash.total')} `);
-  totalName.append(msuCell);
-  fr.append(totalName, h('td'), h('td'), ...totalCells);
-  const tfoot = h('tfoot');
-  tfoot.append(fr);
-  table.append(tfoot);
-  wrap.append(table);
-  s.append(wrap);
+  const unitTable = (list: readonly number[], title: string): HTMLElement | null => {
+    const owned = list.filter((id) => level(body, id) > 0);
+    if (!owned.length) return null;
+    const wrap = h('div', 'table-wrap');
+    const table = h('table', 'scrap');
+    const hr = h('tr');
+    for (const [label, cls] of [[title, ''], [t('dash.owned'), 'num'], [t('dash.toScrap'), 'num'], [t('res.metal'), 'num'], [t('res.crystal'), 'num'], [t('res.deuterium'), 'num']] as const) hr.append(h('th', cls, label));
+    const thead = h('thead');
+    thead.append(hr);
+    table.append(thead);
+    const tbody = h('tbody');
+    for (const id of owned) {
+      const n = level(body, id);
+      const tr = h('tr');
+      const nameCell = h('td', 'unit');
+      // The picture and the name are one button: all of this unit, or none again.
+      const label = h('button', 'unit-label');
+      label.type = 'button';
+      label.title = `${ctx.name(id)} · ${t('dash.scrapPick')}`;
+      const p = ctx.pic(id, 22);
+      if (p) label.append(p);
+      label.append(h('span', '', ctx.name(id)));
+      picks.set(id, label);
+      nameCell.append(label);
+      tr.append(nameCell, h('td', 'num mono', count(n)));
+      const qty = h('input', 'field qty');
+      qty.type = 'number';
+      qty.min = '0';
+      qty.max = String(n);
+      qty.value = '0';
+      qty.setAttribute('aria-label', ctx.name(id));
+      inputs.set(id, qty);
+      const qCell = h('td', 'num');
+      qCell.append(qty);
+      tr.append(qCell);
+      const cells = [h('td', 'num mono m'), h('td', 'num mono c'), h('td', 'num mono d')];
+      outs.set(id, cells);
+      tr.append(...cells);
+      tbody.append(tr);
+    }
+    table.append(tbody);
+    wrap.append(table);
+    return wrap;
+  };
+  const cols = h('div', 'scrap-cols');
+  for (const part of [unitTable(units.filter((id) => id < 400), t('dash.tab.ships')), unitTable(units.filter((id) => id >= 400), t('dash.tab.defence'))]) if (part) cols.append(part);
+  s.append(cols);
+  // The total of both columns, in one line under them.
+  const totalCells = [h('b', 'mono m'), h('b', 'mono c'), h('b', 'mono d')];
+  const msuCell = h('b', 'mono msu');
+  const totalLine = h('div', 'scrap-total');
+  totalLine.append(h('span', 'name', t('dash.total')), ...totalCells.map((c, i) => {
+    const cell = h('span', 'part');
+    cell.append(h('small', '', t(`res.${['metal', 'crystal', 'deuterium'][i]}`)), c);
+    return cell;
+  }), msuCell);
+  s.append(totalLine);
 
   const update = () => {
     scrapRate = Math.min(SCRAP_MAX, Math.max(35, Number(rate.value) || 35));
