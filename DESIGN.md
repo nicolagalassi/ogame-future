@@ -6,8 +6,8 @@ colors:
   raised: "#151C26"
   surface: "#1A2230"
   hover: "#212B3A"
-  band: "#1B2A44"
-  band-2: "#22314D"
+  band: "#152036"
+  band-2: "#1C2940"
   line: "#263142"
   line-soft: "#1D2531"
   line-strong: "#33415A"
@@ -215,8 +215,8 @@ A low-chroma blue-black board with warm ink, one saturated yellow, and the game'
 - **Pawn Wash** (#2A2614, `accent-soft`) and **Pawn Rule** (#8A7420, `accent-line`): the tinted background of a selected option, and the dashed edge of an estimated level.
 
 ### Secondary
-- **Board Blue** (#1B2A44, `band`): the window head and the tab strip, the one coloured band on the board.
-- **Board Blue Raised** (#22314D, `band-2`): idle tabs printed on the band, and hover on the band's close button.
+- **Board Blue** (#152036, `band`; darker since 2026-11-20, Nicola: the old #1B2A44 read too blue): the window head and the tab strip, the one coloured band on the board.
+- **Board Blue Raised** (#1C2940, `band-2`): idle tabs printed on the band, and hover on the band's close button.
 - **Band Ink** (#D3DAE4, `on-band`): subtitle and idle tab text on the band.
 
 ### Tertiary (state)

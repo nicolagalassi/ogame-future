@@ -521,6 +521,7 @@
   "marks.profile": "Profilo",
   "marks.rank": "Classifica",
   "marks.ships": "Navi",
+  "marks.estimate": "stima",
   "marks.planets": "Pianeti {n} · lune {moons}",
   "marks.keyNext": "prossima posizione",
   "marks.footData": "galassia + API pubblica",

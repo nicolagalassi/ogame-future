@@ -521,6 +521,7 @@
   "marks.profile": "Profile",
   "marks.rank": "Highscore",
   "marks.ships": "Ships",
+  "marks.estimate": "estimate",
   "marks.planets": "Planets {n} · moons {moons}",
   "marks.keyNext": "next position",
   "marks.footData": "galaxy + public API",

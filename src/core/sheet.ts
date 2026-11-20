@@ -26,7 +26,7 @@ export const PAGE_TOKENS = `--hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --di
  * Age of a reading (galaxy, targets, planets): --fresh, --warm, --old.
  * Queue kinds use the game's own queue colours (--q-*), so they read as they do in OGame.
  */
-const SURFACE_TOKENS = '--bg: #0F141B; --surface: #1A2230; --raised: #151C26; --band: #1B2A44; --band-2: #22314D;';
+const SURFACE_TOKENS = '--bg: #0F141B; --surface: #1A2230; --raised: #151C26; --band: #152036; --band-2: #1C2940;';
 const LINE_TOKENS = '--line: #263142; --line-soft: #1D2531; --faint: #4A5566;';
 /** Hairline a step stronger, for tooltips and badges that sit on a tile. */
 const STRONG_LINE = '--line-strong: #33415A; --line-hover: #56657C; --accent-line: #8A7420; --hover: #212B3A;';

@@ -24,6 +24,7 @@ const PATHS = {
   note: '<path d="M5 4h14v11l-5 5H5z"/><path d="M14 20v-5h5M8.5 9h7M8.5 12.5h4"/>',
   chevron: '<path d="M6 9.5l6 6 6-6"/>',
   next: '<path d="M4.5 12h14M13 5.5l6.5 6.5-6.5 6.5"/>',
+  shield: '<path d="M12 3l7 3v5c0 4.4-3 8-7 10-4-2-7-5.6-7-10V6z"/>',
   sword: '<path d="M19.5 4.5L9 15M19.5 4.5V9M19.5 4.5H15"/><path d="M6.5 12.5l5 5M8 16l-3.5 3.5"/>',
   play: '<path d="M8 5.5v13l10.5-6.5z"/>',
   trash: '<path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/>',
