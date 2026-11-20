@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.135
+// @version      0.3.136
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -11681,6 +11681,7 @@ td.guess { font-style: italic; opacity: 0.7; }
 .matrix.lf th.col { min-width: 0; max-width: none; }
 .matrix.lf .col-name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; text-align: right; overflow-wrap: anywhere; hyphens: none; }
 .matrix.lf td.tech { max-width: none; }
+.matrix.lf td { padding-top: 2px; padding-bottom: 2px; }
 
 /* Research: one tile per technology, its picture over its level. */
 .levels { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 2px; }
@@ -11726,7 +11727,20 @@ td.guess { font-style: italic; opacity: 0.7; }
 .field-label { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
 .field.rate { width: 44px; text-align: center; }
 .field.qty { width: 110px; text-align: right; font-family: "JetBrains Mono", Consolas, monospace; }
-table.scrap td.unit { padding: 2px 8px 2px 2px; }
+/* Rottamatore: ships and defences side by side, denser rows, one shared total underneath. */
+.scrap-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 12px; align-items: start; }
+table.scrap { width: 100%; }
+table.scrap th, table.scrap td { padding: 2px 6px; }
+table.scrap .field.qty { width: 74px; height: 24px; }
+table.scrap .unit-label span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scrap-total { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 20px; margin-top: 8px; padding: 8px 10px; background: var(--raised); box-shadow: inset 0 2px 0 var(--accent); }
+.scrap-total .name { font: 600 condensed 14px var(--display); color: var(--text); }
+.scrap-total .part { display: inline-flex; align-items: baseline; gap: 6px; }
+.scrap-total small { color: var(--label); font-size: 11px; }
+.scrap-total b { font: 600 condensed 16px var(--display); }
+.scrap-total b.m { color: var(--m); } .scrap-total b.c { color: var(--c); } .scrap-total b.d { color: var(--d); }
+.scrap-total .msu { margin-left: auto; color: var(--text); }
+table.scrap td.unit { padding: 1px 6px 1px 2px; }
 table.scrap .unit-label { display: flex; align-items: center; gap: 8px; width: 100%; padding: 2px 8px 2px 2px; border: 1px solid transparent; border-radius: 6px; background: none; color: var(--text-2); font: 12px var(--body); text-align: left; cursor: pointer; }
 table.scrap .unit-label:hover { border-color: var(--line); color: var(--text); }
 table.scrap .unit-label[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
@@ -11770,6 +11784,8 @@ table.queues td.acts { width: 1%; text-align: right; }
   var scrapBody = null;
   var scrapRate = 35;
   var unitScope = "planet";
+  var facScope = "planet";
+  var lfScope = "buildings";
   var keyHandler2 = null;
   function h3(tag, className = "", text) {
     const node = document.createElement(tag);
@@ -12500,16 +12516,28 @@ table.queues td.acts { width: 1%; text-align: right; }
     const { t } = ctx.o;
     const planets = ctx.bodies.filter((b) => b.type === "planet");
     const moons = ctx.bodies.filter((b) => b.type === "moon");
-    section(parent, t("dash.planets")).append(bodyMatrix(ctx, planets, PLANET_FACILITIES, { foot: "avg" }));
-    if (moons.length) section(parent, t("dash.moons")).append(bodyMatrix(ctx, moons, MOON_FACILITIES, { foot: "avg" }));
+    const scope = moons.length ? facScope : "planet";
+    const s = scopedCard(parent, ctx, t("dash.tab.facilities"), [
+      { key: "planet", label: t("dash.planets"), icon: "planet", note: String(planets.length) },
+      { key: "moon", label: t("dash.moons"), icon: "moon", note: String(moons.length), off: !moons.length }
+    ], scope, (k) => {
+      facScope = k;
+    });
+    s.append(scope === "moon" ? bodyMatrix(ctx, moons, MOON_FACILITIES, { foot: "avg" }) : bodyMatrix(ctx, planets, PLANET_FACILITIES, { foot: "avg" }));
   }
   function lifeformsTab(parent, ctx) {
     const { o, name } = ctx;
     const { t, doc } = o;
     const planets = ctx.bodies.filter((b) => b.type === "planet");
     const active = new Map(planets.map((p) => [p.id, { b: activeLfBuildings(p), r: activeLfResearch(p, o.lfSlots?.[String(p.id)]) }]));
-    const table = (title, pick) => {
-      const s = section(parent, title, t("dash.lfHint"));
+    const s = scopedCard(parent, ctx, t("dash.tab.lifeforms"), [
+      { key: "buildings", label: t("dash.lfBuildings") },
+      { key: "research", label: t("dash.lfResearch") }
+    ], lfScope, (k) => {
+      lfScope = k;
+    });
+    s.append(h3("p", "hint", t("dash.lfHint")));
+    const table = (pick) => {
       const ids = [...new Set(planets.flatMap((p) => pick(p).filter((a) => a.level > 0).map((a) => a.id)))].sort(
         (a, b) => a % 100 - b % 100 || a - b
       );
@@ -12542,7 +12570,7 @@ table.queues td.acts { width: 1%; text-align: right; }
         const sp = speciesOf(id);
         const cell = h3("td", "name tech");
         const label = h3("span", "tech-label");
-        label.append(ctx.pic(id, 26) ?? techIconEl(doc, void 0, 26, "pic"));
+        label.append(ctx.pic(id, 22) ?? techIconEl(doc, void 0, 22, "pic"));
         label.append(h3("span", "", name(id)));
         if (sp) label.append(h3("small", "", t(`lf.${sp}`)));
         cell.append(label);
@@ -12564,8 +12592,35 @@ table.queues td.acts { width: 1%; text-align: right; }
       wrap.append(tab2);
       s.append(wrap);
     };
-    table(t("dash.lfBuildings"), (p) => active.get(p.id).b);
-    table(t("dash.lfResearch"), (p) => active.get(p.id).r);
+    table(lfScope === "research" ? (p) => active.get(p.id).r : (p) => active.get(p.id).b);
+  }
+  function scopedCard(parent, ctx, title, options, current3, onPick) {
+    const s = h3("div", "card");
+    parent.append(s);
+    const head = h3("div", "table-head");
+    head.append(h3("h3", "", title));
+    const seg = h3("div", "seg");
+    seg.setAttribute("role", "group");
+    seg.setAttribute("aria-label", title);
+    for (const opt of options) {
+      const b = h3("button", "");
+      b.type = "button";
+      b.dataset.scope = opt.key;
+      b.disabled = !!opt.off;
+      b.setAttribute("aria-pressed", String(current3 === opt.key));
+      if (opt.icon) b.append(icon(ctx.o.doc, opt.icon, 14, "seg-ico"));
+      b.append(h3("span", "", opt.label));
+      if (opt.note !== void 0) b.append(h3("i", "mono", opt.note));
+      b.addEventListener("click", () => {
+        if (current3 === opt.key) return;
+        onPick(opt.key);
+        ctx.redraw();
+      });
+      seg.append(b);
+    }
+    head.append(seg);
+    s.append(head);
+    return s;
   }
   function unitsTab(parent, ctx, ids, ships) {
     const { t } = ctx.o;
@@ -12661,58 +12716,64 @@ table.queues td.acts { width: 1%; text-align: right; }
     none.type = "button";
     bar.append(pick, rateLabel, quick, all2, none);
     s.append(bar);
-    const wrap = h3("div", "table-wrap");
-    const table = h3("table", "scrap");
-    const hr = h3("tr");
-    for (const [label, cls] of [[t("dash.unit"), ""], [t("dash.owned"), "num"], [t("dash.toScrap"), "num"], [t("res.metal"), "num"], [t("res.crystal"), "num"], [t("res.deuterium"), "num"]]) hr.append(h3("th", cls, label));
-    const thead = h3("thead");
-    thead.append(hr);
-    table.append(thead);
-    const tbody = h3("tbody");
     const inputs = /* @__PURE__ */ new Map();
     const outs = /* @__PURE__ */ new Map();
     const picks = /* @__PURE__ */ new Map();
-    for (const id of units) {
-      const owned = level(body, id);
-      if (!owned) continue;
-      const tr = h3("tr");
-      const nameCell = h3("td", "unit");
-      const label = h3("button", "unit-label");
-      label.type = "button";
-      label.title = t("dash.scrapPick");
-      const p = ctx.pic(id, 28);
-      if (p) label.append(p);
-      label.append(h3("span", "", ctx.name(id)));
-      picks.set(id, label);
-      nameCell.append(label);
-      tr.append(nameCell, h3("td", "num mono", count(owned)));
-      const qty = h3("input", "field qty");
-      qty.type = "number";
-      qty.min = "0";
-      qty.max = String(owned);
-      qty.value = "0";
-      qty.setAttribute("aria-label", ctx.name(id));
-      inputs.set(id, qty);
-      const qCell = h3("td", "num");
-      qCell.append(qty);
-      tr.append(qCell);
-      const cells = [h3("td", "num mono m"), h3("td", "num mono c"), h3("td", "num mono d")];
-      outs.set(id, cells);
-      tr.append(...cells);
-      tbody.append(tr);
-    }
-    table.append(tbody);
-    const fr = h3("tr");
-    const totalCells = [h3("td", "num mono m"), h3("td", "num mono c"), h3("td", "num mono d")];
-    const msuCell = h3("span", "mono msu");
-    const totalName = h3("td", "name", `${t("dash.total")} `);
-    totalName.append(msuCell);
-    fr.append(totalName, h3("td"), h3("td"), ...totalCells);
-    const tfoot = h3("tfoot");
-    tfoot.append(fr);
-    table.append(tfoot);
-    wrap.append(table);
-    s.append(wrap);
+    const unitTable = (list, title) => {
+      const owned = list.filter((id) => level(body, id) > 0);
+      if (!owned.length) return null;
+      const wrap = h3("div", "table-wrap");
+      const table = h3("table", "scrap");
+      const hr = h3("tr");
+      for (const [label, cls] of [[title, ""], [t("dash.owned"), "num"], [t("dash.toScrap"), "num"], [t("res.metal"), "num"], [t("res.crystal"), "num"], [t("res.deuterium"), "num"]]) hr.append(h3("th", cls, label));
+      const thead = h3("thead");
+      thead.append(hr);
+      table.append(thead);
+      const tbody = h3("tbody");
+      for (const id of owned) {
+        const n = level(body, id);
+        const tr = h3("tr");
+        const nameCell = h3("td", "unit");
+        const label = h3("button", "unit-label");
+        label.type = "button";
+        label.title = `${ctx.name(id)} \xB7 ${t("dash.scrapPick")}`;
+        const p = ctx.pic(id, 22);
+        if (p) label.append(p);
+        label.append(h3("span", "", ctx.name(id)));
+        picks.set(id, label);
+        nameCell.append(label);
+        tr.append(nameCell, h3("td", "num mono", count(n)));
+        const qty = h3("input", "field qty");
+        qty.type = "number";
+        qty.min = "0";
+        qty.max = String(n);
+        qty.value = "0";
+        qty.setAttribute("aria-label", ctx.name(id));
+        inputs.set(id, qty);
+        const qCell = h3("td", "num");
+        qCell.append(qty);
+        tr.append(qCell);
+        const cells = [h3("td", "num mono m"), h3("td", "num mono c"), h3("td", "num mono d")];
+        outs.set(id, cells);
+        tr.append(...cells);
+        tbody.append(tr);
+      }
+      table.append(tbody);
+      wrap.append(table);
+      return wrap;
+    };
+    const cols = h3("div", "scrap-cols");
+    for (const part of [unitTable(units.filter((id) => id < 400), t("dash.tab.ships")), unitTable(units.filter((id) => id >= 400), t("dash.tab.defence"))]) if (part) cols.append(part);
+    s.append(cols);
+    const totalCells = [h3("b", "mono m"), h3("b", "mono c"), h3("b", "mono d")];
+    const msuCell = h3("b", "mono msu");
+    const totalLine = h3("div", "scrap-total");
+    totalLine.append(h3("span", "name", t("dash.total")), ...totalCells.map((c, i) => {
+      const cell = h3("span", "part");
+      cell.append(h3("small", "", t(`res.${["metal", "crystal", "deuterium"][i]}`)), c);
+      return cell;
+    }), msuCell);
+    s.append(totalLine);
     const update = () => {
       scrapRate = Math.min(SCRAP_MAX, Math.max(35, Number(rate.value) || 35));
       for (const b of quickBtns) b.setAttribute("aria-pressed", String(Number(b.dataset.rate) === scrapRate));

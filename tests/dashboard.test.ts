@@ -189,3 +189,53 @@ describe('scrap tab', () => {
     closeDashboard(document);
   });
 });
+
+describe('one page at a time', () => {
+  const setup = async () => {
+    const { readPlanetList } = await import('../src/data/planet-list');
+    const { PLANET_LIST_HTML, SNAPSHOT } = await import('./fixtures');
+    const { translator } = await import('../src/core/i18n');
+    document.body.innerHTML = PLANET_LIST_HTML;
+    const snapshot = { ...SNAPSHOT, bodies: SNAPSHOT.bodies.map((b) => ({ ...b, species: b.type === 'planet' ? 3 : 0, levels: { ...b.levels, 14: 10, 41: 5, 13101: 4, 13201: 3, 202: 10, 401: 20 } })) };
+    openDashboard({ doc: document, snapshot, entries: readPlanetList(document), score: null, now: 0, locale: 'it', t: translator('it') });
+    const root = () => document.getElementById('fut-dashboard')!.shadowRoot!;
+    const go = (tab: string) => root().querySelector<HTMLButtonElement>(`.tab[data-tab="${tab}"]`)!.click();
+    return { root, go };
+  };
+
+  it('Strutture: planets or moons; Forme di vita: buildings or research, switched in the title row', async () => {
+    const { root, go } = await setup();
+    go('facilities');
+    expect(root().querySelectorAll('.table-head .seg button')).toHaveLength(2);
+    expect(root().querySelectorAll('table.matrix')).toHaveLength(1);
+    root().querySelector<HTMLButtonElement>('.seg button[data-scope="moon"]')!.click();
+    expect(root().querySelector('.seg button[data-scope="moon"]')!.getAttribute('aria-pressed')).toBe('true');
+    expect(root().querySelectorAll('table.matrix')).toHaveLength(1);
+    go('lifeforms');
+    expect(root().querySelector('.seg button[data-scope="buildings"]')!.getAttribute('aria-pressed')).toBe('true');
+    expect(root().querySelectorAll('table.matrix.lf')).toHaveLength(1);
+    root().querySelector<HTMLButtonElement>('.seg button[data-scope="research"]')!.click();
+    expect(root().querySelector('.seg button[data-scope="research"]')!.getAttribute('aria-pressed')).toBe('true');
+    expect(root().querySelectorAll('table.matrix.lf')).toHaveLength(1);
+    closeDashboard(document);
+  });
+
+  it('Rottamatore: ships and defences in two tables, one total over both', async () => {
+    const { root, go } = await setup();
+    go('scrap');
+    const tables = root().querySelectorAll('.scrap-cols table.scrap');
+    expect(tables).toHaveLength(2);
+    const [ship, def] = [...root().querySelectorAll<HTMLInputElement>('.scrap-cols input.qty')];
+    ship!.value = '10';
+    ship!.dispatchEvent(new Event('input'));
+    def!.value = '20';
+    def!.dispatchEvent(new Event('input'));
+    // 10 small cargo (2000 M + 2000 C each) and 20 rocket launchers (2000 M each), at the rate in the field.
+    const rate = Number(root().querySelector<HTMLInputElement>('.scrap-bar input.rate')!.value);
+    const sum = scrapReturn({ 202: 10, 401: 20 }, rate);
+    const metal = root().querySelector('.scrap-total b.m')!.textContent!;
+    expect(sum.metal).toBe(Math.floor(60000 * rate / 100));
+    expect(metal).toBe(`${(sum.metal / 1000).toFixed(1).replace('.', ',')}k`);
+    closeDashboard(document);
+  });
+});

@@ -122,6 +122,7 @@ td.guess { font-style: italic; opacity: 0.7; }
 .matrix.lf th.col { min-width: 0; max-width: none; }
 .matrix.lf .col-name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; text-align: right; overflow-wrap: anywhere; hyphens: none; }
 .matrix.lf td.tech { max-width: none; }
+.matrix.lf td { padding-top: 2px; padding-bottom: 2px; }
 
 /* Research: one tile per technology, its picture over its level. */
 .levels { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 2px; }
@@ -167,7 +168,20 @@ td.guess { font-style: italic; opacity: 0.7; }
 .field-label { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
 .field.rate { width: 44px; text-align: center; }
 .field.qty { width: 110px; text-align: right; font-family: "JetBrains Mono", Consolas, monospace; }
-table.scrap td.unit { padding: 2px 8px 2px 2px; }
+/* Rottamatore: ships and defences side by side, denser rows, one shared total underneath. */
+.scrap-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 12px; align-items: start; }
+table.scrap { width: 100%; }
+table.scrap th, table.scrap td { padding: 2px 6px; }
+table.scrap .field.qty { width: 74px; height: 24px; }
+table.scrap .unit-label span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scrap-total { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 20px; margin-top: 8px; padding: 8px 10px; background: var(--raised); box-shadow: inset 0 2px 0 var(--accent); }
+.scrap-total .name { font: 600 condensed 14px var(--display); color: var(--text); }
+.scrap-total .part { display: inline-flex; align-items: baseline; gap: 6px; }
+.scrap-total small { color: var(--label); font-size: 11px; }
+.scrap-total b { font: 600 condensed 16px var(--display); }
+.scrap-total b.m { color: var(--m); } .scrap-total b.c { color: var(--c); } .scrap-total b.d { color: var(--d); }
+.scrap-total .msu { margin-left: auto; color: var(--text); }
+table.scrap td.unit { padding: 1px 6px 1px 2px; }
 table.scrap .unit-label { display: flex; align-items: center; gap: 8px; width: 100%; padding: 2px 8px 2px 2px; border: 1px solid transparent; border-radius: 6px; background: none; color: var(--text-2); font: 12px var(--body); text-align: left; cursor: pointer; }
 table.scrap .unit-label:hover { border-color: var(--line); color: var(--text); }
 table.scrap .unit-label[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
