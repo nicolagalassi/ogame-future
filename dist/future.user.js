@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.136
+// @version      0.3.137
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -11560,6 +11560,8 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
   // src/modules/dashboard/style.ts
   var DASHBOARD_CSS = `
 :host { --panel-w: 1120px; }
+/* The Dashboard is the tallest window: closer to the top of the screen than the others (40px), so a 1080p screen shows more of it. */
+.backdrop { padding-top: 16px; padding-bottom: 16px; }
 .moon-ico { margin-right: 4px; vertical-align: -1px; color: var(--muted); }
 .kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 

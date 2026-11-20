@@ -1,6 +1,8 @@
 /** Dashboard styles. They live inside the panel's Shadow DOM, so the game's CSS cannot reach them. */
 export const DASHBOARD_CSS = `
 :host { --panel-w: 1120px; }
+/* The Dashboard is the tallest window: closer to the top of the screen than the others (40px), so a 1080p screen shows more of it. */
+.backdrop { padding-top: 16px; padding-bottom: 16px; }
 .moon-ico { margin-right: 4px; vertical-align: -1px; color: var(--muted); }
 .kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 
