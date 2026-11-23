@@ -960,5 +960,7 @@
   "fleet.tip.skipEmpty": "No ships here: opens the next planet or moon of the round with the expedition prepared. Nothing leaves from here.",
   "ping.label": "Ping {ms} ms",
   "ping.hint": "The server answered in {ms} ms; the page loaded in {s} s. Measured when this page loaded: a send made now reaches the server with a similar delay.",
-  "ping.hintShort": "The server answered in {ms} ms. Measured when this page loaded."
+  "ping.hintShort": "The server answered in {ms} ms. Measured when this page loaded.",
+  "fleet.send.allBtn": "All",
+  "fleet.send.allHint": "Every resource on this planet or moon (the flight fuel stays home)"
 }

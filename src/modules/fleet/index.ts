@@ -28,7 +28,6 @@ import type { Store } from '../../core/storage';
 import { ARCHIVE_KEY, loadArchive, noteFuel, type Archive } from '../../engines/orion';
 import {
   CARGO_SHIPS,
-  cargoLoad,
   activeProfile,
   copySections,
   RESERVE_SECTIONS,
@@ -532,22 +531,6 @@ function copyPanel(o: FleetOptions, moon: boolean, onCopy: (sections: ReserveSec
 /* Bar                                                                 */
 /* ------------------------------------------------------------------ */
 
-/** What the rules keep back here right now, rule by rule; switched-off rules are named as such. */
-function summary(o: FleetOptions, stored: Required<FleetProfile>, settings: FleetSettings): string {
-  const { t } = o;
-  const fmt = (n: number) => n.toLocaleString(o.locale);
-  const parts: string[] = [];
-  const off: string[] = [];
-  const ships = Object.values(stored.reserve.ships).reduce((a, b) => a + b, 0);
-  if (ships) (settings.shipsOn ? parts.push(`${t('fleet.rule.ships')}: ${fmt(ships)}`) : off.push(t('fleet.rule.ships')));
-  const r = stored.reserve.resources;
-  if (r.metal || r.crystal || r.deuterium)
-    settings.resourcesOn ? parts.push(`${t('fleet.rule.resources')}: ${fmt(r.metal)} / ${fmt(r.crystal)} / ${fmt(r.deuterium)}`) : off.push(t('fleet.rule.resources'));
-  if (settings.ignoreFood) parts.push(t('fleet.foodShort'));
-  const text = parts.length ? `${t('fleet.reserve')}: ${parts.join(' · ')}` : t('fleet.noReserve');
-  return off.length ? `${text} · ${t('fleet.rule.offList', { list: off.join(', ') })}` : text;
-}
-
 /** Points of the universe's first player, from the cached public highscore; undefined when not known yet. */
 function topScore(store: Store): number | undefined {
   const ranks = store.get<UniverseRanks | null>(UNIVERSE_RANKS_KEY, null);
@@ -1004,7 +987,12 @@ function sendPanel(
   clear.title = t('fleet.send.clearBtn');
   clear.setAttribute('aria-label', t('fleet.send.clearHint'));
   peek(clear, t('fleet.send.clearBtn'), t('fleet.send.clearHint'));
-  res.append(clear);
+  // All three at once: every resource here (the flight's fuel is kept back when loading).
+  const all = el(doc, 'button', 'fut-fall', t('fleet.send.allBtn'));
+  all.type = 'button';
+  all.setAttribute('aria-label', t('fleet.send.allHint'));
+  peek(all, t('fleet.send.allBtn'), t('fleet.send.allHint'));
+  res.append(all, clear);
 
   // CL / CP: how many of each the resources need, recounted while typing (fuel is added when preparing).
   const cargoBox = el(doc, 'span', 'fut-fcargo');
@@ -1063,6 +1051,15 @@ function sendPanel(
       recount();
     });
   }
+  all.addEventListener('click', (e) => {
+    e.preventDefault();
+    const fd = getDispatcher();
+    if (!fd) return;
+    const here = { metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet };
+    for (const [k, input] of inputs) input.value = groupInt(Math.max(0, Math.floor(here[k] || 0)), o.locale);
+    save({ sendPick: readPick() });
+    recount();
+  });
   clear.addEventListener('click', (e) => {
     e.preventDefault();
     for (const [, input] of inputs) input.value = '';
@@ -1591,18 +1588,15 @@ export function renderFleetTools(o: FleetOptions): void {
   }
 
   if (fleet2 && anchor2) {
+    // Page 2 has nothing of Future's own to offer (the resources are chosen on page 1, Nicola): the bar
+    // shows only to ask about the speed during a fleetsave round, and is hidden otherwise.
     const bar = el(doc, 'div', 'fut-fbar');
-    const out2 = readout(doc, summary(o, stored, settings));
-    const load = tile(doc, 'cargo', t('fleet.resMinusReserve'), () => {
-      const fd = getDispatcher();
-      if (!fd) return;
-      out2.say(t('fleet.resLoaded', { cargo: loadCargoNow(fd, profile).toLocaleString(o.locale) }));
-    });
-    out2.peek(load, t('fleet.resMinusReserve'), t('fleet.tip.cargo'));
+    bar.hidden = true;
+    const out2 = readout(doc, '');
     const row = el(doc, 'div', 'fut-frow');
     const ask = el(doc, 'span', 'fut-fask');
     ask.hidden = true;
-    row.append(load, out2.box, ask);
+    row.append(out2.box, ask);
     bar.append(row);
     anchor2.before(bar);
     // Speed changed by hand during a fleetsave round (only fleetsave, Nicola): offer it for the next
@@ -1621,6 +1615,7 @@ export function renderFleetTools(o: FleetOptions): void {
         box.hidden = true;
         return;
       }
+      bar.hidden = false;
       const yes = el(doc, 'button', 'fut-fask-b yes', t('fleet.speedAsk.yes'));
       const no = el(doc, 'button', 'fut-fask-b', t('fleet.speedAsk.no'));
       yes.type = no.type = 'button';
@@ -1837,14 +1832,4 @@ function whenTargetIdle(fd: FleetDispatcher, timeoutMs = 5000): Promise<void> {
     const check = () => (!busy() || Date.now() - started > timeoutMs ? resolve() : setTimeout(check, 50));
     check();
   });
-}
-
-function loadCargoNow(fd: FleetDispatcher, profile: FleetProfile): number {
-  const onPlanet = { metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet };
-  const load = cargoLoad(onPlanet, profile.reserve, Math.ceil(Number(fd.getConsumption()) || 0), fd.getCargoCapacity());
-  fd.cargoMetal = load.metal;
-  fd.cargoCrystal = load.crystal;
-  fd.cargoDeuterium = load.deuterium;
-  fd.refresh();
-  return load.metal + load.crystal + load.deuterium;
 }
