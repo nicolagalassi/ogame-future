@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.138
+// @version      0.3.139
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -6445,13 +6445,13 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   function drawPing(doc, t, timing, locale) {
     doc.getElementById(PING_ID)?.remove();
     if (!timing) return null;
-    const el6 = doc.createElement("span");
+    const clock = doc.querySelector(".OGameClock");
+    const el6 = doc.createElement(clock?.tagName === "LI" ? "li" : "span");
     el6.id = PING_ID;
     el6.textContent = t("ping.label", { ms: timing.server.toLocaleString(locale) });
-    el6.style.cssText = `margin-left: 8px; font: 700 11px Verdana, Arial, sans-serif; color: ${COLORS[pingLevel(timing.server)]}; white-space: nowrap; cursor: help;`;
+    el6.style.cssText = `display: inline-block; margin-left: 8px; font: 700 11px Verdana, Arial, sans-serif; color: ${COLORS[pingLevel(timing.server)]}; white-space: nowrap; cursor: help;`;
     el6.title = timing.total ? t("ping.hint", { ms: timing.server.toLocaleString(locale), s: (timing.total / 1e3).toLocaleString(locale, { maximumFractionDigits: 1, minimumFractionDigits: 1 }) }) : t("ping.hintShort", { ms: timing.server.toLocaleString(locale) });
-    const clock = doc.querySelector(".OGameClock");
-    if (clock) clock.append(el6);
+    if (clock) clock.after(el6);
     else {
       const row = doc.querySelector("#siteFooter .content .fright");
       if (!row) return null;
