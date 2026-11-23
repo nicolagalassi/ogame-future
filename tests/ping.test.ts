@@ -24,7 +24,11 @@ describe('game ping', () => {
     drawPing(document, t, { server: 183, total: 1540 }, 'it');
     const el = document.getElementById(PING_ID)!;
     expect(document.querySelectorAll(`#${PING_ID}`)).toHaveLength(1);
-    expect(el.parentElement!.className).toBe('OGameClock');
+    expect(el.previousElementSibling!.className).toBe('OGameClock');
+    expect(el.tagName).toBe('LI');
+    // The game rewrites its clock every second: the ping stays.
+    document.querySelector('.OGameClock')!.innerHTML = '20.11.2026 <span>16:03:11</span>';
+    expect(document.getElementById(PING_ID)).toBe(el);
     expect(el.textContent).toBe('Ping 183 ms');
     expect(el.title).toContain('1,5 s');
     document.body.innerHTML = '<div id="siteFooter"><div class="content"><div class="fright"><a>Forum</a></div></div></div>';

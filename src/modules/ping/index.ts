@@ -15,15 +15,17 @@ const COLORS = { fresh: '#38C56E', warm: '#E3BB28', old: '#EF7676' } as const;
 export function drawPing(doc: Document, t: T, timing: PageTiming | null, locale: string): HTMLElement | null {
   doc.getElementById(PING_ID)?.remove();
   if (!timing) return null;
-  const el = doc.createElement('span');
+  const clock = doc.querySelector('.OGameClock');
+  // Beside the clock, never inside it: the game rewrites the clock every second and would wipe the ping.
+  // In the game's bar the clock is a list item, so the ping is one too.
+  const el = doc.createElement(clock?.tagName === 'LI' ? 'li' : 'span');
   el.id = PING_ID;
   el.textContent = t('ping.label', { ms: timing.server.toLocaleString(locale) });
-  el.style.cssText = `margin-left: 8px; font: 700 11px Verdana, Arial, sans-serif; color: ${COLORS[pingLevel(timing.server)]}; white-space: nowrap; cursor: help;`;
+  el.style.cssText = `display: inline-block; margin-left: 8px; font: 700 11px Verdana, Arial, sans-serif; color: ${COLORS[pingLevel(timing.server)]}; white-space: nowrap; cursor: help;`;
   el.title = timing.total
     ? t('ping.hint', { ms: timing.server.toLocaleString(locale), s: (timing.total / 1000).toLocaleString(locale, { maximumFractionDigits: 1, minimumFractionDigits: 1 }) })
     : t('ping.hintShort', { ms: timing.server.toLocaleString(locale) });
-  const clock = doc.querySelector('.OGameClock');
-  if (clock) clock.append(el);
+  if (clock) clock.after(el);
   else {
     const row = doc.querySelector('#siteFooter .content .fright');
     if (!row) return null;
