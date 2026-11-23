@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.140
+// @version      0.3.141
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -6474,6 +6474,59 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     else win?.addEventListener("load", () => win.setTimeout(draw, 0), { once: true });
   }
 
+  // src/data/import-export.ts
+  var IMPORT_EXPORT_PATH = "/game/index.php?page=componentOnly&component=externaldataexport&action=importExportInfo&asJson=1";
+  var IMPORT_EXPORT_KEY = "importexport";
+  var isFalse = (v) => v === false || v === "false" || v === 0 || v === "0";
+  var isTrue = (v) => v === true || v === "true" || v === 1 || v === "1";
+  function parseImportExport(json2) {
+    if (!json2 || typeof json2 !== "object") return null;
+    const { hasBought, gotItem } = json2;
+    if (hasBought === void 0 && gotItem === void 0) return null;
+    if (isFalse(hasBought) || isFalse(gotItem)) return true;
+    if (isTrue(hasBought) && (gotItem === void 0 || isTrue(gotItem))) return false;
+    return null;
+  }
+  var sessionKey2 = (store) => `${store.namespace}:importexport.read`;
+  async function fetchImportExport(deps, reason) {
+    const response = await deps.guard.request(IMPORT_EXPORT_PATH, reason);
+    let json2 = null;
+    try {
+      json2 = JSON.parse(await response.text());
+    } catch {
+      json2 = null;
+    }
+    const available = parseImportExport(json2);
+    if (available === null) return deps.store.get(IMPORT_EXPORT_KEY, null);
+    const state = { available, at: (deps.now ?? Date.now)() };
+    deps.store.set(IMPORT_EXPORT_KEY, state);
+    return state;
+  }
+  async function importExportOncePerSession(deps) {
+    if (deps.session.getItem(sessionKey2(deps.store)) === "1") return deps.store.get(IMPORT_EXPORT_KEY, null);
+    deps.session.setItem(sessionKey2(deps.store), "1");
+    return fetchImportExport(deps, "page-load");
+  }
+  function forgetImportExportRead(store, session) {
+    session.setItem(sessionKey2(store), "0");
+  }
+
+  // src/modules/merchant/index.ts
+  var MERCHANT_CLASS = "fut-ie-open";
+  var STYLE_ID2 = "fut-merchant-style";
+  var MERCHANT = '.menubutton[data-ipi-hint="ipiToolbarTrader"]';
+  var CSS3 = `body.${MERCHANT_CLASS} #menuTable ${MERCHANT} .textlabel, body.${MERCHANT_CLASS} #leftMenu ${MERCHANT} .textlabel { color: #7FB8FF !important; }`;
+  var isTraderPage = (href) => /[?&]component=trader/i.test(href);
+  function markMerchant(doc, state) {
+    if (!doc.getElementById(STYLE_ID2)) {
+      const style = doc.createElement("style");
+      style.id = STYLE_ID2;
+      style.textContent = CSS3;
+      doc.head.append(style);
+    }
+    doc.body.classList.toggle(MERCHANT_CLASS, state?.available === true);
+  }
+
   // src/engines/expeditions.ts
   var JOURNAL_KEY = "exp.journal";
   var DAY = 864e5;
@@ -6890,7 +6943,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     for (const cls of [1, 2, 3]) classBooster[cls] = num5(data.characterclasses?.[String(600 + cls)]?.totalBonus?.characterClass);
     return { expedition: value > 0 ? value : 0, ships, classBooster, at };
   }
-  var sessionKey2 = (store) => `${store.namespace}:lf.hydrated`;
+  var sessionKey3 = (store) => `${store.namespace}:lf.hydrated`;
   async function fetchLfBonuses(deps, reason, now = Date.now()) {
     const response = await deps.guard.request(SPECIES_BONUSES_PATH, reason);
     const text = await response.text();
@@ -6907,8 +6960,8 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   }
   async function hydrateLfOncePerSession(deps) {
     const stored = deps.store.get(LF_BONUS_KEY, null);
-    if (stored && deps.session.getItem(sessionKey2(deps.store)) === "1") return stored;
-    deps.session.setItem(sessionKey2(deps.store), "1");
+    if (stored && deps.session.getItem(sessionKey3(deps.store)) === "1") return stored;
+    deps.session.setItem(sessionKey3(deps.store), "1");
     return fetchLfBonuses(deps, "page-load");
   }
   function readActiveItems(doc, now = Date.now()) {
@@ -9617,7 +9670,7 @@ td.spark-cell { width: 90px; }
   var SETTINGS_ID = "fut-settings-window";
   var TAB_KEY = "settings.tab";
   var SECTIONS = ["menu", "mail", "galaxy", "fleet", "keys", "data"];
-  var CSS3 = `
+  var CSS4 = `
 :host { --panel-w: 620px; }
 .body { display: flex; flex-direction: column; }
 /* Rows that follow each other read as one card, split by hairlines. */
@@ -9690,7 +9743,7 @@ input.field { width: 190px; }
       return n;
     };
     const style = el6("style");
-    style.textContent = WINDOW_SHEET + CSS3;
+    style.textContent = WINDOW_SHEET + CSS4;
     const backdrop = el6("div", "backdrop");
     const panel = el6("div", "panel");
     panel.setAttribute("role", "dialog");
@@ -10534,7 +10587,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     }
     if (on) delete link.dataset.futNoTip;
   }
-  var STYLE_ID2 = "fut-planet-menu-style";
+  var STYLE_ID3 = "fut-planet-menu-style";
   var ICONS2 = {
     journal: '<path d="M5 3.5h11a3 3 0 0 1 3 3V20.5H8a3 3 0 0 1-3-3z" fill="none" stroke-width="2"/><path d="M5 17.5a3 3 0 0 1 3-3h11" fill="none" stroke-width="2"/><path stroke="none" d="M9.5 6.5l1 2.2 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3L6.2 9l2.3-.3z"/>',
     planner: '<path d="M9 6h11M9 12h11M9 18h11" fill="none" stroke-width="2.2"/><path stroke="none" d="M3 4.5h3v3H3zM3 10.5h3v3H3zM3 16.5h3v3H3z"/>',
@@ -10848,9 +10901,9 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     const { doc } = o;
     const list = doc.getElementById("planetList");
     if (!list) return;
-    if (!doc.getElementById(STYLE_ID2)) {
+    if (!doc.getElementById(STYLE_ID3)) {
       const style = el3(doc, "style", "");
-      style.id = STYLE_ID2;
+      style.id = STYLE_ID3;
       style.textContent = PLANET_MENU_CSS;
       doc.head.append(style);
     }
@@ -13763,7 +13816,7 @@ input[type="checkbox"] { accent-color: var(--accent); }
 `;
 
   // src/modules/fleet/index.ts
-  var STYLE_ID3 = "fut-fleet-style";
+  var STYLE_ID4 = "fut-fleet-style";
   var MODAL_ID = "fut-fleet-modal";
   var FLEETSAVE_MISSIONS = [3, 4, 6, 8, 15, 5, 1];
   var pageState = /* @__PURE__ */ new WeakMap();
@@ -14583,9 +14636,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   }
   function renderFleetTools(o) {
     const { doc, t } = o;
-    if (!doc.getElementById(STYLE_ID3)) {
+    if (!doc.getElementById(STYLE_ID4)) {
       const style = el4(doc, "style");
-      style.id = STYLE_ID3;
+      style.id = STYLE_ID4;
       style.textContent = FLEET_CSS;
       doc.head.append(style);
     }
@@ -17388,7 +17441,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   // src/modules/highscore/index.ts
   var ptreSeen = /* @__PURE__ */ new WeakMap();
   var isHighscorePage = (doc) => new URL(doc.location?.href ?? "http://x/").searchParams.get("component") === "highscore";
-  var CSS4 = `
+  var CSS5 = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
 #ranks, #fut-hs-top { ${WINDOW_TOKENS} }
 #ranks { --fut-up: var(--ok); --fut-down: #E57B70; --fut-mute: var(--muted); --fut-line: var(--faint); --fut-btn: var(--surface); --fut-txt: var(--text-2); --fut-hi: #FFFFFF; --fut-link: var(--link); }
@@ -17471,7 +17524,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     if (!o.doc.getElementById("fut-hs-style")) {
       const style = o.doc.createElement("style");
       style.id = "fut-hs-style";
-      style.textContent = CSS4;
+      style.textContent = CSS5;
       o.doc.head.append(style);
     }
     decorateHighscore(o);
@@ -17795,8 +17848,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   }
 
   // src/modules/orion/index.ts
-  var STYLE_ID4 = "fut-orion-style";
-  var CSS5 = `
+  var STYLE_ID5 = "fut-orion-style";
+  var CSS6 = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
 .fut-or, .fut-or-box, .fut-or-tiles, .fut-or-t, .fut-or-m, .fut-or-c, .fut-or-d, .fut-or-li, .fut-or-val, .fut-or-x, .fut-or-cap, .fut-or-sim, .fut-or-best, .fut-or-line, .fut-or-dot, .fut-or-sw, .fut-or-head, .fut-or-kpis, .fut-or-kpi, .fut-or-rows, .fut-or-row, .fut-or-empty, .fut-or-warn { ${WINDOW_TOKENS_NO_LINES} }
 .fut-or, .fut-or-box {
@@ -17897,10 +17950,10 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       s.innerHTML = html;
       return s.firstElementChild ?? s;
     };
-    if (!doc.getElementById(STYLE_ID4)) {
+    if (!doc.getElementById(STYLE_ID5)) {
       const style = h7(doc, "style");
-      style.id = STYLE_ID4;
-      style.textContent = CSS5;
+      style.id = STYLE_ID5;
+      style.textContent = CSS6;
       doc.head.append(style);
     }
     const loadLedger = () => store.get(LEDGER_KEY, {});
@@ -18297,12 +18350,12 @@ ${waves2.map((w) => `${t("orion.waveN", { n: w.n })}: ${fmt(w.cap)}`).join("\n")
 
   // src/core/fonts.ts
   var DISPLAY_FAMILY = "Future Barlow";
-  var STYLE_ID5 = "fut-fonts";
+  var STYLE_ID6 = "fut-fonts";
   var face = (data, weights) => `@font-face { font-family: '${DISPLAY_FAMILY}'; font-style: normal; font-weight: ${weights}; font-stretch: 50% 200%; font-display: block; src: url(data:font/woff2;base64,${data}) format('woff2'); }`;
   function installFonts(doc) {
-    if (doc.getElementById(STYLE_ID5)) return;
+    if (doc.getElementById(STYLE_ID6)) return;
     const style = doc.createElement("style");
-    style.id = STYLE_ID5;
+    style.id = STYLE_ID6;
     style.textContent = `${face(barlow_semi_condensed_400_default, "100 500")}
 ${face(barlow_semi_condensed_600_default, "501 900")}`;
     (doc.head ?? doc.documentElement).append(style);
@@ -18340,7 +18393,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
     const bodyIds = readPlanetList(document).flatMap((e) => [e.planetId, e.moonId]).filter((id) => id !== null);
     let queues = store.get(QUEUES_KEY, null);
     try {
-      const [account, queue, lf] = await Promise.allSettled([
+      const [account, queue, lf, , , importExport] = await Promise.allSettled([
         hydrateAccountOncePerSession({ guard, store, session: window.sessionStorage }),
         loadQueuesOnPageLoad({ guard, store, ids: bodyIds }),
         // Lifeform bonuses for the expedition size: once per session, like accountInfo.
@@ -18349,8 +18402,13 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
         loadServerDataOnPageLoad({ guard, store, origin: location.origin }),
         // Top score of the universe for the expedition size (the game's table changes below 100M points):
         // only on the fleet page, public API, cached an hour.
-        isFleetDispatch(document) ? universeRanks({ guard, store, origin: location.origin }) : Promise.resolve(null)
+        isFleetDispatch(document) ? universeRanks({ guard, store, origin: location.origin }) : Promise.resolve(null),
+        // Today's import/export offer, for the Merchant's colour in the menu: once per session.
+        importExportOncePerSession({ guard, store, session: window.sessionStorage })
       ]);
+      if (importExport.status === "fulfilled") markMerchant(document, importExport.value);
+      else console.warn(`[${t("app.name")}]`, importExport.reason);
+      if (isTraderPage(location.href)) forgetImportExportRead(store, window.sessionStorage);
       if (lf.status === "rejected") console.warn(`[${t("app.name")}]`, lf.reason);
       if (account.status === "fulfilled") snapshot = account.value;
       else console.warn(`[${t("app.name")}]`, account.reason);
@@ -18571,7 +18629,8 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
             const [account, queue] = await Promise.allSettled([
               syncAccountOnUserClick(deps),
               syncQueuesOnUserClick({ guard, store, ids: bodyIds }),
-              fetchLfBonuses({ guard, store }, "user-sync")
+              fetchLfBonuses({ guard, store }, "user-sync"),
+              fetchImportExport({ guard, store }, "user-sync").then((state) => markMerchant(document, state))
             ]);
             if (queue.status === "fulfilled") queues = queue.value;
             if (account.status === "rejected") {

@@ -21,6 +21,8 @@ import { nextInSide, onSideNavigate, openSide, refreshSide, restoreSide, toggleS
 import { renderDock } from './modules/dock';
 import { addFooterLinks } from './modules/footer-links';
 import { showPing } from './modules/ping';
+import { fetchImportExport, forgetImportExportRead, importExportOncePerSession } from './data/import-export';
+import { isTraderPage, markMerchant } from './modules/merchant';
 import { loadMarks, MARKS_KEY, migrateOld, type Marks } from './engines/marks';
 import { convertOglight, convertOglightStats, isOglightDb } from './engines/oglight-import';
 import { POSITIONS_KEY, type Positions } from './engines/positions';
@@ -94,7 +96,7 @@ async function bootstrap(): Promise<void> {
   const bodyIds = readPlanetList(document).flatMap((e) => [e.planetId, e.moonId]).filter((id): id is number => id !== null);
   let queues: QueueSnapshot | null = store.get<QueueSnapshot | null>(QUEUES_KEY, null);
   try {
-    const [account, queue, lf] = await Promise.allSettled([
+    const [account, queue, lf, , , importExport] = await Promise.allSettled([
       hydrateAccountOncePerSession({ guard, store, session: window.sessionStorage }),
       loadQueuesOnPageLoad({ guard, store, ids: bodyIds }),
       // Lifeform bonuses for the expedition size: once per session, like accountInfo.
@@ -104,7 +106,13 @@ async function bootstrap(): Promise<void> {
       // Top score of the universe for the expedition size (the game's table changes below 100M points):
       // only on the fleet page, public API, cached an hour.
       isFleetDispatch(document) ? universeRanks({ guard, store, origin: location.origin }) : Promise.resolve(null),
+      // Today's import/export offer, for the Merchant's colour in the menu: once per session.
+      importExportOncePerSession({ guard, store, session: window.sessionStorage }),
     ]);
+    if (importExport.status === 'fulfilled') markMerchant(document, importExport.value);
+    else console.warn(`[${t('app.name')}]`, importExport.reason);
+    // On the Merchant's pages the offer may be bought or taken now: read it again on the next page.
+    if (isTraderPage(location.href)) forgetImportExportRead(store, window.sessionStorage);
     if (lf.status === 'rejected') console.warn(`[${t('app.name')}]`, lf.reason);
     if (account.status === 'fulfilled') snapshot = account.value;
     else console.warn(`[${t('app.name')}]`, account.reason);
@@ -352,6 +360,7 @@ async function bootstrap(): Promise<void> {
             syncAccountOnUserClick(deps),
             syncQueuesOnUserClick({ guard, store, ids: bodyIds }),
             fetchLfBonuses({ guard, store }, 'user-sync'),
+            fetchImportExport({ guard, store }, 'user-sync').then((state) => markMerchant(document, state)),
           ]);
           if (queue.status === 'fulfilled') queues = queue.value;
           if (account.status === 'rejected') {
