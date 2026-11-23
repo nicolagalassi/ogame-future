@@ -10,3 +10,4 @@
   l'orologio del gioco (`.OGameClock`, altrimenti piè di pagina), verde < 400 ms, giallo < 1 s, rosso oltre; nel tooltip
   anche il caricamento completo. Letto una volta per pagina.
 - Versione 0.3.138.
+- floor-guard: il controllo «test reso più facile» (.skip/.only/.todo) guarda solo i file di test (deciso da Nicola), commit a parte; un .skip in un test resta bloccato (provato).
