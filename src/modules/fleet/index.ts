@@ -117,7 +117,7 @@ export const FLEETSAVE_MISSIONS = [3, 4, 6, 8, 15, 5, 1];
 const pageState = new WeakMap<Document, { active: RepeatState | null; o: FleetOptions; prepared?: number; rerun?: (mode: FleetMode, dest?: number | null) => void }>();
 const REPEATABLE: FleetMode[] = ['moon', 'collect', 'collectDeploy', 'expedition', 'fleetsave', 'plan'];
 /** Rounds that offer "Salta" (nothing worth moving here: on to the next body). */
-const SKIPPABLE: FleetMode[] = ['moon', 'collect', 'collectDeploy'];
+const SKIPPABLE: FleetMode[] = ['moon', 'collect', 'collectDeploy', 'expedition'];
 
 function el<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, className = '', text?: string) {
   const node = doc.createElement(tag);
@@ -1096,6 +1096,23 @@ export function readMissionLink(href: string): { mode: 'transport' | 'deploy'; t
   return { mode, target: { galaxy: g!, system: sys!, position: pos!, type: p.get('type') === '3' ? 3 : 1 } };
 }
 
+/**
+ * "Salta nelle spedizioni" for this planet or moon: the expedition round (Ripeti, Salta) passes over it,
+ * empty or not. Only a list of bodies in Future's settings; nothing is sent.
+ */
+function skipSwitch(o: FleetOptions, out: ReturnType<typeof readout>, redraw: () => void): HTMLButtonElement {
+  const { doc, t } = o;
+  const skipped = loadSettings(o.store).skipBodies.includes(o.bodyId);
+  const b = ruleSwitch(doc, 'skip', t('fleet.rule.skipHere'), skipped, () => {
+    const now = loadSettings(o.store);
+    const others = now.skipBodies.filter((id) => id !== o.bodyId);
+    o.store.set(SETTINGS_KEY, { ...now, skipBodies: skipped ? others : [...others, o.bodyId] });
+    redraw();
+  });
+  out.peek(b, `${t('fleet.rule.skip')}: ${skipped ? t('fleet.on') : t('fleet.off')}.`, t('fleet.rule.skipHint'));
+  return b;
+}
+
 export function renderFleetTools(o: FleetOptions): void {
   const { doc, t } = o;
   if (!doc.getElementById(STYLE_ID)) {
@@ -1500,16 +1517,8 @@ export function renderFleetTools(o: FleetOptions): void {
     round.setAttribute('aria-label', t('fleet.zone.round'));
     round.append(zone(t('fleet.zone.round')), sw('repeat', t('fleet.repeatShort'), t('fleet.repeatHint'), 'repeat'));
     rules.append(reserves, round);
-    // This body only: the round (Ripeti, Salta) passes over it.
-    const skipped = settings.skipBodies.includes(o.bodyId);
-    const skipSw = ruleSwitch(doc, 'skip', t('fleet.rule.skipHere'), skipped, () => {
-      const now = loadSettings(o.store);
-      const others = now.skipBodies.filter((id) => id !== o.bodyId);
-      o.store.set(SETTINGS_KEY, { ...now, skipBodies: skipped ? others : [...others, o.bodyId] });
-      redraw();
-    });
-    rulesOut.peek(skipSw, `${t('fleet.rule.skip')}: ${skipped ? t('fleet.on') : t('fleet.off')}.`, t('fleet.rule.skipHint'));
-    round.append(skipSw);
+    // This body only: the expedition round (Ripeti, Salta) passes over it.
+    round.append(skipSwitch(o, rulesOut, redraw));
 
     // The editors: this body's rules, and Future's general fleet settings.
     const edit = el(doc, 'span', 'fut-fedit');
@@ -1554,6 +1563,31 @@ export function renderFleetTools(o: FleetOptions): void {
     if (below) below.before(strip);
     else anchor1.after(strip);
     addInvertButtons(o);
+  }
+
+  // No ships on this planet or moon: the game draws no ship list, so there is no action bar. The switch
+  // that passes this body over in expeditions, and Salta during a round, still matter here (an empty moon).
+  const dispatch = doc.getElementById('fleetdispatchcomponent');
+  if (!anchor1 && (fleet1 || dispatch) && !fleet2?.offsetParent) {
+    const host = (fleet1 ?? dispatch)!;
+    const strip = el(doc, 'div', 'fut-fbar fut-freserves fut-fempty');
+    const row = el(doc, 'div', 'fut-frow');
+    const rulesOut = readout(doc, t('fleet.emptyHint'));
+    const round = el(doc, 'span', 'fut-fgroup');
+    round.setAttribute('role', 'group');
+    round.setAttribute('aria-label', t('fleet.zone.round'));
+    round.append(skipSwitch(o, rulesOut, redraw));
+    const next = skipTarget();
+    if (next !== null) {
+      const keys = keymap(o.store);
+      const b = tile(doc, 'skip', `${t('fleet.btn.skip')} → ${shortLabel(o, next)}`, skip, '', keys.get('fleet.skip') ?? '', t('fleet.btn.skip'));
+      rulesOut.peek(b, `${t('fleet.btn.skip')} → ${shortLabel(o, next)}`, t('fleet.tip.skipEmpty'));
+      round.append(b);
+    }
+    row.append(round);
+    strip.append(row, rulesOut.box);
+    host.prepend(strip);
+    registerActions(doc, o.store, t, { 'fleet.skip': skip });
   }
 
   if (fleet2 && anchor2) {
@@ -1662,6 +1696,8 @@ export function renderFleetTools(o: FleetOptions): void {
         navigate(repeatUrl(href, current.o.bodyId, current.active));
         return true;
       }
+      // Expeditions go round and round: once this send took the last free slot, the round is over.
+      if (current.active.mode === 'expedition' && freeExpeditionSlots(fd.expeditionCount, fd.maxExpeditionCount) <= 1) return false;
       const next = nextInRound(current.active, current.o.bodyId, current.o.bodies, loadSettings(current.o.store).skipBodies);
       if (next === null) return false;
       navigate(repeatUrl(href, next, current.active));

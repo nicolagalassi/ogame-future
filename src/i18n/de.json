@@ -162,8 +162,8 @@
   "fleet.speedAsk.no": "Nein",
   "fleet.speedAsk.done": "Die nächsten Fleetsaves der Runde fliegen mit {pct}%. Die allgemeine Vorgabe bleibt.",
   "fleet.speedAsk.hint": "Die Runde nutzt bisher {pct}%. Nur für diese Runde: die Vorgabe in den Einstellungen bleibt unverändert.",
-  "fleet.rule.skip": "In der Runde überspringen",
-  "fleet.rule.skipHint": "Nur dieser Planet oder Mond: Wiederholen und Überspringen lassen ihn aus, als gäbe es ihn nicht.",
+  "fleet.rule.skip": "Bei Expeditionen überspringen",
+  "fleet.rule.skipHint": "Nur Expeditionen: Wiederholen und Überspringen lassen diesen Planeten oder Mond aus, auch wenn er leer ist.",
   "fleet.on": "an",
   "fleet.off": "aus",
   "fleet.repeatNext": "Gesendet. Weiter zu {body}…",
@@ -955,5 +955,10 @@
   "fleet.expeditionStay": "Expeditionen vom selben Planeten",
   "settings.expStayHint": "Mit Wiederholen: nach einer Expedition öffnet sich derselbe Planet oder Mond mit vorbereiteter Expedition, solange Slots frei sind. Aus = nächster Planet.",
   "fleet.ok.expSystem": "nach {coords} (±{n})",
-  "fleet.ok.expSplit": "Transporter auf {slots} Slots verteilt"
+  "fleet.ok.expSplit": "Transporter auf {slots} Slots verteilt",
+  "fleet.emptyHint": "Hier sind keine Schiffe. Du kannst diesen Körper bei Expeditionen überspringen lassen.",
+  "fleet.tip.skipEmpty": "Hier sind keine Schiffe: öffnet den nächsten Planeten oder Mond der Runde mit vorbereiteter Expedition. Von hier startet nichts.",
+  "ping.label": "Ping {ms} ms",
+  "ping.hint": "Der Server hat in {ms} ms geantwortet; die Seite war in {s} s geladen. Beim Laden dieser Seite gemessen: ein jetzt gesendeter Flug erreicht den Server mit ähnlicher Verzögerung.",
+  "ping.hintShort": "Der Server hat in {ms} ms geantwortet. Beim Laden dieser Seite gemessen."
 }

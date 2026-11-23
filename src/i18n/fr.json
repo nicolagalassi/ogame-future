@@ -162,8 +162,8 @@
   "fleet.speedAsk.no": "Non",
   "fleet.speedAsk.done": "Les fleetsaves suivants de la tournée partiront à {pct}%. Le préréglage général ne change pas.",
   "fleet.speedAsk.hint": "La tournée utilise {pct}% jusqu'ici. Seulement pour cette tournée : le préréglage des paramètres reste tel quel.",
-  "fleet.rule.skip": "Passer dans le tour",
-  "fleet.rule.skipHint": "Cette planète ou lune seulement : Répéter et Passer la sautent, comme si elle n'existait pas.",
+  "fleet.rule.skip": "Ignorer en expédition",
+  "fleet.rule.skipHint": "Expéditions uniquement : Répéter et Passer ignorent cette planète ou lune, même vide.",
   "fleet.on": "oui",
   "fleet.off": "non",
   "fleet.repeatNext": "Envoyée. Passage à {body}…",
@@ -955,5 +955,10 @@
   "fleet.expeditionStay": "Expéditions depuis la même planète",
   "settings.expStayHint": "Avec Répéter actif, après une expédition la même planète ou lune se rouvre avec l'expédition prête, tant qu'il reste des emplacements. Désactivé = planète suivante.",
   "fleet.ok.expSystem": "vers {coords} (±{n})",
-  "fleet.ok.expSplit": "transporteurs répartis sur {slots} empl."
+  "fleet.ok.expSplit": "transporteurs répartis sur {slots} empl.",
+  "fleet.emptyHint": "Aucun vaisseau ici. Vous pouvez marquer ce corps à ignorer pendant les expéditions.",
+  "fleet.tip.skipEmpty": "Aucun vaisseau ici : ouvre la planète ou lune suivante du tour avec l'expédition prête. Rien ne part d'ici.",
+  "ping.label": "Ping {ms} ms",
+  "ping.hint": "Le serveur a répondu en {ms} ms ; la page s'est chargée en {s} s. Mesuré au chargement de cette page : un envoi fait maintenant arrive au serveur avec un retard semblable.",
+  "ping.hintShort": "Le serveur a répondu en {ms} ms. Mesuré au chargement de cette page."
 }

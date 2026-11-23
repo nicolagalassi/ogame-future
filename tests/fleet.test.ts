@@ -346,26 +346,29 @@ describe('repeat', () => {
     expect(readRepeatParams(fast.replace('futspeed=50', 'futspeed=7'))).toEqual({ mode: 'fleetsave', first: 1, dest: null });
   });
 
-  it('goes round the bodies and stops at the first one', () => {
+  it('goes round the bodies and stops at the first one; expeditions go on from the last to the first', () => {
     expect(nextInRound({ mode: 'expedition', first: 1, dest: null }, 1, list)).toBe(2);
-    expect(nextInRound({ mode: 'expedition', first: 1, dest: null }, 2, list)).toBeNull();
+    expect(nextInRound({ mode: 'expedition', first: 1, dest: null }, 2, list)).toBe(1);
+    expect(nextInRound({ mode: 'fleetsave', first: 1, dest: null }, 2, list)).toBeNull();
     expect(nextInRound({ mode: 'collect', first: 11, dest: 12 }, 11, list)).toBeNull();
     expect(nextInRound({ mode: 'moon', first: 2, dest: null }, 2, list)).toBe(1);
   });
 
-  it('passes over the bodies marked to skip, never over the first one', () => {
+  it('passes over the bodies marked to skip in expeditions only', () => {
     const four = [
       { planetId: 1, moonId: 11 },
       { planetId: 2, moonId: 12 },
       { planetId: 3, moonId: 13 },
       { planetId: 4, moonId: 14 },
     ];
-    expect(nextInRound({ mode: 'collect', first: 11, dest: 14 }, 11, four, [12])).toBe(13);
+    // A collection does not look at the list: every moon but its destination.
+    expect(nextInRound({ mode: 'collect', first: 11, dest: 14 }, 11, four, [12])).toBe(12);
     expect(nextInRound({ mode: 'collect', first: 11, dest: 14 }, 13, four, [12])).toBeNull();
-    expect(nextInRound({ mode: 'collect', first: 11, dest: 14 }, 11, four, [12, 13])).toBeNull();
-    // Started on a body marked to skip: the round still ends there.
+    expect(nextInRound({ mode: 'collect', first: 11, dest: 14 }, 11, four, [12, 13])).toBe(12);
+    // Expeditions: round and round, past the marked bodies, the first one included.
     expect(nextInRound({ mode: 'expedition', first: 2, dest: null }, 4, four, [2, 3])).toBe(1);
-    expect(nextInRound({ mode: 'expedition', first: 2, dest: null }, 1, four, [2, 3])).toBeNull();
+    expect(nextInRound({ mode: 'expedition', first: 2, dest: null }, 1, four, [2, 3])).toBe(4);
+    expect(nextInRound({ mode: 'expedition', first: 1, dest: null }, 1, four, [2, 3, 4])).toBeNull();
     expect(nextBody(four, 1, { skipIds: [2, 3] })).toBe(4);
   });
 
@@ -842,7 +845,7 @@ describe('thousands in number fields', () => {
   });
 });
 
-describe('skip in the collection round', () => {
+describe('skip in the expedition round', () => {
   it('shows Salta towards the next body not marked to skip; the switch marks this body; Salta navigates', async () => {
     const { renderFleetTools } = await import('../src/modules/fleet/index');
     // A document of its own: the round state is kept per document, as per page in the game.
@@ -859,14 +862,14 @@ describe('skip in the collection round', () => {
       { planetId: 4, moonId: 14, name: 'Quarta', coords: '5:188:8' },
     ];
     const went: string[] = [];
-    const href = 'https://x/game/index.php?page=ingame&component=fleetdispatch&cp=11&futmode=collect&futfirst=11&futdest=14';
+    const href = 'https://x/game/index.php?page=ingame&component=fleetdispatch&cp=11&futmode=expedition&futfirst=11';
     const o = { doc, store, bodyId: 11, bodies, t: (k: string, v?: Record<string, string | number>) => (v ? `${k}:${Object.values(v).join('|')}` : k), locale: 'it', href, navigate: (u: string) => went.push(u) };
     renderFleetTools(o);
     const tileEl = doc.querySelector<HTMLButtonElement>('.fut-fskip .fut-fact')!;
     expect(tileEl.getAttribute('aria-label')).toBe('fleet.btn.skip → Terza ☾');
     tileEl.click();
     expect(went[0]).toContain('cp=13');
-    expect(went[0]).toContain('futmode=collect');
+    expect(went[0]).toContain('futmode=expedition');
     // The switch on this body adds it to the list, pressing again takes it off.
     const sw = () => [...doc.querySelectorAll<HTMLButtonElement>('.fut-freserves .fut-fchip')].find((b) => b.getAttribute('aria-label') === 'fleet.rule.skipHere')!;
     expect(sw().getAttribute('aria-checked')).toBe('false');
@@ -945,5 +948,31 @@ describe('expeditions: random system, cargo shared over the slots, same planet',
     const r = prepareExpedition(fd, fleetPage(), { reserve: { ships: {}, resources: { metal: 0, crystal: 0, deuterium: 0 } }, save: null }, { ...DEFAULT_SETTINGS, expeditionShip: 203, expeditionValue: '10m' }, { economySpeed: 1 });
     expect(fd.selected[203]).toBe(100);
     expect(r).toMatchObject({ slots: 0, system: 185 });
+  });
+});
+
+describe('fleet page without ships', () => {
+  it('still shows the expedition skip switch and, in a round, Salta to the next body', async () => {
+    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    const doc = document.implementation.createHTMLDocument();
+    doc.body.innerHTML = '<div id="fleetdispatchcomponent"><div id="fleet1"><div id="warning"><p>Nessuna nave</p></div></div></div>';
+    const store = new Store(new MemoryStore(), 'empty');
+    const bodies = [
+      { planetId: 1, moonId: 11, name: 'Casa', coords: '5:185:8' },
+      { planetId: 2, moonId: 12, name: 'Colonia', coords: '5:186:8' },
+    ];
+    const went: string[] = [];
+    const t = (k: string, v?: Record<string, string | number>) => (v ? `${k}:${Object.values(v).join('|')}` : k);
+    const href = 'https://x/game/index.php?page=ingame&component=fleetdispatch&cp=12&futmode=expedition&futfirst=1';
+    renderFleetTools({ doc, store, bodyId: 12, bodies, t, locale: 'it', href, navigate: (u: string) => went.push(u) });
+    const strip = doc.querySelector('#fleet1 > .fut-fempty')!;
+    expect(strip).not.toBeNull();
+    const sw = [...strip.querySelectorAll<HTMLButtonElement>('.fut-fchip')].find((b) => b.getAttribute('aria-label') === 'fleet.rule.skipHere')!;
+    sw.click();
+    expect(store.get<{ skipBodies: number[] }>('fleet.settings', { skipBodies: [] }).skipBodies).toEqual([12]);
+    // Redrawn once, not twice; Salta goes round to the first moon.
+    expect(doc.querySelectorAll('.fut-fempty')).toHaveLength(1);
+    doc.querySelector<HTMLButtonElement>('.fut-fempty .fut-fact')!.click();
+    expect(went[0]).toContain('cp=11');
   });
 });

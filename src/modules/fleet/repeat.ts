@@ -55,13 +55,15 @@ export function repeatUrl(base: string, cp: number, state: RepeatState): string 
 
 /**
  * Where the round goes after `bodyId` (after a send, or when the player presses "Salta"): a body id,
- * or null when done. `skipIds` are the bodies the player marked to skip; the first body of the round
- * is never skipped, so the round still knows where it ends.
+ * or null when done.
+ * Expeditions (Nicola): the round goes round and round, from the last body back to the first, and passes
+ * over the bodies marked to skip (`skipIds`, expeditions only); it ends when the expedition slots are used
+ * up (index.ts), not when it is back where it started. Every other round ends at its first body.
  */
 export function nextInRound(state: RepeatState, bodyId: number, list: BodyRef[], skipIds: readonly number[] = []): number | null {
+  if (state.mode === 'expedition') return nextBody(list, bodyId, { skipIds });
   const next = nextBody(list, bodyId, {
     skip: state.mode === 'collect' || state.mode === 'collectDeploy' || state.mode === 'plan' ? state.dest : null,
-    skipIds: skipIds.filter((id) => id !== state.first),
     onlyWithMoon: state.mode === 'moon',
   });
   return next === null || next === state.first ? null : next;

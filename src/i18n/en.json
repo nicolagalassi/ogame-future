@@ -162,8 +162,8 @@
   "fleet.speedAsk.no": "No",
   "fleet.speedAsk.done": "The next fleetsaves of the round will fly at {pct}%. The general preset does not change.",
   "fleet.speedAsk.hint": "The round uses {pct}% so far. Only for this round: the preset in the settings stays as it is.",
-  "fleet.rule.skip": "Skip in the round",
-  "fleet.rule.skipHint": "This planet or moon only: Repeat and Skip pass over it, as if it were not there.",
+  "fleet.rule.skip": "Skip in expeditions",
+  "fleet.rule.skipHint": "Expeditions only: Repeat and Skip pass over this planet or moon, empty or not.",
   "fleet.on": "on",
   "fleet.off": "off",
   "fleet.repeatNext": "Sent. Moving to {body}…",
@@ -955,5 +955,10 @@
   "fleet.expeditionStay": "Expeditions from the same planet",
   "settings.expStayHint": "With Repeat on, after an expedition the same planet or moon opens again with the expedition prepared, while slots are free. Off = the next planet.",
   "fleet.ok.expSystem": "to {coords} (±{n})",
-  "fleet.ok.expSplit": "cargo shared over {slots} slots"
+  "fleet.ok.expSplit": "cargo shared over {slots} slots",
+  "fleet.emptyHint": "No ships here. You can mark this body to be skipped in expeditions.",
+  "fleet.tip.skipEmpty": "No ships here: opens the next planet or moon of the round with the expedition prepared. Nothing leaves from here.",
+  "ping.label": "Ping {ms} ms",
+  "ping.hint": "The server answered in {ms} ms; the page loaded in {s} s. Measured when this page loaded: a send made now reaches the server with a similar delay.",
+  "ping.hintShort": "The server answered in {ms} ms. Measured when this page loaded."
 }

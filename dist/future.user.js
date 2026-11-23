@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.137
+// @version      0.3.138
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -671,8 +671,8 @@
     "fleet.speedAsk.no": "No",
     "fleet.speedAsk.done": "I prossimi fleetsave del giro partiranno al {pct}%. Il preset generale non cambia.",
     "fleet.speedAsk.hint": "Il giro finora usa il {pct}%. Vale solo per questo giro: il preset nelle impostazioni resta com'\xE8.",
-    "fleet.rule.skip": "Salta nel giro",
-    "fleet.rule.skipHint": "Solo questo pianeta o luna: Ripeti e Salta passano oltre, come se non ci fosse.",
+    "fleet.rule.skip": "Salta nelle spedizioni",
+    "fleet.rule.skipHint": "Solo per le spedizioni: Ripeti e Salta passano oltre questo pianeta o luna, anche se \xE8 vuoto.",
     "fleet.on": "s\xEC",
     "fleet.off": "no",
     "fleet.repeatNext": "Inviata. Passo a {body}\u2026",
@@ -1464,7 +1464,12 @@
     "fleet.expeditionStay": "Spedizioni dallo stesso pianeta",
     "settings.expStayHint": "Con Ripeti attivo, dopo una spedizione riapre lo stesso pianeta o luna con la spedizione gi\xE0 pronta, finch\xE9 restano slot liberi. Spento = passa al pianeta successivo.",
     "fleet.ok.expSystem": "verso {coords} (\xB1{n})",
-    "fleet.ok.expSplit": "cargo divisi per {slots} slot"
+    "fleet.ok.expSplit": "cargo divisi per {slots} slot",
+    "fleet.emptyHint": "Nessuna nave qui. Puoi segnare questo corpo da saltare nelle spedizioni.",
+    "fleet.tip.skipEmpty": "Qui non ci sono navi: apre il prossimo pianeta o luna del giro con la spedizione gi\xE0 pronta. Da qui non parte nulla.",
+    "ping.label": "Ping {ms} ms",
+    "ping.hint": "Il server ha risposto in {ms} ms; la pagina si \xE8 caricata in {s} s. Misurato al caricamento di questa pagina: un invio fatto ora arriva al server con un ritardo simile.",
+    "ping.hintShort": "Il server ha risposto in {ms} ms. Misurato al caricamento di questa pagina."
   };
 
   // src/i18n/en.json
@@ -1632,8 +1637,8 @@
     "fleet.speedAsk.no": "No",
     "fleet.speedAsk.done": "The next fleetsaves of the round will fly at {pct}%. The general preset does not change.",
     "fleet.speedAsk.hint": "The round uses {pct}% so far. Only for this round: the preset in the settings stays as it is.",
-    "fleet.rule.skip": "Skip in the round",
-    "fleet.rule.skipHint": "This planet or moon only: Repeat and Skip pass over it, as if it were not there.",
+    "fleet.rule.skip": "Skip in expeditions",
+    "fleet.rule.skipHint": "Expeditions only: Repeat and Skip pass over this planet or moon, empty or not.",
     "fleet.on": "on",
     "fleet.off": "off",
     "fleet.repeatNext": "Sent. Moving to {body}\u2026",
@@ -2425,7 +2430,12 @@
     "fleet.expeditionStay": "Expeditions from the same planet",
     "settings.expStayHint": "With Repeat on, after an expedition the same planet or moon opens again with the expedition prepared, while slots are free. Off = the next planet.",
     "fleet.ok.expSystem": "to {coords} (\xB1{n})",
-    "fleet.ok.expSplit": "cargo shared over {slots} slots"
+    "fleet.ok.expSplit": "cargo shared over {slots} slots",
+    "fleet.emptyHint": "No ships here. You can mark this body to be skipped in expeditions.",
+    "fleet.tip.skipEmpty": "No ships here: opens the next planet or moon of the round with the expedition prepared. Nothing leaves from here.",
+    "ping.label": "Ping {ms} ms",
+    "ping.hint": "The server answered in {ms} ms; the page loaded in {s} s. Measured when this page loaded: a send made now reaches the server with a similar delay.",
+    "ping.hintShort": "The server answered in {ms} ms. Measured when this page loaded."
   };
 
   // src/i18n/fr.json
@@ -2593,8 +2603,8 @@
     "fleet.speedAsk.no": "Non",
     "fleet.speedAsk.done": "Les fleetsaves suivants de la tourn\xE9e partiront \xE0 {pct}%. Le pr\xE9r\xE9glage g\xE9n\xE9ral ne change pas.",
     "fleet.speedAsk.hint": "La tourn\xE9e utilise {pct}% jusqu'ici. Seulement pour cette tourn\xE9e : le pr\xE9r\xE9glage des param\xE8tres reste tel quel.",
-    "fleet.rule.skip": "Passer dans le tour",
-    "fleet.rule.skipHint": "Cette plan\xE8te ou lune seulement : R\xE9p\xE9ter et Passer la sautent, comme si elle n'existait pas.",
+    "fleet.rule.skip": "Ignorer en exp\xE9dition",
+    "fleet.rule.skipHint": "Exp\xE9ditions uniquement : R\xE9p\xE9ter et Passer ignorent cette plan\xE8te ou lune, m\xEAme vide.",
     "fleet.on": "oui",
     "fleet.off": "non",
     "fleet.repeatNext": "Envoy\xE9e. Passage \xE0 {body}\u2026",
@@ -3386,7 +3396,12 @@
     "fleet.expeditionStay": "Exp\xE9ditions depuis la m\xEAme plan\xE8te",
     "settings.expStayHint": "Avec R\xE9p\xE9ter actif, apr\xE8s une exp\xE9dition la m\xEAme plan\xE8te ou lune se rouvre avec l'exp\xE9dition pr\xEAte, tant qu'il reste des emplacements. D\xE9sactiv\xE9 = plan\xE8te suivante.",
     "fleet.ok.expSystem": "vers {coords} (\xB1{n})",
-    "fleet.ok.expSplit": "transporteurs r\xE9partis sur {slots} empl."
+    "fleet.ok.expSplit": "transporteurs r\xE9partis sur {slots} empl.",
+    "fleet.emptyHint": "Aucun vaisseau ici. Vous pouvez marquer ce corps \xE0 ignorer pendant les exp\xE9ditions.",
+    "fleet.tip.skipEmpty": "Aucun vaisseau ici : ouvre la plan\xE8te ou lune suivante du tour avec l'exp\xE9dition pr\xEAte. Rien ne part d'ici.",
+    "ping.label": "Ping {ms} ms",
+    "ping.hint": "Le serveur a r\xE9pondu en {ms} ms ; la page s'est charg\xE9e en {s} s. Mesur\xE9 au chargement de cette page : un envoi fait maintenant arrive au serveur avec un retard semblable.",
+    "ping.hintShort": "Le serveur a r\xE9pondu en {ms} ms. Mesur\xE9 au chargement de cette page."
   };
 
   // src/i18n/de.json
@@ -3554,8 +3569,8 @@
     "fleet.speedAsk.no": "Nein",
     "fleet.speedAsk.done": "Die n\xE4chsten Fleetsaves der Runde fliegen mit {pct}%. Die allgemeine Vorgabe bleibt.",
     "fleet.speedAsk.hint": "Die Runde nutzt bisher {pct}%. Nur f\xFCr diese Runde: die Vorgabe in den Einstellungen bleibt unver\xE4ndert.",
-    "fleet.rule.skip": "In der Runde \xFCberspringen",
-    "fleet.rule.skipHint": "Nur dieser Planet oder Mond: Wiederholen und \xDCberspringen lassen ihn aus, als g\xE4be es ihn nicht.",
+    "fleet.rule.skip": "Bei Expeditionen \xFCberspringen",
+    "fleet.rule.skipHint": "Nur Expeditionen: Wiederholen und \xDCberspringen lassen diesen Planeten oder Mond aus, auch wenn er leer ist.",
     "fleet.on": "an",
     "fleet.off": "aus",
     "fleet.repeatNext": "Gesendet. Weiter zu {body}\u2026",
@@ -4347,7 +4362,12 @@
     "fleet.expeditionStay": "Expeditionen vom selben Planeten",
     "settings.expStayHint": "Mit Wiederholen: nach einer Expedition \xF6ffnet sich derselbe Planet oder Mond mit vorbereiteter Expedition, solange Slots frei sind. Aus = n\xE4chster Planet.",
     "fleet.ok.expSystem": "nach {coords} (\xB1{n})",
-    "fleet.ok.expSplit": "Transporter auf {slots} Slots verteilt"
+    "fleet.ok.expSplit": "Transporter auf {slots} Slots verteilt",
+    "fleet.emptyHint": "Hier sind keine Schiffe. Du kannst diesen K\xF6rper bei Expeditionen \xFCberspringen lassen.",
+    "fleet.tip.skipEmpty": "Hier sind keine Schiffe: \xF6ffnet den n\xE4chsten Planeten oder Mond der Runde mit vorbereiteter Expedition. Von hier startet nichts.",
+    "ping.label": "Ping {ms} ms",
+    "ping.hint": "Der Server hat in {ms} ms geantwortet; die Seite war in {s} s geladen. Beim Laden dieser Seite gemessen: ein jetzt gesendeter Flug erreicht den Server mit \xE4hnlicher Verz\xF6gerung.",
+    "ping.hintShort": "Der Server hat in {ms} ms geantwortet. Beim Laden dieser Seite gemessen."
   };
 
   // src/core/i18n.ts
@@ -6405,6 +6425,45 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     dock.append(journal, targets);
     if (menu) menu.append(dock);
     else home.append(dock);
+  }
+
+  // src/engines/ping.ts
+  function pageTiming(perf) {
+    const nav = perf?.getEntriesByType?.("navigation")?.[0];
+    if (!nav || !(nav.responseStart > 0) || !(nav.requestStart > 0)) return null;
+    const server = Math.max(0, Math.round(nav.responseStart - nav.requestStart));
+    const total = nav.loadEventEnd > 0 ? Math.max(0, Math.round(nav.loadEventEnd - nav.startTime)) : 0;
+    return { server, total };
+  }
+  function pingLevel(ms) {
+    return ms < 400 ? "fresh" : ms < 1e3 ? "warm" : "old";
+  }
+
+  // src/modules/ping/index.ts
+  var PING_ID = "fut-ping";
+  var COLORS = { fresh: "#38C56E", warm: "#E3BB28", old: "#EF7676" };
+  function drawPing(doc, t, timing, locale) {
+    doc.getElementById(PING_ID)?.remove();
+    if (!timing) return null;
+    const el6 = doc.createElement("span");
+    el6.id = PING_ID;
+    el6.textContent = t("ping.label", { ms: timing.server.toLocaleString(locale) });
+    el6.style.cssText = `margin-left: 8px; font: 700 11px Verdana, Arial, sans-serif; color: ${COLORS[pingLevel(timing.server)]}; white-space: nowrap; cursor: help;`;
+    el6.title = timing.total ? t("ping.hint", { ms: timing.server.toLocaleString(locale), s: (timing.total / 1e3).toLocaleString(locale, { maximumFractionDigits: 1, minimumFractionDigits: 1 }) }) : t("ping.hintShort", { ms: timing.server.toLocaleString(locale) });
+    const clock = doc.querySelector(".OGameClock");
+    if (clock) clock.append(el6);
+    else {
+      const row = doc.querySelector("#siteFooter .content .fright");
+      if (!row) return null;
+      row.append(doc.createTextNode("|"), el6);
+    }
+    return el6;
+  }
+  function showPing(doc, t, locale) {
+    const win = doc.defaultView;
+    const draw = () => drawPing(doc, t, pageTiming(win?.performance), locale);
+    if (doc.readyState === "complete") draw();
+    else win?.addEventListener("load", () => win.setTimeout(draw, 0), { once: true });
   }
 
   // src/engines/expeditions.ts
@@ -13373,9 +13432,9 @@ table.queues td.acts { width: 1%; text-align: right; }
     return u.toString();
   }
   function nextInRound(state, bodyId, list, skipIds = []) {
+    if (state.mode === "expedition") return nextBody(list, bodyId, { skipIds });
     const next = nextBody(list, bodyId, {
       skip: state.mode === "collect" || state.mode === "collectDeploy" || state.mode === "plan" ? state.dest : null,
-      skipIds: skipIds.filter((id) => id !== state.first),
       onlyWithMoon: state.mode === "moon"
     });
     return next === null || next === state.first ? null : next;
@@ -13697,7 +13756,7 @@ input[type="checkbox"] { accent-color: var(--accent); }
   var FLEETSAVE_MISSIONS = [3, 4, 6, 8, 15, 5, 1];
   var pageState = /* @__PURE__ */ new WeakMap();
   var REPEATABLE = ["moon", "collect", "collectDeploy", "expedition", "fleetsave", "plan"];
-  var SKIPPABLE = ["moon", "collect", "collectDeploy"];
+  var SKIPPABLE = ["moon", "collect", "collectDeploy", "expedition"];
   function el4(doc, tag, className = "", text) {
     const node = doc.createElement(tag);
     if (className) node.className = className;
@@ -14499,6 +14558,18 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     if (!mode || !(g > 0) || !(sys > 0) || !(pos >= 1 && pos <= 17)) return null;
     return { mode, target: { galaxy: g, system: sys, position: pos, type: p.get("type") === "3" ? 3 : 1 } };
   }
+  function skipSwitch(o, out, redraw) {
+    const { doc, t } = o;
+    const skipped = loadSettings(o.store).skipBodies.includes(o.bodyId);
+    const b = ruleSwitch(doc, "skip", t("fleet.rule.skipHere"), skipped, () => {
+      const now = loadSettings(o.store);
+      const others = now.skipBodies.filter((id) => id !== o.bodyId);
+      o.store.set(SETTINGS_KEY, { ...now, skipBodies: skipped ? others : [...others, o.bodyId] });
+      redraw();
+    });
+    out.peek(b, `${t("fleet.rule.skip")}: ${skipped ? t("fleet.on") : t("fleet.off")}.`, t("fleet.rule.skipHint"));
+    return b;
+  }
   function renderFleetTools(o) {
     const { doc, t } = o;
     if (!doc.getElementById(STYLE_ID3)) {
@@ -14853,15 +14924,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       round.setAttribute("aria-label", t("fleet.zone.round"));
       round.append(zone(t("fleet.zone.round")), sw("repeat", t("fleet.repeatShort"), t("fleet.repeatHint"), "repeat"));
       rules.append(reserves, round);
-      const skipped = settings.skipBodies.includes(o.bodyId);
-      const skipSw = ruleSwitch(doc, "skip", t("fleet.rule.skipHere"), skipped, () => {
-        const now = loadSettings(o.store);
-        const others = now.skipBodies.filter((id) => id !== o.bodyId);
-        o.store.set(SETTINGS_KEY, { ...now, skipBodies: skipped ? others : [...others, o.bodyId] });
-        redraw();
-      });
-      rulesOut.peek(skipSw, `${t("fleet.rule.skip")}: ${skipped ? t("fleet.on") : t("fleet.off")}.`, t("fleet.rule.skipHint"));
-      round.append(skipSw);
+      round.append(skipSwitch(o, rulesOut, redraw));
       const edit = el4(doc, "span", "fut-fedit");
       const tool = (ico, label, hint, onClick, cls = "") => {
         const b = el4(doc, "button", `fut-ftool ${cls}`.trim());
@@ -14900,6 +14963,28 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       if (below) below.before(strip);
       else anchor1.after(strip);
       addInvertButtons(o);
+    }
+    const dispatch = doc.getElementById("fleetdispatchcomponent");
+    if (!anchor1 && (fleet1 || dispatch) && !fleet2?.offsetParent) {
+      const host = fleet1 ?? dispatch;
+      const strip = el4(doc, "div", "fut-fbar fut-freserves fut-fempty");
+      const row = el4(doc, "div", "fut-frow");
+      const rulesOut = readout(doc, t("fleet.emptyHint"));
+      const round = el4(doc, "span", "fut-fgroup");
+      round.setAttribute("role", "group");
+      round.setAttribute("aria-label", t("fleet.zone.round"));
+      round.append(skipSwitch(o, rulesOut, redraw));
+      const next = skipTarget();
+      if (next !== null) {
+        const keys = keymap(o.store);
+        const b = tile(doc, "skip", `${t("fleet.btn.skip")} \u2192 ${shortLabel(o, next)}`, skip, "", keys.get("fleet.skip") ?? "", t("fleet.btn.skip"));
+        rulesOut.peek(b, `${t("fleet.btn.skip")} \u2192 ${shortLabel(o, next)}`, t("fleet.tip.skipEmpty"));
+        round.append(b);
+      }
+      row.append(round);
+      strip.append(row, rulesOut.box);
+      host.prepend(strip);
+      registerActions(doc, o.store, t, { "fleet.skip": skip });
     }
     if (fleet2 && anchor2) {
       const bar = el4(doc, "div", "fut-fbar");
@@ -14992,6 +15077,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           navigate(repeatUrl(href, current3.o.bodyId, current3.active));
           return true;
         }
+        if (current3.active.mode === "expedition" && freeExpeditionSlots(fd.expeditionCount, fd.maxExpeditionCount) <= 1) return false;
         const next = nextInRound(current3.active, current3.o.bodyId, current3.o.bodies, loadSettings(current3.o.store).skipBodies);
         if (next === null) return false;
         navigate(repeatUrl(href, next, current3.active));
@@ -18556,6 +18642,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
     };
     drawDock();
     addFooterLinks(document);
+    showPing(document, t, locale);
     onSideNavigate(highlightPosition);
     restoreSide(side);
     registerActions(document, store, t, { "targets.next": () => void nextInSide(document) });

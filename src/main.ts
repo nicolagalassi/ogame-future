@@ -20,6 +20,7 @@ import { highlightPosition, isGalaxyPage, TARGETS_KEY, watchGalaxy } from './mod
 import { nextInSide, onSideNavigate, openSide, refreshSide, restoreSide, toggleSide } from './modules/marks/side';
 import { renderDock } from './modules/dock';
 import { addFooterLinks } from './modules/footer-links';
+import { showPing } from './modules/ping';
 import { loadMarks, MARKS_KEY, migrateOld, type Marks } from './engines/marks';
 import { convertOglight, convertOglightStats, isOglightDb } from './engines/oglight-import';
 import { POSITIONS_KEY, type Positions } from './engines/positions';
@@ -421,6 +422,8 @@ async function bootstrap(): Promise<void> {
   drawDock();
   // Quick links in the game's footer, as OGLight adds its own (ostats.eu).
   addFooterLinks(document);
+  // The game's ping next to its clock, from this page's own load timing (no request).
+  showPing(document, t, locale);
   onSideNavigate(highlightPosition);
   restoreSide(side);
   registerActions(document, store, t, { 'targets.next': () => void nextInSide(document) });

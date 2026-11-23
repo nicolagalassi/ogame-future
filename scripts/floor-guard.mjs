@@ -83,7 +83,9 @@ for (const { file, text } of added) {
   if (isConstraints(file)) { if (/^\| *(W|E)\d+ *\|/.test(text)) flag('new-exception', file, text); continue; }
   if (SUPPRESSIONS.test(text)) flag('silenced-checker', file, text);
   if (STUBS.test(text)) flag('unfinished-work', file, text);
-  if (SKIPS.test(text)) flag('test-made-easier', file, text);
+  // A skipped or focused test only exists in a test file (Nicola, 2026-11-23): elsewhere `.skip` is an ordinary name
+  // (e.g. the fleet's "Salta", `fleet.skip`).
+  if (isTest(file) && SKIPS.test(text)) flag('test-made-easier', file, text);
   if (isConstraints(file) && /^\| *(W|E)\d+ *\|/.test(text)) flag('new-exception', file, text);
 }
 
