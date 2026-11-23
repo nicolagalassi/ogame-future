@@ -960,5 +960,7 @@
   "fleet.tip.skipEmpty": "Aucun vaisseau ici : ouvre la planète ou lune suivante du tour avec l'expédition prête. Rien ne part d'ici.",
   "ping.label": "Ping {ms} ms",
   "ping.hint": "Le serveur a répondu en {ms} ms ; la page s'est chargée en {s} s. Mesuré au chargement de cette page : un envoi fait maintenant arrive au serveur avec un retard semblable.",
-  "ping.hintShort": "Le serveur a répondu en {ms} ms. Mesuré au chargement de cette page."
+  "ping.hintShort": "Le serveur a répondu en {ms} ms. Mesuré au chargement de cette page.",
+  "fleet.send.allBtn": "Tout",
+  "fleet.send.allHint": "Toutes les ressources de cette planète ou lune (le carburant du vol reste)"
 }

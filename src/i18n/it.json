@@ -960,5 +960,7 @@
   "fleet.tip.skipEmpty": "Qui non ci sono navi: apre il prossimo pianeta o luna del giro con la spedizione già pronta. Da qui non parte nulla.",
   "ping.label": "Ping {ms} ms",
   "ping.hint": "Il server ha risposto in {ms} ms; la pagina si è caricata in {s} s. Misurato al caricamento di questa pagina: un invio fatto ora arriva al server con un ritardo simile.",
-  "ping.hintShort": "Il server ha risposto in {ms} ms. Misurato al caricamento di questa pagina."
+  "ping.hintShort": "Il server ha risposto in {ms} ms. Misurato al caricamento di questa pagina.",
+  "fleet.send.allBtn": "Tutto",
+  "fleet.send.allHint": "Tutte le risorse di questo pianeta o luna (il carburante del volo resta a casa)"
 }

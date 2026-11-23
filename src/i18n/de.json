@@ -960,5 +960,7 @@
   "fleet.tip.skipEmpty": "Hier sind keine Schiffe: öffnet den nächsten Planeten oder Mond der Runde mit vorbereiteter Expedition. Von hier startet nichts.",
   "ping.label": "Ping {ms} ms",
   "ping.hint": "Der Server hat in {ms} ms geantwortet; die Seite war in {s} s geladen. Beim Laden dieser Seite gemessen: ein jetzt gesendeter Flug erreicht den Server mit ähnlicher Verzögerung.",
-  "ping.hintShort": "Der Server hat in {ms} ms geantwortet. Beim Laden dieser Seite gemessen."
+  "ping.hintShort": "Der Server hat in {ms} ms geantwortet. Beim Laden dieser Seite gemessen.",
+  "fleet.send.allBtn": "Alles",
+  "fleet.send.allHint": "Alle Rohstoffe dieses Planeten oder Mondes (der Treibstoff des Flugs bleibt)"
 }

@@ -976,3 +976,29 @@ describe('fleet page without ships', () => {
     expect(went[0]).toContain('cp=11');
   });
 });
+
+describe('plain Trasporto: «Tutto», and no bar on page 2', () => {
+  it('«Tutto» fills the three fields with everything here', async () => {
+    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    const doc = fleetPage();
+    delete doc.documentElement.dataset.futMissionLink;
+    delete doc.documentElement.dataset.futSendPage;
+    const store = new Store(new MemoryStore(), 'all');
+    (window as unknown as { fleetDispatcher: unknown }).fleetDispatcher = fakeDispatcher();
+    const href = 'https://x/game/index.php?page=ingame&component=fleetdispatch&galaxy=4&system=234&position=9&type=1&mission=3';
+    renderFleetTools({ doc, store, bodyId: 1, bodies: [{ planetId: 1, moonId: null, name: 'Casa', coords: '5:185:8' }], t: (k: string) => k, locale: 'en', href });
+    doc.querySelector<HTMLButtonElement>('.fut-fsend .fut-fall')!.click();
+    expect(store.get<typeof DEFAULT_SETTINGS>('fleet.settings', DEFAULT_SETTINGS).sendPick).toEqual({ metal: 150_000, crystal: 50_000, deuterium: 20_000 });
+    expect(doc.querySelector<HTMLInputElement>('.fut-fresin.metal input')!.value).toBe('150,000');
+  });
+
+  it('page 2 shows no Future bar unless it has a question to ask', async () => {
+    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    const doc = document.implementation.createHTMLDocument();
+    doc.body.innerHTML = '<div id="fleetdispatchcomponent"><div id="fleet2"><div id="buttonz"></div></div></div>';
+    renderFleetTools({ doc, store: new Store(new MemoryStore(), 'p2'), bodyId: 1, bodies: [], t: (k: string) => k, locale: 'en', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch' });
+    const bar = doc.querySelector<HTMLElement>('#fleet2 .fut-fbar')!;
+    expect(bar.hidden).toBe(true);
+    expect(bar.querySelector('.fut-fact')).toBeNull();
+  });
+});

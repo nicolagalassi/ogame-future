@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.139
+// @version      0.3.140
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1469,7 +1469,9 @@
     "fleet.tip.skipEmpty": "Qui non ci sono navi: apre il prossimo pianeta o luna del giro con la spedizione gi\xE0 pronta. Da qui non parte nulla.",
     "ping.label": "Ping {ms} ms",
     "ping.hint": "Il server ha risposto in {ms} ms; la pagina si \xE8 caricata in {s} s. Misurato al caricamento di questa pagina: un invio fatto ora arriva al server con un ritardo simile.",
-    "ping.hintShort": "Il server ha risposto in {ms} ms. Misurato al caricamento di questa pagina."
+    "ping.hintShort": "Il server ha risposto in {ms} ms. Misurato al caricamento di questa pagina.",
+    "fleet.send.allBtn": "Tutto",
+    "fleet.send.allHint": "Tutte le risorse di questo pianeta o luna (il carburante del volo resta a casa)"
   };
 
   // src/i18n/en.json
@@ -2435,7 +2437,9 @@
     "fleet.tip.skipEmpty": "No ships here: opens the next planet or moon of the round with the expedition prepared. Nothing leaves from here.",
     "ping.label": "Ping {ms} ms",
     "ping.hint": "The server answered in {ms} ms; the page loaded in {s} s. Measured when this page loaded: a send made now reaches the server with a similar delay.",
-    "ping.hintShort": "The server answered in {ms} ms. Measured when this page loaded."
+    "ping.hintShort": "The server answered in {ms} ms. Measured when this page loaded.",
+    "fleet.send.allBtn": "All",
+    "fleet.send.allHint": "Every resource on this planet or moon (the flight fuel stays home)"
   };
 
   // src/i18n/fr.json
@@ -3401,7 +3405,9 @@
     "fleet.tip.skipEmpty": "Aucun vaisseau ici : ouvre la plan\xE8te ou lune suivante du tour avec l'exp\xE9dition pr\xEAte. Rien ne part d'ici.",
     "ping.label": "Ping {ms} ms",
     "ping.hint": "Le serveur a r\xE9pondu en {ms} ms ; la page s'est charg\xE9e en {s} s. Mesur\xE9 au chargement de cette page : un envoi fait maintenant arrive au serveur avec un retard semblable.",
-    "ping.hintShort": "Le serveur a r\xE9pondu en {ms} ms. Mesur\xE9 au chargement de cette page."
+    "ping.hintShort": "Le serveur a r\xE9pondu en {ms} ms. Mesur\xE9 au chargement de cette page.",
+    "fleet.send.allBtn": "Tout",
+    "fleet.send.allHint": "Toutes les ressources de cette plan\xE8te ou lune (le carburant du vol reste)"
   };
 
   // src/i18n/de.json
@@ -4367,7 +4373,9 @@
     "fleet.tip.skipEmpty": "Hier sind keine Schiffe: \xF6ffnet den n\xE4chsten Planeten oder Mond der Runde mit vorbereiteter Expedition. Von hier startet nichts.",
     "ping.label": "Ping {ms} ms",
     "ping.hint": "Der Server hat in {ms} ms geantwortet; die Seite war in {s} s geladen. Beim Laden dieser Seite gemessen: ein jetzt gesendeter Flug erreicht den Server mit \xE4hnlicher Verz\xF6gerung.",
-    "ping.hintShort": "Der Server hat in {ms} ms geantwortet. Beim Laden dieser Seite gemessen."
+    "ping.hintShort": "Der Server hat in {ms} ms geantwortet. Beim Laden dieser Seite gemessen.",
+    "fleet.send.allBtn": "Alles",
+    "fleet.send.allHint": "Alle Rohstoffe dieses Planeten oder Mondes (der Treibstoff des Flugs bleibt)"
   };
 
   // src/core/i18n.ts
@@ -13478,7 +13486,7 @@ table.queues td.acts { width: 1%; text-align: right; }
   // src/modules/fleet/style.ts
   var FLEET_CSS = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
-.fut-fbar, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fclear, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
+.fut-fbar, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fclear, .fut-fall, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
 /* The fleet bar speaks the inbox's language: Verdana 11px, tabular numbers, one set of tokens. */
 .fut-fbar, .fut-fmenu {
   ${PAGE_TOKENS} --line: var(--line-strong); --line-soft: #1D2531;
@@ -13523,6 +13531,7 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fsecond .fut-fact { background: none; box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--mute); }
 .fut-fsecond .fut-fact:hover { background: var(--tile); color: var(--ico-hi); }
 .fut-fskip[hidden] { display: none; }
+.fut-fbar[hidden] { display: none; }
 /* Main cargo ship, picked on the ship itself (top right; the game keeps the top left). */
 #fleet1 #technologies li[data-technology] { position: relative; }
 .fut-mainship { position: absolute; top: 2px; right: 2px; z-index: 2; width: 20px; height: 20px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--accent-soft); border-radius: 5px; background: rgba(13, 21, 34, 0.85); color: var(--muted); cursor: pointer; opacity: 0.75; }
@@ -13630,6 +13639,9 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fresin.deuterium .sym { color: var(--d); }
 .fut-fclear { width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--mute); }
 .fut-fclear:hover { border-color: var(--line-hover); color: var(--hi); }
+/* \xABTutto\xBB: every resource here in the three fields, beside the eraser. */
+.fut-fall { height: 26px; padding: 0 10px; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--txt); font: 600 12px Verdana, Arial, sans-serif; cursor: pointer; }
+.fut-fall:hover { border-color: var(--line-hover); color: var(--hi); }
 /* CL / CP: the game's ship pictures, short name in the corner, cargo needed along the bottom. */
 .fut-fcargo { grid-column: 3; grid-row: 1 / span 2; display: flex; align-items: center; gap: 4px; padding-left: 10px; border-left: 1px solid var(--line-soft); }
 .fut-fcl { position: relative; width: 48px; height: 48px; padding: 0; overflow: hidden; border: 1px solid var(--tile-line); border-radius: 6px; background: var(--tile); color: var(--hi); }
@@ -14092,20 +14104,6 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     box.append(go);
     return box;
   }
-  function summary(o, stored, settings) {
-    const { t } = o;
-    const fmt = (n) => n.toLocaleString(o.locale);
-    const parts = [];
-    const off = [];
-    const ships = Object.values(stored.reserve.ships).reduce((a, b) => a + b, 0);
-    if (ships) settings.shipsOn ? parts.push(`${t("fleet.rule.ships")}: ${fmt(ships)}`) : off.push(t("fleet.rule.ships"));
-    const r = stored.reserve.resources;
-    if (r.metal || r.crystal || r.deuterium)
-      settings.resourcesOn ? parts.push(`${t("fleet.rule.resources")}: ${fmt(r.metal)} / ${fmt(r.crystal)} / ${fmt(r.deuterium)}`) : off.push(t("fleet.rule.resources"));
-    if (settings.ignoreFood) parts.push(t("fleet.foodShort"));
-    const text = parts.length ? `${t("fleet.reserve")}: ${parts.join(" \xB7 ")}` : t("fleet.noReserve");
-    return off.length ? `${text} \xB7 ${t("fleet.rule.offList", { list: off.join(", ") })}` : text;
-  }
   function topScore(store) {
     const ranks = store.get(UNIVERSE_RANKS_KEY, null);
     const best = ranks ? Math.max(0, ...Object.values(ranks.ranks).map(([, points]) => points)) : 0;
@@ -14478,7 +14476,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     clear.title = t("fleet.send.clearBtn");
     clear.setAttribute("aria-label", t("fleet.send.clearHint"));
     peek(clear, t("fleet.send.clearBtn"), t("fleet.send.clearHint"));
-    res.append(clear);
+    const all2 = el4(doc, "button", "fut-fall", t("fleet.send.allBtn"));
+    all2.type = "button";
+    all2.setAttribute("aria-label", t("fleet.send.allHint"));
+    peek(all2, t("fleet.send.allBtn"), t("fleet.send.allHint"));
+    res.append(all2, clear);
     const cargoBox = el4(doc, "span", "fut-fcargo");
     const counts = /* @__PURE__ */ new Map();
     for (const id of SEND_CARGO) {
@@ -14532,6 +14534,15 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         recount();
       });
     }
+    all2.addEventListener("click", (e) => {
+      e.preventDefault();
+      const fd = getDispatcher();
+      if (!fd) return;
+      const here = { metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet };
+      for (const [k, input] of inputs) input.value = groupInt(Math.max(0, Math.floor(here[k] || 0)), o.locale);
+      save({ sendPick: readPick() });
+      recount();
+    });
     clear.addEventListener("click", (e) => {
       e.preventDefault();
       for (const [, input] of inputs) input.value = "";
@@ -14988,17 +14999,12 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     }
     if (fleet2 && anchor2) {
       const bar = el4(doc, "div", "fut-fbar");
-      const out2 = readout(doc, summary(o, stored, settings));
-      const load = tile(doc, "cargo", t("fleet.resMinusReserve"), () => {
-        const fd = getDispatcher();
-        if (!fd) return;
-        out2.say(t("fleet.resLoaded", { cargo: loadCargoNow(fd, profile).toLocaleString(o.locale) }));
-      });
-      out2.peek(load, t("fleet.resMinusReserve"), t("fleet.tip.cargo"));
+      bar.hidden = true;
+      const out2 = readout(doc, "");
       const row = el4(doc, "div", "fut-frow");
       const ask = el4(doc, "span", "fut-fask");
       ask.hidden = true;
-      row.append(load, out2.box, ask);
+      row.append(out2.box, ask);
       bar.append(row);
       anchor2.before(bar);
       const offerSpeed = () => {
@@ -15013,6 +15019,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           box.hidden = true;
           return;
         }
+        bar.hidden = false;
         const yes = el4(doc, "button", "fut-fask-b yes", t("fleet.speedAsk.yes"));
         const no = el4(doc, "button", "fut-fask-b", t("fleet.speedAsk.no"));
         yes.type = no.type = "button";
@@ -15180,15 +15187,6 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const check = () => !busy() || Date.now() - started > timeoutMs ? resolve() : setTimeout(check, 50);
       check();
     });
-  }
-  function loadCargoNow(fd, profile) {
-    const onPlanet2 = { metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet };
-    const load = cargoLoad(onPlanet2, profile.reserve, Math.ceil(Number(fd.getConsumption()) || 0), fd.getCargoCapacity());
-    fd.cargoMetal = load.metal;
-    fd.cargoCrystal = load.crystal;
-    fd.cargoDeuterium = load.deuterium;
-    fd.refresh();
-    return load.metal + load.crystal + load.deuterium;
   }
 
   // src/modules/fleet/jumpgate.ts
