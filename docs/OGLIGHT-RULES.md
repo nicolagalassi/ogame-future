@@ -10,6 +10,6 @@ OGLight 5.4.3 è tollerato. Queste regole emergono dal suo codice e valgono anch
 6. **Nessuna UI alternativa:** si arricchiscono le pagine del gioco, non si sostituiscono.
 7. **Servizi esterni dichiarati:** nessun dato esce dal PC senza consenso esplicito.
 
-8. **Mercante colorato con l'import/export disponibile** (riferito da Nicola il 2026-11-23, **non verificato** nel codice di OGLight): l'etichetta «Mercante» del menu del gioco si colora di azzurro finché l'offerta del giorno è da usare. In Future cambia solo il colore del testo (classe su `<body>` e foglio di stile di Future), mai l'elemento del gioco; lo stato viene da `importExportInfo` letto una volta per sessione (come OGame Infinity). AGENTS.md §1.7 protegge il Mercante: segnata come area grigia nel codice.
+8. **Mercante colorato con l'import/export disponibile** (riferito da Nicola il 2026-11-23, **non verificato** nel codice di OGLight): l'etichetta «Mercante» del menu del gioco si colora di azzurro finché l'offerta del giorno è da usare. In Future cambia solo il colore del testo, ciano acceso con un leggero alone (classe su `<body>` e foglio di stile di Future), mai l'elemento del gioco; lo stato viene da `importExportInfo` letto una volta per sessione (come OGame Infinity). AGENTS.md §1.7 protegge il Mercante: segnata come area grigia nel codice.
 
 Da verificare con un ToolDev prima di copiarle: "Repeat x" sulla coda e la pulizia automatica dei report.
