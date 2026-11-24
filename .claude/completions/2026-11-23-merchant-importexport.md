@@ -9,3 +9,4 @@
   (`.menubutton[data-ipi-hint="ipiToolbarTrader"] .textlabel`, selettore di Infinity, non verificato qui). L'elemento
   del gioco non viene mai toccato. GRAY AREA (§1.7) nel codice; voce 8 in docs/OGLIGHT-RULES.md (non verificata).
 - Versione 0.3.141.
+- 2026-11-24: colore più visibile, ciano #4FE3FF con un leggero alone (text-shadow), versione 0.3.142.

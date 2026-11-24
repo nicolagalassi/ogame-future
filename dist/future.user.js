@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.141
+// @version      0.3.142
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -6515,7 +6515,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   var MERCHANT_CLASS = "fut-ie-open";
   var STYLE_ID2 = "fut-merchant-style";
   var MERCHANT = '.menubutton[data-ipi-hint="ipiToolbarTrader"]';
-  var CSS3 = `body.${MERCHANT_CLASS} #menuTable ${MERCHANT} .textlabel, body.${MERCHANT_CLASS} #leftMenu ${MERCHANT} .textlabel { color: #7FB8FF !important; }`;
+  var CSS3 = `body.${MERCHANT_CLASS} #menuTable ${MERCHANT} .textlabel, body.${MERCHANT_CLASS} #leftMenu ${MERCHANT} .textlabel { color: #4FE3FF !important; text-shadow: 0 0 4px rgba(79, 227, 255, 0.65), 0 0 9px rgba(79, 227, 255, 0.35); }`;
   var isTraderPage = (href) => /[?&]component=trader/i.test(href);
   function markMerchant(doc, state) {
     if (!doc.getElementById(STYLE_ID2)) {
