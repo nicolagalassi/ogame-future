@@ -17,7 +17,7 @@
   },
   "dist": {
     "path": "dist/future.user.js",
-    "maxBytes": 1050000,
+    "maxBytes": 1150000,
     "maxLineLength": 2000,
     "maxAvgLineLength": 120,
     "credit": "2019 Oz"

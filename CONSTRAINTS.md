@@ -38,12 +38,12 @@ Controllato da `node scripts/constraints.mjs src` (sorgenti) e `dist` (file pubb
 | Types | Zero errori | `tsc --noEmit` | `npm run check` |
 | Coverage | Righe cambiate in `src/engines/` coperte ≥ 80% | `vitest run --coverage` + `node scripts/constraints.mjs coverage` | `npm run check` |
 | Dependencies | Niente a high o sopra | `node scripts/constraints.mjs audit` (`npm audit`) | pre-push (`npm run check:push`) |
-| Size | `dist/future.user.js` ≤ 1050000 byte | `node scripts/constraints.mjs dist` | `npm run check` |
+| Size | `dist/future.user.js` ≤ 1150000 byte | `node scripts/constraints.mjs dist` | `npm run check` |
 
 Perché questi numeri:
 - **80% delle righe cambiate**: obbliga a un test per ogni calcolo nuovo (ROI, MSU, spedizioni) senza contare le righe di configurazione. Solo `src/engines/`, dove un numero sbagliato toglie fiducia al giocatore; l'interfaccia si controlla in gioco.
 - **high o sopra**: sotto è quasi sempre rumore. È l'unico controllo esterno: lo decide il database delle vulnerabilità di npm, non i nostri test.
-- **1050000 byte**: oggi 958027 (2026-11-17); circa 10% di margine per le funzioni dei prossimi mesi. Superarlo chiede di alzare il tetto qui, con il motivo, o di togliere peso.
+- **1150000 byte**: oggi 1040583 (2026-11-25); circa 10% di margine per le funzioni dei prossimi mesi. Alzato da 1050000 (Nicola, 2026-11-25): il font Barlow incorporato (+61693 byte, lo stesso giorno del primo tetto) aveva preso più di metà del margine. Superarlo chiede di alzare il tetto qui, con il motivo, o di togliere peso.
 
 ## Measured, not yet enforced
 
