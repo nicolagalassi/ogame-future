@@ -30,8 +30,6 @@ export interface SettingsOptions {
   t: (key: string, vars?: Record<string, string | number>) => string;
   menu: {
     settings: MenuSettings;
-    /** False when the screen is too narrow for the side-by-side view. */
-    canSide: boolean;
     onChange: (next: MenuSettings) => void;
   };
   /** Backup and OGLight import; the import returns how many values or a message. */
@@ -435,7 +433,6 @@ export function openSettings(o: SettingsOptions): void {
         o.menu.onChange(menu);
       };
       body.append(
-        row(t('settings.view'), t(o.menu.canSide ? 'settings.viewHint' : 'settings.viewNarrow'), choice([['side', t('planetMenu.side')], ['compact', t('planetMenu.compact')]], o.menu.canSide ? menu.mode : 'compact', (v) => setMenu({ mode: v as MenuSettings['mode'] }), !o.menu.canSide)),
         row(t('settings.totals'), t('settings.totalsHint'), yesNo(menu.showTotals, (v) => setMenu({ showTotals: v }))),
         row(t('settings.totalView'), t('settings.totalViewHint'), choice([['msu', 'MSU 3:2:1'], ['sum', '1:1:1']], menu.totalView ?? 'msu', (v) => setMenu({ totalView: v as MenuSettings['totalView'] }), !menu.showTotals)),
         row(t('settings.fleetPill'), t('settings.fleetPillHint'), yesNo(menu.showFleet === true, (v) => setMenu({ showFleet: v }))),

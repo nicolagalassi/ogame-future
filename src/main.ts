@@ -53,7 +53,7 @@ import { watchMessages } from './modules/messages';
 import { openJournal } from './modules/messages/journal-view';
 import { isHighscorePage, watchHighscore } from './modules/highscore';
 import { bellButton, clockOffset, startReminders, watchEventList } from './modules/reminders';
-import { renderPlanetMenu, watchPlanetBar, type MenuMode, type MenuSettings, type PlanMark } from './modules/planet-menu';
+import { renderPlanetMenu, watchPlanetBar, type MenuSettings, type PlanMark } from './modules/planet-menu';
 import { techIcons } from './data/tech-icons';
 import { isOrionPage } from './data/orion';
 import { watchOrion } from './modules/orion';
@@ -179,10 +179,7 @@ async function bootstrap(): Promise<void> {
   });
 
   const deps = { guard, store, session: window.sessionStorage };
-  const storedMode = store.get<string>('planetMenu.mode', 'side');
   let settings: MenuSettings = {
-    // 'stacked' was the previous layout: it maps to the side-by-side one.
-    mode: (storedMode === 'compact' ? 'compact' : 'side') as MenuMode,
     showTotals: store.get<boolean>('planetMenu.totals', true),
     showFleet: store.get<boolean>('planetMenu.fleet', false),
     totalView: store.get<string>('planetMenu.totalView', 'msu') === 'sum' ? 'sum' : 'msu',
@@ -247,7 +244,7 @@ async function bootstrap(): Promise<void> {
   let refreshInbox: (() => void) | null = null;
   let refreshFleet: (() => void) | null = null;
   // Planet menu facts the settings show (whether the side view fits, colonies); updated by the menu.
-  let menuCtx = { roomy: true, colonies: '' };
+  let menuCtx = { colonies: '' };
   const openFutureSettings = (section?: Section) =>
     openSettings({
       doc: document,
@@ -255,10 +252,8 @@ async function bootstrap(): Promise<void> {
       t,
       menu: {
         settings,
-        canSide: menuCtx.roomy,
         onChange: (next) => {
           settings = next;
-          store.set('planetMenu.mode', next.mode);
           store.set('planetMenu.totals', next.showTotals);
           store.set('planetMenu.fleet', next.showFleet === true);
           store.set('planetMenu.totalView', next.totalView ?? 'msu');

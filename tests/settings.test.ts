@@ -10,7 +10,7 @@ const t = translator('it');
 const open = (store: Store, over: Partial<Parameters<typeof openSettings>[0]> = {}) => {
   const onChange = vi.fn();
   const onMailChange = vi.fn();
-  openSettings({ doc: document, store, t, menu: { settings: { mode: 'side', showTotals: true }, canSide: true, onChange }, onMailChange, notes: ['15/15 pianeti'], ...over });
+  openSettings({ doc: document, store, t, menu: { settings: { showTotals: true }, onChange }, onMailChange, notes: ['15/15 pianeti'], ...over });
   const root = document.getElementById(SETTINGS_ID)!.shadowRoot!;
   const tab = (name: string) => Array.from(root.querySelectorAll<HTMLButtonElement>('.tab')).find((b) => b.textContent === name)!;
   const seg = (label: string, row: string) => {
@@ -23,10 +23,10 @@ const open = (store: Store, over: Partial<Parameters<typeof openSettings>[0]> = 
 describe('settings window', () => {
   it('changes the planet menu through the callback', () => {
     const w = open(new Store(new MemoryStore(), 'x'));
-    w.seg('Compatto', 'Vista del menu').click();
-    expect(w.onChange).toHaveBeenCalledWith({ mode: 'compact', showTotals: true });
+    w.seg('1:1:1', 'Totale nel riepilogo').click();
+    expect(w.onChange).toHaveBeenCalledWith({ showTotals: true, totalView: 'sum' });
     // The window redraws with the new choice pressed.
-    expect(w.seg('Compatto', 'Vista del menu').getAttribute('aria-pressed')).toBe('true');
+    expect(w.seg('1:1:1', 'Totale nel riepilogo').getAttribute('aria-pressed')).toBe('true');
     closeSettings(document);
     expect(document.getElementById(SETTINGS_ID)).toBeNull();
   });
@@ -48,10 +48,12 @@ describe('settings window', () => {
     closeSettings(document);
   });
 
-  it('closes with Escape and cannot switch to side by side on a narrow screen', () => {
-    const w = open(new Store(new MemoryStore(), 'x'), { menu: { settings: { mode: 'side', showTotals: true }, canSide: false, onChange: vi.fn() } });
-    expect(w.seg('Affiancato', 'Vista del menu').disabled).toBe(true);
-    expect(w.seg('Compatto', 'Vista del menu').getAttribute('aria-pressed')).toBe('true');
+  it('closes with Escape, with no menu view choice left', () => {
+    const w = open(new Store(new MemoryStore(), 'x'));
+    const names = Array.from(w.root.querySelectorAll('.row .name')).map((n) => n.textContent);
+    expect(names).not.toContain('Vista del menu');
+    // The rest of the menu section is still there.
+    expect(names).toContain('Totali risorse');
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     expect(document.getElementById(SETTINGS_ID)).toBeNull();
   });

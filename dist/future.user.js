@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.142
+// @version      0.3.143
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -515,17 +515,11 @@
     "data.missing": "Dati mancanti su {count} pianeti: apri la loro panoramica",
     "guard.refused": "Chiamata bloccata per rispettare le regole di OGame",
     "planetMenu.moon": "Luna",
-    "planetMenu.compact": "Compatto",
     "res.metal": "Metallo",
     "res.crystal": "Cristallo",
     "res.deuterium": "Deuterio",
-    "planetMenu.side": "Affiancato",
-    "planetMenu.toSide": "Vista affiancata (con risorse)",
-    "planetMenu.toCompact": "Vista compatta",
-    "planetMenu.noRoom": "Schermo troppo stretto per la vista affiancata",
     "toolbar.settings": "Impostazioni",
     "toolbar.lastSync": "ultimo aggiornamento {time}",
-    "settings.view": "Vista del menu",
     "settings.totals": "Totali risorse",
     "settings.on": "S\xEC",
     "settings.off": "No",
@@ -1119,8 +1113,6 @@
     "settings.section.menu": "Menu pianeti",
     "settings.section.mail": "Posta e spiate",
     "settings.section.data": "Dati",
-    "settings.viewHint": "Affiancato mostra nome, risorse e lune accanto a ogni pianeta; compatto sta nella larghezza del gioco con coordinate e risorse.",
-    "settings.viewNarrow": "Lo schermo \xE8 troppo stretto per la vista affiancata: resta compatto.",
     "settings.totalsHint": "Il riquadro sotto i pianeti con le risorse di tutto l\u2019account e la produzione al giorno.",
     "settings.sim": "Simulatore",
     "settings.simHint": "Si apre con il pulsante Simula nella tabella spiate e nei rapporti, gi\xE0 compilato con le tue ricerche.",
@@ -1483,17 +1475,11 @@
     "data.missing": "Missing data on {count} planets: open their overview",
     "guard.refused": "Call blocked to respect OGame rules",
     "planetMenu.moon": "Moon",
-    "planetMenu.compact": "Compact",
     "res.metal": "Metal",
     "res.crystal": "Crystal",
     "res.deuterium": "Deuterium",
-    "planetMenu.side": "Side by side",
-    "planetMenu.toSide": "Side-by-side view (with resources)",
-    "planetMenu.toCompact": "Compact view",
-    "planetMenu.noRoom": "Screen too narrow for the side-by-side view",
     "toolbar.settings": "Settings",
     "toolbar.lastSync": "last update {time}",
-    "settings.view": "Menu view",
     "settings.totals": "Resource totals",
     "settings.on": "On",
     "settings.off": "Off",
@@ -2087,8 +2073,6 @@
     "settings.section.menu": "Planet menu",
     "settings.section.mail": "Inbox and spying",
     "settings.section.data": "Data",
-    "settings.viewHint": "Side by side shows name, resources and moons next to each planet; compact fits the game width with coordinates and resources.",
-    "settings.viewNarrow": "The screen is too narrow for side by side: it stays compact.",
     "settings.totalsHint": "The box under the planets with the whole account\u2019s resources and daily production.",
     "settings.sim": "Simulator",
     "settings.simHint": "Opens from the Simulate button in the spy table and in the reports, already filled with your research.",
@@ -2451,17 +2435,11 @@
     "data.missing": "Donn\xE9es manquantes sur {count} plan\xE8tes : ouvrez leur vue d'ensemble",
     "guard.refused": "Appel bloqu\xE9 pour respecter les r\xE8gles d'OGame",
     "planetMenu.moon": "Lune",
-    "planetMenu.compact": "Compact",
     "res.metal": "M\xE9tal",
     "res.crystal": "Cristal",
     "res.deuterium": "Deut\xE9rium",
-    "planetMenu.side": "C\xF4te \xE0 c\xF4te",
-    "planetMenu.toSide": "Vue c\xF4te \xE0 c\xF4te (avec ressources)",
-    "planetMenu.toCompact": "Vue compacte",
-    "planetMenu.noRoom": "\xC9cran trop \xE9troit pour la vue c\xF4te \xE0 c\xF4te",
     "toolbar.settings": "Param\xE8tres",
     "toolbar.lastSync": "derni\xE8re mise \xE0 jour {time}",
-    "settings.view": "Vue du menu",
     "settings.totals": "Totaux des ressources",
     "settings.on": "Oui",
     "settings.off": "Non",
@@ -3055,8 +3033,6 @@
     "settings.section.menu": "Menu des plan\xE8tes",
     "settings.section.mail": "Messagerie et espionnage",
     "settings.section.data": "Donn\xE9es",
-    "settings.viewHint": "C\xF4te \xE0 c\xF4te montre nom, ressources et lunes pr\xE8s de chaque plan\xE8te ; compact tient dans la largeur du jeu avec coordonn\xE9es et ressources.",
-    "settings.viewNarrow": "L\u2019\xE9cran est trop \xE9troit pour c\xF4te \xE0 c\xF4te : il reste compact.",
     "settings.totalsHint": "Le cadre sous les plan\xE8tes avec les ressources de tout le compte et la production par jour.",
     "settings.sim": "Simulateur",
     "settings.simHint": "S\u2019ouvre avec le bouton Simuler du tableau d\u2019espionnage et des rapports, d\xE9j\xE0 rempli avec vos recherches.",
@@ -3419,17 +3395,11 @@
     "data.missing": "Fehlende Daten auf {count} Planeten: \xF6ffne ihre \xDCbersicht",
     "guard.refused": "Aufruf blockiert, um die OGame-Regeln einzuhalten",
     "planetMenu.moon": "Mond",
-    "planetMenu.compact": "Kompakt",
     "res.metal": "Metall",
     "res.crystal": "Kristall",
     "res.deuterium": "Deuterium",
-    "planetMenu.side": "Nebeneinander",
-    "planetMenu.toSide": "Ansicht nebeneinander (mit Rohstoffen)",
-    "planetMenu.toCompact": "Kompakte Ansicht",
-    "planetMenu.noRoom": "Bildschirm zu schmal f\xFCr die Ansicht nebeneinander",
     "toolbar.settings": "Einstellungen",
     "toolbar.lastSync": "letzte Aktualisierung {time}",
-    "settings.view": "Men\xFCansicht",
     "settings.totals": "Rohstoffsummen",
     "settings.on": "An",
     "settings.off": "Aus",
@@ -4023,8 +3993,6 @@
     "settings.section.menu": "Planetenmen\xFC",
     "settings.section.mail": "Posteingang und Spionage",
     "settings.section.data": "Daten",
-    "settings.viewHint": "Nebeneinander zeigt Name, Rohstoffe und Monde neben jedem Planeten; kompakt passt in die Spielbreite mit Koordinaten und Rohstoffen.",
-    "settings.viewNarrow": "Der Bildschirm ist zu schmal f\xFCr nebeneinander: bleibt kompakt.",
     "settings.totalsHint": "Der Kasten unter den Planeten mit den Rohstoffen des ganzen Kontos und der Tagesproduktion.",
     "settings.sim": "Simulator",
     "settings.simHint": "\xD6ffnet sich mit Simulieren in der Spionagetabelle und in den Berichten, schon mit deinen Forschungen ausgef\xFCllt.",
@@ -10029,7 +9997,6 @@ input.field { width: 190px; }
           o.menu.onChange(menu);
         };
         body.append(
-          row(t("settings.view"), t(o.menu.canSide ? "settings.viewHint" : "settings.viewNarrow"), choice([["side", t("planetMenu.side")], ["compact", t("planetMenu.compact")]], o.menu.canSide ? menu.mode : "compact", (v) => setMenu({ mode: v }), !o.menu.canSide)),
           row(t("settings.totals"), t("settings.totalsHint"), yesNo(menu.showTotals, (v) => setMenu({ showTotals: v }))),
           row(t("settings.totalView"), t("settings.totalViewHint"), choice([["msu", "MSU 3:2:1"], ["sum", "1:1:1"]], menu.totalView ?? "msu", (v) => setMenu({ totalView: v }), !menu.showTotals)),
           row(t("settings.fleetPill"), t("settings.fleetPillHint"), yesNo(menu.showFleet === true, (v) => setMenu({ showFleet: v }))),
@@ -10287,7 +10254,6 @@ html { background-color: #030408 !important; }
    the count stays available in the toolbar tooltip and in the settings panel. */
 body.fut-on #planetbarcomponent #countColonies { display: none !important; }
 
-#planetbarcomponent:not(.fut-wide) #planetList.fut-menu,
 #planetbarcomponent:not(.fut-wide) .fut-toolbar,
 #planetbarcomponent:not(.fut-wide) .fut-totals { width: ${NATIVE_WIDTH}px !important; }
 ${L} { width: 100% !important; display: flex !important; flex-direction: column; gap: 2px; padding: 0 !important; background: none !important; }
@@ -10383,7 +10349,6 @@ ${L} .fut-fleet svg, ${L} .fut-fleet-peek svg { flex: none; }
 }
 ${L} .fut-fleet-m { display: inline-flex; align-items: center; gap: 2px; color: #D8A0A0; }
 ${L} .fut-fleet-m svg { flex: none; opacity: 0.8; }
-${L}.fut-mode-compact .fut-fleet-m { display: none; }
 .fut-totals .fut-fleetrow .fut-tname { color: var(--old); }
 .fut-totals .fut-flyrow, .fut-totals .fut-flyrow .fut-tname, .fut-totals .fut-flyrow .fut-tlabel { color: var(--muted); font-size: 0.92em; }
 .fut-totals .fut-flyrow .fut-tnum { color: var(--text-2); font-size: 13px; }
@@ -10441,7 +10406,6 @@ ${L} .fut-plan { display: flex; align-items: center; justify-content: center;
 @media (hover: hover) and (pointer: fine) { ${L} .fut-plan:hover { background: var(--hover); } }
 ${L} .fut-plan:active, ${L} .fut-plan:focus-visible { background: var(--hover); }
 ${L} .fut-plan:focus-visible { box-shadow: inset 2px 0 0 var(--st), inset 0 0 0 1px var(--accent); }
-${L}.fut-mode-compact .fut-plancol { display: none; }
 ${L} .fut-plan-missing { --st: var(--warn); }
 ${L} .fut-plan-arriving { --st: var(--link); }
 ${L} .fut-plan-arrived { --st: var(--warm); }
@@ -10461,18 +10425,6 @@ ${L} .smallplanet a.alert {
   position: absolute !important; left: 1px !important; top: auto !important; bottom: 1px !important; right: auto !important; z-index: 3;
   width: 12px !important; height: 12px !important; border-radius: 50%; box-shadow: 0 0 0 1px var(--bg);
 }
-
-/* Compact: the game's width. Coordinates over the planet's skin (no name), the numbers, the moon as a square button. */
-${L}.fut-mode-compact a.planetlink { padding: 0 2px 0 3px !important; gap: 2px; }
-${L}.fut-mode-compact a.planetlink .planetBarSpaceObjectContainer { left: -10px !important; opacity: 0.4; }
-${L}.fut-mode-compact .fut-name .planet-name { display: none !important; }
-${L}.fut-mode-compact .fut-name .planet-koords { font-size: 11px !important; letter-spacing: -0.4px; color: var(--text) !important; text-overflow: clip; }
-${L}.fut-mode-compact .fut-res { width: 38px; }
-${L}.fut-mode-compact .fut-cell { padding: 0 1px; }
-${L}.fut-mode-compact .fut-nomoon { width: 22px; }
-${L}.fut-mode-compact a.moonlink { width: 22px !important; padding: 0 !important; justify-content: center; }
-${L}.fut-mode-compact a.moonlink .fut-res, ${L}.fut-mode-compact a.moonlink .fut-age { display: none; }
-${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: static !important; width: 16px !important; height: 16px !important; }
 
 /* Toolbar: replaces the colony counter. Two tiles side by side (production \u2192 Dashboard, plan \u2192 Piano),
    name on top and number below; sync and settings stacked on the right. */
@@ -10592,8 +10544,6 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     journal: '<path d="M5 3.5h11a3 3 0 0 1 3 3V20.5H8a3 3 0 0 1-3-3z" fill="none" stroke-width="2"/><path d="M5 17.5a3 3 0 0 1 3-3h11" fill="none" stroke-width="2"/><path stroke="none" d="M9.5 6.5l1 2.2 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3L6.2 9l2.3-.3z"/>',
     planner: '<path d="M9 6h11M9 12h11M9 18h11" fill="none" stroke-width="2.2"/><path stroke="none" d="M3 4.5h3v3H3zM3 10.5h3v3H3zM3 16.5h3v3H3z"/>',
     dashboard: '<path stroke="none" d="M3 3h8v10H3zM13 3h8v6h-8zM13 11h8v10h-8zM3 15h8v6H3z"/>',
-    side: '<path stroke="none" d="M2 5h12v14H2zM16 5h6v14h-6z"/>',
-    compact: '<path stroke="none" d="M3 4h18v3H3zM3 10.5h18v3H3zM3 17h18v3H3z"/>',
     sync: '<path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9" fill="none" stroke-width="2.2"/><path d="M19 3v5h-5M5 21v-5h5" fill="none" stroke-width="2.2"/>',
     settings: '<path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z" fill="none" stroke-width="2.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" fill="none" stroke-width="2.2"/>'
   };
@@ -10827,7 +10777,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
   function formatTime(at, locale) {
     return new Date(at).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
   }
-  function toolbar(o, colonies, roomy) {
+  function toolbar(o, colonies) {
     const { doc, t } = o;
     const bar = el3(doc, "div", "fut-toolbar");
     if (colonies) bar.title = colonies;
@@ -10877,7 +10827,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
       }).finally(() => sync.classList.remove("fut-busy"));
     });
     if (!o.snapshot || o.now - o.snapshot.fetchedAt > 36e5) sync.classList.add("fut-stale");
-    const gear = iconButton2(doc, "settings", t("toolbar.settings"), () => o.onOpenSettings?.({ roomy, colonies }));
+    const gear = iconButton2(doc, "settings", t("toolbar.settings"), () => o.onOpenSettings?.({ colonies }));
     gear.setAttribute("aria-haspopup", "dialog");
     side.append(sync, gear);
     bar.append(side);
@@ -10909,19 +10859,15 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     }
     clearPlanetMenu(doc);
     const roomy = canWiden(doc);
-    const mode = roomy ? o.settings.mode : "compact";
-    const wide = mode === "side";
-    doc.getElementById("planetbarcomponent")?.classList.toggle("fut-wide", wide);
-    doc.body.classList.toggle("fut-banner-shift", wide);
+    doc.getElementById("planetbarcomponent")?.classList.toggle("fut-wide", roomy);
+    doc.body.classList.toggle("fut-banner-shift", roomy);
     doc.body.classList.add("fut-on");
-    list.classList.add("fut-menu");
-    list.classList.toggle("fut-mode-compact", mode === "compact");
-    list.classList.toggle("fut-mode-side", mode === "side");
+    list.classList.toggle("fut-menu", roomy);
     const byId = new Map((o.snapshot?.bodies ?? []).map((b) => [b.id, b]));
     const view2 = { fleet: o.settings.showFleet === true, t: o.t };
     list.style.removeProperty("--fut-row-h");
     const gameTips = o.settings.gameTips !== false;
-    for (const entry of o.entries) {
+    for (const entry of roomy ? o.entries : []) {
       setGameTip(entry.planetLink, gameTips);
       setGameTip(entry.moonLink, gameTips);
       entry.element.classList.add("fut-row");
@@ -10988,7 +10934,7 @@ ${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: stat
     }
     startAgeClock(doc);
     const colonies = (doc.getElementById("countColonies")?.textContent ?? "").replace(/\s+/g, " ").trim();
-    list.before(toolbar(o, colonies, roomy));
+    list.before(toolbar(o, colonies));
     if (o.snapshot && o.settings.showTotals) {
       const base2 = totals(o.snapshot, o.now);
       const perHour = base2.perHour;
@@ -18458,10 +18404,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
       store.set(HISTORY_KEY, recordDay(store.get(HISTORY_KEY, []), { at: score.at, points: score.points, rank: score.rank, ...dayFigures(snapshot) }));
     });
     const deps = { guard, store, session: window.sessionStorage };
-    const storedMode = store.get("planetMenu.mode", "side");
     let settings = {
-      // 'stacked' was the previous layout: it maps to the side-by-side one.
-      mode: storedMode === "compact" ? "compact" : "side",
       showTotals: store.get("planetMenu.totals", true),
       showFleet: store.get("planetMenu.fleet", false),
       totalView: store.get("planetMenu.totalView", "msu") === "sum" ? "sum" : "msu",
@@ -18518,17 +18461,15 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
     };
     let refreshInbox = null;
     let refreshFleet = null;
-    let menuCtx = { roomy: true, colonies: "" };
+    let menuCtx = { colonies: "" };
     const openFutureSettings = (section2) => openSettings({
       doc: document,
       store,
       t,
       menu: {
         settings,
-        canSide: menuCtx.roomy,
         onChange: (next) => {
           settings = next;
-          store.set("planetMenu.mode", next.mode);
           store.set("planetMenu.totals", next.showTotals);
           store.set("planetMenu.fleet", next.showFleet === true);
           store.set("planetMenu.totalView", next.totalView ?? "msu");

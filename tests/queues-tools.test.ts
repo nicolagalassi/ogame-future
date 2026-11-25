@@ -51,7 +51,7 @@ describe('production queue', () => {
     const queues = parseProductionQueue(QUEUE_HTML, [1, 2, 3], 0);
     renderPlanetMenu({
       doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, queues,
-      settings: { mode: 'side', showTotals: true }, now: 1_000_000, locale: 'it',
+      settings: { showTotals: true }, now: 1_000_000, locale: 'it',
       t: translator('it'), onSync: async () => true,
     });
     const stripes = document.querySelectorAll('#planet-1 a.planetlink .fut-q');
