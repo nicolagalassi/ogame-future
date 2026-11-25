@@ -7,9 +7,9 @@ import { DOCK_ID, renderDock } from '../src/modules/dock';
 import { loadMarks } from '../src/engines/marks';
 
 const t = translator('it');
-const draw = (mode: 'side' | 'compact', onOpenSettings = vi.fn(), onSync = vi.fn(async () => true)) =>
+const draw = (onOpenSettings = vi.fn(), onSync = vi.fn(async () => true)) =>
   renderPlanetMenu({
-    doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { mode, showTotals: true },
+    doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { showTotals: true },
     now: 0, locale: 'it', t, onOpenSettings, onSync,
   });
 
@@ -36,7 +36,7 @@ describe('renderPlanetMenu', () => {
   it('the totals count the cargo in flight, with a line that says how much', () => {
     const go = (flying?: { metal: number; crystal: number; deuterium: number }) => {
       document.body.innerHTML = PLANET_LIST_HTML;
-      renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, flying, settings: { mode: 'side', showTotals: true, totalView: 'sum' }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true) });
+      renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, flying, settings: { showTotals: true, totalView: 'sum' }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true) });
       return document.querySelector('.fut-totals')!;
     };
     expect(go().querySelector('.fut-flyrow')).toBeNull();
@@ -50,13 +50,13 @@ describe('renderPlanetMenu', () => {
     expect(markVisited(visits, 1, 30_000)).toBe(visits);
     visits = markVisited(visits, 2, 50 * 60_000);
     // The snapshot's resourcesAt (sync time) is ignored; body 3 was never opened: 60, as stale.
-    renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, visits, settings: { mode: 'side', showTotals: true }, now: 61 * 60_000, locale: 'it', t, onSync: vi.fn(async () => true) });
+    renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, visits, settings: { showTotals: true }, now: 61 * 60_000, locale: 'it', t, onSync: vi.fn(async () => true) });
     expect([...document.querySelectorAll('.fut-age')].map((b) => b.textContent)).toEqual(['60', '11', '60']);
   });
 
   it('a redraw (e.g. after adding to the plan) leaves one fleet line per planet, inside the name column', () => {
     const snapshot = { ...SNAPSHOT, bodies: SNAPSHOT.bodies.map((b) => ({ ...b, levels: { 203: 10 } })) };
-    const once = () => renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot, settings: { mode: 'side', showTotals: true, showFleet: true }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true) });
+    const once = () => renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot, settings: { showTotals: true, showFleet: true }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true) });
     once();
     once();
     const fleets = document.querySelectorAll('#planet-1 .fut-fleet');
@@ -73,7 +73,7 @@ describe('renderPlanetMenu', () => {
   });
 
   it('adds planet and moon rows on the game links themselves', () => {
-    draw('side');
+    draw();
     const planetLink = document.querySelector('#planet-1 a.planetlink')!;
     const moonLink = document.querySelector('#planet-1 a.moonlink')!;
     expect(planetLink.querySelector('.fut-name .planet-name')?.textContent).toBe('Yolen');
@@ -85,14 +85,14 @@ describe('renderPlanetMenu', () => {
   });
 
   it('marks bodies missing from the snapshot instead of printing NaN', () => {
-    draw('side');
+    draw();
     const cells = document.querySelectorAll('#planet-3 .fut-res span');
     expect(Array.from(cells).every((c) => c.textContent === '—')).toBe(true);
     expect(document.body.textContent).not.toMatch(/NaN|undefined/);
   });
 
   it('marks a construction with a dot where the game shows its wrench, nothing on idle planets', () => {
-    draw('side');
+    draw();
     expect(document.querySelector('#planet-1 .fut-queue')).toBeNull();
     // Queues never read: the game's own icon is enough for one plain dot.
     expect(Array.from(document.querySelectorAll('#planet-3 .fut-q')).map((d) => d.className)).toEqual(['fut-q fut-q-unknown']);
@@ -100,7 +100,7 @@ describe('renderPlanetMenu', () => {
 
   it('shows the plan in a column at the outer end of the rows, coloured by where its resources stand', () => {
     renderPlanetMenu({
-      doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { mode: 'side', showTotals: true }, now: 1_000, locale: 'it', t, onSync: vi.fn(async () => true),
+      doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { showTotals: true }, now: 1_000, locale: 'it', t, onSync: vi.fn(async () => true),
       planMarks: {
         3: { state: 'arriving', items: ['Miniera di metallo liv. 46–48'], lack: null, pending: { metal: 5_000_000, crystal: 0, deuterium: 0, arriveAt: 61_000 } },
         2: { state: 'missing', items: ['Falange liv. 7', 'Portale liv. 2'], lack: { metal: 1, crystal: 0, deuterium: 0 }, pending: { metal: 0, crystal: 0, deuterium: 0, arriveAt: 0 } },
@@ -125,27 +125,27 @@ describe('renderPlanetMenu', () => {
     expect(document.querySelectorAll('#planet-3 > .fut-plancol > .fut-plan-empty')).toHaveLength(0);
     // Redrawn with nothing planned: still one column per row, with empty squares only.
     const rows = document.querySelectorAll('#planetList > div').length;
-    draw('side');
+    draw();
     expect(document.querySelectorAll('.fut-plancol')).toHaveLength(rows);
     expect(document.querySelectorAll('.fut-plancol .fut-plan')).toHaveLength(0);
     expect(document.querySelectorAll('.fut-plancol .fut-plan-empty').length).toBeGreaterThan(0);
   });
 
   it('paints storage fill behind planet numbers only, never on moons', () => {
-    draw('side');
+    draw();
     const cell = document.querySelector<HTMLElement>('#planet-1 a.planetlink .fut-m')!;
     expect(cell.style.getPropertyValue('--fut-fill')).toMatch(/%$/);
     expect(document.querySelectorAll('#planet-1 a.moonlink .fut-has-fill')).toHaveLength(0);
   });
 
   it('keeps columns aligned on planets without a moon', () => {
-    draw('side');
+    draw();
     expect(document.querySelector('#planet-3 .fut-nomoon')).not.toBeNull();
     expect(document.querySelector('#planet-1 .fut-nomoon')).toBeNull();
   });
 
   it('falls back to the 1x skin when the image fails, then to a plain sphere', () => {
-    draw('side');
+    draw();
     const img = document.querySelector<HTMLImageElement>('#planet-1 img.planetPic')!;
     img.dataset.defaultSrc = 'fallback.png';
     img.dispatchEvent(new Event('error'));
@@ -155,20 +155,19 @@ describe('renderPlanetMenu', () => {
   });
 
   it('can be redrawn without duplicating anything', () => {
-    draw('side');
-    draw('compact');
+    draw();
+    draw();
     expect(document.querySelectorAll('.fut-toolbar')).toHaveLength(1);
     expect(document.querySelectorAll('.fut-nomoon')).toHaveLength(1);
     expect(document.querySelectorAll('#planet-1 .fut-res')).toHaveLength(2); // planet + moon
     expect(document.querySelectorAll('.fut-name')).toHaveLength(2);
-    expect(document.getElementById('planetList')?.classList.contains('fut-mode-compact')).toBe(true);
   });
 
   it('toolbar lines show data and open their window', () => {
     const onOpenPlanner = vi.fn();
     const onOpenDashboard = vi.fn();
     renderPlanetMenu({
-      doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { mode: 'side', showTotals: true },
+      doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { showTotals: true },
       now: 0, locale: 'it', t, onSync: vi.fn(async () => true),
       onOpenDashboard, onOpenPlanner, planCount: 50, planGap: 1.2e9,
     });
@@ -220,29 +219,37 @@ describe('renderPlanetMenu', () => {
 
   it('sync runs only from the button click', () => {
     const onSync = vi.fn(async () => true);
-    draw('side', vi.fn(), onSync);
+    draw(vi.fn(), onSync);
     expect(onSync).not.toHaveBeenCalled();
     document.querySelector<HTMLButtonElement>('.fut-toolbar .fut-tool-sync')!.click();
     expect(onSync).toHaveBeenCalledTimes(1);
   });
 
-  it('the gear opens the settings window, saying whether side by side fits', () => {
+  it('the gear opens the settings window with the colony count', () => {
     const onOpenSettings = vi.fn();
-    draw('side', onOpenSettings);
+    draw(onOpenSettings);
     document.querySelector<HTMLButtonElement>('.fut-tool-settings')!.click();
-    expect(onOpenSettings).toHaveBeenCalledWith(expect.objectContaining({ roomy: true }));
+    expect(onOpenSettings).toHaveBeenCalledWith({ colonies: expect.any(String) });
   });
 });
 
 describe('width and banner', () => {
-  it('widens the column and shifts the banner only in side-by-side mode', () => {
+  it('widens the column and shifts the banner; without room it leaves the game list as it is', () => {
     document.body.innerHTML = `<div id="planetbarcomponent">${PLANET_LIST_HTML}</div><div id="bannerskyscrapercomponent"></div>`;
-    draw('side');
+    draw();
     expect(document.getElementById('planetbarcomponent')?.classList.contains('fut-wide')).toBe(true);
     expect(document.body.classList.contains('fut-banner-shift')).toBe(true);
-    draw('compact');
+    // A banner on screen that the shift would push out of view (AGENTS.md §1.7).
+    const banner = document.getElementById('bannerskyscrapercomponent')!;
+    banner.getBoundingClientRect = () => ({ left: 1000, right: 1160, width: 160 }) as DOMRect;
+    Object.defineProperty(document.documentElement, 'clientWidth', { configurable: true, value: 1080 });
+    draw();
     expect(document.getElementById('planetbarcomponent')?.classList.contains('fut-wide')).toBe(false);
     expect(document.body.classList.contains('fut-banner-shift')).toBe(false);
+    expect(document.getElementById('planetList')?.classList.contains('fut-menu')).toBe(false);
+    expect(document.querySelectorAll('.fut-row, .fut-res, .fut-plancol, .fut-nomoon, .fut-fleet-peek')).toHaveLength(0);
+    expect(document.querySelectorAll('.fut-toolbar')).toHaveLength(1);
+    Object.defineProperty(document.documentElement, 'clientWidth', { configurable: true, value: 0 });
   });
 
   it('widens unless the shift would push an on-screen banner out of view', async () => {
@@ -281,7 +288,7 @@ describe('when the game reloads the planet bar', () => {
   it('draws the menu again, once', async () => {
     const { watchPlanetBar } = await import('../src/modules/planet-menu');
     document.body.innerHTML = `<div id="planetbarcomponent">${PLANET_LIST_HTML}</div>`;
-    const redraw = vi.fn(() => draw('side'));
+    const redraw = vi.fn(() => draw());
     redraw();
     watchPlanetBar(document, redraw);
     expect(document.querySelector('.fut-toolbar')).not.toBeNull();
@@ -296,7 +303,7 @@ describe('when the game reloads the planet bar', () => {
 describe('the game card on planets, switched off', () => {
   it('stays off on a fresh page even when the game builds its card only after the menu (first hover)', () => {
     document.body.innerHTML = PLANET_LIST_HTML;
-    renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { mode: 'side', showTotals: true, gameTips: false }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true) });
+    renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot: SNAPSHOT, settings: { showTotals: true, gameTips: false }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true) });
     const link = document.querySelector<HTMLElement>('#planet-1 a.planetlink')!;
     const tip = { enable: vi.fn(), disable: vi.fn(), hide: vi.fn() };
     (link as HTMLElement & { _tippy?: typeof tip })._tippy = tip;
@@ -310,7 +317,7 @@ describe('fleet on hover', () => {
   it('no veil on a planet without ships, even when its moon has some (the moon shows its own)', () => {
     document.body.innerHTML = PLANET_LIST_HTML;
     const snapshot = { ...SNAPSHOT, bodies: SNAPSHOT.bodies.map((b) => ({ ...b, levels: (b.type === 'moon' ? { 202: 100 } : {}) as Record<string, number> })) };
-    renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot, settings: { mode: 'side', showTotals: true, showFleet: true }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true) });
+    renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot, settings: { showTotals: true, showFleet: true }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true) });
     expect(document.querySelector('#planet-1 a.planetlink .fut-fleet-peek')).toBeNull();
     expect(document.querySelectorAll('#planet-1 a.moonlink .fut-fleet-peek')).toHaveLength(1);
   });
@@ -320,7 +327,7 @@ describe('the moon fleet, away from the pointer', () => {
   it('lives in the moon tile with the moon mark, drawn over the planet; nothing of the moon inside the planet link', () => {
     document.body.innerHTML = PLANET_LIST_HTML;
     const snapshot = { ...SNAPSHOT, bodies: SNAPSHOT.bodies.map((b) => ({ ...b, levels: (b.type === 'moon' ? { 202: 100 } : { 203: 10 }) as Record<string, number> })) };
-    renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot, settings: { mode: 'side', showTotals: true, showFleet: true }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true) });
+    renderPlanetMenu({ doc: document, entries: readPlanetList(document), snapshot, settings: { showTotals: true, showFleet: true }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true) });
     const moon = document.querySelector<HTMLElement>('#planet-1 a.moonlink')!;
     const peek = moon.querySelector<HTMLElement>('.fut-fleet-peek.fut-peek-moon')!;
     expect(peek.querySelector('.fut-peek-moonmark svg')).not.toBeNull();

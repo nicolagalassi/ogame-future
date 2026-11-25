@@ -35,7 +35,6 @@ html { background-color: #030408 !important; }
    the count stays available in the toolbar tooltip and in the settings panel. */
 body.fut-on #planetbarcomponent #countColonies { display: none !important; }
 
-#planetbarcomponent:not(.fut-wide) #planetList.fut-menu,
 #planetbarcomponent:not(.fut-wide) .fut-toolbar,
 #planetbarcomponent:not(.fut-wide) .fut-totals { width: ${NATIVE_WIDTH}px !important; }
 ${L} { width: 100% !important; display: flex !important; flex-direction: column; gap: 2px; padding: 0 !important; background: none !important; }
@@ -131,7 +130,6 @@ ${L} .fut-fleet svg, ${L} .fut-fleet-peek svg { flex: none; }
 }
 ${L} .fut-fleet-m { display: inline-flex; align-items: center; gap: 2px; color: #D8A0A0; }
 ${L} .fut-fleet-m svg { flex: none; opacity: 0.8; }
-${L}.fut-mode-compact .fut-fleet-m { display: none; }
 .fut-totals .fut-fleetrow .fut-tname { color: var(--old); }
 .fut-totals .fut-flyrow, .fut-totals .fut-flyrow .fut-tname, .fut-totals .fut-flyrow .fut-tlabel { color: var(--muted); font-size: 0.92em; }
 .fut-totals .fut-flyrow .fut-tnum { color: var(--text-2); font-size: 13px; }
@@ -189,7 +187,6 @@ ${L} .fut-plan { display: flex; align-items: center; justify-content: center;
 @media (hover: hover) and (pointer: fine) { ${L} .fut-plan:hover { background: var(--hover); } }
 ${L} .fut-plan:active, ${L} .fut-plan:focus-visible { background: var(--hover); }
 ${L} .fut-plan:focus-visible { box-shadow: inset 2px 0 0 var(--st), inset 0 0 0 1px var(--accent); }
-${L}.fut-mode-compact .fut-plancol { display: none; }
 ${L} .fut-plan-missing { --st: var(--warn); }
 ${L} .fut-plan-arriving { --st: var(--link); }
 ${L} .fut-plan-arrived { --st: var(--warm); }
@@ -209,18 +206,6 @@ ${L} .smallplanet a.alert {
   position: absolute !important; left: 1px !important; top: auto !important; bottom: 1px !important; right: auto !important; z-index: 3;
   width: 12px !important; height: 12px !important; border-radius: 50%; box-shadow: 0 0 0 1px var(--bg);
 }
-
-/* Compact: the game's width. Coordinates over the planet's skin (no name), the numbers, the moon as a square button. */
-${L}.fut-mode-compact a.planetlink { padding: 0 2px 0 3px !important; gap: 2px; }
-${L}.fut-mode-compact a.planetlink .planetBarSpaceObjectContainer { left: -10px !important; opacity: 0.4; }
-${L}.fut-mode-compact .fut-name .planet-name { display: none !important; }
-${L}.fut-mode-compact .fut-name .planet-koords { font-size: 11px !important; letter-spacing: -0.4px; color: var(--text) !important; text-overflow: clip; }
-${L}.fut-mode-compact .fut-res { width: 38px; }
-${L}.fut-mode-compact .fut-cell { padding: 0 1px; }
-${L}.fut-mode-compact .fut-nomoon { width: 22px; }
-${L}.fut-mode-compact a.moonlink { width: 22px !important; padding: 0 !important; justify-content: center; }
-${L}.fut-mode-compact a.moonlink .fut-res, ${L}.fut-mode-compact a.moonlink .fut-age { display: none; }
-${L}.fut-mode-compact a.moonlink .planetBarSpaceObjectContainer { position: static !important; width: 16px !important; height: 16px !important; }
 
 /* Toolbar: replaces the colony counter. Two tiles side by side (production → Dashboard, plan → Piano),
    name on top and number below; sync and settings stacked on the right. */

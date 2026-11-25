@@ -20,10 +20,7 @@ import { MENU_WIDTH, NATIVE_WIDTH, PLANET_MENU_CSS } from './style';
 import { iconSvg, type IconName as FleetIcon } from '../fleet/icons';
 import { resIconSvg } from '../../core/res-icons';
 
-export type MenuMode = 'side' | 'compact';
-
 export interface MenuSettings {
-  mode: MenuMode;
   showTotals: boolean;
   /** A pill under the resources with what the ships on that body are worth, in MSU. */
   showFleet?: boolean;
@@ -73,8 +70,8 @@ export interface PlanetMenuOptions {
   now: number;
   locale: string;
   t: (key: string, vars?: Record<string, string | number>) => string;
-  /** Opens the settings window; `roomy` says whether the side-by-side view fits the screen. */
-  onOpenSettings?: (ctx: { roomy: boolean; colonies: string }) => void;
+  /** Opens the settings window, with the game's colony count (hidden from the bar) for its notes. */
+  onOpenSettings?: (ctx: { colonies: string }) => void;
   /** Runs the user-initiated sync. Only ever called from the Sync button's click. */
   onSync: () => Promise<boolean>;
   /** Opens the account dashboard (Future's own panel, no game action). */
@@ -103,8 +100,6 @@ const ICONS = {
   journal: '<path d="M5 3.5h11a3 3 0 0 1 3 3V20.5H8a3 3 0 0 1-3-3z" fill="none" stroke-width="2"/><path d="M5 17.5a3 3 0 0 1 3-3h11" fill="none" stroke-width="2"/><path stroke="none" d="M9.5 6.5l1 2.2 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3L6.2 9l2.3-.3z"/>',
   planner: '<path d="M9 6h11M9 12h11M9 18h11" fill="none" stroke-width="2.2"/><path stroke="none" d="M3 4.5h3v3H3zM3 10.5h3v3H3zM3 16.5h3v3H3z"/>',
   dashboard: '<path stroke="none" d="M3 3h8v10H3zM13 3h8v6h-8zM13 11h8v10h-8zM3 15h8v6H3z"/>',
-  side: '<path stroke="none" d="M2 5h12v14H2zM16 5h6v14h-6z"/>',
-  compact: '<path stroke="none" d="M3 4h18v3H3zM3 10.5h18v3H3zM3 17h18v3H3z"/>',
   sync: '<path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9" fill="none" stroke-width="2.2"/><path d="M19 3v5h-5M5 21v-5h5" fill="none" stroke-width="2.2"/>',
   settings:
     '<path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z" fill="none" stroke-width="2.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" fill="none" stroke-width="2.2"/>',
@@ -383,8 +378,8 @@ export function clearPlanetMenu(doc: Document): void {
 
 /**
  * Widens the planet column only when the shifted banner still fits on screen,
- * so the banner is never pushed out of view (AGENTS.md §1.7). Otherwise the menu
- * stays in the game's own width and switches to compact.
+ * so the banner is never pushed out of view (AGENTS.md §1.7). Otherwise the game's own planet list
+ * stays as it is (no compact view any more: in practice the game always leaves room).
  * A banner that already starts past the screen edge without Future (phones lay the page out at
  * 980px, the banner begins around 991px) is reached by scrolling either way: the shift hides nothing.
  */
@@ -411,7 +406,7 @@ function formatTime(at: number, locale: string): string {
  * a day, what the construction plan still misses); sync and settings stacked on the right.
  * The journal and the targets live in the dock under the game's menu (../dock).
  */
-function toolbar(o: PlanetMenuOptions, colonies: string, roomy: boolean): HTMLElement {
+function toolbar(o: PlanetMenuOptions, colonies: string): HTMLElement {
   const { doc, t } = o;
   const bar = el(doc, 'div', 'fut-toolbar');
   if (colonies) bar.title = colonies;
@@ -471,7 +466,7 @@ function toolbar(o: PlanetMenuOptions, colonies: string, roomy: boolean): HTMLEl
   });
   // Data older than an hour: the sync button says so.
   if (!o.snapshot || o.now - o.snapshot.fetchedAt > 3_600_000) sync.classList.add('fut-stale');
-  const gear = iconButton(doc, 'settings', t('toolbar.settings'), () => o.onOpenSettings?.({ roomy, colonies }));
+  const gear = iconButton(doc, 'settings', t('toolbar.settings'), () => o.onOpenSettings?.({ colonies }));
   gear.setAttribute('aria-haspopup', 'dialog');
   side.append(sync, gear);
   bar.append(side);
@@ -513,23 +508,20 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
   }
 
   clearPlanetMenu(doc);
+  // The side-by-side menu needs the extra width (and the banner shift). Without room for it the game's
+  // own list is left as it is; the toolbar and the totals still sit above it, in the game's width.
   const roomy = canWiden(doc);
-  const mode: MenuMode = roomy ? o.settings.mode : 'compact';
-  // Only the side-by-side menu needs the extra width (and the banner shift).
-  const wide = mode === 'side';
-  doc.getElementById('planetbarcomponent')?.classList.toggle('fut-wide', wide);
-  doc.body.classList.toggle('fut-banner-shift', wide);
+  doc.getElementById('planetbarcomponent')?.classList.toggle('fut-wide', roomy);
+  doc.body.classList.toggle('fut-banner-shift', roomy);
   doc.body.classList.add('fut-on');
-  list.classList.add('fut-menu');
-  list.classList.toggle('fut-mode-compact', mode === 'compact');
-  list.classList.toggle('fut-mode-side', mode === 'side');
+  list.classList.toggle('fut-menu', roomy);
 
   const byId = new Map((o.snapshot?.bodies ?? []).map((b) => [b.id, b]));
   const view = { fleet: o.settings.showFleet === true, t: o.t };
   list.style.removeProperty('--fut-row-h');
 
   const gameTips = o.settings.gameTips !== false;
-  for (const entry of o.entries) {
+  for (const entry of roomy ? o.entries : []) {
     setGameTip(entry.planetLink, gameTips);
     setGameTip(entry.moonLink, gameTips);
     entry.element.classList.add('fut-row');
@@ -610,7 +602,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
 
   startAgeClock(doc);
   const colonies = (doc.getElementById('countColonies')?.textContent ?? '').replace(/\s+/g, ' ').trim();
-  list.before(toolbar(o, colonies, roomy));
+  list.before(toolbar(o, colonies));
 
   if (o.snapshot && o.settings.showTotals) {
     // A small table: what the whole account holds now and makes in a day; MSU sums the three.
