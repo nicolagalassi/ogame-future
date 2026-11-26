@@ -194,8 +194,8 @@ export function prepareFleetsave(fd: FleetDispatcher, doc: Document, base: Fleet
 
 /**
  * Planner delivery: brings what is still missing to the planned body, from this one. The ships
- * reserve does not apply (Nicola: a transport for the plan may use every cargo ship); the resources
- * rule does, and so do the resources held for this body's own levels queued in the game (`hold`).
+ * reserve applies, as in every mission but the expedition and the fleetsave (Nicola, 2026-11-26);
+ * so do the resources rule and the resources held for this body's own levels queued in the game (`hold`).
  * The main cargo ship goes first, the second covers the rest.
  */
 export function prepareDelivery(
@@ -208,7 +208,7 @@ export function prepareDelivery(
   hold: Resources = { metal: 0, crystal: 0, deuterium: 0 },
 ): PrepareResult {
   const r = base.reserve.resources;
-  const profile: FleetProfile = { ...base, reserve: { ships: {}, resources: { ...r, metal: r.metal + hold.metal, crystal: r.crystal + hold.crystal, deuterium: r.deuterium + hold.deuterium } } };
+  const profile: FleetProfile = { ...base, reserve: { ships: base.reserve.ships, resources: { ...r, metal: r.metal + hold.metal, crystal: r.crystal + hold.crystal, deuterium: r.deuterium + hold.deuterium } } };
   const free = deliveryLoad(onPlanet(fd), profile.reserve, 0, Number.MAX_SAFE_INTEGER, need);
   const amount = free.metal + free.crystal + free.deuterium;
   if (amount <= 0) return { ok: false, reason: 'fleet.err.noResources', ships: 0, cargo: 0 };
@@ -304,8 +304,8 @@ function playerSelection(fd: FleetDispatcher): Record<number, number> | null {
 /**
  * Plain Trasporto / Schiera towards any coordinates, with the resources the player picked and
  * the cargo ship the player chose (CL / CP): as many of it as the resources need, after what the
- * ships already picked by hand can carry. Ships picked by hand stay. No reserve: that is what the
- * collection is for.
+ * ships already picked by hand can carry. Ships picked by hand stay (the player chose them). The ships
+ * reserve applies to the cargo ships Future adds (`keep`, Nicola 2026-11-26); the resources are the ones picked.
  */
 export function prepareSend(
   fd: FleetDispatcher,
@@ -315,6 +315,7 @@ export function prepareSend(
   pick: ResourcePick,
   mission: 'transport' | 'deploy',
   cargoShip: number,
+  keep: Record<string, number> = {},
 ): PrepareResult & { missing: number } {
   const here = onPlanet(fd);
   const wanted = pickedLoad(here, pick, 0, Number.MAX_SAFE_INTEGER);
@@ -323,7 +324,7 @@ export function prepareSend(
   const already = manual[cargoShip] ?? 0;
   delete manual[cargoShip];
   const othersCapacity = Object.entries(manual).reduce((sum, [id, n]) => sum + n * shipCapacity(fd, Number(id)), 0);
-  const available = shipsOnPlanet(fd)[String(cargoShip)] ?? 0;
+  const available = Math.max(0, (shipsOnPlanet(fd)[String(cargoShip)] ?? 0) - (keep[String(cargoShip)] ?? 0));
   const capacity = shipCapacity(fd, cargoShip);
   if (!available && !Object.keys(manual).length) return { ok: false, reason: 'fleet.err.noCargoShip', ships: 0, cargo: 0, missing: 0 };
   if (mission === 'transport' && amount <= 0) return { ok: false, reason: 'fleet.err.nothingPicked', ships: 0, cargo: 0, missing: 0 };

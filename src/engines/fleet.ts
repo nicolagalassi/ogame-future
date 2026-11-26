@@ -248,7 +248,8 @@ export const DEFAULT_SETTINGS: FleetSettings = {
   resourcesOn: true,
   gateOn: true,
   ignoreFood: false,
-  collectIgnoreShips: true,
+  // Off (Nicola, 2026-11-26): the ships reserve holds in every mission but the expedition and the fleetsave.
+  collectIgnoreShips: false,
   collectDeployRes: true,
   loadOrder: ['deuterium', 'crystal', 'metal'],
   sendMode: null,
