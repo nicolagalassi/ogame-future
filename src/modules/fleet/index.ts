@@ -732,6 +732,34 @@ function addInvertButtons(o: FleetOptions): void {
   }
 }
 
+/**
+ * The game's orange "select all ships": right after it, the ships reserve (when switched on) is taken
+ * back out of the selection, as in Future's own actions. Not during an expedition or a fleetsave round
+ * (the expedition keeps no reserve, the fleetsave has its own). Nicola, 2026-11-26.
+ * COMPLIANCE: only the game's ship fields change, as the invert buttons do; nothing is sent.
+ */
+function keepReserveOnSelectAll(o: FleetOptions): void {
+  const { doc } = o;
+  const root = doc.documentElement;
+  if (root.dataset.futSendAll) return;
+  root.dataset.futSendAll = '1';
+  doc.addEventListener('click', (e) => {
+    const b = (e.target as Element | null)?.closest?.('#sendall, a.send_all');
+    if (!b || !b.closest('#fleetdispatchcomponent, #fleet1')) return;
+    // After the game's own handler has filled every field.
+    (doc.defaultView ?? globalThis).setTimeout(() => {
+      const current = pageState.get(doc)?.o ?? o;
+      const mode = pageState.get(doc)?.active?.mode;
+      if (mode === 'expedition' || mode === 'fleetsave') return;
+      const keep = activeProfile(profileFor(loadProfiles(current.store), current.bodyId), loadSettings(current.store)).reserve.ships;
+      for (const slot of readShipSlots(doc)) {
+        const k = keep[slot.id] ?? 0;
+        if (k > 0) typeInto(slot.input, Math.max(0, slot.available - k) || '');
+      }
+    }, 0);
+  });
+}
+
 /** Shows `menu` under `anchor`, on <body> with fixed position, and closes it on a click away or a page scroll. */
 function popup(doc: Document, anchor: HTMLElement, menu: HTMLElement): void {
   doc.querySelectorAll('.fut-fmenu').forEach((n) => n.remove());
@@ -1561,6 +1589,7 @@ export function renderFleetTools(o: FleetOptions): void {
     if (below) below.before(strip);
     else anchor1.after(strip);
     addInvertButtons(o);
+    keepReserveOnSelectAll(o);
   }
 
   // No ships on this planet or moon: the game draws no ship list, so there is no action bar. The switch

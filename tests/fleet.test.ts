@@ -1019,3 +1019,39 @@ describe('ships reserve in the plain Trasporto / Schiera', () => {
     expect(r).toMatchObject({ ok: true, ships: 20, missing: 80 });
   });
 });
+
+describe("the game's select-all ships", () => {
+  const setup = async (href: string) => {
+    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    // A page of its own: Future keeps its state per page, as each game page is a new document.
+    const page = fleetPage();
+    const doc = document.implementation.createHTMLDocument();
+    doc.head.innerHTML = page.head.innerHTML;
+    doc.body.innerHTML = page.body.innerHTML;
+    doc.getElementById('fleet1')!.insertAdjacentHTML('beforeend', '<div id="allornone"><a id="sendall"></a></div>');
+    // The game's own handler: every field to all the ships there are.
+    doc.getElementById('sendall')!.addEventListener('click', () => {
+      for (const li of doc.querySelectorAll<HTMLElement>('#technologies li')) li.querySelector('input')!.value = li.querySelector<HTMLElement>('.amount')!.dataset.value!;
+    });
+    const store = new Store(new MemoryStore(), `all-${href.length}`);
+    store.set('fleet.profiles', { 1: { reserve: { ships: { '203': 1000 }, resources: { metal: 0, crystal: 0, deuterium: 0 } } } });
+    renderFleetTools({ doc, store, bodyId: 1, bodies: [{ planetId: 1, moonId: null, name: 'Casa', coords: '5:185:8' }], t: (k: string) => k, locale: 'en', href });
+    return { doc, store };
+  };
+  const field = (doc: Document, id: string) => doc.querySelector<HTMLInputElement>(`li[data-technology="${id}"] input`)!.value;
+
+  it('takes the ships reserve back out of the selection', async () => {
+    const { doc } = await setup('https://x/game/index.php?page=ingame&component=fleetdispatch');
+    doc.getElementById('sendall')!.click();
+    await new Promise((r) => setTimeout(r, 5));
+    expect(field(doc, '203')).toBe('4000');
+    expect(field(doc, '210')).toBe('3');
+  });
+
+  it('not during an expedition round', async () => {
+    const { doc } = await setup('https://x/game/index.php?page=ingame&component=fleetdispatch&futmode=expedition&futfirst=1');
+    doc.getElementById('sendall')!.click();
+    await new Promise((r) => setTimeout(r, 5));
+    expect(field(doc, '203')).toBe('5000');
+  });
+});

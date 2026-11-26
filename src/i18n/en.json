@@ -567,7 +567,7 @@
   "fleet.rule.ships": "Ships",
   "fleet.rule.resources": "Resources",
   "fleet.rule.gate": "Jump gate",
-  "fleet.rule.shipsHint": "Ships that stay on the body with To moon, Transport, Deploy, Collection, Last and Bring the resources here. Expeditions do not use it; the fleetsave has its own.",
+  "fleet.rule.shipsHint": "Ships that stay on the body with To moon, Transport, Deploy, Collection, Last, Bring the resources here and the game's select-all-ships button. Expeditions do not use it; the fleetsave has its own.",
   "fleet.rule.resourcesHint": "Resources that stay here with To moon, Transport, Deploy, Bring resources and Resources − reserve.",
   "fleet.rule.gateHint": "Ships that stay on the moon when you use the game's jump gate.",
   "fleet.rule.saveShips": "Ships to keep",

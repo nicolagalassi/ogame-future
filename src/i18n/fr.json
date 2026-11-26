@@ -567,7 +567,7 @@
   "fleet.rule.ships": "Vaisseaux",
   "fleet.rule.resources": "Ressources",
   "fleet.rule.gate": "Porte de saut",
-  "fleet.rule.shipsHint": "Vaisseaux qui restent sur le corps avec Vers lune, Transport, Stationner, Collecte, Dernière et Apporter les ressources ici. L'expédition ne l'utilise pas ; le fleetsave a la sienne.",
+  "fleet.rule.shipsHint": "Vaisseaux qui restent sur le corps avec Vers lune, Transport, Stationner, Collecte, Dernière, Apporter les ressources ici et le bouton du jeu qui sélectionne tous les vaisseaux. L'expédition ne l'utilise pas ; le fleetsave a la sienne.",
   "fleet.rule.resourcesHint": "Ressources qui restent ici avec Vers lune, Transport, Stationner, Apporter les ressources et Ressources − réserve.",
   "fleet.rule.gateHint": "Vaisseaux qui restent sur la lune quand tu utilises la porte de saut du jeu.",
   "fleet.rule.saveShips": "Vaisseaux à garder",
