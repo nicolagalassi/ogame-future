@@ -1683,12 +1683,16 @@ export function renderFleetTools(o: FleetOptions): void {
     // The cargo room of the ships picked now (recyclers included), counted as the player types.
     const cap = el(doc, 'span', 'fut-fcap');
     cap.setAttribute('role', 'status');
-    stripRow.append(rules, cap, rulesTool);
-    watchSelectedCargo(o);
-    strip.append(stripRow, rulesOut.box);
+    stripRow.append(rules, rulesTool);
+    // The cargo room sits on the explanation's line, on the right: in the rules' row it pushed them onto two lines.
+    const foot = el(doc, 'div', 'fut-frow fut-ffoot');
+    foot.append(rulesOut.box, cap);
+    strip.append(stripRow, foot);
     const below = fleet1.querySelector('#allornone') ?? null;
     if (below) below.before(strip);
     else anchor1.after(strip);
+    // Once the strip is on the page: the first count shows ships already picked (Ripeti, Ultima…).
+    watchSelectedCargo(o);
     addInvertButtons(o);
     keepReserveOnSelectAll(o);
     markShipReserve(o, profile.reserve.ships);

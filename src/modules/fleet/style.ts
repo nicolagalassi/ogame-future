@@ -162,7 +162,9 @@ export const FLEET_CSS = `
 /* Ships reserve on a ship tile (page 1): how many stay here, bottom left over the picture. */
 #fleet1 #technologies li .fut-fkeep { position: absolute; left: 2px; bottom: 24px; z-index: 2; padding: 0 4px; border-radius: 3px; background: rgba(13, 21, 34, 0.88); color: #F5B547; font: 700 10px/14px Verdana, Arial, sans-serif; pointer-events: auto; cursor: help; }
 /* Cargo room of the ships picked, in the reserves strip. */
-.fut-fcap { margin-left: auto; color: var(--hi); font: 700 12px Verdana, Arial, sans-serif; white-space: nowrap; }
+.fut-fcap { flex: none; margin-left: auto; padding-left: 12px; color: var(--hi); font: 700 12px Verdana, Arial, sans-serif; white-space: nowrap; }
+.fut-fcap:empty { display: none; }
+.fut-ffoot { align-items: center; }
 /* Resources reserve next to the game's resource field (page 2). */
 .fut-fkeepres { display: inline-block; margin-left: 6px; padding: 0 4px; border-radius: 3px; background: rgba(13, 21, 34, 0.88); color: #F5B547; font: 700 10px/16px Verdana, Arial, sans-serif; white-space: nowrap; cursor: help; }
 /* CL / CP: the game's ship pictures, short name in the corner, cargo needed along the bottom. */
