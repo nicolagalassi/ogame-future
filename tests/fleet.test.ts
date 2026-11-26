@@ -1181,3 +1181,27 @@ describe('speed bar on Firefox for Android', () => {
     expect(seen).toEqual([430, undefined]);
   });
 });
+
+describe('speed question on a phone', () => {
+  it('rides on the touch bar, and Sì answers it there', async () => {
+    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    const { resetShortcuts, TOUCH_KEY } = await import('../src/modules/shortcuts');
+    resetShortcuts();
+    const doc = document.implementation.createHTMLDocument();
+    doc.body.innerHTML = '<div id="fleetdispatchcomponent"><div id="fleet1" style="display:none"></div><div id="fleet2"><div id="speedPercentage"></div><div id="buttonz"></div><a id="sendFleet"></a></div></div>';
+    (window as unknown as { fleetDispatcher: unknown }).fleetDispatcher = fakeDispatcher({ speedPercent: 4 });
+    const store = new Store(new MemoryStore(), 'asktouch');
+    store.set('fleet.settings', { repeat: true });
+    store.set(TOUCH_KEY, 'on');
+    const bodies = [{ planetId: 1, moonId: null, name: 'Casa', coords: '5:185:8' }, { planetId: 2, moonId: null, name: 'Colonia', coords: '5:186:8' }];
+    renderFleetTools({ doc, store, bodyId: 1, bodies, t: (k: string, v?: Record<string, string | number>) => (v ? `${k}:${Object.values(v).join('|')}` : k), locale: 'en', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch&futmode=fleetsave&futfirst=1&futspeed=30' });
+    await Promise.resolve();
+    doc.getElementById('speedPercentage')!.click();
+    await new Promise((r) => setTimeout(r, 5));
+    const note = doc.querySelector<HTMLElement>('#fut-touchbar > .note')!;
+    expect(note.querySelector('.q')?.textContent).toContain('40');
+    expect(doc.querySelector<HTMLElement>('#fleet2 .fut-faskbar')!.hidden).toBe(true);
+    note.querySelector<HTMLButtonElement>('button.yes')!.click();
+    expect(note.querySelector('.q')?.textContent).toContain('fleet.speedAsk.done');
+  });
+});
