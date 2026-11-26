@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.162
+// @version      0.3.163
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -11017,6 +11017,8 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
 #${TOUCH_ID} button[data-tone]:active { background: color-mix(in srgb, var(--tone) 26%, var(--surface)); }
 @media (pointer: coarse) { #${TOUCH_ID} button.named:has(.k) .fut-tb-glyph { margin: 0; } }
 #${TOUCH_ID}[data-page="fleet2"] button.fleet, #${TOUCH_ID}[data-page="fleet2"] .sep.fleet { display: none; }
+/* Future's settings: the same key shape, kept apart at the right end. */
+#${TOUCH_ID} .gear { margin-left: auto; box-shadow: inset 0 0 0 1px var(--line-strong); }
 /* The one primary action: pawn yellow. Not ready: struck through in quiet grey on an outline, as every disabled button. */
 #${TOUCH_ID} .send { width: auto; min-width: 88px; padding: 0 12px; gap: 6px; background: var(--accent); color: var(--on-accent); font-size: 14px; }
 #${TOUCH_ID} .send:active { background: var(--accent-hi); color: var(--on-accent); }
@@ -11042,6 +11044,11 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
     notes.set(doc, node);
     bar.append(node);
     return true;
+  }
+  var openSettingsFromBar = null;
+  function setTouchSettings(doc, open2) {
+    openSettingsFromBar = open2;
+    if (current?.doc === doc) scheduleTouchBar();
   }
   var queued = false;
   function scheduleTouchBar() {
@@ -11073,7 +11080,7 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
     for (const def of ACTIONS) {
       const run = runs.get(def.id);
       if (!run || def.keysOnly) continue;
-      if (def.group === "planet" && doc.getElementById("fleetdispatchcomponent")) continue;
+      if (def.group === "planet" && (doc.getElementById("fleetdispatchcomponent") || runs.has("galaxy.left"))) continue;
       if (group && group !== def.group) {
         const sep = doc.createElement("span");
         sep.className = `sep ${def.group}`;
@@ -11137,6 +11144,20 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
       });
       new MutationObserver(sync).observe(fleet, { attributes: true, subtree: true, attributeFilter: ["style", "class", "disabled"] });
       bar.append(send);
+    } else if (openSettingsFromBar) {
+      const open2 = openSettingsFromBar;
+      const gear = doc.createElement("button");
+      gear.type = "button";
+      gear.className = "gear";
+      gear.title = t("toolbar.settings");
+      gear.setAttribute("aria-label", t("toolbar.settings"));
+      gear.setAttribute("aria-haspopup", "dialog");
+      gear.append(glyph(doc, { glyph: { fleet: "settings" } }, 22));
+      gear.addEventListener("click", (e) => {
+        e.preventDefault();
+        open2();
+      });
+      bar.append(gear);
     }
     if (!keys.childElementCount && !fleet) return;
     const note = notes.get(doc);
@@ -19399,6 +19420,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
     onSideNavigate(highlightPosition);
     restoreSide(side);
     registerActions(document, store, t, { "targets.next": () => void nextInSide(document) });
+    setTouchSettings(document, () => openFutureSettings());
     const pageMeta = (name) => document.querySelector(`meta[name="${name}"]`)?.getAttribute("content") ?? "";
     const reminders = { doc: document, store, t, locale, offset: clockOffset(document, Date.now()) };
     startReminders(reminders);
