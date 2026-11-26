@@ -4,7 +4,7 @@
  * The game positions everything absolutely with its own rules, so ours use two ids
  * plus !important on layout properties to win reliably.
  */
-import { RES_COLORS, WINDOW_TOKENS } from '../../core/sheet';
+import { RES_COLORS, STATE_COLORS, WINDOW_TOKENS } from '../../core/sheet';
 /** Width of the side-by-side menu (tolerated OGLight uses 208px; ours is a bit wider for larger text). */
 export const MENU_WIDTH = 225;
 /** Native width of the planet column (#rechts) in OGame 13. */
@@ -129,6 +129,21 @@ ${L} .fut-fleet svg, ${L} .fut-fleet-peek svg { flex: none; }
   ${L} .fut-name .planet-koords { line-height: 12px !important; }
 }
 ${L} .fut-fleet-m { display: inline-flex; align-items: center; gap: 2px; color: #D8A0A0; }
+/* Third line under name and coordinates: the fleet's worth (touch screens) and the fleets in flight. */
+${L} .fut-line3 { display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; }
+${L} .fut-line3 .fut-fleet { flex: none; margin-top: 0; }
+/* Fleets in flight from or to this row: the mission's glyph in its colour (expedition blue, transport and
+   deploy green, the rest silver), the way (→ leaving, ← coming back, ↓ arriving here), how many when more
+   than one; the moon's after a moon mark. Details in the tooltip. */
+${L} .fut-flights { display: flex; align-items: center; gap: 4px; min-width: 0; margin-top: 1px; font: 600 11px/12px var(--display); white-space: nowrap; }
+${L} .fut-fl { display: inline-flex; align-items: center; gap: 1px; color: var(--tone, var(--text-2)); }
+${L} .fut-fl svg { flex: none; }
+${L} .fut-fl .w { font: 700 13px/11px Arial, sans-serif; }
+${L} .fut-fl .n { color: var(--text); font-variant-numeric: tabular-nums; }
+${L} .fut-fl-moon { display: inline-flex; margin-left: 2px; color: var(--muted); }
+${L} .fut-fl-moon svg { width: 9px; height: 9px; }
+${L} .fut-has-flights .fut-name .planet-name { font-size: 13px !important; line-height: 13px !important; }
+${L} .fut-has-flights .fut-name .planet-koords { line-height: 12px !important; }
 ${L} .fut-fleet-m svg { flex: none; opacity: 0.8; }
 .fut-totals .fut-fleetrow .fut-tname { color: var(--old); }
 .fut-totals .fut-flyrow, .fut-totals .fut-flyrow .fut-tname, .fut-totals .fut-flyrow .fut-tlabel { color: var(--muted); font-size: 0.92em; }
@@ -148,6 +163,21 @@ ${L} a.moonlink .planetBarSpaceObjectContainer {
 ${L} a.moonlink img.icon-moon { position: static !important; width: 16px !important; height: 16px !important; margin: 0 !important; }
 ${L} a.moonlink .fut-res { width: 32px; }
 ${L} .fut-nomoon { flex-shrink: 0; width: ${MOON_W}px; border-left: 1px solid var(--line); background: var(--surface); }
+
+/* An enemy landing here (data/events): the planet or moon tile lights up red, as OGLight does; an attack
+   strongly, an espionage a little softer. Sword or eye over the skin, the time in its tooltip. Both layouts. */
+#planetbarcomponent #planetList a.fut-attack, #planetbarcomponent #planetList a.fut-spy { position: relative; }
+#planetbarcomponent #planetList a.fut-attack {
+  background: rgba(239, 106, 96, 0.24) !important; box-shadow: inset 0 0 0 2px ${STATE_COLORS.bad}, inset 0 0 18px rgba(239, 106, 96, 0.6) !important; }
+#planetbarcomponent #planetList a.fut-spy {
+  background: rgba(239, 106, 96, 0.14) !important; box-shadow: inset 0 0 0 2px rgba(239, 106, 96, 0.85), inset 0 0 12px rgba(239, 106, 96, 0.35) !important; }
+#planetbarcomponent #planetList a.active.fut-attack, #planetbarcomponent #planetList a.active.fut-spy {
+  box-shadow: inset 0 0 0 2px ${STATE_COLORS.bad}, inset 4px 0 0 var(--accent), inset 0 0 18px rgba(239, 106, 96, 0.6) !important; }
+#planetbarcomponent .fut-threat {
+  position: absolute; left: 5px; top: calc(50% - 8px); z-index: 3; display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; border-radius: 50%; background: ${STATE_COLORS.bad}; color: #1A0505; box-shadow: 0 0 6px rgba(239, 106, 96, 0.9); pointer-events: auto; }
+#planetbarcomponent .fut-threat svg { width: 11px; height: 11px; stroke-width: 2.4; }
+#planetbarcomponent a.moonlink .fut-threat { left: 3px; top: 6px; }
 
 /* Skin that failed to load (game CDN 502): a plain sphere keeps the row's shape. */
 ${L} img.fut-noskin { visibility: hidden; }

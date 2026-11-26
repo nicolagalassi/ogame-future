@@ -970,5 +970,15 @@
   "settings.section.bodies": "Planètes et lunes",
   "fleet.bodiesHint": "Réserves, porte de saut et fleetsave de chaque planète et lune. Touchez un corps pour changer ses règles ; les changements s’appliquent tout de suite.",
   "fleet.bodiesAll": "Tous les corps",
-  "fleet.rule.saveReserveOnly": "sans cible"
+  "fleet.rule.saveReserveOnly": "sans cible",
+  "threat.attack": "Attaque à {time}",
+  "threat.spy": "Espionnage à {time}",
+  "flights.out": "{mission} : {n} à l’aller, première arrivée {time}",
+  "flights.back": "{mission} : {n} au retour, premier à {time}",
+  "flights.in": "{mission} : {n} arrive ici à {time}",
+  "flights.moon": "Lune :",
+  "mission.2": "Attaque groupée",
+  "mission.7": "Coloniser",
+  "mission.9": "Détruire la lune",
+  "mission.18": "Exploration"
 }

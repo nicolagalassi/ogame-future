@@ -970,5 +970,15 @@
   "settings.section.bodies": "Planets and moons",
   "fleet.bodiesHint": "Reserves, jump gate and fleetsave of every planet and moon. Tap a body to change its rules; changes apply at once.",
   "fleet.bodiesAll": "All bodies",
-  "fleet.rule.saveReserveOnly": "no target"
+  "fleet.rule.saveReserveOnly": "no target",
+  "threat.attack": "Attack landing at {time}",
+  "threat.spy": "Espionage landing at {time}",
+  "flights.out": "{mission}: {n} outbound, first arrives {time}",
+  "flights.back": "{mission}: {n} returning, first at {time}",
+  "flights.in": "{mission}: {n} arriving here at {time}",
+  "flights.moon": "Moon:",
+  "mission.2": "ACS attack",
+  "mission.7": "Colonisation",
+  "mission.9": "Moon destruction",
+  "mission.18": "Discovery"
 }

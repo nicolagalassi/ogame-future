@@ -61,7 +61,8 @@ describe('renderPlanetMenu', () => {
     once();
     const fleets = document.querySelectorAll('#planet-1 .fut-fleet');
     expect(fleets).toHaveLength(1);
-    expect(fleets[0]!.parentElement!.classList.contains('fut-name')).toBe(true);
+    // In the third line of the name column, which it shares with the fleets in flight.
+    expect(fleets[0]!.parentElement!.parentElement!.classList.contains('fut-name')).toBe(true);
     // The moon keeps its own fleet in its tile, shown on hover in place of the figures; one after a redraw too.
     const peeks = document.querySelectorAll('#planet-1 a.moonlink .fut-fleet-peek');
     expect(peeks).toHaveLength(1);
@@ -337,5 +338,32 @@ describe('the moon fleet, away from the pointer', () => {
     Object.defineProperty(document.querySelector('#planet-1 a.planetlink')!, 'offsetWidth', { value: 148 });
     moon.dispatchEvent(new MouseEvent('mouseenter'));
     expect(peek.style.getPropertyValue('--fut-peek-w')).toBe('148px');
+  });
+});
+
+describe('fleets in flight on the planet menu', () => {
+  it('lights up a planet or moon an enemy lands on, and lists own fleets per row with their way and count', () => {
+    const entries = readPlanetList(document);
+    const e = entries.find((x) => x.moonId)!;
+    const events = new Map([
+      [`${e.coords}|m`, { attack: 5_000, spy: null, own: [] }],
+      [`${e.coords}|p`, { attack: null, spy: 4_000, own: [
+        { mission: 15, way: 'out' as const, count: 2, first: 3_000 },
+        { mission: 3, way: 'back' as const, count: 1, first: 6_000 },
+      ] }],
+    ]);
+    renderPlanetMenu({ doc: document, entries, snapshot: SNAPSHOT, settings: { showTotals: true }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true), events });
+    expect(e.moonLink!.classList.contains('fut-attack')).toBe(true);
+    expect(e.planetLink!.classList.contains('fut-spy')).toBe(true);
+    expect(e.planetLink!.querySelector('.fut-threat')!.getAttribute('aria-label')).toMatch(/^Spionaggio in arrivo alle /);
+    const chips = [...e.element.querySelectorAll('.fut-flights .fut-fl')];
+    expect(chips.map((c) => c.textContent)).toEqual(['→2', '←']);
+    // Expedition in its colour (blue), the transport in Accentra's green.
+    expect((chips[0] as HTMLElement).style.getPropertyValue('--tone').toUpperCase()).toBe('#4AA3FF');
+    // Gone once nothing is landing: the next drawing clears the red.
+    renderPlanetMenu({ doc: document, entries, snapshot: SNAPSHOT, settings: { showTotals: true }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true), events: new Map() });
+    expect(e.moonLink!.classList.contains('fut-attack')).toBe(false);
+    expect(e.planetLink!.querySelector('.fut-threat')).toBeNull();
+    expect(e.element.querySelector('.fut-flights')).toBeNull();
   });
 });
