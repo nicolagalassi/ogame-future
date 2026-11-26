@@ -311,6 +311,34 @@ function place(msg: Element, box: HTMLElement): void {
 }
 
 /** Reads and summarises every report on the page not done yet. Returns new journal entries. */
+/**
+ * The game's «API» button of a report: one click copies the report's API key, without opening the
+ * tooltip and selecting it by hand (Nicola). The button is the one whose tooltip carries the key (or
+ * marked as the API one). COMPLIANCE: the browser clipboard, on the player's click; nothing is sent.
+ */
+export function apiButton(msg: Element, key: string): HTMLElement | null {
+  const tip = (b: Element) => `${b.getAttribute('title') ?? ''} ${b.getAttribute('data-tooltip-title') ?? ''} ${b.getAttribute('data-title') ?? ''}`;
+  const all = Array.from(msg.querySelectorAll<HTMLElement>('button, a'));
+  return all.find((b) => tip(b).includes(key)) ?? all.find((b) => /api/i.test(b.className) || b.textContent?.trim() === 'API') ?? null;
+}
+
+function copyApiOnClick(doc: Document, msg: Element, key: string, t: (k: string, v?: Record<string, string | number>) => string): void {
+  const b = apiButton(msg, key);
+  if (!b || b.dataset.futApi) return;
+  b.dataset.futApi = '1';
+  b.addEventListener('click', (e) => {
+    e.preventDefault();
+    const done = (ok: boolean) => {
+      b.setAttribute('aria-label', t(ok ? 'msg.apiCopied' : 'msg.apiCopyFailed'));
+      b.classList.toggle('fut-api-copied', ok);
+      (doc.defaultView ?? globalThis).setTimeout(() => b.classList.remove('fut-api-copied'), 1500);
+    };
+    const clip = doc.defaultView?.navigator?.clipboard;
+    if (clip?.writeText) clip.writeText(key).then(() => done(true), () => done(false));
+    else done(false);
+  });
+}
+
 export function processMessages(o: MessagesOptions): number {
   const { doc, store, t, locale } = o;
   const ships = store.get<ShipsInfo>(SHIPS_INFO_KEY, {});
@@ -346,6 +374,7 @@ export function processMessages(o: MessagesOptions): number {
     msg.setAttribute('data-fut-done', '');
     const parsed = readMessage(msg, o.playerId);
     if (!parsed) continue;
+    if (parsed.kind === 'spy' && parsed.apiKey) copyApiOnClick(doc, msg, parsed.apiKey, t);
     if (parsed.kind === 'expedition') msg.setAttribute('data-fut-kind', 'expedition');
     const silent = parsed.kind === 'expedition' && silentNow(msg);
     if (silent) msg.setAttribute('data-fut-quiet', '');

@@ -954,5 +954,12 @@
   "ping.hint": "Il server ha risposto in {ms} ms; la pagina si è caricata in {s} s. Misurato al caricamento di questa pagina: un invio fatto ora arriva al server con un ritardo simile.",
   "ping.hintShort": "Il server ha risposto in {ms} ms. Misurato al caricamento di questa pagina.",
   "fleet.send.allBtn": "Tutto",
-  "fleet.send.allHint": "Tutte le risorse di questo pianeta o luna (il carburante del volo resta a casa)"
+  "fleet.send.allHint": "Tutte le risorse di questo pianeta o luna (il carburante del volo resta a casa)",
+  "msg.apiCopied": "API copiata",
+  "msg.apiCopyFailed": "Impossibile copiare l'API: il browser non lo permette",
+  "fleet.keepShips": "Riserva navi: {n} restano su questo corpo (non vale per spedizione e fleetsave)",
+  "fleet.keepRes": "riserva {n}",
+  "fleet.keepResHint": "Riserva risorse: {n} restano su questo corpo (non vale per spedizione e fleetsave)",
+  "fleet.cargoPicked": "Stiva {n}",
+  "fleet.cargoPickedHint": "Stiva delle navi selezionate: {n}"
 }

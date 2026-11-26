@@ -954,5 +954,12 @@
   "ping.hint": "The server answered in {ms} ms; the page loaded in {s} s. Measured when this page loaded: a send made now reaches the server with a similar delay.",
   "ping.hintShort": "The server answered in {ms} ms. Measured when this page loaded.",
   "fleet.send.allBtn": "All",
-  "fleet.send.allHint": "Every resource on this planet or moon (the flight fuel stays home)"
+  "fleet.send.allHint": "Every resource on this planet or moon (the flight fuel stays home)",
+  "msg.apiCopied": "API copied",
+  "msg.apiCopyFailed": "Could not copy the API: the browser does not allow it",
+  "fleet.keepShips": "Ships reserve: {n} stay on this body (not for expeditions and the fleetsave)",
+  "fleet.keepRes": "reserve {n}",
+  "fleet.keepResHint": "Resources reserve: {n} stay on this body (not for expeditions and the fleetsave)",
+  "fleet.cargoPicked": "Cargo {n}",
+  "fleet.cargoPickedHint": "Cargo room of the ships picked: {n}"
 }

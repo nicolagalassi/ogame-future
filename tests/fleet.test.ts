@@ -1098,3 +1098,36 @@ describe('resources reserve in the plain Trasporto', () => {
     expect([fd.cargoMetal, fd.cargoCrystal, fd.cargoDeuterium]).toEqual([50_000, 50_000, 14_000]);
   });
 });
+
+describe('what the reserves keep, and the cargo picked', () => {
+  it('page 1: the ships reserve on its ship, the cargo room of the ships typed in', async () => {
+    const { renderFleetTools, selectedCargo } = await import('../src/modules/fleet/index');
+    const page = fleetPage();
+    const doc = document.implementation.createHTMLDocument();
+    doc.head.innerHTML = page.head.innerHTML;
+    doc.body.innerHTML = page.body.innerHTML;
+    (window as unknown as { fleetDispatcher: unknown }).fleetDispatcher = fakeDispatcher();
+    const store = new Store(new MemoryStore(), 'keep1');
+    store.set('fleet.profiles', { 1: { reserve: { ships: { '203': 1000 }, resources: { metal: 0, crystal: 0, deuterium: 0 } } } });
+    renderFleetTools({ doc, store, bodyId: 1, bodies: [{ planetId: 1, moonId: null, name: 'Casa', coords: '5:185:8' }], t: (k: string, v?: Record<string, string | number>) => (v ? `${k}:${Object.values(v).join('|')}` : k), locale: 'en', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch' });
+    expect(doc.querySelector('li[data-technology="203"] .fut-fkeep')?.getAttribute('title')).toContain('1,000');
+    expect(doc.querySelector('li[data-technology="210"] .fut-fkeep')).toBeNull();
+    const input = doc.querySelector<HTMLInputElement>('li[data-technology="203"] input')!;
+    input.value = '10';
+    expect(selectedCargo(doc, (id) => (id === 203 ? 2000 : 0))).toBe(20_000);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 5));
+    expect(doc.querySelector('.fut-fcap')!.textContent).toContain('fleet.cargoPicked');
+  });
+
+  it('page 2: the resources reserve next to each field', async () => {
+    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    const doc = document.implementation.createHTMLDocument();
+    doc.body.innerHTML = '<div id="fleetdispatchcomponent"><div id="fleet2"><div id="buttonz"></div><div><input id="metal"></div><div><input id="crystal"></div><div><input id="deuterium"></div></div></div>';
+    const store = new Store(new MemoryStore(), 'keep2');
+    store.set('fleet.profiles', { 1: { reserve: { ships: {}, resources: { metal: 300_000_000, crystal: 0, deuterium: 0 } } } });
+    renderFleetTools({ doc, store, bodyId: 1, bodies: [], t: (k: string, v?: Record<string, string | number>) => (v ? `${k}:${Object.values(v).join('|')}` : k), locale: 'en', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch' });
+    expect(doc.querySelector('#metal + .fut-fkeepres')?.textContent).toContain('fleet.keepRes');
+    expect(doc.querySelector('#crystal + .fut-fkeepres')).toBeNull();
+  });
+});

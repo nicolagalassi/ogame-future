@@ -3,7 +3,7 @@ import { PAGE_TOKENS, WINDOW_TOKENS_NO_LINES } from '../../core/sheet';
 /** Styles for the action bars on the game's fleet page (scoped by fut- class names). */
 export const FLEET_CSS = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
-.fut-fbar, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fclear, .fut-fall, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
+.fut-fbar, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fclear, .fut-fall, .fut-fcap, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
 /* The fleet bar speaks the inbox's language: Verdana 11px, tabular numbers, one set of tokens. */
 .fut-fbar, .fut-fmenu {
   ${PAGE_TOKENS} --line: var(--line-strong); --line-soft: #1D2531;
@@ -159,6 +159,12 @@ export const FLEET_CSS = `
 /* «Tutto»: every resource here in the three fields, beside the eraser. */
 .fut-fall { height: 26px; padding: 0 10px; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--txt); font: 600 12px Verdana, Arial, sans-serif; cursor: pointer; }
 .fut-fall:hover { border-color: var(--line-hover); color: var(--hi); }
+/* Ships reserve on a ship tile (page 1): how many stay here, bottom left over the picture. */
+#fleet1 #technologies li .fut-fkeep { position: absolute; left: 2px; bottom: 24px; z-index: 2; padding: 0 4px; border-radius: 3px; background: rgba(13, 21, 34, 0.88); color: #F5B547; font: 700 10px/14px Verdana, Arial, sans-serif; pointer-events: auto; cursor: help; }
+/* Cargo room of the ships picked, in the reserves strip. */
+.fut-fcap { margin-left: auto; color: var(--hi); font: 700 12px Verdana, Arial, sans-serif; white-space: nowrap; }
+/* Resources reserve next to the game's resource field (page 2). */
+.fut-fkeepres { display: inline-block; margin-left: 6px; padding: 0 4px; border-radius: 3px; background: rgba(13, 21, 34, 0.88); color: #F5B547; font: 700 10px/16px Verdana, Arial, sans-serif; white-space: nowrap; cursor: help; }
 /* CL / CP: the game's ship pictures, short name in the corner, cargo needed along the bottom. */
 .fut-fcargo { grid-column: 3; grid-row: 1 / span 2; display: flex; align-items: center; gap: 4px; padding-left: 10px; border-left: 1px solid var(--line-soft); }
 .fut-fcl { position: relative; width: 48px; height: 48px; padding: 0; overflow: hidden; border: 1px solid var(--tile-line); border-radius: 6px; background: var(--tile); color: var(--hi); }

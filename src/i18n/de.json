@@ -954,5 +954,12 @@
   "ping.hint": "Der Server hat in {ms} ms geantwortet; die Seite war in {s} s geladen. Beim Laden dieser Seite gemessen: ein jetzt gesendeter Flug erreicht den Server mit ähnlicher Verzögerung.",
   "ping.hintShort": "Der Server hat in {ms} ms geantwortet. Beim Laden dieser Seite gemessen.",
   "fleet.send.allBtn": "Alles",
-  "fleet.send.allHint": "Alle Rohstoffe dieses Planeten oder Mondes (der Treibstoff des Flugs bleibt)"
+  "fleet.send.allHint": "Alle Rohstoffe dieses Planeten oder Mondes (der Treibstoff des Flugs bleibt)",
+  "msg.apiCopied": "API kopiert",
+  "msg.apiCopyFailed": "API konnte nicht kopiert werden: der Browser erlaubt es nicht",
+  "fleet.keepShips": "Schiffsreserve: {n} bleiben auf diesem Körper (nicht für Expeditionen und den Fleetsave)",
+  "fleet.keepRes": "Reserve {n}",
+  "fleet.keepResHint": "Rohstoffreserve: {n} bleiben auf diesem Körper (nicht für Expeditionen und den Fleetsave)",
+  "fleet.cargoPicked": "Laderaum {n}",
+  "fleet.cargoPickedHint": "Laderaum der gewählten Schiffe: {n}"
 }

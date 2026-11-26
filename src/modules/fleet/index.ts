@@ -760,6 +760,62 @@ function keepReserveOnSelectAll(o: FleetOptions): void {
   });
 }
 
+/** On each ship of page 1, how many the ships reserve keeps on this body (when its switch is on). */
+function markShipReserve(o: FleetOptions, keep: Record<string, number>): void {
+  const { doc, t } = o;
+  for (const slot of readShipSlots(doc)) {
+    const tile = slot.input.closest('li');
+    if (!tile) continue;
+    tile.querySelector('.fut-fkeep')?.remove();
+    const n = keep[slot.id] ?? 0;
+    if (n <= 0) continue;
+    const b = el(doc, 'span', 'fut-fkeep', `−${formatUnits(n, o.locale)}`);
+    b.title = t('fleet.keepShips', { n: n.toLocaleString(o.locale) });
+    tile.append(b);
+  }
+}
+
+/** Page 2: next to each of the game's resource fields, how much the resources reserve keeps here. */
+function markResourceReserve(o: FleetOptions, keep: Reserve['resources']): void {
+  const { doc, t } = o;
+  for (const k of ['metal', 'crystal', 'deuterium'] as const) {
+    const input = doc.querySelector<HTMLInputElement>(`#fleet2 input#${k}`);
+    if (!input) continue;
+    input.parentElement?.querySelector('.fut-fkeepres')?.remove();
+    if (keep[k] <= 0) continue;
+    const b = el(doc, 'span', 'fut-fkeepres', t('fleet.keepRes', { n: formatUnits(keep[k], o.locale) }));
+    b.title = t('fleet.keepResHint', { n: keep[k].toLocaleString(o.locale) });
+    input.after(b);
+  }
+}
+
+/** The cargo room of the ships picked on page 1, from the game's fields and its ship data. */
+export function selectedCargo(doc: Document, capacityOf: (id: number) => number): number {
+  return readShipSlots(doc).reduce((sum, s) => sum + Math.min(s.available, parseAmount(s.input.value) || 0) * capacityOf(Number(s.id)), 0);
+}
+
+function watchSelectedCargo(o: FleetOptions): void {
+  const { doc, t } = o;
+  const draw = () => {
+    const out = doc.querySelector<HTMLElement>('.fut-fcap');
+    const fd = getDispatcher();
+    if (!out) return;
+    const room = fd ? selectedCargo(doc, (id) => shipCapacityOf(fd, id)) : 0;
+    out.textContent = room > 0 ? t('fleet.cargoPicked', { n: formatUnits(room, o.locale) }) : '';
+    out.title = room > 0 ? t('fleet.cargoPickedHint', { n: room.toLocaleString(o.locale) }) : '';
+  };
+  draw();
+  const list = doc.querySelector('#fleet1 #technologies');
+  if (!list || (list as HTMLElement).dataset.futCap) return;
+  (list as HTMLElement).dataset.futCap = '1';
+  // After the game's own handler (its max and select-all buttons too).
+  const later = () => (doc.defaultView ?? globalThis).setTimeout(draw, 0);
+  for (const type of ['input', 'keyup', 'change', 'click']) list.addEventListener(type, later);
+  doc.addEventListener('click', (e) => {
+    if ((e.target as Element | null)?.closest?.('#sendall, a.send_all, #resetall, a.reset_all')) later();
+  });
+}
+
 /** What may leave of each resource with the reserve kept home (deuterium also keeps the flight's fuel). */
 export function cappedByReserve(loaded: Reserve['resources'], onPlanet: Reserve['resources'], keep: Reserve['resources'], fuel: number): Reserve['resources'] {
   const cap = (k: keyof Reserve['resources']) => Math.max(0, Math.min(loaded[k], Math.floor(onPlanet[k] - keep[k] - (k === 'deuterium' ? fuel : 0))));
@@ -1624,13 +1680,18 @@ export function renderFleetTools(o: FleetOptions): void {
     // different question from what to send. Same cleanup as the bar (class fut-fbar).
     const strip = el(doc, 'div', 'fut-fbar fut-freserves');
     const stripRow = el(doc, 'div', 'fut-frow');
-    stripRow.append(rules, rulesTool);
+    // The cargo room of the ships picked now (recyclers included), counted as the player types.
+    const cap = el(doc, 'span', 'fut-fcap');
+    cap.setAttribute('role', 'status');
+    stripRow.append(rules, cap, rulesTool);
+    watchSelectedCargo(o);
     strip.append(stripRow, rulesOut.box);
     const below = fleet1.querySelector('#allornone') ?? null;
     if (below) below.before(strip);
     else anchor1.after(strip);
     addInvertButtons(o);
     keepReserveOnSelectAll(o);
+    markShipReserve(o, profile.reserve.ships);
   }
 
   // No ships on this planet or moon: the game draws no ship list, so there is no action bar. The switch
@@ -1659,7 +1720,10 @@ export function renderFleetTools(o: FleetOptions): void {
   }
 
   // The game's "all resources" keeps the resources reserve home (page 2; listened on the page once).
-  if (fleet2) keepReserveOnLoadAll(o);
+  if (fleet2) {
+    keepReserveOnLoadAll(o);
+    markResourceReserve(o, profile.reserve.resources);
+  }
 
   if (fleet2 && anchor2) {
     // Page 2 has nothing of Future's own to offer (the resources are chosen on page 1, Nicola): the bar

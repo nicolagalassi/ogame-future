@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.146
+// @version      0.3.147
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1463,7 +1463,14 @@
     "ping.hint": "Il server ha risposto in {ms} ms; la pagina si \xE8 caricata in {s} s. Misurato al caricamento di questa pagina: un invio fatto ora arriva al server con un ritardo simile.",
     "ping.hintShort": "Il server ha risposto in {ms} ms. Misurato al caricamento di questa pagina.",
     "fleet.send.allBtn": "Tutto",
-    "fleet.send.allHint": "Tutte le risorse di questo pianeta o luna (il carburante del volo resta a casa)"
+    "fleet.send.allHint": "Tutte le risorse di questo pianeta o luna (il carburante del volo resta a casa)",
+    "msg.apiCopied": "API copiata",
+    "msg.apiCopyFailed": "Impossibile copiare l'API: il browser non lo permette",
+    "fleet.keepShips": "Riserva navi: {n} restano su questo corpo (non vale per spedizione e fleetsave)",
+    "fleet.keepRes": "riserva {n}",
+    "fleet.keepResHint": "Riserva risorse: {n} restano su questo corpo (non vale per spedizione e fleetsave)",
+    "fleet.cargoPicked": "Stiva {n}",
+    "fleet.cargoPickedHint": "Stiva delle navi selezionate: {n}"
   };
 
   // src/i18n/en.json
@@ -2423,7 +2430,14 @@
     "ping.hint": "The server answered in {ms} ms; the page loaded in {s} s. Measured when this page loaded: a send made now reaches the server with a similar delay.",
     "ping.hintShort": "The server answered in {ms} ms. Measured when this page loaded.",
     "fleet.send.allBtn": "All",
-    "fleet.send.allHint": "Every resource on this planet or moon (the flight fuel stays home)"
+    "fleet.send.allHint": "Every resource on this planet or moon (the flight fuel stays home)",
+    "msg.apiCopied": "API copied",
+    "msg.apiCopyFailed": "Could not copy the API: the browser does not allow it",
+    "fleet.keepShips": "Ships reserve: {n} stay on this body (not for expeditions and the fleetsave)",
+    "fleet.keepRes": "reserve {n}",
+    "fleet.keepResHint": "Resources reserve: {n} stay on this body (not for expeditions and the fleetsave)",
+    "fleet.cargoPicked": "Cargo {n}",
+    "fleet.cargoPickedHint": "Cargo room of the ships picked: {n}"
   };
 
   // src/i18n/fr.json
@@ -3383,7 +3397,14 @@
     "ping.hint": "Le serveur a r\xE9pondu en {ms} ms ; la page s'est charg\xE9e en {s} s. Mesur\xE9 au chargement de cette page : un envoi fait maintenant arrive au serveur avec un retard semblable.",
     "ping.hintShort": "Le serveur a r\xE9pondu en {ms} ms. Mesur\xE9 au chargement de cette page.",
     "fleet.send.allBtn": "Tout",
-    "fleet.send.allHint": "Toutes les ressources de cette plan\xE8te ou lune (le carburant du vol reste)"
+    "fleet.send.allHint": "Toutes les ressources de cette plan\xE8te ou lune (le carburant du vol reste)",
+    "msg.apiCopied": "API copi\xE9e",
+    "msg.apiCopyFailed": "Impossible de copier l'API : le navigateur ne le permet pas",
+    "fleet.keepShips": "R\xE9serve de vaisseaux : {n} restent sur ce corps (pas pour l'exp\xE9dition et le fleetsave)",
+    "fleet.keepRes": "r\xE9serve {n}",
+    "fleet.keepResHint": "R\xE9serve de ressources : {n} restent sur ce corps (pas pour l'exp\xE9dition et le fleetsave)",
+    "fleet.cargoPicked": "Fret {n}",
+    "fleet.cargoPickedHint": "Capacit\xE9 de fret des vaisseaux choisis : {n}"
   };
 
   // src/i18n/de.json
@@ -4343,7 +4364,14 @@
     "ping.hint": "Der Server hat in {ms} ms geantwortet; die Seite war in {s} s geladen. Beim Laden dieser Seite gemessen: ein jetzt gesendeter Flug erreicht den Server mit \xE4hnlicher Verz\xF6gerung.",
     "ping.hintShort": "Der Server hat in {ms} ms geantwortet. Beim Laden dieser Seite gemessen.",
     "fleet.send.allBtn": "Alles",
-    "fleet.send.allHint": "Alle Rohstoffe dieses Planeten oder Mondes (der Treibstoff des Flugs bleibt)"
+    "fleet.send.allHint": "Alle Rohstoffe dieses Planeten oder Mondes (der Treibstoff des Flugs bleibt)",
+    "msg.apiCopied": "API kopiert",
+    "msg.apiCopyFailed": "API konnte nicht kopiert werden: der Browser erlaubt es nicht",
+    "fleet.keepShips": "Schiffsreserve: {n} bleiben auf diesem K\xF6rper (nicht f\xFCr Expeditionen und den Fleetsave)",
+    "fleet.keepRes": "Reserve {n}",
+    "fleet.keepResHint": "Rohstoffreserve: {n} bleiben auf diesem K\xF6rper (nicht f\xFCr Expeditionen und den Fleetsave)",
+    "fleet.cargoPicked": "Laderaum {n}",
+    "fleet.cargoPickedHint": "Laderaum der gew\xE4hlten Schiffe: {n}"
   };
 
   // src/core/i18n.ts
@@ -8222,6 +8250,9 @@ tr.on td { background: color-mix(in srgb, var(--accent) 10%, transparent); }
 td.spark-cell { width: 90px; }
 .spark { display: block; height: 7px; border-radius: 2px; background: var(--accent); opacity: 0.55; }
 @media (max-width: 640px) { .two { grid-template-columns: 1fr; } .hero-v { font-size: 28px; } .chart:not(.dense) .tot { font-size: 10px; } }
+
+/* The \xABAPI\xBB button right after a click copied the key: a green ring for a moment. */
+.msg .fut-api-copied { box-shadow: 0 0 0 2px #38C56E !important; border-radius: 4px; }
 `;
 
   // src/modules/messages/spy-table.ts
@@ -8892,6 +8923,27 @@ td.spark-cell { width: 90px; }
     if (actions?.parentElement) actions.before(box);
     else (msg.querySelector(".msgContent") ?? msg).after(box);
   }
+  function apiButton(msg, key) {
+    const tip = (b) => `${b.getAttribute("title") ?? ""} ${b.getAttribute("data-tooltip-title") ?? ""} ${b.getAttribute("data-title") ?? ""}`;
+    const all2 = Array.from(msg.querySelectorAll("button, a"));
+    return all2.find((b) => tip(b).includes(key)) ?? all2.find((b) => /api/i.test(b.className) || b.textContent?.trim() === "API") ?? null;
+  }
+  function copyApiOnClick(doc, msg, key, t) {
+    const b = apiButton(msg, key);
+    if (!b || b.dataset.futApi) return;
+    b.dataset.futApi = "1";
+    b.addEventListener("click", (e) => {
+      e.preventDefault();
+      const done = (ok) => {
+        b.setAttribute("aria-label", t(ok ? "msg.apiCopied" : "msg.apiCopyFailed"));
+        b.classList.toggle("fut-api-copied", ok);
+        (doc.defaultView ?? globalThis).setTimeout(() => b.classList.remove("fut-api-copied"), 1500);
+      };
+      const clip = doc.defaultView?.navigator?.clipboard;
+      if (clip?.writeText) clip.writeText(key).then(() => done(true), () => done(false));
+      else done(false);
+    });
+  }
   function processMessages(o) {
     const { doc, store, t, locale } = o;
     const ships = store.get(SHIPS_INFO_KEY, {});
@@ -8922,6 +8974,7 @@ td.spark-cell { width: 90px; }
       msg.setAttribute("data-fut-done", "");
       const parsed = readMessage(msg, o.playerId);
       if (!parsed) continue;
+      if (parsed.kind === "spy" && parsed.apiKey) copyApiOnClick(doc, msg, parsed.apiKey, t);
       if (parsed.kind === "expedition") msg.setAttribute("data-fut-kind", "expedition");
       const silent = parsed.kind === "expedition" && silentNow(msg);
       if (silent) msg.setAttribute("data-fut-quiet", "");
@@ -13487,7 +13540,7 @@ table.queues td.acts { width: 1%; text-align: right; }
   // src/modules/fleet/style.ts
   var FLEET_CSS = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
-.fut-fbar, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fclear, .fut-fall, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
+.fut-fbar, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fclear, .fut-fall, .fut-fcap, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
 /* The fleet bar speaks the inbox's language: Verdana 11px, tabular numbers, one set of tokens. */
 .fut-fbar, .fut-fmenu {
   ${PAGE_TOKENS} --line: var(--line-strong); --line-soft: #1D2531;
@@ -13643,6 +13696,12 @@ table.queues td.acts { width: 1%; text-align: right; }
 /* \xABTutto\xBB: every resource here in the three fields, beside the eraser. */
 .fut-fall { height: 26px; padding: 0 10px; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--txt); font: 600 12px Verdana, Arial, sans-serif; cursor: pointer; }
 .fut-fall:hover { border-color: var(--line-hover); color: var(--hi); }
+/* Ships reserve on a ship tile (page 1): how many stay here, bottom left over the picture. */
+#fleet1 #technologies li .fut-fkeep { position: absolute; left: 2px; bottom: 24px; z-index: 2; padding: 0 4px; border-radius: 3px; background: rgba(13, 21, 34, 0.88); color: #F5B547; font: 700 10px/14px Verdana, Arial, sans-serif; pointer-events: auto; cursor: help; }
+/* Cargo room of the ships picked, in the reserves strip. */
+.fut-fcap { margin-left: auto; color: var(--hi); font: 700 12px Verdana, Arial, sans-serif; white-space: nowrap; }
+/* Resources reserve next to the game's resource field (page 2). */
+.fut-fkeepres { display: inline-block; margin-left: 6px; padding: 0 4px; border-radius: 3px; background: rgba(13, 21, 34, 0.88); color: #F5B547; font: 700 10px/16px Verdana, Arial, sans-serif; white-space: nowrap; cursor: help; }
 /* CL / CP: the game's ship pictures, short name in the corner, cargo needed along the bottom. */
 .fut-fcargo { grid-column: 3; grid-row: 1 / span 2; display: flex; align-items: center; gap: 4px; padding-left: 10px; border-left: 1px solid var(--line-soft); }
 .fut-fcl { position: relative; width: 48px; height: 48px; padding: 0; overflow: hidden; border: 1px solid var(--tile-line); border-radius: 6px; background: var(--tile); color: var(--hi); }
@@ -14283,6 +14342,54 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           if (k > 0) typeInto(slot.input, Math.max(0, slot.available - k) || "");
         }
       }, 0);
+    });
+  }
+  function markShipReserve(o, keep) {
+    const { doc, t } = o;
+    for (const slot of readShipSlots(doc)) {
+      const tile2 = slot.input.closest("li");
+      if (!tile2) continue;
+      tile2.querySelector(".fut-fkeep")?.remove();
+      const n = keep[slot.id] ?? 0;
+      if (n <= 0) continue;
+      const b = el4(doc, "span", "fut-fkeep", `\u2212${formatUnits(n, o.locale)}`);
+      b.title = t("fleet.keepShips", { n: n.toLocaleString(o.locale) });
+      tile2.append(b);
+    }
+  }
+  function markResourceReserve(o, keep) {
+    const { doc, t } = o;
+    for (const k of ["metal", "crystal", "deuterium"]) {
+      const input = doc.querySelector(`#fleet2 input#${k}`);
+      if (!input) continue;
+      input.parentElement?.querySelector(".fut-fkeepres")?.remove();
+      if (keep[k] <= 0) continue;
+      const b = el4(doc, "span", "fut-fkeepres", t("fleet.keepRes", { n: formatUnits(keep[k], o.locale) }));
+      b.title = t("fleet.keepResHint", { n: keep[k].toLocaleString(o.locale) });
+      input.after(b);
+    }
+  }
+  function selectedCargo(doc, capacityOf) {
+    return readShipSlots(doc).reduce((sum, s) => sum + Math.min(s.available, parseAmount(s.input.value) || 0) * capacityOf(Number(s.id)), 0);
+  }
+  function watchSelectedCargo(o) {
+    const { doc, t } = o;
+    const draw = () => {
+      const out = doc.querySelector(".fut-fcap");
+      const fd = getDispatcher();
+      if (!out) return;
+      const room = fd ? selectedCargo(doc, (id) => shipCapacity(fd, id)) : 0;
+      out.textContent = room > 0 ? t("fleet.cargoPicked", { n: formatUnits(room, o.locale) }) : "";
+      out.title = room > 0 ? t("fleet.cargoPickedHint", { n: room.toLocaleString(o.locale) }) : "";
+    };
+    draw();
+    const list = doc.querySelector("#fleet1 #technologies");
+    if (!list || list.dataset.futCap) return;
+    list.dataset.futCap = "1";
+    const later = () => (doc.defaultView ?? globalThis).setTimeout(draw, 0);
+    for (const type of ["input", "keyup", "change", "click"]) list.addEventListener(type, later);
+    doc.addEventListener("click", (e) => {
+      if (e.target?.closest?.("#sendall, a.send_all, #resetall, a.reset_all")) later();
     });
   }
   function cappedByReserve(loaded, onPlanet2, keep, fuel) {
@@ -15022,13 +15129,17 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       markUsed(state.active?.mode ?? null);
       const strip = el4(doc, "div", "fut-fbar fut-freserves");
       const stripRow = el4(doc, "div", "fut-frow");
-      stripRow.append(rules, rulesTool);
+      const cap = el4(doc, "span", "fut-fcap");
+      cap.setAttribute("role", "status");
+      stripRow.append(rules, cap, rulesTool);
+      watchSelectedCargo(o);
       strip.append(stripRow, rulesOut.box);
       const below = fleet1.querySelector("#allornone") ?? null;
       if (below) below.before(strip);
       else anchor1.after(strip);
       addInvertButtons(o);
       keepReserveOnSelectAll(o);
+      markShipReserve(o, profile.reserve.ships);
     }
     const dispatch = doc.getElementById("fleetdispatchcomponent");
     if (!anchor1 && (fleet1 || dispatch) && !fleet2?.offsetParent) {
@@ -15052,7 +15163,10 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       host.prepend(strip);
       registerActions(doc, o.store, t, { "fleet.skip": skip });
     }
-    if (fleet2) keepReserveOnLoadAll(o);
+    if (fleet2) {
+      keepReserveOnLoadAll(o);
+      markResourceReserve(o, profile.reserve.resources);
+    }
     if (fleet2 && anchor2) {
       const bar = el4(doc, "div", "fut-fbar");
       bar.hidden = true;
@@ -17834,8 +17948,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   var isDisabled = (el6) => !!(el6.disabled || el6.classList.contains("disabled") || el6.getAttribute("aria-disabled") === "true");
   var WAVE_SIM = ".waveSimButton";
   var WAVE_API = ".waveApiButton";
-  function readWaveFleet(apiButton) {
-    const tip = apiButton.getAttribute("data-tooltip-title") ?? apiButton.getAttribute("title") ?? "";
+  function readWaveFleet(apiButton2) {
+    const tip = apiButton2.getAttribute("data-tooltip-title") ?? apiButton2.getAttribute("title") ?? "";
     const raw = /value='([^']*)'/.exec(tip)?.[1] ?? /value="([^"]*)"/.exec(tip)?.[1];
     if (!raw) return null;
     try {

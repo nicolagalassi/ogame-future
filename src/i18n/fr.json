@@ -954,5 +954,12 @@
   "ping.hint": "Le serveur a répondu en {ms} ms ; la page s'est chargée en {s} s. Mesuré au chargement de cette page : un envoi fait maintenant arrive au serveur avec un retard semblable.",
   "ping.hintShort": "Le serveur a répondu en {ms} ms. Mesuré au chargement de cette page.",
   "fleet.send.allBtn": "Tout",
-  "fleet.send.allHint": "Toutes les ressources de cette planète ou lune (le carburant du vol reste)"
+  "fleet.send.allHint": "Toutes les ressources de cette planète ou lune (le carburant du vol reste)",
+  "msg.apiCopied": "API copiée",
+  "msg.apiCopyFailed": "Impossible de copier l'API : le navigateur ne le permet pas",
+  "fleet.keepShips": "Réserve de vaisseaux : {n} restent sur ce corps (pas pour l'expédition et le fleetsave)",
+  "fleet.keepRes": "réserve {n}",
+  "fleet.keepResHint": "Réserve de ressources : {n} restent sur ce corps (pas pour l'expédition et le fleetsave)",
+  "fleet.cargoPicked": "Fret {n}",
+  "fleet.cargoPickedHint": "Capacité de fret des vaisseaux choisis : {n}"
 }
