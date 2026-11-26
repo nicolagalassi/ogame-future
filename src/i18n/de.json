@@ -567,7 +567,7 @@
   "fleet.rule.ships": "Schiffe",
   "fleet.rule.resources": "Rohstoffe",
   "fleet.rule.gate": "Sprungtor",
-  "fleet.rule.shipsHint": "Schiffe, die bei Zum Mond, Transport, Stationieren, Sammeln, Letzte und Rohstoffe hierher bringen auf dem Körper bleiben. Expeditionen nutzen sie nicht; der Fleetsave hat seine eigene.",
+  "fleet.rule.shipsHint": "Schiffe, die bei Zum Mond, Transport, Stationieren, Sammeln, Letzte, Rohstoffe hierher bringen und der Spielschaltfläche «alle Schiffe auswählen» auf dem Körper bleiben. Expeditionen nutzen sie nicht; der Fleetsave hat seine eigene.",
   "fleet.rule.resourcesHint": "Rohstoffe, die hier bleiben bei Zum Mond, Transport, Stationieren, Rohstoffe bringen und Rohstoffe − Reserve.",
   "fleet.rule.gateHint": "Schiffe, die auf dem Mond bleiben, wenn du das Sprungtor des Spiels nutzt.",
   "fleet.rule.saveShips": "Schiffe behalten",

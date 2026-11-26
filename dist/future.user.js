@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.144
+// @version      0.3.145
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1076,7 +1076,7 @@
     "fleet.rule.ships": "Navi",
     "fleet.rule.resources": "Risorse",
     "fleet.rule.gate": "Portale",
-    "fleet.rule.shipsHint": "Navi che restano sul corpo con Su luna, Trasporto, Schiera, Raccolta, Ultima e Porta qui le risorse. La spedizione non la usa, il fleetsave ha la sua.",
+    "fleet.rule.shipsHint": "Navi che restano sul corpo con Su luna, Trasporto, Schiera, Raccolta, Ultima, Porta qui le risorse e con il pulsante del gioco che seleziona tutte le navi. La spedizione non la usa, il fleetsave ha la sua.",
     "fleet.rule.resourcesHint": "Risorse che restano sul corpo con Su luna, Trasporto, Schiera, Porta qui le risorse e Risorse \u2212 riserva.",
     "fleet.rule.gateHint": "Navi che restano sulla luna quando usi il portale del gioco.",
     "fleet.rule.saveShips": "Navi da lasciare",
@@ -2036,7 +2036,7 @@
     "fleet.rule.ships": "Ships",
     "fleet.rule.resources": "Resources",
     "fleet.rule.gate": "Jump gate",
-    "fleet.rule.shipsHint": "Ships that stay on the body with To moon, Transport, Deploy, Collection, Last and Bring the resources here. Expeditions do not use it; the fleetsave has its own.",
+    "fleet.rule.shipsHint": "Ships that stay on the body with To moon, Transport, Deploy, Collection, Last, Bring the resources here and the game's select-all-ships button. Expeditions do not use it; the fleetsave has its own.",
     "fleet.rule.resourcesHint": "Resources that stay here with To moon, Transport, Deploy, Bring resources and Resources \u2212 reserve.",
     "fleet.rule.gateHint": "Ships that stay on the moon when you use the game's jump gate.",
     "fleet.rule.saveShips": "Ships to keep",
@@ -2996,7 +2996,7 @@
     "fleet.rule.ships": "Vaisseaux",
     "fleet.rule.resources": "Ressources",
     "fleet.rule.gate": "Porte de saut",
-    "fleet.rule.shipsHint": "Vaisseaux qui restent sur le corps avec Vers lune, Transport, Stationner, Collecte, Derni\xE8re et Apporter les ressources ici. L'exp\xE9dition ne l'utilise pas ; le fleetsave a la sienne.",
+    "fleet.rule.shipsHint": "Vaisseaux qui restent sur le corps avec Vers lune, Transport, Stationner, Collecte, Derni\xE8re, Apporter les ressources ici et le bouton du jeu qui s\xE9lectionne tous les vaisseaux. L'exp\xE9dition ne l'utilise pas ; le fleetsave a la sienne.",
     "fleet.rule.resourcesHint": "Ressources qui restent ici avec Vers lune, Transport, Stationner, Apporter les ressources et Ressources \u2212 r\xE9serve.",
     "fleet.rule.gateHint": "Vaisseaux qui restent sur la lune quand tu utilises la porte de saut du jeu.",
     "fleet.rule.saveShips": "Vaisseaux \xE0 garder",
@@ -3956,7 +3956,7 @@
     "fleet.rule.ships": "Schiffe",
     "fleet.rule.resources": "Rohstoffe",
     "fleet.rule.gate": "Sprungtor",
-    "fleet.rule.shipsHint": "Schiffe, die bei Zum Mond, Transport, Stationieren, Sammeln, Letzte und Rohstoffe hierher bringen auf dem K\xF6rper bleiben. Expeditionen nutzen sie nicht; der Fleetsave hat seine eigene.",
+    "fleet.rule.shipsHint": "Schiffe, die bei Zum Mond, Transport, Stationieren, Sammeln, Letzte, Rohstoffe hierher bringen und der Spielschaltfl\xE4che \xABalle Schiffe ausw\xE4hlen\xBB auf dem K\xF6rper bleiben. Expeditionen nutzen sie nicht; der Fleetsave hat seine eigene.",
     "fleet.rule.resourcesHint": "Rohstoffe, die hier bleiben bei Zum Mond, Transport, Stationieren, Rohstoffe bringen und Rohstoffe \u2212 Reserve.",
     "fleet.rule.gateHint": "Schiffe, die auf dem Mond bleiben, wenn du das Sprungtor des Spiels nutzt.",
     "fleet.rule.saveShips": "Schiffe behalten",
@@ -14264,6 +14264,26 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       tile2.append(b);
     }
   }
+  function keepReserveOnSelectAll(o) {
+    const { doc } = o;
+    const root = doc.documentElement;
+    if (root.dataset.futSendAll) return;
+    root.dataset.futSendAll = "1";
+    doc.addEventListener("click", (e) => {
+      const b = e.target?.closest?.("#sendall, a.send_all");
+      if (!b || !b.closest("#fleetdispatchcomponent, #fleet1")) return;
+      (doc.defaultView ?? globalThis).setTimeout(() => {
+        const current3 = pageState.get(doc)?.o ?? o;
+        const mode = pageState.get(doc)?.active?.mode;
+        if (mode === "expedition" || mode === "fleetsave") return;
+        const keep = activeProfile(profileFor(loadProfiles(current3.store), current3.bodyId), loadSettings(current3.store)).reserve.ships;
+        for (const slot of readShipSlots(doc)) {
+          const k = keep[slot.id] ?? 0;
+          if (k > 0) typeInto(slot.input, Math.max(0, slot.available - k) || "");
+        }
+      }, 0);
+    });
+  }
   function popup(doc, anchor, menu) {
     doc.querySelectorAll(".fut-fmenu").forEach((n) => n.remove());
     const r = anchor.getBoundingClientRect();
@@ -14974,6 +14994,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       if (below) below.before(strip);
       else anchor1.after(strip);
       addInvertButtons(o);
+      keepReserveOnSelectAll(o);
     }
     const dispatch = doc.getElementById("fleetdispatchcomponent");
     if (!anchor1 && (fleet1 || dispatch) && !fleet2?.offsetParent) {
