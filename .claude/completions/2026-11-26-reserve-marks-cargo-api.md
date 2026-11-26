@@ -7,3 +7,4 @@
 - Posta, spiate: click sul pulsante «API» del gioco = API copiata negli appunti (anello verde per un attimo).
   Il pulsante è quello il cui tooltip contiene la chiave, o con classe/testo API. Non verificato in gioco.
 - Versione 0.3.147.
+- 0.3.148: «Stiva» spostata sulla riga della spiegazione, a destra (nella riga delle riserve mandava «Ignora cibo» a capo); primo calcolo dopo l'inserimento della striscia (prima restava vuota fino al primo clic). Verificato con screenshot di prova.
