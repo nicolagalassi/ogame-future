@@ -1159,3 +1159,25 @@ describe('speed question in a fleetsave round', () => {
   });
 });
 
+
+describe('speed bar on Firefox for Android', () => {
+  it('a touch on the bar gets the finger position the game reads (pageX), other touches are left alone', async () => {
+    const { fixSpeedBarTouch } = await import('../src/modules/fleet/index');
+    const doc = document.implementation.createHTMLDocument();
+    doc.body.innerHTML = '<div id="speedPercentage" class="percentageBar"><div class="steps"><div class="step">40</div></div></div><div id="other"></div>';
+    fixSpeedBarTouch(doc);
+    fixSpeedBarTouch(doc);
+    const seen: (number | undefined)[] = [];
+    // The game's handler, bound on the bar: it reads event.pageX.
+    doc.getElementById('speedPercentage')!.addEventListener('touchend', (e) => seen.push((e as unknown as { pageX?: number }).pageX));
+    doc.getElementById('other')!.addEventListener('touchend', (e) => seen.push((e as unknown as { pageX?: number }).pageX));
+    const tap = (id: string, x: number) => {
+      const e = new Event('touchend', { bubbles: true });
+      Object.defineProperty(e, 'changedTouches', { value: [{ pageX: x, pageY: 5 }] });
+      doc.querySelector(id)!.dispatchEvent(e);
+    };
+    tap('#speedPercentage .step', 430);
+    tap('#other', 99);
+    expect(seen).toEqual([430, undefined]);
+  });
+});

@@ -852,6 +852,32 @@ export function cappedByReserve(loaded: Reserve['resources'], onPlanet: Reserve[
  * stays home, as in Future's own actions. Not during an expedition or a fleetsave round. Nicola, 2026-11-26.
  * COMPLIANCE: only the game's cargo fields change, through its own dispatcher; nothing is sent.
  */
+/**
+ * Firefox for Android: the game's speed bar takes its touch path there (document.createTouch exists), and on
+ * lifting the finger reads the position from `event.pageX`, which a touch event does not have (it is in
+ * `changedTouches`). The bar then fell to its lowest step and every later tap did the same: «goes to 10 and
+ * sticks» (Nicola, 2026-11-26; reproduced in the Android emulator with a Firefox-like event). Before the game
+ * reads it, the missing position is filled in with the finger's own. Chrome (mouse path) is untouched.
+ * COMPLIANCE: only the event of the player's own tap is completed; no game action.
+ */
+export function fixSpeedBarTouch(doc: Document): void {
+  const root = doc.documentElement;
+  if (root.dataset.futSpeedTouch) return;
+  root.dataset.futSpeedTouch = '1';
+  doc.addEventListener(
+    'touchend',
+    (e) => {
+      if (!(e.target as Element | null)?.closest?.('.percentageBar')) return;
+      const touch = (e as TouchEvent).changedTouches?.[0];
+      const ev = e as unknown as { pageX?: number; pageY?: number };
+      if (!touch || typeof ev.pageX === 'number') return;
+      Object.defineProperty(e, 'pageX', { value: touch.pageX, configurable: true });
+      Object.defineProperty(e, 'pageY', { value: touch.pageY, configurable: true });
+    },
+    true,
+  );
+}
+
 function keepReserveOnLoadAll(o: FleetOptions): void {
   const { doc } = o;
   const root = doc.documentElement;
@@ -1750,6 +1776,7 @@ export function renderFleetTools(o: FleetOptions): void {
 
   // The game's "all resources" keeps the resources reserve home (page 2; listened on the page once).
   if (fleet2) {
+    fixSpeedBarTouch(doc);
     keepReserveOnLoadAll(o);
     markResourceReserve(o, profile.reserve.resources);
   }
