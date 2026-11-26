@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.156
+// @version      0.3.157
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -4886,6 +4886,8 @@
   // src/core/sheet.ts
   var RES_COLORS = { metal: "#B8C2CC", crystal: "#7FB8FF", deuterium: "#4FE0B0", darkMatter: "#B58CDB", food: "#D6A8C8" };
   var STATE_COLORS = { accent: "#F2D04A", ok: "#7BC47F", warn: "#F08A3C", bad: "#EF6A60" };
+  var MISSION_TONES = { collect: "#6CC04A", expedition: "#4AA3FF", fleetsave: "#A77BFF" };
+  var toneRules = (sel) => Object.keys(MISSION_TONES).map((k) => `${sel(k)} { --tone: ${MISSION_TONES[k]}; }`).join("\n");
   var PAGE_TOKENS = `--hi: #F1F4F7; --txt: #C9D2DC; --mute: #A3AFBD; --dim: #8592A1;
   --accent: ${STATE_COLORS.accent}; --ok: ${STATE_COLORS.ok}; --warn: ${STATE_COLORS.warn}; --neg: ${STATE_COLORS.bad};`;
   var SURFACE_TOKENS = "--bg: #0F141B; --surface: #1A2230; --raised: #151C26; --band: #152036; --band-2: #1C2940;";
@@ -9602,11 +9604,9 @@ td.spark-cell { width: 90px; }
 #${TOUCH_ID} button.named:has(.ts) { gap: 2px; }
 #${TOUCH_ID} button.named:has(.ts) .fut-tb-glyph svg { width: 17px; height: 17px; }
 #${TOUCH_ID} button.named .ts { color: var(--text-2); font: 500 10px/1 var(--display); white-space: nowrap; }
-/* One colour per kind of fleet action: blue the expedition (as the game), violet the fleetsave (a colour the
-   game does not use), green Accentra. Glyph and a bottom line in the colour, the key faintly tinted. */
-#${TOUCH_ID} button[data-tone="collect"] { --tone: #6cc04a; }
-#${TOUCH_ID} button[data-tone="expedition"] { --tone: #4aa3ff; }
-#${TOUCH_ID} button[data-tone="fleetsave"] { --tone: #a77bff; }
+/* One colour per kind of fleet action (core/sheet MISSION_TONES): glyph and a bottom line in the colour,
+   the key faintly tinted. */
+${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
 #${TOUCH_ID} button[data-tone] { background: color-mix(in srgb, var(--tone) 14%, var(--surface)); box-shadow: inset 0 -2px 0 var(--tone); }
 #${TOUCH_ID} button[data-tone] .fut-tb-glyph { color: var(--tone); }
 #${TOUCH_ID} button[data-tone]:active { background: color-mix(in srgb, var(--tone) 26%, var(--surface)); }
@@ -13636,7 +13636,7 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-frow { display: flex; align-items: center; gap: 8px; min-width: 0; }
 
 /* Actions: a hotbar of filled icons on solid tiles, the key in the corner. Dashed = still to set up.
-   Silver on slate, no neon: colour is left to what the game's own page says. */
+   Silver on slate; only the three kinds Future runs whole carry a colour, as on the touch bar. */
 .fut-facts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .fut-fact {
   position: relative; flex: none; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 62px; height: 48px; padding: 4px 8px 3px;
@@ -13645,6 +13645,14 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fact:hover { background: var(--tile-hi); color: var(--ico-hi); }
 .fut-fact:active { transform: translateY(1px); }
 .fut-fact .ico { display: inline-flex; }
+/* Expedition blue, fleetsave violet, Accentra green (core/sheet MISSION_TONES): icon and a bottom line in the
+   colour, the tile faintly tinted; the name stays silver, readable. */
+${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
+.fut-fact[data-mode="collect"], .fut-fact[data-mode="expedition"], .fut-fact[data-mode="fleetsave"] {
+  background: color-mix(in srgb, var(--tone) 12%, var(--tile)); box-shadow: inset 0 -2px 0 var(--tone); }
+.fut-fact[data-mode="collect"] .ico, .fut-fact[data-mode="expedition"] .ico, .fut-fact[data-mode="fleetsave"] .ico { color: var(--tone); }
+.fut-fact[data-mode="collect"]:hover, .fut-fact[data-mode="expedition"]:hover, .fut-fact[data-mode="fleetsave"]:hover {
+  background: color-mix(in srgb, var(--tone) 22%, var(--tile-hi)); }
 /* The name under the icon: what the button does, readable without pointing at it. */
 .fut-fact .name { font: 600 condensed 12px/1 var(--display); white-space: nowrap; color: inherit; }
 /* Zone labels: what a group of buttons is for, printed once at its head. */
@@ -13659,6 +13667,7 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fsecond { display: inline-flex; gap: 4px; margin-left: 6px; padding-left: 12px; border-left: 2px solid var(--bg); }
 .fut-fsecond .fut-fact { background: none; box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--mute); }
 .fut-fsecond .fut-fact:hover { background: var(--tile); color: var(--ico-hi); }
+.fut-fsecond .fut-fact[data-mode="collect"] { box-shadow: inset 0 -2px 0 var(--tone), inset 0 0 0 1px var(--line-strong); }
 .fut-fskip[hidden] { display: none; }
 .fut-fbar[hidden] { display: none; }
 /* Main cargo ship, picked on the ship itself (top right; the game keeps the top left). */
@@ -13737,6 +13746,8 @@ table.queues td.acts { width: 1%; text-align: right; }
 
 /* Trasporto / Schiera on: the tile stays lit until pressed again. */
 .fut-fact[aria-pressed="true"], .fut-fact.used { background: var(--tile-hi); box-shadow: inset 0 3px 0 var(--accent); color: var(--ico-hi); }
+.fut-fact[data-mode="collect"].used, .fut-fact[data-mode="expedition"].used, .fut-fact[data-mode="fleetsave"].used,
+.fut-fact[data-mode="collect"][aria-pressed="true"] { box-shadow: inset 0 3px 0 var(--accent), inset 0 -2px 0 var(--tone); }
 .fut-fsecond .fut-fact.used { box-shadow: inset 0 3px 0 var(--accent), inset 0 0 0 1px var(--line-strong); }
 .fut-fact[aria-pressed="true"] kbd, .fut-fact.used kbd { color: var(--accent); }
 
