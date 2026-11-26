@@ -10,3 +10,7 @@
 - Aperti (chiesti dettagli a Nicola): velocità del fleetsave su smartphone che va a 10 e si blocca (ipotesi: la
   barra percentuale del gioco su mobile vuole valori diversi da `setSpeedBar`), glitch rossi su riepilogo flotta e ufficiali.
 - Versione 0.3.149.
+- 0.3.150 (smartphone): la domanda sulla velocità del fleetsave (pagina 2) su touch è fissa in fondo allo schermo
+  (`.fut-faskbar`, position: fixed) — ipotesi: comparendo sopra «Invia» spostava la barra della velocità sotto il dito,
+  che finiva al 10% e restava incastrata. Variabili di colore di Future solo sulle campanelle della lista eventi
+  (prima su tutto `#eventContent`: ipotesi per il rosso su mobile). Non verificato su telefono.

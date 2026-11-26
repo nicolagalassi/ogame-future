@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.149
+// @version      0.3.150
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -13601,6 +13601,11 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fsecond .fut-fact:hover { background: var(--tile); color: var(--ico-hi); }
 .fut-fskip[hidden] { display: none; }
 .fut-fbar[hidden] { display: none; }
+/* The fleetsave speed question on a touch screen: fixed at the bottom of the screen, so it never moves the
+   page while the finger is still on the game's speed bar (it shifted the bar, which then stuck at 10%). */
+@media (pointer: coarse) {
+  #fleet2 .fut-faskbar { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 100000; margin: 0; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6); }
+}
 /* Main cargo ship, picked on the ship itself (top right; the game keeps the top left). */
 #fleet1 #technologies li[data-technology] { position: relative; }
 .fut-mainship { position: absolute; top: 2px; right: 2px; z-index: 2; width: 20px; height: 20px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--accent-soft); border-radius: 5px; background: rgba(13, 21, 34, 0.85); color: var(--muted); cursor: pointer; opacity: 0.75; }
@@ -15213,7 +15218,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       markResourceReserve(o, profile.reserve.resources);
     }
     if (fleet2 && anchor2) {
-      const bar = el4(doc, "div", "fut-fbar");
+      const bar = el4(doc, "div", "fut-fbar fut-faskbar");
       bar.hidden = true;
       const out2 = readout(doc, "");
       const row = el4(doc, "div", "fut-frow");
@@ -17834,8 +17839,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     }
   }
   var EVENT_CSS = `
-/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
-#eventContent { ${WINDOW_TOKENS} }
+/* Window tokens (core/sheet.ts) on the bells only, never on the game's event list itself: the game's own
+   (mobile) styles may use variables of the same names, and turned red (Nicola, 2026-11-26). */
+#eventContent .fut-bell { ${WINDOW_TOKENS} }
 #eventContent .fut-bell { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-left: 4px; padding: 0;
   border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--muted); cursor: pointer; vertical-align: middle; }
 #eventContent .fut-bell:hover, #eventContent .fut-bell:focus-visible { border-color: var(--accent); color: var(--text); }
