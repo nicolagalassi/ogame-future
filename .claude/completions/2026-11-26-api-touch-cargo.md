@@ -14,3 +14,8 @@
   (`.fut-faskbar`, position: fixed) — ipotesi: comparendo sopra «Invia» spostava la barra della velocità sotto il dito,
   che finiva al 10% e restava incastrata. Variabili di colore di Future solo sulle campanelle della lista eventi
   (prima su tutto `#eventContent`: ipotesi per il rosso su mobile). Non verificato su telefono.
+- 0.3.151: dagli screenshot di Nicola — su telefono la velocità è una fila di pulsanti 10…100: `setSpeedBar` su touch preme
+  il pulsante della percentuale (`speedButton`, cerca la fila attorno a «100») invece di `setValue(passo)`, che
+  selezionava 10 e bloccava la barra. Barra in alto tornata com'era (i pulsanti telefono erano quelli in basso);
+  barra touch in basso: solo Raccogli / Schiera / Spedizione / Fleetsave con icone diverse e nome sotto
+  (`touchName`, `keysOnly` per gli altri); nella pagina Flotta niente frecce pianeta. Verificato a 390 e 420 px.

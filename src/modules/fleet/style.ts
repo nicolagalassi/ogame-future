@@ -189,18 +189,7 @@ export const FLEET_CSS = `
 .fut-fcl.none .pic { opacity: 0.3; filter: grayscale(1); }
 
 /* Fingers: bigger targets, no key letters. */
-/* The collection's two direct tiles exist for touch screens only. */
-.fut-fact.fut-touch { display: none; }
 @media (pointer: coarse) {
-  /* Touch (Nicola): only the most used actions, large and clearly drawn: expedition, fleetsave and the
-     collection's transport and deploy; the rest stays on the computer. */
-  .fut-fact[data-mode="transport"], .fut-fact[data-mode="deploy"], .fut-fact[data-mode="last"], .fut-fact[data-mode="moon"], .fut-fact[data-mode="collect"] { display: none; }
-  .fut-fact.fut-touch { display: inline-flex; }
-  .fut-facts .fut-fact { width: auto; min-width: 76px; height: 62px; padding: 6px 10px 5px; }
-  .fut-facts .fut-fact .ico svg { width: 26px; height: 26px; }
-  .fut-facts .fut-fact .name { font-size: 14px; }
-  .fut-fsecond { margin-left: 0; padding-left: 0; border-left: 0; }
-  .fut-fsecond .fut-fact { background: var(--tile); box-shadow: none; color: var(--ico); }
   .fut-fact { width: 48px; height: 46px; }
   .fut-fcaret { width: 30px; height: 46px; }
   .fut-fact kbd { display: none; }

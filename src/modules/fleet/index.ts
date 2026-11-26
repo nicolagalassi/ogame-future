@@ -1578,16 +1578,6 @@ export function renderFleetTools(o: FleetOptions): void {
     const secondary = dest.row;
     if (here?.moonId) secondary.append(act('moon', 'fleet.moon', t('fleet.btn.moon'), to(here.moonId), t('fleet.tip.moon'), () => run.moon()));
     secondary.append(collect);
-    // Touch screens (Nicola): the two collection sends as tiles of their own, straight to the favourite
-    // destinations, in place of the menu; shown only there (style.ts), where the plain Trasporto / Schiera,
-    // Ultima and Su luna make way for them.
-    for (const [m, ico, label] of [['collect', 'transport', 'fleet.btn.touchCollect'], ['collectDeploy', 'deploy', 'fleet.btn.touchDeploy']] as const) {
-      const fav = m === 'collect' ? settings.favTransport : settings.favDeploy;
-      const b = act(ico, `fleet.${m}`, t(label), fav ? to(fav) : '', fav ? t('fleet.tip.collect') : t('fleet.err.noDefault'), favRun[m], !fav);
-      b.classList.add('fut-touch');
-      b.dataset.mode = m === 'collect' ? 'collect-touch' : 'collectDeploy-touch';
-      secondary.append(b);
-    }
     tiles.append(dest.box);
     // "Salta → next body", only while a collection round is on.
     const skipSlot = el(doc, 'span', 'fut-fsecond fut-fskip');

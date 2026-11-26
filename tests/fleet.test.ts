@@ -484,10 +484,13 @@ describe('shortcuts, last fleet and jump gate', () => {
     await Promise.resolve();
     expect(document.getElementById(TOUCH_ID)).toBeNull();
     store.set(TOUCH_KEY, 'on');
-    registerActions(document, store, (k) => k, { 'fleet.last': () => (pressed = 'all') });
+    // On the phone only the four most used fleet actions: Ultima stays a keyboard key, and on the fleet
+    // page the planet arrows make room for them.
+    registerActions(document, store, (k) => k, { 'fleet.last': () => {}, 'fleet.fleetsave': () => (pressed = 'all') });
     await Promise.resolve();
     const bar = document.getElementById(TOUCH_ID)!;
-    expect([...bar.querySelectorAll('.keys button')].map((b) => b.getAttribute('aria-label'))).toEqual(['shortcut.next', 'fleet.btn.last']);
+    expect([...bar.querySelectorAll('.keys button')].map((b) => b.getAttribute('aria-label'))).toEqual(['fleet.btn.fleetsave']);
+    expect(bar.querySelector('.keys button:last-child .tn')?.textContent).toBe('fleet.btn.fleetsave');
     (bar.querySelector('.keys button:last-child') as HTMLButtonElement).click();
     expect(pressed).toBe('all');
     const send = bar.querySelector<HTMLButtonElement>('.send')!;
@@ -1132,21 +1135,15 @@ describe('what the reserves keep, and the cargo picked', () => {
   });
 });
 
-describe('touch tiles for the collection', () => {
-  it('two direct tiles to the favourite destinations (dashed without one)', async () => {
-    const { renderFleetTools } = await import('../src/modules/fleet/index');
-    const page = fleetPage();
-    const doc = document.implementation.createHTMLDocument();
-    doc.head.innerHTML = page.head.innerHTML;
-    doc.body.innerHTML = page.body.innerHTML;
-    const store = new Store(new MemoryStore(), 'touch');
-    store.set('fleet.settings', { favTransport: 2 });
-    const bodies = [{ planetId: 1, moonId: null, name: 'Casa', coords: '5:185:8' }, { planetId: 2, moonId: null, name: 'Colonia', coords: '5:186:8' }];
-    renderFleetTools({ doc, store, bodyId: 1, bodies, t: (k: string) => k, locale: 'en', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch' });
-    const touch = [...doc.querySelectorAll<HTMLElement>('.fut-fact.fut-touch')];
-    expect(touch.map((b) => b.dataset.mode)).toEqual(['collect-touch', 'collectDeploy-touch']);
-    expect(touch[0]!.getAttribute('aria-label')).toBe('fleet.btn.touchCollect → Colonia');
-    expect(touch[0]!.classList.contains('dim')).toBe(false);
-    expect(touch[1]!.classList.contains('dim')).toBe(true);
+
+describe('speed on a phone', () => {
+  it('finds the button of the percentage in the row 10…100, not other numbers of the page', async () => {
+    const { speedButton } = await import('../src/modules/fleet/actions');
+    document.body.innerHTML = '<div id="fleet2"><div class="coords"><span>356</span><span>16</span><span>30</span></div><div id="speedPercentage"><div class="row">'
+      + [10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((v) => `<button data-v="${v}">${v}</button>`).join('') + '</div></div></div>';
+    expect(speedButton(document, 30)?.getAttribute('data-v')).toBe('30');
+    expect(speedButton(document, 100)?.getAttribute('data-v')).toBe('100');
+    document.body.innerHTML = '<div id="fleet2"><span>30</span><span>100</span></div>';
+    expect(speedButton(document, 30)).toBeNull();
   });
 });
