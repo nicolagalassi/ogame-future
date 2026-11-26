@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.164
+// @version      0.3.165
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -11498,16 +11498,20 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       return [s, input];
     });
     box.append(el3(doc, "h6", "", t("fleet.copyWhat")), secRow);
-    const bodyRow = el3(doc, "div", "fut-fchecks");
+    const planetRow = el3(doc, "div", "fut-fchecks");
+    const moonRow = el3(doc, "div", "fut-fchecks");
     const targets = [];
     for (const b of o.bodies) {
       for (const [id, isMoonId] of [[b.planetId, false], [b.moonId, true]]) {
         if (id === null || id === o.bodyId) continue;
         const [wrap, input] = checkField(doc, `${shortName(o, id)} [${b.coords}]`, false);
-        bodyRow.append(wrap);
+        (isMoonId ? moonRow : planetRow).append(wrap);
         targets.push([id, isMoonId, input]);
       }
     }
+    const bodyRow = el3(doc, "div", "fut-fcopywhere");
+    if (planetRow.childElementCount) bodyRow.append(el3(doc, "h6", "", o.t("dash.planets")), planetRow);
+    if (moonRow.childElementCount) bodyRow.append(el3(doc, "h6", "", o.t("dash.moons")), moonRow);
     const pick = (which) => {
       for (const [, isMoonId, input] of targets) input.checked = which === "moons" ? isMoonId : which === "planets" ? !isMoonId : false;
     };
