@@ -491,6 +491,8 @@ describe('shortcuts, last fleet and jump gate', () => {
     const bar = document.getElementById(TOUCH_ID)!;
     expect([...bar.querySelectorAll('.keys button')].map((b) => b.getAttribute('aria-label'))).toEqual(['fleet.btn.fleetsave']);
     expect(bar.querySelector('.keys button:last-child .tn')?.textContent).toBe('fleet.btn.fleetsave');
+    // Each kind of fleet action in its own colour (fleetsave violet).
+    expect((bar.querySelector('.keys button:last-child') as HTMLElement).dataset.tone).toBe('fleetsave');
     (bar.querySelector('.keys button:last-child') as HTMLButtonElement).click();
     expect(pressed).toBe('all');
     const send = bar.querySelector<HTMLButtonElement>('.send')!;
@@ -1203,5 +1205,22 @@ describe('speed question on a phone', () => {
     expect(doc.querySelector<HTMLElement>('#fleet2 .fut-faskbar')!.hidden).toBe(true);
     note.querySelector<HTMLButtonElement>('button.yes')!.click();
     expect(note.querySelector('.q')?.textContent).toContain('fleet.speedAsk.done');
+  });
+});
+
+describe('touch bar Accentra keys', () => {
+  it('both Accentra keys say which kind they are under their shared name, in the same colour', async () => {
+    const { registerActions, resetShortcuts, TOUCH_KEY, TOUCH_ID } = await import('../src/modules/shortcuts');
+    resetShortcuts();
+    document.body.innerHTML = '';
+    const store = new Store(new MemoryStore(), 'accentra');
+    store.set(TOUCH_KEY, 'on');
+    registerActions(document, store, (k) => k, { 'fleet.collect': () => {}, 'fleet.collectDeploy': () => {} });
+    await Promise.resolve();
+    const keys = [...document.getElementById(TOUCH_ID)!.querySelectorAll<HTMLElement>('.keys button')];
+    expect(keys.map((b) => [b.querySelector('.tn')?.textContent, b.querySelector('.ts')?.textContent, b.dataset.tone])).toEqual([
+      ['fleet.btn.touchCollect', 'fleet.btn.touchSubTransport', 'collect'],
+      ['fleet.btn.touchDeploy', 'fleet.btn.touchSubDeploy', 'collect'],
+    ]);
   });
 });
