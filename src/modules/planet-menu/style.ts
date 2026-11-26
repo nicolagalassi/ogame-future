@@ -210,7 +210,7 @@ ${L} .smallplanet a.alert {
 /* Toolbar: replaces the colony counter. Two tiles side by side (production → Dashboard, plan → Piano),
    name on top and number below; sync and settings stacked on the right. */
 #planetbarcomponent .fut-toolbar {
-  box-sizing: border-box; display: grid !important; height: auto !important; padding: 0 !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 26px; margin: 0 0 3px;
+  box-sizing: border-box; display: grid !important; height: auto !important; padding: 0 !important; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto; margin: 0 0 3px;
   border: 0; border-radius: 6px; background: var(--band); overflow: hidden;
 }
 /* The board's band: two printed tiles (production → Dashboard, plan → Plan), figures in the board's face. */
@@ -229,13 +229,14 @@ ${L} .smallplanet a.alert {
 #planetbarcomponent .fut-cell-v { min-width: 0; font: 600 condensed 15px/16px var(--display); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #planetbarcomponent .fut-cell-v small { margin-left: 2px; font: 11px/14px var(--body); color: var(--on-band); font-weight: 400; }
 #planetbarcomponent .fut-cell-v.fut-warn { color: var(--warn); } #planetbarcomponent .fut-cell-v.fut-ok { color: var(--ok); }
-#planetbarcomponent .fut-side { display: flex; flex-direction: column; grid-column: 3; grid-row: 1; }
+/* Sync and settings side by side, each a full-height key: stacked they were 20px tall, too small to hit (Nicola). */
+#planetbarcomponent .fut-side { display: flex; grid-column: 3; grid-row: 1; }
 #planetbarcomponent .fut-tool {
-  position: relative; flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; padding: 0;
+  position: relative; flex: none; display: flex; align-items: center; justify-content: center; width: 32px; padding: 0;
   border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; color: var(--on-band); cursor: pointer; height: auto !important; min-height: 0 !important;
 }
-#planetbarcomponent .fut-tool + .fut-tool { border-top: 2px solid var(--bg) !important; }
-#planetbarcomponent .fut-tool svg { width: 13px; height: 13px; }
+#planetbarcomponent .fut-tool + .fut-tool { border-left: 2px solid var(--bg) !important; }
+#planetbarcomponent .fut-tool svg { width: 16px; height: 16px; }
 #planetbarcomponent .fut-tool:hover { background: var(--band-2) !important; color: var(--text); }
 #planetbarcomponent .fut-tool:disabled { opacity: 0.35; cursor: default; background: none; }
 #planetbarcomponent .fut-tool[aria-expanded="true"] { background: var(--accent-soft) !important; color: var(--accent); }
