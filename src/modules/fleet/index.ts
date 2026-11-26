@@ -588,15 +588,36 @@ export function bodyRulesPanel(r: BodyRulesOptions): HTMLElement {
   const ids = r.bodies.flatMap((b) => [b.planetId, b.moonId]).filter((x): x is number => x !== null);
   const status = el(doc, 'span', 'fut-fsaved');
   status.setAttribute('role', 'status');
+  // Planets or moons, one list at a time, as the Dashboard shows them (Nicola: the same views everywhere).
+  const moonIds = ids.filter((id) => isMoon(r.bodies, id));
+  let scope: 'planet' | 'moon' = r.bodyId && moonIds.includes(r.bodyId) ? 'moon' : 'planet';
   const showList = () => {
     const profiles = loadProfiles(r.store);
-    const table = el(doc, 'div', 'fut-fbodies');
+    if (!moonIds.length) scope = 'planet';
+    const shown = ids.filter((id) => moonIds.includes(id) === (scope === 'moon'));
+    const switcher = el(doc, 'span', 'control fut-fscope');
+    switcher.setAttribute('role', 'group');
+    for (const [key, label, count] of [['planet', t('dash.planets'), ids.length - moonIds.length], ['moon', t('dash.moons'), moonIds.length]] as const) {
+      const b = el(doc, 'button', 'seg');
+      b.type = 'button';
+      b.disabled = !count;
+      b.setAttribute('aria-pressed', String(scope === key));
+      b.append(icon(doc, key, 14), el(doc, 'span', '', label), el(doc, 'i', '', String(count)));
+      b.addEventListener('click', () => {
+        if (scope === key) return;
+        scope = key;
+        showList();
+      });
+      switcher.append(b);
+    }
+    const sections = (['ships', 'resources', 'gate', 'fleetsave'] as const).filter((sec) => sec !== 'gate' || scope === 'moon');
+    const table = el(doc, 'div', `fut-fbodies ${scope === 'moon' ? 'moons' : 'planets'}`);
     table.setAttribute('role', 'list');
     const head = el(doc, 'div', 'fut-fbrow head');
     head.setAttribute('aria-hidden', 'true');
-    head.append(el(doc, 'span', '', ''), ...(['ships', 'resources', 'gate', 'fleetsave'] as const).map((s) => el(doc, 'span', '', t(s === 'fleetsave' ? 'fleet.fleetsave' : `fleet.rule.${s}`))));
+    head.append(el(doc, 'span', '', ''), ...sections.map((sec) => el(doc, 'span', '', t(sec === 'fleetsave' ? 'fleet.fleetsave' : `fleet.rule.${sec}`))));
     table.append(head);
-    for (const id of ids) {
+    for (const id of shown) {
       const o = opts(id);
       const moon = isMoon(r.bodies, id);
       const p = profileFor(profiles, id);
@@ -606,7 +627,6 @@ export function bodyRulesPanel(r: BodyRulesOptions): HTMLElement {
       const name = el(doc, 'span', 'nm');
       name.append(el(doc, 'b', '', shortLabel(o, id)), el(doc, 'small', '', r.bodies.find((b) => b.planetId === id || b.moonId === id)?.coords ?? ''));
       const cell = (section: ReserveSection, text: () => string) => {
-        if (section === 'gate' && !moon) return el(doc, 'span', 'na', '');
         const empty = sectionEmpty(p, section);
         const c = el(doc, 'span', empty ? 'unset' : 'set', empty ? t('fleet.rule.unset') : text());
         // On a phone the column heads are gone: each value says what it is.
@@ -618,7 +638,7 @@ export function bodyRulesPanel(r: BodyRulesOptions): HTMLElement {
         name,
         cell('ships', () => shipsSum(p.reserve.ships)),
         cell('resources', () => formatUnits(p.reserve.resources.metal + p.reserve.resources.crystal + p.reserve.resources.deuterium, r.locale)),
-        cell('gate', () => shipsSum(p.gate)),
+        ...(moon ? [cell('gate', () => shipsSum(p.gate))] : []),
         cell('fleetsave', () => {
           if (!p.save) return t('fleet.rule.saveReserveOnly');
           // An empty galaxy or system means this body's own, as the fleetsave sends it.
@@ -630,7 +650,9 @@ export function bodyRulesPanel(r: BodyRulesOptions): HTMLElement {
       row.addEventListener('click', () => showBody(id));
       table.append(row);
     }
-    root.replaceChildren(el(doc, 'p', 'fut-fnote', t('fleet.bodiesHint')), table);
+    const top = el(doc, 'div', 'fut-fbtop');
+    top.append(switcher);
+    root.replaceChildren(el(doc, 'p', 'fut-fnote', t('fleet.bodiesHint')), top, table);
   };
   const showBody = (id: number) => {
     const o = opts(id);

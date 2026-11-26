@@ -1237,17 +1237,24 @@ describe('rules of every planet and moon (settings window)', () => {
     const bodies = [{ planetId: 1, moonId: 11, name: 'Casa', coords: '5:185:8' }, { planetId: 2, moonId: null, name: 'Colonia', coords: '5:186:8' }];
     let changed = 0;
     const panel = doc.body.appendChild(bodyRulesPanel({ doc, store, t: (k: string) => k, locale: 'it', bodies, onChange: () => changed++ }));
-    const rows = [...panel.querySelectorAll<HTMLButtonElement>('button.fut-fbrow')];
-    // Casa, Casa ☾, Colonia; the gate only for the moon.
-    expect(rows.map((r) => r.querySelector('.nm b')?.textContent)).toEqual(['Casa', 'Casa ☾', 'Colonia']);
+    let rows = [...panel.querySelectorAll<HTMLButtonElement>('button.fut-fbrow')];
+    // Planets first (as the Dashboard: planets or moons, one at a time); the gate column only for moons.
+    expect(rows.map((r) => r.querySelector('.nm b')?.textContent)).toEqual(['Casa', 'Colonia']);
     expect(rows[0]!.querySelectorAll('.set').length).toBe(2);
-    expect(rows[0]!.querySelector('.na')).not.toBeNull();
-    expect(rows[1]!.querySelector('.na')).toBeNull();
-    expect([...rows[2]!.querySelectorAll('.unset')].length).toBe(3);
+    expect(rows[0]!.children.length).toBe(4);
+    expect([...rows[1]!.querySelectorAll('.unset')].length).toBe(3);
     // The fleetsave with the body's own galaxy and system.
     expect(rows[0]!.querySelectorAll('.set')[1]!.textContent).toBe('5:185:16 mission.6');
+    const scopes = [...panel.querySelectorAll<HTMLButtonElement>('.fut-fscope .seg')];
+    expect(scopes.map((b) => b.textContent)).toEqual(['dash.planets2', 'dash.moons1']);
+    scopes[1]!.click();
+    rows = [...panel.querySelectorAll<HTMLButtonElement>('button.fut-fbrow')];
+    expect(rows.map((r) => r.querySelector('.nm b')?.textContent)).toEqual(['Casa ☾']);
+    expect(rows[0]!.children.length).toBe(5);
+    (panel.querySelectorAll<HTMLButtonElement>('.fut-fscope .seg')[0]!).click();
+    rows = [...panel.querySelectorAll<HTMLButtonElement>('button.fut-fbrow')];
     // Off the fleet page: every ship type still listed.
-    rows[2]!.click();
+    rows[1]!.click();
     const inputs = [...panel.querySelectorAll<HTMLInputElement>('.fut-ffield input')];
     expect(inputs.length).toBeGreaterThan(15);
     inputs[0]!.value = '7';
@@ -1256,6 +1263,6 @@ describe('rules of every planet and moon (settings window)', () => {
     expect(changed).toBe(1);
     expect(panel.querySelector('.fut-fsaved')?.textContent).toBe('fleet.saved');
     (panel.querySelector('.fut-fback') as HTMLButtonElement).click();
-    expect(panel.querySelectorAll('button.fut-fbrow')[2]!.querySelector('.set')).not.toBeNull();
+    expect(panel.querySelectorAll('button.fut-fbrow')[1]!.querySelector('.set')).not.toBeNull();
   });
 });

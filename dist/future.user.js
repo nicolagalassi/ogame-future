@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.161
+// @version      0.3.162
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -4978,12 +4978,26 @@
   position: fixed; inset: 0; z-index: 1000001; display: flex; justify-content: center; align-items: flex-start;
   padding: 40px 16px; background: rgba(4,6,10,0.74); overflow-y: auto;
   font: 13px/1.4 var(--body); color: var(--text-2);
+  /* Chrome on Android enlarges long paragraphs on its own (text autosizing): the window keeps one scale. */
+  -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+}
+/* Fitted to a phone's screen (core/viewport): edge to edge, the head and tabs always in reach. */
+@media (pointer: coarse) {
+  .backdrop[style*="scale"] { padding: 0; align-items: flex-start; overscroll-behavior: contain; }
+  .backdrop[style*="scale"] .panel { width: 100%; min-height: 100%; border-radius: 0; overflow: visible; }
+  .backdrop[style*="scale"] .head { position: sticky; top: 0; z-index: 5; }
+  .backdrop[style*="scale"] .tabs { flex: none; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .backdrop[style*="scale"] .tab { flex: none; height: 40px; }
+  .backdrop[style*="scale"] .close { width: 44px; height: 44px; }
 }
 /* The board: one printed sheet, its head and tab strip on the board-blue band, the zones below as fields of colour. */
 .panel {
   width: min(var(--panel-w), 100%); display: flex; flex-direction: column; gap: 10px; padding: 0 0 14px;
   border-radius: 6px; background: var(--raised); box-shadow: 0 24px 64px rgba(0,0,0,0.6); overflow: hidden;
   animation: fut-panel-in 200ms var(--ease-out);
+  /* Narrow layouts follow the window's own width (@container), not the page's: on a phone the page is
+     980px wide while the window fitted to the screen is about 400. */
+  container-type: inline-size;
 }
 .panel > :not(.head):not(.tabs) { margin-left: 14px; margin-right: 14px; }
 /* Opening: the window settles in from just below, the page dims behind it. Closing is instant. */
@@ -8395,12 +8409,12 @@ ${RARITY.map((c, i) => `.rar-${i} { --rar: ${c}; }`).join(" ")}
 .ship-info { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
 .ship-info b { font-size: 12px; font-variant-numeric: tabular-nums; }
 .ship-name { color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-@media (max-width: 560px) { .res { grid-template-columns: repeat(2, minmax(0, 1fr)); } .res-tile b { font-size: 18px; } }
+@container (max-width: 560px) { .res { grid-template-columns: repeat(2, minmax(0, 1fr)); } .res-tile b { font-size: 18px; } }
 h4.lost { margin: 10px 0 6px; color: var(--bad); }
 .foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
 .opt { position: relative; min-height: 24px; display: flex; gap: 6px; align-items: center; color: var(--text-2); font-size: 12px; cursor: pointer; }
 .acts { display: flex; gap: 6px; }
-@media (max-width: 560px) { .kpi .value { font-size: 15px; } }
+@container (max-width: 560px) { .kpi .value { font-size: 15px; } }
 /* Expeditions as a statement: net gain first, where it came from, then the columns. */
 .gi { display: inline-flex; flex: none; }
 .hero { display: flex; flex-direction: column; gap: 12px; padding: 16px 18px; }
@@ -8459,7 +8473,7 @@ td.hi { color: var(--text); }
 tr.on td { background: color-mix(in srgb, var(--accent) 10%, transparent); }
 td.spark-cell { width: 90px; }
 .spark { display: block; height: 7px; border-radius: 2px; background: var(--accent); opacity: 0.55; }
-@media (max-width: 640px) { .two { grid-template-columns: 1fr; } .hero-v { font-size: 28px; } .chart:not(.dense) .tot { font-size: 10px; } }
+@container (max-width: 640px) { .two { grid-template-columns: 1fr; } .hero-v { font-size: 28px; } .chart:not(.dense) .tot { font-size: 10px; } }
 
 /* The \xABAPI\xBB button right after a click copied the key: a green ring for a moment. */
 .fut-api-copied { box-shadow: 0 0 0 2px #38C56E !important; border-radius: 4px; }
@@ -10732,10 +10746,15 @@ ${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
 .fut-frules-panel > .fut-fnote:first-child { margin: 4px 2px 8px; }
 /* Every body on one line: name, then what each rule keeps; the empty ones in the quiet dashed look. */
 .fut-fbodies { display: flex; flex-direction: column; gap: 4px; }
-.fut-fbrow { display: grid; grid-template-columns: minmax(110px, 1.3fr) repeat(4, minmax(0, 1fr)); align-items: center; gap: 8px; min-height: 40px; padding: 4px 10px;
+.fut-fbrow { display: grid; grid-template-columns: minmax(110px, 1.3fr) repeat(3, minmax(0, 1fr)); align-items: center; gap: 8px; min-height: 40px; padding: 4px 10px;
   border: 1px solid var(--line); border-radius: 7px; background: var(--raised); color: var(--text-2); font: 12px Arial, sans-serif; text-align: left; cursor: pointer; }
 @media (hover: hover) and (pointer: fine) { .fut-fbrow:hover { border-color: var(--accent); } }
 .fut-fbrow:active { background: var(--hover); }
+.fut-fbodies.moons .fut-fbrow { grid-template-columns: minmax(110px, 1.3fr) repeat(4, minmax(0, 1fr)); }
+/* Planets / Moons: the settings window's own pills, each with its symbol and how many. */
+.fut-fscope .seg { display: inline-flex; align-items: center; gap: 6px; height: 32px; }
+.fut-fscope .seg i { font-style: normal; color: var(--muted); font-size: 11px; }
+.fut-fscope .seg[aria-pressed="true"] i { color: var(--accent); }
 .fut-fbrow.head:active { background: none; }
 .fut-fbrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .fut-fbrow.head { min-height: 0; padding: 0 10px; border: 0; background: none; color: var(--muted); font-size: 11px; cursor: default; }
@@ -10744,12 +10763,14 @@ ${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
 .fut-fbrow .nm small { color: var(--muted); font-size: 11px; }
 .fut-fbrow .set { color: var(--text); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fut-fbrow .unset { color: var(--muted); font-style: italic; }
-@media (max-width: 560px) {
-  .fut-fbrow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .fut-fbrow .nm { grid-column: 1 / -1; }
+@container (max-width: 560px) {
+  /* Phone: the name on its own line, then the rules side by side, each with its small label above. */
+  .fut-fbrow { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 4px; padding: 8px 10px; }
+  .fut-fbodies.moons .fut-fbrow { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .fut-fbrow .nm { grid-column: 1 / -1; flex-direction: row; align-items: baseline; gap: 8px; }
   .fut-fbrow.head { display: none; }
-  .fut-fbrow > span:not(.nm):not(.na)::before { content: attr(data-l) ': '; color: var(--muted); font-style: normal; }
-  .fut-fbrow .na { display: none; }
+  .fut-fbrow .set { white-space: normal; }
+  .fut-fbrow > span:not(.nm)::before { content: attr(data-l); display: block; color: var(--muted); font-size: 11px; font-style: normal; }
 }
 .fut-fbtop { display: flex; align-items: center; gap: 10px; margin: 2px 0 8px; }
 .fut-fsaved { color: var(--ok); font-size: 11px; }
@@ -10801,6 +10822,47 @@ input[type="checkbox"] { accent-color: var(--accent); }
 .fut-factions { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
 .fut-feditor > .fut-factions { position: sticky; bottom: 0; z-index: 1; margin: 10px -8px -8px; padding: 10px 8px; border-top: 1px solid var(--line); background: var(--bg); }
 `;
+
+  // src/core/viewport.ts
+  var ZOOMED_OUT = 0.95;
+  function placeOnViewport(el6, vv, fit) {
+    const s = vv.scale || 1;
+    if (fit === "bottom") {
+      Object.assign(el6.style, { left: `${vv.offsetLeft}px`, top: `${vv.offsetTop + vv.height}px`, width: `${vv.width * s}px`, transform: `scale(${1 / s}) translateY(-100%)` });
+      return;
+    }
+    if (s >= ZOOMED_OUT) {
+      for (const p of ["left", "top", "width", "height", "transform", "transformOrigin", "inset"]) el6.style[p] = "";
+      return;
+    }
+    Object.assign(el6.style, {
+      inset: "auto",
+      left: `${vv.offsetLeft}px`,
+      top: `${vv.offsetTop}px`,
+      width: `${vv.width * s}px`,
+      height: `${vv.height * s}px`,
+      transformOrigin: "0 0",
+      transform: `scale(${1 / s})`
+    });
+  }
+  function followViewport(doc, el6, fit) {
+    const vv = doc.defaultView?.visualViewport;
+    if (!vv) {
+      if (fit === "bottom") Object.assign(el6.style, { top: "auto", bottom: "0", width: "100%" });
+      return;
+    }
+    const place2 = () => {
+      if (!el6.isConnected) {
+        vv.removeEventListener("resize", place2);
+        vv.removeEventListener("scroll", place2);
+        return;
+      }
+      placeOnViewport(el6, vv, fit);
+    };
+    placeOnViewport(el6, vv, fit);
+    vv.addEventListener("resize", place2);
+    vv.addEventListener("scroll", place2);
+  }
 
   // src/modules/shortcuts/index.ts
   var ACTIONS = [
@@ -11083,28 +11145,8 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
     const pad = doc.createElement("div");
     pad.className = "fut-touch-pad";
     doc.body.append(pad);
-    followViewport(doc, bar);
+    followViewport(doc, bar, "bottom");
   }
-  function followViewport(doc, bar) {
-    const vv = doc.defaultView?.visualViewport;
-    if (!vv) {
-      Object.assign(bar.style, { top: "auto", bottom: "0", width: "100%" });
-      return;
-    }
-    const place2 = () => {
-      const b = doc.getElementById(TOUCH_ID);
-      if (!b) return;
-      const s = vv.scale || 1;
-      Object.assign(b.style, { left: `${vv.offsetLeft}px`, top: `${vv.offsetTop + vv.height}px`, width: `${vv.width * s}px`, transform: `scale(${1 / s}) translateY(-100%)` });
-    };
-    place2();
-    if (!followers.has(doc)) {
-      followers.add(doc);
-      vv.addEventListener("resize", place2);
-      vv.addEventListener("scroll", place2);
-    }
-  }
-  var followers = /* @__PURE__ */ new WeakSet();
 
   // src/modules/fleet/index.ts
   var STYLE_ID3 = "fut-fleet-style";
@@ -11473,15 +11515,35 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const ids = r.bodies.flatMap((b) => [b.planetId, b.moonId]).filter((x) => x !== null);
     const status = el3(doc, "span", "fut-fsaved");
     status.setAttribute("role", "status");
+    const moonIds = ids.filter((id) => isMoon(r.bodies, id));
+    let scope = r.bodyId && moonIds.includes(r.bodyId) ? "moon" : "planet";
     const showList = () => {
       const profiles = loadProfiles(r.store);
-      const table = el3(doc, "div", "fut-fbodies");
+      if (!moonIds.length) scope = "planet";
+      const shown2 = ids.filter((id) => moonIds.includes(id) === (scope === "moon"));
+      const switcher = el3(doc, "span", "control fut-fscope");
+      switcher.setAttribute("role", "group");
+      for (const [key, label, count2] of [["planet", t("dash.planets"), ids.length - moonIds.length], ["moon", t("dash.moons"), moonIds.length]]) {
+        const b = el3(doc, "button", "seg");
+        b.type = "button";
+        b.disabled = !count2;
+        b.setAttribute("aria-pressed", String(scope === key));
+        b.append(icon(doc, key, 14), el3(doc, "span", "", label), el3(doc, "i", "", String(count2)));
+        b.addEventListener("click", () => {
+          if (scope === key) return;
+          scope = key;
+          showList();
+        });
+        switcher.append(b);
+      }
+      const sections = ["ships", "resources", "gate", "fleetsave"].filter((sec) => sec !== "gate" || scope === "moon");
+      const table = el3(doc, "div", `fut-fbodies ${scope === "moon" ? "moons" : "planets"}`);
       table.setAttribute("role", "list");
       const head = el3(doc, "div", "fut-fbrow head");
       head.setAttribute("aria-hidden", "true");
-      head.append(el3(doc, "span", "", ""), ...["ships", "resources", "gate", "fleetsave"].map((s) => el3(doc, "span", "", t(s === "fleetsave" ? "fleet.fleetsave" : `fleet.rule.${s}`))));
+      head.append(el3(doc, "span", "", ""), ...sections.map((sec) => el3(doc, "span", "", t(sec === "fleetsave" ? "fleet.fleetsave" : `fleet.rule.${sec}`))));
       table.append(head);
-      for (const id of ids) {
+      for (const id of shown2) {
         const o = opts(id);
         const moon = isMoon(r.bodies, id);
         const p = profileFor(profiles, id);
@@ -11491,7 +11553,6 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         const name = el3(doc, "span", "nm");
         name.append(el3(doc, "b", "", shortLabel(o, id)), el3(doc, "small", "", r.bodies.find((b) => b.planetId === id || b.moonId === id)?.coords ?? ""));
         const cell = (section2, text) => {
-          if (section2 === "gate" && !moon) return el3(doc, "span", "na", "");
           const empty = sectionEmpty(p, section2);
           const c = el3(doc, "span", empty ? "unset" : "set", empty ? t("fleet.rule.unset") : text());
           c.dataset.l = t(section2 === "fleetsave" ? "fleet.fleetsave" : `fleet.rule.${section2}`);
@@ -11502,7 +11563,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           name,
           cell("ships", () => shipsSum(p.reserve.ships)),
           cell("resources", () => formatUnits(p.reserve.resources.metal + p.reserve.resources.crystal + p.reserve.resources.deuterium, r.locale)),
-          cell("gate", () => shipsSum(p.gate)),
+          ...moon ? [cell("gate", () => shipsSum(p.gate))] : [],
           cell("fleetsave", () => {
             if (!p.save) return t("fleet.rule.saveReserveOnly");
             const [g, sys] = (r.bodies.find((b) => b.planetId === id || b.moonId === id)?.coords ?? "").split(":");
@@ -11513,7 +11574,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         row.addEventListener("click", () => showBody(id));
         table.append(row);
       }
-      root.replaceChildren(el3(doc, "p", "fut-fnote", t("fleet.bodiesHint")), table);
+      const top = el3(doc, "div", "fut-fbtop");
+      top.append(switcher);
+      root.replaceChildren(el3(doc, "p", "fut-fnote", t("fleet.bodiesHint")), top, table);
     };
     const showBody = (id) => {
       const o = opts(id);
@@ -12774,7 +12837,7 @@ input.field { width: 190px; }
 .mini { height: 28px; padding: 0 8px; border: 0; border-radius: 6px; background: none; color: var(--muted); font: 11px Arial, sans-serif; cursor: pointer; }
 .mini:hover { background: var(--line); color: var(--text); }
 .mini[hidden] { display: inline-block; visibility: hidden; }
-@media (max-width: 520px) { .row { grid-template-columns: 1fr; } .row .control { grid-column: 1; grid-row: auto; } }
+@container (max-width: 520px) { .row { grid-template-columns: 1fr; } .row .control { grid-column: 1; grid-row: auto; } }
 `;
   var keyHandler = null;
   function closeSettings(doc) {
@@ -12807,6 +12870,7 @@ input.field { width: 190px; }
     });
     root.append(style, backdrop);
     doc.body.append(host);
+    followViewport(doc, backdrop, "cover");
     const sections = SECTIONS.filter((s) => s !== "bodies" || o.rules);
     let section2 = o.section ?? store.get(TAB_KEY, "menu");
     if (!sections.includes(section2)) section2 = "menu";
@@ -13201,6 +13265,7 @@ input.field { width: 190px; }
         if (o.notes?.length) body.append(el6("div", "notes", o.notes.join(" \xB7 ")));
       }
       panel.replaceChildren(head, tabs, body);
+      tabs.querySelector('[aria-pressed="true"]')?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
     };
     draw();
     keyHandler = (e) => {
@@ -14622,7 +14687,7 @@ tfoot td { border-top: 1px solid var(--line); border-bottom: 0; font-weight: 700
 .ladder .move { margin: 0; padding: 7px 10px; }
 .ladder .move .pic { width: 24px !important; height: 24px !important; }
 .ladder .roi { font-size: 19px; }
-@media (max-width: 900px) { .ladder { grid-template-columns: 1fr; } }
+@container (max-width: 900px) { .ladder { grid-template-columns: 1fr; } }
 @media (hover: hover) and (pointer: fine) { .card:hover > .move:not(:hover) { opacity: 0.72; } }
 .move .n { width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; background: var(--accent); color: var(--on-accent); font: 600 condensed 12px var(--display); display: flex; align-items: center; justify-content: center; }
 .move-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -14732,8 +14797,8 @@ table.scrap .unit-label { display: flex; align-items: center; gap: 8px; width: 1
 table.scrap .unit-label:hover { border-color: var(--line); color: var(--text); }
 table.scrap .unit-label[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
 .msu { color: var(--accent); margin-left: 4px; }
-@media (max-width: 1100px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 900px) {
+@container (max-width: 1100px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@container (max-width: 900px) {
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cols { grid-template-columns: 1fr; }
     }
@@ -14936,6 +15001,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     else scrapTab(body, ctx);
     panel.append(body);
     doc.body.append(host);
+    followViewport(doc, backdrop, "cover");
     backdrop.scrollTop = keepScroll;
   }
   function section(parent, title, hint) {
@@ -16211,7 +16277,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
 .grow.queued .gbody { align-items: center; padding-left: 2px; color: var(--muted); white-space: nowrap; }
 .grow.queued .gbody > span { white-space: nowrap; }
 .qtag { padding: 0 5px; border: 1px dashed var(--line); border-radius: 4px; color: var(--muted); font-size: 10px; white-space: nowrap; }
-@media (max-width: 640px) { .kpis { grid-template-columns: 1fr; } }
+@container (max-width: 640px) { .kpis { grid-template-columns: 1fr; } }
 `;
 
   // src/modules/tech/index.ts
@@ -16741,6 +16807,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     backdrop.append(panel);
     root.append(style, backdrop);
     doc.body.append(host);
+    followViewport(doc, backdrop, "cover");
     const fmt = (n) => formatUnits(n, locale);
     const byId = new Map((o.snapshot?.bodies ?? []).map((b) => [b.id, b]));
     const stock2 = (id) => {
@@ -17536,6 +17603,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     backdrop.append(panel);
     root.append(style, backdrop);
     doc.body.append(host);
+    followViewport(doc, backdrop, "cover");
     const fmt = (n) => formatUnits(n, locale);
     const ships = store.get(SHIPS_INFO_KEY, {});
     let period = store.get(PERIOD_KEY, "week");
