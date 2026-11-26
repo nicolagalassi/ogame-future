@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { eventsByBody, loadEventsOnPageLoad, parseEventRows, EVENT_LIST_PATH, EVENTS_KEY, type Events } from '../src/data/events';
 import { NetworkGuard } from '../src/core/guard';
 import { MemoryStore, Store } from '../src/core/storage';
+import { EVENT_LIST_V12 } from './event-list-v12';
 
 const fig = (type: string) => `<figure class="planetIcon ${type}"></figure>`;
 const row = (o: { mission: number; side: 'friendly' | 'hostile' | 'neutral'; back?: boolean; at: number; from: string; fromType?: string; to: string; toType?: string; ships?: number; cls?: string }) =>
@@ -95,5 +96,20 @@ describe('event list per body', () => {
     guard.closePageLoadWindow();
     now += 60_000;
     await expect(loadEventsOnPageLoad(deps)).rejects.toThrow(/page has finished loading/);
+  });
+});
+
+describe('the real event table (OGame v12)', () => {
+  it('reads every row of a saved page: 14 expeditions from moons count once each, going out', () => {
+    const box = document.createElement('div');
+    box.innerHTML = EVENT_LIST_V12;
+    const list = parseEventRows(box, 0);
+    expect(list).toHaveLength(28);
+    expect(list[0]).toEqual({ mission: 15, side: 'own', back: false, arrival: 1782732081000, from: { coords: '1:234:8', type: 'moon' }, to: { coords: '1:234:16', type: 'planet' }, ships: 8691 });
+    const by = eventsByBody(list, 0, new Set(['1:234:8|m', '5:185:7|m']));
+    expect(by.get('1:234:8|m')!.own).toEqual([{ mission: 15, way: 'out', count: 1, first: 1782732081000 }]);
+    expect(by.get('5:185:7|m')!.own).toHaveLength(1);
+    // Not the player's body in this test: not listed.
+    expect(by.size).toBe(2);
   });
 });

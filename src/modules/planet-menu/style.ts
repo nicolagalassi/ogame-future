@@ -166,7 +166,8 @@ ${L} .fut-nomoon { flex-shrink: 0; width: ${MOON_W}px; border-left: 1px solid va
 
 /* An enemy landing here (data/events): the planet or moon tile lights up red, as OGLight does; an attack
    strongly, an espionage a little softer. Sword or eye over the skin, the time in its tooltip. Both layouts. */
-#planetbarcomponent #planetList a.fut-attack, #planetbarcomponent #planetList a.fut-spy { position: relative; }
+/* Only in Future's side-by-side menu: in the game's own layout the moon link is placed absolutely. */
+${L} a.fut-attack, ${L} a.fut-spy { position: relative; }
 #planetbarcomponent #planetList a.fut-attack {
   background: rgba(239, 106, 96, 0.24) !important; box-shadow: inset 0 0 0 2px ${STATE_COLORS.bad}, inset 0 0 18px rgba(239, 106, 96, 0.6) !important; }
 #planetbarcomponent #planetList a.fut-spy {
@@ -311,6 +312,8 @@ ${L} .smallplanet a.alert {
   border: 1px solid var(--line-strong); border-radius: 6px; background: linear-gradient(180deg, var(--accent-soft) 0%, var(--surface) 100%);
   box-shadow: 0 6px 18px rgba(0,0,0,0.6); color: var(--text-2); font: 11px/1.45 Verdana, Arial, sans-serif; pointer-events: none; }
 .fut-plan-tip .fut-pt-head { display: flex; flex-direction: column; align-items: center; margin-bottom: 6px; }
+.fut-info-tip .fut-pt-items li { color: var(--text-2); }
+${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
 .fut-plan-tip .fut-pt-head b { color: #fff; font-size: 13px; }
 .fut-plan-tip .fut-pt-head span { color: var(--muted); font-size: 10px; }
 .fut-plan-tip .fut-pt-title { display: flex; align-items: center; gap: 5px; padding: 4px 0 3px; border-top: 1px solid var(--line-strong); color: var(--label); font-weight: 700; }

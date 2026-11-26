@@ -67,6 +67,8 @@ export const WINDOW_SHEET = `
   font: 13px/1.4 var(--body); color: var(--text-2);
   /* Chrome on Android enlarges long paragraphs on its own (text autosizing): the window keeps one scale. */
   -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+  /* Firefox for Android (Nicola's phone) inflates text with its own switch. */
+  -moz-text-size-adjust: none;
 }
 /* Fitted to a phone's screen (core/viewport): edge to edge, the head and tabs always in reach. */
 @media (pointer: coarse) {

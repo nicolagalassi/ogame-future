@@ -3,12 +3,15 @@
  * being spied on, and which of the player's own fleets are leaving from or coming back to each body.
  *
  * Source: the same table the game shows (#eventContent), either already on the page (the player opened
- * the list) or read once while the page loads, as OGLight does for its fleet movements.
+ * the list) or read once while the page loads. OGLight shows fleet movements per planet too
+ * (docs/API-NOTES.md, `ogl.cache.movements`); whether it fetches this list itself is NOT verified in its
+ * code (docs/OGLIGHT-RULES.md, rule 9).
  *
  * COMPLIANCE (AGENTS.md §1.3, §1.4, §4):
  * - At most one background call per page load, through the guard with reason 'page-load', never on a
- *   timer: an attack shows up when the player loads a page, never by itself (Nicola, 2026-11-26).
- *   Skipped when the last reading is under 10 s old (OGLight's own interval).
+ *   timer: an attack shows up when the player loads a page, never by itself (Nicola, 2026-11-26). The same
+ *   rule as the production queue (data/queues.ts). Skipped when the last reading is under 10 s old.
+ * - Not awaited by the page: started inside the load window, the menu is redrawn when it lands (main.ts).
  * - Nothing is sent anywhere and no alarm fires: the planet menu only paints what the game already lists.
  */
 import type { CallReason, NetworkGuard } from '../core/guard';
