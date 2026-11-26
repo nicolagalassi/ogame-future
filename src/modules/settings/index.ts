@@ -19,7 +19,7 @@ import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { iconSvg, type IconName as FleetIcon } from '../fleet/icons';
 import { bodyRulesPanel, RULES_CSS, type FleetBody } from '../fleet';
 import { ACTIONS, assignKey, glyph, keyLabel, keymap, resetKeys, TOUCH_KEY, usableKey, type TouchMode } from '../shortcuts';
-import { followViewport } from '../../core/viewport';
+import { followViewport, revealActiveTabs } from '../../core/viewport';
 
 export const SETTINGS_ID = 'fut-settings-window';
 const TAB_KEY = 'settings.tab';
@@ -561,7 +561,7 @@ export function openSettings(o: SettingsOptions): void {
     }
     panel.replaceChildren(head, tabs, body);
     // On a phone the tabs scroll sideways: the one in use stays in sight.
-    tabs.querySelector<HTMLElement>('[aria-pressed="true"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+    revealActiveTabs(panel);
   };
   draw();
 
