@@ -470,3 +470,16 @@ describe('spy reports taken off the table', () => {
     expect(clicked).toEqual(['42']);
   });
 });
+
+describe('API of a spy report', () => {
+  it('a click on the game API button copies the key', async () => {
+    const { apiButton } = await import('../src/modules/messages/index');
+    document.body.innerHTML = '<div class="msg" data-msg-id="1"><message-footer class="msg_actions"><button class="custom_btn">★</button><button class="custom_btn" data-tooltip-title="<input value=&quot;sr-it-269-abc&quot;>">API</button></message-footer></div>';
+    const msg = document.querySelector('.msg')!;
+    expect(apiButton(msg, 'sr-it-269-abc')?.textContent).toBe('API');
+    document.body.innerHTML = '<div class="msg"><button class="icon_apikey"></button></div>';
+    expect(apiButton(document.querySelector('.msg')!, 'sr-x')?.className).toBe('icon_apikey');
+    document.body.innerHTML = '<div class="msg"><button>★</button></div>';
+    expect(apiButton(document.querySelector('.msg')!, 'sr-x')).toBeNull();
+  });
+});

@@ -358,5 +358,8 @@ tr.on td { background: color-mix(in srgb, var(--accent) 10%, transparent); }
 td.spark-cell { width: 90px; }
 .spark { display: block; height: 7px; border-radius: 2px; background: var(--accent); opacity: 0.55; }
 @media (max-width: 640px) { .two { grid-template-columns: 1fr; } .hero-v { font-size: 28px; } .chart:not(.dense) .tot { font-size: 10px; } }
+
+/* The «API» button right after a click copied the key: a green ring for a moment. */
+.msg .fut-api-copied { box-shadow: 0 0 0 2px #38C56E !important; border-radius: 4px; }
 `;
 
