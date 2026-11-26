@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.157
+// @version      0.3.158
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1474,7 +1474,8 @@
     "fleet.btn.touchCollect": "Accentra",
     "fleet.btn.touchDeploy": "Accentra",
     "fleet.btn.touchSubTransport": "trasporto",
-    "fleet.btn.touchSubDeploy": "schiera"
+    "fleet.btn.touchSubDeploy": "schiera",
+    "fleet.rulesShort": "Regole"
   };
 
   // src/i18n/en.json
@@ -2445,7 +2446,8 @@
     "fleet.btn.touchCollect": "Collect",
     "fleet.btn.touchDeploy": "Collect",
     "fleet.btn.touchSubTransport": "transport",
-    "fleet.btn.touchSubDeploy": "deploy"
+    "fleet.btn.touchSubDeploy": "deploy",
+    "fleet.rulesShort": "Rules"
   };
 
   // src/i18n/fr.json
@@ -3416,7 +3418,8 @@
     "fleet.btn.touchCollect": "Collecter",
     "fleet.btn.touchDeploy": "Collecter",
     "fleet.btn.touchSubTransport": "transport",
-    "fleet.btn.touchSubDeploy": "stationner"
+    "fleet.btn.touchSubDeploy": "stationner",
+    "fleet.rulesShort": "R\xE8gles"
   };
 
   // src/i18n/de.json
@@ -4387,7 +4390,8 @@
     "fleet.btn.touchCollect": "Sammeln",
     "fleet.btn.touchDeploy": "Sammeln",
     "fleet.btn.touchSubTransport": "Transport",
-    "fleet.btn.touchSubDeploy": "Stationieren"
+    "fleet.btn.touchSubDeploy": "Stationieren",
+    "fleet.rulesShort": "Regeln"
   };
 
   // src/core/i18n.ts
@@ -13687,8 +13691,11 @@ ${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
 
 /* Editors, pushed to the far end of the first row. */
 .fut-fedit { display: inline-flex; gap: 2px; margin-left: auto; }
-.fut-ftool { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 5px; background: none; color: var(--mute); }
+.fut-ftool { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 32px; height: 32px; padding: 0 10px 0 8px; border: 0; border-radius: 5px;
+  background: var(--tile); box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--ico-hi); cursor: pointer; }
+.fut-ftool .name { font: 600 condensed 12px/1 var(--display); white-space: nowrap; color: var(--hi); }
 .fut-ftool:hover { background: var(--tile-hi); color: var(--hi); }
+.fut-ftool:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* Rules: the rule's icon beside a switch track, so on and off read without a word. */
 .fut-frules { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; min-width: 0; }
@@ -13816,7 +13823,7 @@ ${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
   .fut-fcaret { width: 30px; height: 46px; }
   .fut-fact kbd { display: none; }
   .fut-fact:has(kbd) .ico { margin: 0; }
-  .fut-ftool { width: 44px; height: 44px; }
+  .fut-ftool { min-width: 44px; height: 44px; }
   .fut-frow { flex-wrap: wrap; }
   .fut-frules { flex-wrap: wrap; gap: 6px; }
   /* Riserve and Giro one under the other: one column of switches beside the labels. */
@@ -15220,12 +15227,13 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       rules.append(reserves, round);
       roundChips.append(skipSwitch(o, rulesOut, redraw));
       const edit = el4(doc, "span", "fut-fedit");
-      const tool = (ico, label, hint, onClick, cls = "") => {
+      const tool = (ico, label, hint, onClick, cls = "", short = "") => {
         const b = el4(doc, "button", `fut-ftool ${cls}`.trim());
         b.type = "button";
         b.title = label;
         b.setAttribute("aria-label", label);
         b.innerHTML = iconSvg(ico, 18);
+        if (short) b.append(el4(doc, "span", "name", short));
         b.addEventListener("click", (e) => {
           e.preventDefault();
           onClick();
@@ -15233,9 +15241,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         out.peek(b, label, hint);
         return b;
       };
-      const rulesTool = tool("rules", t("fleet.editRules", { body: shortLabel(o, o.bodyId) }), t("fleet.editRulesHint"), () => openSettings2(o, "body", redraw), "fut-frules-open");
+      const rulesTool = tool("rules", t("fleet.editRules", { body: shortLabel(o, o.bodyId) }), t("fleet.editRulesHint"), () => openSettings2(o, "body", redraw), "fut-frules-open", t("fleet.rulesShort"));
       rulesOut.peek(rulesTool, t("fleet.editRules", { body: shortLabel(o, o.bodyId) }), t("fleet.editRulesHint"));
-      if (o.onOpenSettings) edit.append(tool("settings", t("fleet.general"), t("fleet.generalHint"), () => o.onOpenSettings?.()));
+      if (o.onOpenSettings) edit.append(tool("settings", t("fleet.general"), t("fleet.generalHint"), () => o.onOpenSettings?.(), "", t("fleet.general")));
       const top = el4(doc, "div", "fut-frow");
       top.append(tiles, edit);
       const bottom = el4(doc, "div", "fut-frow");

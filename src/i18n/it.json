@@ -965,5 +965,6 @@
   "fleet.btn.touchCollect": "Accentra",
   "fleet.btn.touchDeploy": "Accentra",
   "fleet.btn.touchSubTransport": "trasporto",
-  "fleet.btn.touchSubDeploy": "schiera"
+  "fleet.btn.touchSubDeploy": "schiera",
+  "fleet.rulesShort": "Regole"
 }

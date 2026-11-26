@@ -1682,12 +1682,14 @@ export function renderFleetTools(o: FleetOptions): void {
 
     // The editors: this body's rules, and Future's general fleet settings.
     const edit = el(doc, 'span', 'fut-fedit');
-    const tool = (ico: IconName, label: string, hint: string, onClick: () => void, cls = '') => {
+    // Icon and a word on a raised button: a bare grey icon was hard to see (Nicola).
+    const tool = (ico: IconName, label: string, hint: string, onClick: () => void, cls = '', short = '') => {
       const b = el(doc, 'button', `fut-ftool ${cls}`.trim());
       b.type = 'button';
       b.title = label;
       b.setAttribute('aria-label', label);
       b.innerHTML = iconSvg(ico, 18);
+      if (short) b.append(el(doc, 'span', 'name', short));
       b.addEventListener('click', (e) => {
         e.preventDefault();
         onClick();
@@ -1695,9 +1697,9 @@ export function renderFleetTools(o: FleetOptions): void {
       out.peek(b, label, hint);
       return b;
     };
-    const rulesTool = tool('rules', t('fleet.editRules', { body: shortLabel(o, o.bodyId) }), t('fleet.editRulesHint'), () => openSettings(o, 'body', redraw), 'fut-frules-open');
+    const rulesTool = tool('rules', t('fleet.editRules', { body: shortLabel(o, o.bodyId) }), t('fleet.editRulesHint'), () => openSettings(o, 'body', redraw), 'fut-frules-open', t('fleet.rulesShort'));
     rulesOut.peek(rulesTool, t('fleet.editRules', { body: shortLabel(o, o.bodyId) }), t('fleet.editRulesHint'));
-    if (o.onOpenSettings) edit.append(tool('settings', t('fleet.general'), t('fleet.generalHint'), () => o.onOpenSettings?.()));
+    if (o.onOpenSettings) edit.append(tool('settings', t('fleet.general'), t('fleet.generalHint'), () => o.onOpenSettings?.(), '', t('fleet.general')));
 
     const top = el(doc, 'div', 'fut-frow');
     top.append(tiles, edit);
