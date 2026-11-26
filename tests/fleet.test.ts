@@ -1266,3 +1266,29 @@ describe('rules of every planet and moon (settings window)', () => {
     expect(panel.querySelectorAll('button.fut-fbrow')[1]!.querySelector('.set')).not.toBeNull();
   });
 });
+
+describe('touch bar settings key', () => {
+  it('opens Future settings from any page but the fleet page, at the right end of the bar', async () => {
+    const { registerActions, resetShortcuts, setTouchSettings, TOUCH_KEY, TOUCH_ID } = await import('../src/modules/shortcuts');
+    resetShortcuts();
+    document.body.innerHTML = '';
+    const store = new Store(new MemoryStore(), 'gear');
+    store.set(TOUCH_KEY, 'on');
+    let opened = 0;
+    registerActions(document, store, (k) => k, { 'targets.next': () => {} });
+    setTouchSettings(document, () => opened++);
+    await Promise.resolve();
+    const bar = document.getElementById(TOUCH_ID)!;
+    const gear = bar.querySelector<HTMLButtonElement>(':scope > .gear')!;
+    expect(gear.getAttribute('aria-label')).toBe('toolbar.settings');
+    expect(bar.lastElementChild).toBe(gear);
+    gear.click();
+    expect(opened).toBe(1);
+    // The fleet page keeps its Avanti / Invia there instead.
+    document.body.innerHTML = '<div id="fleetdispatchcomponent"><div id="fleet1"></div><a id="continueToFleet2"></a></div>';
+    registerActions(document, store, (k) => k, { 'fleet.fleetsave': () => {} });
+    await Promise.resolve();
+    expect(document.querySelector(`#${TOUCH_ID} > .gear`)).toBeNull();
+    setTouchSettings(document, null);
+  });
+});
