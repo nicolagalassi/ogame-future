@@ -966,5 +966,9 @@
   "fleet.btn.touchDeploy": "Collecter",
   "fleet.btn.touchSubTransport": "transport",
   "fleet.btn.touchSubDeploy": "stationner",
-  "fleet.rulesShort": "Règles"
+  "fleet.rulesShort": "Règles",
+  "settings.section.bodies": "Planètes et lunes",
+  "fleet.bodiesHint": "Réserves, porte de saut et fleetsave de chaque planète et lune. Touchez un corps pour changer ses règles ; les changements s’appliquent tout de suite.",
+  "fleet.bodiesAll": "Tous les corps",
+  "fleet.rule.saveReserveOnly": "sans cible"
 }

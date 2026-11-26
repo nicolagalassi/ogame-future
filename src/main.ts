@@ -287,6 +287,7 @@ async function bootstrap(): Promise<void> {
         mountTouchBar(document, store, t);
       },
       section,
+      rules: { bodies: readPlanetList(document).map(({ planetId, moonId, name, coords }) => ({ planetId, moonId, name, coords })), bodyId: currentId, locale },
     });
   /** Draws the dock under the game's menu (set once the targets side bar is ready, below). */
   let drawDock: (() => void) | null = null;
@@ -504,7 +505,7 @@ async function bootstrap(): Promise<void> {
   // Fleet page helpers: reserves and fleetsave, on the game's own form.
   if (isFleetDispatch(document) && currentId) {
     const bodies = readPlanetList(document).map(({ planetId, moonId, name, coords }) => ({ planetId, moonId, name, coords }));
-    const fleet = { doc: document, store, bodyId: currentId, bodies, t, locale, onOpenSettings: () => openFutureSettings('fleet') };
+    const fleet = { doc: document, store, bodyId: currentId, bodies, t, locale, onOpenSettings: (s?: 'fleet' | 'bodies') => openFutureSettings(s ?? 'fleet') };
     renderFleetTools(fleet);
     refreshFleet = () => renderFleetTools(fleet);
   }

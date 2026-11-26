@@ -17,12 +17,13 @@ import { formatUnits } from '../../core/format';
 import { BIG_DEBRIS, BIG_DEBRIS_KEY } from '../marks/side';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { iconSvg, type IconName as FleetIcon } from '../fleet/icons';
+import { bodyRulesPanel, RULES_CSS, type FleetBody } from '../fleet';
 import { ACTIONS, assignKey, glyph, keyLabel, keymap, resetKeys, TOUCH_KEY, usableKey, type TouchMode } from '../shortcuts';
 
 export const SETTINGS_ID = 'fut-settings-window';
 const TAB_KEY = 'settings.tab';
-export type Section = 'menu' | 'mail' | 'galaxy' | 'fleet' | 'keys' | 'data';
-const SECTIONS: Section[] = ['menu', 'mail', 'galaxy', 'fleet', 'keys', 'data'];
+export type Section = 'menu' | 'mail' | 'galaxy' | 'fleet' | 'bodies' | 'keys' | 'data';
+const SECTIONS: Section[] = ['menu', 'mail', 'galaxy', 'fleet', 'bodies', 'keys', 'data'];
 
 export interface SettingsOptions {
   doc: Document;
@@ -44,6 +45,9 @@ export interface SettingsOptions {
   onFleetChange?: () => void;
   /** Section to open on, instead of the last one used. */
   section?: Section;
+  /** Rules of the planets and moons (reserves, jump gate, fleetsave); without it the section is not shown.
+   *  bodyId: the body to open on when the window opens on that section (the fleet page's Regole). */
+  rules?: { bodies: FleetBody[]; bodyId?: number | null; locale: string };
 }
 
 const CSS = `
@@ -122,7 +126,7 @@ export function openSettings(o: SettingsOptions): void {
     return n;
   };
   const style = el('style');
-  style.textContent = WINDOW_SHEET + CSS;
+  style.textContent = WINDOW_SHEET + CSS + (o.rules ? RULES_CSS : '');
   const backdrop = el('div', 'backdrop');
   const panel = el('div', 'panel');
   panel.setAttribute('role', 'dialog');
@@ -135,8 +139,11 @@ export function openSettings(o: SettingsOptions): void {
   root.append(style, backdrop);
   doc.body.append(host);
 
+  const sections = SECTIONS.filter((s) => s !== 'bodies' || o.rules);
   let section = o.section ?? store.get<Section>(TAB_KEY, 'menu');
-  if (!SECTIONS.includes(section)) section = 'menu';
+  if (!sections.includes(section)) section = 'menu';
+  // Built once per opening: it keeps which body is open while the rest of the window redraws.
+  let rulesPanel: HTMLElement | null = null;
   let menu = { ...o.menu.settings };
   let status = '';
 
@@ -409,7 +416,7 @@ export function openSettings(o: SettingsOptions): void {
 
     const tabs = el('div', 'tabs');
     tabs.setAttribute('role', 'tablist');
-    for (const s of SECTIONS) {
+    for (const s of sections) {
       const b = el('button', 'tab', t(`settings.section.${s}`));
       b.type = 'button';
       b.setAttribute('role', 'tab');
@@ -501,6 +508,9 @@ export function openSettings(o: SettingsOptions): void {
       body.append(row(t('settings.bigDebris'), t('settings.bigDebrisHint'), box), st);
     } else if (section === 'fleet') {
       body.append(...fleetRows());
+    } else if (section === 'bodies' && o.rules) {
+      rulesPanel ??= bodyRulesPanel({ doc, store, t, locale: o.rules.locale, bodies: o.rules.bodies, bodyId: o.section === 'bodies' ? o.rules.bodyId : null, onChange: o.onFleetChange });
+      body.append(rulesPanel);
     } else if (section === 'keys') {
       body.append(...keyRows());
     } else {
