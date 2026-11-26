@@ -311,35 +311,44 @@ function place(msg: Element, box: HTMLElement): void {
 }
 
 /** Reads and summarises every report on the page not done yet. Returns new journal entries. */
-/**
- * The game's «API» button of a report: one click copies the report's API key, without opening the
- * tooltip and selecting it by hand (Nicola). The button is the one whose tooltip carries the key (or
- * marked as the API one). COMPLIANCE: the browser clipboard, on the player's click; nothing is sent.
- */
-export function apiButton(msg: Element, key: string): HTMLElement | null {
-  const tip = (b: Element) => `${b.getAttribute('title') ?? ''} ${b.getAttribute('data-tooltip-title') ?? ''} ${b.getAttribute('data-title') ?? ''}`;
-  const all = Array.from(msg.querySelectorAll<HTMLElement>('button, a'));
-  return all.find((b) => tip(b).includes(key)) ?? all.find((b) => /api/i.test(b.className) || b.textContent?.trim() === 'API') ?? null;
+/** The API key in the game's API button: its tooltip holds `<input value='sr-…'>`. */
+export function apiKeyOf(button: Element): string | null {
+  const tip = `${button.getAttribute('data-tooltip-title') ?? ''} ${button.getAttribute('title') ?? ''}`;
+  return /value=['"]([^'"]+)['"]/.exec(tip)?.[1] ?? /\b([a-z]{2}-[a-z]{2}-\d+-[0-9a-f]{20,})\b/i.exec(tip)?.[1] ?? null;
 }
 
-function copyApiOnClick(doc: Document, msg: Element, key: string, t: (k: string, v?: Record<string, string | number>) => string): void {
-  const b = apiButton(msg, key);
-  if (!b || b.dataset.futApi) return;
-  b.dataset.futApi = '1';
-  b.addEventListener('click', (e) => {
-    e.preventDefault();
-    const done = (ok: boolean) => {
-      b.setAttribute('aria-label', t(ok ? 'msg.apiCopied' : 'msg.apiCopyFailed'));
-      b.classList.toggle('fut-api-copied', ok);
-      (doc.defaultView ?? globalThis).setTimeout(() => b.classList.remove('fut-api-copied'), 1500);
-    };
-    const clip = doc.defaultView?.navigator?.clipboard;
-    if (clip?.writeText) clip.writeText(key).then(() => done(true), () => done(false));
-    else done(false);
-  });
+/**
+ * Once per page: a click on any of the game's API buttons (reports in the list or opened in detail,
+ * spy or combat) copies the key at once, instead of opening the tooltip to select it.
+ */
+export function copyApiOnClick(doc: Document, t: (k: string, v?: Record<string, string | number>) => string): void {
+  const root = doc.documentElement;
+  if (root.dataset.futApi) return;
+  root.dataset.futApi = '1';
+  doc.addEventListener(
+    'click',
+    (e) => {
+      const b = (e.target as Element | null)?.closest?.<HTMLElement>('.msgApiKeyBtn, .icon_apikey');
+      const key = b ? apiKeyOf(b) : null;
+      if (!b || !key) return;
+      // Ours: the game's tooltip does not open for this click.
+      e.preventDefault();
+      e.stopPropagation();
+      const done = (ok: boolean) => {
+        b.setAttribute('aria-label', t(ok ? 'msg.apiCopied' : 'msg.apiCopyFailed'));
+        b.classList.toggle('fut-api-copied', ok);
+        (doc.defaultView ?? globalThis).setTimeout(() => b.classList.remove('fut-api-copied'), 1500);
+      };
+      const clip = doc.defaultView?.navigator?.clipboard;
+      if (clip?.writeText) clip.writeText(key).then(() => done(true), () => done(false));
+      else done(false);
+    },
+    true,
+  );
 }
 
 export function processMessages(o: MessagesOptions): number {
+  copyApiOnClick(o.doc, o.t);
   const { doc, store, t, locale } = o;
   const ships = store.get<ShipsInfo>(SHIPS_INFO_KEY, {});
   const universe = universeOf(doc, store.get<ServerData | null>(SERVER_DATA_KEY, null));
@@ -374,7 +383,6 @@ export function processMessages(o: MessagesOptions): number {
     msg.setAttribute('data-fut-done', '');
     const parsed = readMessage(msg, o.playerId);
     if (!parsed) continue;
-    if (parsed.kind === 'spy' && parsed.apiKey) copyApiOnClick(doc, msg, parsed.apiKey, t);
     if (parsed.kind === 'expedition') msg.setAttribute('data-fut-kind', 'expedition');
     const silent = parsed.kind === 'expedition' && silentNow(msg);
     if (silent) msg.setAttribute('data-fut-quiet', '');

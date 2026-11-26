@@ -961,5 +961,7 @@
   "fleet.keepRes": "reserve {n}",
   "fleet.keepResHint": "Resources reserve: {n} stay on this body (not for expeditions and the fleetsave)",
   "fleet.cargoPicked": "Cargo {n}",
-  "fleet.cargoPickedHint": "Cargo room of the ships picked: {n}"
+  "fleet.cargoPickedHint": "Cargo room of the ships picked: {n}",
+  "fleet.btn.touchCollect": "Collect",
+  "fleet.btn.touchDeploy": "Deploy"
 }

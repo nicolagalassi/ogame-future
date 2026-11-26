@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.148
+// @version      0.3.149
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1470,7 +1470,9 @@
     "fleet.keepRes": "riserva {n}",
     "fleet.keepResHint": "Riserva risorse: {n} restano su questo corpo (non vale per spedizione e fleetsave)",
     "fleet.cargoPicked": "Stiva {n}",
-    "fleet.cargoPickedHint": "Stiva delle navi selezionate: {n}"
+    "fleet.cargoPickedHint": "Stiva delle navi selezionate: {n}",
+    "fleet.btn.touchCollect": "Raccogli",
+    "fleet.btn.touchDeploy": "Schiera"
   };
 
   // src/i18n/en.json
@@ -2437,7 +2439,9 @@
     "fleet.keepRes": "reserve {n}",
     "fleet.keepResHint": "Resources reserve: {n} stay on this body (not for expeditions and the fleetsave)",
     "fleet.cargoPicked": "Cargo {n}",
-    "fleet.cargoPickedHint": "Cargo room of the ships picked: {n}"
+    "fleet.cargoPickedHint": "Cargo room of the ships picked: {n}",
+    "fleet.btn.touchCollect": "Collect",
+    "fleet.btn.touchDeploy": "Deploy"
   };
 
   // src/i18n/fr.json
@@ -3404,7 +3408,9 @@
     "fleet.keepRes": "r\xE9serve {n}",
     "fleet.keepResHint": "R\xE9serve de ressources : {n} restent sur ce corps (pas pour l'exp\xE9dition et le fleetsave)",
     "fleet.cargoPicked": "Fret {n}",
-    "fleet.cargoPickedHint": "Capacit\xE9 de fret des vaisseaux choisis : {n}"
+    "fleet.cargoPickedHint": "Capacit\xE9 de fret des vaisseaux choisis : {n}",
+    "fleet.btn.touchCollect": "Collecter",
+    "fleet.btn.touchDeploy": "Stationner"
   };
 
   // src/i18n/de.json
@@ -4371,7 +4377,9 @@
     "fleet.keepRes": "Reserve {n}",
     "fleet.keepResHint": "Rohstoffreserve: {n} bleiben auf diesem K\xF6rper (nicht f\xFCr Expeditionen und den Fleetsave)",
     "fleet.cargoPicked": "Laderaum {n}",
-    "fleet.cargoPickedHint": "Laderaum der gew\xE4hlten Schiffe: {n}"
+    "fleet.cargoPickedHint": "Laderaum der gew\xE4hlten Schiffe: {n}",
+    "fleet.btn.touchCollect": "Sammeln",
+    "fleet.btn.touchDeploy": "Stationieren"
   };
 
   // src/core/i18n.ts
@@ -8252,7 +8260,7 @@ td.spark-cell { width: 90px; }
 @media (max-width: 640px) { .two { grid-template-columns: 1fr; } .hero-v { font-size: 28px; } .chart:not(.dense) .tot { font-size: 10px; } }
 
 /* The \xABAPI\xBB button right after a click copied the key: a green ring for a moment. */
-.msg .fut-api-copied { box-shadow: 0 0 0 2px #38C56E !important; border-radius: 4px; }
+.fut-api-copied { box-shadow: 0 0 0 2px #38C56E !important; border-radius: 4px; }
 `;
 
   // src/modules/messages/spy-table.ts
@@ -8923,28 +8931,36 @@ td.spark-cell { width: 90px; }
     if (actions?.parentElement) actions.before(box);
     else (msg.querySelector(".msgContent") ?? msg).after(box);
   }
-  function apiButton(msg, key) {
-    const tip = (b) => `${b.getAttribute("title") ?? ""} ${b.getAttribute("data-tooltip-title") ?? ""} ${b.getAttribute("data-title") ?? ""}`;
-    const all2 = Array.from(msg.querySelectorAll("button, a"));
-    return all2.find((b) => tip(b).includes(key)) ?? all2.find((b) => /api/i.test(b.className) || b.textContent?.trim() === "API") ?? null;
+  function apiKeyOf(button3) {
+    const tip = `${button3.getAttribute("data-tooltip-title") ?? ""} ${button3.getAttribute("title") ?? ""}`;
+    return /value=['"]([^'"]+)['"]/.exec(tip)?.[1] ?? /\b([a-z]{2}-[a-z]{2}-\d+-[0-9a-f]{20,})\b/i.exec(tip)?.[1] ?? null;
   }
-  function copyApiOnClick(doc, msg, key, t) {
-    const b = apiButton(msg, key);
-    if (!b || b.dataset.futApi) return;
-    b.dataset.futApi = "1";
-    b.addEventListener("click", (e) => {
-      e.preventDefault();
-      const done = (ok) => {
-        b.setAttribute("aria-label", t(ok ? "msg.apiCopied" : "msg.apiCopyFailed"));
-        b.classList.toggle("fut-api-copied", ok);
-        (doc.defaultView ?? globalThis).setTimeout(() => b.classList.remove("fut-api-copied"), 1500);
-      };
-      const clip = doc.defaultView?.navigator?.clipboard;
-      if (clip?.writeText) clip.writeText(key).then(() => done(true), () => done(false));
-      else done(false);
-    });
+  function copyApiOnClick(doc, t) {
+    const root = doc.documentElement;
+    if (root.dataset.futApi) return;
+    root.dataset.futApi = "1";
+    doc.addEventListener(
+      "click",
+      (e) => {
+        const b = e.target?.closest?.(".msgApiKeyBtn, .icon_apikey");
+        const key = b ? apiKeyOf(b) : null;
+        if (!b || !key) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const done = (ok) => {
+          b.setAttribute("aria-label", t(ok ? "msg.apiCopied" : "msg.apiCopyFailed"));
+          b.classList.toggle("fut-api-copied", ok);
+          (doc.defaultView ?? globalThis).setTimeout(() => b.classList.remove("fut-api-copied"), 1500);
+        };
+        const clip = doc.defaultView?.navigator?.clipboard;
+        if (clip?.writeText) clip.writeText(key).then(() => done(true), () => done(false));
+        else done(false);
+      },
+      true
+    );
   }
   function processMessages(o) {
+    copyApiOnClick(o.doc, o.t);
     const { doc, store, t, locale } = o;
     const ships = store.get(SHIPS_INFO_KEY, {});
     const universe = universeOf(doc, store.get(SERVER_DATA_KEY, null));
@@ -8974,7 +8990,6 @@ td.spark-cell { width: 90px; }
       msg.setAttribute("data-fut-done", "");
       const parsed = readMessage(msg, o.playerId);
       if (!parsed) continue;
-      if (parsed.kind === "spy" && parsed.apiKey) copyApiOnClick(doc, msg, parsed.apiKey, t);
       if (parsed.kind === "expedition") msg.setAttribute("data-fut-kind", "expedition");
       const silent = parsed.kind === "expedition" && silentNow(msg);
       if (silent) msg.setAttribute("data-fut-quiet", "");
@@ -13699,7 +13714,10 @@ table.queues td.acts { width: 1%; text-align: right; }
 /* Ships reserve on a ship tile (page 1): how many stay here, bottom left over the picture. */
 #fleet1 #technologies li .fut-fkeep { position: absolute; left: 2px; bottom: 24px; z-index: 2; padding: 0 4px; border-radius: 3px; background: rgba(13, 21, 34, 0.88); color: #F5B547; font: 700 10px/14px Verdana, Arial, sans-serif; pointer-events: auto; cursor: help; }
 /* Cargo room of the ships picked, in the reserves strip. */
-.fut-fcap { flex: none; margin-left: auto; padding-left: 12px; color: var(--hi); font: 700 12px Verdana, Arial, sans-serif; white-space: nowrap; }
+.fut-fcap { flex: none; display: inline-flex; align-items: center; gap: 6px; margin-left: auto; padding: 4px 10px; border-radius: 4px;
+  background: rgba(242, 208, 74, 0.10); box-shadow: inset 0 0 0 1px #8A7420, 0 0 10px rgba(242, 208, 74, 0.18);
+  color: #F7DF7A; font: 700 12px Verdana, Arial, sans-serif; white-space: nowrap; text-shadow: 0 0 6px rgba(247, 223, 122, 0.35); }
+.fut-fcap .ico { display: inline-flex; color: #F2D04A; }
 .fut-fcap:empty { display: none; }
 .fut-ffoot { align-items: center; }
 /* Resources reserve next to the game's resource field (page 2). */
@@ -13718,7 +13736,18 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fcl.none .pic { opacity: 0.3; filter: grayscale(1); }
 
 /* Fingers: bigger targets, no key letters. */
+/* The collection's two direct tiles exist for touch screens only. */
+.fut-fact.fut-touch { display: none; }
 @media (pointer: coarse) {
+  /* Touch (Nicola): only the most used actions, large and clearly drawn: expedition, fleetsave and the
+     collection's transport and deploy; the rest stays on the computer. */
+  .fut-fact[data-mode="transport"], .fut-fact[data-mode="deploy"], .fut-fact[data-mode="last"], .fut-fact[data-mode="moon"], .fut-fact[data-mode="collect"] { display: none; }
+  .fut-fact.fut-touch { display: inline-flex; }
+  .fut-facts .fut-fact { width: auto; min-width: 76px; height: 62px; padding: 6px 10px 5px; }
+  .fut-facts .fut-fact .ico svg { width: 26px; height: 26px; }
+  .fut-facts .fut-fact .name { font-size: 14px; }
+  .fut-fsecond { margin-left: 0; padding-left: 0; border-left: 0; }
+  .fut-fsecond .fut-fact { background: var(--tile); box-shadow: none; color: var(--ico); }
   .fut-fact { width: 48px; height: 46px; }
   .fut-fcaret { width: 30px; height: 46px; }
   .fut-fact kbd { display: none; }
@@ -14381,7 +14410,12 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const fd = getDispatcher();
       if (!out) return;
       const room = fd ? selectedCargo(doc, (id) => shipCapacity(fd, id)) : 0;
-      out.textContent = room > 0 ? t("fleet.cargoPicked", { n: formatUnits(room, o.locale) }) : "";
+      out.replaceChildren();
+      if (room > 0) {
+        const ico = el4(doc, "span", "ico");
+        ico.innerHTML = iconSvg("cargo", 14);
+        out.append(ico, el4(doc, "span", "", t("fleet.cargoPicked", { n: formatUnits(room, o.locale) })));
+      }
       out.title = room > 0 ? t("fleet.cargoPickedHint", { n: room.toLocaleString(o.locale) }) : "";
     };
     draw();
@@ -15036,6 +15070,13 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const secondary = dest.row;
       if (here?.moonId) secondary.append(act2("moon", "fleet.moon", t("fleet.btn.moon"), to(here.moonId), t("fleet.tip.moon"), () => run.moon()));
       secondary.append(collect);
+      for (const [m, ico, label] of [["collect", "transport", "fleet.btn.touchCollect"], ["collectDeploy", "deploy", "fleet.btn.touchDeploy"]]) {
+        const fav = m === "collect" ? settings.favTransport : settings.favDeploy;
+        const b = act2(ico, `fleet.${m}`, t(label), fav ? to(fav) : "", fav ? t("fleet.tip.collect") : t("fleet.err.noDefault"), favRun[m], !fav);
+        b.classList.add("fut-touch");
+        b.dataset.mode = m === "collect" ? "collect-touch" : "collectDeploy-touch";
+        secondary.append(b);
+      }
       tiles.append(dest.box);
       const skipSlot = el4(doc, "span", "fut-fsecond fut-fskip");
       drawSkip = () => {
@@ -17952,8 +17993,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   var isDisabled = (el6) => !!(el6.disabled || el6.classList.contains("disabled") || el6.getAttribute("aria-disabled") === "true");
   var WAVE_SIM = ".waveSimButton";
   var WAVE_API = ".waveApiButton";
-  function readWaveFleet(apiButton2) {
-    const tip = apiButton2.getAttribute("data-tooltip-title") ?? apiButton2.getAttribute("title") ?? "";
+  function readWaveFleet(apiButton) {
+    const tip = apiButton.getAttribute("data-tooltip-title") ?? apiButton.getAttribute("title") ?? "";
     const raw = /value='([^']*)'/.exec(tip)?.[1] ?? /value="([^"]*)"/.exec(tip)?.[1];
     if (!raw) return null;
     try {

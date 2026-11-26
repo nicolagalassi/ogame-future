@@ -472,14 +472,24 @@ describe('spy reports taken off the table', () => {
 });
 
 describe('API of a spy report', () => {
-  it('a click on the game API button copies the key', async () => {
-    const { apiButton } = await import('../src/modules/messages/index');
-    document.body.innerHTML = '<div class="msg" data-msg-id="1"><message-footer class="msg_actions"><button class="custom_btn">★</button><button class="custom_btn" data-tooltip-title="<input value=&quot;sr-it-269-abc&quot;>">API</button></message-footer></div>';
-    const msg = document.querySelector('.msg')!;
-    expect(apiButton(msg, 'sr-it-269-abc')?.textContent).toBe('API');
-    document.body.innerHTML = '<div class="msg"><button class="icon_apikey"></button></div>';
-    expect(apiButton(document.querySelector('.msg')!, 'sr-x')?.className).toBe('icon_apikey');
-    document.body.innerHTML = '<div class="msg"><button>★</button></div>';
-    expect(apiButton(document.querySelector('.msg')!, 'sr-x')).toBeNull();
+  it('a click on the game API button (list or detail) copies the key, without the tooltip', async () => {
+    const { apiKeyOf, copyApiOnClick } = await import('../src/modules/messages/index');
+    // The button as the game draws it (Nicola, 2026-11-26).
+    const html = `<gradient-button sq28=""><button class="custom_btn icon_apikey tooltip msgApiKeyBtn" data-tooltip-interactive="true" data-message-id="16473111" data-tooltip-title="Questi dati possono essere letti da un simulatore di battaglie compatibile:&lt;br/&gt;&lt;input value='sr-it-269-b22f5b7d39306c855f6ed4210a02fddd1901dacf' readonly onclick='ogame.messages.copyToClipboard(this)' style='width:360px'&gt;&lt;/input&gt;" aria-expanded="false"><img src="/cdn/img/icons/basic/apikey.png"></button></gradient-button>`;
+    document.body.innerHTML = `<div id="messagedetails">${html}</div>`;
+    const b = document.querySelector<HTMLElement>('.msgApiKeyBtn')!;
+    expect(apiKeyOf(b)).toBe('sr-it-269-b22f5b7d39306c855f6ed4210a02fddd1901dacf');
+    expect(apiKeyOf(document.createElement('button'))).toBeNull();
+    const copied: string[] = [];
+    Object.defineProperty(window.navigator, 'clipboard', { value: { writeText: async (s: string) => void copied.push(s) }, configurable: true });
+    let tooltip = 0;
+    document.body.addEventListener('click', () => tooltip++);
+    copyApiOnClick(document, (k: string) => k);
+    copyApiOnClick(document, (k: string) => k);
+    b.querySelector('img')!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    await new Promise((r) => setTimeout(r, 0));
+    expect(copied).toEqual(['sr-it-269-b22f5b7d39306c855f6ed4210a02fddd1901dacf']);
+    expect(tooltip).toBe(0);
+    expect(b.classList.contains('fut-api-copied')).toBe(true);
   });
 });

@@ -162,7 +162,10 @@ export const FLEET_CSS = `
 /* Ships reserve on a ship tile (page 1): how many stay here, bottom left over the picture. */
 #fleet1 #technologies li .fut-fkeep { position: absolute; left: 2px; bottom: 24px; z-index: 2; padding: 0 4px; border-radius: 3px; background: rgba(13, 21, 34, 0.88); color: #F5B547; font: 700 10px/14px Verdana, Arial, sans-serif; pointer-events: auto; cursor: help; }
 /* Cargo room of the ships picked, in the reserves strip. */
-.fut-fcap { flex: none; margin-left: auto; padding-left: 12px; color: var(--hi); font: 700 12px Verdana, Arial, sans-serif; white-space: nowrap; }
+.fut-fcap { flex: none; display: inline-flex; align-items: center; gap: 6px; margin-left: auto; padding: 4px 10px; border-radius: 4px;
+  background: rgba(242, 208, 74, 0.10); box-shadow: inset 0 0 0 1px #8A7420, 0 0 10px rgba(242, 208, 74, 0.18);
+  color: #F7DF7A; font: 700 12px Verdana, Arial, sans-serif; white-space: nowrap; text-shadow: 0 0 6px rgba(247, 223, 122, 0.35); }
+.fut-fcap .ico { display: inline-flex; color: #F2D04A; }
 .fut-fcap:empty { display: none; }
 .fut-ffoot { align-items: center; }
 /* Resources reserve next to the game's resource field (page 2). */
@@ -181,7 +184,18 @@ export const FLEET_CSS = `
 .fut-fcl.none .pic { opacity: 0.3; filter: grayscale(1); }
 
 /* Fingers: bigger targets, no key letters. */
+/* The collection's two direct tiles exist for touch screens only. */
+.fut-fact.fut-touch { display: none; }
 @media (pointer: coarse) {
+  /* Touch (Nicola): only the most used actions, large and clearly drawn: expedition, fleetsave and the
+     collection's transport and deploy; the rest stays on the computer. */
+  .fut-fact[data-mode="transport"], .fut-fact[data-mode="deploy"], .fut-fact[data-mode="last"], .fut-fact[data-mode="moon"], .fut-fact[data-mode="collect"] { display: none; }
+  .fut-fact.fut-touch { display: inline-flex; }
+  .fut-facts .fut-fact { width: auto; min-width: 76px; height: 62px; padding: 6px 10px 5px; }
+  .fut-facts .fut-fact .ico svg { width: 26px; height: 26px; }
+  .fut-facts .fut-fact .name { font-size: 14px; }
+  .fut-fsecond { margin-left: 0; padding-left: 0; border-left: 0; }
+  .fut-fsecond .fut-fact { background: var(--tile); box-shadow: none; color: var(--ico); }
   .fut-fact { width: 48px; height: 46px; }
   .fut-fcaret { width: 30px; height: 46px; }
   .fut-fact kbd { display: none; }

@@ -1131,3 +1131,22 @@ describe('what the reserves keep, and the cargo picked', () => {
     expect(doc.querySelector('#crystal + .fut-fkeepres')).toBeNull();
   });
 });
+
+describe('touch tiles for the collection', () => {
+  it('two direct tiles to the favourite destinations (dashed without one)', async () => {
+    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    const page = fleetPage();
+    const doc = document.implementation.createHTMLDocument();
+    doc.head.innerHTML = page.head.innerHTML;
+    doc.body.innerHTML = page.body.innerHTML;
+    const store = new Store(new MemoryStore(), 'touch');
+    store.set('fleet.settings', { favTransport: 2 });
+    const bodies = [{ planetId: 1, moonId: null, name: 'Casa', coords: '5:185:8' }, { planetId: 2, moonId: null, name: 'Colonia', coords: '5:186:8' }];
+    renderFleetTools({ doc, store, bodyId: 1, bodies, t: (k: string) => k, locale: 'en', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch' });
+    const touch = [...doc.querySelectorAll<HTMLElement>('.fut-fact.fut-touch')];
+    expect(touch.map((b) => b.dataset.mode)).toEqual(['collect-touch', 'collectDeploy-touch']);
+    expect(touch[0]!.getAttribute('aria-label')).toBe('fleet.btn.touchCollect → Colonia');
+    expect(touch[0]!.classList.contains('dim')).toBe(false);
+    expect(touch[1]!.classList.contains('dim')).toBe(true);
+  });
+});

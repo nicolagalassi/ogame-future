@@ -961,5 +961,7 @@
   "fleet.keepRes": "riserva {n}",
   "fleet.keepResHint": "Riserva risorse: {n} restano su questo corpo (non vale per spedizione e fleetsave)",
   "fleet.cargoPicked": "Stiva {n}",
-  "fleet.cargoPickedHint": "Stiva delle navi selezionate: {n}"
+  "fleet.cargoPickedHint": "Stiva delle navi selezionate: {n}",
+  "fleet.btn.touchCollect": "Raccogli",
+  "fleet.btn.touchDeploy": "Schiera"
 }

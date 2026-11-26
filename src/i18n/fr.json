@@ -961,5 +961,7 @@
   "fleet.keepRes": "réserve {n}",
   "fleet.keepResHint": "Réserve de ressources : {n} restent sur ce corps (pas pour l'expédition et le fleetsave)",
   "fleet.cargoPicked": "Fret {n}",
-  "fleet.cargoPickedHint": "Capacité de fret des vaisseaux choisis : {n}"
+  "fleet.cargoPickedHint": "Capacité de fret des vaisseaux choisis : {n}",
+  "fleet.btn.touchCollect": "Collecter",
+  "fleet.btn.touchDeploy": "Stationner"
 }
