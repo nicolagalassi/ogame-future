@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.153
+// @version      0.3.154
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -9598,7 +9598,27 @@ td.spark-cell { width: 90px; }
 #${TOUCH_ID} .send:active { background: var(--accent-hi); color: var(--on-accent); }
 #${TOUCH_ID} .send[aria-disabled="true"] { background: transparent; box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--quiet); text-decoration: line-through; }
 .fut-touch-pad { height: 72px; }
+/* A message carried by the bar, standing on top of its keys (it scales and moves with the bar). */
+#${TOUCH_ID} .note { position: absolute; left: 8px; right: 8px; bottom: calc(100% + 6px); display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 6px; background: var(--raised); box-shadow: inset 0 0 0 1px var(--accent-line), 0 8px 24px rgba(0, 0, 0, 0.6); color: var(--text); font: 600 14px/1.3 var(--display); }
+#${TOUCH_ID} .note .q { flex: 1 1 200px; }
+#${TOUCH_ID} .note button { width: auto; height: 38px; padding: 0 16px; }
+#${TOUCH_ID} .note button.yes { background: var(--accent); color: var(--on-accent); }
 `;
+  var notes = /* @__PURE__ */ new WeakMap();
+  function setTouchNote(doc, node) {
+    doc.getElementById(TOUCH_ID)?.querySelector(":scope > .note")?.remove();
+    if (!node) {
+      notes.delete(doc);
+      return !!doc.getElementById(TOUCH_ID);
+    }
+    const bar = doc.getElementById(TOUCH_ID);
+    if (!bar) return false;
+    node.classList.add("note");
+    notes.set(doc, node);
+    bar.append(node);
+    return true;
+  }
   var queued = false;
   function scheduleTouchBar() {
     if (queued) return;
@@ -9688,6 +9708,8 @@ td.spark-cell { width: 90px; }
       bar.append(send);
     }
     if (!keys.childElementCount && !fleet) return;
+    const note = notes.get(doc);
+    if (note) bar.append(note);
     doc.body.append(bar);
     const pad = doc.createElement("div");
     pad.className = "fut-touch-pad";
@@ -13613,12 +13635,6 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fsecond .fut-fact:hover { background: var(--tile); color: var(--ico-hi); }
 .fut-fskip[hidden] { display: none; }
 .fut-fbar[hidden] { display: none; }
-/* The fleetsave speed question on a touch screen: fixed at the bottom of the screen, so it never moves the
-   page while the finger is still on the game's speed bar (it shifted the bar, which then stuck at 10%). */
-@media (pointer: coarse) {
-  #fleet2 .fut-faskbar .fut-fread:has(.fut-finfo:empty) { display: none; }
-  #fleet2 .fut-faskbar { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 1000001; margin: 0; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6); }
-}
 /* Main cargo ship, picked on the ship itself (top right; the game keeps the top left). */
 #fleet1 #technologies li[data-technology] { position: relative; }
 .fut-mainship { position: absolute; top: 2px; right: 2px; z-index: 2; width: 20px; height: 20px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--accent-soft); border-radius: 5px; background: rgba(13, 21, 34, 0.85); color: var(--muted); cursor: pointer; opacity: 0.75; }
@@ -14434,19 +14450,6 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     doc.addEventListener("click", (e) => {
       if (e.target?.closest?.("#sendall, a.send_all, #resetall, a.reset_all")) later();
     });
-  }
-  function placeAboveTouchBar(doc, host) {
-    const win = doc.defaultView;
-    const bar = doc.getElementById("fut-touchbar");
-    if (!win || win.getComputedStyle(host).position !== "fixed") return;
-    const r = bar?.getBoundingClientRect();
-    const k = bar && bar.offsetHeight > 0 && r ? r.height / bar.offsetHeight : 1;
-    host.style.bottom = r ? `${Math.max(8, win.innerHeight - r.top + 8)}px` : "";
-    const scaled = k > 1.05;
-    host.style.transformOrigin = scaled ? "left bottom" : "";
-    host.style.transform = scaled ? `scale(${k})` : "";
-    host.style.right = scaled ? "auto" : "";
-    host.style.width = scaled ? `${(win.innerWidth - 16) / k}px` : "";
   }
   function cappedByReserve(loaded, onPlanet2, keep, fuel) {
     const cap = (k) => Math.max(0, Math.min(loaded[k], Math.floor(onPlanet2[k] - keep[k] - (k === "deuterium" ? fuel : 0))));
@@ -15265,11 +15268,27 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           box.hidden = true;
           return;
         }
-        const host = box.closest(".fut-fbar");
-        if (host) {
-          host.hidden = false;
-          placeAboveTouchBar(doc, host);
+        const note = el4(doc, "div", "");
+        const noteYes = el4(doc, "button", "yes", t("fleet.speedAsk.yes"));
+        const noteNo = el4(doc, "button", "", t("fleet.speedAsk.no"));
+        noteYes.type = noteNo.type = "button";
+        note.append(el4(doc, "span", "q", t("fleet.speedAsk.q", { pct })), noteYes, noteNo);
+        noteYes.addEventListener("click", (e) => {
+          e.preventDefault();
+          state.active = { ...a, speed: pct };
+          note.replaceChildren(el4(doc, "span", "q", t("fleet.speedAsk.done", { pct })));
+          (doc.defaultView ?? globalThis).setTimeout(() => setTouchNote(doc, null), 3e3);
+        });
+        noteNo.addEventListener("click", (e) => {
+          e.preventDefault();
+          setTouchNote(doc, null);
+        });
+        if (setTouchNote(doc, note)) {
+          box.hidden = true;
+          return;
         }
+        const host = box.closest(".fut-fbar");
+        if (host) host.hidden = false;
         const yes = el4(doc, "button", "fut-fask-b yes", t("fleet.speedAsk.yes"));
         const no = el4(doc, "button", "fut-fask-b", t("fleet.speedAsk.no"));
         yes.type = no.type = "button";
