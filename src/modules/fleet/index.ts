@@ -504,16 +504,21 @@ function copyPanel(o: FleetOptions, moon: boolean, onCopy: (sections: ReserveSec
   });
   box.append(el(doc, 'h6', '', t('fleet.copyWhat')), secRow);
 
-  const bodyRow = el(doc, 'div', 'fut-fchecks');
+  // Planets and moons in two groups, as every list of bodies in Future (Nicola: the same views everywhere).
+  const planetRow = el(doc, 'div', 'fut-fchecks');
+  const moonRow = el(doc, 'div', 'fut-fchecks');
   const targets: [number, boolean, HTMLInputElement][] = [];
   for (const b of o.bodies) {
     for (const [id, isMoonId] of [[b.planetId, false], [b.moonId, true]] as const) {
       if (id === null || id === o.bodyId) continue;
       const [wrap, input] = checkField(doc, `${shortName(o, id)} [${b.coords}]`, false);
-      bodyRow.append(wrap);
+      (isMoonId ? moonRow : planetRow).append(wrap);
       targets.push([id, isMoonId, input]);
     }
   }
+  const bodyRow = el(doc, 'div', 'fut-fcopywhere');
+  if (planetRow.childElementCount) bodyRow.append(el(doc, 'h6', '', o.t('dash.planets')), planetRow);
+  if (moonRow.childElementCount) bodyRow.append(el(doc, 'h6', '', o.t('dash.moons')), moonRow);
   const pick = (which: 'planets' | 'moons' | 'none') => {
     for (const [, isMoonId, input] of targets) input.checked = which === 'moons' ? isMoonId : which === 'planets' ? !isMoonId : false;
   };
