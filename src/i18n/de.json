@@ -963,5 +963,7 @@
   "fleet.cargoPicked": "Laderaum {n}",
   "fleet.cargoPickedHint": "Laderaum der gewählten Schiffe: {n}",
   "fleet.btn.touchCollect": "Sammeln",
-  "fleet.btn.touchDeploy": "Stationieren"
+  "fleet.btn.touchDeploy": "Sammeln",
+  "fleet.btn.touchSubTransport": "Transport",
+  "fleet.btn.touchSubDeploy": "Stationieren"
 }

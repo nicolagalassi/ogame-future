@@ -963,5 +963,7 @@
   "fleet.cargoPicked": "Cargo {n}",
   "fleet.cargoPickedHint": "Cargo room of the ships picked: {n}",
   "fleet.btn.touchCollect": "Collect",
-  "fleet.btn.touchDeploy": "Deploy"
+  "fleet.btn.touchDeploy": "Collect",
+  "fleet.btn.touchSubTransport": "transport",
+  "fleet.btn.touchSubDeploy": "deploy"
 }

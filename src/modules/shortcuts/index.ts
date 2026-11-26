@@ -29,6 +29,10 @@ export interface ActionDef {
   keysOnly?: boolean;
   /** Short name printed under the glyph in the touch bar. */
   touchName?: string;
+  /** Second, smaller line under the name: which kind, when two keys share it (Accentra trasporto / schiera). */
+  touchSub?: string;
+  /** Colour of the key in the touch bar, one per kind of fleet action, so it is found at a glance. */
+  tone?: 'collect' | 'expedition' | 'fleetsave';
 }
 
 export const ACTIONS: ActionDef[] = [
@@ -38,10 +42,10 @@ export const ACTIONS: ActionDef[] = [
   { id: 'fleet.moon', key: 'l', label: 'fleet.btn.moon', group: 'fleet', glyph: { fleet: 'moon' }, keysOnly: true },
   { id: 'fleet.transport', key: 't', label: 'fleet.btn.transport', group: 'fleet', glyph: { fleet: 'transport' }, keysOnly: true },
   { id: 'fleet.deploy', key: 'd', label: 'fleet.btn.deploy', group: 'fleet', glyph: { fleet: 'deploy' }, keysOnly: true },
-  { id: 'fleet.collect', key: 'c', label: 'fleet.btn.collectTransport', group: 'fleet', glyph: { fleet: 'transport' }, touchName: 'fleet.btn.touchCollect' },
-  { id: 'fleet.collectDeploy', key: 'v', label: 'fleet.btn.collectDeploy', group: 'fleet', glyph: { fleet: 'deploy' }, touchName: 'fleet.btn.touchDeploy' },
-  { id: 'fleet.expedition', key: 'x', label: 'fleet.btn.expedition', group: 'fleet', glyph: { fleet: 'expedition' }, touchName: 'fleet.btn.expedition' },
-  { id: 'fleet.fleetsave', key: 'e', label: 'fleet.btn.fleetsave', group: 'fleet', glyph: { fleet: 'fleetsave' }, touchName: 'fleet.btn.fleetsave' },
+  { id: 'fleet.collect', key: 'c', label: 'fleet.btn.collectTransport', group: 'fleet', glyph: { fleet: 'transport' }, touchName: 'fleet.btn.touchCollect', touchSub: 'fleet.btn.touchSubTransport', tone: 'collect' },
+  { id: 'fleet.collectDeploy', key: 'v', label: 'fleet.btn.collectDeploy', group: 'fleet', glyph: { fleet: 'deploy' }, touchName: 'fleet.btn.touchDeploy', touchSub: 'fleet.btn.touchSubDeploy', tone: 'collect' },
+  { id: 'fleet.expedition', key: 'x', label: 'fleet.btn.expedition', group: 'fleet', glyph: { fleet: 'expedition' }, touchName: 'fleet.btn.expedition', tone: 'expedition' },
+  { id: 'fleet.fleetsave', key: 'e', label: 'fleet.btn.fleetsave', group: 'fleet', glyph: { fleet: 'fleetsave' }, touchName: 'fleet.btn.fleetsave', tone: 'fleetsave' },
   { id: 'fleet.skip', key: 'n', label: 'fleet.btn.skip', group: 'fleet', glyph: { fleet: 'skip' }, keysOnly: true },
   { id: 'fleet.last', key: 'p', label: 'fleet.btn.last', group: 'fleet', glyph: { fleet: 'last' }, keysOnly: true },
   { id: 'galaxy.left', key: 'ArrowLeft', label: 'shortcut.galaxyLeft', group: 'galaxy', glyph: { core: 'back' }, fixed: true, touchOnly: true },
@@ -223,6 +227,17 @@ const TOUCH_CSS = `
 /* Named fleet keys: glyph over its name, wider, so each one reads and takes a thumb. */
 #${TOUCH_ID} button.named { flex-direction: column; gap: 3px; width: auto; min-width: 56px; padding: 0 5px; color: var(--text); }
 #${TOUCH_ID} button.named .tn { font: 600 11px/1 var(--display); white-space: nowrap; }
+#${TOUCH_ID} button.named:has(.ts) { gap: 2px; }
+#${TOUCH_ID} button.named:has(.ts) .fut-tb-glyph svg { width: 17px; height: 17px; }
+#${TOUCH_ID} button.named .ts { color: var(--text-2); font: 500 10px/1 var(--display); white-space: nowrap; }
+/* One colour per kind of fleet action: blue the expedition (as the game), violet the fleetsave (a colour the
+   game does not use), green Accentra. Glyph and a bottom line in the colour, the key faintly tinted. */
+#${TOUCH_ID} button[data-tone="collect"] { --tone: #6cc04a; }
+#${TOUCH_ID} button[data-tone="expedition"] { --tone: #4aa3ff; }
+#${TOUCH_ID} button[data-tone="fleetsave"] { --tone: #a77bff; }
+#${TOUCH_ID} button[data-tone] { background: color-mix(in srgb, var(--tone) 14%, var(--surface)); box-shadow: inset 0 -2px 0 var(--tone); }
+#${TOUCH_ID} button[data-tone] .fut-tb-glyph { color: var(--tone); }
+#${TOUCH_ID} button[data-tone]:active { background: color-mix(in srgb, var(--tone) 26%, var(--surface)); }
 @media (pointer: coarse) { #${TOUCH_ID} button.named:has(.k) .fut-tb-glyph { margin: 0; } }
 #${TOUCH_ID}[data-page="fleet2"] button.fleet, #${TOUCH_ID}[data-page="fleet2"] .sep.fleet { display: none; }
 /* The one primary action: pawn yellow. Not ready: struck through in quiet grey on an outline, as every disabled button. */
@@ -312,7 +327,14 @@ export function mountTouchBar(doc: Document, store: Store, t: (k: string) => str
       n.className = 'tn';
       n.textContent = t(def.touchName);
       b.append(n);
+      if (def.touchSub) {
+        const sub = doc.createElement('span');
+        sub.className = 'ts';
+        sub.textContent = t(def.touchSub);
+        b.append(sub);
+      }
     }
+    if (def.tone) b.dataset.tone = def.tone;
     if (key && !def.touchOnly) {
       const k = doc.createElement('span');
       k.className = 'k';
