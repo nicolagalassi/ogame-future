@@ -760,6 +760,47 @@ function keepReserveOnSelectAll(o: FleetOptions): void {
   });
 }
 
+/** What may leave of each resource with the reserve kept home (deuterium also keeps the flight's fuel). */
+export function cappedByReserve(loaded: Reserve['resources'], onPlanet: Reserve['resources'], keep: Reserve['resources'], fuel: number): Reserve['resources'] {
+  const cap = (k: keyof Reserve['resources']) => Math.max(0, Math.min(loaded[k], Math.floor(onPlanet[k] - keep[k] - (k === 'deuterium' ? fuel : 0))));
+  return { metal: cap('metal'), crystal: cap('crystal'), deuterium: cap('deuterium') };
+}
+
+/**
+ * The game's orange "all resources" on page 2: right after it, the resources reserve (when switched on)
+ * stays home, as in Future's own actions. Not during an expedition or a fleetsave round. Nicola, 2026-11-26.
+ * COMPLIANCE: only the game's cargo fields change, through its own dispatcher; nothing is sent.
+ */
+function keepReserveOnLoadAll(o: FleetOptions): void {
+  const { doc } = o;
+  const root = doc.documentElement;
+  if (root.dataset.futLoadAll) return;
+  root.dataset.futLoadAll = '1';
+  doc.addEventListener('click', (e) => {
+    const b = (e.target as Element | null)?.closest?.('#allresources, #loadAllResources, .allresources');
+    if (!b) return;
+    (doc.defaultView ?? globalThis).setTimeout(() => {
+      const current = pageState.get(doc)?.o ?? o;
+      const mode = pageState.get(doc)?.active?.mode;
+      if (mode === 'expedition' || mode === 'fleetsave') return;
+      const keep = activeProfile(profileFor(loadProfiles(current.store), current.bodyId), loadSettings(current.store)).reserve.resources;
+      if (!keep.metal && !keep.crystal && !keep.deuterium) return;
+      const fd = getDispatcher();
+      if (!fd) return;
+      const left = cappedByReserve(
+        { metal: Number(fd.cargoMetal) || 0, crystal: Number(fd.cargoCrystal) || 0, deuterium: Number(fd.cargoDeuterium) || 0 },
+        { metal: Number(fd.metalOnPlanet) || 0, crystal: Number(fd.crystalOnPlanet) || 0, deuterium: Number(fd.deuteriumOnPlanet) || 0 },
+        keep,
+        Math.ceil(Number(fd.getConsumption()) || 0),
+      );
+      fd.cargoMetal = left.metal;
+      fd.cargoCrystal = left.crystal;
+      fd.cargoDeuterium = left.deuterium;
+      fd.refresh();
+    }, 0);
+  });
+}
+
 /** Shows `menu` under `anchor`, on <body> with fixed position, and closes it on a click away or a page scroll. */
 function popup(doc: Document, anchor: HTMLElement, menu: HTMLElement): void {
   doc.querySelectorAll('.fut-fmenu').forEach((n) => n.remove());
@@ -1372,7 +1413,7 @@ export function renderFleetTools(o: FleetOptions): void {
         return say(t('fleet.err.sameBody'), true);
       begin(now.sendMode);
       // The ships reserve (if switched on) stays home here too: only the expedition and the fleetsave go without it.
-      const r = prepareSend(fd, doc, now, target, now.sendPick, now.sendMode, ship, profile.reserve.ships);
+      const r = prepareSend(fd, doc, now, target, now.sendPick, now.sendMode, ship, profile.reserve.ships, profile.reserve.resources);
       if (r.ok && r.missing > 0)
         return say(t('fleet.ok.cargoShort', { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), missing: r.missing.toLocaleString(o.locale) }), true);
       report(r, 'fleet.ok.cargo');
@@ -1616,6 +1657,9 @@ export function renderFleetTools(o: FleetOptions): void {
     host.prepend(strip);
     registerActions(doc, o.store, t, { 'fleet.skip': skip });
   }
+
+  // The game's "all resources" keeps the resources reserve home (page 2; listened on the page once).
+  if (fleet2) keepReserveOnLoadAll(o);
 
   if (fleet2 && anchor2) {
     // Page 2 has nothing of Future's own to offer (the resources are chosen on page 1, Nicola): the bar

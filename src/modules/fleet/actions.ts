@@ -316,8 +316,11 @@ export function prepareSend(
   mission: 'transport' | 'deploy',
   cargoShip: number,
   keep: Record<string, number> = {},
+  keepRes: Resources = { metal: 0, crystal: 0, deuterium: 0 },
 ): PrepareResult & { missing: number } {
-  const here = onPlanet(fd);
+  // The resources reserve stays home: only what is above it can be picked (Nicola, 2026-11-26).
+  const all = onPlanet(fd);
+  const here = { metal: Math.max(0, all.metal - keepRes.metal), crystal: Math.max(0, all.crystal - keepRes.crystal), deuterium: Math.max(0, all.deuterium - keepRes.deuterium) };
   const wanted = pickedLoad(here, pick, 0, Number.MAX_SAFE_INTEGER);
   const amount = wanted.metal + wanted.crystal + wanted.deuterium;
   const manual = playerSelection(fd) ?? {};
