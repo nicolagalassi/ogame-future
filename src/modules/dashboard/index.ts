@@ -30,7 +30,7 @@ import { activeLfBuildings, activeLfResearch, type ActiveTech, type LfLocked, ty
 import { SHIP_ICONS, shipIcon } from '../../data/ship-icons';
 import { techIconEl, type TechIcon } from '../../data/tech-icons';
 import { DASHBOARD_CSS } from './style';
-import { followViewport } from '../../core/viewport';
+import { followViewport, revealActiveTabs } from '../../core/viewport';
 
 export interface DashboardOptions {
   doc: Document;
@@ -176,6 +176,8 @@ export function openDashboard(o: DashboardOptions): void {
   const { doc, t, locale } = o;
   numLocale = locale;
   const keepScroll = doc.getElementById(HOST_ID)?.shadowRoot?.querySelector('.backdrop')?.scrollTop ?? 0;
+  // A redraw (a tab, a choice) replaces the window: it must not play the opening again.
+  const again = !!doc.getElementById(HOST_ID);
   closeDashboard(doc);
   const host = doc.createElement('div');
   host.id = HOST_ID;
@@ -185,7 +187,7 @@ export function openDashboard(o: DashboardOptions): void {
   style.textContent = WINDOW_SHEET + DASHBOARD_CSS;
   root.append(style);
 
-  const backdrop = h('div', 'backdrop');
+  const backdrop = h('div', again ? 'backdrop again' : 'backdrop');
   const panel = h('section', 'panel');
   panel.setAttribute('role', 'dialog');
   panel.setAttribute('aria-label', t('dash.title'));
@@ -274,6 +276,7 @@ export function openDashboard(o: DashboardOptions): void {
   doc.body.append(host);
   // On a phone showing the page zoomed out: the window over the whole screen, at the phone's own size.
   followViewport(doc, backdrop, 'cover');
+  revealActiveTabs(panel);
   backdrop.scrollTop = keepScroll;
 }
 

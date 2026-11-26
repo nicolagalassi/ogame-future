@@ -10,6 +10,9 @@ export type ViewportFit = 'bottom' | 'cover';
 
 /** Below this zoom a window is fitted to the screen; at 1 (computers, a page zoomed in) it is left alone. */
 const ZOOMED_OUT = 0.95;
+/** A fitted window is drawn this much larger than the phone's own CSS pixels: its 11–13px text, sized for a
+ *  computer screen, reads at 13–15px on a phone (Nicola: everything readable without squinting). */
+const PHONE_TEXT = 1.15;
 
 export function placeOnViewport(el: HTMLElement, vv: VisualViewport, fit: ViewportFit): void {
   const s = vv.scale || 1;
@@ -25,10 +28,10 @@ export function placeOnViewport(el: HTMLElement, vv: VisualViewport, fit: Viewpo
     inset: 'auto',
     left: `${vv.offsetLeft}px`,
     top: `${vv.offsetTop}px`,
-    width: `${vv.width * s}px`,
-    height: `${vv.height * s}px`,
+    width: `${(vv.width * s) / PHONE_TEXT}px`,
+    height: `${(vv.height * s) / PHONE_TEXT}px`,
     transformOrigin: '0 0',
-    transform: `scale(${1 / s})`,
+    transform: `scale(${PHONE_TEXT / s})`,
   });
 }
 
@@ -54,4 +57,22 @@ export function followViewport(doc: Document, el: HTMLElement, fit: ViewportFit)
   placeOnViewport(el, vv, fit);
   vv.addEventListener('resize', place);
   vv.addEventListener('scroll', place);
+}
+
+/**
+ * Tab strips that scroll sideways (a window on a phone): brings the tab in use into sight, without moving
+ * the window up or down. Call once the window is on the page.
+ */
+export function revealActiveTabs(root: ParentNode): void {
+  for (const strip of root.querySelectorAll<HTMLElement>('.tabs')) {
+    if (strip.scrollWidth <= strip.clientWidth) continue;
+    const tab = strip.querySelector<HTMLElement>('[aria-pressed="true"], [aria-selected="true"]');
+    if (!tab) continue;
+    const s = strip.getBoundingClientRect();
+    const r = tab.getBoundingClientRect();
+    // The strip may be drawn scaled (core/viewport): rectangles are on screen, scrollLeft is in CSS pixels.
+    const k = strip.offsetWidth ? s.width / strip.offsetWidth : 1;
+    if (r.left < s.left) strip.scrollLeft -= (s.left - r.left) / k + 16;
+    else if (r.right > s.right) strip.scrollLeft += (r.right - s.right) / k + 16;
+  }
 }

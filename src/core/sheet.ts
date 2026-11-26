@@ -92,6 +92,8 @@ export const WINDOW_SHEET = `
 @keyframes fut-panel-in { from { opacity: 0; transform: translateY(6px) scale(0.985); } }
 @keyframes fut-fade-in { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .panel { animation-name: fut-fade-in; } }
+/* A window redrawn in place (a tab, a choice) does not open again. */
+.backdrop.again, .backdrop.again .panel { animation: none; }
 .head { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 8px 10px 8px 18px; background: var(--band); }
 .head + .tabs { margin-top: -10px; }
 .titles { flex: 1; display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 14px; min-width: 0; }

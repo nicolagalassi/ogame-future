@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.163
+// @version      0.3.164
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -5005,6 +5005,8 @@
 @keyframes fut-panel-in { from { opacity: 0; transform: translateY(6px) scale(0.985); } }
 @keyframes fut-fade-in { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .panel { animation-name: fut-fade-in; } }
+/* A window redrawn in place (a tab, a choice) does not open again. */
+.backdrop.again, .backdrop.again .panel { animation: none; }
 .head { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 8px 10px 8px 18px; background: var(--band); }
 .head + .tabs { margin-top: -10px; }
 .titles { flex: 1; display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 14px; min-width: 0; }
@@ -10825,6 +10827,7 @@ input[type="checkbox"] { accent-color: var(--accent); }
 
   // src/core/viewport.ts
   var ZOOMED_OUT = 0.95;
+  var PHONE_TEXT = 1.15;
   function placeOnViewport(el6, vv, fit) {
     const s = vv.scale || 1;
     if (fit === "bottom") {
@@ -10839,10 +10842,10 @@ input[type="checkbox"] { accent-color: var(--accent); }
       inset: "auto",
       left: `${vv.offsetLeft}px`,
       top: `${vv.offsetTop}px`,
-      width: `${vv.width * s}px`,
-      height: `${vv.height * s}px`,
+      width: `${vv.width * s / PHONE_TEXT}px`,
+      height: `${vv.height * s / PHONE_TEXT}px`,
       transformOrigin: "0 0",
-      transform: `scale(${1 / s})`
+      transform: `scale(${PHONE_TEXT / s})`
     });
   }
   function followViewport(doc, el6, fit) {
@@ -10862,6 +10865,18 @@ input[type="checkbox"] { accent-color: var(--accent); }
     placeOnViewport(el6, vv, fit);
     vv.addEventListener("resize", place2);
     vv.addEventListener("scroll", place2);
+  }
+  function revealActiveTabs(root) {
+    for (const strip of root.querySelectorAll(".tabs")) {
+      if (strip.scrollWidth <= strip.clientWidth) continue;
+      const tab2 = strip.querySelector('[aria-pressed="true"], [aria-selected="true"]');
+      if (!tab2) continue;
+      const s = strip.getBoundingClientRect();
+      const r = tab2.getBoundingClientRect();
+      const k = strip.offsetWidth ? s.width / strip.offsetWidth : 1;
+      if (r.left < s.left) strip.scrollLeft -= (s.left - r.left) / k + 16;
+      else if (r.right > s.right) strip.scrollLeft += (r.right - s.right) / k + 16;
+    }
   }
 
   // src/modules/shortcuts/index.ts
@@ -13286,7 +13301,7 @@ input.field { width: 190px; }
         if (o.notes?.length) body.append(el6("div", "notes", o.notes.join(" \xB7 ")));
       }
       panel.replaceChildren(head, tabs, body);
-      tabs.querySelector('[aria-pressed="true"]')?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+      revealActiveTabs(panel);
     };
     draw();
     keyHandler = (e) => {
@@ -14788,6 +14803,12 @@ td.guess { font-style: italic; opacity: 0.7; }
 .seg button:hover { color: var(--text); }
 .seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
 .seg button[aria-pressed="true"] i { color: var(--accent); font-weight: 400; }
+/* A narrow window (a phone): the choices wrap, each its own pill, instead of running off the edge. */
+@container (max-width: 560px) {
+  .seg { display: flex; flex-wrap: wrap; gap: 4px; border: 0; border-radius: 0; overflow: visible; }
+  .seg button { flex: 1 1 auto; justify-content: center; height: 34px; border: 1px solid var(--line); border-radius: 7px; }
+  .seg button + button { border-left: 1px solid var(--line); }
+}
 .seg button i { margin-left: 2px; }
 .seg .seg-ico { flex: none; color: var(--muted); }
 .seg button[aria-pressed="true"] .seg-ico { color: var(--text); }
@@ -14936,6 +14957,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const { doc, t, locale } = o;
     numLocale = locale;
     const keepScroll = doc.getElementById(HOST_ID)?.shadowRoot?.querySelector(".backdrop")?.scrollTop ?? 0;
+    const again = !!doc.getElementById(HOST_ID);
     closeDashboard(doc);
     const host = doc.createElement("div");
     host.id = HOST_ID;
@@ -14944,7 +14966,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const style = h3("style");
     style.textContent = WINDOW_SHEET + DASHBOARD_CSS;
     root.append(style);
-    const backdrop = h3("div", "backdrop");
+    const backdrop = h3("div", again ? "backdrop again" : "backdrop");
     const panel = h3("section", "panel");
     panel.setAttribute("role", "dialog");
     panel.setAttribute("aria-label", t("dash.title"));
@@ -15023,6 +15045,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     panel.append(body);
     doc.body.append(host);
     followViewport(doc, backdrop, "cover");
+    revealActiveTabs(panel);
     backdrop.scrollTop = keepScroll;
   }
   function section(parent, title, hint) {
@@ -18086,6 +18109,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       foot.append(opt, acts);
       parts.push(foot);
       panel.replaceChildren(...parts);
+      if (panel.isConnected) revealActiveTabs(panel);
     };
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop) closeJournal(doc);

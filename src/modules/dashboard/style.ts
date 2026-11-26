@@ -158,6 +158,12 @@ td.guess { font-style: italic; opacity: 0.7; }
 .seg button:hover { color: var(--text); }
 .seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
 .seg button[aria-pressed="true"] i { color: var(--accent); font-weight: 400; }
+/* A narrow window (a phone): the choices wrap, each its own pill, instead of running off the edge. */
+@container (max-width: 560px) {
+  .seg { display: flex; flex-wrap: wrap; gap: 4px; border: 0; border-radius: 0; overflow: visible; }
+  .seg button { flex: 1 1 auto; justify-content: center; height: 34px; border: 1px solid var(--line); border-radius: 7px; }
+  .seg button + button { border-left: 1px solid var(--line); }
+}
 .seg button i { margin-left: 2px; }
 .seg .seg-ico { flex: none; color: var(--muted); }
 .seg button[aria-pressed="true"] .seg-ico { color: var(--text); }

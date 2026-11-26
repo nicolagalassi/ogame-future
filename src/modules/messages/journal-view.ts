@@ -16,7 +16,7 @@ import { shipIcon, shipName } from '../../data/ship-icons';
 import type { T } from '../../core/i18n';
 import { JOURNAL_CSS, OUTCOME_COLORS } from './style';
 import { clearOrion, hasOrion, loadOrion, ORION_CSS, orionCount, orionCsv, orionData, orionState, orionView } from './orion-view';
-import { followViewport } from '../../core/viewport';
+import { followViewport, revealActiveTabs } from '../../core/viewport';
 
 export const JOURNAL_ID = 'fut-journal';
 const PERIOD_KEY = 'exp.period';
@@ -561,6 +561,8 @@ export function openJournal(o: JournalOptions): void {
     parts.push(foot);
 
     panel.replaceChildren(...parts);
+    // On a phone the tab strips scroll sideways: the ones in use stay in sight.
+    if (panel.isConnected) revealActiveTabs(panel);
   };
 
   backdrop.addEventListener('click', (e) => {
