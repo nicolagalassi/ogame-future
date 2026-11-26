@@ -961,5 +961,7 @@
   "fleet.keepRes": "Reserve {n}",
   "fleet.keepResHint": "Rohstoffreserve: {n} bleiben auf diesem Körper (nicht für Expeditionen und den Fleetsave)",
   "fleet.cargoPicked": "Laderaum {n}",
-  "fleet.cargoPickedHint": "Laderaum der gewählten Schiffe: {n}"
+  "fleet.cargoPickedHint": "Laderaum der gewählten Schiffe: {n}",
+  "fleet.btn.touchCollect": "Sammeln",
+  "fleet.btn.touchDeploy": "Stationieren"
 }
