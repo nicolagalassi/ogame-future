@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.155
+// @version      0.3.156
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -687,7 +687,7 @@
     "fleet.ok.expedition": "Spedizione pronta: {ships} navi per {target} di carico. Premi Avanti e Invia flotta",
     "fleet.err.noShips": "Nessuna nave disponibile oltre la riserva",
     "fleet.err.noResources": "Nessuna risorsa da trasportare oltre la riserva",
-    "fleet.err.noSkip": "Nessun giro di raccolta in corso da far avanzare",
+    "fleet.err.noSkip": "Nessun giro in corso da far avanzare",
     "fleet.skipOffer": "premi Salta per passare a {body}",
     "fleet.err.noExpSlots": "Nessuno slot spedizione libero",
     "fleet.err.noMoon": "Questo pianeta non ha una luna",
@@ -696,7 +696,7 @@
     "fleet.err.notReady": "La pagina flotta non \xE8 ancora pronta, riprova",
     "fleet.err.page1": "Torna alla prima pagina della flotta per usare questi pulsanti",
     "fleet.close": "Chiudi",
-    "fleet.favTitle": "Raccolta spedizioni: luna principale",
+    "fleet.favTitle": "Accentra: luna principale",
     "fleet.favTransport": "1 \xB7 Trasporto verso",
     "fleet.favDeploy": "2 \xB7 Schieramento verso",
     "fleet.tip.cargo": "Carica le risorse lasciando la riserva e il deuterio per il volo",
@@ -1076,8 +1076,8 @@
     "fleet.rule.ships": "Navi",
     "fleet.rule.resources": "Risorse",
     "fleet.rule.gate": "Portale",
-    "fleet.rule.shipsHint": "Navi che restano sul corpo con Su luna, Trasporto, Schiera, Raccolta, Ultima, Porta qui le risorse e con il pulsante del gioco che seleziona tutte le navi. La spedizione non la usa, il fleetsave ha la sua.",
-    "fleet.rule.resourcesHint": "Risorse che restano sul corpo con Su luna, Trasporto, Schiera, Raccolta, Porta qui le risorse e con il pulsante del gioco che carica tutte le risorse. La spedizione non la usa, il fleetsave ha la sua.",
+    "fleet.rule.shipsHint": "Navi che restano sul corpo con Su luna, Trasporto, Schiera, Accentra, Ultima, Porta qui le risorse e con il pulsante del gioco che seleziona tutte le navi. La spedizione non la usa, il fleetsave ha la sua.",
+    "fleet.rule.resourcesHint": "Risorse che restano sul corpo con Su luna, Trasporto, Schiera, Accentra, Porta qui le risorse e con il pulsante del gioco che carica tutte le risorse. La spedizione non la usa, il fleetsave ha la sua.",
     "fleet.rule.gateHint": "Navi che restano sulla luna quando usi il portale del gioco.",
     "fleet.rule.saveShips": "Navi da lasciare",
     "fleet.rule.saveResources": "Risorse da lasciare",
@@ -1157,7 +1157,7 @@
     "settings.mainShipHint": "La nave da carico usata per prima da Trasporto, Schiera e Su luna.",
     "settings.secondShipHint": "Copre quello che la prima non riesce a portare.",
     "settings.speedHint": "Velocit\xE0 di Trasporto, Schiera e Su luna.",
-    "settings.favHint": "Dove la Raccolta spedizioni porta flotta e risorse in eccesso, con i limiti delle riserve.",
+    "settings.favHint": "Dove Accentra porta flotta e risorse in eccesso, con i limiti delle riserve.",
     "settings.expValueHint": "Vuoto = calcolato; 50% = met\xE0 del calcolato; un numero = carico fisso.",
     "settings.extrasHint": "Aggiunge una sonda e un pathfinder, come OGLight.",
     "settings.touch": "Barra da toccare",
@@ -1218,7 +1218,7 @@
     "planetMenu.building": "Costruzione in corso",
     "fleet.jumpgateStay": "restano",
     "fleet.jumpgateEdit": "Riserva del portale: scegli quante navi restano su questa luna",
-    "fleet.err.noDefault": "Raccolta spedizioni: nessuna luna principale. Sceglila nelle Impostazioni (ingranaggio) o scegli un corpo nel menu Raccolta.",
+    "fleet.err.noDefault": "Accentra: nessuna luna principale. Sceglila nelle Impostazioni (ingranaggio) o scegli un corpo nel menu Accentra.",
     "fleet.invert": "Inverti la selezione di questa nave",
     "settings.section.galaxy": "Galassia",
     "settings.bigDebris": "Detriti da evidenziare",
@@ -1241,7 +1241,7 @@
     "tech.satPerGuess": "1 satellite \u2248 {energy} (stima: apri il Satellite Solare su questo pianeta per il valore esatto)",
     "tech.satFill": "clic: scrive il numero nella quantit\xE0",
     "tech.satGo": "clic: apre il Satellite Solare nelle Risorse con il numero gi\xE0 scritto",
-    "fleet.btn.collect": "Raccolta spedizioni",
+    "fleet.btn.collect": "Accentra",
     "fleet.readyHint": "Scegli cosa preparare: l'invio resta sempre un tuo clic.",
     "fleet.reservesHint": "Cosa resta sul corpo quando prepari una flotta. Un clic accende o spegne; i valori si cambiano con il pulsante delle regole a destra.",
     "fleet.rule.skipHere": "Salta questo corpo",
@@ -1250,9 +1250,9 @@
     "fleet.zone.reserves": "Riserve",
     "fleet.zone.dest": "Destinazione",
     "fleet.zone.mission": "Missione",
-    "fleet.btn.collectShort": "Raccolta",
-    "fleet.btn.collectTransport": "Raccolta: trasporto",
-    "fleet.btn.collectDeploy": "Raccolta: schieramento",
+    "fleet.btn.collectShort": "Accentra",
+    "fleet.btn.collectTransport": "Accentra: trasporto",
+    "fleet.btn.collectDeploy": "Accentra: schieramento",
     "fleet.btn.skip": "Salta",
     "fleet.tip.skip": "Qui non c'\xE8 niente da portare: apre il prossimo pianeta o luna del giro con la stessa azione gi\xE0 pronta. Da qui non parte nulla.",
     "fleet.tip.collect": "Per chi fa spedizioni da pi\xF9 lune: porta navi e risorse in eccesso alla luna principale, rispettando le riserve",
@@ -1286,11 +1286,11 @@
     "res.short.crystal": "C",
     "res.short.deuterium": "D",
     "fleet.collectIgnoreShips": "Trasporto: ignora la riserva navi",
-    "settings.collectIgnoreShipsHint": 'Il trasporto della Raccolta (e "Su luna") pu\xF2 usare anche le navi tenute dalla riserva: i cargo tornano indietro. La riserva risorse vale sempre.',
+    "settings.collectIgnoreShipsHint": 'Il trasporto di Accentra (e "Su luna") pu\xF2 usare anche le navi tenute dalla riserva: i cargo tornano indietro. La riserva risorse vale sempre.',
     "fleet.collectDeployRes": "Schieramento: porta anche le risorse",
-    "settings.collectDeployResHint": "Spento: lo schieramento della Raccolta manda solo le navi, le risorse restano.",
+    "settings.collectDeployResHint": "Spento: lo schieramento di Accentra manda solo le navi, le risorse restano.",
     "fleet.loadOrder": "Ordine di carico",
-    "settings.loadOrderHint": "Quale risorsa riempie per prima i cargo della Raccolta, poi la seconda e la terza (il gioco fa D \u2192 C \u2192 M).",
+    "settings.loadOrderHint": "Quale risorsa riempie per prima i cargo di Accentra, poi la seconda e la terza (il gioco fa D \u2192 C \u2192 M).",
     "msg.say.late": "la flotta rientra pi\xF9 tardi",
     "msg.say.early": "la flotta rientra prima",
     "msg.say.nothing": "non \xE8 stato trovato niente",
@@ -1323,7 +1323,7 @@
     "plan.queuedHint": "In coda nel gioco, non ancora pagato: le sue risorse restano da parte e non contano per il piano n\xE9 per i trasporti",
     "plan.unhold": "Non tenere pi\xF9 da parte (gi\xE0 partito o annullato)",
     "fleet.mainShipIs": "Nave principale dei trasporti automatici",
-    "fleet.mainShipPick": "Usa questa nave per i trasporti automatici (luna, raccolta, piano)",
+    "fleet.mainShipPick": "Usa questa nave per i trasporti automatici (luna, Accentra, piano)",
     "settings.expStyle": "Riepilogo spedizioni",
     "settings.expStyleHint": "Con un altro tool che decora i messaggi (OGame Tracker, OGLight, \u2026) Future si fa da parte e registra soltanto, come OGLight. Il diario registra sempre.",
     "settings.expStyle.auto": "Automatico",
@@ -1471,8 +1471,10 @@
     "fleet.keepResHint": "Riserva risorse: {n} restano su questo corpo (non vale per spedizione e fleetsave)",
     "fleet.cargoPicked": "Stiva {n}",
     "fleet.cargoPickedHint": "Stiva delle navi selezionate: {n}",
-    "fleet.btn.touchCollect": "Raccogli",
-    "fleet.btn.touchDeploy": "Schiera"
+    "fleet.btn.touchCollect": "Accentra",
+    "fleet.btn.touchDeploy": "Accentra",
+    "fleet.btn.touchSubTransport": "trasporto",
+    "fleet.btn.touchSubDeploy": "schiera"
   };
 
   // src/i18n/en.json
@@ -2441,7 +2443,9 @@
     "fleet.cargoPicked": "Cargo {n}",
     "fleet.cargoPickedHint": "Cargo room of the ships picked: {n}",
     "fleet.btn.touchCollect": "Collect",
-    "fleet.btn.touchDeploy": "Deploy"
+    "fleet.btn.touchDeploy": "Collect",
+    "fleet.btn.touchSubTransport": "transport",
+    "fleet.btn.touchSubDeploy": "deploy"
   };
 
   // src/i18n/fr.json
@@ -3410,7 +3414,9 @@
     "fleet.cargoPicked": "Fret {n}",
     "fleet.cargoPickedHint": "Capacit\xE9 de fret des vaisseaux choisis : {n}",
     "fleet.btn.touchCollect": "Collecter",
-    "fleet.btn.touchDeploy": "Stationner"
+    "fleet.btn.touchDeploy": "Collecter",
+    "fleet.btn.touchSubTransport": "transport",
+    "fleet.btn.touchSubDeploy": "stationner"
   };
 
   // src/i18n/de.json
@@ -4379,7 +4385,9 @@
     "fleet.cargoPicked": "Laderaum {n}",
     "fleet.cargoPickedHint": "Laderaum der gew\xE4hlten Schiffe: {n}",
     "fleet.btn.touchCollect": "Sammeln",
-    "fleet.btn.touchDeploy": "Stationieren"
+    "fleet.btn.touchDeploy": "Sammeln",
+    "fleet.btn.touchSubTransport": "Transport",
+    "fleet.btn.touchSubDeploy": "Stationieren"
   };
 
   // src/core/i18n.ts
@@ -9457,10 +9465,10 @@ td.spark-cell { width: 90px; }
     { id: "fleet.moon", key: "l", label: "fleet.btn.moon", group: "fleet", glyph: { fleet: "moon" }, keysOnly: true },
     { id: "fleet.transport", key: "t", label: "fleet.btn.transport", group: "fleet", glyph: { fleet: "transport" }, keysOnly: true },
     { id: "fleet.deploy", key: "d", label: "fleet.btn.deploy", group: "fleet", glyph: { fleet: "deploy" }, keysOnly: true },
-    { id: "fleet.collect", key: "c", label: "fleet.btn.collectTransport", group: "fleet", glyph: { fleet: "transport" }, touchName: "fleet.btn.touchCollect" },
-    { id: "fleet.collectDeploy", key: "v", label: "fleet.btn.collectDeploy", group: "fleet", glyph: { fleet: "deploy" }, touchName: "fleet.btn.touchDeploy" },
-    { id: "fleet.expedition", key: "x", label: "fleet.btn.expedition", group: "fleet", glyph: { fleet: "expedition" }, touchName: "fleet.btn.expedition" },
-    { id: "fleet.fleetsave", key: "e", label: "fleet.btn.fleetsave", group: "fleet", glyph: { fleet: "fleetsave" }, touchName: "fleet.btn.fleetsave" },
+    { id: "fleet.collect", key: "c", label: "fleet.btn.collectTransport", group: "fleet", glyph: { fleet: "transport" }, touchName: "fleet.btn.touchCollect", touchSub: "fleet.btn.touchSubTransport", tone: "collect" },
+    { id: "fleet.collectDeploy", key: "v", label: "fleet.btn.collectDeploy", group: "fleet", glyph: { fleet: "deploy" }, touchName: "fleet.btn.touchDeploy", touchSub: "fleet.btn.touchSubDeploy", tone: "collect" },
+    { id: "fleet.expedition", key: "x", label: "fleet.btn.expedition", group: "fleet", glyph: { fleet: "expedition" }, touchName: "fleet.btn.expedition", tone: "expedition" },
+    { id: "fleet.fleetsave", key: "e", label: "fleet.btn.fleetsave", group: "fleet", glyph: { fleet: "fleetsave" }, touchName: "fleet.btn.fleetsave", tone: "fleetsave" },
     { id: "fleet.skip", key: "n", label: "fleet.btn.skip", group: "fleet", glyph: { fleet: "skip" }, keysOnly: true },
     { id: "fleet.last", key: "p", label: "fleet.btn.last", group: "fleet", glyph: { fleet: "last" }, keysOnly: true },
     { id: "galaxy.left", key: "ArrowLeft", label: "shortcut.galaxyLeft", group: "galaxy", glyph: { core: "back" }, fixed: true, touchOnly: true },
@@ -9591,6 +9599,17 @@ td.spark-cell { width: 90px; }
 /* Named fleet keys: glyph over its name, wider, so each one reads and takes a thumb. */
 #${TOUCH_ID} button.named { flex-direction: column; gap: 3px; width: auto; min-width: 56px; padding: 0 5px; color: var(--text); }
 #${TOUCH_ID} button.named .tn { font: 600 11px/1 var(--display); white-space: nowrap; }
+#${TOUCH_ID} button.named:has(.ts) { gap: 2px; }
+#${TOUCH_ID} button.named:has(.ts) .fut-tb-glyph svg { width: 17px; height: 17px; }
+#${TOUCH_ID} button.named .ts { color: var(--text-2); font: 500 10px/1 var(--display); white-space: nowrap; }
+/* One colour per kind of fleet action: blue the expedition (as the game), violet the fleetsave (a colour the
+   game does not use), green Accentra. Glyph and a bottom line in the colour, the key faintly tinted. */
+#${TOUCH_ID} button[data-tone="collect"] { --tone: #6cc04a; }
+#${TOUCH_ID} button[data-tone="expedition"] { --tone: #4aa3ff; }
+#${TOUCH_ID} button[data-tone="fleetsave"] { --tone: #a77bff; }
+#${TOUCH_ID} button[data-tone] { background: color-mix(in srgb, var(--tone) 14%, var(--surface)); box-shadow: inset 0 -2px 0 var(--tone); }
+#${TOUCH_ID} button[data-tone] .fut-tb-glyph { color: var(--tone); }
+#${TOUCH_ID} button[data-tone]:active { background: color-mix(in srgb, var(--tone) 26%, var(--surface)); }
 @media (pointer: coarse) { #${TOUCH_ID} button.named:has(.k) .fut-tb-glyph { margin: 0; } }
 #${TOUCH_ID}[data-page="fleet2"] button.fleet, #${TOUCH_ID}[data-page="fleet2"] .sep.fleet { display: none; }
 /* The one primary action: pawn yellow. Not ready: struck through in quiet grey on an outline, as every disabled button. */
@@ -9669,7 +9688,14 @@ td.spark-cell { width: 90px; }
         n.className = "tn";
         n.textContent = t(def.touchName);
         b.append(n);
+        if (def.touchSub) {
+          const sub = doc.createElement("span");
+          sub.className = "ts";
+          sub.textContent = t(def.touchSub);
+          b.append(sub);
+        }
       }
+      if (def.tone) b.dataset.tone = def.tone;
       if (key && !def.touchOnly) {
         const k = doc.createElement("span");
         k.className = "k";
