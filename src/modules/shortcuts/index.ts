@@ -239,6 +239,8 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
 #${TOUCH_ID} button[data-tone]:active { background: color-mix(in srgb, var(--tone) 26%, var(--surface)); }
 @media (pointer: coarse) { #${TOUCH_ID} button.named:has(.k) .fut-tb-glyph { margin: 0; } }
 #${TOUCH_ID}[data-page="fleet2"] button.fleet, #${TOUCH_ID}[data-page="fleet2"] .sep.fleet { display: none; }
+/* Future's settings: the same key shape, kept apart at the right end. */
+#${TOUCH_ID} .gear { margin-left: auto; box-shadow: inset 0 0 0 1px var(--line-strong); }
 /* The one primary action: pawn yellow. Not ready: struck through in quiet grey on an outline, as every disabled button. */
 #${TOUCH_ID} .send { width: auto; min-width: 88px; padding: 0 12px; gap: 6px; background: var(--accent); color: var(--on-accent); font-size: 14px; }
 #${TOUCH_ID} .send:active { background: var(--accent-hi); color: var(--on-accent); }
@@ -270,6 +272,14 @@ export function setTouchNote(doc: Document, node: HTMLElement | null): boolean {
   notes.set(doc, node);
   bar.append(node);
   return true;
+}
+
+/** Opens Future's settings from the touch bar (set by main.ts); none = no gear. */
+let openSettingsFromBar: (() => void) | null = null;
+/** The gear at the right end of the touch bar: Future's settings from any page, a thumb away (Nicola). */
+export function setTouchSettings(doc: Document, open: (() => void) | null): void {
+  openSettingsFromBar = open;
+  if (current?.doc === doc) scheduleTouchBar();
 }
 
 let queued = false;
@@ -305,7 +315,9 @@ export function mountTouchBar(doc: Document, store: Store, t: (k: string) => str
     const run = runs.get(def.id);
     if (!run || def.keysOnly) continue;
     // Fleet page on a phone: the four fleet actions need the room; the planet arrows stay keyboard keys there.
-    if (def.group === 'planet' && doc.getElementById('fleetdispatchcomponent')) continue;
+    // Galaxy view: its own four arrows move through systems and galaxies; the planet arrows, drawn the same,
+    // would be mistaken for them and push the last one off the bar.
+    if (def.group === 'planet' && (doc.getElementById('fleetdispatchcomponent') || runs.has('galaxy.left'))) continue;
     if (group && group !== def.group) {
       const sep = doc.createElement('span');
       sep.className = `sep ${def.group}`;
@@ -375,6 +387,21 @@ export function mountTouchBar(doc: Document, store: Store, t: (k: string) => str
     // The game swaps page 1 and page 2 without a reload, and lights the button when the form is ready.
     new MutationObserver(sync).observe(fleet, { attributes: true, subtree: true, attributeFilter: ['style', 'class', 'disabled'] });
     bar.append(send);
+  } else if (openSettingsFromBar) {
+    // Everywhere but the fleet page, where the keys fill the bar and the page has its own Impostazioni.
+    const open = openSettingsFromBar;
+    const gear = doc.createElement('button');
+    gear.type = 'button';
+    gear.className = 'gear';
+    gear.title = t('toolbar.settings');
+    gear.setAttribute('aria-label', t('toolbar.settings'));
+    gear.setAttribute('aria-haspopup', 'dialog');
+    gear.append(glyph(doc, { glyph: { fleet: 'settings' } }, 22));
+    gear.addEventListener('click', (e) => {
+      e.preventDefault();
+      open();
+    });
+    bar.append(gear);
   }
   if (!keys.childElementCount && !fleet) return;
   const note = notes.get(doc);

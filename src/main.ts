@@ -42,7 +42,7 @@ import { isFleetDispatch } from './data/fleet-page';
 import { universeRanks } from './data/universe-ranks';
 import { renderFleetTools } from './modules/fleet';
 import { watchJumpgate } from './modules/fleet/jumpgate';
-import { mountTouchBar, registerActions, switchBodyUrl } from './modules/shortcuts';
+import { mountTouchBar, registerActions, setTouchSettings, switchBodyUrl } from './modules/shortcuts';
 import { nextBody } from './engines/fleet';
 import { watchTechPages } from './modules/tech';
 import { accountResources, openPlanner } from './modules/tech/planner-view';
@@ -441,6 +441,7 @@ async function bootstrap(): Promise<void> {
   onSideNavigate(highlightPosition);
   restoreSide(side);
   registerActions(document, store, t, { 'targets.next': () => void nextInSide(document) });
+  setTouchSettings(document, () => openFutureSettings());
   const pageMeta = (name: string) => document.querySelector(`meta[name="${name}"]`)?.getAttribute('content') ?? '';
 
   // Manual reminders: due ones are shown on the page; bells on the game's event list.
