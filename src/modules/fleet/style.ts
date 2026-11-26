@@ -52,7 +52,8 @@ export const FLEET_CSS = `
 /* The fleetsave speed question on a touch screen: fixed at the bottom of the screen, so it never moves the
    page while the finger is still on the game's speed bar (it shifted the bar, which then stuck at 10%). */
 @media (pointer: coarse) {
-  #fleet2 .fut-faskbar { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 100000; margin: 0; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6); }
+  #fleet2 .fut-faskbar .fut-fread:has(.fut-finfo:empty) { display: none; }
+  #fleet2 .fut-faskbar { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 1000001; margin: 0; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6); }
 }
 /* Main cargo ship, picked on the ship itself (top right; the game keeps the top left). */
 #fleet1 #technologies li[data-technology] { position: relative; }

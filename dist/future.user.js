@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.151
+// @version      0.3.152
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -13289,23 +13289,8 @@ table.queues td.acts { width: 1%; text-align: right; }
   function onPlanet(fd) {
     return { metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet };
   }
-  function speedButton(root, percent) {
-    const leaves = (el6) => Array.from(el6.querySelectorAll("*")).filter((e) => !e.children.length && /^\d{2,3}$/.test(e.textContent?.trim() ?? ""));
-    const hundred = leaves(root).find((e) => e.textContent.trim() === "100");
-    let box = hundred?.parentElement ?? null;
-    while (box && !["10", "50", "90"].every((v) => leaves(box).some((e) => e.textContent.trim() === v))) box = box.parentElement;
-    if (!box) return null;
-    return leaves(box).find((e) => e.textContent.trim() === String(percent)) ?? null;
-  }
-  function setSpeedBar(fd, percent, doc) {
+  function setSpeedBar(fd, percent) {
     const step = Math.max(1, Math.min(10, Math.round(percent / 10)));
-    const touch = doc?.defaultView?.matchMedia?.("(pointer: coarse)").matches;
-    const button3 = touch && doc ? speedButton(doc, step * 10) : null;
-    if (button3) {
-      button3.click();
-      fd.speedPercent = step;
-      return;
-    }
     fd.speedPercent = step;
     const $ = pageWindow().jQuery;
     try {
@@ -13375,7 +13360,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const ships = cargoShipsFor(amount, stock(fd, profile), settings.mainShip, settings.secondShip);
     const count2 = selectShips(fd, ships);
     setTarget(fd, doc, target);
-    setSpeedBar(fd, settings.transportSpeed, doc);
+    setSpeedBar(fd, settings.transportSpeed);
     fd.mission = TRANSPORT;
     const cargo = count2 > 0 ? loadCargo(fd, profile, settings.loadOrder) : 0;
     return finish(fd, TRANSPORT, count2, cargo);
@@ -13384,7 +13369,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const ships = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
     const count2 = selectShips(fd, ships);
     setTarget(fd, doc, target);
-    setSpeedBar(fd, settings.transportSpeed, doc);
+    setSpeedBar(fd, settings.transportSpeed);
     fd.mission = DEPLOY;
     const cargo = count2 > 0 && settings.collectDeployRes ? loadCargo(fd, profile, settings.loadOrder) : 0;
     return finish(fd, DEPLOY, count2, cargo);
@@ -13394,7 +13379,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const ships = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
     const count2 = selectShips(fd, ships);
     setTarget(fd, doc, resolveTarget(save, fd.currentPlanet));
-    setSpeedBar(fd, save.speed, doc);
+    setSpeedBar(fd, save.speed);
     fd.mission = save.mission;
     const cargo = count2 > 0 ? loadCargo(fd, profile) : 0;
     return finish(fd, save.mission, count2, cargo);
@@ -13407,7 +13392,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (amount <= 0) return { ok: false, reason: "fleet.err.noResources", ships: 0, cargo: 0 };
     const count2 = selectShips(fd, cargoShipsFor(amount, stock(fd, profile), settings.mainShip, settings.secondShip));
     setTarget(fd, doc, target);
-    setSpeedBar(fd, settings.transportSpeed, doc);
+    setSpeedBar(fd, settings.transportSpeed);
     fd.mission = TRANSPORT;
     let cargo = 0;
     if (count2 > 0) {
@@ -13442,7 +13427,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const here = fd.currentPlanet;
     const system = expeditionSystem(here.system, settings.expeditionSpread, { systems: universe.systems ?? 499, donut: universe.donutSystem ?? true }, rand);
     setTarget(fd, doc, { galaxy: here.galaxy, system, position: 16, type: 1 });
-    setSpeedBar(fd, 100, doc);
+    setSpeedBar(fd, 100);
     fd.expeditionTime = 1;
     const $ = pageWindow().jQuery;
     try {
@@ -13457,7 +13442,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     for (const [id, n] of Object.entries(last2.ships)) ships[Number(id)] = Math.min(n, left[Number(id)] ?? 0);
     const count2 = selectShips(fd, ships);
     setTarget(fd, doc, last2.target);
-    setSpeedBar(fd, last2.speed, doc);
+    setSpeedBar(fd, last2.speed);
     return finish(fd, last2.mission, count2, 0);
   }
   function selectionKey(fd) {
@@ -13485,7 +13470,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const needed = capacity > 0 ? Math.ceil(Math.max(0, amount - othersCapacity) / capacity) : 0;
     const count2 = selectShips(fd, { ...manual, [cargoShip]: n });
     setTarget(fd, doc, target);
-    setSpeedBar(fd, settings.transportSpeed, doc);
+    setSpeedBar(fd, settings.transportSpeed);
     const code = mission === "transport" ? TRANSPORT : DEPLOY;
     fd.mission = code;
     let cargo = 0;
@@ -13631,7 +13616,8 @@ table.queues td.acts { width: 1%; text-align: right; }
 /* The fleetsave speed question on a touch screen: fixed at the bottom of the screen, so it never moves the
    page while the finger is still on the game's speed bar (it shifted the bar, which then stuck at 10%). */
 @media (pointer: coarse) {
-  #fleet2 .fut-faskbar { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 100000; margin: 0; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6); }
+  #fleet2 .fut-faskbar .fut-fread:has(.fut-finfo:empty) { display: none; }
+  #fleet2 .fut-faskbar { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 1000001; margin: 0; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6); }
 }
 /* Main cargo ship, picked on the ship itself (top right; the game keeps the top left). */
 #fleet1 #technologies li[data-technology] { position: relative; }
@@ -14449,6 +14435,19 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       if (e.target?.closest?.("#sendall, a.send_all, #resetall, a.reset_all")) later();
     });
   }
+  function placeAboveTouchBar(doc, host) {
+    const win = doc.defaultView;
+    const bar = doc.getElementById("fut-touchbar");
+    if (!win || win.getComputedStyle(host).position !== "fixed") return;
+    const r = bar?.getBoundingClientRect();
+    const k = bar && bar.offsetHeight > 0 && r ? r.height / bar.offsetHeight : 1;
+    host.style.bottom = r ? `${Math.max(8, win.innerHeight - r.top + 8)}px` : "";
+    const scaled = k > 1.05;
+    host.style.transformOrigin = scaled ? "left bottom" : "";
+    host.style.transform = scaled ? `scale(${k})` : "";
+    host.style.right = scaled ? "auto" : "";
+    host.style.width = scaled ? `${(win.innerWidth - 16) / k}px` : "";
+  }
   function cappedByReserve(loaded, onPlanet2, keep, fuel) {
     const cap = (k) => Math.max(0, Math.min(loaded[k], Math.floor(onPlanet2[k] - keep[k] - (k === "deuterium" ? fuel : 0))));
     return { metal: cap("metal"), crystal: cap("crystal"), deuterium: cap("deuterium") };
@@ -15248,7 +15247,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           box.hidden = true;
           return;
         }
-        bar.hidden = false;
+        const host = box.closest(".fut-fbar");
+        if (host) {
+          host.hidden = false;
+          placeAboveTouchBar(doc, host);
+        }
         const yes = el4(doc, "button", "fut-fask-b yes", t("fleet.speedAsk.yes"));
         const no = el4(doc, "button", "fut-fask-b", t("fleet.speedAsk.no"));
         yes.type = no.type = "button";
@@ -15256,7 +15259,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           e.preventDefault();
           state.active = { ...a, speed: pct };
           box.hidden = true;
-          out2.say(t("fleet.speedAsk.done", { pct }));
+          const said = host?.querySelector(".fut-finfo");
+          if (said) said.textContent = t("fleet.speedAsk.done", { pct });
         });
         no.addEventListener("click", (e) => {
           e.preventDefault();

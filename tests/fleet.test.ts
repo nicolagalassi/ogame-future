@@ -1136,14 +1136,26 @@ describe('what the reserves keep, and the cargo picked', () => {
 });
 
 
-describe('speed on a phone', () => {
-  it('finds the button of the percentage in the row 10…100, not other numbers of the page', async () => {
-    const { speedButton } = await import('../src/modules/fleet/actions');
-    document.body.innerHTML = '<div id="fleet2"><div class="coords"><span>356</span><span>16</span><span>30</span></div><div id="speedPercentage"><div class="row">'
-      + [10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((v) => `<button data-v="${v}">${v}</button>`).join('') + '</div></div></div>';
-    expect(speedButton(document, 30)?.getAttribute('data-v')).toBe('30');
-    expect(speedButton(document, 100)?.getAttribute('data-v')).toBe('100');
-    document.body.innerHTML = '<div id="fleet2"><span>30</span><span>100</span></div>';
-    expect(speedButton(document, 30)).toBeNull();
+describe('speed question in a fleetsave round', () => {
+  it('shows on the bar on the page now, also after a redraw replaced it', async () => {
+    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    const doc = document.implementation.createHTMLDocument();
+    doc.body.innerHTML = '<div id="fleetdispatchcomponent"><div id="fleet2"><div id="speedPercentage"></div><div id="buttonz"></div></div></div>';
+    const fd = fakeDispatcher({ speedPercent: 4 });
+    (window as unknown as { fleetDispatcher: unknown }).fleetDispatcher = fd;
+    const store = new Store(new MemoryStore(), 'ask');
+    store.set('fleet.settings', { repeat: true });
+    const bodies = [{ planetId: 1, moonId: null, name: 'Casa', coords: '5:185:8' }, { planetId: 2, moonId: null, name: 'Colonia', coords: '5:186:8' }];
+    const o = { doc, store, bodyId: 1, bodies, t: (k: string, v?: Record<string, string | number>) => (v ? `${k}:${Object.values(v).join('|')}` : k), locale: 'en', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch&futmode=fleetsave&futfirst=1&futspeed=30' };
+    renderFleetTools(o);
+    // A redraw (after a setting) builds the page 2 bar again.
+    renderFleetTools(o);
+    doc.getElementById('speedPercentage')!.click();
+    await new Promise((r) => setTimeout(r, 5));
+    const bar = doc.querySelector<HTMLElement>('#fleet2 .fut-faskbar')!;
+    expect(doc.querySelectorAll('#fleet2 .fut-faskbar')).toHaveLength(1);
+    expect(bar.hidden).toBe(false);
+    expect(bar.querySelector('.fut-fask-q')?.textContent).toContain('40');
   });
 });
+
