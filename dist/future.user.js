@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.158
+// @version      0.3.159
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1475,7 +1475,11 @@
     "fleet.btn.touchDeploy": "Accentra",
     "fleet.btn.touchSubTransport": "trasporto",
     "fleet.btn.touchSubDeploy": "schiera",
-    "fleet.rulesShort": "Regole"
+    "fleet.rulesShort": "Regole",
+    "settings.section.bodies": "Pianeti e lune",
+    "fleet.bodiesHint": "Riserve, portale e fleetsave di ogni pianeta e luna. Tocca un corpo per cambiarne le regole; le modifiche valgono subito.",
+    "fleet.bodiesAll": "Tutti i corpi",
+    "fleet.rule.saveReserveOnly": "senza destinazione"
   };
 
   // src/i18n/en.json
@@ -2447,7 +2451,11 @@
     "fleet.btn.touchDeploy": "Collect",
     "fleet.btn.touchSubTransport": "transport",
     "fleet.btn.touchSubDeploy": "deploy",
-    "fleet.rulesShort": "Rules"
+    "fleet.rulesShort": "Rules",
+    "settings.section.bodies": "Planets and moons",
+    "fleet.bodiesHint": "Reserves, jump gate and fleetsave of every planet and moon. Tap a body to change its rules; changes apply at once.",
+    "fleet.bodiesAll": "All bodies",
+    "fleet.rule.saveReserveOnly": "no target"
   };
 
   // src/i18n/fr.json
@@ -3419,7 +3427,11 @@
     "fleet.btn.touchDeploy": "Collecter",
     "fleet.btn.touchSubTransport": "transport",
     "fleet.btn.touchSubDeploy": "stationner",
-    "fleet.rulesShort": "R\xE8gles"
+    "fleet.rulesShort": "R\xE8gles",
+    "settings.section.bodies": "Plan\xE8tes et lunes",
+    "fleet.bodiesHint": "R\xE9serves, porte de saut et fleetsave de chaque plan\xE8te et lune. Touchez un corps pour changer ses r\xE8gles ; les changements s\u2019appliquent tout de suite.",
+    "fleet.bodiesAll": "Tous les corps",
+    "fleet.rule.saveReserveOnly": "sans cible"
   };
 
   // src/i18n/de.json
@@ -4391,7 +4403,11 @@
     "fleet.btn.touchDeploy": "Sammeln",
     "fleet.btn.touchSubTransport": "Transport",
     "fleet.btn.touchSubDeploy": "Stationieren",
-    "fleet.rulesShort": "Regeln"
+    "fleet.rulesShort": "Regeln",
+    "settings.section.bodies": "Planeten und Monde",
+    "fleet.bodiesHint": "Reserven, Sprungtor und Fleetsave jedes Planeten und Mondes. Tippe auf einen K\xF6rper, um seine Regeln zu \xE4ndern; \xC4nderungen gelten sofort.",
+    "fleet.bodiesAll": "Alle K\xF6rper",
+    "fleet.rule.saveReserveOnly": "kein Ziel"
   };
 
   // src/core/i18n.ts
@@ -9463,6 +9479,1155 @@ td.spark-cell { width: 90px; }
     return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="currentColor" aria-hidden="true">${ICONS[name]}</svg>`;
   }
 
+  // src/engines/planner.ts
+  var PLAN_KEY = "planner";
+  var isResearch = (id) => id > 100 && id < 200;
+  function addToPlan(plan, bodyId, items) {
+    const key = String(bodyId);
+    const list = [...plan[key] ?? []];
+    for (const item of items) {
+      const same = item.level !== void 0 ? list.findIndex((x) => x.id === item.id && x.level === item.level) : -1;
+      if (same >= 0) list[same] = item;
+      else list.push(item);
+    }
+    list.sort((a, b) => a.added - b.added || a.id - b.id || (a.level ?? 0) - (b.level ?? 0));
+    return { ...plan, [key]: list };
+  }
+  function removeFromPlan(plan, bodyId, index) {
+    const key = String(bodyId);
+    const list = (plan[key] ?? []).filter((_, i) => i !== index);
+    const next = { ...plan };
+    if (list.length) next[key] = list;
+    else delete next[key];
+    return next;
+  }
+  function clearBody(plan, bodyId) {
+    const next = { ...plan };
+    delete next[String(bodyId)];
+    return next;
+  }
+  function prune(plan, bodyId, levels) {
+    let changed = false;
+    const next = {};
+    for (const [key, list] of Object.entries(plan)) {
+      const kept = list.filter((item) => {
+        if (item.level === void 0) return true;
+        const here = key === String(bodyId) || isResearch(item.id);
+        const reached = levels[item.id];
+        if (here && reached !== void 0 && reached >= item.level) {
+          changed = true;
+          return false;
+        }
+        return true;
+      });
+      if (kept.length) next[key] = kept;
+    }
+    return { plan: changed ? next : plan, changed };
+  }
+  function planTotal(items) {
+    return items.reduce((sum, item) => addCost(sum, item.cost), { ...ZERO_COST });
+  }
+  function planCount(plan) {
+    return Object.values(plan).reduce((n, list) => n + list.length, 0);
+  }
+  function planMissing(items, have) {
+    return missing(planTotal(items), have);
+  }
+  function inPlan(plan, bodyId, id, level2) {
+    return (plan[String(bodyId)] ?? []).some((x) => x.id === id && (level2 === void 0 || x.level === level2));
+  }
+  var SENT_KEY = "plan.sent";
+  function pendingFor(list, target, seenAt) {
+    const out = { metal: 0, crystal: 0, deuterium: 0, arriveAt: 0 };
+    for (const s of list) {
+      if (s.target !== target || s.arriveAt <= seenAt) continue;
+      out.metal += s.cargo.metal;
+      out.crystal += s.cargo.crystal;
+      out.deuterium += s.cargo.deuterium;
+      out.arriveAt = Math.max(out.arriveAt, s.arriveAt);
+    }
+    return out;
+  }
+  function planStatus(items, have, pending, now) {
+    if (!have) return { state: "unknown", lack: null };
+    const total = planTotal(items);
+    const now0 = missing(total, have);
+    if (!now0.metal && !now0.crystal && !now0.deuterium) return { state: "ready", lack: null };
+    const lack = missing(total, { metal: have.metal + pending.metal, crystal: have.crystal + pending.crystal, deuterium: have.deuterium + pending.deuterium });
+    if (lack.metal || lack.crystal || lack.deuterium) return { state: "missing", lack };
+    return { state: pending.arriveAt > now ? "arriving" : "arrived", lack: null };
+  }
+  function prunePending(list, plan, seenAtOf) {
+    return list.filter((s) => (plan[String(s.target)]?.length ?? 0) > 0 && s.arriveAt > seenAtOf(s.target));
+  }
+  var norm = (s) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+  function pruneByQueues(plan, queues) {
+    let changed = false;
+    const started = [];
+    for (const [body, items] of Object.entries(queues)) for (const q of items) if (q.level > 0 && q.name) started.push({ body, name: norm(q.name), level: q.level });
+    const next = {};
+    for (const [key, list] of Object.entries(plan)) {
+      const kept = list.filter((item) => {
+        if (item.level === void 0) return true;
+        const hit = started.some((s) => (s.body === key || isResearch(item.id)) && s.name === norm(item.name) && s.level >= item.level);
+        if (hit) changed = true;
+        return !hit;
+      });
+      if (kept.length) next[key] = kept;
+    }
+    return { plan: changed ? next : plan, changed };
+  }
+  function startBuild(plan, bodyId, id, o) {
+    const key = String(bodyId);
+    let changed = false;
+    const removed = [];
+    const next = {};
+    for (const [k, list] of Object.entries(plan)) {
+      let left = o.amount ?? 0;
+      const kept = [];
+      for (const item of list) {
+        if (item.id !== id || k !== key && !isResearch(id)) {
+          kept.push(item);
+          continue;
+        }
+        if (item.level !== void 0 && o.level !== void 0 && item.level <= o.level) {
+          changed = true;
+          if (item.level === o.level) removed.push(item);
+          continue;
+        }
+        if (item.amount !== void 0 && left > 0 && k === key) {
+          changed = true;
+          if (item.amount <= left) {
+            left -= item.amount;
+            continue;
+          }
+          const keep = item.amount - left;
+          const share = keep / item.amount;
+          kept.push({ ...item, amount: keep, cost: { metal: Math.round(item.cost.metal * share), crystal: Math.round(item.cost.crystal * share), deuterium: Math.round(item.cost.deuterium * share), energy: item.cost.energy } });
+          left = 0;
+          continue;
+        }
+        kept.push(item);
+      }
+      if (kept.length) next[k] = kept;
+    }
+    return { plan: changed ? next : plan, changed, removed };
+  }
+  function groupByTech(plan, haveOf) {
+    const groups = /* @__PURE__ */ new Map();
+    for (const [key, items] of Object.entries(plan)) {
+      const bodyId = Number(key);
+      const have = haveOf(bodyId);
+      let spent = { ...ZERO_COST };
+      let before = have ? missing(spent, have) : null;
+      items.forEach((item, index) => {
+        spent = addCost(spent, item.cost);
+        const after = have ? missing(spent, have) : null;
+        const short = after && before ? { metal: after.metal - before.metal, crystal: after.crystal - before.crystal, deuterium: after.deuterium - before.deuterium, energy: 0 } : null;
+        before = after;
+        let g = groups.get(item.id);
+        if (!g) groups.set(item.id, g = { id: item.id, name: item.name, cost: { ...ZERO_COST }, rows: [], added: item.added });
+        g.cost = addCost(g.cost, item.cost);
+        g.added = Math.min(g.added, item.added);
+        const last2 = g.rows[g.rows.length - 1];
+        if (last2 && last2.bodyId === bodyId && item.level !== void 0 && last2.to !== void 0 && item.level === last2.to + 1) {
+          last2.to = item.level;
+          last2.cost = addCost(last2.cost, item.cost);
+          last2.indexes.push(index);
+          last2.short = last2.short && short ? addCost(last2.short, short) : null;
+        } else g.rows.push({ bodyId, from: item.level, to: item.level, amount: item.amount, cost: { ...item.cost }, indexes: [index], short });
+      });
+    }
+    return [...groups.values()].sort((a, b) => a.added - b.added || a.id - b.id);
+  }
+  function accountGap(plan, account) {
+    const total = Object.values(plan).reduce((sum, items) => addCost(sum, planTotal(items)), { ...ZERO_COST });
+    return { total, missing: account ? missing(total, account) : null };
+  }
+  var QUEUED_KEY = "plan.queued";
+  function queueKindOf(id) {
+    if (id < 100) return "building";
+    if (id < 200) return "research";
+    if (id < 1e3) return null;
+    return Math.floor(id % 1e3 / 100) === 1 ? "lfbuilding" : "lfresearch";
+  }
+  function reservedFor(queued2, bodyId) {
+    const out = { metal: 0, crystal: 0, deuterium: 0 };
+    for (const q of queued2[String(bodyId)] ?? []) {
+      out.metal += q.cost.metal;
+      out.crystal += q.cost.crystal;
+      out.deuterium += q.cost.deuterium;
+    }
+    return out;
+  }
+  function lessReserved(have, hold) {
+    return { metal: have.metal - hold.metal, crystal: have.crystal - hold.crystal, deuterium: have.deuterium - hold.deuterium };
+  }
+  function queuedLevel(queued2, bodyId, id) {
+    const list = isResearch(id) ? Object.values(queued2).flat() : queued2[String(bodyId)] ?? [];
+    return list.reduce((top, q) => q.id === id ? Math.max(top, q.level) : top, 0);
+  }
+  function holdQueued(queued2, bodyId, item) {
+    const key = String(bodyId);
+    const list = (queued2[key] ?? []).filter((q) => !(q.id === item.id && q.level === item.level));
+    return { ...queued2, [key]: [...list, item].sort((a, b) => a.queuedAt - b.queuedAt) };
+  }
+  function dropQueued(queued2, bodyId, index) {
+    const key = String(bodyId);
+    const list = (queued2[key] ?? []).filter((_, i) => i !== index);
+    const next = { ...queued2 };
+    if (list.length) next[key] = list;
+    else delete next[key];
+    return next;
+  }
+  function releaseQueued(queued2, o) {
+    let changed = false;
+    const next = {};
+    const running = (key, kind, at) => {
+      const lists = kind === "research" ? Object.values(o.queues?.bodies ?? {}) : [o.queues?.bodies[key] ?? []];
+      return lists.flat().filter((r) => r.kind === kind && r.end > at);
+    };
+    for (const [key, list] of Object.entries(queued2)) {
+      const kept = list.filter((q) => {
+        const built = o.built && (o.built.bodyId === Number(key) || isResearch(q.id)) ? o.built.levels[q.id] : void 0;
+        if (built !== void 0 && built >= q.level) return changed = true, false;
+        const snap = o.queues;
+        if (!snap || snap.at <= q.queuedAt) return true;
+        const now = running(key, q.kind, snap.at);
+        if (!now.length || now.some((r) => norm(r.name) === norm(q.name) && r.level >= q.level)) return changed = true, false;
+        return true;
+      });
+      if (kept.length) next[key] = kept;
+    }
+    return { queued: changed ? next : queued2, changed };
+  }
+  function withQueued(plan, queued2) {
+    const out = { ...plan };
+    for (const [key, list] of Object.entries(queued2)) if (list.length) out[key] = [...out[key] ?? [], ...list];
+    return out;
+  }
+
+  // src/engines/account.ts
+  var KEYS3 = ["metal", "crystal", "deuterium"];
+  var msu2 = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
+  var FLYING = [202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 213, 214, 215, 218, 219];
+  function fleetValue(body) {
+    let total = 0;
+    for (const id of FLYING) {
+      const n = body.levels[String(id)] ?? 0;
+      if (!n) continue;
+      const c = rawCost(id, 1);
+      total += n * (c.metal + c.crystal + c.deuterium);
+    }
+    return total;
+  }
+  function applyPageShips(snapshot, bodyId, ships) {
+    const body = snapshot.bodies.find((b) => b.id === bodyId);
+    if (!body) return false;
+    let changed = false;
+    for (const id of FLYING) {
+      const n = Math.max(0, Math.floor(Number(ships[String(id)]) || 0));
+      if ((body.levels[String(id)] ?? 0) === n) continue;
+      body.levels[String(id)] = n;
+      changed = true;
+    }
+    return changed;
+  }
+  function shipsAfterSend(onPlanet2, sent) {
+    const out = { ...onPlanet2 };
+    for (const s of sent) out[String(s.id)] = Math.max(0, (out[String(s.id)] ?? 0) - (Number(s.number) || 0));
+    return out;
+  }
+  function bodyRows(snapshot, entries, now, queues = null) {
+    if (!snapshot) return [];
+    const byId = new Map(snapshot.bodies.map((b) => [b.id, b]));
+    const rows = [];
+    for (const entry of entries) {
+      for (const type of ["planet", "moon"]) {
+        const id = type === "planet" ? entry.planetId : entry.moonId;
+        const body = id ? byId.get(id) : void 0;
+        if (!body) continue;
+        const amount = estimateResources(body, now);
+        const cap = effectiveStorage(body);
+        const perHour = type === "planet" ? { ...body.production } : { metal: 0, crystal: 0, deuterium: 0 };
+        const toFull = (k) => {
+          if (cap[k] <= 0) return null;
+          if (amount[k] >= cap[k]) return 0;
+          return perHour[k] > 0 ? (cap[k] - amount[k]) / perHour[k] : null;
+        };
+        rows.push({
+          id: body.id,
+          type,
+          name: type === "planet" ? entry.name || body.name : body.name || entry.name,
+          coords: entry.coords || body.coords,
+          amount,
+          perHour,
+          fill: storageFill(body, amount),
+          hoursToFull: { metal: toFull("metal"), crystal: toFull("crystal"), deuterium: toFull("deuterium") },
+          ageMinutes: Math.max(0, Math.floor((now - body.resourcesAt) / 6e4)),
+          mines: { metal: body.levels["1"] ?? 0, crystal: body.levels["2"] ?? 0, deuterium: body.levels["3"] ?? 0 },
+          idle: type !== "planet" ? null : queues ? !activeItems(queues.bodies[String(body.id)], now).some((i) => i.kind === "building" || i.kind === "lfbuilding") : !entry.construction.planet
+        });
+      }
+    }
+    return rows;
+  }
+  function summarize(rows) {
+    const stock2 = { metal: 0, crystal: 0, deuterium: 0 };
+    const perHour = { metal: 0, crystal: 0, deuterium: 0 };
+    for (const row of rows) for (const k of KEYS3) {
+      stock2[k] += row.amount[k];
+      perHour[k] += row.perHour[k];
+    }
+    return {
+      stock: stock2,
+      perHour,
+      planets: rows.filter((r) => r.type === "planet").length,
+      moons: rows.filter((r) => r.type === "moon").length,
+      idle: rows.filter((r) => r.idle === true).length
+    };
+  }
+  var SOON_FULL_HOURS = 6;
+  var STALE_MINUTES = 60;
+  function accountAlerts(rows, snapshot, entries) {
+    const label = (r) => `${r.name} [${r.coords}]`;
+    const known = new Set((snapshot?.bodies ?? []).map((b) => b.id));
+    const missing2 = entries.filter((e) => e.planetId && !known.has(e.planetId) || e.moonId && !known.has(e.moonId));
+    const planets = rows.filter((r) => r.type === "planet");
+    const minHours = (r) => {
+      const hours = KEYS3.map((k) => r.hoursToFull[k]).filter((h8) => h8 !== null);
+      return hours.length ? Math.min(...hours) : null;
+    };
+    const full = planets.filter((r) => minHours(r) === 0 || r.fill !== null && KEYS3.some((k) => r.fill[k] >= 0.9));
+    const soon = planets.filter((r) => !full.includes(r) && (minHours(r) ?? Infinity) <= SOON_FULL_HOURS);
+    const idle = planets.filter((r) => r.idle === true);
+    const stale = rows.filter((r) => r.ageMinutes > STALE_MINUTES);
+    const out = [];
+    const push = (level2, key, list) => {
+      if (list.length) out.push({ level: level2, key, count: list.length, names: list.map(label), moons: list.map((r) => r.type === "moon") });
+    };
+    push("warn", "alert.missing", missing2);
+    push("warn", "alert.full", full);
+    push("warn", "alert.soonFull", soon);
+    push("info", "alert.idle", idle);
+    push("info", "alert.stale", stale);
+    return out;
+  }
+
+  // src/data/fleet-page.ts
+  function isFleetDispatch(doc) {
+    return doc.getElementById("fleetdispatchcomponent") !== null && doc.getElementById("fleet1") !== null;
+  }
+  var FLEET_PAGE_SHIPS = ["204", "205", "206", "207", "215", "211", "213", "214", "218", "219", "202", "203", "208", "209", "210"];
+  function readShipSlots(doc) {
+    return Array.from(doc.querySelectorAll("#fleet1 #technologies li[data-technology]")).flatMap((li) => {
+      const input = li.querySelector("input");
+      if (!input) return [];
+      const amount = li.querySelector(".amount");
+      const available = Number(amount?.dataset.value ?? 0) || 0;
+      return [{ id: li.dataset.technology ?? "", name: li.getAttribute("aria-label") ?? "", available, input }];
+    });
+  }
+  function originCoords(doc) {
+    const raw = doc.querySelector('meta[name="ogame-planet-coordinates"]')?.getAttribute("content");
+    const parts = raw?.split(":").map(Number);
+    if (!parts || parts.length !== 3 || parts.some((n) => !Number.isFinite(n))) return null;
+    return { galaxy: parts[0], system: parts[1], position: parts[2] };
+  }
+
+  // src/data/tech-names.ts
+  var TECH_NAMES_KEY = "tech.names";
+  var MINES = [1, 2, 3, 4, 12, 212, 217, 22, 23, 24];
+  var PLANET_FACILITIES = [14, 15, 21, 31, 33, 34, 36, 44];
+  var MOON_FACILITIES = [41, 42, 43, 14, 21, 22, 23, 24];
+  var RESEARCH = [106, 108, 109, 110, 111, 113, 114, 115, 117, 118, 120, 121, 122, 123, 124, 199];
+  var SHIPS = [202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 213, 214, 215, 218, 219, 212, 217];
+  var DEFENCES = [401, 402, 403, 404, 405, 406, 407, 408, 502, 503];
+  var SPECIES = [1, 2, 3, 4];
+  var lfBuildings = (s) => Array.from({ length: 12 }, (_, i) => 1e4 + s * 1e3 + 101 + i);
+  var speciesOf = (id) => {
+    const s = Math.floor(id % 1e4 / 1e3);
+    return id > 1e4 && s >= 1 && s <= 4 ? s : null;
+  };
+  var EN = {
+    1: "Metal Mine",
+    2: "Crystal Mine",
+    3: "Deuterium Synthesizer",
+    4: "Solar Plant",
+    12: "Fusion Reactor",
+    14: "Robotics Factory",
+    15: "Nanite Factory",
+    21: "Shipyard",
+    22: "Metal Storage",
+    23: "Crystal Storage",
+    24: "Deuterium Tank",
+    31: "Research Lab",
+    33: "Terraformer",
+    34: "Alliance Depot",
+    36: "Space Dock",
+    41: "Lunar Base",
+    42: "Sensor Phalanx",
+    43: "Jump Gate",
+    44: "Missile Silo",
+    45: "Interstellar Anomaly Scanner",
+    106: "Espionage",
+    108: "Computer",
+    109: "Weapons",
+    110: "Shielding",
+    111: "Armour",
+    113: "Energy",
+    114: "Hyperspace",
+    115: "Combustion Drive",
+    117: "Impulse Drive",
+    118: "Hyperspace Drive",
+    120: "Laser",
+    121: "Ion",
+    122: "Plasma",
+    123: "Intergalactic Research Network",
+    124: "Astrophysics",
+    199: "Graviton",
+    202: "Small Cargo",
+    203: "Large Cargo",
+    204: "Light Fighter",
+    205: "Heavy Fighter",
+    206: "Cruiser",
+    207: "Battleship",
+    208: "Colony Ship",
+    209: "Recycler",
+    210: "Espionage Probe",
+    211: "Bomber",
+    212: "Solar Satellite",
+    213: "Destroyer",
+    214: "Deathstar",
+    215: "Battlecruiser",
+    217: "Crawler",
+    218: "Reaper",
+    219: "Pathfinder",
+    401: "Rocket Launcher",
+    402: "Light Laser",
+    403: "Heavy Laser",
+    404: "Gauss Cannon",
+    405: "Ion Cannon",
+    406: "Plasma Turret",
+    407: "Small Shield Dome",
+    408: "Large Shield Dome",
+    502: "Anti-Ballistic Missile",
+    503: "Interplanetary Missile"
+  };
+  var LF_EN = {
+    1: {
+      b: ["Residential Sector", "Biosphere Farm", "Research Centre", "Academy of Sciences", "Neuro-Calibration Centre", "High Energy Smelting", "Food Silo", "Fusion-Powered Production", "Skyscraper", "Biotech Lab", "Metropolis", "Planetary Shield"],
+      r: ["Intergalactic Envoys", "High-Performance Extractors", "Fusion Drives", "Stealth Field Generator", "Orbital Den", "Research AI", "High-Performance Terraformer", "Enhanced Production Technologies", "Light Fighter Mk II", "Cruiser Mk II", "Improved Lab Technology", "Plasma Terraformer", "Low-Temperature Drives", "Bomber Mk II", "Destroyer Mk II", "Battlecruiser Mk II", "Robot Assistants", "Supercomputer"]
+    },
+    2: {
+      b: ["Meditation Enclave", "Crystal Farm", "Rune Technologium", "Rune Forge", "Oriktorium", "Magma Forge", "Disruption Chamber", "Megalith", "Crystal Refinery", "Deuterium Synthesiser", "Mineral Research Centre", "Advanced Recycling Plant"],
+      r: ["Volcanic Batteries", "Acoustic Scanning", "High Energy Pump Systems", "Cargo Hold Expansion", "Magma-Powered Production", "Geothermal Power Plants", "Depth Sounding", "Ion Crystal Enhancement", "Improved Stellarator", "Hardened Diamond Drill Heads", "Seismic Mining Technology", "Magma-Powered Pump Systems", "Ion Crystal Modules", "Optimised Silo Construction", "Diamond Energy Transmitter", "Obsidian Shield Reinforcement", "Rune Shields", "Rock'tal Collector Enhancement"]
+    },
+    3: {
+      b: ["Assembly Line", "Fusion Cell Factory", "Robotics Research Centre", "Update Network", "Quantum Computer Centre", "Automatised Assembly Centre", "High-Performance Transformer", "Microchip Assembly Line", "Production Assembly Hall", "High-Performance Synthesiser", "Chip Mass Production", "Nano Repair Bots"],
+      r: ["Catalyser Technology", "Plasma Drive", "Efficiency Module", "Depot AI", "General Overhaul (Light Fighter)", "Automated Transport Lines", "Improved Drone AI", "Experimental Recycling Technology", "General Overhaul (Cruiser)", "Slingshot Autopilot", "High-Temperature Superconductors", "General Overhaul (Battleship)", "Artificial Swarm Intelligence", "General Overhaul (Battlecruiser)", "General Overhaul (Bomber)", "General Overhaul (Destroyer)", "Experimental Weapons Technology", "Mechan General Enhancement"]
+    },
+    4: {
+      b: ["Sanctuary", "Antimatter Condenser", "Vortex Chamber", "Halls of Realisation", "Forum of Transcendence", "Antimatter Convector", "Cloning Laboratory", "Chrysalis Accelerator", "Bio Modifier", "Psionic Modulator", "Ship Manufacturing Hall", "Supra Refractor"],
+      r: ["Heat Recovery", "Sulphide Process", "Psionic Network", "Telekinetic Tractor Beam", "Enhanced Sensor Technology", "Neuromodal Compressor", "Neuro-Interface", "Interplanetary Analysis Network", "Overclocking (Heavy Fighter)", "Telekinetic Drive", "Sixth Sense", "Psychoharmoniser", "Efficient Swarm Intelligence", "Overclocking (Large Cargo)", "Gravitation Sensors", "Overclocking (Battleship)", "Psionic Shield Matrix", "Kaelesh Discoverer Enhancement"]
+    }
+  };
+  var IT = {
+    1: "Miniera di metallo",
+    2: "Miniera di cristallo",
+    3: "Sintetizzatore di deuterio",
+    4: "Centrale solare",
+    12: "Centrale a fusione",
+    14: "Fabbrica dei robot",
+    15: "Fabbrica di naniti",
+    21: "Cantiere spaziale",
+    22: "Deposito di metallo",
+    23: "Deposito di cristallo",
+    24: "Cisterna di deuterio",
+    31: "Laboratorio di ricerca",
+    33: "Terraformer",
+    34: "Deposito dell'alleanza",
+    36: "Porto spaziale",
+    41: "Base lunare",
+    42: "Falange di sensori",
+    43: "Portale iperspaziale",
+    44: "Silos missilistico",
+    45: "Scanner di anomalie interstellari",
+    106: "Spionaggio",
+    108: "Computer",
+    109: "Armi",
+    110: "Scudi",
+    111: "Corazze",
+    113: "Energia",
+    114: "Iperspazio",
+    115: "Propulsore a combustione",
+    117: "Propulsore a impulso",
+    118: "Propulsore iperspaziale",
+    120: "Laser",
+    121: "Ionica",
+    122: "Plasma",
+    123: "Rete di ricerca intergalattica",
+    124: "Astrofisica",
+    199: "Gravitoni",
+    217: "Crawler",
+    218: "Reaper",
+    219: "Pathfinder",
+    401: "Lanciamissili",
+    402: "Laser leggero",
+    403: "Laser pesante",
+    404: "Cannone Gauss",
+    405: "Cannone ionico",
+    406: "Cannone al plasma",
+    407: "Cupola scudo piccola",
+    408: "Cupola scudo potente",
+    502: "Missili anti-balistici",
+    503: "Missili interplanetari"
+  };
+  var BUILT_IN = { it: IT };
+  function techName(id, locale, learned = {}, t) {
+    const seen = learned[String(id)];
+    if (seen) return seen;
+    const local = BUILT_IN[locale]?.[id];
+    if (local) return local;
+    if (t && id >= 202 && id <= 219) {
+      const ship = t(`ship.${id}`);
+      if (ship !== `ship.${id}`) return ship;
+    }
+    const s = speciesOf(id);
+    if (s) {
+      const group = Math.floor(id % 1e3 / 100) === 1 ? LF_EN[s].b : LF_EN[s].r;
+      return group[id % 100 - 1] ?? String(id);
+    }
+    return EN[id] ?? String(id);
+  }
+  function learnTechNames(names, list) {
+    let changed = false;
+    for (const e of list) {
+      if (!e.name || e.name === String(e.id) || names[String(e.id)] === e.name) continue;
+      names[String(e.id)] = e.name;
+      changed = true;
+    }
+    return changed;
+  }
+
+  // src/modules/fleet/actions.ts
+  var TRANSPORT = 3;
+  var DEPLOY = 4;
+  var EXPEDITION = 15;
+  function stock(fd, profile) {
+    const left = shipsAfterReserve(shipsOnPlanet(fd), profile.reserve);
+    return fd.shipsOnPlanet.map((s) => ({ id: s.id, available: left[String(s.id)] ?? 0, capacity: shipCapacity(fd, s.id) }));
+  }
+  function onPlanet(fd) {
+    return { metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet };
+  }
+  function setSpeedBar(fd, percent) {
+    const step = Math.max(1, Math.min(10, Math.round(percent / 10)));
+    fd.speedPercent = step;
+    const $ = pageWindow().jQuery;
+    try {
+      $?.("#speedPercentage").data("percentageBarInstance")?.setValue?.(step);
+    } catch {
+    }
+    fd.speedPercent = step;
+  }
+  function setTarget(fd, doc, target) {
+    fd.targetPlanet.galaxy = target.galaxy;
+    fd.targetPlanet.system = target.system;
+    fd.targetPlanet.position = target.position;
+    fd.targetPlanet.type = target.type;
+    if (target.name) fd.targetPlanet.name = target.name;
+    const set = (id, v) => {
+      const input = doc.querySelector(`#fleet2 #${id}`);
+      if (input) input.value = String(v);
+    };
+    set("galaxy", target.galaxy);
+    set("system", target.system);
+    set("position", target.position);
+  }
+  var ourSelection = /* @__PURE__ */ new WeakMap();
+  function selectShips(fd, ships) {
+    fd.resetShips();
+    fd.resetCargo();
+    let total = 0;
+    for (const [id, n] of Object.entries(ships)) {
+      if (n > 0) {
+        fd.selectShip(Number(id), n);
+        total += n;
+      }
+    }
+    ourSelection.set(fd, selectionKey(fd));
+    return total;
+  }
+  function clearOurSelection(fd) {
+    const key = selectionKey(fd);
+    if (!key || key !== ourSelection.get(fd)) return false;
+    fd.resetShips();
+    fd.resetCargo();
+    ourSelection.delete(fd);
+    fd.refresh();
+    return true;
+  }
+  function loadCargo(fd, profile, order) {
+    const load = cargoLoad(onPlanet(fd), profile.reserve, Math.ceil(Number(fd.getConsumption()) || 0), fd.getCargoCapacity(), order);
+    fd.cargoMetal = load.metal;
+    fd.cargoCrystal = load.crystal;
+    fd.cargoDeuterium = load.deuterium;
+    return load.metal + load.crystal + load.deuterium;
+  }
+  function finish(fd, mission, ships, cargo) {
+    fd.mission = mission;
+    fd.refresh();
+    fd.focusSubmitFleet1();
+    return { ok: ships > 0, reason: ships > 0 ? void 0 : "fleet.err.noShips", ships, cargo };
+  }
+  function toMove(fd, profile) {
+    const r = profile.reserve.resources;
+    return Math.max(0, fd.metalOnPlanet - r.metal) + Math.max(0, fd.crystalOnPlanet - r.crystal) + Math.max(0, fd.deuteriumOnPlanet - r.deuterium);
+  }
+  function prepareTransport(fd, doc, profile, settings, target) {
+    if (settings.collectIgnoreShips) profile = { ...profile, reserve: { ...profile.reserve, ships: {} } };
+    const amount = toMove(fd, profile);
+    if (amount <= 0) return { ok: false, reason: "fleet.err.noResources", ships: 0, cargo: 0 };
+    const ships = cargoShipsFor(amount, stock(fd, profile), settings.mainShip, settings.secondShip);
+    const count2 = selectShips(fd, ships);
+    setTarget(fd, doc, target);
+    setSpeedBar(fd, settings.transportSpeed);
+    fd.mission = TRANSPORT;
+    const cargo = count2 > 0 ? loadCargo(fd, profile, settings.loadOrder) : 0;
+    return finish(fd, TRANSPORT, count2, cargo);
+  }
+  function prepareDeploy(fd, doc, profile, settings, target) {
+    const ships = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
+    const count2 = selectShips(fd, ships);
+    setTarget(fd, doc, target);
+    setSpeedBar(fd, settings.transportSpeed);
+    fd.mission = DEPLOY;
+    const cargo = count2 > 0 && settings.collectDeployRes ? loadCargo(fd, profile, settings.loadOrder) : 0;
+    return finish(fd, DEPLOY, count2, cargo);
+  }
+  function prepareFleetsave(fd, doc, base2, save) {
+    const profile = { ...base2, reserve: base2.saveReserve ?? EMPTY_RESERVE };
+    const ships = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
+    const count2 = selectShips(fd, ships);
+    setTarget(fd, doc, resolveTarget(save, fd.currentPlanet));
+    setSpeedBar(fd, save.speed);
+    fd.mission = save.mission;
+    const cargo = count2 > 0 ? loadCargo(fd, profile) : 0;
+    return finish(fd, save.mission, count2, cargo);
+  }
+  function prepareDelivery(fd, doc, base2, settings, target, need, hold = { metal: 0, crystal: 0, deuterium: 0 }) {
+    const r = base2.reserve.resources;
+    const profile = { ...base2, reserve: { ships: base2.reserve.ships, resources: { ...r, metal: r.metal + hold.metal, crystal: r.crystal + hold.crystal, deuterium: r.deuterium + hold.deuterium } } };
+    const free = deliveryLoad(onPlanet(fd), profile.reserve, 0, Number.MAX_SAFE_INTEGER, need);
+    const amount = free.metal + free.crystal + free.deuterium;
+    if (amount <= 0) return { ok: false, reason: "fleet.err.noResources", ships: 0, cargo: 0 };
+    const count2 = selectShips(fd, cargoShipsFor(amount, stock(fd, profile), settings.mainShip, settings.secondShip));
+    setTarget(fd, doc, target);
+    setSpeedBar(fd, settings.transportSpeed);
+    fd.mission = TRANSPORT;
+    let cargo = 0;
+    if (count2 > 0) {
+      const load = deliveryLoad(onPlanet(fd), profile.reserve, Math.ceil(Number(fd.getConsumption()) || 0), fd.getCargoCapacity(), need);
+      fd.cargoMetal = load.metal;
+      fd.cargoCrystal = load.crystal;
+      fd.cargoDeuterium = load.deuterium;
+      cargo = load.metal + load.crystal + load.deuterium;
+    }
+    return finish(fd, TRANSPORT, count2, cargo);
+  }
+  function expeditionLimits(fd, universe) {
+    const cls = fd.apiDataJson?.characterClassId ?? 0;
+    const booster = fd.apiDataJson?.bonuses?.characterClassBooster?.[String(cls)] ?? 0;
+    return expeditionMax({
+      topScore: universe.topScore,
+      characterClass: cls,
+      economySpeed: universe.economySpeed,
+      classBooster: booster,
+      lfBooster: universe.lfBooster,
+      itemBoost: universe.itemBoost
+    });
+  }
+  function prepareExpedition(fd, doc, profile, settings, universe, rand = Math.random) {
+    profile = { ...profile, reserve: EMPTY_RESERVE };
+    const limits = expeditionLimits(fd, universe);
+    const target = expeditionTarget(limits.max, settings.expeditionValue);
+    const base2 = settings.expeditionValue.trim() ? 0 : limits.base;
+    const slots = settings.expeditionSplit ? freeExpeditionSlots(fd.expeditionCount, fd.maxExpeditionCount) : 0;
+    const ships = expeditionFleet(stock(fd, profile), { ship: settings.expeditionShip, target, base: base2, extras: settings.expeditionExtras, big: settings.expeditionBig, slots });
+    const count2 = selectShips(fd, ships);
+    const here = fd.currentPlanet;
+    const system = expeditionSystem(here.system, settings.expeditionSpread, { systems: universe.systems ?? 499, donut: universe.donutSystem ?? true }, rand);
+    setTarget(fd, doc, { galaxy: here.galaxy, system, position: 16, type: 1 });
+    setSpeedBar(fd, 100);
+    fd.expeditionTime = 1;
+    const $ = pageWindow().jQuery;
+    try {
+      $?.("#expeditiontime").val("1");
+    } catch {
+    }
+    return { ...finish(fd, EXPEDITION, count2, 0), target, system, slots };
+  }
+  function prepareLast(fd, doc, profile, last2) {
+    const left = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
+    const ships = {};
+    for (const [id, n] of Object.entries(last2.ships)) ships[Number(id)] = Math.min(n, left[Number(id)] ?? 0);
+    const count2 = selectShips(fd, ships);
+    setTarget(fd, doc, last2.target);
+    setSpeedBar(fd, last2.speed);
+    return finish(fd, last2.mission, count2, 0);
+  }
+  function selectionKey(fd) {
+    return (fd.shipsToSend ?? []).filter((s) => s.number > 0).map((s) => `${s.id}:${s.number}`).sort().join(",");
+  }
+  function playerSelection(fd) {
+    const key = selectionKey(fd);
+    if (!key || key === ourSelection.get(fd)) return null;
+    return Object.fromEntries((fd.shipsToSend ?? []).filter((s) => s.number > 0).map((s) => [s.id, s.number]));
+  }
+  function prepareSend(fd, doc, settings, target, pick, mission, cargoShip, keep = {}, keepRes = { metal: 0, crystal: 0, deuterium: 0 }) {
+    const all2 = onPlanet(fd);
+    const here = { metal: Math.max(0, all2.metal - keepRes.metal), crystal: Math.max(0, all2.crystal - keepRes.crystal), deuterium: Math.max(0, all2.deuterium - keepRes.deuterium) };
+    const wanted = pickedLoad(here, pick, 0, Number.MAX_SAFE_INTEGER);
+    const amount = wanted.metal + wanted.crystal + wanted.deuterium;
+    const manual = playerSelection(fd) ?? {};
+    const already = manual[cargoShip] ?? 0;
+    delete manual[cargoShip];
+    const othersCapacity = Object.entries(manual).reduce((sum, [id, n2]) => sum + n2 * shipCapacity(fd, Number(id)), 0);
+    const available = Math.max(0, (shipsOnPlanet(fd)[String(cargoShip)] ?? 0) - (keep[String(cargoShip)] ?? 0));
+    const capacity = shipCapacity(fd, cargoShip);
+    if (!available && !Object.keys(manual).length) return { ok: false, reason: "fleet.err.noCargoShip", ships: 0, cargo: 0, missing: 0 };
+    if (mission === "transport" && amount <= 0) return { ok: false, reason: "fleet.err.nothingPicked", ships: 0, cargo: 0, missing: 0 };
+    const n = cargoCount(amount, othersCapacity, capacity, available, already);
+    const needed = capacity > 0 ? Math.ceil(Math.max(0, amount - othersCapacity) / capacity) : 0;
+    const count2 = selectShips(fd, { ...manual, [cargoShip]: n });
+    setTarget(fd, doc, target);
+    setSpeedBar(fd, settings.transportSpeed);
+    const code = mission === "transport" ? TRANSPORT : DEPLOY;
+    fd.mission = code;
+    let cargo = 0;
+    if (count2 > 0) {
+      const load = pickedLoad(here, pick, Math.ceil(Number(fd.getConsumption()) || 0), fd.getCargoCapacity());
+      fd.cargoMetal = load.metal;
+      fd.cargoCrystal = load.crystal;
+      fd.cargoDeuterium = load.deuterium;
+      cargo = load.metal + load.crystal + load.deuterium;
+    }
+    return { ...finish(fd, code, count2, cargo), missing: Math.max(0, needed - n) };
+  }
+  function aimSend(fd, doc, target, mission) {
+    setTarget(fd, doc, target);
+    fd.mission = mission === "transport" ? TRANSPORT : DEPLOY;
+  }
+  function snapshotFleet(fd) {
+    return {
+      ships: Object.fromEntries(fd.shipsToSend.map((s) => [String(s.id), s.number])),
+      target: { galaxy: fd.targetPlanet.galaxy, system: fd.targetPlanet.system, position: fd.targetPlanet.position, type: fd.targetPlanet.type },
+      mission: fd.mission,
+      speed: Math.round(fd.speedPercent * 10)
+    };
+  }
+
+  // src/modules/fleet/repeat.ts
+  function readRepeatParams(url) {
+    const p = new URL(url).searchParams;
+    const mode = p.get("futmode");
+    const first = Number(p.get("futfirst"));
+    if (!mode || !Number.isFinite(first) || first <= 0) return null;
+    const dest = Number(p.get("futdest"));
+    const speed = Number(p.get("futspeed"));
+    const state = { mode, first, dest: Number.isFinite(dest) && dest > 0 ? dest : null };
+    if (Number.isInteger(speed) && speed >= 10 && speed <= 100) state.speed = speed;
+    return state;
+  }
+  function repeatUrl(base2, cp, state) {
+    const u = new URL(base2);
+    u.search = "";
+    u.searchParams.set("page", "ingame");
+    u.searchParams.set("component", "fleetdispatch");
+    u.searchParams.set("cp", String(cp));
+    u.searchParams.set("futmode", state.mode);
+    u.searchParams.set("futfirst", String(state.first));
+    if (state.dest) u.searchParams.set("futdest", String(state.dest));
+    if (state.speed) u.searchParams.set("futspeed", String(state.speed));
+    return u.toString();
+  }
+  function nextInRound(state, bodyId, list, skipIds = []) {
+    if (state.mode === "expedition") return nextBody(list, bodyId, { skipIds });
+    const next = nextBody(list, bodyId, {
+      skip: state.mode === "collect" || state.mode === "collectDeploy" || state.mode === "plan" ? state.dest : null,
+      onlyWithMoon: state.mode === "moon"
+    });
+    return next === null || next === state.first ? null : next;
+  }
+  function hookSend(fd, onSent) {
+    const original = fd.submitFleet2;
+    if (!original || original.futHooked) return;
+    const win = pageWindow();
+    let leaving = false;
+    const wrapped = function(force) {
+      if (leaving) return void 0;
+      const $ = win.$;
+      if (!$) return original.call(fd, force);
+      const post = $.post;
+      $.post = function(url, params, cb) {
+        if (url !== fd.sendFleetUrl || typeof cb !== "function") return post.call(this, url, params, cb);
+        return post.call(this, url, params, function(response) {
+          let ok = false;
+          try {
+            ok = JSON.parse(response).success === true;
+          } catch {
+            ok = false;
+          }
+          if (ok && onSent()) {
+            leaving = true;
+            return void 0;
+          }
+          return cb.call(this, response);
+        });
+      };
+      try {
+        return original.call(fd, force);
+      } finally {
+        $.post = post;
+      }
+    };
+    wrapped.futHooked = true;
+    fd.submitFleet2 = wrapped;
+  }
+
+  // src/modules/fleet/style.ts
+  var FLEET_CSS = `
+/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
+.fut-fbar, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fchips, .fut-fclear, .fut-fall, .fut-fcap, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
+/* The fleet bar speaks the inbox's language: Verdana 11px, tabular numbers, one set of tokens. */
+.fut-fbar, .fut-fmenu {
+  ${PAGE_TOKENS} --line: var(--line-strong); --line-soft: #1D2531;
+  /* The player's board (DESIGN.md): buttons are fields printed on the board, the one in use marked by the pawn's edge. */
+  --tile: var(--surface); --tile-hi: var(--hover); --tile-line: var(--line-strong); --ico: var(--txt); --ico-hi: var(--hi);
+  --track: var(--faint); --knob-on: var(--on-accent); --on-line: var(--accent-line); --on-bg: var(--accent-soft); --field: var(--bg);
+  --display: Bahnschrift, "DIN Alternate", "Roboto Condensed", "sans-serif-condensed", "Liberation Sans Narrow", "Arial Narrow", "DejaVu Sans Condensed", sans-serif;
+}
+.fut-fbar {
+  display: flex; flex-direction: column; gap: 8px; margin: 6px 10px; padding: 8px; min-width: 0; box-sizing: border-box;
+  border: 0; border-radius: 6px; background: var(--raised);
+  font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums;
+}
+.fut-fbar button { font: inherit; cursor: pointer; }
+.fut-fbar button:focus-visible, .fut-fmenu button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Two rows: what to send (and the editors), then what to keep back (and the readout). */
+.fut-frow { display: flex; align-items: center; gap: 8px; min-width: 0; }
+
+/* Actions: a hotbar of filled icons on solid tiles, the key in the corner. Dashed = still to set up.
+   Silver on slate; only the three kinds Future runs whole carry a colour, as on the touch bar. */
+.fut-facts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.fut-fact {
+  position: relative; flex: none; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 62px; height: 48px; padding: 4px 8px 3px;
+  border: 0; border-radius: 4px; background: var(--tile); color: var(--ico);
+}
+.fut-fact:hover { background: var(--tile-hi); color: var(--ico-hi); }
+.fut-fact:active { transform: translateY(1px); }
+.fut-fact .ico { display: inline-flex; }
+/* Expedition blue, fleetsave violet, Accentra green (core/sheet MISSION_TONES): icon and a bottom line in the
+   colour, the tile faintly tinted; the name stays silver, readable. */
+${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
+.fut-fact[data-mode="collect"], .fut-fact[data-mode="expedition"], .fut-fact[data-mode="fleetsave"] {
+  background: color-mix(in srgb, var(--tone) 12%, var(--tile)); box-shadow: inset 0 -2px 0 var(--tone); }
+.fut-fact[data-mode="collect"] .ico, .fut-fact[data-mode="expedition"] .ico, .fut-fact[data-mode="fleetsave"] .ico { color: var(--tone); }
+.fut-fact[data-mode="collect"]:hover, .fut-fact[data-mode="expedition"]:hover, .fut-fact[data-mode="fleetsave"]:hover {
+  background: color-mix(in srgb, var(--tone) 22%, var(--tile-hi)); }
+/* The name under the icon: what the button does, readable without pointing at it. */
+.fut-fact .name { font: 600 condensed 12px/1 var(--display); white-space: nowrap; color: inherit; }
+/* Zone labels: what a group of buttons is for, printed once at its head. */
+.fut-fzone { color: var(--label); font: 600 condensed 13px var(--display); white-space: nowrap; }
+.fut-fzonebox { display: inline-flex; flex-direction: column; gap: 4px; }
+.fut-ftiles { display: inline-flex; gap: 4px; }
+.fut-fgroup .fut-fzone { margin-right: 4px; }
+.fut-fact kbd { position: absolute; top: 3px; right: 4px; color: var(--dim); font: 11px/11px Verdana, Arial, sans-serif; }
+.fut-fact:hover kbd { color: var(--mute); }
+.fut-fact.dim { background: none; box-shadow: none; outline: 1px dashed var(--line-strong); outline-offset: -1px; color: var(--dim); }
+/* Secondary tools (moon, expedition collection): set apart and quieter. */
+.fut-fsecond { display: inline-flex; gap: 4px; margin-left: 6px; padding-left: 12px; border-left: 2px solid var(--bg); }
+.fut-fsecond .fut-fact { background: none; box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--mute); }
+.fut-fsecond .fut-fact:hover { background: var(--tile); color: var(--ico-hi); }
+.fut-fsecond .fut-fact[data-mode="collect"] { box-shadow: inset 0 -2px 0 var(--tone), inset 0 0 0 1px var(--line-strong); }
+.fut-fskip[hidden] { display: none; }
+.fut-fbar[hidden] { display: none; }
+/* Main cargo ship, picked on the ship itself (top right; the game keeps the top left). */
+#fleet1 #technologies li[data-technology] { position: relative; }
+.fut-mainship { position: absolute; top: 2px; right: 2px; z-index: 2; width: 20px; height: 20px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--accent-soft); border-radius: 5px; background: rgba(13, 21, 34, 0.85); color: var(--muted); cursor: pointer; opacity: 0.75; }
+.fut-mainship:hover { opacity: 1; color: var(--hi); border-color: var(--accent); }
+.fut-mainship.on { opacity: 1; color: var(--surface); background: var(--accent); border-color: var(--accent); cursor: default; }
+/* "Opens a list" mark, in the corner where the others have their key. */
+.fut-fact .more-mark { position: absolute; right: 3px; bottom: 3px; width: 0; height: 0; border-left: 5px solid transparent; border-bottom: 5px solid currentColor; opacity: 0.7; }
+
+/* On the game's ship tiles: inverts that ship's selection. */
+#fleet1 #technologies li[data-technology] { position: relative; }
+.fut-finv { position: absolute; top: 2px; left: 2px; z-index: 3; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; padding: 0;
+  border: 1px solid var(--line-strong); border-radius: 4px; background: rgba(8, 13, 20, 0.85); color: var(--txt); cursor: pointer; opacity: 0.75; }
+.fut-finv:hover, .fut-finv:focus-visible { opacity: 1; border-color: var(--line-hover); color: var(--hi); }
+@media (pointer: coarse) { .fut-finv { width: 26px; height: 26px; opacity: 1; } }
+
+/* Editors, pushed to the far end of the first row. */
+.fut-fedit { display: inline-flex; gap: 2px; margin-left: auto; }
+.fut-ftool { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 32px; height: 32px; padding: 0 10px 0 8px; border: 0; border-radius: 5px;
+  background: var(--tile); box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--ico-hi); cursor: pointer; }
+.fut-ftool .name { font: 600 condensed 12px/1 var(--display); white-space: nowrap; color: var(--hi); }
+.fut-ftool:hover { background: var(--tile-hi); color: var(--hi); }
+.fut-ftool:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Rules: the rule's icon beside a switch track, so on and off read without a word. */
+.fut-frules { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; min-width: 0; }
+/* Reserves and round: a strip of their own under the ships, apart from the actions. */
+.fut-freserves { margin-top: 8px; }
+.fut-fgroup { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; max-width: 100%; }
+/* A labelled group: the label stays on the first line, the switches wrap in their own column beside it. */
+.fut-fgroup:has(> .fut-fchips) { flex-wrap: nowrap; align-items: flex-start; }
+.fut-fgroup > .fut-fzone { line-height: 28px; }
+.fut-fchips { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; }
+/* A rule as a printed chip: pip filled when on, its name, what it keeps back. Off = outline only. */
+.fut-fchip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 8px; border: 1px solid var(--tile-line); border-radius: 4px; background: none; color: var(--mute); }
+.fut-fchip .ico { display: inline-flex; opacity: 0.8; }
+.fut-fchip b { font: 600 condensed 12px var(--display); }
+.fut-fchip .val { color: var(--dim); }
+.fut-fchip .pip { flex: none; width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; }
+.fut-fchip:hover { border-color: var(--line-hover); color: var(--hi); }
+.fut-fchip[aria-checked="true"] { border-color: var(--accent-line); background: var(--tile-hi); color: var(--hi); }
+.fut-fchip[aria-checked="true"] .pip { background: var(--accent); box-shadow: none; }
+.fut-fchip[aria-checked="true"] .val { color: var(--txt); }
+.fut-fchip .toks { display: inline-flex; gap: 8px; }
+.fut-fchip .toks > span { display: inline-flex; align-items: center; gap: 3px; }
+.fut-fbar .tok { display: inline-flex; flex: none; vertical-align: -2px; }
+.fut-fbar .tok svg { display: block; }
+.fut-fbar .tok.m { color: var(--m); } .fut-fbar .tok.c { color: var(--c); } .fut-fbar .tok.d { color: var(--d); }
+.fut-fsw { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 7px 0 8px; border: 1px solid var(--line-soft); border-radius: 14px; background: none; color: var(--dim); }
+.fut-fsw .ico { display: inline-flex; }
+.fut-fsw .track { position: relative; flex: none; width: 20px; height: 12px; border-radius: 6px; background: var(--track); transition: background-color 120ms ease-out; }
+.fut-fsw .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 8px; height: 8px; border-radius: 50%; background: var(--txt); transition: transform 120ms ease-out; }
+.fut-fsw:hover { border-color: var(--line); color: var(--txt); }
+.fut-fsw[aria-checked="true"] { border-color: var(--on-line); background: var(--on-bg); color: var(--on-accent); }
+.fut-fsw[aria-checked="true"] .track { background: var(--accent); }
+.fut-fsw[aria-checked="true"] .track::after { transform: translateX(8px); background: var(--knob-on); }
+
+/* Readout: the last outcome, or what the control under the pointer does. Two lines at most, in a box of
+   fixed size: one line or two (or a long word) never moves the page. In the reserves strip it sits in a
+   column, where flex: 1 used to replace the height with the text's own (one line or two). */
+.fut-fread { flex: 1 1 0; min-width: 0; width: 100%; max-width: 100%; height: 30px; min-height: 30px; max-height: 30px; box-sizing: border-box; overflow: hidden; display: flex; align-items: center; }
+.fut-fbar > .fut-fread { flex: none; }
+.fut-fread span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; min-width: 0; overflow-wrap: anywhere; }
+.fut-fread .tip { color: var(--mute); }
+/* Speed changed during a round: "also for the next ones?", with its two answers. */
+.fut-fask { flex: none; display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 4px 0 10px; border: 1px solid #6B5A1E; border-radius: 8px; background: rgba(245,181,71,0.08); }
+.fut-fask[hidden] { display: none; }
+.fut-fask-q { color: #F5D9A0; white-space: nowrap; }
+.fut-fask-b { height: 22px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: 5px; background: var(--surface); color: var(--text-2); font: 12px Arial, Helvetica, sans-serif; cursor: pointer; }
+.fut-fask-b.yes { border-color: var(--warn); color: var(--warn); font-weight: 700; }
+.fut-fask-b:hover { color: #fff; border-color: var(--accent); }
+.fut-fask-b:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
+.fut-fread .tip b { color: var(--hi); }
+.fut-fread .tip:empty { display: none; }
+.fut-fread .tip:not(:empty) + .fut-finfo { display: none; }
+.fut-finfo { color: var(--mute); }
+.fut-finfo.err { color: var(--neg); }
+
+/* Trasporto / Schiera on: the tile stays lit until pressed again. */
+.fut-fact[aria-pressed="true"], .fut-fact.used { background: var(--tile-hi); box-shadow: inset 0 3px 0 var(--accent); color: var(--ico-hi); }
+.fut-fact[data-mode="collect"].used, .fut-fact[data-mode="expedition"].used, .fut-fact[data-mode="fleetsave"].used,
+.fut-fact[data-mode="collect"][aria-pressed="true"] { box-shadow: inset 0 3px 0 var(--accent), inset 0 -2px 0 var(--tone); }
+.fut-fsecond .fut-fact.used { box-shadow: inset 0 3px 0 var(--accent), inset 0 0 0 1px var(--line-strong); }
+.fut-fact[aria-pressed="true"] kbd, .fut-fact.used kbd { color: var(--accent); }
+
+/* Their panel: destination over resources, labels in one column; CL / CP on the right, as tall as both rows. */
+.fut-fsend {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px 10px;
+  padding: 8px 8px 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface);
+}
+.fut-fsend .lbl { grid-column: 1; color: var(--mute); }
+.fut-fdest { grid-column: 2; grid-row: 1; display: inline-flex; align-items: center; gap: 3px; }
+.fut-fres { grid-column: 2; grid-row: 2; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+.fut-fdest .colon { color: var(--dim); }
+.fut-fdest .fut-fpick { margin: 0 4px 0 2px; }
+.fut-fin { box-sizing: border-box; height: 26px; padding: 0 6px; border: 1px solid var(--line); border-radius: 5px; background: var(--field); color: var(--hi); font: 11px/1 Verdana, Arial, sans-serif; font-variant-numeric: tabular-nums; }
+.fut-fin::placeholder { color: var(--dim); }
+.fut-fin:focus { outline: none; border-color: var(--accent); }
+.fut-fin.bad { border-color: var(--neg); }
+.fut-fin.g, .fut-fin.p { width: 34px; text-align: center; }
+.fut-fin.s { width: 46px; text-align: center; }
+.fut-fin.amount { width: calc(13ch + 14px); text-align: right; }
+.fut-fpick { width: 24px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--mute); }
+.fut-fpick:hover { border-color: var(--line-hover); color: var(--hi); }
+.fut-fseg { display: inline-flex; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+.fut-fseg button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 30px; height: 24px; padding: 0 7px; border: 0; background: none; color: var(--dim); }
+.fut-fseg button + button { border-left: 1px solid var(--line); }
+.fut-fseg button:hover { color: var(--txt); }
+.fut-fseg button[aria-pressed="true"] { background: var(--tile-hi); box-shadow: inset 0 2px 0 var(--accent); color: var(--hi); font-weight: bold; }
+.fut-fresin { display: inline-flex; align-items: center; gap: 2px; }
+.fut-fresin .sym { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 26px; padding: 0; border: 1px solid transparent; border-radius: 5px; background: none; }
+.fut-fresin .sym:hover { border-color: var(--line); background: var(--tile); }
+.fut-fresin.metal .sym { color: var(--m); }
+.fut-fresin.crystal .sym { color: var(--c); }
+.fut-fresin.deuterium .sym { color: var(--d); }
+.fut-fclear { width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--mute); }
+.fut-fclear:hover { border-color: var(--line-hover); color: var(--hi); }
+/* \xABTutto\xBB: every resource here in the three fields, beside the eraser. */
+.fut-fall { height: 26px; padding: 0 10px; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--txt); font: 600 12px Verdana, Arial, sans-serif; cursor: pointer; }
+.fut-fall:hover { border-color: var(--line-hover); color: var(--hi); }
+/* Ships reserve on a ship tile (page 1): how many stay here, bottom left over the picture. */
+#fleet1 #technologies li .fut-fkeep { position: absolute; left: 2px; bottom: 24px; z-index: 2; padding: 0 4px; border-radius: 3px; background: rgba(13, 21, 34, 0.88); color: #F5B547; font: 700 10px/14px Verdana, Arial, sans-serif; pointer-events: auto; cursor: help; }
+/* Cargo room of the ships picked, in the reserves strip. */
+.fut-fcap { flex: none; display: inline-flex; align-items: center; gap: 6px; margin-left: auto; padding: 4px 10px; border-radius: 4px;
+  background: rgba(242, 208, 74, 0.10); box-shadow: inset 0 0 0 1px #8A7420, 0 0 10px rgba(242, 208, 74, 0.18);
+  color: #F7DF7A; font: 700 12px Verdana, Arial, sans-serif; white-space: nowrap; text-shadow: 0 0 6px rgba(247, 223, 122, 0.35); }
+.fut-fcap .ico { display: inline-flex; color: #F2D04A; }
+.fut-fcap:empty { display: none; }
+.fut-ffoot { align-items: center; }
+/* Resources reserve next to the game's resource field (page 2). */
+.fut-fkeepres { display: inline-block; margin-left: 6px; padding: 0 4px; border-radius: 3px; background: rgba(13, 21, 34, 0.88); color: #F5B547; font: 700 10px/16px Verdana, Arial, sans-serif; white-space: nowrap; cursor: help; }
+/* CL / CP: the game's ship pictures, short name in the corner, cargo needed along the bottom. */
+.fut-fcargo { grid-column: 3; grid-row: 1 / span 2; display: flex; align-items: center; gap: 4px; padding-left: 10px; border-left: 1px solid var(--line-soft); }
+.fut-fcl { position: relative; width: 48px; height: 48px; padding: 0; overflow: hidden; border: 1px solid var(--tile-line); border-radius: 6px; background: var(--tile); color: var(--hi); }
+.fut-fcl .pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.85; }
+.fut-fcl b { position: absolute; top: 2px; left: 2px; padding: 0 3px; border-radius: 3px; background: rgba(8, 13, 20, 0.8); font-size: 10px; line-height: 14px; }
+.fut-fcl .n { position: absolute; left: 0; right: 0; bottom: 0; padding: 1px 0; background: rgba(8, 13, 20, 0.82); color: var(--hi); font-size: 10px; line-height: 13px; text-align: center; }
+.fut-fcl .n:empty { display: none; }
+.fut-fcl:hover { border-color: var(--accent); }
+.fut-fcl:hover .pic { opacity: 1; }
+.fut-fcl.short .n { color: var(--warn); }
+.fut-fcl.none { border-style: dashed; }
+.fut-fcl.none .pic { opacity: 0.3; filter: grayscale(1); }
+
+/* Fingers: bigger targets, no key letters. */
+@media (pointer: coarse) {
+  .fut-fact { width: 48px; height: 46px; }
+  .fut-fcaret { width: 30px; height: 46px; }
+  .fut-fact kbd { display: none; }
+  .fut-fact:has(kbd) .ico { margin: 0; }
+  .fut-ftool { min-width: 44px; height: 44px; }
+  .fut-frow { flex-wrap: wrap; }
+  .fut-frules { flex-wrap: wrap; gap: 6px; }
+  /* Riserve and Giro one under the other: one column of switches beside the labels. */
+  .fut-fgroup > .fut-fzone { min-width: 4em; }
+  .fut-fsw { height: 40px; padding: 0 10px 0 12px; border-radius: 20px; }
+  .fut-fread { flex-basis: 100%; }
+  .fut-fin, .fut-fclear, .fut-fpick { height: 40px; }
+  .fut-fsend { grid-template-columns: minmax(0, 1fr); }
+  .fut-fsend .lbl { display: none; }
+  .fut-fdest, .fut-fres, .fut-fcargo { grid-column: 1; grid-row: auto; }
+  .fut-fcargo { padding-left: 0; border-left: 0; }
+  .fut-fcl { width: 52px; height: 52px; }
+  .fut-fseg button { height: 38px; min-width: 44px; }
+  .fut-fsecond { margin-left: 0; padding-left: 0; border-left: 0; }
+}
+
+/* Destination list of Trasporto / Schiera. */
+.fut-fmenu {
+  position: fixed; z-index: 1000002; min-width: 240px; max-height: 320px; overflow-y: auto; overscroll-behavior: contain;
+  display: grid; grid-template-columns: minmax(0, 1fr) 40px; gap: 2px; padding: 4px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); font: 11px/1.35 Verdana, Arial, sans-serif;
+}
+.fut-fmenu .fut-fbtn {
+  display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 8px; border: 1px solid transparent; border-radius: 4px; background: var(--tile);
+  color: var(--txt); font: inherit; cursor: pointer; white-space: nowrap; text-align: left;
+}
+.fut-fmenu .fut-fbtn small { margin-left: auto; color: var(--dim); font-size: 11px; }
+.fut-fmenu .fut-fbtn.moon { justify-content: center; padding: 0; color: var(--mute); }
+.fut-fmenu .fut-fbtn:hover { border-color: var(--accent); background: var(--tile-hi); color: var(--hi); }
+.fut-fmenu .fut-fbtn.on { border-color: var(--warn); color: var(--warn); }
+.fut-fmenu .fut-fbtn:disabled { background: none; color: var(--dim); opacity: 0.5; cursor: default; border-color: transparent; }
+.fut-fmenu .fut-fbtn.moon svg { color: var(--mute); }
+/* Collection menu: the two sends to the favourite on top, then "once towards\u2026". */
+.fut-fcollect { min-width: 280px; }
+.fut-fmhead, .fut-fmsub { grid-column: 1 / -1; margin: 4px 4px 2px; color: var(--mute); }
+.fut-fmhead { color: var(--hi); font-weight: 700; }
+.fut-fmsub { margin-top: 8px; }
+.fut-fmenu .fut-fmain { grid-column: 1 / -1; min-height: 40px; gap: 10px; }
+.fut-fmain .ico { display: inline-flex; color: var(--ico); }
+.fut-fmain .txt { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.fut-fmain .txt b { color: var(--hi); font-weight: 700; }
+.fut-fmain .txt span { color: var(--mute); }
+.fut-fmain kbd { margin-left: auto; color: var(--dim); font: 11px Verdana, Arial, sans-serif; }
+.fut-fmain.dim { opacity: 0.7; }
+.fut-fcollect .fut-fseg { grid-column: 1 / -1; margin: 0 4px 4px; }
+.fut-fcollect .fut-fseg button { flex: 1; font: inherit; cursor: pointer; }
+@media (pointer: coarse) { .fut-fmenu { grid-template-columns: minmax(0, 1fr) 48px; max-height: 60vh; } .fut-fmenu .fut-fbtn { min-height: 44px; } }
+@media (prefers-reduced-motion: reduce) { .fut-fact:active { transform: none; } .fut-fsw .track, .fut-fsw .track::after { transition: none; } }
+`;
+  var RULES_CSS = `
+.fut-frules-panel { color: var(--text-2); font-size: 12px; }
+.fut-frules-panel > .fut-fnote:first-child { margin: 4px 2px 8px; }
+/* Every body on one line: name, then what each rule keeps; the empty ones in the quiet dashed look. */
+.fut-fbodies { display: flex; flex-direction: column; gap: 4px; }
+.fut-fbrow { display: grid; grid-template-columns: minmax(110px, 1.3fr) repeat(4, minmax(0, 1fr)); align-items: center; gap: 8px; min-height: 40px; padding: 4px 10px;
+  border: 1px solid var(--line); border-radius: 7px; background: var(--raised); color: var(--text-2); font: 12px Arial, sans-serif; text-align: left; cursor: pointer; }
+@media (hover: hover) and (pointer: fine) { .fut-fbrow:hover { border-color: var(--accent); } }
+.fut-fbrow:active { background: var(--hover); }
+.fut-fbrow.head:active { background: none; }
+.fut-fbrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.fut-fbrow.head { min-height: 0; padding: 0 10px; border: 0; background: none; color: var(--muted); font-size: 11px; cursor: default; }
+.fut-fbrow .nm { display: flex; flex-direction: column; min-width: 0; }
+.fut-fbrow .nm b { overflow: hidden; color: var(--text); text-overflow: ellipsis; white-space: nowrap; }
+.fut-fbrow .nm small { color: var(--muted); font-size: 11px; }
+.fut-fbrow .set { color: var(--text); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fut-fbrow .unset { color: var(--muted); font-style: italic; }
+@media (max-width: 560px) {
+  .fut-fbrow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fut-fbrow .nm { grid-column: 1 / -1; }
+  .fut-fbrow.head { display: none; }
+  .fut-fbrow > span:not(.nm):not(.na)::before { content: attr(data-l) ': '; color: var(--muted); font-style: normal; }
+  .fut-fbrow .na { display: none; }
+}
+.fut-fbtop { display: flex; align-items: center; gap: 10px; margin: 2px 0 8px; }
+.fut-fsaved { color: var(--ok); font-size: 11px; }
+.fut-moon-ico { margin-right: 4px; vertical-align: -1px; color: var(--muted); }
+.fut-fbtn {
+  height: 28px; padding: 0 12px; border-radius: 7px; border: 1px solid var(--line-strong); background: var(--surface);
+  color: var(--text); font: 12px Arial, sans-serif; cursor: pointer;
+}
+.fut-fbtn:hover { border-color: var(--accent); }
+.fut-fbtn.primary { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
+.fut-feditor h4 { margin: 0 0 4px; font-size: 14px; color: var(--text); }
+.fut-feditor h5 { margin: 16px 0 6px; font-size: 12px; font-weight: 700; color: var(--text-2); }
+.fut-feditor > h5:first-child { margin-top: 0; }
+.fut-fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 4px 14px; }
+.fut-ffield { display: grid; grid-template-columns: minmax(0, 1fr) 96px; align-items: center; gap: 8px; min-height: 28px; color: var(--text-2); font-size: 11px; }
+.fut-ffield span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fut-ffield select { width: 96px; }
+.fut-fgrid.wide .fut-ffield { grid-template-columns: minmax(0, 1fr) 130px; }
+.fut-fgrid.wide .fut-ffield select { width: 130px; }
+.fut-ffield input { text-align: right; font-variant-numeric: tabular-nums; }
+.fut-ffield input, .fut-ffield select {
+  height: 26px; padding: 0 6px; border-radius: 6px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); font: 12px Arial, sans-serif;
+}
+.fut-ffield input:focus, .fut-ffield select:focus { outline: none; border-color: var(--accent); }
+.fut-fcheck { display: flex; align-items: center; gap: 6px; color: var(--text-2); font-size: 12px; align-self: end; min-height: 26px; }
+.fut-freserve { margin-top: 6px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); }
+.fut-freserve[open] { padding-bottom: 10px; }
+.fut-frulebody { padding: 0 12px; }
+.fold { display: inline-flex; color: var(--muted); transform: rotate(-90deg); transition: transform 120ms ease-out; }
+.fut-freserve[open] .fold { transform: none; }
+@media (prefers-reduced-motion: reduce) { .fold { transition: none; } }
+.fut-freserve h5 { margin: 0; }
+.fut-frulehead { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-height: 40px; padding: 0 12px; cursor: pointer; list-style: none; }
+.fut-frulehead::-webkit-details-marker { display: none; }
+.fut-frulehead:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; border-radius: 7px; }
+.fut-fruleico { display: inline-flex; color: var(--accent); }
+.fut-fswitch { margin-left: auto; display: inline-flex; align-items: center; padding: 8px 0 8px 8px; cursor: pointer; }
+.fut-fswitch input { position: absolute; opacity: 0; pointer-events: none; }
+.fut-fswitch input:focus-visible + .sw-track { outline: 2px solid var(--accent); outline-offset: 2px; }
+input[type="checkbox"] { accent-color: var(--accent); }
+.fut-fbadge { padding: 1px 7px; border-radius: 9px; border: 1px solid var(--line-strong); color: var(--muted); font-size: 11px; cursor: default; }
+.fut-fbadge.on { border-color: var(--fresh); color: var(--fresh); }
+.fut-fbadge.off { border-color: #C9853A; color: #FFB15C; }
+.fut-fchecks { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 2px 12px; }
+.fut-fchecks .fut-fcheck { align-self: auto; min-height: 22px; }
+.fut-fcopy .fut-factions { margin-top: 6px; }
+.fut-feditor h6 { margin: 10px 0 4px; font-size: 11px; font-weight: 400; color: var(--muted); }
+.fut-fnote { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
+.fut-factions { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+.fut-feditor > .fut-factions { position: sticky; bottom: 0; z-index: 1; margin: 10px -8px -8px; padding: 10px 8px; border-top: 1px solid var(--line); background: var(--bg); }
+`;
+
   // src/modules/shortcuts/index.ts
   var ACTIONS = [
     { id: "planet.prev", key: "i", label: "shortcut.prev", group: "planet", glyph: { core: "back" } },
@@ -9767,10 +10932,1622 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
   }
   var followers = /* @__PURE__ */ new WeakSet();
 
+  // src/modules/fleet/index.ts
+  var STYLE_ID3 = "fut-fleet-style";
+  var FLEETSAVE_MISSIONS = [3, 4, 6, 8, 15, 5, 1];
+  var pageState = /* @__PURE__ */ new WeakMap();
+  var REPEATABLE = ["moon", "collect", "collectDeploy", "expedition", "fleetsave", "plan"];
+  var SKIPPABLE = ["moon", "collect", "collectDeploy", "expedition"];
+  function el3(doc, tag, className = "", text) {
+    const node = doc.createElement(tag);
+    if (className) node.className = className;
+    if (text !== void 0) node.textContent = text;
+    return node;
+  }
+  function typeInto(input, value) {
+    input.value = String(value);
+    input.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  function enableOriginAutofill(doc) {
+    const p = doc.querySelector("#fleet2 #position");
+    if (!p || p.dataset.futAutofill) return;
+    p.dataset.futAutofill = "1";
+    p.addEventListener("keyup", () => {
+      if (!p.value.trim()) return;
+      const origin = originCoords(doc);
+      const g = doc.querySelector("#fleet2 #galaxy");
+      const s = doc.querySelector("#fleet2 #system");
+      if (!origin || !g || !s) return;
+      if (!g.value.trim()) g.value = String(origin.galaxy);
+      if (!s.value.trim()) s.value = String(origin.system);
+    });
+  }
+  function loadProfiles(store) {
+    return store.get(PROFILES_KEY, {});
+  }
+  function loadSettings(store) {
+    return settingsFrom(store.get(SETTINGS_KEY, {}));
+  }
+  function button(doc, text, onClick, cls = "", title = "") {
+    const b = el3(doc, "button", `fut-fbtn ${cls}`.trim(), text);
+    b.type = "button";
+    if (title) b.title = title;
+    b.addEventListener("click", (e) => {
+      e.preventDefault();
+      onClick();
+    });
+    return b;
+  }
+  function isolate(input) {
+    input.setAttribute("autocomplete", "off");
+    input.addEventListener("keydown", (e) => e.stopPropagation());
+    input.addEventListener("keyup", (e) => e.stopPropagation());
+    input.addEventListener("keypress", (e) => e.stopPropagation());
+  }
+  function numberField(doc, label, value, placeholder = "", locale) {
+    const wrap = el3(doc, "label", "fut-ffield");
+    wrap.append(el3(doc, "span", "", label));
+    const input = el3(doc, "input");
+    input.type = "text";
+    input.inputMode = "numeric";
+    input.placeholder = placeholder;
+    input.value = value ? locale && typeof value === "number" ? groupInt(value, locale) : String(value) : "";
+    isolate(input);
+    if (locale) groupWhileTyping(input, locale);
+    wrap.append(input);
+    return [wrap, input];
+  }
+  function selectField(doc, label, options, value) {
+    const wrap = el3(doc, "label", "fut-ffield");
+    wrap.append(el3(doc, "span", "", label));
+    const sel = el3(doc, "select");
+    for (const [v, text] of options) {
+      const opt = el3(doc, "option", "", text);
+      opt.value = v;
+      opt.selected = v === value;
+      sel.append(opt);
+    }
+    isolate(sel);
+    wrap.append(sel);
+    return [wrap, sel];
+  }
+  function checkField(doc, label, checked) {
+    const wrap = el3(doc, "label", "fut-fcheck");
+    const input = el3(doc, "input");
+    input.type = "checkbox";
+    input.checked = checked;
+    wrap.append(input, el3(doc, "span", "", label));
+    return [wrap, input];
+  }
+  function bodyTarget(bodies, id) {
+    for (const b of bodies) {
+      const c = parseCoords(b.coords);
+      if (!c) continue;
+      if (b.planetId === id) return { galaxy: c[0], system: c[1], position: c[2], type: 1, name: b.name };
+      if (b.moonId === id) return { galaxy: c[0], system: c[1], position: c[2], type: 3, name: b.name };
+    }
+    return null;
+  }
+  function twinTarget(bodies, id) {
+    const b = bodies.find((x) => x.planetId === id || x.moonId === id);
+    const twin = b ? b.moonId === id ? b.planetId : b.moonId : null;
+    const t = twin ? bodyTarget(bodies, twin) : null;
+    return t ? { galaxy: t.galaxy, system: t.system, position: t.position, type: b?.moonId === twin ? 3 : 1 } : null;
+  }
+  function isMoon(bodies, id) {
+    return bodies.some((b) => b.moonId === id);
+  }
+  function bodyLabel(o, id) {
+    const b = o.bodies.find((x) => x.planetId === id || x.moonId === id);
+    if (!b) return String(id);
+    return `${b.name} [${b.coords}]${b.moonId === id ? ` \xB7 ${o.t("fleet.typeMoon")}` : ""}`;
+  }
+  function shipFields(o, ships) {
+    const grid2 = el3(o.doc, "div", "fut-fgrid");
+    const inputs = [];
+    const onPage = readShipSlots(o.doc);
+    const info = o.store.get(SHIPS_INFO_KEY, {});
+    const learned = o.store.get(TECH_NAMES_KEY, {});
+    const slots = onPage.length ? onPage : FLEET_PAGE_SHIPS.map((id) => ({ id, name: info[id]?.name || techName(Number(id), o.locale, learned) }));
+    for (const slot of slots) {
+      const [wrap, input] = numberField(o.doc, slot.name, ships[slot.id] ?? null, "0", o.locale);
+      grid2.append(wrap);
+      inputs.push([slot.id, input]);
+    }
+    if (!inputs.length) grid2.append(el3(o.doc, "span", "fut-fnote", o.t("fleet.noShips")));
+    return {
+      el: grid2,
+      read: () => {
+        const out = {};
+        for (const [id, input] of inputs) {
+          const n = parseAmount(input.value);
+          if (n > 0) out[id] = n;
+        }
+        return out;
+      }
+    };
+  }
+  function resourceFields(o, res) {
+    const grid2 = el3(o.doc, "div", "fut-fgrid");
+    const inputs = ["metal", "crystal", "deuterium"].map((k) => {
+      const [wrap, input] = numberField(o.doc, o.t(`res.${k}`), res[k] || null, "0", o.locale);
+      grid2.append(wrap);
+      return [k, input];
+    });
+    return {
+      el: grid2,
+      read: () => {
+        const out = { metal: 0, crystal: 0, deuterium: 0 };
+        for (const [k, input] of inputs) out[k] = parseAmount(input.value);
+        return out;
+      }
+    };
+  }
+  function shortName(o, id) {
+    const b = o.bodies.find((x) => x.planetId === id || x.moonId === id);
+    return b ? `${b.name}${b.moonId === id ? " \u263E" : ""}` : String(id);
+  }
+  var SWITCH = { ships: "shipsOn", resources: "resourcesOn", gate: "gateOn" };
+  function ruleBadge(o, section2) {
+    const { doc, t } = o;
+    const profiles = loadProfiles(o.store);
+    const settings = loadSettings(o.store);
+    const key = SWITCH[section2];
+    const badge = el3(doc, "span", "fut-fbadge");
+    if (sectionEmpty(profileFor(profiles, o.bodyId), section2)) {
+      badge.classList.add("empty");
+      badge.textContent = t("fleet.rule.empty");
+      return badge;
+    }
+    const on = key ? settings[key] : true;
+    badge.classList.add(on ? "on" : "off");
+    const ids = o.bodies.flatMap((b) => [b.planetId, b.moonId]).filter((x) => x !== null);
+    const same = sameSection(profiles, o.bodyId, ids, section2);
+    const names = same.map((id) => shortName(o, id));
+    const where = same.length ? t("fleet.rule.alsoOn", { list: names.slice(0, 3).join(", ") + (names.length > 3 ? ` +${names.length - 3}` : "") }) : t("fleet.rule.onlyHere");
+    badge.textContent = `${on ? t("fleet.rule.on") : t("fleet.rule.off")} \xB7 ${where}`;
+    badge.title = same.length ? `${t("fleet.rule.sameTitle")}
+${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
+    return badge;
+  }
+  function ruleBox(o, section2, title, hint, fields, onSwitch) {
+    const { doc, t } = o;
+    const box = el3(doc, "details", "fut-freserve");
+    box.open = !sectionEmpty(profileFor(loadProfiles(o.store), o.bodyId), section2);
+    const head = el3(doc, "summary", "fut-frulehead");
+    const mark = el3(doc, "span", "fut-fruleico");
+    mark.innerHTML = iconSvg(section2, 18);
+    head.append(iconEl(doc), mark, el3(doc, "h5", "", title), ruleBadge(o, section2));
+    const key = SWITCH[section2];
+    if (key) {
+      const wrap = el3(doc, "label", "fut-fswitch");
+      wrap.title = t("fleet.rule.switchHint");
+      const input = el3(doc, "input");
+      input.type = "checkbox";
+      input.setAttribute("role", "switch");
+      input.setAttribute("aria-label", `${title}: ${t("fleet.rule.switch")}`);
+      input.checked = loadSettings(o.store)[key];
+      wrap.append(input, el3(doc, "i", "sw-track"));
+      input.addEventListener("change", () => {
+        o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: input.checked });
+        head.querySelector(".fut-fbadge")?.replaceWith(ruleBadge(o, section2));
+        onSwitch();
+      });
+      head.append(wrap);
+    }
+    const inner = el3(doc, "div", "fut-frulebody");
+    inner.append(el3(doc, "p", "fut-fnote", hint), ...fields);
+    box.append(head, inner);
+    return box;
+  }
+  function iconEl(doc) {
+    const span = el3(doc, "span", "fold");
+    span.innerHTML = iconSvg("caret", 14);
+    return span;
+  }
+  function statusOf(panel) {
+    return panel.closest(".fut-frules-panel")?.querySelector(".fut-fsaved") ?? null;
+  }
+  function reserveEditor(o, onSaved) {
+    const { doc, t } = o;
+    const profile = profileFor(loadProfiles(o.store), o.bodyId);
+    const moon = isMoon(o.bodies, o.bodyId);
+    const panel = el3(doc, "div", "fut-feditor");
+    const refresh = () => onSaved("");
+    const ships = shipFields(o, profile.reserve.ships);
+    panel.append(ruleBox(o, "ships", t("fleet.rule.ships"), t("fleet.rule.shipsHint"), [ships.el], refresh));
+    const res = resourceFields(o, profile.reserve.resources);
+    panel.append(ruleBox(o, "resources", t("fleet.rule.resources"), t("fleet.rule.resourcesHint"), [res.el], refresh));
+    const gate = moon ? shipFields(o, profile.gate) : null;
+    if (gate) panel.append(ruleBox(o, "gate", t("fleet.rule.gate"), t("fleet.rule.gateHint"), [gate.el], refresh));
+    const saveGrid = el3(doc, "div", "fut-fgrid wide");
+    const own = o.bodies.find((b) => b.planetId === o.bodyId || b.moonId === o.bodyId)?.coords.split(":").map(Number);
+    const origin = own && own.length === 3 ? { galaxy: own[0], system: own[1] } : originCoords(doc);
+    const [gWrap, gIn] = numberField(doc, t("fleet.galaxy"), profile.save?.galaxy ?? null, origin ? String(origin.galaxy) : "");
+    const [sWrap, sIn] = numberField(doc, t("fleet.system"), profile.save?.system ?? null, origin ? String(origin.system) : "");
+    const [pWrap, pIn] = numberField(doc, t("fleet.position"), profile.save?.position ?? null, "16");
+    const [typeWrap, typeSel] = selectField(
+      doc,
+      t("fleet.type"),
+      [["1", t("fleet.typePlanet")], ["3", t("fleet.typeMoon")], ["2", t("fleet.typeDebris")]],
+      String(profile.save?.type ?? 1)
+    );
+    const [misWrap, misSel] = selectField(doc, t("fleet.mission"), FLEETSAVE_MISSIONS.map((m) => [String(m), t(`mission.${m}`)]), String(profile.save?.mission ?? 6));
+    const [spdWrap, spdSel] = selectField(
+      doc,
+      t("fleet.speed"),
+      Array.from({ length: 10 }, (_, i) => [String((i + 1) * 10), `${(i + 1) * 10}%`]),
+      String(profile.save?.speed ?? 10)
+    );
+    saveGrid.append(gWrap, sWrap, pWrap, typeWrap, misWrap, spdWrap);
+    const saveShips = shipFields(o, profile.saveReserve.ships);
+    const saveRes = resourceFields(o, profile.saveReserve.resources);
+    panel.append(
+      ruleBox(o, "fleetsave", t("fleet.fleetsave"), t("fleet.fleetsaveHint"), [
+        saveGrid,
+        el3(doc, "h6", "", t("fleet.rule.saveShips")),
+        saveShips.el,
+        el3(doc, "h6", "", t("fleet.rule.saveResources")),
+        saveRes.el
+      ], refresh)
+    );
+    const read = () => {
+      const position = parseAmount(pIn.value);
+      const save = position >= 1 && position <= 17 ? {
+        galaxy: parseAmount(gIn.value) || null,
+        system: parseAmount(sIn.value) || null,
+        position,
+        type: Number(typeSel.value),
+        mission: Number(misSel.value),
+        speed: Number(spdSel.value)
+      } : null;
+      return {
+        reserve: { ships: ships.read(), resources: res.read() },
+        gate: gate ? gate.read() : profile.gate,
+        saveReserve: { ships: saveShips.read(), resources: saveRes.read() },
+        save
+      };
+    };
+    const store = () => {
+      const all2 = loadProfiles(o.store);
+      all2[String(o.bodyId)] = read();
+      o.store.set(PROFILES_KEY, all2);
+      return all2;
+    };
+    const copyBox = copyPanel(o, moon, (sections, ids) => {
+      o.store.set(PROFILES_KEY, copySections(store(), o.bodyId, ids, sections));
+      onSaved(t("fleet.copied", { count: ids.length }));
+    });
+    copyBox.hidden = true;
+    panel.addEventListener("change", (e) => {
+      if (e.target.closest(".fut-fcopy, .fut-fswitch")) return;
+      store();
+      onSaved("");
+      statusOf(panel)?.replaceChildren(doc.createTextNode(t("fleet.saved")));
+    });
+    const actions = el3(doc, "div", "fut-factions");
+    actions.append(
+      button(doc, t("fleet.copyTo"), () => {
+        copyBox.hidden = !copyBox.hidden;
+      })
+    );
+    panel.append(copyBox, actions);
+    return panel;
+  }
+  function copyPanel(o, moon, onCopy) {
+    const { doc, t } = o;
+    const box = el3(doc, "div", "fut-freserve fut-fcopy");
+    box.append(el3(doc, "h5", "", t("fleet.copyTitle")), el3(doc, "p", "fut-fnote", t("fleet.copyHint")));
+    const secRow = el3(doc, "div", "fut-fchecks");
+    const sections = RESERVE_SECTIONS.filter((s) => s !== "gate" || moon).map((s) => {
+      const [wrap, input] = checkField(doc, t(s === "fleetsave" ? "fleet.fleetsave" : `fleet.rule.${s}`), true);
+      secRow.append(wrap);
+      return [s, input];
+    });
+    box.append(el3(doc, "h6", "", t("fleet.copyWhat")), secRow);
+    const bodyRow = el3(doc, "div", "fut-fchecks");
+    const targets = [];
+    for (const b of o.bodies) {
+      for (const [id, isMoonId] of [[b.planetId, false], [b.moonId, true]]) {
+        if (id === null || id === o.bodyId) continue;
+        const [wrap, input] = checkField(doc, `${shortName(o, id)} [${b.coords}]`, false);
+        bodyRow.append(wrap);
+        targets.push([id, isMoonId, input]);
+      }
+    }
+    const pick = (which) => {
+      for (const [, isMoonId, input] of targets) input.checked = which === "moons" ? isMoonId : which === "planets" ? !isMoonId : false;
+    };
+    const quick = el3(doc, "div", "fut-factions");
+    quick.append(
+      button(doc, t("fleet.pickPlanets"), () => pick("planets")),
+      button(doc, t("fleet.pickMoons"), () => pick("moons")),
+      button(doc, t("fleet.pickNone"), () => pick("none"))
+    );
+    box.append(el3(doc, "h6", "", t("fleet.copyWhere")), quick, bodyRow);
+    const status = el3(doc, "span", "fut-fnote");
+    const go = el3(doc, "div", "fut-factions");
+    go.append(
+      button(doc, t("fleet.copyGo"), () => {
+        const chosen = sections.filter(([, i]) => i.checked).map(([s]) => s);
+        const ids = targets.filter(([, , i]) => i.checked).map(([id]) => id);
+        if (!chosen.length || !ids.length) {
+          status.textContent = t("fleet.copyNothing");
+          return;
+        }
+        onCopy(chosen, ids);
+      }, "primary"),
+      status
+    );
+    box.append(go);
+    return box;
+  }
+  function topScore(store) {
+    const ranks = store.get(UNIVERSE_RANKS_KEY, null);
+    const best = ranks ? Math.max(0, ...Object.values(ranks.ranks).map(([, points]) => points)) : 0;
+    return best > 0 ? best : void 0;
+  }
+  function universeSpeed(doc) {
+    const n = Number(doc.querySelector('meta[name="ogame-universe-speed"]')?.getAttribute("content"));
+    return Number.isFinite(n) && n > 0 ? n : 1;
+  }
+  function bodyRulesPanel(r) {
+    const { doc, t } = r;
+    const root = el3(doc, "div", "fut-frules-panel");
+    const opts = (id) => ({ doc, store: r.store, bodyId: id, bodies: r.bodies, t, locale: r.locale });
+    const ids = r.bodies.flatMap((b) => [b.planetId, b.moonId]).filter((x) => x !== null);
+    const status = el3(doc, "span", "fut-fsaved");
+    status.setAttribute("role", "status");
+    const showList = () => {
+      const profiles = loadProfiles(r.store);
+      const table = el3(doc, "div", "fut-fbodies");
+      table.setAttribute("role", "list");
+      const head = el3(doc, "div", "fut-fbrow head");
+      head.setAttribute("aria-hidden", "true");
+      head.append(el3(doc, "span", "", ""), ...["ships", "resources", "gate", "fleetsave"].map((s) => el3(doc, "span", "", t(s === "fleetsave" ? "fleet.fleetsave" : `fleet.rule.${s}`))));
+      table.append(head);
+      for (const id of ids) {
+        const o = opts(id);
+        const moon = isMoon(r.bodies, id);
+        const p = profileFor(profiles, id);
+        const row = el3(doc, "button", "fut-fbrow");
+        row.type = "button";
+        row.setAttribute("role", "listitem");
+        const name = el3(doc, "span", "nm");
+        name.append(el3(doc, "b", "", shortLabel(o, id)), el3(doc, "small", "", r.bodies.find((b) => b.planetId === id || b.moonId === id)?.coords ?? ""));
+        const cell = (section2, text) => {
+          if (section2 === "gate" && !moon) return el3(doc, "span", "na", "");
+          const empty = sectionEmpty(p, section2);
+          const c = el3(doc, "span", empty ? "unset" : "set", empty ? t("fleet.rule.unset") : text());
+          c.dataset.l = t(section2 === "fleetsave" ? "fleet.fleetsave" : `fleet.rule.${section2}`);
+          return c;
+        };
+        const shipsSum = (ships) => formatUnits(Object.values(ships).reduce((a, n) => a + n, 0), r.locale);
+        row.append(
+          name,
+          cell("ships", () => shipsSum(p.reserve.ships)),
+          cell("resources", () => formatUnits(p.reserve.resources.metal + p.reserve.resources.crystal + p.reserve.resources.deuterium, r.locale)),
+          cell("gate", () => shipsSum(p.gate)),
+          cell("fleetsave", () => {
+            if (!p.save) return t("fleet.rule.saveReserveOnly");
+            const [g, sys] = (r.bodies.find((b) => b.planetId === id || b.moonId === id)?.coords ?? "").split(":");
+            return `${p.save.galaxy ?? g}:${p.save.system ?? sys}:${p.save.position} ${t(`mission.${p.save.mission}`)}`;
+          })
+        );
+        row.setAttribute("aria-label", bodyLabel(o, id));
+        row.addEventListener("click", () => showBody(id));
+        table.append(row);
+      }
+      root.replaceChildren(el3(doc, "p", "fut-fnote", t("fleet.bodiesHint")), table);
+    };
+    const showBody = (id) => {
+      const o = opts(id);
+      const back = el3(doc, "button", "fut-fbtn fut-fback", `\u2190 ${t("fleet.bodiesAll")}`);
+      back.type = "button";
+      back.addEventListener("click", () => {
+        status.textContent = "";
+        showList();
+      });
+      const title = el3(doc, "h4", "", t(isMoon(r.bodies, id) ? "fleet.editTitleMoon" : "fleet.editTitlePlanet", { body: bodyLabel(o, id) }));
+      const top = el3(doc, "div", "fut-fbtop");
+      top.append(back, status);
+      const saved = (msg) => {
+        r.onChange?.();
+        status.textContent = msg;
+        if (msg) {
+          root.replaceChildren(top, title, reserveEditor(o, saved));
+        }
+      };
+      root.replaceChildren(top, title, reserveEditor(o, saved));
+    };
+    if (r.bodyId && ids.includes(r.bodyId)) showBody(r.bodyId);
+    else showList();
+    return root;
+  }
+  function shortLabel(o, id) {
+    if (!id) return o.t("fleet.pickDest");
+    const b = o.bodies.find((x) => x.planetId === id || x.moonId === id);
+    if (!b) return o.t("fleet.pickDest");
+    return `${b.name}${b.moonId === id ? " \u263E" : ""}`;
+  }
+  function readout(doc, text) {
+    const box = el3(doc, "span", "fut-fread");
+    const tip = el3(doc, "span", "tip");
+    tip.setAttribute("aria-hidden", "true");
+    const info = el3(doc, "span", "fut-finfo", text);
+    info.setAttribute("role", "status");
+    box.append(tip, info);
+    const clear = () => tip.replaceChildren();
+    return {
+      box,
+      say(msg, err = false) {
+        clear();
+        info.textContent = msg;
+        info.classList.toggle("err", err);
+      },
+      peek(node, name, detail) {
+        const show2 = () => tip.replaceChildren(el3(doc, "b", "", name), doc.createTextNode(detail ? ` ${detail}` : ""));
+        node.addEventListener("mouseenter", show2);
+        node.addEventListener("focus", show2);
+        node.addEventListener("mouseleave", clear);
+        node.addEventListener("blur", clear);
+      }
+    };
+  }
+  function tile(doc, icon2, label, onClick, cls = "", key = "", name = "") {
+    const b = el3(doc, "button", `fut-fact ${cls}`.trim());
+    b.type = "button";
+    b.title = key ? `${label} [${keyLabel(key)}]` : label;
+    b.setAttribute("aria-label", label);
+    const ico = el3(doc, "span", "ico");
+    ico.innerHTML = iconSvg(icon2, 20);
+    b.append(ico);
+    if (name) {
+      const n = el3(doc, "span", "name", name);
+      n.setAttribute("aria-hidden", "true");
+      b.append(n);
+    }
+    if (key) {
+      const cap = el3(doc, "kbd", "", keyLabel(key));
+      cap.setAttribute("aria-hidden", "true");
+      b.append(cap);
+    }
+    b.addEventListener("click", (e) => {
+      e.preventDefault();
+      onClick();
+    });
+    return b;
+  }
+  function ruleSwitch(doc, icon2, label, on, onClick, value) {
+    const b = el3(doc, "button", "fut-fchip");
+    b.type = "button";
+    b.setAttribute("role", "switch");
+    b.setAttribute("aria-checked", String(on));
+    const ico = el3(doc, "span", "ico");
+    ico.innerHTML = iconSvg(icon2, 14);
+    b.append(el3(doc, "i", "pip"), ico, el3(doc, "b", "", label));
+    if (value !== void 0) {
+      const v = el3(doc, "span", "val");
+      v.append(value);
+      b.append(v);
+    }
+    b.setAttribute("aria-label", typeof value === "string" && value ? `${label}: ${value}` : label);
+    b.addEventListener("click", (e) => {
+      e.preventDefault();
+      onClick();
+    });
+    return b;
+  }
+  function addInvertButtons(o) {
+    const { doc, t } = o;
+    for (const slot of readShipSlots(doc)) {
+      const tile2 = slot.input.closest("li");
+      if (!tile2 || !slot.available || tile2.querySelector(".fut-finv")) continue;
+      const b = el3(doc, "button", "fut-finv");
+      b.type = "button";
+      b.title = t("fleet.invert");
+      b.setAttribute("aria-label", `${t("fleet.invert")}: ${slot.name}`);
+      b.innerHTML = iconSvg("invert", 12);
+      b.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const available = Number(tile2.querySelector(".amount")?.dataset.value ?? 0) || 0;
+        const picked2 = Math.min(available, parseAmount(slot.input.value));
+        typeInto(slot.input, available - picked2 || "");
+      });
+      tile2.append(b);
+    }
+  }
+  function keepReserveOnSelectAll(o) {
+    const { doc } = o;
+    const root = doc.documentElement;
+    if (root.dataset.futSendAll) return;
+    root.dataset.futSendAll = "1";
+    doc.addEventListener("click", (e) => {
+      const b = e.target?.closest?.("#sendall, a.send_all");
+      if (!b || !b.closest("#fleetdispatchcomponent, #fleet1")) return;
+      (doc.defaultView ?? globalThis).setTimeout(() => {
+        const current3 = pageState.get(doc)?.o ?? o;
+        const mode = pageState.get(doc)?.active?.mode;
+        if (mode === "expedition" || mode === "fleetsave") return;
+        const keep = activeProfile(profileFor(loadProfiles(current3.store), current3.bodyId), loadSettings(current3.store)).reserve.ships;
+        for (const slot of readShipSlots(doc)) {
+          const k = keep[slot.id] ?? 0;
+          if (k > 0) typeInto(slot.input, Math.max(0, slot.available - k) || "");
+        }
+      }, 0);
+    });
+  }
+  function markShipReserve(o, keep) {
+    const { doc, t } = o;
+    for (const slot of readShipSlots(doc)) {
+      const tile2 = slot.input.closest("li");
+      if (!tile2) continue;
+      tile2.querySelector(".fut-fkeep")?.remove();
+      const n = keep[slot.id] ?? 0;
+      if (n <= 0) continue;
+      const b = el3(doc, "span", "fut-fkeep", `\u2212${formatUnits(n, o.locale)}`);
+      b.title = t("fleet.keepShips", { n: n.toLocaleString(o.locale) });
+      tile2.append(b);
+    }
+  }
+  function markResourceReserve(o, keep) {
+    const { doc, t } = o;
+    for (const k of ["metal", "crystal", "deuterium"]) {
+      const input = doc.querySelector(`#fleet2 input#${k}`);
+      if (!input) continue;
+      input.parentElement?.querySelector(".fut-fkeepres")?.remove();
+      if (keep[k] <= 0) continue;
+      const b = el3(doc, "span", "fut-fkeepres", t("fleet.keepRes", { n: formatUnits(keep[k], o.locale) }));
+      b.title = t("fleet.keepResHint", { n: keep[k].toLocaleString(o.locale) });
+      input.after(b);
+    }
+  }
+  function selectedCargo(doc, capacityOf) {
+    return readShipSlots(doc).reduce((sum, s) => sum + Math.min(s.available, parseAmount(s.input.value) || 0) * capacityOf(Number(s.id)), 0);
+  }
+  function watchSelectedCargo(o) {
+    const { doc, t } = o;
+    const draw = () => {
+      const out = doc.querySelector(".fut-fcap");
+      const fd = getDispatcher();
+      if (!out) return;
+      const room = fd ? selectedCargo(doc, (id) => shipCapacity(fd, id)) : 0;
+      out.replaceChildren();
+      if (room > 0) {
+        const ico = el3(doc, "span", "ico");
+        ico.innerHTML = iconSvg("cargo", 14);
+        out.append(ico, el3(doc, "span", "", t("fleet.cargoPicked", { n: formatUnits(room, o.locale) })));
+      }
+      out.title = room > 0 ? t("fleet.cargoPickedHint", { n: room.toLocaleString(o.locale) }) : "";
+    };
+    draw();
+    const list = doc.querySelector("#fleet1 #technologies");
+    if (!list || list.dataset.futCap) return;
+    list.dataset.futCap = "1";
+    const later = () => (doc.defaultView ?? globalThis).setTimeout(draw, 0);
+    for (const type of ["input", "keyup", "change", "click"]) list.addEventListener(type, later);
+    doc.addEventListener("click", (e) => {
+      if (e.target?.closest?.("#sendall, a.send_all, #resetall, a.reset_all")) later();
+    });
+  }
+  function cappedByReserve(loaded, onPlanet2, keep, fuel) {
+    const cap = (k) => Math.max(0, Math.min(loaded[k], Math.floor(onPlanet2[k] - keep[k] - (k === "deuterium" ? fuel : 0))));
+    return { metal: cap("metal"), crystal: cap("crystal"), deuterium: cap("deuterium") };
+  }
+  function fixSpeedBarTouch(doc) {
+    const root = doc.documentElement;
+    if (root.dataset.futSpeedTouch) return;
+    root.dataset.futSpeedTouch = "1";
+    doc.addEventListener(
+      "touchend",
+      (e) => {
+        if (!e.target?.closest?.(".percentageBar")) return;
+        const touch = e.changedTouches?.[0];
+        const ev = e;
+        if (!touch || typeof ev.pageX === "number") return;
+        Object.defineProperty(e, "pageX", { value: touch.pageX, configurable: true });
+        Object.defineProperty(e, "pageY", { value: touch.pageY, configurable: true });
+      },
+      true
+    );
+  }
+  function keepReserveOnLoadAll(o) {
+    const { doc } = o;
+    const root = doc.documentElement;
+    if (root.dataset.futLoadAll) return;
+    root.dataset.futLoadAll = "1";
+    doc.addEventListener("click", (e) => {
+      const b = e.target?.closest?.("#allresources, #loadAllResources, .allresources");
+      if (!b) return;
+      (doc.defaultView ?? globalThis).setTimeout(() => {
+        const current3 = pageState.get(doc)?.o ?? o;
+        const mode = pageState.get(doc)?.active?.mode;
+        if (mode === "expedition" || mode === "fleetsave") return;
+        const keep = activeProfile(profileFor(loadProfiles(current3.store), current3.bodyId), loadSettings(current3.store)).reserve.resources;
+        if (!keep.metal && !keep.crystal && !keep.deuterium) return;
+        const fd = getDispatcher();
+        if (!fd) return;
+        const left = cappedByReserve(
+          { metal: Number(fd.cargoMetal) || 0, crystal: Number(fd.cargoCrystal) || 0, deuterium: Number(fd.cargoDeuterium) || 0 },
+          { metal: Number(fd.metalOnPlanet) || 0, crystal: Number(fd.crystalOnPlanet) || 0, deuterium: Number(fd.deuteriumOnPlanet) || 0 },
+          keep,
+          Math.ceil(Number(fd.getConsumption()) || 0)
+        );
+        fd.cargoMetal = left.metal;
+        fd.cargoCrystal = left.crystal;
+        fd.cargoDeuterium = left.deuterium;
+        fd.refresh();
+      }, 0);
+    });
+  }
+  function popup(doc, anchor, menu) {
+    doc.querySelectorAll(".fut-fmenu").forEach((n) => n.remove());
+    const r = anchor.getBoundingClientRect();
+    menu.style.top = `${Math.round(r.bottom + 4)}px`;
+    menu.style.left = `${Math.round(r.left)}px`;
+    doc.body.append(menu);
+    const away = (e) => {
+      if (!menu.contains(e.target)) {
+        menu.remove();
+        doc.removeEventListener("mousedown", away, true);
+      }
+    };
+    doc.addEventListener("mousedown", away, true);
+    const onScroll = (e) => {
+      if (e.target instanceof Node && menu.contains(e.target)) return;
+      menu.remove();
+      doc.defaultView?.removeEventListener("scroll", onScroll, true);
+    };
+    doc.defaultView?.addEventListener("scroll", onScroll, true);
+  }
+  function bodyGrid(o, menu, current3, onPick, allowHere = false) {
+    const { doc } = o;
+    const cell = (id, moon, b) => {
+      if (id === null) return el3(doc, "span");
+      const item = button(doc, moon ? "" : b.name, () => {
+        menu.remove();
+        onPick(id);
+      }, `${moon ? "moon" : "planet"}${id === current3 ? " on" : ""}`);
+      if (moon) item.innerHTML = iconSvg("moon", 14);
+      else item.append(el3(doc, "small", "", b.coords));
+      item.setAttribute("aria-label", `${b.name}${moon ? ` (${o.t("fleet.typeMoon")})` : ""} [${b.coords}]`);
+      if (moon) item.title = `${b.name} (${o.t("fleet.typeMoon")})`;
+      if (id === current3) item.setAttribute("aria-current", "true");
+      item.disabled = !allowHere && id === o.bodyId;
+      return item;
+    };
+    return o.bodies.flatMap((b) => [cell(b.planetId, false, b), cell(b.moonId, true, b)]);
+  }
+  function destinationMenu(o, anchor, current3, onPick) {
+    const menu = el3(o.doc, "div", "fut-fmenu");
+    menu.append(...bodyGrid(o, menu, current3, onPick));
+    popup(o.doc, anchor, menu);
+  }
+  function collectMenu(o, anchor, settings, keys, run) {
+    const { doc, t } = o;
+    const menu = el3(doc, "div", "fut-fmenu fut-fcollect");
+    menu.setAttribute("role", "menu");
+    menu.append(el3(doc, "p", "fut-fmhead", t("fleet.btn.collect")));
+    const main2 = (mode2, ico, label, fav, key) => {
+      const b = button(doc, "", () => {
+        menu.remove();
+        run(mode2, fav);
+      }, "fut-fmain");
+      b.setAttribute("role", "menuitem");
+      const i = el3(doc, "span", "ico");
+      i.innerHTML = iconSvg(ico, 18);
+      const text = el3(doc, "span", "txt");
+      text.append(el3(doc, "b", "", label), el3(doc, "span", "", fav ? `\u2192 ${shortLabel(o, fav)}` : t("fleet.collectNoFav")));
+      b.append(i, text);
+      if (key) b.append(el3(doc, "kbd", "", keyLabel(key)));
+      if (!fav) b.classList.add("dim");
+      return b;
+    };
+    menu.append(
+      main2("collect", "transport", t("fleet.collect.transport"), settings.favTransport, keys.transport),
+      main2("collectDeploy", "deploy", t("fleet.collect.deploy"), settings.favDeploy, keys.deploy)
+    );
+    let mode = "collect";
+    const seg = el3(doc, "div", "fut-fseg");
+    seg.setAttribute("role", "group");
+    seg.setAttribute("aria-label", t("fleet.collectOnce"));
+    const segBtn = (m, label) => {
+      const b = button(doc, label, () => {
+        mode = m;
+        seg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      });
+      b.setAttribute("aria-pressed", String(m === mode));
+      return b;
+    };
+    seg.append(segBtn("collect", t("fleet.collect.transport")), segBtn("collectDeploy", t("fleet.collect.deploy")));
+    menu.append(el3(doc, "p", "fut-fmsub", t("fleet.collectOnce")), seg);
+    menu.append(...bodyGrid(o, menu, null, (id) => run(mode, id)));
+    popup(doc, anchor, menu);
+  }
+  function sendTargetOf(o, t, origin) {
+    if (!t || !(t.position >= 1 && t.position <= 17)) return null;
+    const r = resolveSend(t, origin);
+    const b = o.bodies.find((x) => x.coords === `${r.galaxy}:${r.system}:${r.position}`);
+    return { ...r, name: b?.name };
+  }
+  var SEND_CARGO = [202, 203];
+  function sendPanel(o, peek, onCargo, onTarget) {
+    const { doc, t } = o;
+    const settings = loadSettings(o.store);
+    const save = (part) => {
+      o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), ...part });
+      if ("sendTarget" in part) onTarget();
+    };
+    const origin = originCoords(doc);
+    const panel = el3(doc, "div", "fut-fsend");
+    panel.setAttribute("role", "group");
+    panel.setAttribute("aria-label", t("fleet.send.label"));
+    const st = settings.sendTarget;
+    let type = st?.type ?? 1;
+    const coordIn = (label2, ph, v, cls) => {
+      const input = el3(doc, "input", `fut-fin ${cls}`);
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.placeholder = ph;
+      input.value = v ? String(v) : "";
+      input.setAttribute("aria-label", label2);
+      input.title = label2;
+      isolate(input);
+      return input;
+    };
+    const gIn = coordIn(t("fleet.galaxy"), origin ? String(origin.galaxy) : "G", st?.galaxy, "g");
+    const sIn = coordIn(t("fleet.system"), origin ? String(origin.system) : "S", st?.system, "s");
+    const pIn = coordIn(t("fleet.position"), "P", st?.position, "p");
+    const typeSeg = el3(doc, "span", "fut-fseg");
+    typeSeg.setAttribute("role", "group");
+    typeSeg.setAttribute("aria-label", t("fleet.type"));
+    const showType = () => typeSeg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(Number(x.dataset.type) === type)));
+    const store = () => {
+      const num5 = (i) => parseAmount(i.value) || null;
+      const position = num5(pIn) ?? 0;
+      pIn.classList.toggle("bad", Boolean(pIn.value.trim()) && !(position >= 1 && position <= 17));
+      const empty = !gIn.value.trim() && !sIn.value.trim() && !pIn.value.trim();
+      save({ sendTarget: empty ? null : { galaxy: num5(gIn), system: num5(sIn), position, type } });
+    };
+    const fill = (g, sys, pos) => {
+      gIn.value = String(g);
+      sIn.value = String(sys);
+      pIn.value = String(pos);
+    };
+    for (const input of [gIn, sIn, pIn]) {
+      input.addEventListener("input", () => {
+        const c = /\D/.test(input.value.trim()) ? parseCoords(input.value) : null;
+        if (c) fill(c[0], c[1], c[2]);
+        store();
+      });
+    }
+    const typeBtn = (v, ico, label2) => {
+      const b = el3(doc, "button", "fut-ftype");
+      b.type = "button";
+      b.dataset.type = String(v);
+      b.title = label2;
+      b.setAttribute("aria-label", label2);
+      b.innerHTML = iconSvg(ico, 15);
+      b.addEventListener("click", (e) => {
+        e.preventDefault();
+        type = v;
+        showType();
+        store();
+      });
+      return b;
+    };
+    typeSeg.append(typeBtn(1, "planet", t("fleet.typePlanet")), typeBtn(3, "moon", t("fleet.typeMoon")));
+    showType();
+    const dest = el3(doc, "span", "fut-fdest");
+    const pick = el3(doc, "button", "fut-fpick");
+    pick.type = "button";
+    pick.setAttribute("aria-label", t("fleet.send.pick"));
+    pick.setAttribute("aria-haspopup", "menu");
+    pick.innerHTML = iconSvg("caret", 14);
+    peek(pick, t("fleet.send.pick"), t("fleet.send.pickHint"));
+    pick.addEventListener("click", (e) => {
+      e.preventDefault();
+      destinationMenu(o, dest, null, (id) => {
+        const tg = bodyTarget(o.bodies, id);
+        if (!tg) return;
+        fill(tg.galaxy, tg.system, tg.position);
+        type = tg.type === 3 ? 3 : 1;
+        showType();
+        store();
+      });
+    });
+    const sep = () => el3(doc, "span", "colon", ":");
+    dest.append(gIn, sep(), sIn, sep(), pIn, pick, typeSeg);
+    for (const input of [gIn, sIn, pIn]) peek(input, t("fleet.send.dest"), t("fleet.send.destHint"));
+    const res = el3(doc, "span", "fut-fres");
+    const inputs = ["metal", "crystal", "deuterium"].map((k) => {
+      const wrap = el3(doc, "span", `fut-fresin ${k}`);
+      const sym = el3(doc, "button", "sym");
+      sym.type = "button";
+      sym.innerHTML = iconSvg(k, 18);
+      sym.setAttribute("aria-label", `${t(`res.${k}`)}: ${t("fleet.send.max")}`);
+      peek(sym, t(`res.${k}`), t("fleet.send.maxHint"));
+      const input = el3(doc, "input", "fut-fin amount");
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.placeholder = "0";
+      input.setAttribute("aria-label", t(`res.${k}`));
+      const v = settings.sendPick[k];
+      input.value = v === null ? "" : groupInt(v, o.locale);
+      isolate(input);
+      groupWhileTyping(input, o.locale);
+      wrap.append(sym, input);
+      res.append(wrap);
+      peek(input, t(`res.${k}`), t("fleet.send.resHint"));
+      return [k, input];
+    });
+    const readPick = () => {
+      const out = { metal: null, crystal: null, deuterium: null };
+      for (const [k, input] of inputs) out[k] = input.value.trim() ? parseAmount(input.value) : null;
+      return out;
+    };
+    const clear = el3(doc, "button", "fut-fclear");
+    clear.type = "button";
+    clear.innerHTML = iconSvg("erase", 15);
+    clear.title = t("fleet.send.clearBtn");
+    clear.setAttribute("aria-label", t("fleet.send.clearHint"));
+    peek(clear, t("fleet.send.clearBtn"), t("fleet.send.clearHint"));
+    const all2 = el3(doc, "button", "fut-fall", t("fleet.send.allBtn"));
+    all2.type = "button";
+    all2.setAttribute("aria-label", t("fleet.send.allHint"));
+    peek(all2, t("fleet.send.allBtn"), t("fleet.send.allHint"));
+    res.append(all2, clear);
+    const cargoBox = el3(doc, "span", "fut-fcargo");
+    const counts = /* @__PURE__ */ new Map();
+    for (const id of SEND_CARGO) {
+      const b = el3(doc, "button", "fut-fcl");
+      b.type = "button";
+      const short = t(id === 202 ? "fleet.send.small" : "fleet.send.large");
+      const full = t(`ship.${id}`);
+      b.setAttribute("aria-label", `${t("fleet.send.cargoWith")} ${full}`);
+      const n = el3(doc, "small", "n");
+      const pic = el3(doc, "img", "pic");
+      pic.src = SHIP_ICONS[id] ?? "";
+      pic.alt = "";
+      pic.addEventListener("error", () => pic.remove());
+      b.append(pic, el3(doc, "b", "", short), n);
+      counts.set(id, n);
+      peek(b, `${short} \xB7 ${full}`, t("fleet.send.cargoHint"));
+      b.addEventListener("click", (e) => {
+        e.preventDefault();
+        onCargo(id);
+      });
+      cargoBox.append(b);
+    }
+    const recount = () => {
+      const fd = getDispatcher();
+      for (const [id, n] of counts) {
+        if (!fd) {
+          n.textContent = "";
+          continue;
+        }
+        const have = shipsOnPlanet(fd)[String(id)] ?? 0;
+        const cap = shipCapacity(fd, id);
+        const w = pickedLoad({ metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet }, readPick(), 0, Number.MAX_SAFE_INTEGER);
+        const need = cap > 0 ? Math.ceil((w.metal + w.crystal + w.deuterium) / cap) : 0;
+        n.textContent = have ? `\xD7${Math.min(need, have).toLocaleString(o.locale)}` : "0";
+        n.parentElement?.classList.toggle("short", need > have);
+        n.parentElement?.classList.toggle("none", !have);
+      }
+    };
+    for (const [k, input] of inputs) {
+      input.addEventListener("input", () => {
+        save({ sendPick: readPick() });
+        recount();
+      });
+      input.parentElement?.querySelector(".sym")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        const fd = getDispatcher();
+        if (!fd) return;
+        const have = { metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet }[k];
+        input.value = groupInt(Math.max(0, Math.floor(have || 0)), o.locale);
+        save({ sendPick: readPick() });
+        recount();
+      });
+    }
+    all2.addEventListener("click", (e) => {
+      e.preventDefault();
+      const fd = getDispatcher();
+      if (!fd) return;
+      const here = { metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet };
+      for (const [k, input] of inputs) input.value = groupInt(Math.max(0, Math.floor(here[k] || 0)), o.locale);
+      save({ sendPick: readPick() });
+      recount();
+    });
+    clear.addEventListener("click", (e) => {
+      e.preventDefault();
+      for (const [, input] of inputs) input.value = "";
+      save({ sendPick: readPick() });
+      recount();
+    });
+    recount();
+    void whenDispatcherReady().then(recount);
+    const label = (text) => el3(doc, "span", "lbl", text);
+    panel.append(label(t("fleet.send.dest")), dest, label(t("fleet.send.res")), res, cargoBox);
+    return panel;
+  }
+  function readMissionLink(href) {
+    let p;
+    try {
+      p = new URL(href).searchParams;
+    } catch {
+      return null;
+    }
+    if (p.get("futmode")) return null;
+    const mission = Number(p.get("mission"));
+    const mode = mission === 3 ? "transport" : mission === 4 ? "deploy" : null;
+    const [g, sys, pos] = ["galaxy", "system", "position"].map((k) => Number(p.get(k)));
+    if (!mode || !(g > 0) || !(sys > 0) || !(pos >= 1 && pos <= 17)) return null;
+    return { mode, target: { galaxy: g, system: sys, position: pos, type: p.get("type") === "3" ? 3 : 1 } };
+  }
+  function skipSwitch(o, out, redraw) {
+    const { doc, t } = o;
+    const skipped = loadSettings(o.store).skipBodies.includes(o.bodyId);
+    const b = ruleSwitch(doc, "skip", t("fleet.rule.skipHere"), skipped, () => {
+      const now = loadSettings(o.store);
+      const others = now.skipBodies.filter((id) => id !== o.bodyId);
+      o.store.set(SETTINGS_KEY, { ...now, skipBodies: skipped ? others : [...others, o.bodyId] });
+      redraw();
+    });
+    out.peek(b, `${t("fleet.rule.skip")}: ${skipped ? t("fleet.on") : t("fleet.off")}.`, t("fleet.rule.skipHint"));
+    return b;
+  }
+  function renderFleetTools(o) {
+    const { doc, t } = o;
+    if (!doc.getElementById(STYLE_ID3)) {
+      const style = el3(doc, "style");
+      style.id = STYLE_ID3;
+      style.textContent = FLEET_CSS;
+      doc.head.append(style);
+    }
+    doc.querySelectorAll(".fut-fbar").forEach((n) => n.remove());
+    const href = o.href ?? doc.location?.href ?? "";
+    const navigate = o.navigate ?? ((url) => doc.location.assign(url));
+    if (!doc.documentElement.dataset.futSendPage) {
+      doc.documentElement.dataset.futSendPage = "1";
+      o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), sendMode: null, sendTarget: null, sendPick: { metal: null, crystal: null, deuterium: null } });
+    }
+    const link = readMissionLink(href);
+    let focusRes = false;
+    if (link && !doc.documentElement.dataset.futMissionLink) {
+      doc.documentElement.dataset.futMissionLink = "1";
+      o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), sendMode: link.mode, sendTarget: link.target });
+      focusRes = true;
+    }
+    const settings = loadSettings(o.store);
+    const stored = profileFor(loadProfiles(o.store), o.bodyId);
+    const profile = activeProfile(stored, settings);
+    const redraw = () => renderFleetTools(o);
+    const fleet1 = doc.getElementById("fleet1");
+    const anchor1 = fleet1?.querySelector("#technologies") ?? null;
+    const fleet2 = doc.getElementById("fleet2");
+    const anchor2 = fleet2?.querySelector("#buttonz") ?? null;
+    if (fleet2) enableOriginAutofill(doc);
+    const incoming = readRepeatParams(href);
+    let releaseHold = () => {
+    };
+    if (incoming && fleet1 && !doc.documentElement.dataset.futAutoRun && !doc.documentElement.dataset.futHold) {
+      doc.documentElement.dataset.futHold = "1";
+      releaseHold = holdContinue(doc);
+    }
+    const state = pageState.get(doc) ?? { active: incoming, o };
+    state.o = o;
+    pageState.set(doc, state);
+    const out = readout(doc, t("fleet.readyHint"));
+    const say = out.say;
+    const report = (r, okKey, vars = {}) => r.ok ? say(t(okKey, { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), ...vars })) : say(t(r.reason ?? "fleet.err.noShips"), true);
+    const expUniverse = () => ({
+      economySpeed: universeSpeed(doc),
+      topScore: topScore(o.store),
+      lfBooster: o.store.get(LF_BONUS_KEY, null)?.expedition ?? 0,
+      itemBoost: expeditionItemBoost(o.store.get(ITEMS_KEY, null)),
+      // Size and donut of the universe, for the random system (public API cache, else the page's meta tags).
+      ...(({ systems, donutSystem }) => ({ systems, donutSystem }))(universeOf(doc, o.store.get(SERVER_DATA_KEY, null)))
+    });
+    if (fleet1)
+      void whenDispatcherReady().then((fd) => {
+        const max = fd ? expeditionLimits(fd, expUniverse()).max : 0;
+        if (!fd || max <= 0) return;
+        const here = shipsOnPlanet(fd);
+        const cargo = Object.fromEntries([219, 203, 202].map((id) => [String(id), here[String(id)] ?? 0]));
+        const free = Math.max(0, (fd.maxExpeditionCount || 0) - (fd.expeditionCount || 0));
+        o.store.set(EXPEDITION_MAX_KEY, { max, at: Date.now(), cargo, free });
+      });
+    const withDispatcher = (fn) => {
+      const fd = getDispatcher();
+      if (!fd || fd.currentPage !== "fleet1") {
+        releaseHold();
+        return say(t(fd ? "fleet.err.page1" : "fleet.err.notReady"), true);
+      }
+      void whenTargetIdle(fd).then(() => {
+        try {
+          fn(fd);
+          state.prepared = Math.round(fd.speedPercent * 10);
+        } finally {
+          releaseHold();
+        }
+      });
+    };
+    let drawSkip = () => {
+    };
+    let skipTile = null;
+    const markUsed = (mode) => {
+      const key = mode === "collectDeploy" ? "collect" : mode;
+      for (const b of Array.from(doc.querySelectorAll(".fut-fbar .fut-fact[data-mode]"))) b.classList.toggle("used", b.dataset.mode === key);
+    };
+    const begin = (mode, dest = null) => {
+      const prev = state.active;
+      const same = prev && prev.mode === mode;
+      state.active = REPEATABLE.includes(mode) ? { mode, first: same ? prev.first : o.bodyId, dest, ...same && prev.speed ? { speed: prev.speed } : {} } : null;
+      markUsed(mode);
+      drawSkip();
+    };
+    const roundSpeed = () => state.active?.speed;
+    const skipTarget = () => {
+      const a = state.active;
+      if (!a || !SKIPPABLE.includes(a.mode)) return null;
+      return nextInRound(a, o.bodyId, o.bodies, loadSettings(o.store).skipBodies);
+    };
+    const skip = () => {
+      const a = state.active;
+      const next = skipTarget();
+      if (!a || next === null) return say(t("fleet.err.noSkip"), true);
+      navigate(repeatUrl(href, next, a));
+    };
+    const reportRound = (r) => {
+      report(r, "fleet.ok.cargo");
+      const next = r.ok ? null : skipTarget();
+      if (next === null) return;
+      say(`${t(r.reason ?? "fleet.err.noShips")} \xB7 ${t("fleet.skipOffer", { body: shortLabel(o, next) })}`, true);
+      skipTile?.focus();
+    };
+    const run = {
+      moon: () => withDispatcher((fd) => {
+        const here = o.bodies.find((b) => b.planetId === o.bodyId);
+        const target = here?.moonId ? bodyTarget(o.bodies, here.moonId) : null;
+        if (!target) return say(t("fleet.err.noMoon"), true);
+        begin("moon");
+        reportRound(prepareTransport(fd, doc, profile, settings, target));
+      }),
+      collect: (dest) => withDispatcher((fd) => {
+        const target = dest ? bodyTarget(o.bodies, dest) : null;
+        if (!dest || !target) return say(t("fleet.err.noDest"), true);
+        begin("collect", dest);
+        reportRound(prepareTransport(fd, doc, profile, settings, target));
+      }),
+      collectDeploy: (dest) => withDispatcher((fd) => {
+        const target = dest ? bodyTarget(o.bodies, dest) : null;
+        if (!dest || !target) return say(t("fleet.err.noDest"), true);
+        begin("collectDeploy", dest);
+        reportRound(prepareDeploy(fd, doc, profile, settings, target));
+      }),
+      // Plain game actions: destination and resources from the row on page 1, read when pressed.
+      // Plain game actions: a switch that stays on; CL / CP below then prepare the fleet.
+      transport: () => toggleSend("transport"),
+      deploy: () => toggleSend("deploy"),
+      expedition: () => withDispatcher((fd) => {
+        begin("expedition");
+        const r = prepareExpedition(fd, doc, profile, settings, expUniverse());
+        const extra = [
+          settings.expeditionSpread > 0 ? t("fleet.ok.expSystem", { coords: `${fd.currentPlanet.galaxy}:${r.system}:16`, n: settings.expeditionSpread }) : "",
+          r.ok && r.slots ? t("fleet.ok.expSplit", { slots: r.slots }) : ""
+        ].filter(Boolean);
+        if (r.ok && extra.length) say(`${t("fleet.ok.expedition", { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), target: r.target.toLocaleString(o.locale) })} \xB7 ${extra.join(" \xB7 ")}`);
+        else report(r, "fleet.ok.expedition", { target: r.target.toLocaleString(o.locale) });
+      }),
+      fleetsave: () => withDispatcher((fd) => {
+        if (!profile.save) return say(t("fleet.err.noFleetsave"), true);
+        begin("fleetsave");
+        report(prepareFleetsave(fd, doc, profile, roundSpeed() ? { ...profile.save, speed: roundSpeed() } : profile.save), "fleet.ok.cargo");
+      }),
+      plan: (dest) => withDispatcher((fd) => {
+        const delivery = o.store.get(DELIVERY_KEY, null);
+        const target = dest ? bodyTarget(o.bodies, dest) : null;
+        if (!delivery || !dest || delivery.target !== dest || !target) return say(t("fleet.err.noDelivery"), true);
+        begin("plan", dest);
+        const r = prepareDelivery(fd, doc, profile, settings, target, delivery.need, reservedFor(o.store.get(QUEUED_KEY, {}), o.bodyId));
+        const left = delivery.need.metal + delivery.need.crystal + delivery.need.deuterium;
+        report(r, "fleet.ok.delivery", { left: left.toLocaleString(o.locale) });
+      }),
+      last: () => withDispatcher((fd) => {
+        const last2 = o.store.get(LAST_FLEET_KEY, null);
+        if (!last2) return say(t("fleet.err.noLast"), true);
+        begin("last");
+        report(prepareLast(fd, doc, profile, last2), "fleet.ok.ships");
+      })
+    };
+    function toggleSend(mode) {
+      const now = loadSettings(o.store);
+      const next = now.sendMode === mode ? null : mode;
+      const sendTarget = next && !now.sendTarget ? twinTarget(o.bodies, o.bodyId) : now.sendTarget;
+      o.store.set(SETTINGS_KEY, { ...now, sendMode: next, sendTarget });
+      const fd = getDispatcher();
+      if (fd && next) clearOurSelection(fd);
+      redraw();
+      if (next) say(t(next === "transport" ? "fleet.send.onTransport" : "fleet.send.onDeploy"));
+      doc.querySelector(".fut-fsend .fut-fin.p")?.focus();
+    }
+    function aim() {
+      const fd = getDispatcher();
+      if (!fd || fd.currentPage !== "fleet1") return;
+      void whenTargetIdle(fd).then(() => {
+        const now = loadSettings(o.store);
+        if (!now.sendMode) return;
+        const target = sendTargetOf(o, now.sendTarget, fd.currentPlanet);
+        if (target) aimSend(fd, doc, target, now.sendMode);
+      });
+    }
+    function sendWith(ship) {
+      withDispatcher((fd) => {
+        const now = loadSettings(o.store);
+        if (!now.sendMode) return;
+        const target = sendTargetOf(o, now.sendTarget, fd.currentPlanet);
+        if (!target) return say(t("fleet.err.noTarget"), true);
+        const c = fd.currentPlanet;
+        if (c.galaxy === target.galaxy && c.system === target.system && c.position === target.position && (c.type ?? 1) === target.type)
+          return say(t("fleet.err.sameBody"), true);
+        begin(now.sendMode);
+        const r = prepareSend(fd, doc, now, target, now.sendPick, now.sendMode, ship, profile.reserve.ships, profile.reserve.resources);
+        if (r.ok && r.missing > 0)
+          return say(t("fleet.ok.cargoShort", { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), missing: r.missing.toLocaleString(o.locale) }), true);
+        report(r, "fleet.ok.cargo");
+      });
+    }
+    state.rerun = (mode, dest) => run[mode](dest);
+    const favRun = {
+      collect: () => settings.favTransport ? run.collect(settings.favTransport) : say(t("fleet.err.noDefault"), true),
+      collectDeploy: () => settings.favDeploy ? run.collectDeploy(settings.favDeploy) : say(t("fleet.err.noDefault"), true)
+    };
+    if (fleet1 && anchor1) {
+      const AUTO_CARGO = ["moon", "collect", "plan"];
+      for (const li of Array.from(fleet1.querySelectorAll("#technologies li[data-technology]"))) {
+        li.querySelector(".fut-mainship")?.remove();
+        const id = Number(li.dataset.technology);
+        if (!CARGO_SHIPS.includes(id)) continue;
+        const main2 = settings.mainShip === id;
+        const pick = el3(doc, "button", `fut-mainship${main2 ? " on" : ""}`);
+        pick.type = "button";
+        pick.innerHTML = iconSvg("cargo", 12);
+        pick.title = main2 ? t("fleet.mainShipIs") : t("fleet.mainShipPick");
+        pick.setAttribute("aria-label", `${pick.title}: ${li.getAttribute("aria-label") ?? id}`);
+        pick.setAttribute("aria-pressed", String(main2));
+        pick.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (main2) return;
+          const now = loadSettings(o.store);
+          o.store.set(SETTINGS_KEY, { ...now, mainShip: id, secondShip: now.secondShip === id ? now.mainShip : now.secondShip });
+          const active = state.active;
+          redraw();
+          if (active && AUTO_CARGO.includes(active.mode)) pageState.get(doc)?.rerun?.(active.mode, active.dest);
+        });
+        li.append(pick);
+      }
+      const bar = el3(doc, "div", "fut-fbar");
+      const keys = keymap(o.store);
+      const k = (id) => keys.get(id) ?? "";
+      const tiles = el3(doc, "div", "fut-facts");
+      tiles.setAttribute("role", "group");
+      tiles.setAttribute("aria-label", t("fleet.actionsLabel"));
+      const here = o.bodies.find((b) => b.planetId === o.bodyId);
+      const act2 = (ico, id, name, where, tip, onClick, dim = false) => {
+        const b = tile(doc, ico, where ? `${name} ${where}` : name, onClick, dim ? "dim" : "", k(id), name);
+        b.dataset.mode = id.replace(/^fleet\./, "");
+        out.peek(b, where ? `${name} ${where}` : name, tip);
+        return b;
+      };
+      const to = (id) => `\u2192 ${shortLabel(o, id)}`;
+      const last2 = o.store.get(LAST_FLEET_KEY, null);
+      const collect = tile(doc, "collect", t("fleet.btn.collect"), () => collectMenu(
+        o,
+        collect,
+        settings,
+        { transport: k("fleet.collect"), deploy: k("fleet.collectDeploy") },
+        (mode, dest2) => dest2 ? run[mode](dest2) : say(t("fleet.err.noDefault"), true)
+      ), "more", "", t("fleet.btn.collectShort"));
+      collect.setAttribute("aria-haspopup", "menu");
+      collect.dataset.mode = "collect";
+      collect.append(el3(doc, "i", "more-mark"));
+      out.peek(collect, t("fleet.btn.collect"), t("fleet.tip.collect"));
+      const zone = (text) => {
+        const z = el3(doc, "span", "fut-fzone", text);
+        z.setAttribute("aria-hidden", "true");
+        return z;
+      };
+      const zoneBox = (text, cls = "") => {
+        const box = el3(doc, "span", `fut-fzonebox ${cls}`.trim());
+        const row = el3(doc, "span", "fut-ftiles");
+        box.append(zone(text), row);
+        return { box, row };
+      };
+      const mission = zoneBox(t("fleet.zone.mission"));
+      tiles.append(mission.box);
+      mission.row.append(
+        ...["transport", "deploy"].map((m) => {
+          const b = act2(m, `fleet.${m}`, t(`fleet.btn.${m}`), "", t(`fleet.tip.${m}`), () => run[m]());
+          b.setAttribute("aria-pressed", String(settings.sendMode === m));
+          return b;
+        }),
+        act2("expedition", "fleet.expedition", t("fleet.btn.expedition"), "", t("fleet.tip.expedition"), () => run.expedition()),
+        act2(
+          "fleetsave",
+          "fleet.fleetsave",
+          t("fleet.btn.fleetsave"),
+          profile.save ? `\u2192 ${profile.save.galaxy ?? "\xB7"}:${profile.save.system ?? "\xB7"}:${profile.save.position}` : "",
+          profile.save ? t("fleet.tip.fleetsave") : t("fleet.err.noFleetsave"),
+          () => profile.save ? run.fleetsave() : o.onOpenSettings?.("bodies"),
+          !profile.save
+        ),
+        act2("last", "fleet.last", t("fleet.btn.last"), "", last2 ? t("fleet.tip.last") : t("fleet.err.noLast"), () => run.last(), !last2)
+      );
+      const dest = zoneBox(t("fleet.zone.dest"), "fut-fsecond");
+      const secondary = dest.row;
+      if (here?.moonId) secondary.append(act2("moon", "fleet.moon", t("fleet.btn.moon"), to(here.moonId), t("fleet.tip.moon"), () => run.moon()));
+      secondary.append(collect);
+      tiles.append(dest.box);
+      const skipSlot = el3(doc, "span", "fut-fsecond fut-fskip");
+      drawSkip = () => {
+        const next = skipTarget();
+        skipTile = next === null ? null : act2("skip", "fleet.skip", t("fleet.btn.skip"), to(next), t("fleet.tip.skip"), skip);
+        skipSlot.replaceChildren(...skipTile ? [skipTile] : []);
+        skipSlot.hidden = !skipTile;
+      };
+      drawSkip();
+      tiles.append(skipSlot);
+      registerActions(doc, o.store, t, {
+        ...here?.moonId ? { "fleet.moon": () => run.moon() } : {},
+        "fleet.transport": () => run.transport(),
+        "fleet.deploy": () => run.deploy(),
+        "fleet.collect": favRun.collect,
+        "fleet.collectDeploy": favRun.collectDeploy,
+        "fleet.expedition": () => run.expedition(),
+        "fleet.fleetsave": () => run.fleetsave(),
+        "fleet.last": () => run.last(),
+        "fleet.skip": skip
+      });
+      const rules = el3(doc, "div", "fut-frules");
+      rules.setAttribute("role", "group");
+      rules.setAttribute("aria-label", t("fleet.rulesLabel"));
+      const rulesOut = readout(doc, t("fleet.reservesHint"));
+      const sw = (ico, label, hint, key, after, value) => {
+        const b = ruleSwitch(doc, ico, label, settings[key], () => {
+          o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: !loadSettings(o.store)[key] });
+          after?.();
+          redraw();
+        }, value);
+        rulesOut.peek(b, `${label}: ${settings[key] ? t("fleet.on") : t("fleet.off")}.`, hint);
+        return b;
+      };
+      const fmtN = (n) => formatUnits(n, o.locale);
+      const sumOf = (r) => Object.values(r ?? {}).reduce((a, b) => a + b, 0);
+      const shipsKept = sumOf(stored.reserve.ships);
+      const res = stored.reserve.resources;
+      const resValue = el3(doc, "span", "toks");
+      for (const [cls, v] of [["m", res.metal], ["c", res.crystal], ["d", res.deuterium]]) {
+        if (!v) continue;
+        const tk = el3(doc, "span", "");
+        tk.append(resToken(doc, cls, 11), doc.createTextNode(fmtN(v)));
+        resValue.append(tk);
+      }
+      const unset = t("fleet.rule.unset");
+      const gateKept = sumOf(stored.gate);
+      const reserves = el3(doc, "span", "fut-fgroup");
+      reserves.setAttribute("role", "group");
+      reserves.setAttribute("aria-label", t("fleet.zone.reserves"));
+      const reserveChips = el3(doc, "span", "fut-fchips");
+      reserves.append(zone(t("fleet.zone.reserves")), reserveChips);
+      reserveChips.append(
+        sw("ships", t("fleet.rule.ships"), t("fleet.rule.shipsHint"), "shipsOn", void 0, shipsKept ? fmtN(shipsKept) : unset),
+        sw("resources", t("fleet.rule.resources"), t("fleet.rule.resourcesHint"), "resourcesOn", void 0, res.metal || res.crystal || res.deuterium ? resValue : unset),
+        ...isMoon(o.bodies, o.bodyId) ? [sw("gate", t("fleet.rule.gate"), t("fleet.rule.gateHint"), "gateOn", void 0, gateKept ? fmtN(gateKept) : unset)] : [],
+        sw("food", t("fleet.foodShort"), t("fleet.foodHint"), "ignoreFood", () => applyFood(o.store))
+      );
+      const round = el3(doc, "span", "fut-fgroup");
+      round.setAttribute("role", "group");
+      round.setAttribute("aria-label", t("fleet.zone.round"));
+      const roundChips = el3(doc, "span", "fut-fchips");
+      round.append(zone(t("fleet.zone.round")), roundChips);
+      roundChips.append(sw("repeat", t("fleet.repeatShort"), t("fleet.repeatHint"), "repeat"));
+      rules.append(reserves, round);
+      roundChips.append(skipSwitch(o, rulesOut, redraw));
+      const edit = el3(doc, "span", "fut-fedit");
+      const tool = (ico, label, hint, onClick, cls = "", short = "") => {
+        const b = el3(doc, "button", `fut-ftool ${cls}`.trim());
+        b.type = "button";
+        b.title = label;
+        b.setAttribute("aria-label", label);
+        b.innerHTML = iconSvg(ico, 18);
+        if (short) b.append(el3(doc, "span", "name", short));
+        b.addEventListener("click", (e) => {
+          e.preventDefault();
+          onClick();
+        });
+        out.peek(b, label, hint);
+        return b;
+      };
+      const rulesTool = tool("rules", t("fleet.editRules", { body: shortLabel(o, o.bodyId) }), t("fleet.editRulesHint"), () => o.onOpenSettings?.("bodies"), "fut-frules-open", t("fleet.rulesShort"));
+      rulesOut.peek(rulesTool, t("fleet.editRules", { body: shortLabel(o, o.bodyId) }), t("fleet.editRulesHint"));
+      if (o.onOpenSettings) edit.append(tool("settings", t("fleet.general"), t("fleet.generalHint"), () => o.onOpenSettings?.("fleet"), "", t("fleet.general")));
+      const top = el3(doc, "div", "fut-frow");
+      top.append(tiles, edit);
+      const bottom = el3(doc, "div", "fut-frow");
+      bottom.append(out.box);
+      bar.append(top);
+      if (settings.sendMode) {
+        bar.append(sendPanel(o, out.peek, sendWith, aim));
+        aim();
+      }
+      if (focusRes) doc.querySelector(".fut-fsend .fut-fresin.metal input")?.focus();
+      bar.append(bottom);
+      anchor1.before(bar);
+      markUsed(state.active?.mode ?? null);
+      const strip = el3(doc, "div", "fut-fbar fut-freserves");
+      const stripRow = el3(doc, "div", "fut-frow");
+      const cap = el3(doc, "span", "fut-fcap");
+      cap.setAttribute("role", "status");
+      stripRow.append(rules, rulesTool);
+      const foot = el3(doc, "div", "fut-frow fut-ffoot");
+      foot.append(rulesOut.box, cap);
+      strip.append(stripRow, foot);
+      const below = fleet1.querySelector("#allornone") ?? null;
+      if (below) below.before(strip);
+      else anchor1.after(strip);
+      watchSelectedCargo(o);
+      addInvertButtons(o);
+      keepReserveOnSelectAll(o);
+      markShipReserve(o, profile.reserve.ships);
+    }
+    const dispatch = doc.getElementById("fleetdispatchcomponent");
+    if (!anchor1 && (fleet1 || dispatch) && !fleet2?.offsetParent) {
+      const host = fleet1 ?? dispatch;
+      const strip = el3(doc, "div", "fut-fbar fut-freserves fut-fempty");
+      const row = el3(doc, "div", "fut-frow");
+      const rulesOut = readout(doc, t("fleet.emptyHint"));
+      const round = el3(doc, "span", "fut-fgroup");
+      round.setAttribute("role", "group");
+      round.setAttribute("aria-label", t("fleet.zone.round"));
+      round.append(skipSwitch(o, rulesOut, redraw));
+      const next = skipTarget();
+      if (next !== null) {
+        const keys = keymap(o.store);
+        const b = tile(doc, "skip", `${t("fleet.btn.skip")} \u2192 ${shortLabel(o, next)}`, skip, "", keys.get("fleet.skip") ?? "", t("fleet.btn.skip"));
+        rulesOut.peek(b, `${t("fleet.btn.skip")} \u2192 ${shortLabel(o, next)}`, t("fleet.tip.skipEmpty"));
+        round.append(b);
+      }
+      row.append(round);
+      strip.append(row, rulesOut.box);
+      host.prepend(strip);
+      registerActions(doc, o.store, t, { "fleet.skip": skip });
+    }
+    if (fleet2) {
+      fixSpeedBarTouch(doc);
+      keepReserveOnLoadAll(o);
+      markResourceReserve(o, profile.reserve.resources);
+    }
+    if (fleet2 && anchor2) {
+      const bar = el3(doc, "div", "fut-fbar fut-faskbar");
+      bar.hidden = true;
+      const out2 = readout(doc, "");
+      const row = el3(doc, "div", "fut-frow");
+      const ask = el3(doc, "span", "fut-fask");
+      ask.hidden = true;
+      row.append(out2.box, ask);
+      bar.append(row);
+      anchor2.before(bar);
+      const offerSpeed = () => {
+        const box = doc.querySelector(".fut-fask");
+        const fd = getDispatcher();
+        const a = state.active;
+        if (!box) return;
+        const pct = fd ? Math.round(fd.speedPercent * 10) : 0;
+        const current3 = a?.speed ?? state.prepared;
+        const next = a ? nextInRound(a, o.bodyId, o.bodies, loadSettings(o.store).skipBodies) : null;
+        if (!fd || !a || a.mode !== "fleetsave" || !loadSettings(o.store).repeat || current3 === void 0 || pct === current3 || next === null) {
+          box.hidden = true;
+          return;
+        }
+        const note = el3(doc, "div", "");
+        const noteYes = el3(doc, "button", "yes", t("fleet.speedAsk.yes"));
+        const noteNo = el3(doc, "button", "", t("fleet.speedAsk.no"));
+        noteYes.type = noteNo.type = "button";
+        note.append(el3(doc, "span", "q", t("fleet.speedAsk.q", { pct })), noteYes, noteNo);
+        noteYes.addEventListener("click", (e) => {
+          e.preventDefault();
+          state.active = { ...a, speed: pct };
+          note.replaceChildren(el3(doc, "span", "q", t("fleet.speedAsk.done", { pct })));
+          (doc.defaultView ?? globalThis).setTimeout(() => setTouchNote(doc, null), 3e3);
+        });
+        noteNo.addEventListener("click", (e) => {
+          e.preventDefault();
+          setTouchNote(doc, null);
+        });
+        if (setTouchNote(doc, note)) {
+          box.hidden = true;
+          return;
+        }
+        const host = box.closest(".fut-fbar");
+        if (host) host.hidden = false;
+        const yes = el3(doc, "button", "fut-fask-b yes", t("fleet.speedAsk.yes"));
+        const no = el3(doc, "button", "fut-fask-b", t("fleet.speedAsk.no"));
+        yes.type = no.type = "button";
+        yes.addEventListener("click", (e) => {
+          e.preventDefault();
+          state.active = { ...a, speed: pct };
+          box.hidden = true;
+          const said = host?.querySelector(".fut-finfo");
+          if (said) said.textContent = t("fleet.speedAsk.done", { pct });
+        });
+        no.addEventListener("click", (e) => {
+          e.preventDefault();
+          box.hidden = true;
+        });
+        box.replaceChildren(el3(doc, "span", "fut-fask-q", t("fleet.speedAsk.q", { pct })), yes, no);
+        box.title = t("fleet.speedAsk.hint", { pct: current3 });
+        box.hidden = false;
+      };
+      const speedBar = doc.getElementById("speedPercentage");
+      if (speedBar && !speedBar.dataset.futAsk) {
+        speedBar.dataset.futAsk = "1";
+        speedBar.addEventListener("click", () => setTimeout(offerSpeed, 0));
+      }
+    }
+    registerActions(doc, o.store, t, {});
+    void whenDispatcherReady().then((fd) => {
+      if (!fd) return;
+      applyFood(o.store, fd);
+      const ships = readShipsInfo(fd);
+      if (ships) o.store.set(SHIPS_INFO_KEY, ships);
+      try {
+        recordShipsHere(o, fd);
+      } catch {
+      }
+      hookSend(fd, () => {
+        try {
+          o.store.set(LAST_FLEET_KEY, snapshotFleet(fd));
+          recordLeft(o, fd);
+          recordShipment(o, fd);
+          recordOrionFuel(o.store, fd);
+        } catch {
+        }
+        const current3 = pageState.get(doc);
+        if (current3?.active?.mode === "plan") {
+          const d = current3.o.store.get(DELIVERY_KEY, null);
+          if (!d) return false;
+          const need = {
+            metal: Math.max(0, d.need.metal - fd.cargoMetal),
+            crystal: Math.max(0, d.need.crystal - fd.cargoCrystal),
+            deuterium: Math.max(0, d.need.deuterium - fd.cargoDeuterium)
+          };
+          const done = need.metal + need.crystal + need.deuterium <= 0;
+          current3.o.store.set(DELIVERY_KEY, done ? null : { ...d, need });
+          if (done) return false;
+          const nextBody2 = nextInRound(current3.active, current3.o.bodyId, current3.o.bodies, loadSettings(current3.o.store).skipBodies);
+          if (nextBody2 === null) return false;
+          navigate(repeatUrl(href, nextBody2, current3.active));
+          return true;
+        }
+        if (!current3?.active || !loadSettings(current3.o.store).repeat) return false;
+        if (current3.active.mode === "expedition" && loadSettings(current3.o.store).expeditionStay) {
+          if (freeExpeditionSlots(fd.expeditionCount, fd.maxExpeditionCount) <= 1) return false;
+          navigate(repeatUrl(href, current3.o.bodyId, current3.active));
+          return true;
+        }
+        if (current3.active.mode === "expedition" && freeExpeditionSlots(fd.expeditionCount, fd.maxExpeditionCount) <= 1) return false;
+        const next = nextInRound(current3.active, current3.o.bodyId, current3.o.bodies, loadSettings(current3.o.store).skipBodies);
+        if (next === null) return false;
+        navigate(repeatUrl(href, next, current3.active));
+        return true;
+      });
+      if (incoming && fd.currentPage === "fleet1" && !doc.documentElement.dataset.futAutoRun) {
+        doc.documentElement.dataset.futAutoRun = "1";
+        const go = () => {
+          if (incoming.mode === "collect" || incoming.mode === "collectDeploy" || incoming.mode === "plan") run[incoming.mode](incoming.dest);
+          else run[incoming.mode]();
+        };
+        if (doc.readyState === "complete") setTimeout(go, 0);
+        else doc.defaultView?.addEventListener("load", () => setTimeout(go, 0), { once: true });
+      }
+    });
+  }
+  function holdContinue(doc, maxMs = 8e3) {
+    const win = doc.defaultView;
+    if (!win) return () => {
+    };
+    const keys = (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    };
+    const clicks = (e) => {
+      const t = e.target;
+      if (!t?.closest?.("#continueToFleet2, #sendFleet")) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    };
+    const types = ["keydown", "keypress", "keyup"];
+    types.forEach((type) => win.addEventListener(type, keys, true));
+    win.addEventListener("click", clicks, true);
+    let done = false;
+    const release = () => {
+      if (done) return;
+      done = true;
+      types.forEach((type) => win.removeEventListener(type, keys, true));
+      win.removeEventListener("click", clicks, true);
+      delete doc.documentElement.dataset.futHold;
+    };
+    win.setTimeout(release, maxMs);
+    return release;
+  }
+  function recordLeft(o, fd) {
+    const snapshot = o.store.get(SNAPSHOT_KEY, null);
+    if (!snapshot) return;
+    const onPlanet2 = { metal: Number(fd.metalOnPlanet) || 0, crystal: Number(fd.crystalOnPlanet) || 0, deuterium: Number(fd.deuteriumOnPlanet) || 0 };
+    const cargo = { metal: Number(fd.cargoMetal) || 0, crystal: Number(fd.cargoCrystal) || 0, deuterium: Number(fd.cargoDeuterium) || 0 };
+    const res = applyPageResources(snapshot, o.bodyId, leftAfterSend(onPlanet2, cargo, Number(fd.getConsumption()) || 0), Date.now());
+    const ships = applyPageShips(snapshot, o.bodyId, shipsAfterSend(shipsOnPlanet(fd), fd.shipsToSend ?? []));
+    if (res || ships) o.store.set(SNAPSHOT_KEY, snapshot);
+  }
+  function recordShipsHere(o, fd) {
+    const snapshot = o.store.get(SNAPSHOT_KEY, null);
+    if (snapshot && applyPageShips(snapshot, o.bodyId, shipsOnPlanet(fd))) o.store.set(SNAPSHOT_KEY, snapshot);
+  }
+  function recordShipment(o, fd) {
+    if (fd.mission !== 3 && fd.mission !== 4) return;
+    const cargo = { metal: Math.floor(fd.cargoMetal || 0), crystal: Math.floor(fd.cargoCrystal || 0), deuterium: Math.floor(fd.cargoDeuterium || 0) };
+    if (cargo.metal + cargo.crystal + cargo.deuterium <= 0) return;
+    const tp = fd.targetPlanet;
+    const coords = `${tp.galaxy}:${tp.system}:${tp.position}`;
+    const body = o.bodies.find((b) => b.coords === coords);
+    const target = body ? tp.type === 3 ? body.moonId : body.planetId : null;
+    if (!target) return;
+    const plan = o.store.get(PLAN_KEY, {});
+    if (!plan[String(target)]?.length) return;
+    const seconds = Number(fd.getDuration?.()) || 0;
+    const now = Date.now();
+    const list = o.store.get(SENT_KEY, []);
+    o.store.set(SENT_KEY, [...list, { target, cargo, sentAt: now, arriveAt: now + Math.max(0, seconds) * 1e3 }]);
+  }
+  function recordOrionFuel(store, fd) {
+    const tp = fd.targetPlanet;
+    const archive = loadArchive(store.get(ARCHIVE_KEY, null));
+    const next = noteFuel(archive, { at: Date.now(), coords: `${tp.galaxy}:${tp.system}:${tp.position}`, type: Number(tp.type), mission: Number(fd.mission), deut: Math.round(Number(fd.getConsumption()) || 0) });
+    if (next) store.set(ARCHIVE_KEY, next);
+  }
+  var initialFood = /* @__PURE__ */ new WeakMap();
+  function applyFood(store, fd = getDispatcher()) {
+    if (!fd) return;
+    const f = fd;
+    if (f.foodOnPlanet === void 0) return;
+    if (!initialFood.has(fd)) initialFood.set(fd, f.foodOnPlanet);
+    const ignore = loadSettings(store).ignoreFood;
+    f.foodOnPlanet = ignore ? 0 : initialFood.get(fd) ?? f.foodOnPlanet;
+    if (ignore) f.cargoFood = 0;
+    try {
+      fd.refresh();
+    } catch {
+    }
+  }
+  function whenTargetIdle(fd, timeoutMs = 5e3) {
+    const busy = () => Boolean(fd.fetchTargetPlayerDataTimeout);
+    if (!busy()) return Promise.resolve();
+    const started = Date.now();
+    return new Promise((resolve) => {
+      const check = () => !busy() || Date.now() - started > timeoutMs ? resolve() : setTimeout(check, 50);
+      check();
+    });
+  }
+
   // src/modules/settings/index.ts
   var SETTINGS_ID = "fut-settings-window";
   var TAB_KEY = "settings.tab";
-  var SECTIONS = ["menu", "mail", "galaxy", "fleet", "keys", "data"];
+  var SECTIONS = ["menu", "mail", "galaxy", "fleet", "bodies", "keys", "data"];
   var CSS4 = `
 :host { --panel-w: 620px; }
 .body { display: flex; flex-direction: column; }
@@ -9844,7 +12621,7 @@ input.field { width: 190px; }
       return n;
     };
     const style = el6("style");
-    style.textContent = WINDOW_SHEET + CSS4;
+    style.textContent = WINDOW_SHEET + CSS4 + (o.rules ? RULES_CSS : "");
     const backdrop = el6("div", "backdrop");
     const panel = el6("div", "panel");
     panel.setAttribute("role", "dialog");
@@ -9856,8 +12633,10 @@ input.field { width: 190px; }
     });
     root.append(style, backdrop);
     doc.body.append(host);
+    const sections = SECTIONS.filter((s) => s !== "bodies" || o.rules);
     let section2 = o.section ?? store.get(TAB_KEY, "menu");
-    if (!SECTIONS.includes(section2)) section2 = "menu";
+    if (!sections.includes(section2)) section2 = "menu";
+    let rulesPanel = null;
     let menu = { ...o.menu.settings };
     let status = "";
     const choice = (options, current3, onPick, disabled = false) => {
@@ -10107,7 +12886,7 @@ input.field { width: 190px; }
       head.append(titles, close);
       const tabs = el6("div", "tabs");
       tabs.setAttribute("role", "tablist");
-      for (const s of SECTIONS) {
+      for (const s of sections) {
         const b = el6("button", "tab", t(`settings.section.${s}`));
         b.type = "button";
         b.setAttribute("role", "tab");
@@ -10195,6 +12974,9 @@ input.field { width: 190px; }
         body.append(row(t("settings.bigDebris"), t("settings.bigDebrisHint"), box), st);
       } else if (section2 === "fleet") {
         body.append(...fleetRows());
+      } else if (section2 === "bodies" && o.rules) {
+        rulesPanel ?? (rulesPanel = bodyRulesPanel({ doc, store, t, locale: o.rules.locale, bodies: o.rules.bodies, bodyId: o.section === "bodies" ? o.rules.bodyId : null, onChange: o.onFleetChange }));
+        body.append(rulesPanel);
       } else if (section2 === "keys") {
         body.append(...keyRows());
       } else {
@@ -10252,113 +13034,6 @@ input.field { width: 190px; }
       if (e.key === "Escape") closeSettings(doc);
     };
     doc.addEventListener("keydown", keyHandler, true);
-  }
-
-  // src/engines/account.ts
-  var KEYS3 = ["metal", "crystal", "deuterium"];
-  var msu2 = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
-  var FLYING = [202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 213, 214, 215, 218, 219];
-  function fleetValue(body) {
-    let total = 0;
-    for (const id of FLYING) {
-      const n = body.levels[String(id)] ?? 0;
-      if (!n) continue;
-      const c = rawCost(id, 1);
-      total += n * (c.metal + c.crystal + c.deuterium);
-    }
-    return total;
-  }
-  function applyPageShips(snapshot, bodyId, ships) {
-    const body = snapshot.bodies.find((b) => b.id === bodyId);
-    if (!body) return false;
-    let changed = false;
-    for (const id of FLYING) {
-      const n = Math.max(0, Math.floor(Number(ships[String(id)]) || 0));
-      if ((body.levels[String(id)] ?? 0) === n) continue;
-      body.levels[String(id)] = n;
-      changed = true;
-    }
-    return changed;
-  }
-  function shipsAfterSend(onPlanet2, sent) {
-    const out = { ...onPlanet2 };
-    for (const s of sent) out[String(s.id)] = Math.max(0, (out[String(s.id)] ?? 0) - (Number(s.number) || 0));
-    return out;
-  }
-  function bodyRows(snapshot, entries, now, queues = null) {
-    if (!snapshot) return [];
-    const byId = new Map(snapshot.bodies.map((b) => [b.id, b]));
-    const rows = [];
-    for (const entry of entries) {
-      for (const type of ["planet", "moon"]) {
-        const id = type === "planet" ? entry.planetId : entry.moonId;
-        const body = id ? byId.get(id) : void 0;
-        if (!body) continue;
-        const amount = estimateResources(body, now);
-        const cap = effectiveStorage(body);
-        const perHour = type === "planet" ? { ...body.production } : { metal: 0, crystal: 0, deuterium: 0 };
-        const toFull = (k) => {
-          if (cap[k] <= 0) return null;
-          if (amount[k] >= cap[k]) return 0;
-          return perHour[k] > 0 ? (cap[k] - amount[k]) / perHour[k] : null;
-        };
-        rows.push({
-          id: body.id,
-          type,
-          name: type === "planet" ? entry.name || body.name : body.name || entry.name,
-          coords: entry.coords || body.coords,
-          amount,
-          perHour,
-          fill: storageFill(body, amount),
-          hoursToFull: { metal: toFull("metal"), crystal: toFull("crystal"), deuterium: toFull("deuterium") },
-          ageMinutes: Math.max(0, Math.floor((now - body.resourcesAt) / 6e4)),
-          mines: { metal: body.levels["1"] ?? 0, crystal: body.levels["2"] ?? 0, deuterium: body.levels["3"] ?? 0 },
-          idle: type !== "planet" ? null : queues ? !activeItems(queues.bodies[String(body.id)], now).some((i) => i.kind === "building" || i.kind === "lfbuilding") : !entry.construction.planet
-        });
-      }
-    }
-    return rows;
-  }
-  function summarize(rows) {
-    const stock2 = { metal: 0, crystal: 0, deuterium: 0 };
-    const perHour = { metal: 0, crystal: 0, deuterium: 0 };
-    for (const row of rows) for (const k of KEYS3) {
-      stock2[k] += row.amount[k];
-      perHour[k] += row.perHour[k];
-    }
-    return {
-      stock: stock2,
-      perHour,
-      planets: rows.filter((r) => r.type === "planet").length,
-      moons: rows.filter((r) => r.type === "moon").length,
-      idle: rows.filter((r) => r.idle === true).length
-    };
-  }
-  var SOON_FULL_HOURS = 6;
-  var STALE_MINUTES = 60;
-  function accountAlerts(rows, snapshot, entries) {
-    const label = (r) => `${r.name} [${r.coords}]`;
-    const known = new Set((snapshot?.bodies ?? []).map((b) => b.id));
-    const missing2 = entries.filter((e) => e.planetId && !known.has(e.planetId) || e.moonId && !known.has(e.moonId));
-    const planets = rows.filter((r) => r.type === "planet");
-    const minHours = (r) => {
-      const hours = KEYS3.map((k) => r.hoursToFull[k]).filter((h8) => h8 !== null);
-      return hours.length ? Math.min(...hours) : null;
-    };
-    const full = planets.filter((r) => minHours(r) === 0 || r.fill !== null && KEYS3.some((k) => r.fill[k] >= 0.9));
-    const soon = planets.filter((r) => !full.includes(r) && (minHours(r) ?? Infinity) <= SOON_FULL_HOURS);
-    const idle = planets.filter((r) => r.idle === true);
-    const stale = rows.filter((r) => r.ageMinutes > STALE_MINUTES);
-    const out = [];
-    const push = (level2, key, list) => {
-      if (list.length) out.push({ level: level2, key, count: list.length, names: list.map(label), moons: list.map((r) => r.type === "moon") });
-    };
-    push("warn", "alert.missing", missing2);
-    push("warn", "alert.full", full);
-    push("warn", "alert.soonFull", soon);
-    push("info", "alert.idle", idle);
-    push("info", "alert.stale", stale);
-    return out;
   }
 
   // src/modules/planet-menu/style.ts
@@ -10672,7 +13347,7 @@ ${L} .smallplanet a.alert {
     }
     if (on) delete link.dataset.futNoTip;
   }
-  var STYLE_ID3 = "fut-planet-menu-style";
+  var STYLE_ID4 = "fut-planet-menu-style";
   var ICONS2 = {
     journal: '<path d="M5 3.5h11a3 3 0 0 1 3 3V20.5H8a3 3 0 0 1-3-3z" fill="none" stroke-width="2"/><path d="M5 17.5a3 3 0 0 1 3-3h11" fill="none" stroke-width="2"/><path stroke="none" d="M9.5 6.5l1 2.2 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3L6.2 9l2.3-.3z"/>',
     planner: '<path d="M9 6h11M9 12h11M9 18h11" fill="none" stroke-width="2.2"/><path stroke="none" d="M3 4.5h3v3H3zM3 10.5h3v3H3zM3 16.5h3v3H3z"/>',
@@ -10680,14 +13355,14 @@ ${L} .smallplanet a.alert {
     sync: '<path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9" fill="none" stroke-width="2.2"/><path d="M19 3v5h-5M5 21v-5h5" fill="none" stroke-width="2.2"/>',
     settings: '<path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z" fill="none" stroke-width="2.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" fill="none" stroke-width="2.2"/>'
   };
-  function el3(doc, tag, className, text) {
+  function el4(doc, tag, className, text) {
     const node = doc.createElement(tag);
     node.className = className;
     if (text !== void 0) node.textContent = text;
     return node;
   }
   function iconButton2(doc, icon2, title, onClick) {
-    const button3 = el3(doc, "button", `fut-tool fut-tool-${icon2}`);
+    const button3 = el4(doc, "button", `fut-tool fut-tool-${icon2}`);
     button3.type = "button";
     button3.title = title;
     button3.setAttribute("aria-label", title);
@@ -10699,16 +13374,16 @@ ${L} .smallplanet a.alert {
     return button3;
   }
   function resourceColumn(doc, body, now, locale, withStorage, view2) {
-    const box = el3(doc, "span", "fut-res");
+    const box = el4(doc, "span", "fut-res");
     if (!body) {
-      for (const cls of ["fut-m", "fut-c", "fut-d"]) box.append(el3(doc, "span", `fut-cell ${cls} fut-missing`, "\u2014"));
+      for (const cls of ["fut-m", "fut-c", "fut-d"]) box.append(el4(doc, "span", `fut-cell ${cls} fut-missing`, "\u2014"));
       return box;
     }
     const amount = estimateResources(body, now);
     const fill = withStorage ? storageFill(body, amount) : null;
     const cell = (key, cls) => {
       const full = fill !== null && fill[key] >= 0.9;
-      const node = el3(doc, "span", full ? `fut-cell ${cls} fut-full` : `fut-cell ${cls}`, formatUnits(amount[key], locale));
+      const node = el4(doc, "span", full ? `fut-cell ${cls} fut-full` : `fut-cell ${cls}`, formatUnits(amount[key], locale));
       if (fill !== null) {
         const pct = Math.round(fill[key] * 100);
         node.style.setProperty("--fut-fill", `${pct}%`);
@@ -10726,12 +13401,12 @@ ${L} .smallplanet a.alert {
     const p = planet ? fleetValue(planet) : 0;
     const m = moon ? fleetValue(moon) : 0;
     if (!p && !m) return null;
-    const line = el3(doc, "span", "fut-fleet");
+    const line = el4(doc, "span", "fut-fleet");
     line.title = t("planetMenu.fleetHint");
     if (p || m) line.append(icon(doc, "fleet", 12));
-    if (p) line.append(el3(doc, "span", "fut-fleet-p", formatUnits(p, locale)));
+    if (p) line.append(el4(doc, "span", "fut-fleet-p", formatUnits(p, locale)));
     if (m) {
-      const moonPart = el3(doc, "span", "fut-fleet-m");
+      const moonPart = el4(doc, "span", "fut-fleet-m");
       moonPart.innerHTML = '<svg viewBox="0 0 24 24" width="8" height="8" aria-hidden="true" fill="currentColor"><path d="M14.6 2.6A9.6 9.6 0 1 0 21.4 16 8 8 0 0 1 14.6 2.6z"/></svg>';
       moonPart.append(formatUnits(m, locale));
       line.append(moonPart);
@@ -10740,12 +13415,12 @@ ${L} .smallplanet a.alert {
   }
   var MOON_MARK = '<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="currentColor"><path d="M14.6 2.6A9.6 9.6 0 1 0 21.4 16 8 8 0 0 1 14.6 2.6z"/></svg>';
   function fleetPeek(doc, value, o, cls, moon = false) {
-    const peek = el3(doc, "span", `fut-fleet-peek ${cls}`);
+    const peek = el4(doc, "span", `fut-fleet-peek ${cls}`);
     peek.setAttribute("aria-hidden", "true");
-    const v = el3(doc, "span", "fut-peek-v");
+    const v = el4(doc, "span", "fut-peek-v");
     v.append(icon(doc, "fleet", 12));
     if (moon) {
-      const mark = el3(doc, "span", "fut-peek-moonmark");
+      const mark = el4(doc, "span", "fut-peek-moonmark");
       mark.innerHTML = MOON_MARK;
       v.append(mark);
     }
@@ -10778,7 +13453,7 @@ ${L} .smallplanet a.alert {
     if (!id) return null;
     const at = visits?.[String(id)];
     const { text, cls } = at ? dataAge(at, now) : { text: "60", cls: "fut-age-old" };
-    const badge = el3(doc, "span", `fut-age ${cls}`, text);
+    const badge = el4(doc, "span", `fut-age ${cls}`, text);
     if (at) badge.dataset.at = String(at);
     badge.title = t("planetMenu.age");
     return badge;
@@ -10802,13 +13477,13 @@ ${L} .smallplanet a.alert {
   }
   function queueDots(doc, items, building2, now, t, locale) {
     if (!items.length && !building2) return null;
-    const box = el3(doc, "span", "fut-queue");
+    const box = el4(doc, "span", "fut-queue");
     if (items.length) {
       box.title = items.map((i) => `${t(`queue.${i.kind}`)}: ${queueLabel(i, locale)} \xB7 ${remaining(i.end, now)}`).join("\n");
-      for (const kind of new Set(items.map((i) => i.kind))) box.append(el3(doc, "span", `fut-q fut-q-${kind}`));
+      for (const kind of new Set(items.map((i) => i.kind))) box.append(el4(doc, "span", `fut-q fut-q-${kind}`));
     } else {
       box.title = building2?.getAttribute("title") || t("planetMenu.building");
-      box.append(el3(doc, "span", "fut-q fut-q-unknown"));
+      box.append(el4(doc, "span", "fut-q fut-q-unknown"));
     }
     return box;
   }
@@ -10816,7 +13491,7 @@ ${L} .smallplanet a.alert {
   var TIP_ID = "fut-plan-tip";
   function planBadge(doc, mark, o, where) {
     if (!mark) return null;
-    const b = el3(doc, "span", `fut-plan fut-plan-${mark.state}`);
+    const b = el4(doc, "span", `fut-plan fut-plan-${mark.state}`);
     b.textContent = String(mark.items.length);
     b.tabIndex = 0;
     b.setAttribute("role", "button");
@@ -10842,30 +13517,30 @@ ${L} .smallplanet a.alert {
   }
   function showPlanTip(doc, anchor, mark, o, where) {
     doc.getElementById(TIP_ID)?.remove();
-    const tip = el3(doc, "div", `fut-plan-tip fut-plan-${mark.state}`);
+    const tip = el4(doc, "div", `fut-plan-tip fut-plan-${mark.state}`);
     tip.id = TIP_ID;
     tip.setAttribute("role", "tooltip");
-    const head = el3(doc, "div", "fut-pt-head");
-    head.append(el3(doc, "b", "", where.name), el3(doc, "span", "", `[${where.coords}]${where.moon ? ` \xB7 ${o.t("planetMenu.moon")}` : ""}`));
-    const title = el3(doc, "div", "fut-pt-title");
+    const head = el4(doc, "div", "fut-pt-head");
+    head.append(el4(doc, "b", "", where.name), el4(doc, "span", "", `[${where.coords}]${where.moon ? ` \xB7 ${o.t("planetMenu.moon")}` : ""}`));
+    const title = el4(doc, "div", "fut-pt-title");
     title.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="currentColor">${PLAN_ICON}</svg>`;
     title.append(doc.createTextNode(o.t("plan.title")));
-    const list = el3(doc, "ul", "fut-pt-items");
-    for (const i of mark.items) list.append(el3(doc, "li", "", i));
+    const list = el4(doc, "ul", "fut-pt-items");
+    for (const i of mark.items) list.append(el4(doc, "li", "", i));
     const time = (ms) => new Date(ms).toLocaleTimeString(o.locale, { hour: "2-digit", minute: "2-digit" });
     const resRow = (r) => {
-      const row = el3(doc, "div", "fut-pt-res");
+      const row = el4(doc, "div", "fut-pt-res");
       for (const k of ["metal", "crystal", "deuterium"]) {
         if (!r[k]) continue;
-        const c = el3(doc, "span", `fut-pt-${k}`);
+        const c = el4(doc, "span", `fut-pt-${k}`);
         c.innerHTML = resIconSvg(k, 12);
         c.append(doc.createTextNode(formatUnits(r[k], o.locale)));
         row.append(c);
       }
       return row;
     };
-    const status = el3(doc, "div", "fut-pt-status");
-    const say = (text) => status.append(el3(doc, "div", "fut-pt-say", text));
+    const status = el4(doc, "div", "fut-pt-status");
+    const say = (text) => status.append(el4(doc, "div", "fut-pt-say", text));
     const sent = mark.pending.metal + mark.pending.crystal + mark.pending.deuterium > 0;
     const sentText = mark.pending.arriveAt > o.now ? o.t("plan.sentArriving", { time: time(mark.pending.arriveAt) }) : o.t("plan.sentArrived");
     if (mark.state === "ready") say(o.t("plan.readyHere"));
@@ -10875,7 +13550,7 @@ ${L} .smallplanet a.alert {
       status.append(resRow(mark.lack ?? { metal: 0, crystal: 0, deuterium: 0 }));
     }
     if (mark.state !== "ready" && mark.state !== "unknown" && sent) {
-      const line = el3(doc, "div", "fut-pt-say fut-pt-sent", sentText);
+      const line = el4(doc, "div", "fut-pt-say fut-pt-sent", sentText);
       status.append(line, resRow(mark.pending));
     }
     tip.append(head, title, list, status);
@@ -10912,21 +13587,21 @@ ${L} .smallplanet a.alert {
   }
   function toolbar(o, colonies) {
     const { doc, t } = o;
-    const bar = el3(doc, "div", "fut-toolbar");
+    const bar = el4(doc, "div", "fut-toolbar");
     if (colonies) bar.title = colonies;
     const fmt = (n) => formatUnits(n, o.locale);
     const msu4 = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
     const cell = (glyph2, label, value, unit, cls, title, onClick) => {
-      const b = el3(doc, "button", "fut-cell");
+      const b = el4(doc, "button", "fut-cell");
       b.type = "button";
       b.title = title;
-      const top = el3(doc, "span", "fut-cell-t");
-      const ico = el3(doc, "span", "fut-cell-i");
+      const top = el4(doc, "span", "fut-cell-t");
+      const ico = el4(doc, "span", "fut-cell-i");
       ico.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="currentColor" stroke="currentColor">${ICONS2[glyph2]}</svg>`;
-      top.append(ico, el3(doc, "span", "fut-cell-k", label));
-      const v = el3(doc, "span", `fut-cell-v ${cls}`.trim());
+      top.append(ico, el4(doc, "span", "fut-cell-k", label));
+      const v = el4(doc, "span", `fut-cell-v ${cls}`.trim());
       v.append(value);
-      if (unit) v.append(" ", el3(doc, "small", "", unit));
+      if (unit) v.append(" ", el4(doc, "small", "", unit));
       b.append(top, v);
       if (onClick) b.addEventListener("click", onClick);
       else b.disabled = true;
@@ -10947,7 +13622,7 @@ ${L} .smallplanet a.alert {
       `${t("plan.title")}${known && gap > 0 ? ` \xB7 ${t("bar.missing")} ${fmt(gap)}` : ""}${count2 && gap ? ` \xB7 ${t("bar.planHint")}` : ""}`,
       () => o.onOpenPlanner?.()
     );
-    const side = el3(doc, "div", "fut-side");
+    const side = el4(doc, "div", "fut-side");
     const lastSync = o.snapshot ? t("toolbar.lastSync", { time: formatTime(o.snapshot.fetchedAt, o.locale) }) : "";
     const sync = iconButton2(doc, "sync", [t("sync.button"), lastSync].filter(Boolean).join(" \xB7 "), () => {
       if (sync.classList.contains("fut-busy")) return;
@@ -10984,9 +13659,9 @@ ${L} .smallplanet a.alert {
     const { doc } = o;
     const list = doc.getElementById("planetList");
     if (!list) return;
-    if (!doc.getElementById(STYLE_ID3)) {
-      const style = el3(doc, "style", "");
-      style.id = STYLE_ID3;
+    if (!doc.getElementById(STYLE_ID4)) {
+      const style = el4(doc, "style", "");
+      style.id = STYLE_ID4;
       style.textContent = PLANET_MENU_CSS;
       doc.head.append(style);
     }
@@ -11007,7 +13682,7 @@ ${L} .smallplanet a.alert {
       if (entry.current) entry.element.classList.add("fut-current");
       const link = entry.planetLink;
       if (link) {
-        const wrap = el3(doc, "span", "fut-name");
+        const wrap = el4(doc, "span", "fut-name");
         link.querySelectorAll(".planet-name, .planet-koords").forEach((n) => wrap.append(n));
         const planetBody = entry.planetId ? byId.get(entry.planetId) : void 0;
         if (view2.fleet) {
@@ -11043,22 +13718,22 @@ ${L} .smallplanet a.alert {
         const mq = queueDots(doc, entry.moonId ? activeItems(o.queues?.bodies[String(entry.moonId)], o.now) : [], entry.construction.moon, o.now, o.t, o.locale);
         if (mq) moon.append(mq);
       } else {
-        gap = el3(doc, "span", "fut-nomoon");
+        gap = el4(doc, "span", "fut-nomoon");
         link?.after(gap);
       }
       {
-        const col = el3(doc, "span", "fut-plancol");
+        const col = el4(doc, "span", "fut-plancol");
         const pb = planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : void 0, o, { id: entry.planetId, name: entry.name, coords: entry.coords, moon: false });
         const moonName = entry.moonLink?.querySelector("img")?.getAttribute("alt") || entry.name;
         const mb = planBadge(doc, entry.moonId ? o.planMarks?.[String(entry.moonId)] : void 0, o, { id: entry.moonId, name: moonName, coords: entry.coords, moon: true });
         if (pb) pb.classList.add("fut-plan-p");
         if (mb) mb.classList.add("fut-plan-m");
         const empty = () => {
-          const slot = el3(doc, "span", "fut-plan-empty");
+          const slot = el4(doc, "span", "fut-plan-empty");
           slot.setAttribute("aria-hidden", "true");
           return slot;
         };
-        col.append(pb ?? (entry.planetId ? empty() : el3(doc, "span", "")), mb ?? (moon ? empty() : el3(doc, "span", "")));
+        col.append(pb ?? (entry.planetId ? empty() : el4(doc, "span", "")), mb ?? (moon ? empty() : el4(doc, "span", "")));
         const after = moon ?? gap;
         if (after) after.after(col);
         else entry.element.append(col);
@@ -11074,24 +13749,24 @@ ${L} .smallplanet a.alert {
       const fly = o.flying ?? { metal: 0, crystal: 0, deuterium: 0 };
       const stock2 = { metal: base2.stock.metal + fly.metal, crystal: base2.stock.crystal + fly.crystal, deuterium: base2.stock.deuterium + fly.deuterium };
       const msu4 = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
-      const box = el3(doc, "div", "fut-totals");
+      const box = el4(doc, "div", "fut-totals");
       box.setAttribute("role", "table");
       const row = (cls, cells, glyph2) => {
-        const r = el3(doc, "div", `fut-trow ${cls}`.trim());
+        const r = el4(doc, "div", `fut-trow ${cls}`.trim());
         r.setAttribute("role", "row");
         cells.forEach((text, i) => {
-          const c = el3(doc, "span", i ? "fut-tnum" : "fut-tname");
+          const c = el4(doc, "span", i ? "fut-tnum" : "fut-tname");
           c.setAttribute("role", "cell");
           if (i && text) {
             c.title = o.t(i === 1 ? "totals.stock" : "totals.day");
             c.setAttribute("aria-label", `${c.title}: ${text}`);
           }
           if (!i && glyph2) {
-            const ico = el3(doc, "span", "fut-tico");
+            const ico = el4(doc, "span", "fut-tico");
             ico.innerHTML = iconSvg(glyph2, 13);
             c.append(ico);
           }
-          c.append(el3(doc, "span", "fut-tlabel", text));
+          c.append(el4(doc, "span", "fut-tlabel", text));
           r.append(c);
         });
         box.append(r);
@@ -11112,181 +13787,6 @@ ${L} .smallplanet a.alert {
       if (view2.fleet) row("fut-fleetrow", [o.t("planetMenu.fleet"), formatUnits(o.snapshot.bodies.reduce((sum, b) => sum + fleetValue(b), 0), o.locale), ""], "fleetValue");
       list.after(box);
     }
-  }
-
-  // src/data/tech-names.ts
-  var TECH_NAMES_KEY = "tech.names";
-  var MINES = [1, 2, 3, 4, 12, 212, 217, 22, 23, 24];
-  var PLANET_FACILITIES = [14, 15, 21, 31, 33, 34, 36, 44];
-  var MOON_FACILITIES = [41, 42, 43, 14, 21, 22, 23, 24];
-  var RESEARCH = [106, 108, 109, 110, 111, 113, 114, 115, 117, 118, 120, 121, 122, 123, 124, 199];
-  var SHIPS = [202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 213, 214, 215, 218, 219, 212, 217];
-  var DEFENCES = [401, 402, 403, 404, 405, 406, 407, 408, 502, 503];
-  var SPECIES = [1, 2, 3, 4];
-  var lfBuildings = (s) => Array.from({ length: 12 }, (_, i) => 1e4 + s * 1e3 + 101 + i);
-  var speciesOf = (id) => {
-    const s = Math.floor(id % 1e4 / 1e3);
-    return id > 1e4 && s >= 1 && s <= 4 ? s : null;
-  };
-  var EN = {
-    1: "Metal Mine",
-    2: "Crystal Mine",
-    3: "Deuterium Synthesizer",
-    4: "Solar Plant",
-    12: "Fusion Reactor",
-    14: "Robotics Factory",
-    15: "Nanite Factory",
-    21: "Shipyard",
-    22: "Metal Storage",
-    23: "Crystal Storage",
-    24: "Deuterium Tank",
-    31: "Research Lab",
-    33: "Terraformer",
-    34: "Alliance Depot",
-    36: "Space Dock",
-    41: "Lunar Base",
-    42: "Sensor Phalanx",
-    43: "Jump Gate",
-    44: "Missile Silo",
-    45: "Interstellar Anomaly Scanner",
-    106: "Espionage",
-    108: "Computer",
-    109: "Weapons",
-    110: "Shielding",
-    111: "Armour",
-    113: "Energy",
-    114: "Hyperspace",
-    115: "Combustion Drive",
-    117: "Impulse Drive",
-    118: "Hyperspace Drive",
-    120: "Laser",
-    121: "Ion",
-    122: "Plasma",
-    123: "Intergalactic Research Network",
-    124: "Astrophysics",
-    199: "Graviton",
-    202: "Small Cargo",
-    203: "Large Cargo",
-    204: "Light Fighter",
-    205: "Heavy Fighter",
-    206: "Cruiser",
-    207: "Battleship",
-    208: "Colony Ship",
-    209: "Recycler",
-    210: "Espionage Probe",
-    211: "Bomber",
-    212: "Solar Satellite",
-    213: "Destroyer",
-    214: "Deathstar",
-    215: "Battlecruiser",
-    217: "Crawler",
-    218: "Reaper",
-    219: "Pathfinder",
-    401: "Rocket Launcher",
-    402: "Light Laser",
-    403: "Heavy Laser",
-    404: "Gauss Cannon",
-    405: "Ion Cannon",
-    406: "Plasma Turret",
-    407: "Small Shield Dome",
-    408: "Large Shield Dome",
-    502: "Anti-Ballistic Missile",
-    503: "Interplanetary Missile"
-  };
-  var LF_EN = {
-    1: {
-      b: ["Residential Sector", "Biosphere Farm", "Research Centre", "Academy of Sciences", "Neuro-Calibration Centre", "High Energy Smelting", "Food Silo", "Fusion-Powered Production", "Skyscraper", "Biotech Lab", "Metropolis", "Planetary Shield"],
-      r: ["Intergalactic Envoys", "High-Performance Extractors", "Fusion Drives", "Stealth Field Generator", "Orbital Den", "Research AI", "High-Performance Terraformer", "Enhanced Production Technologies", "Light Fighter Mk II", "Cruiser Mk II", "Improved Lab Technology", "Plasma Terraformer", "Low-Temperature Drives", "Bomber Mk II", "Destroyer Mk II", "Battlecruiser Mk II", "Robot Assistants", "Supercomputer"]
-    },
-    2: {
-      b: ["Meditation Enclave", "Crystal Farm", "Rune Technologium", "Rune Forge", "Oriktorium", "Magma Forge", "Disruption Chamber", "Megalith", "Crystal Refinery", "Deuterium Synthesiser", "Mineral Research Centre", "Advanced Recycling Plant"],
-      r: ["Volcanic Batteries", "Acoustic Scanning", "High Energy Pump Systems", "Cargo Hold Expansion", "Magma-Powered Production", "Geothermal Power Plants", "Depth Sounding", "Ion Crystal Enhancement", "Improved Stellarator", "Hardened Diamond Drill Heads", "Seismic Mining Technology", "Magma-Powered Pump Systems", "Ion Crystal Modules", "Optimised Silo Construction", "Diamond Energy Transmitter", "Obsidian Shield Reinforcement", "Rune Shields", "Rock'tal Collector Enhancement"]
-    },
-    3: {
-      b: ["Assembly Line", "Fusion Cell Factory", "Robotics Research Centre", "Update Network", "Quantum Computer Centre", "Automatised Assembly Centre", "High-Performance Transformer", "Microchip Assembly Line", "Production Assembly Hall", "High-Performance Synthesiser", "Chip Mass Production", "Nano Repair Bots"],
-      r: ["Catalyser Technology", "Plasma Drive", "Efficiency Module", "Depot AI", "General Overhaul (Light Fighter)", "Automated Transport Lines", "Improved Drone AI", "Experimental Recycling Technology", "General Overhaul (Cruiser)", "Slingshot Autopilot", "High-Temperature Superconductors", "General Overhaul (Battleship)", "Artificial Swarm Intelligence", "General Overhaul (Battlecruiser)", "General Overhaul (Bomber)", "General Overhaul (Destroyer)", "Experimental Weapons Technology", "Mechan General Enhancement"]
-    },
-    4: {
-      b: ["Sanctuary", "Antimatter Condenser", "Vortex Chamber", "Halls of Realisation", "Forum of Transcendence", "Antimatter Convector", "Cloning Laboratory", "Chrysalis Accelerator", "Bio Modifier", "Psionic Modulator", "Ship Manufacturing Hall", "Supra Refractor"],
-      r: ["Heat Recovery", "Sulphide Process", "Psionic Network", "Telekinetic Tractor Beam", "Enhanced Sensor Technology", "Neuromodal Compressor", "Neuro-Interface", "Interplanetary Analysis Network", "Overclocking (Heavy Fighter)", "Telekinetic Drive", "Sixth Sense", "Psychoharmoniser", "Efficient Swarm Intelligence", "Overclocking (Large Cargo)", "Gravitation Sensors", "Overclocking (Battleship)", "Psionic Shield Matrix", "Kaelesh Discoverer Enhancement"]
-    }
-  };
-  var IT = {
-    1: "Miniera di metallo",
-    2: "Miniera di cristallo",
-    3: "Sintetizzatore di deuterio",
-    4: "Centrale solare",
-    12: "Centrale a fusione",
-    14: "Fabbrica dei robot",
-    15: "Fabbrica di naniti",
-    21: "Cantiere spaziale",
-    22: "Deposito di metallo",
-    23: "Deposito di cristallo",
-    24: "Cisterna di deuterio",
-    31: "Laboratorio di ricerca",
-    33: "Terraformer",
-    34: "Deposito dell'alleanza",
-    36: "Porto spaziale",
-    41: "Base lunare",
-    42: "Falange di sensori",
-    43: "Portale iperspaziale",
-    44: "Silos missilistico",
-    45: "Scanner di anomalie interstellari",
-    106: "Spionaggio",
-    108: "Computer",
-    109: "Armi",
-    110: "Scudi",
-    111: "Corazze",
-    113: "Energia",
-    114: "Iperspazio",
-    115: "Propulsore a combustione",
-    117: "Propulsore a impulso",
-    118: "Propulsore iperspaziale",
-    120: "Laser",
-    121: "Ionica",
-    122: "Plasma",
-    123: "Rete di ricerca intergalattica",
-    124: "Astrofisica",
-    199: "Gravitoni",
-    217: "Crawler",
-    218: "Reaper",
-    219: "Pathfinder",
-    401: "Lanciamissili",
-    402: "Laser leggero",
-    403: "Laser pesante",
-    404: "Cannone Gauss",
-    405: "Cannone ionico",
-    406: "Cannone al plasma",
-    407: "Cupola scudo piccola",
-    408: "Cupola scudo potente",
-    502: "Missili anti-balistici",
-    503: "Missili interplanetari"
-  };
-  var BUILT_IN = { it: IT };
-  function techName(id, locale, learned = {}, t) {
-    const seen = learned[String(id)];
-    if (seen) return seen;
-    const local = BUILT_IN[locale]?.[id];
-    if (local) return local;
-    if (t && id >= 202 && id <= 219) {
-      const ship = t(`ship.${id}`);
-      if (ship !== `ship.${id}`) return ship;
-    }
-    const s = speciesOf(id);
-    if (s) {
-      const group = Math.floor(id % 1e3 / 100) === 1 ? LF_EN[s].b : LF_EN[s].r;
-      return group[id % 100 - 1] ?? String(id);
-    }
-    return EN[id] ?? String(id);
-  }
-  function learnTechNames(names, list) {
-    let changed = false;
-    for (const e of list) {
-      if (!e.name || e.name === String(e.id) || names[String(e.id)] === e.name) continue;
-      names[String(e.id)] = e.name;
-      changed = true;
-    }
-    return changed;
   }
 
   // src/data/lf-slots.ts
@@ -13080,2437 +15580,6 @@ table.queues td.acts { width: 1%; text-align: right; }
       energyNeed: num4(root.querySelector(".information li.additional_energy_consumption .value")?.getAttribute("data-value")),
       energyProduction: readEnergyProduction(root)
     };
-  }
-
-  // src/data/fleet-page.ts
-  function isFleetDispatch(doc) {
-    return doc.getElementById("fleetdispatchcomponent") !== null && doc.getElementById("fleet1") !== null;
-  }
-  function readShipSlots(doc) {
-    return Array.from(doc.querySelectorAll("#fleet1 #technologies li[data-technology]")).flatMap((li) => {
-      const input = li.querySelector("input");
-      if (!input) return [];
-      const amount = li.querySelector(".amount");
-      const available = Number(amount?.dataset.value ?? 0) || 0;
-      return [{ id: li.dataset.technology ?? "", name: li.getAttribute("aria-label") ?? "", available, input }];
-    });
-  }
-  function originCoords(doc) {
-    const raw = doc.querySelector('meta[name="ogame-planet-coordinates"]')?.getAttribute("content");
-    const parts = raw?.split(":").map(Number);
-    if (!parts || parts.length !== 3 || parts.some((n) => !Number.isFinite(n))) return null;
-    return { galaxy: parts[0], system: parts[1], position: parts[2] };
-  }
-
-  // src/engines/planner.ts
-  var PLAN_KEY = "planner";
-  var isResearch = (id) => id > 100 && id < 200;
-  function addToPlan(plan, bodyId, items) {
-    const key = String(bodyId);
-    const list = [...plan[key] ?? []];
-    for (const item of items) {
-      const same = item.level !== void 0 ? list.findIndex((x) => x.id === item.id && x.level === item.level) : -1;
-      if (same >= 0) list[same] = item;
-      else list.push(item);
-    }
-    list.sort((a, b) => a.added - b.added || a.id - b.id || (a.level ?? 0) - (b.level ?? 0));
-    return { ...plan, [key]: list };
-  }
-  function removeFromPlan(plan, bodyId, index) {
-    const key = String(bodyId);
-    const list = (plan[key] ?? []).filter((_, i) => i !== index);
-    const next = { ...plan };
-    if (list.length) next[key] = list;
-    else delete next[key];
-    return next;
-  }
-  function clearBody(plan, bodyId) {
-    const next = { ...plan };
-    delete next[String(bodyId)];
-    return next;
-  }
-  function prune(plan, bodyId, levels) {
-    let changed = false;
-    const next = {};
-    for (const [key, list] of Object.entries(plan)) {
-      const kept = list.filter((item) => {
-        if (item.level === void 0) return true;
-        const here = key === String(bodyId) || isResearch(item.id);
-        const reached = levels[item.id];
-        if (here && reached !== void 0 && reached >= item.level) {
-          changed = true;
-          return false;
-        }
-        return true;
-      });
-      if (kept.length) next[key] = kept;
-    }
-    return { plan: changed ? next : plan, changed };
-  }
-  function planTotal(items) {
-    return items.reduce((sum, item) => addCost(sum, item.cost), { ...ZERO_COST });
-  }
-  function planCount(plan) {
-    return Object.values(plan).reduce((n, list) => n + list.length, 0);
-  }
-  function planMissing(items, have) {
-    return missing(planTotal(items), have);
-  }
-  function inPlan(plan, bodyId, id, level2) {
-    return (plan[String(bodyId)] ?? []).some((x) => x.id === id && (level2 === void 0 || x.level === level2));
-  }
-  var SENT_KEY = "plan.sent";
-  function pendingFor(list, target, seenAt) {
-    const out = { metal: 0, crystal: 0, deuterium: 0, arriveAt: 0 };
-    for (const s of list) {
-      if (s.target !== target || s.arriveAt <= seenAt) continue;
-      out.metal += s.cargo.metal;
-      out.crystal += s.cargo.crystal;
-      out.deuterium += s.cargo.deuterium;
-      out.arriveAt = Math.max(out.arriveAt, s.arriveAt);
-    }
-    return out;
-  }
-  function planStatus(items, have, pending, now) {
-    if (!have) return { state: "unknown", lack: null };
-    const total = planTotal(items);
-    const now0 = missing(total, have);
-    if (!now0.metal && !now0.crystal && !now0.deuterium) return { state: "ready", lack: null };
-    const lack = missing(total, { metal: have.metal + pending.metal, crystal: have.crystal + pending.crystal, deuterium: have.deuterium + pending.deuterium });
-    if (lack.metal || lack.crystal || lack.deuterium) return { state: "missing", lack };
-    return { state: pending.arriveAt > now ? "arriving" : "arrived", lack: null };
-  }
-  function prunePending(list, plan, seenAtOf) {
-    return list.filter((s) => (plan[String(s.target)]?.length ?? 0) > 0 && s.arriveAt > seenAtOf(s.target));
-  }
-  var norm = (s) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
-  function pruneByQueues(plan, queues) {
-    let changed = false;
-    const started = [];
-    for (const [body, items] of Object.entries(queues)) for (const q of items) if (q.level > 0 && q.name) started.push({ body, name: norm(q.name), level: q.level });
-    const next = {};
-    for (const [key, list] of Object.entries(plan)) {
-      const kept = list.filter((item) => {
-        if (item.level === void 0) return true;
-        const hit = started.some((s) => (s.body === key || isResearch(item.id)) && s.name === norm(item.name) && s.level >= item.level);
-        if (hit) changed = true;
-        return !hit;
-      });
-      if (kept.length) next[key] = kept;
-    }
-    return { plan: changed ? next : plan, changed };
-  }
-  function startBuild(plan, bodyId, id, o) {
-    const key = String(bodyId);
-    let changed = false;
-    const removed = [];
-    const next = {};
-    for (const [k, list] of Object.entries(plan)) {
-      let left = o.amount ?? 0;
-      const kept = [];
-      for (const item of list) {
-        if (item.id !== id || k !== key && !isResearch(id)) {
-          kept.push(item);
-          continue;
-        }
-        if (item.level !== void 0 && o.level !== void 0 && item.level <= o.level) {
-          changed = true;
-          if (item.level === o.level) removed.push(item);
-          continue;
-        }
-        if (item.amount !== void 0 && left > 0 && k === key) {
-          changed = true;
-          if (item.amount <= left) {
-            left -= item.amount;
-            continue;
-          }
-          const keep = item.amount - left;
-          const share = keep / item.amount;
-          kept.push({ ...item, amount: keep, cost: { metal: Math.round(item.cost.metal * share), crystal: Math.round(item.cost.crystal * share), deuterium: Math.round(item.cost.deuterium * share), energy: item.cost.energy } });
-          left = 0;
-          continue;
-        }
-        kept.push(item);
-      }
-      if (kept.length) next[k] = kept;
-    }
-    return { plan: changed ? next : plan, changed, removed };
-  }
-  function groupByTech(plan, haveOf) {
-    const groups = /* @__PURE__ */ new Map();
-    for (const [key, items] of Object.entries(plan)) {
-      const bodyId = Number(key);
-      const have = haveOf(bodyId);
-      let spent = { ...ZERO_COST };
-      let before = have ? missing(spent, have) : null;
-      items.forEach((item, index) => {
-        spent = addCost(spent, item.cost);
-        const after = have ? missing(spent, have) : null;
-        const short = after && before ? { metal: after.metal - before.metal, crystal: after.crystal - before.crystal, deuterium: after.deuterium - before.deuterium, energy: 0 } : null;
-        before = after;
-        let g = groups.get(item.id);
-        if (!g) groups.set(item.id, g = { id: item.id, name: item.name, cost: { ...ZERO_COST }, rows: [], added: item.added });
-        g.cost = addCost(g.cost, item.cost);
-        g.added = Math.min(g.added, item.added);
-        const last2 = g.rows[g.rows.length - 1];
-        if (last2 && last2.bodyId === bodyId && item.level !== void 0 && last2.to !== void 0 && item.level === last2.to + 1) {
-          last2.to = item.level;
-          last2.cost = addCost(last2.cost, item.cost);
-          last2.indexes.push(index);
-          last2.short = last2.short && short ? addCost(last2.short, short) : null;
-        } else g.rows.push({ bodyId, from: item.level, to: item.level, amount: item.amount, cost: { ...item.cost }, indexes: [index], short });
-      });
-    }
-    return [...groups.values()].sort((a, b) => a.added - b.added || a.id - b.id);
-  }
-  function accountGap(plan, account) {
-    const total = Object.values(plan).reduce((sum, items) => addCost(sum, planTotal(items)), { ...ZERO_COST });
-    return { total, missing: account ? missing(total, account) : null };
-  }
-  var QUEUED_KEY = "plan.queued";
-  function queueKindOf(id) {
-    if (id < 100) return "building";
-    if (id < 200) return "research";
-    if (id < 1e3) return null;
-    return Math.floor(id % 1e3 / 100) === 1 ? "lfbuilding" : "lfresearch";
-  }
-  function reservedFor(queued2, bodyId) {
-    const out = { metal: 0, crystal: 0, deuterium: 0 };
-    for (const q of queued2[String(bodyId)] ?? []) {
-      out.metal += q.cost.metal;
-      out.crystal += q.cost.crystal;
-      out.deuterium += q.cost.deuterium;
-    }
-    return out;
-  }
-  function lessReserved(have, hold) {
-    return { metal: have.metal - hold.metal, crystal: have.crystal - hold.crystal, deuterium: have.deuterium - hold.deuterium };
-  }
-  function queuedLevel(queued2, bodyId, id) {
-    const list = isResearch(id) ? Object.values(queued2).flat() : queued2[String(bodyId)] ?? [];
-    return list.reduce((top, q) => q.id === id ? Math.max(top, q.level) : top, 0);
-  }
-  function holdQueued(queued2, bodyId, item) {
-    const key = String(bodyId);
-    const list = (queued2[key] ?? []).filter((q) => !(q.id === item.id && q.level === item.level));
-    return { ...queued2, [key]: [...list, item].sort((a, b) => a.queuedAt - b.queuedAt) };
-  }
-  function dropQueued(queued2, bodyId, index) {
-    const key = String(bodyId);
-    const list = (queued2[key] ?? []).filter((_, i) => i !== index);
-    const next = { ...queued2 };
-    if (list.length) next[key] = list;
-    else delete next[key];
-    return next;
-  }
-  function releaseQueued(queued2, o) {
-    let changed = false;
-    const next = {};
-    const running = (key, kind, at) => {
-      const lists = kind === "research" ? Object.values(o.queues?.bodies ?? {}) : [o.queues?.bodies[key] ?? []];
-      return lists.flat().filter((r) => r.kind === kind && r.end > at);
-    };
-    for (const [key, list] of Object.entries(queued2)) {
-      const kept = list.filter((q) => {
-        const built = o.built && (o.built.bodyId === Number(key) || isResearch(q.id)) ? o.built.levels[q.id] : void 0;
-        if (built !== void 0 && built >= q.level) return changed = true, false;
-        const snap = o.queues;
-        if (!snap || snap.at <= q.queuedAt) return true;
-        const now = running(key, q.kind, snap.at);
-        if (!now.length || now.some((r) => norm(r.name) === norm(q.name) && r.level >= q.level)) return changed = true, false;
-        return true;
-      });
-      if (kept.length) next[key] = kept;
-    }
-    return { queued: changed ? next : queued2, changed };
-  }
-  function withQueued(plan, queued2) {
-    const out = { ...plan };
-    for (const [key, list] of Object.entries(queued2)) if (list.length) out[key] = [...out[key] ?? [], ...list];
-    return out;
-  }
-
-  // src/modules/fleet/actions.ts
-  var TRANSPORT = 3;
-  var DEPLOY = 4;
-  var EXPEDITION = 15;
-  function stock(fd, profile) {
-    const left = shipsAfterReserve(shipsOnPlanet(fd), profile.reserve);
-    return fd.shipsOnPlanet.map((s) => ({ id: s.id, available: left[String(s.id)] ?? 0, capacity: shipCapacity(fd, s.id) }));
-  }
-  function onPlanet(fd) {
-    return { metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet };
-  }
-  function setSpeedBar(fd, percent) {
-    const step = Math.max(1, Math.min(10, Math.round(percent / 10)));
-    fd.speedPercent = step;
-    const $ = pageWindow().jQuery;
-    try {
-      $?.("#speedPercentage").data("percentageBarInstance")?.setValue?.(step);
-    } catch {
-    }
-    fd.speedPercent = step;
-  }
-  function setTarget(fd, doc, target) {
-    fd.targetPlanet.galaxy = target.galaxy;
-    fd.targetPlanet.system = target.system;
-    fd.targetPlanet.position = target.position;
-    fd.targetPlanet.type = target.type;
-    if (target.name) fd.targetPlanet.name = target.name;
-    const set = (id, v) => {
-      const input = doc.querySelector(`#fleet2 #${id}`);
-      if (input) input.value = String(v);
-    };
-    set("galaxy", target.galaxy);
-    set("system", target.system);
-    set("position", target.position);
-  }
-  var ourSelection = /* @__PURE__ */ new WeakMap();
-  function selectShips(fd, ships) {
-    fd.resetShips();
-    fd.resetCargo();
-    let total = 0;
-    for (const [id, n] of Object.entries(ships)) {
-      if (n > 0) {
-        fd.selectShip(Number(id), n);
-        total += n;
-      }
-    }
-    ourSelection.set(fd, selectionKey(fd));
-    return total;
-  }
-  function clearOurSelection(fd) {
-    const key = selectionKey(fd);
-    if (!key || key !== ourSelection.get(fd)) return false;
-    fd.resetShips();
-    fd.resetCargo();
-    ourSelection.delete(fd);
-    fd.refresh();
-    return true;
-  }
-  function loadCargo(fd, profile, order) {
-    const load = cargoLoad(onPlanet(fd), profile.reserve, Math.ceil(Number(fd.getConsumption()) || 0), fd.getCargoCapacity(), order);
-    fd.cargoMetal = load.metal;
-    fd.cargoCrystal = load.crystal;
-    fd.cargoDeuterium = load.deuterium;
-    return load.metal + load.crystal + load.deuterium;
-  }
-  function finish(fd, mission, ships, cargo) {
-    fd.mission = mission;
-    fd.refresh();
-    fd.focusSubmitFleet1();
-    return { ok: ships > 0, reason: ships > 0 ? void 0 : "fleet.err.noShips", ships, cargo };
-  }
-  function toMove(fd, profile) {
-    const r = profile.reserve.resources;
-    return Math.max(0, fd.metalOnPlanet - r.metal) + Math.max(0, fd.crystalOnPlanet - r.crystal) + Math.max(0, fd.deuteriumOnPlanet - r.deuterium);
-  }
-  function prepareTransport(fd, doc, profile, settings, target) {
-    if (settings.collectIgnoreShips) profile = { ...profile, reserve: { ...profile.reserve, ships: {} } };
-    const amount = toMove(fd, profile);
-    if (amount <= 0) return { ok: false, reason: "fleet.err.noResources", ships: 0, cargo: 0 };
-    const ships = cargoShipsFor(amount, stock(fd, profile), settings.mainShip, settings.secondShip);
-    const count2 = selectShips(fd, ships);
-    setTarget(fd, doc, target);
-    setSpeedBar(fd, settings.transportSpeed);
-    fd.mission = TRANSPORT;
-    const cargo = count2 > 0 ? loadCargo(fd, profile, settings.loadOrder) : 0;
-    return finish(fd, TRANSPORT, count2, cargo);
-  }
-  function prepareDeploy(fd, doc, profile, settings, target) {
-    const ships = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
-    const count2 = selectShips(fd, ships);
-    setTarget(fd, doc, target);
-    setSpeedBar(fd, settings.transportSpeed);
-    fd.mission = DEPLOY;
-    const cargo = count2 > 0 && settings.collectDeployRes ? loadCargo(fd, profile, settings.loadOrder) : 0;
-    return finish(fd, DEPLOY, count2, cargo);
-  }
-  function prepareFleetsave(fd, doc, base2, save) {
-    const profile = { ...base2, reserve: base2.saveReserve ?? EMPTY_RESERVE };
-    const ships = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
-    const count2 = selectShips(fd, ships);
-    setTarget(fd, doc, resolveTarget(save, fd.currentPlanet));
-    setSpeedBar(fd, save.speed);
-    fd.mission = save.mission;
-    const cargo = count2 > 0 ? loadCargo(fd, profile) : 0;
-    return finish(fd, save.mission, count2, cargo);
-  }
-  function prepareDelivery(fd, doc, base2, settings, target, need, hold = { metal: 0, crystal: 0, deuterium: 0 }) {
-    const r = base2.reserve.resources;
-    const profile = { ...base2, reserve: { ships: base2.reserve.ships, resources: { ...r, metal: r.metal + hold.metal, crystal: r.crystal + hold.crystal, deuterium: r.deuterium + hold.deuterium } } };
-    const free = deliveryLoad(onPlanet(fd), profile.reserve, 0, Number.MAX_SAFE_INTEGER, need);
-    const amount = free.metal + free.crystal + free.deuterium;
-    if (amount <= 0) return { ok: false, reason: "fleet.err.noResources", ships: 0, cargo: 0 };
-    const count2 = selectShips(fd, cargoShipsFor(amount, stock(fd, profile), settings.mainShip, settings.secondShip));
-    setTarget(fd, doc, target);
-    setSpeedBar(fd, settings.transportSpeed);
-    fd.mission = TRANSPORT;
-    let cargo = 0;
-    if (count2 > 0) {
-      const load = deliveryLoad(onPlanet(fd), profile.reserve, Math.ceil(Number(fd.getConsumption()) || 0), fd.getCargoCapacity(), need);
-      fd.cargoMetal = load.metal;
-      fd.cargoCrystal = load.crystal;
-      fd.cargoDeuterium = load.deuterium;
-      cargo = load.metal + load.crystal + load.deuterium;
-    }
-    return finish(fd, TRANSPORT, count2, cargo);
-  }
-  function expeditionLimits(fd, universe) {
-    const cls = fd.apiDataJson?.characterClassId ?? 0;
-    const booster = fd.apiDataJson?.bonuses?.characterClassBooster?.[String(cls)] ?? 0;
-    return expeditionMax({
-      topScore: universe.topScore,
-      characterClass: cls,
-      economySpeed: universe.economySpeed,
-      classBooster: booster,
-      lfBooster: universe.lfBooster,
-      itemBoost: universe.itemBoost
-    });
-  }
-  function prepareExpedition(fd, doc, profile, settings, universe, rand = Math.random) {
-    profile = { ...profile, reserve: EMPTY_RESERVE };
-    const limits = expeditionLimits(fd, universe);
-    const target = expeditionTarget(limits.max, settings.expeditionValue);
-    const base2 = settings.expeditionValue.trim() ? 0 : limits.base;
-    const slots = settings.expeditionSplit ? freeExpeditionSlots(fd.expeditionCount, fd.maxExpeditionCount) : 0;
-    const ships = expeditionFleet(stock(fd, profile), { ship: settings.expeditionShip, target, base: base2, extras: settings.expeditionExtras, big: settings.expeditionBig, slots });
-    const count2 = selectShips(fd, ships);
-    const here = fd.currentPlanet;
-    const system = expeditionSystem(here.system, settings.expeditionSpread, { systems: universe.systems ?? 499, donut: universe.donutSystem ?? true }, rand);
-    setTarget(fd, doc, { galaxy: here.galaxy, system, position: 16, type: 1 });
-    setSpeedBar(fd, 100);
-    fd.expeditionTime = 1;
-    const $ = pageWindow().jQuery;
-    try {
-      $?.("#expeditiontime").val("1");
-    } catch {
-    }
-    return { ...finish(fd, EXPEDITION, count2, 0), target, system, slots };
-  }
-  function prepareLast(fd, doc, profile, last2) {
-    const left = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
-    const ships = {};
-    for (const [id, n] of Object.entries(last2.ships)) ships[Number(id)] = Math.min(n, left[Number(id)] ?? 0);
-    const count2 = selectShips(fd, ships);
-    setTarget(fd, doc, last2.target);
-    setSpeedBar(fd, last2.speed);
-    return finish(fd, last2.mission, count2, 0);
-  }
-  function selectionKey(fd) {
-    return (fd.shipsToSend ?? []).filter((s) => s.number > 0).map((s) => `${s.id}:${s.number}`).sort().join(",");
-  }
-  function playerSelection(fd) {
-    const key = selectionKey(fd);
-    if (!key || key === ourSelection.get(fd)) return null;
-    return Object.fromEntries((fd.shipsToSend ?? []).filter((s) => s.number > 0).map((s) => [s.id, s.number]));
-  }
-  function prepareSend(fd, doc, settings, target, pick, mission, cargoShip, keep = {}, keepRes = { metal: 0, crystal: 0, deuterium: 0 }) {
-    const all2 = onPlanet(fd);
-    const here = { metal: Math.max(0, all2.metal - keepRes.metal), crystal: Math.max(0, all2.crystal - keepRes.crystal), deuterium: Math.max(0, all2.deuterium - keepRes.deuterium) };
-    const wanted = pickedLoad(here, pick, 0, Number.MAX_SAFE_INTEGER);
-    const amount = wanted.metal + wanted.crystal + wanted.deuterium;
-    const manual = playerSelection(fd) ?? {};
-    const already = manual[cargoShip] ?? 0;
-    delete manual[cargoShip];
-    const othersCapacity = Object.entries(manual).reduce((sum, [id, n2]) => sum + n2 * shipCapacity(fd, Number(id)), 0);
-    const available = Math.max(0, (shipsOnPlanet(fd)[String(cargoShip)] ?? 0) - (keep[String(cargoShip)] ?? 0));
-    const capacity = shipCapacity(fd, cargoShip);
-    if (!available && !Object.keys(manual).length) return { ok: false, reason: "fleet.err.noCargoShip", ships: 0, cargo: 0, missing: 0 };
-    if (mission === "transport" && amount <= 0) return { ok: false, reason: "fleet.err.nothingPicked", ships: 0, cargo: 0, missing: 0 };
-    const n = cargoCount(amount, othersCapacity, capacity, available, already);
-    const needed = capacity > 0 ? Math.ceil(Math.max(0, amount - othersCapacity) / capacity) : 0;
-    const count2 = selectShips(fd, { ...manual, [cargoShip]: n });
-    setTarget(fd, doc, target);
-    setSpeedBar(fd, settings.transportSpeed);
-    const code = mission === "transport" ? TRANSPORT : DEPLOY;
-    fd.mission = code;
-    let cargo = 0;
-    if (count2 > 0) {
-      const load = pickedLoad(here, pick, Math.ceil(Number(fd.getConsumption()) || 0), fd.getCargoCapacity());
-      fd.cargoMetal = load.metal;
-      fd.cargoCrystal = load.crystal;
-      fd.cargoDeuterium = load.deuterium;
-      cargo = load.metal + load.crystal + load.deuterium;
-    }
-    return { ...finish(fd, code, count2, cargo), missing: Math.max(0, needed - n) };
-  }
-  function aimSend(fd, doc, target, mission) {
-    setTarget(fd, doc, target);
-    fd.mission = mission === "transport" ? TRANSPORT : DEPLOY;
-  }
-  function snapshotFleet(fd) {
-    return {
-      ships: Object.fromEntries(fd.shipsToSend.map((s) => [String(s.id), s.number])),
-      target: { galaxy: fd.targetPlanet.galaxy, system: fd.targetPlanet.system, position: fd.targetPlanet.position, type: fd.targetPlanet.type },
-      mission: fd.mission,
-      speed: Math.round(fd.speedPercent * 10)
-    };
-  }
-
-  // src/modules/fleet/repeat.ts
-  function readRepeatParams(url) {
-    const p = new URL(url).searchParams;
-    const mode = p.get("futmode");
-    const first = Number(p.get("futfirst"));
-    if (!mode || !Number.isFinite(first) || first <= 0) return null;
-    const dest = Number(p.get("futdest"));
-    const speed = Number(p.get("futspeed"));
-    const state = { mode, first, dest: Number.isFinite(dest) && dest > 0 ? dest : null };
-    if (Number.isInteger(speed) && speed >= 10 && speed <= 100) state.speed = speed;
-    return state;
-  }
-  function repeatUrl(base2, cp, state) {
-    const u = new URL(base2);
-    u.search = "";
-    u.searchParams.set("page", "ingame");
-    u.searchParams.set("component", "fleetdispatch");
-    u.searchParams.set("cp", String(cp));
-    u.searchParams.set("futmode", state.mode);
-    u.searchParams.set("futfirst", String(state.first));
-    if (state.dest) u.searchParams.set("futdest", String(state.dest));
-    if (state.speed) u.searchParams.set("futspeed", String(state.speed));
-    return u.toString();
-  }
-  function nextInRound(state, bodyId, list, skipIds = []) {
-    if (state.mode === "expedition") return nextBody(list, bodyId, { skipIds });
-    const next = nextBody(list, bodyId, {
-      skip: state.mode === "collect" || state.mode === "collectDeploy" || state.mode === "plan" ? state.dest : null,
-      onlyWithMoon: state.mode === "moon"
-    });
-    return next === null || next === state.first ? null : next;
-  }
-  function hookSend(fd, onSent) {
-    const original = fd.submitFleet2;
-    if (!original || original.futHooked) return;
-    const win = pageWindow();
-    let leaving = false;
-    const wrapped = function(force) {
-      if (leaving) return void 0;
-      const $ = win.$;
-      if (!$) return original.call(fd, force);
-      const post = $.post;
-      $.post = function(url, params, cb) {
-        if (url !== fd.sendFleetUrl || typeof cb !== "function") return post.call(this, url, params, cb);
-        return post.call(this, url, params, function(response) {
-          let ok = false;
-          try {
-            ok = JSON.parse(response).success === true;
-          } catch {
-            ok = false;
-          }
-          if (ok && onSent()) {
-            leaving = true;
-            return void 0;
-          }
-          return cb.call(this, response);
-        });
-      };
-      try {
-        return original.call(fd, force);
-      } finally {
-        $.post = post;
-      }
-    };
-    wrapped.futHooked = true;
-    fd.submitFleet2 = wrapped;
-  }
-
-  // src/modules/fleet/style.ts
-  var FLEET_CSS = `
-/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
-.fut-fbar, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fchips, .fut-fclear, .fut-fall, .fut-fcap, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
-/* The fleet bar speaks the inbox's language: Verdana 11px, tabular numbers, one set of tokens. */
-.fut-fbar, .fut-fmenu {
-  ${PAGE_TOKENS} --line: var(--line-strong); --line-soft: #1D2531;
-  /* The player's board (DESIGN.md): buttons are fields printed on the board, the one in use marked by the pawn's edge. */
-  --tile: var(--surface); --tile-hi: var(--hover); --tile-line: var(--line-strong); --ico: var(--txt); --ico-hi: var(--hi);
-  --track: var(--faint); --knob-on: var(--on-accent); --on-line: var(--accent-line); --on-bg: var(--accent-soft); --field: var(--bg);
-  --display: Bahnschrift, "DIN Alternate", "Roboto Condensed", "sans-serif-condensed", "Liberation Sans Narrow", "Arial Narrow", "DejaVu Sans Condensed", sans-serif;
-}
-.fut-fbar {
-  display: flex; flex-direction: column; gap: 8px; margin: 6px 10px; padding: 8px; min-width: 0; box-sizing: border-box;
-  border: 0; border-radius: 6px; background: var(--raised);
-  font: 11px/1.35 Verdana, Arial, sans-serif; color: var(--txt); font-variant-numeric: tabular-nums;
-}
-.fut-fbar button { font: inherit; cursor: pointer; }
-.fut-fbar button:focus-visible, .fut-fmenu button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-
-/* Two rows: what to send (and the editors), then what to keep back (and the readout). */
-.fut-frow { display: flex; align-items: center; gap: 8px; min-width: 0; }
-
-/* Actions: a hotbar of filled icons on solid tiles, the key in the corner. Dashed = still to set up.
-   Silver on slate; only the three kinds Future runs whole carry a colour, as on the touch bar. */
-.fut-facts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
-.fut-fact {
-  position: relative; flex: none; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 62px; height: 48px; padding: 4px 8px 3px;
-  border: 0; border-radius: 4px; background: var(--tile); color: var(--ico);
-}
-.fut-fact:hover { background: var(--tile-hi); color: var(--ico-hi); }
-.fut-fact:active { transform: translateY(1px); }
-.fut-fact .ico { display: inline-flex; }
-/* Expedition blue, fleetsave violet, Accentra green (core/sheet MISSION_TONES): icon and a bottom line in the
-   colour, the tile faintly tinted; the name stays silver, readable. */
-${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
-.fut-fact[data-mode="collect"], .fut-fact[data-mode="expedition"], .fut-fact[data-mode="fleetsave"] {
-  background: color-mix(in srgb, var(--tone) 12%, var(--tile)); box-shadow: inset 0 -2px 0 var(--tone); }
-.fut-fact[data-mode="collect"] .ico, .fut-fact[data-mode="expedition"] .ico, .fut-fact[data-mode="fleetsave"] .ico { color: var(--tone); }
-.fut-fact[data-mode="collect"]:hover, .fut-fact[data-mode="expedition"]:hover, .fut-fact[data-mode="fleetsave"]:hover {
-  background: color-mix(in srgb, var(--tone) 22%, var(--tile-hi)); }
-/* The name under the icon: what the button does, readable without pointing at it. */
-.fut-fact .name { font: 600 condensed 12px/1 var(--display); white-space: nowrap; color: inherit; }
-/* Zone labels: what a group of buttons is for, printed once at its head. */
-.fut-fzone { color: var(--label); font: 600 condensed 13px var(--display); white-space: nowrap; }
-.fut-fzonebox { display: inline-flex; flex-direction: column; gap: 4px; }
-.fut-ftiles { display: inline-flex; gap: 4px; }
-.fut-fgroup .fut-fzone { margin-right: 4px; }
-.fut-fact kbd { position: absolute; top: 3px; right: 4px; color: var(--dim); font: 11px/11px Verdana, Arial, sans-serif; }
-.fut-fact:hover kbd { color: var(--mute); }
-.fut-fact.dim { background: none; box-shadow: none; outline: 1px dashed var(--line-strong); outline-offset: -1px; color: var(--dim); }
-/* Secondary tools (moon, expedition collection): set apart and quieter. */
-.fut-fsecond { display: inline-flex; gap: 4px; margin-left: 6px; padding-left: 12px; border-left: 2px solid var(--bg); }
-.fut-fsecond .fut-fact { background: none; box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--mute); }
-.fut-fsecond .fut-fact:hover { background: var(--tile); color: var(--ico-hi); }
-.fut-fsecond .fut-fact[data-mode="collect"] { box-shadow: inset 0 -2px 0 var(--tone), inset 0 0 0 1px var(--line-strong); }
-.fut-fskip[hidden] { display: none; }
-.fut-fbar[hidden] { display: none; }
-/* Main cargo ship, picked on the ship itself (top right; the game keeps the top left). */
-#fleet1 #technologies li[data-technology] { position: relative; }
-.fut-mainship { position: absolute; top: 2px; right: 2px; z-index: 2; width: 20px; height: 20px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--accent-soft); border-radius: 5px; background: rgba(13, 21, 34, 0.85); color: var(--muted); cursor: pointer; opacity: 0.75; }
-.fut-mainship:hover { opacity: 1; color: var(--hi); border-color: var(--accent); }
-.fut-mainship.on { opacity: 1; color: var(--surface); background: var(--accent); border-color: var(--accent); cursor: default; }
-/* "Opens a list" mark, in the corner where the others have their key. */
-.fut-fact .more-mark { position: absolute; right: 3px; bottom: 3px; width: 0; height: 0; border-left: 5px solid transparent; border-bottom: 5px solid currentColor; opacity: 0.7; }
-
-/* On the game's ship tiles: inverts that ship's selection. */
-#fleet1 #technologies li[data-technology] { position: relative; }
-.fut-finv { position: absolute; top: 2px; left: 2px; z-index: 3; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; padding: 0;
-  border: 1px solid var(--line-strong); border-radius: 4px; background: rgba(8, 13, 20, 0.85); color: var(--txt); cursor: pointer; opacity: 0.75; }
-.fut-finv:hover, .fut-finv:focus-visible { opacity: 1; border-color: var(--line-hover); color: var(--hi); }
-@media (pointer: coarse) { .fut-finv { width: 26px; height: 26px; opacity: 1; } }
-
-/* Editors, pushed to the far end of the first row. */
-.fut-fedit { display: inline-flex; gap: 2px; margin-left: auto; }
-.fut-ftool { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 32px; height: 32px; padding: 0 10px 0 8px; border: 0; border-radius: 5px;
-  background: var(--tile); box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--ico-hi); cursor: pointer; }
-.fut-ftool .name { font: 600 condensed 12px/1 var(--display); white-space: nowrap; color: var(--hi); }
-.fut-ftool:hover { background: var(--tile-hi); color: var(--hi); }
-.fut-ftool:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-/* Rules: the rule's icon beside a switch track, so on and off read without a word. */
-.fut-frules { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; min-width: 0; }
-/* Reserves and round: a strip of their own under the ships, apart from the actions. */
-.fut-freserves { margin-top: 8px; }
-.fut-fgroup { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; max-width: 100%; }
-/* A labelled group: the label stays on the first line, the switches wrap in their own column beside it. */
-.fut-fgroup:has(> .fut-fchips) { flex-wrap: nowrap; align-items: flex-start; }
-.fut-fgroup > .fut-fzone { line-height: 28px; }
-.fut-fchips { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; }
-/* A rule as a printed chip: pip filled when on, its name, what it keeps back. Off = outline only. */
-.fut-fchip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 8px; border: 1px solid var(--tile-line); border-radius: 4px; background: none; color: var(--mute); }
-.fut-fchip .ico { display: inline-flex; opacity: 0.8; }
-.fut-fchip b { font: 600 condensed 12px var(--display); }
-.fut-fchip .val { color: var(--dim); }
-.fut-fchip .pip { flex: none; width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; }
-.fut-fchip:hover { border-color: var(--line-hover); color: var(--hi); }
-.fut-fchip[aria-checked="true"] { border-color: var(--accent-line); background: var(--tile-hi); color: var(--hi); }
-.fut-fchip[aria-checked="true"] .pip { background: var(--accent); box-shadow: none; }
-.fut-fchip[aria-checked="true"] .val { color: var(--txt); }
-.fut-fchip .toks { display: inline-flex; gap: 8px; }
-.fut-fchip .toks > span { display: inline-flex; align-items: center; gap: 3px; }
-.fut-fbar .tok { display: inline-flex; flex: none; vertical-align: -2px; }
-.fut-fbar .tok svg { display: block; }
-.fut-fbar .tok.m { color: var(--m); } .fut-fbar .tok.c { color: var(--c); } .fut-fbar .tok.d { color: var(--d); }
-.fut-fsw { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 7px 0 8px; border: 1px solid var(--line-soft); border-radius: 14px; background: none; color: var(--dim); }
-.fut-fsw .ico { display: inline-flex; }
-.fut-fsw .track { position: relative; flex: none; width: 20px; height: 12px; border-radius: 6px; background: var(--track); transition: background-color 120ms ease-out; }
-.fut-fsw .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 8px; height: 8px; border-radius: 50%; background: var(--txt); transition: transform 120ms ease-out; }
-.fut-fsw:hover { border-color: var(--line); color: var(--txt); }
-.fut-fsw[aria-checked="true"] { border-color: var(--on-line); background: var(--on-bg); color: var(--on-accent); }
-.fut-fsw[aria-checked="true"] .track { background: var(--accent); }
-.fut-fsw[aria-checked="true"] .track::after { transform: translateX(8px); background: var(--knob-on); }
-
-/* Readout: the last outcome, or what the control under the pointer does. Two lines at most, in a box of
-   fixed size: one line or two (or a long word) never moves the page. In the reserves strip it sits in a
-   column, where flex: 1 used to replace the height with the text's own (one line or two). */
-.fut-fread { flex: 1 1 0; min-width: 0; width: 100%; max-width: 100%; height: 30px; min-height: 30px; max-height: 30px; box-sizing: border-box; overflow: hidden; display: flex; align-items: center; }
-.fut-fbar > .fut-fread { flex: none; }
-.fut-fread span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; min-width: 0; overflow-wrap: anywhere; }
-.fut-fread .tip { color: var(--mute); }
-/* Speed changed during a round: "also for the next ones?", with its two answers. */
-.fut-fask { flex: none; display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 4px 0 10px; border: 1px solid #6B5A1E; border-radius: 8px; background: rgba(245,181,71,0.08); }
-.fut-fask[hidden] { display: none; }
-.fut-fask-q { color: #F5D9A0; white-space: nowrap; }
-.fut-fask-b { height: 22px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: 5px; background: var(--surface); color: var(--text-2); font: 12px Arial, Helvetica, sans-serif; cursor: pointer; }
-.fut-fask-b.yes { border-color: var(--warn); color: var(--warn); font-weight: 700; }
-.fut-fask-b:hover { color: #fff; border-color: var(--accent); }
-.fut-fask-b:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
-.fut-fread .tip b { color: var(--hi); }
-.fut-fread .tip:empty { display: none; }
-.fut-fread .tip:not(:empty) + .fut-finfo { display: none; }
-.fut-finfo { color: var(--mute); }
-.fut-finfo.err { color: var(--neg); }
-
-/* Trasporto / Schiera on: the tile stays lit until pressed again. */
-.fut-fact[aria-pressed="true"], .fut-fact.used { background: var(--tile-hi); box-shadow: inset 0 3px 0 var(--accent); color: var(--ico-hi); }
-.fut-fact[data-mode="collect"].used, .fut-fact[data-mode="expedition"].used, .fut-fact[data-mode="fleetsave"].used,
-.fut-fact[data-mode="collect"][aria-pressed="true"] { box-shadow: inset 0 3px 0 var(--accent), inset 0 -2px 0 var(--tone); }
-.fut-fsecond .fut-fact.used { box-shadow: inset 0 3px 0 var(--accent), inset 0 0 0 1px var(--line-strong); }
-.fut-fact[aria-pressed="true"] kbd, .fut-fact.used kbd { color: var(--accent); }
-
-/* Their panel: destination over resources, labels in one column; CL / CP on the right, as tall as both rows. */
-.fut-fsend {
-  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px 10px;
-  padding: 8px 8px 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface);
-}
-.fut-fsend .lbl { grid-column: 1; color: var(--mute); }
-.fut-fdest { grid-column: 2; grid-row: 1; display: inline-flex; align-items: center; gap: 3px; }
-.fut-fres { grid-column: 2; grid-row: 2; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
-.fut-fdest .colon { color: var(--dim); }
-.fut-fdest .fut-fpick { margin: 0 4px 0 2px; }
-.fut-fin { box-sizing: border-box; height: 26px; padding: 0 6px; border: 1px solid var(--line); border-radius: 5px; background: var(--field); color: var(--hi); font: 11px/1 Verdana, Arial, sans-serif; font-variant-numeric: tabular-nums; }
-.fut-fin::placeholder { color: var(--dim); }
-.fut-fin:focus { outline: none; border-color: var(--accent); }
-.fut-fin.bad { border-color: var(--neg); }
-.fut-fin.g, .fut-fin.p { width: 34px; text-align: center; }
-.fut-fin.s { width: 46px; text-align: center; }
-.fut-fin.amount { width: calc(13ch + 14px); text-align: right; }
-.fut-fpick { width: 24px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--mute); }
-.fut-fpick:hover { border-color: var(--line-hover); color: var(--hi); }
-.fut-fseg { display: inline-flex; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
-.fut-fseg button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 30px; height: 24px; padding: 0 7px; border: 0; background: none; color: var(--dim); }
-.fut-fseg button + button { border-left: 1px solid var(--line); }
-.fut-fseg button:hover { color: var(--txt); }
-.fut-fseg button[aria-pressed="true"] { background: var(--tile-hi); box-shadow: inset 0 2px 0 var(--accent); color: var(--hi); font-weight: bold; }
-.fut-fresin { display: inline-flex; align-items: center; gap: 2px; }
-.fut-fresin .sym { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 26px; padding: 0; border: 1px solid transparent; border-radius: 5px; background: none; }
-.fut-fresin .sym:hover { border-color: var(--line); background: var(--tile); }
-.fut-fresin.metal .sym { color: var(--m); }
-.fut-fresin.crystal .sym { color: var(--c); }
-.fut-fresin.deuterium .sym { color: var(--d); }
-.fut-fclear { width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--mute); }
-.fut-fclear:hover { border-color: var(--line-hover); color: var(--hi); }
-/* \xABTutto\xBB: every resource here in the three fields, beside the eraser. */
-.fut-fall { height: 26px; padding: 0 10px; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--txt); font: 600 12px Verdana, Arial, sans-serif; cursor: pointer; }
-.fut-fall:hover { border-color: var(--line-hover); color: var(--hi); }
-/* Ships reserve on a ship tile (page 1): how many stay here, bottom left over the picture. */
-#fleet1 #technologies li .fut-fkeep { position: absolute; left: 2px; bottom: 24px; z-index: 2; padding: 0 4px; border-radius: 3px; background: rgba(13, 21, 34, 0.88); color: #F5B547; font: 700 10px/14px Verdana, Arial, sans-serif; pointer-events: auto; cursor: help; }
-/* Cargo room of the ships picked, in the reserves strip. */
-.fut-fcap { flex: none; display: inline-flex; align-items: center; gap: 6px; margin-left: auto; padding: 4px 10px; border-radius: 4px;
-  background: rgba(242, 208, 74, 0.10); box-shadow: inset 0 0 0 1px #8A7420, 0 0 10px rgba(242, 208, 74, 0.18);
-  color: #F7DF7A; font: 700 12px Verdana, Arial, sans-serif; white-space: nowrap; text-shadow: 0 0 6px rgba(247, 223, 122, 0.35); }
-.fut-fcap .ico { display: inline-flex; color: #F2D04A; }
-.fut-fcap:empty { display: none; }
-.fut-ffoot { align-items: center; }
-/* Resources reserve next to the game's resource field (page 2). */
-.fut-fkeepres { display: inline-block; margin-left: 6px; padding: 0 4px; border-radius: 3px; background: rgba(13, 21, 34, 0.88); color: #F5B547; font: 700 10px/16px Verdana, Arial, sans-serif; white-space: nowrap; cursor: help; }
-/* CL / CP: the game's ship pictures, short name in the corner, cargo needed along the bottom. */
-.fut-fcargo { grid-column: 3; grid-row: 1 / span 2; display: flex; align-items: center; gap: 4px; padding-left: 10px; border-left: 1px solid var(--line-soft); }
-.fut-fcl { position: relative; width: 48px; height: 48px; padding: 0; overflow: hidden; border: 1px solid var(--tile-line); border-radius: 6px; background: var(--tile); color: var(--hi); }
-.fut-fcl .pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.85; }
-.fut-fcl b { position: absolute; top: 2px; left: 2px; padding: 0 3px; border-radius: 3px; background: rgba(8, 13, 20, 0.8); font-size: 10px; line-height: 14px; }
-.fut-fcl .n { position: absolute; left: 0; right: 0; bottom: 0; padding: 1px 0; background: rgba(8, 13, 20, 0.82); color: var(--hi); font-size: 10px; line-height: 13px; text-align: center; }
-.fut-fcl .n:empty { display: none; }
-.fut-fcl:hover { border-color: var(--accent); }
-.fut-fcl:hover .pic { opacity: 1; }
-.fut-fcl.short .n { color: var(--warn); }
-.fut-fcl.none { border-style: dashed; }
-.fut-fcl.none .pic { opacity: 0.3; filter: grayscale(1); }
-
-/* Fingers: bigger targets, no key letters. */
-@media (pointer: coarse) {
-  .fut-fact { width: 48px; height: 46px; }
-  .fut-fcaret { width: 30px; height: 46px; }
-  .fut-fact kbd { display: none; }
-  .fut-fact:has(kbd) .ico { margin: 0; }
-  .fut-ftool { min-width: 44px; height: 44px; }
-  .fut-frow { flex-wrap: wrap; }
-  .fut-frules { flex-wrap: wrap; gap: 6px; }
-  /* Riserve and Giro one under the other: one column of switches beside the labels. */
-  .fut-fgroup > .fut-fzone { min-width: 4em; }
-  .fut-fsw { height: 40px; padding: 0 10px 0 12px; border-radius: 20px; }
-  .fut-fread { flex-basis: 100%; }
-  .fut-fin, .fut-fclear, .fut-fpick { height: 40px; }
-  .fut-fsend { grid-template-columns: minmax(0, 1fr); }
-  .fut-fsend .lbl { display: none; }
-  .fut-fdest, .fut-fres, .fut-fcargo { grid-column: 1; grid-row: auto; }
-  .fut-fcargo { padding-left: 0; border-left: 0; }
-  .fut-fcl { width: 52px; height: 52px; }
-  .fut-fseg button { height: 38px; min-width: 44px; }
-  .fut-fsecond { margin-left: 0; padding-left: 0; border-left: 0; }
-}
-
-/* Destination list of Trasporto / Schiera. */
-.fut-fmenu {
-  position: fixed; z-index: 1000002; min-width: 240px; max-height: 320px; overflow-y: auto; overscroll-behavior: contain;
-  display: grid; grid-template-columns: minmax(0, 1fr) 40px; gap: 2px; padding: 4px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); font: 11px/1.35 Verdana, Arial, sans-serif;
-}
-.fut-fmenu .fut-fbtn {
-  display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 8px; border: 1px solid transparent; border-radius: 4px; background: var(--tile);
-  color: var(--txt); font: inherit; cursor: pointer; white-space: nowrap; text-align: left;
-}
-.fut-fmenu .fut-fbtn small { margin-left: auto; color: var(--dim); font-size: 11px; }
-.fut-fmenu .fut-fbtn.moon { justify-content: center; padding: 0; color: var(--mute); }
-.fut-fmenu .fut-fbtn:hover { border-color: var(--accent); background: var(--tile-hi); color: var(--hi); }
-.fut-fmenu .fut-fbtn.on { border-color: var(--warn); color: var(--warn); }
-.fut-fmenu .fut-fbtn:disabled { background: none; color: var(--dim); opacity: 0.5; cursor: default; border-color: transparent; }
-.fut-fmenu .fut-fbtn.moon svg { color: var(--mute); }
-/* Collection menu: the two sends to the favourite on top, then "once towards\u2026". */
-.fut-fcollect { min-width: 280px; }
-.fut-fmhead, .fut-fmsub { grid-column: 1 / -1; margin: 4px 4px 2px; color: var(--mute); }
-.fut-fmhead { color: var(--hi); font-weight: 700; }
-.fut-fmsub { margin-top: 8px; }
-.fut-fmenu .fut-fmain { grid-column: 1 / -1; min-height: 40px; gap: 10px; }
-.fut-fmain .ico { display: inline-flex; color: var(--ico); }
-.fut-fmain .txt { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.fut-fmain .txt b { color: var(--hi); font-weight: 700; }
-.fut-fmain .txt span { color: var(--mute); }
-.fut-fmain kbd { margin-left: auto; color: var(--dim); font: 11px Verdana, Arial, sans-serif; }
-.fut-fmain.dim { opacity: 0.7; }
-.fut-fcollect .fut-fseg { grid-column: 1 / -1; margin: 0 4px 4px; }
-.fut-fcollect .fut-fseg button { flex: 1; font: inherit; cursor: pointer; }
-@media (pointer: coarse) { .fut-fmenu { grid-template-columns: minmax(0, 1fr) 48px; max-height: 60vh; } .fut-fmenu .fut-fbtn { min-height: 44px; } }
-@media (prefers-reduced-motion: reduce) { .fut-fact:active { transform: none; } .fut-fsw .track, .fut-fsw .track::after { transition: none; } }
-`;
-  var MODAL_CSS = `
-:host { --panel-w: 720px; }
-.fut-moon-ico { margin-right: 4px; vertical-align: -1px; color: var(--muted); }
-.status { color: var(--ok); min-height: 17px; }
-.body { padding-top: 2px; color: var(--text-2); font-size: 12px; }
-.fut-fbtn {
-  height: 28px; padding: 0 12px; border-radius: 7px; border: 1px solid var(--line-strong); background: var(--surface);
-  color: var(--text); font: 12px Arial, sans-serif; cursor: pointer;
-}
-.fut-fbtn:hover { border-color: var(--accent); }
-.fut-fbtn.primary { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
-.fut-feditor h4 { margin: 0 0 4px; font-size: 14px; color: var(--text); }
-.fut-feditor h5 { margin: 16px 0 6px; font-size: 12px; font-weight: 700; color: var(--text-2); }
-.fut-feditor > h5:first-child { margin-top: 0; }
-.fut-fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 4px 14px; }
-.fut-ffield { display: grid; grid-template-columns: minmax(0, 1fr) 96px; align-items: center; gap: 8px; min-height: 28px; color: var(--text-2); font-size: 11px; }
-.fut-ffield span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fut-ffield select { width: 96px; }
-.fut-fgrid.wide .fut-ffield { grid-template-columns: minmax(0, 1fr) 130px; }
-.fut-fgrid.wide .fut-ffield select { width: 130px; }
-.fut-ffield input { text-align: right; font-variant-numeric: tabular-nums; }
-.fut-ffield input, .fut-ffield select {
-  height: 26px; padding: 0 6px; border-radius: 6px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); font: 12px Arial, sans-serif;
-}
-.fut-ffield input:focus, .fut-ffield select:focus { outline: none; border-color: var(--accent); }
-.fut-fcheck { display: flex; align-items: center; gap: 6px; color: var(--text-2); font-size: 12px; align-self: end; min-height: 26px; }
-.fut-freserve { margin-top: 6px; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); }
-.fut-freserve[open] { padding-bottom: 10px; }
-.fut-frulebody { padding: 0 12px; }
-.fold { display: inline-flex; color: var(--muted); transform: rotate(-90deg); transition: transform 120ms ease-out; }
-.fut-freserve[open] .fold { transform: none; }
-@media (prefers-reduced-motion: reduce) { .fold { transition: none; } }
-.fut-freserve h5 { margin: 0; }
-.fut-frulehead { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-height: 40px; padding: 0 12px; cursor: pointer; list-style: none; }
-.fut-frulehead::-webkit-details-marker { display: none; }
-.fut-frulehead:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; border-radius: 7px; }
-.fut-fruleico { display: inline-flex; color: var(--accent); }
-.fut-fswitch { margin-left: auto; display: inline-flex; align-items: center; padding: 8px 0 8px 8px; cursor: pointer; }
-.fut-fswitch input { position: absolute; opacity: 0; pointer-events: none; }
-.fut-fswitch input:focus-visible + .sw-track { outline: 2px solid var(--accent); outline-offset: 2px; }
-input[type="checkbox"] { accent-color: var(--accent); }
-.fut-fbadge { padding: 1px 7px; border-radius: 9px; border: 1px solid var(--line-strong); color: var(--muted); font-size: 11px; cursor: default; }
-.fut-fbadge.on { border-color: var(--fresh); color: var(--fresh); }
-.fut-fbadge.off { border-color: #C9853A; color: #FFB15C; }
-.fut-fchecks { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 2px 12px; }
-.fut-fchecks .fut-fcheck { align-self: auto; min-height: 22px; }
-.fut-fcopy .fut-factions { margin-top: 6px; }
-.fut-feditor h6 { margin: 10px 0 4px; font-size: 11px; font-weight: 400; color: var(--muted); }
-.fut-fnote { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
-.fut-factions { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
-.fut-feditor > .fut-factions { position: sticky; bottom: 0; z-index: 1; margin: 10px -8px -8px; padding: 10px 8px; border-top: 1px solid var(--line); background: var(--bg); }
-`;
-
-  // src/modules/fleet/index.ts
-  var STYLE_ID4 = "fut-fleet-style";
-  var MODAL_ID = "fut-fleet-modal";
-  var FLEETSAVE_MISSIONS = [3, 4, 6, 8, 15, 5, 1];
-  var pageState = /* @__PURE__ */ new WeakMap();
-  var REPEATABLE = ["moon", "collect", "collectDeploy", "expedition", "fleetsave", "plan"];
-  var SKIPPABLE = ["moon", "collect", "collectDeploy", "expedition"];
-  function el4(doc, tag, className = "", text) {
-    const node = doc.createElement(tag);
-    if (className) node.className = className;
-    if (text !== void 0) node.textContent = text;
-    return node;
-  }
-  function typeInto(input, value) {
-    input.value = String(value);
-    input.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true }));
-    input.dispatchEvent(new Event("change", { bubbles: true }));
-  }
-  function enableOriginAutofill(doc) {
-    const p = doc.querySelector("#fleet2 #position");
-    if (!p || p.dataset.futAutofill) return;
-    p.dataset.futAutofill = "1";
-    p.addEventListener("keyup", () => {
-      if (!p.value.trim()) return;
-      const origin = originCoords(doc);
-      const g = doc.querySelector("#fleet2 #galaxy");
-      const s = doc.querySelector("#fleet2 #system");
-      if (!origin || !g || !s) return;
-      if (!g.value.trim()) g.value = String(origin.galaxy);
-      if (!s.value.trim()) s.value = String(origin.system);
-    });
-  }
-  function loadProfiles(store) {
-    return store.get(PROFILES_KEY, {});
-  }
-  function loadSettings(store) {
-    return settingsFrom(store.get(SETTINGS_KEY, {}));
-  }
-  function button(doc, text, onClick, cls = "", title = "") {
-    const b = el4(doc, "button", `fut-fbtn ${cls}`.trim(), text);
-    b.type = "button";
-    if (title) b.title = title;
-    b.addEventListener("click", (e) => {
-      e.preventDefault();
-      onClick();
-    });
-    return b;
-  }
-  function isolate(input) {
-    input.setAttribute("autocomplete", "off");
-    input.addEventListener("keydown", (e) => e.stopPropagation());
-    input.addEventListener("keyup", (e) => e.stopPropagation());
-    input.addEventListener("keypress", (e) => e.stopPropagation());
-  }
-  function numberField(doc, label, value, placeholder = "", locale) {
-    const wrap = el4(doc, "label", "fut-ffield");
-    wrap.append(el4(doc, "span", "", label));
-    const input = el4(doc, "input");
-    input.type = "text";
-    input.inputMode = "numeric";
-    input.placeholder = placeholder;
-    input.value = value ? locale && typeof value === "number" ? groupInt(value, locale) : String(value) : "";
-    isolate(input);
-    if (locale) groupWhileTyping(input, locale);
-    wrap.append(input);
-    return [wrap, input];
-  }
-  function selectField(doc, label, options, value) {
-    const wrap = el4(doc, "label", "fut-ffield");
-    wrap.append(el4(doc, "span", "", label));
-    const sel = el4(doc, "select");
-    for (const [v, text] of options) {
-      const opt = el4(doc, "option", "", text);
-      opt.value = v;
-      opt.selected = v === value;
-      sel.append(opt);
-    }
-    isolate(sel);
-    wrap.append(sel);
-    return [wrap, sel];
-  }
-  function checkField(doc, label, checked) {
-    const wrap = el4(doc, "label", "fut-fcheck");
-    const input = el4(doc, "input");
-    input.type = "checkbox";
-    input.checked = checked;
-    wrap.append(input, el4(doc, "span", "", label));
-    return [wrap, input];
-  }
-  function bodyTarget(bodies, id) {
-    for (const b of bodies) {
-      const c = parseCoords(b.coords);
-      if (!c) continue;
-      if (b.planetId === id) return { galaxy: c[0], system: c[1], position: c[2], type: 1, name: b.name };
-      if (b.moonId === id) return { galaxy: c[0], system: c[1], position: c[2], type: 3, name: b.name };
-    }
-    return null;
-  }
-  function twinTarget(bodies, id) {
-    const b = bodies.find((x) => x.planetId === id || x.moonId === id);
-    const twin = b ? b.moonId === id ? b.planetId : b.moonId : null;
-    const t = twin ? bodyTarget(bodies, twin) : null;
-    return t ? { galaxy: t.galaxy, system: t.system, position: t.position, type: b?.moonId === twin ? 3 : 1 } : null;
-  }
-  function isMoon(bodies, id) {
-    return bodies.some((b) => b.moonId === id);
-  }
-  function bodyLabel(o, id) {
-    const b = o.bodies.find((x) => x.planetId === id || x.moonId === id);
-    if (!b) return String(id);
-    return `${b.name} [${b.coords}]${b.moonId === id ? ` \xB7 ${o.t("fleet.typeMoon")}` : ""}`;
-  }
-  function shipFields(o, ships) {
-    const grid2 = el4(o.doc, "div", "fut-fgrid");
-    const inputs = [];
-    for (const slot of readShipSlots(o.doc)) {
-      const [wrap, input] = numberField(o.doc, slot.name, ships[slot.id] ?? null, "0", o.locale);
-      grid2.append(wrap);
-      inputs.push([slot.id, input]);
-    }
-    if (!inputs.length) grid2.append(el4(o.doc, "span", "fut-fnote", o.t("fleet.noShips")));
-    return {
-      el: grid2,
-      read: () => {
-        const out = {};
-        for (const [id, input] of inputs) {
-          const n = parseAmount(input.value);
-          if (n > 0) out[id] = n;
-        }
-        return out;
-      }
-    };
-  }
-  function resourceFields(o, res) {
-    const grid2 = el4(o.doc, "div", "fut-fgrid");
-    const inputs = ["metal", "crystal", "deuterium"].map((k) => {
-      const [wrap, input] = numberField(o.doc, o.t(`res.${k}`), res[k] || null, "0", o.locale);
-      grid2.append(wrap);
-      return [k, input];
-    });
-    return {
-      el: grid2,
-      read: () => {
-        const out = { metal: 0, crystal: 0, deuterium: 0 };
-        for (const [k, input] of inputs) out[k] = parseAmount(input.value);
-        return out;
-      }
-    };
-  }
-  function shortName(o, id) {
-    const b = o.bodies.find((x) => x.planetId === id || x.moonId === id);
-    return b ? `${b.name}${b.moonId === id ? " \u263E" : ""}` : String(id);
-  }
-  var SWITCH = { ships: "shipsOn", resources: "resourcesOn", gate: "gateOn" };
-  function ruleBadge(o, section2) {
-    const { doc, t } = o;
-    const profiles = loadProfiles(o.store);
-    const settings = loadSettings(o.store);
-    const key = SWITCH[section2];
-    const badge = el4(doc, "span", "fut-fbadge");
-    if (sectionEmpty(profileFor(profiles, o.bodyId), section2)) {
-      badge.classList.add("empty");
-      badge.textContent = t("fleet.rule.empty");
-      return badge;
-    }
-    const on = key ? settings[key] : true;
-    badge.classList.add(on ? "on" : "off");
-    const ids = o.bodies.flatMap((b) => [b.planetId, b.moonId]).filter((x) => x !== null);
-    const same = sameSection(profiles, o.bodyId, ids, section2);
-    const names = same.map((id) => shortName(o, id));
-    const where = same.length ? t("fleet.rule.alsoOn", { list: names.slice(0, 3).join(", ") + (names.length > 3 ? ` +${names.length - 3}` : "") }) : t("fleet.rule.onlyHere");
-    badge.textContent = `${on ? t("fleet.rule.on") : t("fleet.rule.off")} \xB7 ${where}`;
-    badge.title = same.length ? `${t("fleet.rule.sameTitle")}
-${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
-    return badge;
-  }
-  function ruleBox(o, section2, title, hint, fields, onSwitch) {
-    const { doc, t } = o;
-    const box = el4(doc, "details", "fut-freserve");
-    box.open = !sectionEmpty(profileFor(loadProfiles(o.store), o.bodyId), section2);
-    const head = el4(doc, "summary", "fut-frulehead");
-    const mark = el4(doc, "span", "fut-fruleico");
-    mark.innerHTML = iconSvg(section2, 18);
-    head.append(iconEl(doc), mark, el4(doc, "h5", "", title), ruleBadge(o, section2));
-    const key = SWITCH[section2];
-    if (key) {
-      const wrap = el4(doc, "label", "fut-fswitch");
-      wrap.title = t("fleet.rule.switchHint");
-      const input = el4(doc, "input");
-      input.type = "checkbox";
-      input.setAttribute("role", "switch");
-      input.setAttribute("aria-label", `${title}: ${t("fleet.rule.switch")}`);
-      input.checked = loadSettings(o.store)[key];
-      wrap.append(input, el4(doc, "i", "sw-track"));
-      input.addEventListener("change", () => {
-        o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: input.checked });
-        head.querySelector(".fut-fbadge")?.replaceWith(ruleBadge(o, section2));
-        onSwitch();
-      });
-      head.append(wrap);
-    }
-    const inner = el4(doc, "div", "fut-frulebody");
-    inner.append(el4(doc, "p", "fut-fnote", hint), ...fields);
-    box.append(head, inner);
-    return box;
-  }
-  function iconEl(doc) {
-    const span = el4(doc, "span", "fold");
-    span.innerHTML = iconSvg("caret", 14);
-    return span;
-  }
-  function reserveEditor(o, onSaved) {
-    const { doc, t } = o;
-    const profile = profileFor(loadProfiles(o.store), o.bodyId);
-    const moon = isMoon(o.bodies, o.bodyId);
-    const panel = el4(doc, "div", "fut-feditor");
-    const refresh = () => onSaved("");
-    const ships = shipFields(o, profile.reserve.ships);
-    panel.append(ruleBox(o, "ships", t("fleet.rule.ships"), t("fleet.rule.shipsHint"), [ships.el], refresh));
-    const res = resourceFields(o, profile.reserve.resources);
-    panel.append(ruleBox(o, "resources", t("fleet.rule.resources"), t("fleet.rule.resourcesHint"), [res.el], refresh));
-    const gate = moon ? shipFields(o, profile.gate) : null;
-    if (gate) panel.append(ruleBox(o, "gate", t("fleet.rule.gate"), t("fleet.rule.gateHint"), [gate.el], refresh));
-    const saveGrid = el4(doc, "div", "fut-fgrid wide");
-    const origin = originCoords(doc);
-    const [gWrap, gIn] = numberField(doc, t("fleet.galaxy"), profile.save?.galaxy ?? null, origin ? String(origin.galaxy) : "");
-    const [sWrap, sIn] = numberField(doc, t("fleet.system"), profile.save?.system ?? null, origin ? String(origin.system) : "");
-    const [pWrap, pIn] = numberField(doc, t("fleet.position"), profile.save?.position ?? null, "16");
-    const [typeWrap, typeSel] = selectField(
-      doc,
-      t("fleet.type"),
-      [["1", t("fleet.typePlanet")], ["3", t("fleet.typeMoon")], ["2", t("fleet.typeDebris")]],
-      String(profile.save?.type ?? 1)
-    );
-    const [misWrap, misSel] = selectField(doc, t("fleet.mission"), FLEETSAVE_MISSIONS.map((m) => [String(m), t(`mission.${m}`)]), String(profile.save?.mission ?? 6));
-    const [spdWrap, spdSel] = selectField(
-      doc,
-      t("fleet.speed"),
-      Array.from({ length: 10 }, (_, i) => [String((i + 1) * 10), `${(i + 1) * 10}%`]),
-      String(profile.save?.speed ?? 10)
-    );
-    saveGrid.append(gWrap, sWrap, pWrap, typeWrap, misWrap, spdWrap);
-    const saveShips = shipFields(o, profile.saveReserve.ships);
-    const saveRes = resourceFields(o, profile.saveReserve.resources);
-    panel.append(
-      ruleBox(o, "fleetsave", t("fleet.fleetsave"), t("fleet.fleetsaveHint"), [
-        saveGrid,
-        el4(doc, "h6", "", t("fleet.rule.saveShips")),
-        saveShips.el,
-        el4(doc, "h6", "", t("fleet.rule.saveResources")),
-        saveRes.el
-      ], refresh)
-    );
-    const read = () => {
-      const position = parseAmount(pIn.value);
-      const save = position >= 1 && position <= 17 ? {
-        galaxy: parseAmount(gIn.value) || null,
-        system: parseAmount(sIn.value) || null,
-        position,
-        type: Number(typeSel.value),
-        mission: Number(misSel.value),
-        speed: Number(spdSel.value)
-      } : null;
-      return {
-        reserve: { ships: ships.read(), resources: res.read() },
-        gate: gate ? gate.read() : profile.gate,
-        saveReserve: { ships: saveShips.read(), resources: saveRes.read() },
-        save
-      };
-    };
-    const store = () => {
-      const all2 = loadProfiles(o.store);
-      all2[String(o.bodyId)] = read();
-      o.store.set(PROFILES_KEY, all2);
-      return all2;
-    };
-    const copyBox = copyPanel(o, moon, (sections, ids) => {
-      o.store.set(PROFILES_KEY, copySections(store(), o.bodyId, ids, sections));
-      onSaved(t("fleet.copied", { count: ids.length }));
-    });
-    copyBox.hidden = true;
-    const actions = el4(doc, "div", "fut-factions");
-    actions.append(
-      button(doc, t("fleet.save"), () => {
-        store();
-        onSaved(t("fleet.saved"));
-      }, "primary"),
-      button(doc, t("fleet.copyTo"), () => {
-        copyBox.hidden = !copyBox.hidden;
-      })
-    );
-    panel.append(copyBox, actions);
-    return panel;
-  }
-  function copyPanel(o, moon, onCopy) {
-    const { doc, t } = o;
-    const box = el4(doc, "div", "fut-freserve fut-fcopy");
-    box.append(el4(doc, "h5", "", t("fleet.copyTitle")), el4(doc, "p", "fut-fnote", t("fleet.copyHint")));
-    const secRow = el4(doc, "div", "fut-fchecks");
-    const sections = RESERVE_SECTIONS.filter((s) => s !== "gate" || moon).map((s) => {
-      const [wrap, input] = checkField(doc, t(s === "fleetsave" ? "fleet.fleetsave" : `fleet.rule.${s}`), true);
-      secRow.append(wrap);
-      return [s, input];
-    });
-    box.append(el4(doc, "h6", "", t("fleet.copyWhat")), secRow);
-    const bodyRow = el4(doc, "div", "fut-fchecks");
-    const targets = [];
-    for (const b of o.bodies) {
-      for (const [id, isMoonId] of [[b.planetId, false], [b.moonId, true]]) {
-        if (id === null || id === o.bodyId) continue;
-        const [wrap, input] = checkField(doc, `${shortName(o, id)} [${b.coords}]`, false);
-        bodyRow.append(wrap);
-        targets.push([id, isMoonId, input]);
-      }
-    }
-    const pick = (which) => {
-      for (const [, isMoonId, input] of targets) input.checked = which === "moons" ? isMoonId : which === "planets" ? !isMoonId : false;
-    };
-    const quick = el4(doc, "div", "fut-factions");
-    quick.append(
-      button(doc, t("fleet.pickPlanets"), () => pick("planets")),
-      button(doc, t("fleet.pickMoons"), () => pick("moons")),
-      button(doc, t("fleet.pickNone"), () => pick("none"))
-    );
-    box.append(el4(doc, "h6", "", t("fleet.copyWhere")), quick, bodyRow);
-    const status = el4(doc, "span", "fut-fnote");
-    const go = el4(doc, "div", "fut-factions");
-    go.append(
-      button(doc, t("fleet.copyGo"), () => {
-        const chosen = sections.filter(([, i]) => i.checked).map(([s]) => s);
-        const ids = targets.filter(([, , i]) => i.checked).map(([id]) => id);
-        if (!chosen.length || !ids.length) {
-          status.textContent = t("fleet.copyNothing");
-          return;
-        }
-        onCopy(chosen, ids);
-      }, "primary"),
-      status
-    );
-    box.append(go);
-    return box;
-  }
-  function topScore(store) {
-    const ranks = store.get(UNIVERSE_RANKS_KEY, null);
-    const best = ranks ? Math.max(0, ...Object.values(ranks.ranks).map(([, points]) => points)) : 0;
-    return best > 0 ? best : void 0;
-  }
-  function universeSpeed(doc) {
-    const n = Number(doc.querySelector('meta[name="ogame-universe-speed"]')?.getAttribute("content"));
-    return Number.isFinite(n) && n > 0 ? n : 1;
-  }
-  var modalKeyHandler = null;
-  function closeModal(doc) {
-    doc.getElementById(MODAL_ID)?.remove();
-    if (modalKeyHandler) doc.removeEventListener("keydown", modalKeyHandler, true);
-    modalKeyHandler = null;
-  }
-  function openSettings2(o, _tab, onChange) {
-    const { doc, t } = o;
-    closeModal(doc);
-    const host = el4(doc, "div");
-    host.id = MODAL_ID;
-    const root = host.attachShadow({ mode: "open" });
-    const style = el4(doc, "style");
-    style.textContent = WINDOW_SHEET + MODAL_CSS;
-    const backdrop = el4(doc, "div", "backdrop");
-    const panel = el4(doc, "div", "panel");
-    panel.setAttribute("role", "dialog");
-    panel.setAttribute("aria-modal", "true");
-    panel.setAttribute("aria-label", t("fleet.settingsTitle"));
-    const head = el4(doc, "div", "head");
-    const status = el4(doc, "span", "sub status");
-    status.setAttribute("role", "status");
-    const body = el4(doc, "div", "body");
-    const show2 = () => {
-      const saved = (msg) => {
-        onChange();
-        if (msg) {
-          const top = backdrop.scrollTop;
-          show2();
-          backdrop.scrollTop = top;
-        }
-        status.textContent = msg;
-      };
-      body.replaceChildren(reserveEditor(o, saved));
-    };
-    const close = el4(doc, "button", "close");
-    close.type = "button";
-    close.setAttribute("aria-label", t("fleet.close"));
-    close.addEventListener("click", () => closeModal(doc));
-    close.append(icon(doc, "close", 16));
-    const titles = el4(doc, "div", "titles");
-    titles.append(el4(doc, "h2", "", t(isMoon(o.bodies, o.bodyId) ? "fleet.editTitleMoon" : "fleet.editTitlePlanet", { body: bodyLabel(o, o.bodyId) })), status);
-    head.append(titles, close);
-    panel.append(head, body);
-    backdrop.append(panel);
-    backdrop.addEventListener("click", (e) => {
-      if (e.target === backdrop) closeModal(doc);
-    });
-    root.append(style, backdrop);
-    doc.body.append(host);
-    modalKeyHandler = (e) => {
-      if (e.key === "Escape") closeModal(doc);
-    };
-    doc.addEventListener("keydown", modalKeyHandler, true);
-    show2();
-    close.focus();
-  }
-  function shortLabel(o, id) {
-    if (!id) return o.t("fleet.pickDest");
-    const b = o.bodies.find((x) => x.planetId === id || x.moonId === id);
-    if (!b) return o.t("fleet.pickDest");
-    return `${b.name}${b.moonId === id ? " \u263E" : ""}`;
-  }
-  function readout(doc, text) {
-    const box = el4(doc, "span", "fut-fread");
-    const tip = el4(doc, "span", "tip");
-    tip.setAttribute("aria-hidden", "true");
-    const info = el4(doc, "span", "fut-finfo", text);
-    info.setAttribute("role", "status");
-    box.append(tip, info);
-    const clear = () => tip.replaceChildren();
-    return {
-      box,
-      say(msg, err = false) {
-        clear();
-        info.textContent = msg;
-        info.classList.toggle("err", err);
-      },
-      peek(node, name, detail) {
-        const show2 = () => tip.replaceChildren(el4(doc, "b", "", name), doc.createTextNode(detail ? ` ${detail}` : ""));
-        node.addEventListener("mouseenter", show2);
-        node.addEventListener("focus", show2);
-        node.addEventListener("mouseleave", clear);
-        node.addEventListener("blur", clear);
-      }
-    };
-  }
-  function tile(doc, icon2, label, onClick, cls = "", key = "", name = "") {
-    const b = el4(doc, "button", `fut-fact ${cls}`.trim());
-    b.type = "button";
-    b.title = key ? `${label} [${keyLabel(key)}]` : label;
-    b.setAttribute("aria-label", label);
-    const ico = el4(doc, "span", "ico");
-    ico.innerHTML = iconSvg(icon2, 20);
-    b.append(ico);
-    if (name) {
-      const n = el4(doc, "span", "name", name);
-      n.setAttribute("aria-hidden", "true");
-      b.append(n);
-    }
-    if (key) {
-      const cap = el4(doc, "kbd", "", keyLabel(key));
-      cap.setAttribute("aria-hidden", "true");
-      b.append(cap);
-    }
-    b.addEventListener("click", (e) => {
-      e.preventDefault();
-      onClick();
-    });
-    return b;
-  }
-  function ruleSwitch(doc, icon2, label, on, onClick, value) {
-    const b = el4(doc, "button", "fut-fchip");
-    b.type = "button";
-    b.setAttribute("role", "switch");
-    b.setAttribute("aria-checked", String(on));
-    const ico = el4(doc, "span", "ico");
-    ico.innerHTML = iconSvg(icon2, 14);
-    b.append(el4(doc, "i", "pip"), ico, el4(doc, "b", "", label));
-    if (value !== void 0) {
-      const v = el4(doc, "span", "val");
-      v.append(value);
-      b.append(v);
-    }
-    b.setAttribute("aria-label", typeof value === "string" && value ? `${label}: ${value}` : label);
-    b.addEventListener("click", (e) => {
-      e.preventDefault();
-      onClick();
-    });
-    return b;
-  }
-  function addInvertButtons(o) {
-    const { doc, t } = o;
-    for (const slot of readShipSlots(doc)) {
-      const tile2 = slot.input.closest("li");
-      if (!tile2 || !slot.available || tile2.querySelector(".fut-finv")) continue;
-      const b = el4(doc, "button", "fut-finv");
-      b.type = "button";
-      b.title = t("fleet.invert");
-      b.setAttribute("aria-label", `${t("fleet.invert")}: ${slot.name}`);
-      b.innerHTML = iconSvg("invert", 12);
-      b.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const available = Number(tile2.querySelector(".amount")?.dataset.value ?? 0) || 0;
-        const picked2 = Math.min(available, parseAmount(slot.input.value));
-        typeInto(slot.input, available - picked2 || "");
-      });
-      tile2.append(b);
-    }
-  }
-  function keepReserveOnSelectAll(o) {
-    const { doc } = o;
-    const root = doc.documentElement;
-    if (root.dataset.futSendAll) return;
-    root.dataset.futSendAll = "1";
-    doc.addEventListener("click", (e) => {
-      const b = e.target?.closest?.("#sendall, a.send_all");
-      if (!b || !b.closest("#fleetdispatchcomponent, #fleet1")) return;
-      (doc.defaultView ?? globalThis).setTimeout(() => {
-        const current3 = pageState.get(doc)?.o ?? o;
-        const mode = pageState.get(doc)?.active?.mode;
-        if (mode === "expedition" || mode === "fleetsave") return;
-        const keep = activeProfile(profileFor(loadProfiles(current3.store), current3.bodyId), loadSettings(current3.store)).reserve.ships;
-        for (const slot of readShipSlots(doc)) {
-          const k = keep[slot.id] ?? 0;
-          if (k > 0) typeInto(slot.input, Math.max(0, slot.available - k) || "");
-        }
-      }, 0);
-    });
-  }
-  function markShipReserve(o, keep) {
-    const { doc, t } = o;
-    for (const slot of readShipSlots(doc)) {
-      const tile2 = slot.input.closest("li");
-      if (!tile2) continue;
-      tile2.querySelector(".fut-fkeep")?.remove();
-      const n = keep[slot.id] ?? 0;
-      if (n <= 0) continue;
-      const b = el4(doc, "span", "fut-fkeep", `\u2212${formatUnits(n, o.locale)}`);
-      b.title = t("fleet.keepShips", { n: n.toLocaleString(o.locale) });
-      tile2.append(b);
-    }
-  }
-  function markResourceReserve(o, keep) {
-    const { doc, t } = o;
-    for (const k of ["metal", "crystal", "deuterium"]) {
-      const input = doc.querySelector(`#fleet2 input#${k}`);
-      if (!input) continue;
-      input.parentElement?.querySelector(".fut-fkeepres")?.remove();
-      if (keep[k] <= 0) continue;
-      const b = el4(doc, "span", "fut-fkeepres", t("fleet.keepRes", { n: formatUnits(keep[k], o.locale) }));
-      b.title = t("fleet.keepResHint", { n: keep[k].toLocaleString(o.locale) });
-      input.after(b);
-    }
-  }
-  function selectedCargo(doc, capacityOf) {
-    return readShipSlots(doc).reduce((sum, s) => sum + Math.min(s.available, parseAmount(s.input.value) || 0) * capacityOf(Number(s.id)), 0);
-  }
-  function watchSelectedCargo(o) {
-    const { doc, t } = o;
-    const draw = () => {
-      const out = doc.querySelector(".fut-fcap");
-      const fd = getDispatcher();
-      if (!out) return;
-      const room = fd ? selectedCargo(doc, (id) => shipCapacity(fd, id)) : 0;
-      out.replaceChildren();
-      if (room > 0) {
-        const ico = el4(doc, "span", "ico");
-        ico.innerHTML = iconSvg("cargo", 14);
-        out.append(ico, el4(doc, "span", "", t("fleet.cargoPicked", { n: formatUnits(room, o.locale) })));
-      }
-      out.title = room > 0 ? t("fleet.cargoPickedHint", { n: room.toLocaleString(o.locale) }) : "";
-    };
-    draw();
-    const list = doc.querySelector("#fleet1 #technologies");
-    if (!list || list.dataset.futCap) return;
-    list.dataset.futCap = "1";
-    const later = () => (doc.defaultView ?? globalThis).setTimeout(draw, 0);
-    for (const type of ["input", "keyup", "change", "click"]) list.addEventListener(type, later);
-    doc.addEventListener("click", (e) => {
-      if (e.target?.closest?.("#sendall, a.send_all, #resetall, a.reset_all")) later();
-    });
-  }
-  function cappedByReserve(loaded, onPlanet2, keep, fuel) {
-    const cap = (k) => Math.max(0, Math.min(loaded[k], Math.floor(onPlanet2[k] - keep[k] - (k === "deuterium" ? fuel : 0))));
-    return { metal: cap("metal"), crystal: cap("crystal"), deuterium: cap("deuterium") };
-  }
-  function fixSpeedBarTouch(doc) {
-    const root = doc.documentElement;
-    if (root.dataset.futSpeedTouch) return;
-    root.dataset.futSpeedTouch = "1";
-    doc.addEventListener(
-      "touchend",
-      (e) => {
-        if (!e.target?.closest?.(".percentageBar")) return;
-        const touch = e.changedTouches?.[0];
-        const ev = e;
-        if (!touch || typeof ev.pageX === "number") return;
-        Object.defineProperty(e, "pageX", { value: touch.pageX, configurable: true });
-        Object.defineProperty(e, "pageY", { value: touch.pageY, configurable: true });
-      },
-      true
-    );
-  }
-  function keepReserveOnLoadAll(o) {
-    const { doc } = o;
-    const root = doc.documentElement;
-    if (root.dataset.futLoadAll) return;
-    root.dataset.futLoadAll = "1";
-    doc.addEventListener("click", (e) => {
-      const b = e.target?.closest?.("#allresources, #loadAllResources, .allresources");
-      if (!b) return;
-      (doc.defaultView ?? globalThis).setTimeout(() => {
-        const current3 = pageState.get(doc)?.o ?? o;
-        const mode = pageState.get(doc)?.active?.mode;
-        if (mode === "expedition" || mode === "fleetsave") return;
-        const keep = activeProfile(profileFor(loadProfiles(current3.store), current3.bodyId), loadSettings(current3.store)).reserve.resources;
-        if (!keep.metal && !keep.crystal && !keep.deuterium) return;
-        const fd = getDispatcher();
-        if (!fd) return;
-        const left = cappedByReserve(
-          { metal: Number(fd.cargoMetal) || 0, crystal: Number(fd.cargoCrystal) || 0, deuterium: Number(fd.cargoDeuterium) || 0 },
-          { metal: Number(fd.metalOnPlanet) || 0, crystal: Number(fd.crystalOnPlanet) || 0, deuterium: Number(fd.deuteriumOnPlanet) || 0 },
-          keep,
-          Math.ceil(Number(fd.getConsumption()) || 0)
-        );
-        fd.cargoMetal = left.metal;
-        fd.cargoCrystal = left.crystal;
-        fd.cargoDeuterium = left.deuterium;
-        fd.refresh();
-      }, 0);
-    });
-  }
-  function popup(doc, anchor, menu) {
-    doc.querySelectorAll(".fut-fmenu").forEach((n) => n.remove());
-    const r = anchor.getBoundingClientRect();
-    menu.style.top = `${Math.round(r.bottom + 4)}px`;
-    menu.style.left = `${Math.round(r.left)}px`;
-    doc.body.append(menu);
-    const away = (e) => {
-      if (!menu.contains(e.target)) {
-        menu.remove();
-        doc.removeEventListener("mousedown", away, true);
-      }
-    };
-    doc.addEventListener("mousedown", away, true);
-    const onScroll = (e) => {
-      if (e.target instanceof Node && menu.contains(e.target)) return;
-      menu.remove();
-      doc.defaultView?.removeEventListener("scroll", onScroll, true);
-    };
-    doc.defaultView?.addEventListener("scroll", onScroll, true);
-  }
-  function bodyGrid(o, menu, current3, onPick, allowHere = false) {
-    const { doc } = o;
-    const cell = (id, moon, b) => {
-      if (id === null) return el4(doc, "span");
-      const item = button(doc, moon ? "" : b.name, () => {
-        menu.remove();
-        onPick(id);
-      }, `${moon ? "moon" : "planet"}${id === current3 ? " on" : ""}`);
-      if (moon) item.innerHTML = iconSvg("moon", 14);
-      else item.append(el4(doc, "small", "", b.coords));
-      item.setAttribute("aria-label", `${b.name}${moon ? ` (${o.t("fleet.typeMoon")})` : ""} [${b.coords}]`);
-      if (moon) item.title = `${b.name} (${o.t("fleet.typeMoon")})`;
-      if (id === current3) item.setAttribute("aria-current", "true");
-      item.disabled = !allowHere && id === o.bodyId;
-      return item;
-    };
-    return o.bodies.flatMap((b) => [cell(b.planetId, false, b), cell(b.moonId, true, b)]);
-  }
-  function destinationMenu(o, anchor, current3, onPick) {
-    const menu = el4(o.doc, "div", "fut-fmenu");
-    menu.append(...bodyGrid(o, menu, current3, onPick));
-    popup(o.doc, anchor, menu);
-  }
-  function collectMenu(o, anchor, settings, keys, run) {
-    const { doc, t } = o;
-    const menu = el4(doc, "div", "fut-fmenu fut-fcollect");
-    menu.setAttribute("role", "menu");
-    menu.append(el4(doc, "p", "fut-fmhead", t("fleet.btn.collect")));
-    const main2 = (mode2, ico, label, fav, key) => {
-      const b = button(doc, "", () => {
-        menu.remove();
-        run(mode2, fav);
-      }, "fut-fmain");
-      b.setAttribute("role", "menuitem");
-      const i = el4(doc, "span", "ico");
-      i.innerHTML = iconSvg(ico, 18);
-      const text = el4(doc, "span", "txt");
-      text.append(el4(doc, "b", "", label), el4(doc, "span", "", fav ? `\u2192 ${shortLabel(o, fav)}` : t("fleet.collectNoFav")));
-      b.append(i, text);
-      if (key) b.append(el4(doc, "kbd", "", keyLabel(key)));
-      if (!fav) b.classList.add("dim");
-      return b;
-    };
-    menu.append(
-      main2("collect", "transport", t("fleet.collect.transport"), settings.favTransport, keys.transport),
-      main2("collectDeploy", "deploy", t("fleet.collect.deploy"), settings.favDeploy, keys.deploy)
-    );
-    let mode = "collect";
-    const seg = el4(doc, "div", "fut-fseg");
-    seg.setAttribute("role", "group");
-    seg.setAttribute("aria-label", t("fleet.collectOnce"));
-    const segBtn = (m, label) => {
-      const b = button(doc, label, () => {
-        mode = m;
-        seg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-      });
-      b.setAttribute("aria-pressed", String(m === mode));
-      return b;
-    };
-    seg.append(segBtn("collect", t("fleet.collect.transport")), segBtn("collectDeploy", t("fleet.collect.deploy")));
-    menu.append(el4(doc, "p", "fut-fmsub", t("fleet.collectOnce")), seg);
-    menu.append(...bodyGrid(o, menu, null, (id) => run(mode, id)));
-    popup(doc, anchor, menu);
-  }
-  function sendTargetOf(o, t, origin) {
-    if (!t || !(t.position >= 1 && t.position <= 17)) return null;
-    const r = resolveSend(t, origin);
-    const b = o.bodies.find((x) => x.coords === `${r.galaxy}:${r.system}:${r.position}`);
-    return { ...r, name: b?.name };
-  }
-  var SEND_CARGO = [202, 203];
-  function sendPanel(o, peek, onCargo, onTarget) {
-    const { doc, t } = o;
-    const settings = loadSettings(o.store);
-    const save = (part) => {
-      o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), ...part });
-      if ("sendTarget" in part) onTarget();
-    };
-    const origin = originCoords(doc);
-    const panel = el4(doc, "div", "fut-fsend");
-    panel.setAttribute("role", "group");
-    panel.setAttribute("aria-label", t("fleet.send.label"));
-    const st = settings.sendTarget;
-    let type = st?.type ?? 1;
-    const coordIn = (label2, ph, v, cls) => {
-      const input = el4(doc, "input", `fut-fin ${cls}`);
-      input.type = "text";
-      input.inputMode = "numeric";
-      input.placeholder = ph;
-      input.value = v ? String(v) : "";
-      input.setAttribute("aria-label", label2);
-      input.title = label2;
-      isolate(input);
-      return input;
-    };
-    const gIn = coordIn(t("fleet.galaxy"), origin ? String(origin.galaxy) : "G", st?.galaxy, "g");
-    const sIn = coordIn(t("fleet.system"), origin ? String(origin.system) : "S", st?.system, "s");
-    const pIn = coordIn(t("fleet.position"), "P", st?.position, "p");
-    const typeSeg = el4(doc, "span", "fut-fseg");
-    typeSeg.setAttribute("role", "group");
-    typeSeg.setAttribute("aria-label", t("fleet.type"));
-    const showType = () => typeSeg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(Number(x.dataset.type) === type)));
-    const store = () => {
-      const num5 = (i) => parseAmount(i.value) || null;
-      const position = num5(pIn) ?? 0;
-      pIn.classList.toggle("bad", Boolean(pIn.value.trim()) && !(position >= 1 && position <= 17));
-      const empty = !gIn.value.trim() && !sIn.value.trim() && !pIn.value.trim();
-      save({ sendTarget: empty ? null : { galaxy: num5(gIn), system: num5(sIn), position, type } });
-    };
-    const fill = (g, sys, pos) => {
-      gIn.value = String(g);
-      sIn.value = String(sys);
-      pIn.value = String(pos);
-    };
-    for (const input of [gIn, sIn, pIn]) {
-      input.addEventListener("input", () => {
-        const c = /\D/.test(input.value.trim()) ? parseCoords(input.value) : null;
-        if (c) fill(c[0], c[1], c[2]);
-        store();
-      });
-    }
-    const typeBtn = (v, ico, label2) => {
-      const b = el4(doc, "button", "fut-ftype");
-      b.type = "button";
-      b.dataset.type = String(v);
-      b.title = label2;
-      b.setAttribute("aria-label", label2);
-      b.innerHTML = iconSvg(ico, 15);
-      b.addEventListener("click", (e) => {
-        e.preventDefault();
-        type = v;
-        showType();
-        store();
-      });
-      return b;
-    };
-    typeSeg.append(typeBtn(1, "planet", t("fleet.typePlanet")), typeBtn(3, "moon", t("fleet.typeMoon")));
-    showType();
-    const dest = el4(doc, "span", "fut-fdest");
-    const pick = el4(doc, "button", "fut-fpick");
-    pick.type = "button";
-    pick.setAttribute("aria-label", t("fleet.send.pick"));
-    pick.setAttribute("aria-haspopup", "menu");
-    pick.innerHTML = iconSvg("caret", 14);
-    peek(pick, t("fleet.send.pick"), t("fleet.send.pickHint"));
-    pick.addEventListener("click", (e) => {
-      e.preventDefault();
-      destinationMenu(o, dest, null, (id) => {
-        const tg = bodyTarget(o.bodies, id);
-        if (!tg) return;
-        fill(tg.galaxy, tg.system, tg.position);
-        type = tg.type === 3 ? 3 : 1;
-        showType();
-        store();
-      });
-    });
-    const sep = () => el4(doc, "span", "colon", ":");
-    dest.append(gIn, sep(), sIn, sep(), pIn, pick, typeSeg);
-    for (const input of [gIn, sIn, pIn]) peek(input, t("fleet.send.dest"), t("fleet.send.destHint"));
-    const res = el4(doc, "span", "fut-fres");
-    const inputs = ["metal", "crystal", "deuterium"].map((k) => {
-      const wrap = el4(doc, "span", `fut-fresin ${k}`);
-      const sym = el4(doc, "button", "sym");
-      sym.type = "button";
-      sym.innerHTML = iconSvg(k, 18);
-      sym.setAttribute("aria-label", `${t(`res.${k}`)}: ${t("fleet.send.max")}`);
-      peek(sym, t(`res.${k}`), t("fleet.send.maxHint"));
-      const input = el4(doc, "input", "fut-fin amount");
-      input.type = "text";
-      input.inputMode = "numeric";
-      input.placeholder = "0";
-      input.setAttribute("aria-label", t(`res.${k}`));
-      const v = settings.sendPick[k];
-      input.value = v === null ? "" : groupInt(v, o.locale);
-      isolate(input);
-      groupWhileTyping(input, o.locale);
-      wrap.append(sym, input);
-      res.append(wrap);
-      peek(input, t(`res.${k}`), t("fleet.send.resHint"));
-      return [k, input];
-    });
-    const readPick = () => {
-      const out = { metal: null, crystal: null, deuterium: null };
-      for (const [k, input] of inputs) out[k] = input.value.trim() ? parseAmount(input.value) : null;
-      return out;
-    };
-    const clear = el4(doc, "button", "fut-fclear");
-    clear.type = "button";
-    clear.innerHTML = iconSvg("erase", 15);
-    clear.title = t("fleet.send.clearBtn");
-    clear.setAttribute("aria-label", t("fleet.send.clearHint"));
-    peek(clear, t("fleet.send.clearBtn"), t("fleet.send.clearHint"));
-    const all2 = el4(doc, "button", "fut-fall", t("fleet.send.allBtn"));
-    all2.type = "button";
-    all2.setAttribute("aria-label", t("fleet.send.allHint"));
-    peek(all2, t("fleet.send.allBtn"), t("fleet.send.allHint"));
-    res.append(all2, clear);
-    const cargoBox = el4(doc, "span", "fut-fcargo");
-    const counts = /* @__PURE__ */ new Map();
-    for (const id of SEND_CARGO) {
-      const b = el4(doc, "button", "fut-fcl");
-      b.type = "button";
-      const short = t(id === 202 ? "fleet.send.small" : "fleet.send.large");
-      const full = t(`ship.${id}`);
-      b.setAttribute("aria-label", `${t("fleet.send.cargoWith")} ${full}`);
-      const n = el4(doc, "small", "n");
-      const pic = el4(doc, "img", "pic");
-      pic.src = SHIP_ICONS[id] ?? "";
-      pic.alt = "";
-      pic.addEventListener("error", () => pic.remove());
-      b.append(pic, el4(doc, "b", "", short), n);
-      counts.set(id, n);
-      peek(b, `${short} \xB7 ${full}`, t("fleet.send.cargoHint"));
-      b.addEventListener("click", (e) => {
-        e.preventDefault();
-        onCargo(id);
-      });
-      cargoBox.append(b);
-    }
-    const recount = () => {
-      const fd = getDispatcher();
-      for (const [id, n] of counts) {
-        if (!fd) {
-          n.textContent = "";
-          continue;
-        }
-        const have = shipsOnPlanet(fd)[String(id)] ?? 0;
-        const cap = shipCapacity(fd, id);
-        const w = pickedLoad({ metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet }, readPick(), 0, Number.MAX_SAFE_INTEGER);
-        const need = cap > 0 ? Math.ceil((w.metal + w.crystal + w.deuterium) / cap) : 0;
-        n.textContent = have ? `\xD7${Math.min(need, have).toLocaleString(o.locale)}` : "0";
-        n.parentElement?.classList.toggle("short", need > have);
-        n.parentElement?.classList.toggle("none", !have);
-      }
-    };
-    for (const [k, input] of inputs) {
-      input.addEventListener("input", () => {
-        save({ sendPick: readPick() });
-        recount();
-      });
-      input.parentElement?.querySelector(".sym")?.addEventListener("click", (e) => {
-        e.preventDefault();
-        const fd = getDispatcher();
-        if (!fd) return;
-        const have = { metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet }[k];
-        input.value = groupInt(Math.max(0, Math.floor(have || 0)), o.locale);
-        save({ sendPick: readPick() });
-        recount();
-      });
-    }
-    all2.addEventListener("click", (e) => {
-      e.preventDefault();
-      const fd = getDispatcher();
-      if (!fd) return;
-      const here = { metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet };
-      for (const [k, input] of inputs) input.value = groupInt(Math.max(0, Math.floor(here[k] || 0)), o.locale);
-      save({ sendPick: readPick() });
-      recount();
-    });
-    clear.addEventListener("click", (e) => {
-      e.preventDefault();
-      for (const [, input] of inputs) input.value = "";
-      save({ sendPick: readPick() });
-      recount();
-    });
-    recount();
-    void whenDispatcherReady().then(recount);
-    const label = (text) => el4(doc, "span", "lbl", text);
-    panel.append(label(t("fleet.send.dest")), dest, label(t("fleet.send.res")), res, cargoBox);
-    return panel;
-  }
-  function readMissionLink(href) {
-    let p;
-    try {
-      p = new URL(href).searchParams;
-    } catch {
-      return null;
-    }
-    if (p.get("futmode")) return null;
-    const mission = Number(p.get("mission"));
-    const mode = mission === 3 ? "transport" : mission === 4 ? "deploy" : null;
-    const [g, sys, pos] = ["galaxy", "system", "position"].map((k) => Number(p.get(k)));
-    if (!mode || !(g > 0) || !(sys > 0) || !(pos >= 1 && pos <= 17)) return null;
-    return { mode, target: { galaxy: g, system: sys, position: pos, type: p.get("type") === "3" ? 3 : 1 } };
-  }
-  function skipSwitch(o, out, redraw) {
-    const { doc, t } = o;
-    const skipped = loadSettings(o.store).skipBodies.includes(o.bodyId);
-    const b = ruleSwitch(doc, "skip", t("fleet.rule.skipHere"), skipped, () => {
-      const now = loadSettings(o.store);
-      const others = now.skipBodies.filter((id) => id !== o.bodyId);
-      o.store.set(SETTINGS_KEY, { ...now, skipBodies: skipped ? others : [...others, o.bodyId] });
-      redraw();
-    });
-    out.peek(b, `${t("fleet.rule.skip")}: ${skipped ? t("fleet.on") : t("fleet.off")}.`, t("fleet.rule.skipHint"));
-    return b;
-  }
-  function renderFleetTools(o) {
-    const { doc, t } = o;
-    if (!doc.getElementById(STYLE_ID4)) {
-      const style = el4(doc, "style");
-      style.id = STYLE_ID4;
-      style.textContent = FLEET_CSS;
-      doc.head.append(style);
-    }
-    doc.querySelectorAll(".fut-fbar").forEach((n) => n.remove());
-    const href = o.href ?? doc.location?.href ?? "";
-    const navigate = o.navigate ?? ((url) => doc.location.assign(url));
-    if (!doc.documentElement.dataset.futSendPage) {
-      doc.documentElement.dataset.futSendPage = "1";
-      o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), sendMode: null, sendTarget: null, sendPick: { metal: null, crystal: null, deuterium: null } });
-    }
-    const link = readMissionLink(href);
-    let focusRes = false;
-    if (link && !doc.documentElement.dataset.futMissionLink) {
-      doc.documentElement.dataset.futMissionLink = "1";
-      o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), sendMode: link.mode, sendTarget: link.target });
-      focusRes = true;
-    }
-    const settings = loadSettings(o.store);
-    const stored = profileFor(loadProfiles(o.store), o.bodyId);
-    const profile = activeProfile(stored, settings);
-    const redraw = () => renderFleetTools(o);
-    const fleet1 = doc.getElementById("fleet1");
-    const anchor1 = fleet1?.querySelector("#technologies") ?? null;
-    const fleet2 = doc.getElementById("fleet2");
-    const anchor2 = fleet2?.querySelector("#buttonz") ?? null;
-    if (fleet2) enableOriginAutofill(doc);
-    const incoming = readRepeatParams(href);
-    let releaseHold = () => {
-    };
-    if (incoming && fleet1 && !doc.documentElement.dataset.futAutoRun && !doc.documentElement.dataset.futHold) {
-      doc.documentElement.dataset.futHold = "1";
-      releaseHold = holdContinue(doc);
-    }
-    const state = pageState.get(doc) ?? { active: incoming, o };
-    state.o = o;
-    pageState.set(doc, state);
-    const out = readout(doc, t("fleet.readyHint"));
-    const say = out.say;
-    const report = (r, okKey, vars = {}) => r.ok ? say(t(okKey, { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), ...vars })) : say(t(r.reason ?? "fleet.err.noShips"), true);
-    const expUniverse = () => ({
-      economySpeed: universeSpeed(doc),
-      topScore: topScore(o.store),
-      lfBooster: o.store.get(LF_BONUS_KEY, null)?.expedition ?? 0,
-      itemBoost: expeditionItemBoost(o.store.get(ITEMS_KEY, null)),
-      // Size and donut of the universe, for the random system (public API cache, else the page's meta tags).
-      ...(({ systems, donutSystem }) => ({ systems, donutSystem }))(universeOf(doc, o.store.get(SERVER_DATA_KEY, null)))
-    });
-    if (fleet1)
-      void whenDispatcherReady().then((fd) => {
-        const max = fd ? expeditionLimits(fd, expUniverse()).max : 0;
-        if (!fd || max <= 0) return;
-        const here = shipsOnPlanet(fd);
-        const cargo = Object.fromEntries([219, 203, 202].map((id) => [String(id), here[String(id)] ?? 0]));
-        const free = Math.max(0, (fd.maxExpeditionCount || 0) - (fd.expeditionCount || 0));
-        o.store.set(EXPEDITION_MAX_KEY, { max, at: Date.now(), cargo, free });
-      });
-    const withDispatcher = (fn) => {
-      const fd = getDispatcher();
-      if (!fd || fd.currentPage !== "fleet1") {
-        releaseHold();
-        return say(t(fd ? "fleet.err.page1" : "fleet.err.notReady"), true);
-      }
-      void whenTargetIdle(fd).then(() => {
-        try {
-          fn(fd);
-          state.prepared = Math.round(fd.speedPercent * 10);
-        } finally {
-          releaseHold();
-        }
-      });
-    };
-    let drawSkip = () => {
-    };
-    let skipTile = null;
-    const markUsed = (mode) => {
-      const key = mode === "collectDeploy" ? "collect" : mode;
-      for (const b of Array.from(doc.querySelectorAll(".fut-fbar .fut-fact[data-mode]"))) b.classList.toggle("used", b.dataset.mode === key);
-    };
-    const begin = (mode, dest = null) => {
-      const prev = state.active;
-      const same = prev && prev.mode === mode;
-      state.active = REPEATABLE.includes(mode) ? { mode, first: same ? prev.first : o.bodyId, dest, ...same && prev.speed ? { speed: prev.speed } : {} } : null;
-      markUsed(mode);
-      drawSkip();
-    };
-    const roundSpeed = () => state.active?.speed;
-    const skipTarget = () => {
-      const a = state.active;
-      if (!a || !SKIPPABLE.includes(a.mode)) return null;
-      return nextInRound(a, o.bodyId, o.bodies, loadSettings(o.store).skipBodies);
-    };
-    const skip = () => {
-      const a = state.active;
-      const next = skipTarget();
-      if (!a || next === null) return say(t("fleet.err.noSkip"), true);
-      navigate(repeatUrl(href, next, a));
-    };
-    const reportRound = (r) => {
-      report(r, "fleet.ok.cargo");
-      const next = r.ok ? null : skipTarget();
-      if (next === null) return;
-      say(`${t(r.reason ?? "fleet.err.noShips")} \xB7 ${t("fleet.skipOffer", { body: shortLabel(o, next) })}`, true);
-      skipTile?.focus();
-    };
-    const run = {
-      moon: () => withDispatcher((fd) => {
-        const here = o.bodies.find((b) => b.planetId === o.bodyId);
-        const target = here?.moonId ? bodyTarget(o.bodies, here.moonId) : null;
-        if (!target) return say(t("fleet.err.noMoon"), true);
-        begin("moon");
-        reportRound(prepareTransport(fd, doc, profile, settings, target));
-      }),
-      collect: (dest) => withDispatcher((fd) => {
-        const target = dest ? bodyTarget(o.bodies, dest) : null;
-        if (!dest || !target) return say(t("fleet.err.noDest"), true);
-        begin("collect", dest);
-        reportRound(prepareTransport(fd, doc, profile, settings, target));
-      }),
-      collectDeploy: (dest) => withDispatcher((fd) => {
-        const target = dest ? bodyTarget(o.bodies, dest) : null;
-        if (!dest || !target) return say(t("fleet.err.noDest"), true);
-        begin("collectDeploy", dest);
-        reportRound(prepareDeploy(fd, doc, profile, settings, target));
-      }),
-      // Plain game actions: destination and resources from the row on page 1, read when pressed.
-      // Plain game actions: a switch that stays on; CL / CP below then prepare the fleet.
-      transport: () => toggleSend("transport"),
-      deploy: () => toggleSend("deploy"),
-      expedition: () => withDispatcher((fd) => {
-        begin("expedition");
-        const r = prepareExpedition(fd, doc, profile, settings, expUniverse());
-        const extra = [
-          settings.expeditionSpread > 0 ? t("fleet.ok.expSystem", { coords: `${fd.currentPlanet.galaxy}:${r.system}:16`, n: settings.expeditionSpread }) : "",
-          r.ok && r.slots ? t("fleet.ok.expSplit", { slots: r.slots }) : ""
-        ].filter(Boolean);
-        if (r.ok && extra.length) say(`${t("fleet.ok.expedition", { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), target: r.target.toLocaleString(o.locale) })} \xB7 ${extra.join(" \xB7 ")}`);
-        else report(r, "fleet.ok.expedition", { target: r.target.toLocaleString(o.locale) });
-      }),
-      fleetsave: () => withDispatcher((fd) => {
-        if (!profile.save) return say(t("fleet.err.noFleetsave"), true);
-        begin("fleetsave");
-        report(prepareFleetsave(fd, doc, profile, roundSpeed() ? { ...profile.save, speed: roundSpeed() } : profile.save), "fleet.ok.cargo");
-      }),
-      plan: (dest) => withDispatcher((fd) => {
-        const delivery = o.store.get(DELIVERY_KEY, null);
-        const target = dest ? bodyTarget(o.bodies, dest) : null;
-        if (!delivery || !dest || delivery.target !== dest || !target) return say(t("fleet.err.noDelivery"), true);
-        begin("plan", dest);
-        const r = prepareDelivery(fd, doc, profile, settings, target, delivery.need, reservedFor(o.store.get(QUEUED_KEY, {}), o.bodyId));
-        const left = delivery.need.metal + delivery.need.crystal + delivery.need.deuterium;
-        report(r, "fleet.ok.delivery", { left: left.toLocaleString(o.locale) });
-      }),
-      last: () => withDispatcher((fd) => {
-        const last2 = o.store.get(LAST_FLEET_KEY, null);
-        if (!last2) return say(t("fleet.err.noLast"), true);
-        begin("last");
-        report(prepareLast(fd, doc, profile, last2), "fleet.ok.ships");
-      })
-    };
-    function toggleSend(mode) {
-      const now = loadSettings(o.store);
-      const next = now.sendMode === mode ? null : mode;
-      const sendTarget = next && !now.sendTarget ? twinTarget(o.bodies, o.bodyId) : now.sendTarget;
-      o.store.set(SETTINGS_KEY, { ...now, sendMode: next, sendTarget });
-      const fd = getDispatcher();
-      if (fd && next) clearOurSelection(fd);
-      redraw();
-      if (next) say(t(next === "transport" ? "fleet.send.onTransport" : "fleet.send.onDeploy"));
-      doc.querySelector(".fut-fsend .fut-fin.p")?.focus();
-    }
-    function aim() {
-      const fd = getDispatcher();
-      if (!fd || fd.currentPage !== "fleet1") return;
-      void whenTargetIdle(fd).then(() => {
-        const now = loadSettings(o.store);
-        if (!now.sendMode) return;
-        const target = sendTargetOf(o, now.sendTarget, fd.currentPlanet);
-        if (target) aimSend(fd, doc, target, now.sendMode);
-      });
-    }
-    function sendWith(ship) {
-      withDispatcher((fd) => {
-        const now = loadSettings(o.store);
-        if (!now.sendMode) return;
-        const target = sendTargetOf(o, now.sendTarget, fd.currentPlanet);
-        if (!target) return say(t("fleet.err.noTarget"), true);
-        const c = fd.currentPlanet;
-        if (c.galaxy === target.galaxy && c.system === target.system && c.position === target.position && (c.type ?? 1) === target.type)
-          return say(t("fleet.err.sameBody"), true);
-        begin(now.sendMode);
-        const r = prepareSend(fd, doc, now, target, now.sendPick, now.sendMode, ship, profile.reserve.ships, profile.reserve.resources);
-        if (r.ok && r.missing > 0)
-          return say(t("fleet.ok.cargoShort", { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), missing: r.missing.toLocaleString(o.locale) }), true);
-        report(r, "fleet.ok.cargo");
-      });
-    }
-    state.rerun = (mode, dest) => run[mode](dest);
-    const favRun = {
-      collect: () => settings.favTransport ? run.collect(settings.favTransport) : say(t("fleet.err.noDefault"), true),
-      collectDeploy: () => settings.favDeploy ? run.collectDeploy(settings.favDeploy) : say(t("fleet.err.noDefault"), true)
-    };
-    if (fleet1 && anchor1) {
-      const AUTO_CARGO = ["moon", "collect", "plan"];
-      for (const li of Array.from(fleet1.querySelectorAll("#technologies li[data-technology]"))) {
-        li.querySelector(".fut-mainship")?.remove();
-        const id = Number(li.dataset.technology);
-        if (!CARGO_SHIPS.includes(id)) continue;
-        const main2 = settings.mainShip === id;
-        const pick = el4(doc, "button", `fut-mainship${main2 ? " on" : ""}`);
-        pick.type = "button";
-        pick.innerHTML = iconSvg("cargo", 12);
-        pick.title = main2 ? t("fleet.mainShipIs") : t("fleet.mainShipPick");
-        pick.setAttribute("aria-label", `${pick.title}: ${li.getAttribute("aria-label") ?? id}`);
-        pick.setAttribute("aria-pressed", String(main2));
-        pick.addEventListener("click", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          if (main2) return;
-          const now = loadSettings(o.store);
-          o.store.set(SETTINGS_KEY, { ...now, mainShip: id, secondShip: now.secondShip === id ? now.mainShip : now.secondShip });
-          const active = state.active;
-          redraw();
-          if (active && AUTO_CARGO.includes(active.mode)) pageState.get(doc)?.rerun?.(active.mode, active.dest);
-        });
-        li.append(pick);
-      }
-      const bar = el4(doc, "div", "fut-fbar");
-      const keys = keymap(o.store);
-      const k = (id) => keys.get(id) ?? "";
-      const tiles = el4(doc, "div", "fut-facts");
-      tiles.setAttribute("role", "group");
-      tiles.setAttribute("aria-label", t("fleet.actionsLabel"));
-      const here = o.bodies.find((b) => b.planetId === o.bodyId);
-      const act2 = (ico, id, name, where, tip, onClick, dim = false) => {
-        const b = tile(doc, ico, where ? `${name} ${where}` : name, onClick, dim ? "dim" : "", k(id), name);
-        b.dataset.mode = id.replace(/^fleet\./, "");
-        out.peek(b, where ? `${name} ${where}` : name, tip);
-        return b;
-      };
-      const to = (id) => `\u2192 ${shortLabel(o, id)}`;
-      const last2 = o.store.get(LAST_FLEET_KEY, null);
-      const collect = tile(doc, "collect", t("fleet.btn.collect"), () => collectMenu(
-        o,
-        collect,
-        settings,
-        { transport: k("fleet.collect"), deploy: k("fleet.collectDeploy") },
-        (mode, dest2) => dest2 ? run[mode](dest2) : say(t("fleet.err.noDefault"), true)
-      ), "more", "", t("fleet.btn.collectShort"));
-      collect.setAttribute("aria-haspopup", "menu");
-      collect.dataset.mode = "collect";
-      collect.append(el4(doc, "i", "more-mark"));
-      out.peek(collect, t("fleet.btn.collect"), t("fleet.tip.collect"));
-      const zone = (text) => {
-        const z = el4(doc, "span", "fut-fzone", text);
-        z.setAttribute("aria-hidden", "true");
-        return z;
-      };
-      const zoneBox = (text, cls = "") => {
-        const box = el4(doc, "span", `fut-fzonebox ${cls}`.trim());
-        const row = el4(doc, "span", "fut-ftiles");
-        box.append(zone(text), row);
-        return { box, row };
-      };
-      const mission = zoneBox(t("fleet.zone.mission"));
-      tiles.append(mission.box);
-      mission.row.append(
-        ...["transport", "deploy"].map((m) => {
-          const b = act2(m, `fleet.${m}`, t(`fleet.btn.${m}`), "", t(`fleet.tip.${m}`), () => run[m]());
-          b.setAttribute("aria-pressed", String(settings.sendMode === m));
-          return b;
-        }),
-        act2("expedition", "fleet.expedition", t("fleet.btn.expedition"), "", t("fleet.tip.expedition"), () => run.expedition()),
-        act2(
-          "fleetsave",
-          "fleet.fleetsave",
-          t("fleet.btn.fleetsave"),
-          profile.save ? `\u2192 ${profile.save.galaxy ?? "\xB7"}:${profile.save.system ?? "\xB7"}:${profile.save.position}` : "",
-          profile.save ? t("fleet.tip.fleetsave") : t("fleet.err.noFleetsave"),
-          () => profile.save ? run.fleetsave() : openSettings2(o, "body", redraw),
-          !profile.save
-        ),
-        act2("last", "fleet.last", t("fleet.btn.last"), "", last2 ? t("fleet.tip.last") : t("fleet.err.noLast"), () => run.last(), !last2)
-      );
-      const dest = zoneBox(t("fleet.zone.dest"), "fut-fsecond");
-      const secondary = dest.row;
-      if (here?.moonId) secondary.append(act2("moon", "fleet.moon", t("fleet.btn.moon"), to(here.moonId), t("fleet.tip.moon"), () => run.moon()));
-      secondary.append(collect);
-      tiles.append(dest.box);
-      const skipSlot = el4(doc, "span", "fut-fsecond fut-fskip");
-      drawSkip = () => {
-        const next = skipTarget();
-        skipTile = next === null ? null : act2("skip", "fleet.skip", t("fleet.btn.skip"), to(next), t("fleet.tip.skip"), skip);
-        skipSlot.replaceChildren(...skipTile ? [skipTile] : []);
-        skipSlot.hidden = !skipTile;
-      };
-      drawSkip();
-      tiles.append(skipSlot);
-      registerActions(doc, o.store, t, {
-        ...here?.moonId ? { "fleet.moon": () => run.moon() } : {},
-        "fleet.transport": () => run.transport(),
-        "fleet.deploy": () => run.deploy(),
-        "fleet.collect": favRun.collect,
-        "fleet.collectDeploy": favRun.collectDeploy,
-        "fleet.expedition": () => run.expedition(),
-        "fleet.fleetsave": () => run.fleetsave(),
-        "fleet.last": () => run.last(),
-        "fleet.skip": skip
-      });
-      const rules = el4(doc, "div", "fut-frules");
-      rules.setAttribute("role", "group");
-      rules.setAttribute("aria-label", t("fleet.rulesLabel"));
-      const rulesOut = readout(doc, t("fleet.reservesHint"));
-      const sw = (ico, label, hint, key, after, value) => {
-        const b = ruleSwitch(doc, ico, label, settings[key], () => {
-          o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: !loadSettings(o.store)[key] });
-          after?.();
-          redraw();
-        }, value);
-        rulesOut.peek(b, `${label}: ${settings[key] ? t("fleet.on") : t("fleet.off")}.`, hint);
-        return b;
-      };
-      const fmtN = (n) => formatUnits(n, o.locale);
-      const sumOf = (r) => Object.values(r ?? {}).reduce((a, b) => a + b, 0);
-      const shipsKept = sumOf(stored.reserve.ships);
-      const res = stored.reserve.resources;
-      const resValue = el4(doc, "span", "toks");
-      for (const [cls, v] of [["m", res.metal], ["c", res.crystal], ["d", res.deuterium]]) {
-        if (!v) continue;
-        const tk = el4(doc, "span", "");
-        tk.append(resToken(doc, cls, 11), doc.createTextNode(fmtN(v)));
-        resValue.append(tk);
-      }
-      const unset = t("fleet.rule.unset");
-      const gateKept = sumOf(stored.gate);
-      const reserves = el4(doc, "span", "fut-fgroup");
-      reserves.setAttribute("role", "group");
-      reserves.setAttribute("aria-label", t("fleet.zone.reserves"));
-      const reserveChips = el4(doc, "span", "fut-fchips");
-      reserves.append(zone(t("fleet.zone.reserves")), reserveChips);
-      reserveChips.append(
-        sw("ships", t("fleet.rule.ships"), t("fleet.rule.shipsHint"), "shipsOn", void 0, shipsKept ? fmtN(shipsKept) : unset),
-        sw("resources", t("fleet.rule.resources"), t("fleet.rule.resourcesHint"), "resourcesOn", void 0, res.metal || res.crystal || res.deuterium ? resValue : unset),
-        ...isMoon(o.bodies, o.bodyId) ? [sw("gate", t("fleet.rule.gate"), t("fleet.rule.gateHint"), "gateOn", void 0, gateKept ? fmtN(gateKept) : unset)] : [],
-        sw("food", t("fleet.foodShort"), t("fleet.foodHint"), "ignoreFood", () => applyFood(o.store))
-      );
-      const round = el4(doc, "span", "fut-fgroup");
-      round.setAttribute("role", "group");
-      round.setAttribute("aria-label", t("fleet.zone.round"));
-      const roundChips = el4(doc, "span", "fut-fchips");
-      round.append(zone(t("fleet.zone.round")), roundChips);
-      roundChips.append(sw("repeat", t("fleet.repeatShort"), t("fleet.repeatHint"), "repeat"));
-      rules.append(reserves, round);
-      roundChips.append(skipSwitch(o, rulesOut, redraw));
-      const edit = el4(doc, "span", "fut-fedit");
-      const tool = (ico, label, hint, onClick, cls = "", short = "") => {
-        const b = el4(doc, "button", `fut-ftool ${cls}`.trim());
-        b.type = "button";
-        b.title = label;
-        b.setAttribute("aria-label", label);
-        b.innerHTML = iconSvg(ico, 18);
-        if (short) b.append(el4(doc, "span", "name", short));
-        b.addEventListener("click", (e) => {
-          e.preventDefault();
-          onClick();
-        });
-        out.peek(b, label, hint);
-        return b;
-      };
-      const rulesTool = tool("rules", t("fleet.editRules", { body: shortLabel(o, o.bodyId) }), t("fleet.editRulesHint"), () => openSettings2(o, "body", redraw), "fut-frules-open", t("fleet.rulesShort"));
-      rulesOut.peek(rulesTool, t("fleet.editRules", { body: shortLabel(o, o.bodyId) }), t("fleet.editRulesHint"));
-      if (o.onOpenSettings) edit.append(tool("settings", t("fleet.general"), t("fleet.generalHint"), () => o.onOpenSettings?.(), "", t("fleet.general")));
-      const top = el4(doc, "div", "fut-frow");
-      top.append(tiles, edit);
-      const bottom = el4(doc, "div", "fut-frow");
-      bottom.append(out.box);
-      bar.append(top);
-      if (settings.sendMode) {
-        bar.append(sendPanel(o, out.peek, sendWith, aim));
-        aim();
-      }
-      if (focusRes) doc.querySelector(".fut-fsend .fut-fresin.metal input")?.focus();
-      bar.append(bottom);
-      anchor1.before(bar);
-      markUsed(state.active?.mode ?? null);
-      const strip = el4(doc, "div", "fut-fbar fut-freserves");
-      const stripRow = el4(doc, "div", "fut-frow");
-      const cap = el4(doc, "span", "fut-fcap");
-      cap.setAttribute("role", "status");
-      stripRow.append(rules, rulesTool);
-      const foot = el4(doc, "div", "fut-frow fut-ffoot");
-      foot.append(rulesOut.box, cap);
-      strip.append(stripRow, foot);
-      const below = fleet1.querySelector("#allornone") ?? null;
-      if (below) below.before(strip);
-      else anchor1.after(strip);
-      watchSelectedCargo(o);
-      addInvertButtons(o);
-      keepReserveOnSelectAll(o);
-      markShipReserve(o, profile.reserve.ships);
-    }
-    const dispatch = doc.getElementById("fleetdispatchcomponent");
-    if (!anchor1 && (fleet1 || dispatch) && !fleet2?.offsetParent) {
-      const host = fleet1 ?? dispatch;
-      const strip = el4(doc, "div", "fut-fbar fut-freserves fut-fempty");
-      const row = el4(doc, "div", "fut-frow");
-      const rulesOut = readout(doc, t("fleet.emptyHint"));
-      const round = el4(doc, "span", "fut-fgroup");
-      round.setAttribute("role", "group");
-      round.setAttribute("aria-label", t("fleet.zone.round"));
-      round.append(skipSwitch(o, rulesOut, redraw));
-      const next = skipTarget();
-      if (next !== null) {
-        const keys = keymap(o.store);
-        const b = tile(doc, "skip", `${t("fleet.btn.skip")} \u2192 ${shortLabel(o, next)}`, skip, "", keys.get("fleet.skip") ?? "", t("fleet.btn.skip"));
-        rulesOut.peek(b, `${t("fleet.btn.skip")} \u2192 ${shortLabel(o, next)}`, t("fleet.tip.skipEmpty"));
-        round.append(b);
-      }
-      row.append(round);
-      strip.append(row, rulesOut.box);
-      host.prepend(strip);
-      registerActions(doc, o.store, t, { "fleet.skip": skip });
-    }
-    if (fleet2) {
-      fixSpeedBarTouch(doc);
-      keepReserveOnLoadAll(o);
-      markResourceReserve(o, profile.reserve.resources);
-    }
-    if (fleet2 && anchor2) {
-      const bar = el4(doc, "div", "fut-fbar fut-faskbar");
-      bar.hidden = true;
-      const out2 = readout(doc, "");
-      const row = el4(doc, "div", "fut-frow");
-      const ask = el4(doc, "span", "fut-fask");
-      ask.hidden = true;
-      row.append(out2.box, ask);
-      bar.append(row);
-      anchor2.before(bar);
-      const offerSpeed = () => {
-        const box = doc.querySelector(".fut-fask");
-        const fd = getDispatcher();
-        const a = state.active;
-        if (!box) return;
-        const pct = fd ? Math.round(fd.speedPercent * 10) : 0;
-        const current3 = a?.speed ?? state.prepared;
-        const next = a ? nextInRound(a, o.bodyId, o.bodies, loadSettings(o.store).skipBodies) : null;
-        if (!fd || !a || a.mode !== "fleetsave" || !loadSettings(o.store).repeat || current3 === void 0 || pct === current3 || next === null) {
-          box.hidden = true;
-          return;
-        }
-        const note = el4(doc, "div", "");
-        const noteYes = el4(doc, "button", "yes", t("fleet.speedAsk.yes"));
-        const noteNo = el4(doc, "button", "", t("fleet.speedAsk.no"));
-        noteYes.type = noteNo.type = "button";
-        note.append(el4(doc, "span", "q", t("fleet.speedAsk.q", { pct })), noteYes, noteNo);
-        noteYes.addEventListener("click", (e) => {
-          e.preventDefault();
-          state.active = { ...a, speed: pct };
-          note.replaceChildren(el4(doc, "span", "q", t("fleet.speedAsk.done", { pct })));
-          (doc.defaultView ?? globalThis).setTimeout(() => setTouchNote(doc, null), 3e3);
-        });
-        noteNo.addEventListener("click", (e) => {
-          e.preventDefault();
-          setTouchNote(doc, null);
-        });
-        if (setTouchNote(doc, note)) {
-          box.hidden = true;
-          return;
-        }
-        const host = box.closest(".fut-fbar");
-        if (host) host.hidden = false;
-        const yes = el4(doc, "button", "fut-fask-b yes", t("fleet.speedAsk.yes"));
-        const no = el4(doc, "button", "fut-fask-b", t("fleet.speedAsk.no"));
-        yes.type = no.type = "button";
-        yes.addEventListener("click", (e) => {
-          e.preventDefault();
-          state.active = { ...a, speed: pct };
-          box.hidden = true;
-          const said = host?.querySelector(".fut-finfo");
-          if (said) said.textContent = t("fleet.speedAsk.done", { pct });
-        });
-        no.addEventListener("click", (e) => {
-          e.preventDefault();
-          box.hidden = true;
-        });
-        box.replaceChildren(el4(doc, "span", "fut-fask-q", t("fleet.speedAsk.q", { pct })), yes, no);
-        box.title = t("fleet.speedAsk.hint", { pct: current3 });
-        box.hidden = false;
-      };
-      const speedBar = doc.getElementById("speedPercentage");
-      if (speedBar && !speedBar.dataset.futAsk) {
-        speedBar.dataset.futAsk = "1";
-        speedBar.addEventListener("click", () => setTimeout(offerSpeed, 0));
-      }
-    }
-    registerActions(doc, o.store, t, {});
-    void whenDispatcherReady().then((fd) => {
-      if (!fd) return;
-      applyFood(o.store, fd);
-      const ships = readShipsInfo(fd);
-      if (ships) o.store.set(SHIPS_INFO_KEY, ships);
-      try {
-        recordShipsHere(o, fd);
-      } catch {
-      }
-      hookSend(fd, () => {
-        try {
-          o.store.set(LAST_FLEET_KEY, snapshotFleet(fd));
-          recordLeft(o, fd);
-          recordShipment(o, fd);
-          recordOrionFuel(o.store, fd);
-        } catch {
-        }
-        const current3 = pageState.get(doc);
-        if (current3?.active?.mode === "plan") {
-          const d = current3.o.store.get(DELIVERY_KEY, null);
-          if (!d) return false;
-          const need = {
-            metal: Math.max(0, d.need.metal - fd.cargoMetal),
-            crystal: Math.max(0, d.need.crystal - fd.cargoCrystal),
-            deuterium: Math.max(0, d.need.deuterium - fd.cargoDeuterium)
-          };
-          const done = need.metal + need.crystal + need.deuterium <= 0;
-          current3.o.store.set(DELIVERY_KEY, done ? null : { ...d, need });
-          if (done) return false;
-          const nextBody2 = nextInRound(current3.active, current3.o.bodyId, current3.o.bodies, loadSettings(current3.o.store).skipBodies);
-          if (nextBody2 === null) return false;
-          navigate(repeatUrl(href, nextBody2, current3.active));
-          return true;
-        }
-        if (!current3?.active || !loadSettings(current3.o.store).repeat) return false;
-        if (current3.active.mode === "expedition" && loadSettings(current3.o.store).expeditionStay) {
-          if (freeExpeditionSlots(fd.expeditionCount, fd.maxExpeditionCount) <= 1) return false;
-          navigate(repeatUrl(href, current3.o.bodyId, current3.active));
-          return true;
-        }
-        if (current3.active.mode === "expedition" && freeExpeditionSlots(fd.expeditionCount, fd.maxExpeditionCount) <= 1) return false;
-        const next = nextInRound(current3.active, current3.o.bodyId, current3.o.bodies, loadSettings(current3.o.store).skipBodies);
-        if (next === null) return false;
-        navigate(repeatUrl(href, next, current3.active));
-        return true;
-      });
-      if (incoming && fd.currentPage === "fleet1" && !doc.documentElement.dataset.futAutoRun) {
-        doc.documentElement.dataset.futAutoRun = "1";
-        const go = () => {
-          if (incoming.mode === "collect" || incoming.mode === "collectDeploy" || incoming.mode === "plan") run[incoming.mode](incoming.dest);
-          else run[incoming.mode]();
-        };
-        if (doc.readyState === "complete") setTimeout(go, 0);
-        else doc.defaultView?.addEventListener("load", () => setTimeout(go, 0), { once: true });
-      }
-    });
-  }
-  function holdContinue(doc, maxMs = 8e3) {
-    const win = doc.defaultView;
-    if (!win) return () => {
-    };
-    const keys = (e) => {
-      if (e.key !== "Enter") return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-    };
-    const clicks = (e) => {
-      const t = e.target;
-      if (!t?.closest?.("#continueToFleet2, #sendFleet")) return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-    };
-    const types = ["keydown", "keypress", "keyup"];
-    types.forEach((type) => win.addEventListener(type, keys, true));
-    win.addEventListener("click", clicks, true);
-    let done = false;
-    const release = () => {
-      if (done) return;
-      done = true;
-      types.forEach((type) => win.removeEventListener(type, keys, true));
-      win.removeEventListener("click", clicks, true);
-      delete doc.documentElement.dataset.futHold;
-    };
-    win.setTimeout(release, maxMs);
-    return release;
-  }
-  function recordLeft(o, fd) {
-    const snapshot = o.store.get(SNAPSHOT_KEY, null);
-    if (!snapshot) return;
-    const onPlanet2 = { metal: Number(fd.metalOnPlanet) || 0, crystal: Number(fd.crystalOnPlanet) || 0, deuterium: Number(fd.deuteriumOnPlanet) || 0 };
-    const cargo = { metal: Number(fd.cargoMetal) || 0, crystal: Number(fd.cargoCrystal) || 0, deuterium: Number(fd.cargoDeuterium) || 0 };
-    const res = applyPageResources(snapshot, o.bodyId, leftAfterSend(onPlanet2, cargo, Number(fd.getConsumption()) || 0), Date.now());
-    const ships = applyPageShips(snapshot, o.bodyId, shipsAfterSend(shipsOnPlanet(fd), fd.shipsToSend ?? []));
-    if (res || ships) o.store.set(SNAPSHOT_KEY, snapshot);
-  }
-  function recordShipsHere(o, fd) {
-    const snapshot = o.store.get(SNAPSHOT_KEY, null);
-    if (snapshot && applyPageShips(snapshot, o.bodyId, shipsOnPlanet(fd))) o.store.set(SNAPSHOT_KEY, snapshot);
-  }
-  function recordShipment(o, fd) {
-    if (fd.mission !== 3 && fd.mission !== 4) return;
-    const cargo = { metal: Math.floor(fd.cargoMetal || 0), crystal: Math.floor(fd.cargoCrystal || 0), deuterium: Math.floor(fd.cargoDeuterium || 0) };
-    if (cargo.metal + cargo.crystal + cargo.deuterium <= 0) return;
-    const tp = fd.targetPlanet;
-    const coords = `${tp.galaxy}:${tp.system}:${tp.position}`;
-    const body = o.bodies.find((b) => b.coords === coords);
-    const target = body ? tp.type === 3 ? body.moonId : body.planetId : null;
-    if (!target) return;
-    const plan = o.store.get(PLAN_KEY, {});
-    if (!plan[String(target)]?.length) return;
-    const seconds = Number(fd.getDuration?.()) || 0;
-    const now = Date.now();
-    const list = o.store.get(SENT_KEY, []);
-    o.store.set(SENT_KEY, [...list, { target, cargo, sentAt: now, arriveAt: now + Math.max(0, seconds) * 1e3 }]);
-  }
-  function recordOrionFuel(store, fd) {
-    const tp = fd.targetPlanet;
-    const archive = loadArchive(store.get(ARCHIVE_KEY, null));
-    const next = noteFuel(archive, { at: Date.now(), coords: `${tp.galaxy}:${tp.system}:${tp.position}`, type: Number(tp.type), mission: Number(fd.mission), deut: Math.round(Number(fd.getConsumption()) || 0) });
-    if (next) store.set(ARCHIVE_KEY, next);
-  }
-  var initialFood = /* @__PURE__ */ new WeakMap();
-  function applyFood(store, fd = getDispatcher()) {
-    if (!fd) return;
-    const f = fd;
-    if (f.foodOnPlanet === void 0) return;
-    if (!initialFood.has(fd)) initialFood.set(fd, f.foodOnPlanet);
-    const ignore = loadSettings(store).ignoreFood;
-    f.foodOnPlanet = ignore ? 0 : initialFood.get(fd) ?? f.foodOnPlanet;
-    if (ignore) f.cargoFood = 0;
-    try {
-      fd.refresh();
-    } catch {
-    }
-  }
-  function whenTargetIdle(fd, timeoutMs = 5e3) {
-    const busy = () => Boolean(fd.fetchTargetPlayerDataTimeout);
-    if (!busy()) return Promise.resolve();
-    const started = Date.now();
-    return new Promise((resolve) => {
-      const check = () => !busy() || Date.now() - started > timeoutMs ? resolve() : setTimeout(check, 50);
-      check();
-    });
   }
 
   // src/modules/fleet/jumpgate.ts
@@ -18830,7 +18899,8 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
         refreshFleet?.();
         mountTouchBar(document, store, t);
       },
-      section: section2
+      section: section2,
+      rules: { bodies: readPlanetList(document).map(({ planetId, moonId, name, coords }) => ({ planetId, moonId, name, coords })), bodyId: currentId, locale }
     });
     let drawDock = null;
     const draw = () => {
@@ -19038,7 +19108,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
       });
     if (isFleetDispatch(document) && currentId) {
       const bodies = readPlanetList(document).map(({ planetId, moonId, name, coords }) => ({ planetId, moonId, name, coords }));
-      const fleet = { doc: document, store, bodyId: currentId, bodies, t, locale, onOpenSettings: () => openFutureSettings("fleet") };
+      const fleet = { doc: document, store, bodyId: currentId, bodies, t, locale, onOpenSettings: (s) => openFutureSettings(s ?? "fleet") };
       renderFleetTools(fleet);
       refreshFleet = () => renderFleetTools(fleet);
     }
