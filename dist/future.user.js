@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.152
+// @version      0.3.153
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -14452,6 +14452,23 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const cap = (k) => Math.max(0, Math.min(loaded[k], Math.floor(onPlanet2[k] - keep[k] - (k === "deuterium" ? fuel : 0))));
     return { metal: cap("metal"), crystal: cap("crystal"), deuterium: cap("deuterium") };
   }
+  function fixSpeedBarTouch(doc) {
+    const root = doc.documentElement;
+    if (root.dataset.futSpeedTouch) return;
+    root.dataset.futSpeedTouch = "1";
+    doc.addEventListener(
+      "touchend",
+      (e) => {
+        if (!e.target?.closest?.(".percentageBar")) return;
+        const touch = e.changedTouches?.[0];
+        const ev = e;
+        if (!touch || typeof ev.pageX === "number") return;
+        Object.defineProperty(e, "pageX", { value: touch.pageX, configurable: true });
+        Object.defineProperty(e, "pageY", { value: touch.pageY, configurable: true });
+      },
+      true
+    );
+  }
   function keepReserveOnLoadAll(o) {
     const { doc } = o;
     const root = doc.documentElement;
@@ -15222,6 +15239,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       registerActions(doc, o.store, t, { "fleet.skip": skip });
     }
     if (fleet2) {
+      fixSpeedBarTouch(doc);
       keepReserveOnLoadAll(o);
       markResourceReserve(o, profile.reserve.resources);
     }
