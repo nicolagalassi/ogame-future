@@ -3,7 +3,7 @@ import { PAGE_TOKENS, WINDOW_TOKENS_NO_LINES } from '../../core/sheet';
 /** Styles for the action bars on the game's fleet page (scoped by fut- class names). */
 export const FLEET_CSS = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
-.fut-fbar, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fclear, .fut-fall, .fut-fcap, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
+.fut-fbar, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fchips, .fut-fclear, .fut-fall, .fut-fcap, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
 /* The fleet bar speaks the inbox's language: Verdana 11px, tabular numbers, one set of tokens. */
 .fut-fbar, .fut-fmenu {
   ${PAGE_TOKENS} --line: var(--line-strong); --line-soft: #1D2531;
@@ -73,7 +73,11 @@ export const FLEET_CSS = `
 .fut-frules { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; min-width: 0; }
 /* Reserves and round: a strip of their own under the ships, apart from the actions. */
 .fut-freserves { margin-top: 8px; }
-.fut-fgroup { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.fut-fgroup { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; max-width: 100%; }
+/* A labelled group: the label stays on the first line, the switches wrap in their own column beside it. */
+.fut-fgroup:has(> .fut-fchips) { flex-wrap: nowrap; align-items: flex-start; }
+.fut-fgroup > .fut-fzone { line-height: 28px; }
+.fut-fchips { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; }
 /* A rule as a printed chip: pip filled when on, its name, what it keeps back. Off = outline only. */
 .fut-fchip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 8px; border: 1px solid var(--tile-line); border-radius: 4px; background: none; color: var(--mute); }
 .fut-fchip .ico { display: inline-flex; opacity: 0.8; }
@@ -192,6 +196,8 @@ export const FLEET_CSS = `
   .fut-ftool { width: 44px; height: 44px; }
   .fut-frow { flex-wrap: wrap; }
   .fut-frules { flex-wrap: wrap; gap: 6px; }
+  /* Riserve and Giro one under the other: one column of switches beside the labels. */
+  .fut-fgroup > .fut-fzone { min-width: 4em; }
   .fut-fsw { height: 40px; padding: 0 10px 0 12px; border-radius: 20px; }
   .fut-fread { flex-basis: 100%; }
   .fut-fin, .fut-fclear, .fut-fpick { height: 40px; }

@@ -1660,8 +1660,11 @@ export function renderFleetTools(o: FleetOptions): void {
     const reserves = el(doc, 'span', 'fut-fgroup');
     reserves.setAttribute('role', 'group');
     reserves.setAttribute('aria-label', t('fleet.zone.reserves'));
-    reserves.append(
-      zone(t('fleet.zone.reserves')),
+    // The label in its own column, the switches in theirs: on a narrow screen they wrap under each other,
+    // not back under the label (Ignora cibo sat alone below «Riserve» on a phone).
+    const reserveChips = el(doc, 'span', 'fut-fchips');
+    reserves.append(zone(t('fleet.zone.reserves')), reserveChips);
+    reserveChips.append(
       sw('ships', t('fleet.rule.ships'), t('fleet.rule.shipsHint'), 'shipsOn', undefined, shipsKept ? fmtN(shipsKept) : unset),
       sw('resources', t('fleet.rule.resources'), t('fleet.rule.resourcesHint'), 'resourcesOn', undefined, res.metal || res.crystal || res.deuterium ? resValue : unset),
       ...(isMoon(o.bodies, o.bodyId) ? [sw('gate', t('fleet.rule.gate'), t('fleet.rule.gateHint'), 'gateOn', undefined, gateKept ? fmtN(gateKept) : unset)] : []),
@@ -1670,10 +1673,12 @@ export function renderFleetTools(o: FleetOptions): void {
     const round = el(doc, 'span', 'fut-fgroup');
     round.setAttribute('role', 'group');
     round.setAttribute('aria-label', t('fleet.zone.round'));
-    round.append(zone(t('fleet.zone.round')), sw('repeat', t('fleet.repeatShort'), t('fleet.repeatHint'), 'repeat'));
+    const roundChips = el(doc, 'span', 'fut-fchips');
+    round.append(zone(t('fleet.zone.round')), roundChips);
+    roundChips.append(sw('repeat', t('fleet.repeatShort'), t('fleet.repeatHint'), 'repeat'));
     rules.append(reserves, round);
     // This body only: the expedition round (Ripeti, Salta) passes over it.
-    round.append(skipSwitch(o, rulesOut, redraw));
+    roundChips.append(skipSwitch(o, rulesOut, redraw));
 
     // The editors: this body's rules, and Future's general fleet settings.
     const edit = el(doc, 'span', 'fut-fedit');
