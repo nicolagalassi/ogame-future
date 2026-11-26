@@ -19,6 +19,8 @@ import type { PlanState } from '../../engines/planner';
 import { MENU_WIDTH, NATIVE_WIDTH, PLANET_MENU_CSS } from './style';
 import { iconSvg, type IconName as FleetIcon } from '../fleet/icons';
 import { resIconSvg } from '../../core/res-icons';
+import { MISSION_TONES } from '../../core/sheet';
+import type { BodyEvents } from '../../data/events';
 
 export interface MenuSettings {
   showTotals: boolean;
@@ -83,6 +85,8 @@ export interface PlanetMenuOptions {
   planGap?: number | null;
   /** Bodies with something in the plan, and where their resources stand. */
   planMarks?: Record<string, PlanMark>;
+  /** Fleets in flight per body (data/events, key `coords|p` / `coords|m`): enemies landing, own fleets. */
+  events?: Map<string, BodyEvents>;
 }
 
 export interface PlanMark {
@@ -370,10 +374,10 @@ function showPlanTip(doc: Document, anchor: HTMLElement, mark: PlanMark, o: Plan
 /** Removes everything Future added, so the menu can be redrawn without duplicates. */
 export function clearPlanetMenu(doc: Document): void {
   doc
-    .querySelectorAll('.fut-res, .fut-fleet, .fut-fleet-peek, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue, .fut-plancol, #fut-plan-tip')
+    .querySelectorAll('.fut-res, .fut-line3, .fut-fleet, .fut-fleet-peek, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue, .fut-plancol, #fut-plan-tip')
     .forEach((n) => n.remove());
   doc.querySelectorAll('.fut-name').forEach((wrap) => wrap.replaceWith(...Array.from(wrap.childNodes)));
-  doc.querySelectorAll('.fut-row').forEach((n) => n.classList.remove('fut-row', 'fut-current'));
+  doc.querySelectorAll('.fut-row').forEach((n) => n.classList.remove('fut-row', 'fut-current', 'fut-has-flights'));
 }
 
 /**
@@ -495,6 +499,86 @@ export function watchPlanetBar(doc: Document, redraw: () => void): void {
   }).observe(bar, { childList: true, subtree: true });
 }
 
+/* ------------------------------------------------------------------ */
+/* Fleets in flight per body (data/events)                             */
+/* ------------------------------------------------------------------ */
+
+/** The fleet bar's icon for an own mission, and its colour (core/sheet MISSION_TONES) where it has one. */
+const MISSION_LOOK: Record<number, { icon: FleetIcon; tone?: keyof typeof MISSION_TONES }> = {
+  1: { icon: 'ships' }, 2: { icon: 'ships' }, 3: { icon: 'transport', tone: 'collect' }, 4: { icon: 'deploy', tone: 'collect' },
+  5: { icon: 'reserve' }, 6: { icon: 'spy' }, 7: { icon: 'planet' }, 8: { icon: 'cargo' }, 9: { icon: 'ships' },
+  15: { icon: 'expedition', tone: 'expedition' }, 18: { icon: 'expedition', tone: 'expedition' },
+};
+const WAY_MARK = { out: '→', back: '←', in: '↓' } as const;
+
+function clock(at: number, locale: string): string {
+  return new Date(at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+/**
+ * An enemy landing on this planet or moon: the tile lights up red (attack, or espionage a little softer),
+ * as OGLight does. Painted from the list read when the page loaded: it shows on the player's next page,
+ * never by itself (no timer, no alarm: AGENTS.md §1.3, §1.4).
+ */
+function markThreat(link: HTMLElement | null, ev: BodyEvents | undefined, o: PlanetMenuOptions): void {
+  if (!link) return;
+  link.classList.remove('fut-attack', 'fut-spy');
+  link.querySelector(':scope > .fut-threat')?.remove();
+  if (!ev || (ev.attack === null && ev.spy === null)) return;
+  const { doc, t } = o;
+  link.classList.add(ev.attack !== null ? 'fut-attack' : 'fut-spy');
+  const badge = el(doc, 'span', 'fut-threat');
+  const lines: string[] = [];
+  if (ev.attack !== null) {
+    badge.append(icon(doc, 'sword', 12));
+    lines.push(t('threat.attack', { time: clock(ev.attack, o.locale) }));
+  }
+  if (ev.spy !== null) {
+    if (ev.attack === null) badge.append(icon(doc, 'eye', 12));
+    lines.push(t('threat.spy', { time: clock(ev.spy, o.locale) }));
+  }
+  badge.title = lines.join('\n');
+  badge.setAttribute('role', 'img');
+  badge.setAttribute('aria-label', lines.join('. '));
+  link.append(badge);
+}
+
+/**
+ * The player's own fleets tied to this row: one chip per mission and way (→ leaving, ← coming back,
+ * ↓ arriving here), with how many fleets; the moon's after a moon mark. Details in the tooltip.
+ */
+function flightChips(doc: Document, planet: BodyEvents | undefined, moon: BodyEvents | undefined, o: PlanetMenuOptions): HTMLElement | null {
+  const groups = [planet?.own ?? [], moon?.own ?? []];
+  if (!groups[0]!.length && !groups[1]!.length) return null;
+  const line = el(doc, 'span', 'fut-flights');
+  const lines: string[] = [];
+  const order = { out: 0, in: 1, back: 2 } as const;
+  groups.forEach((own, i) => {
+    if (!own.length) return;
+    if (i === 1) {
+      const mark = el(doc, 'span', 'fut-fl-moon');
+      mark.innerHTML = MOON_MARK;
+      line.append(mark);
+      lines.push(o.t('flights.moon'));
+    }
+    for (const f of [...own].sort((a, b) => order[a.way] - order[b.way] || a.first - b.first)) {
+      const look = MISSION_LOOK[f.mission] ?? { icon: 'ships' as FleetIcon };
+      const chip = el(doc, 'span', 'fut-fl');
+      if (look.tone) chip.style.setProperty('--tone', MISSION_TONES[look.tone]);
+      chip.innerHTML = iconSvg(look.icon, 11);
+      chip.append(el(doc, 'span', 'w', WAY_MARK[f.way]));
+      if (f.count > 1) chip.append(el(doc, 'span', 'n', String(f.count)));
+      const text = o.t(`flights.${f.way}`, { mission: o.t(`mission.${f.mission}`), n: f.count, time: clock(f.first, o.locale) });
+      chip.title = text;
+      lines.push(`${i === 1 ? '  ' : ''}${text}`);
+      line.append(chip);
+    }
+  });
+  line.title = lines.join('\n');
+  line.setAttribute('aria-label', lines.join('. '));
+  return line;
+}
+
 export function renderPlanetMenu(o: PlanetMenuOptions): void {
   const { doc } = o;
   const list = doc.getElementById('planetList');
@@ -521,6 +605,11 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
   list.style.removeProperty('--fut-row-h');
 
   const gameTips = o.settings.gameTips !== false;
+  // Enemies landing: on the game's own planet and moon links, whichever layout is on.
+  for (const entry of o.entries) {
+    markThreat(entry.planetLink, o.events?.get(`${entry.coords}|p`), o);
+    markThreat(entry.moonLink, o.events?.get(`${entry.coords}|m`), o);
+  }
   for (const entry of roomy ? o.entries : []) {
     setGameTip(entry.planetLink, gameTips);
     setGameTip(entry.moonLink, gameTips);
@@ -532,10 +621,19 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       const wrap = el(doc, 'span', 'fut-name');
       link.querySelectorAll('.planet-name, .planet-koords').forEach((n) => wrap.append(n));
       const planetBody = entry.planetId ? byId.get(entry.planetId) : undefined;
+      // Third line: the fleet's worth (touch screens) and the fleets in flight, side by side so the row
+      // keeps its height.
+      const third = el(doc, 'span', 'fut-line3');
       if (view.fleet) {
         const line = fleetLine(doc, planetBody, entry.moonId ? byId.get(entry.moonId) : undefined, o.locale, o.t);
-        if (line) wrap.append(line);
+        if (line) third.append(line);
       }
+      const flights = flightChips(doc, o.events?.get(`${entry.coords}|p`), entry.moonId ? o.events?.get(`${entry.coords}|m`) : undefined, o);
+      if (flights) {
+        third.append(flights);
+        entry.element.classList.add('fut-has-flights');
+      }
+      if (third.childElementCount) wrap.append(third);
       link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true, view));
       // The planet's fleet: on hover a veil over the whole planet, fading in from the planet's picture,
       // with the value on the right (pointer devices; touch screens keep the third line above). Only

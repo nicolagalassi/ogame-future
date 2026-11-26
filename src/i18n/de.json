@@ -970,5 +970,15 @@
   "settings.section.bodies": "Planeten und Monde",
   "fleet.bodiesHint": "Reserven, Sprungtor und Fleetsave jedes Planeten und Mondes. Tippe auf einen Körper, um seine Regeln zu ändern; Änderungen gelten sofort.",
   "fleet.bodiesAll": "Alle Körper",
-  "fleet.rule.saveReserveOnly": "kein Ziel"
+  "fleet.rule.saveReserveOnly": "kein Ziel",
+  "threat.attack": "Angriff landet um {time}",
+  "threat.spy": "Spionage landet um {time}",
+  "flights.out": "{mission}: {n} auf dem Hinflug, erste Ankunft {time}",
+  "flights.back": "{mission}: {n} auf dem Rückflug, erste um {time}",
+  "flights.in": "{mission}: {n} kommt hier an um {time}",
+  "flights.moon": "Mond:",
+  "mission.2": "Verbandsangriff",
+  "mission.7": "Kolonisieren",
+  "mission.9": "Mondzerstörung",
+  "mission.18": "Erkundung"
 }

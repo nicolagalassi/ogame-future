@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.160
+// @version      0.3.161
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1479,7 +1479,17 @@
     "settings.section.bodies": "Pianeti e lune",
     "fleet.bodiesHint": "Riserve, portale e fleetsave di ogni pianeta e luna. Tocca un corpo per cambiarne le regole; le modifiche valgono subito.",
     "fleet.bodiesAll": "Tutti i corpi",
-    "fleet.rule.saveReserveOnly": "senza destinazione"
+    "fleet.rule.saveReserveOnly": "senza destinazione",
+    "threat.attack": "Attacco in arrivo alle {time}",
+    "threat.spy": "Spionaggio in arrivo alle {time}",
+    "flights.out": "{mission}: {n} in andata, primo arrivo {time}",
+    "flights.back": "{mission}: {n} in rientro, primo alle {time}",
+    "flights.in": "{mission}: {n} in arrivo qui alle {time}",
+    "flights.moon": "Luna:",
+    "mission.2": "Attacco federale",
+    "mission.7": "Colonizzazione",
+    "mission.9": "Distruzione luna",
+    "mission.18": "Esplorazione"
   };
 
   // src/i18n/en.json
@@ -2455,7 +2465,17 @@
     "settings.section.bodies": "Planets and moons",
     "fleet.bodiesHint": "Reserves, jump gate and fleetsave of every planet and moon. Tap a body to change its rules; changes apply at once.",
     "fleet.bodiesAll": "All bodies",
-    "fleet.rule.saveReserveOnly": "no target"
+    "fleet.rule.saveReserveOnly": "no target",
+    "threat.attack": "Attack landing at {time}",
+    "threat.spy": "Espionage landing at {time}",
+    "flights.out": "{mission}: {n} outbound, first arrives {time}",
+    "flights.back": "{mission}: {n} returning, first at {time}",
+    "flights.in": "{mission}: {n} arriving here at {time}",
+    "flights.moon": "Moon:",
+    "mission.2": "ACS attack",
+    "mission.7": "Colonisation",
+    "mission.9": "Moon destruction",
+    "mission.18": "Discovery"
   };
 
   // src/i18n/fr.json
@@ -3431,7 +3451,17 @@
     "settings.section.bodies": "Plan\xE8tes et lunes",
     "fleet.bodiesHint": "R\xE9serves, porte de saut et fleetsave de chaque plan\xE8te et lune. Touchez un corps pour changer ses r\xE8gles ; les changements s\u2019appliquent tout de suite.",
     "fleet.bodiesAll": "Tous les corps",
-    "fleet.rule.saveReserveOnly": "sans cible"
+    "fleet.rule.saveReserveOnly": "sans cible",
+    "threat.attack": "Attaque \xE0 {time}",
+    "threat.spy": "Espionnage \xE0 {time}",
+    "flights.out": "{mission} : {n} \xE0 l\u2019aller, premi\xE8re arriv\xE9e {time}",
+    "flights.back": "{mission} : {n} au retour, premier \xE0 {time}",
+    "flights.in": "{mission} : {n} arrive ici \xE0 {time}",
+    "flights.moon": "Lune :",
+    "mission.2": "Attaque group\xE9e",
+    "mission.7": "Coloniser",
+    "mission.9": "D\xE9truire la lune",
+    "mission.18": "Exploration"
   };
 
   // src/i18n/de.json
@@ -4407,7 +4437,17 @@
     "settings.section.bodies": "Planeten und Monde",
     "fleet.bodiesHint": "Reserven, Sprungtor und Fleetsave jedes Planeten und Mondes. Tippe auf einen K\xF6rper, um seine Regeln zu \xE4ndern; \xC4nderungen gelten sofort.",
     "fleet.bodiesAll": "Alle K\xF6rper",
-    "fleet.rule.saveReserveOnly": "kein Ziel"
+    "fleet.rule.saveReserveOnly": "kein Ziel",
+    "threat.attack": "Angriff landet um {time}",
+    "threat.spy": "Spionage landet um {time}",
+    "flights.out": "{mission}: {n} auf dem Hinflug, erste Ankunft {time}",
+    "flights.back": "{mission}: {n} auf dem R\xFCckflug, erste um {time}",
+    "flights.in": "{mission}: {n} kommt hier an um {time}",
+    "flights.moon": "Mond:",
+    "mission.2": "Verbandsangriff",
+    "mission.7": "Kolonisieren",
+    "mission.9": "Mondzerst\xF6rung",
+    "mission.18": "Erkundung"
   };
 
   // src/core/i18n.ts
@@ -6487,13 +6527,13 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   function drawPing(doc, t, timing, locale) {
     doc.getElementById(PING_ID)?.remove();
     if (!timing) return null;
-    const clock = doc.querySelector(".OGameClock");
-    const el6 = doc.createElement(clock?.tagName === "LI" ? "li" : "span");
+    const clock2 = doc.querySelector(".OGameClock");
+    const el6 = doc.createElement(clock2?.tagName === "LI" ? "li" : "span");
     el6.id = PING_ID;
     el6.textContent = t("ping.label", { ms: timing.server.toLocaleString(locale) });
     el6.style.cssText = `display: inline-block; margin-left: 8px; font: 700 11px Verdana, Arial, sans-serif; color: ${COLORS[pingLevel(timing.server)]}; white-space: nowrap; cursor: help;`;
     el6.title = timing.total ? t("ping.hint", { ms: timing.server.toLocaleString(locale), s: (timing.total / 1e3).toLocaleString(locale, { maximumFractionDigits: 1, minimumFractionDigits: 1 }) }) : t("ping.hintShort", { ms: timing.server.toLocaleString(locale) });
-    if (clock) clock.after(el6);
+    if (clock2) clock2.after(el6);
     else {
       const row = doc.querySelector("#siteFooter .content .fright");
       if (!row) return null;
@@ -6927,6 +6967,138 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   }
   function syncQueuesOnUserClick(deps) {
     return fetchQueues(deps, "user-sync");
+  }
+
+  // src/data/events.ts
+  var EVENTS_KEY = "fleet.events";
+  var EVENT_LIST_PATH = "/game/index.php?page=componentOnly&component=eventList&ajax=1";
+  var EVENTS_MIN_INTERVAL_MS = 1e4;
+  var HOSTILE_MISSIONS = [1, 2, 6, 9];
+  var coordsOf2 = (text) => (text ?? "").replace(/[^\d:]/g, "");
+  function placeOf(cell, coords) {
+    const fig = cell?.querySelector("figure");
+    const type = fig?.classList.contains("moon") ? "moon" : fig?.classList.contains("tf") ? "debris" : "planet";
+    return { coords: coordsOf2(coords?.textContent), type };
+  }
+  function parseEventRows(root, offset) {
+    const out = [];
+    for (const row of root.querySelectorAll("#eventContent tr.eventFleet, #eventContent tr.allianceAttack")) {
+      if (row.classList.contains("partnerInfo")) continue;
+      const arrival = Number(row.dataset.arrivalTime) * 1e3 - offset;
+      if (!(arrival > 0)) continue;
+      const mark = row.querySelector("td.countDown");
+      const tone = mark?.querySelector(".hostile, .friendly, .neutral") ?? mark;
+      const side = tone?.classList.contains("hostile") ? "hostile" : tone?.classList.contains("friendly") ? "own" : "neutral";
+      out.push({
+        mission: Number(row.dataset.missionType) || 0,
+        side,
+        back: row.dataset.returnFlight === "true",
+        arrival,
+        from: placeOf(row.querySelector("td.originFleet"), row.querySelector("td.coordsOrigin")),
+        to: placeOf(row.querySelector("td.destFleet"), row.querySelector("td.destCoords")),
+        ships: Number((row.querySelector("td.detailsFleet")?.textContent ?? "").replace(/\D/g, "")) || 0
+      });
+    }
+    return out;
+  }
+  function readPageEvents(doc, offset) {
+    const table = doc.getElementById("eventContent");
+    if (!table || !table.querySelector("tr")) return null;
+    return parseEventRows(doc, offset);
+  }
+  async function fetchEvents(deps, reason) {
+    const now = (deps.now ?? (() => Date.now()))();
+    const response = await deps.guard.request(EVENT_LIST_PATH, reason);
+    const box = deps.doc.createElement("template");
+    box.innerHTML = await response.text();
+    const events = { readAt: now, list: parseEventRows(box.content, deps.offset) };
+    deps.store.set(EVENTS_KEY, events);
+    return events;
+  }
+  async function loadEventsOnPageLoad(deps) {
+    const now = (deps.now ?? (() => Date.now()))();
+    const onPage = readPageEvents(deps.doc, deps.offset);
+    if (onPage) {
+      const events = { readAt: now, list: onPage };
+      deps.store.set(EVENTS_KEY, events);
+      return events;
+    }
+    const stored = deps.store.get(EVENTS_KEY, null);
+    if (stored && now - stored.readAt < EVENTS_MIN_INTERVAL_MS) return stored;
+    return fetchEvents(deps, "page-load");
+  }
+  function syncEventsOnUserClick(deps) {
+    return fetchEvents(deps, "user-sync");
+  }
+  var placeKey = (p) => `${p.coords}|${p.type === "moon" ? "m" : "p"}`;
+  function eventsByBody(list, now, own) {
+    const out = /* @__PURE__ */ new Map();
+    const at = (key) => {
+      let b = out.get(key);
+      if (!b) out.set(key, b = { attack: null, spy: null, own: [] });
+      return b;
+    };
+    const earliest = (a, b) => a === null || b < a ? b : a;
+    const groups = /* @__PURE__ */ new Map();
+    for (const e of list) {
+      if (e.arrival <= now) continue;
+      if (e.side === "hostile") {
+        if (e.back || e.to.type === "debris") continue;
+        const key2 = placeKey(e.to);
+        if (!own.has(key2)) continue;
+        const b = at(key2);
+        if (e.mission === 6) b.spy = earliest(b.spy, e.arrival);
+        else if (HOSTILE_MISSIONS.includes(e.mission)) b.attack = earliest(b.attack, e.arrival);
+        continue;
+      }
+      if (e.side !== "own") continue;
+      const from = placeKey(e.from);
+      const to = e.to.type === "debris" ? `${e.to.coords}|d` : placeKey(e.to);
+      const key = `${e.mission}|${from}|${to}|${e.ships}`;
+      const g = groups.get(key) ?? { mission: e.mission, from, to, out: [], back: [] };
+      (e.back ? g.back : g.out).push(e.arrival);
+      groups.set(key, g);
+    }
+    const add = (key, mission, way, count2, first) => {
+      if (!count2 || !own.has(key)) return;
+      const entries = at(key).own;
+      const same = entries.find((x) => x.mission === mission && x.way === way);
+      if (same) {
+        same.count += count2;
+        same.first = Math.min(same.first, first);
+      } else entries.push({ mission, way, count: count2, first });
+    };
+    for (const g of groups.values()) {
+      const going = g.out.length;
+      const coming = Math.max(0, g.back.length - going);
+      if (going) {
+        add(g.from, g.mission, "out", going, Math.min(...g.out));
+        if ((g.mission === 3 || g.mission === 4) && g.to !== g.from) add(g.to, g.mission, "in", going, Math.min(...g.out));
+      }
+      if (coming) add(g.from, g.mission, "back", coming, Math.min(...g.back));
+    }
+    return out;
+  }
+  function watchPageEvents(doc, offset, onRead) {
+    let last2 = "";
+    const read = () => {
+      const list = readPageEvents(doc, offset);
+      if (!list) return;
+      const sig = JSON.stringify(list);
+      if (sig === last2) return;
+      last2 = sig;
+      onRead(list);
+    };
+    read();
+    let queued2 = false;
+    new MutationObserver(() => {
+      if (queued2) return;
+      queued2 = true;
+      setTimeout(() => {
+        queued2 = false;
+        read();
+      }, 100);
+    }).observe(doc.body, { childList: true, subtree: true });
   }
 
   // src/data/bonuses.ts
@@ -9462,6 +9634,8 @@ td.spark-cell { width: 90px; }
     last: '<path fill-rule="evenodd" d="M12 2.5a9.5 9.5 0 1 1 0 19 9.5 9.5 0 0 1 0-19zM11 6.5v6.4l4.4 2.6.9-1.5-3.5-2V6.5z"/>',
     rules: '<rect x="3" y="6" width="18" height="2.4" rx="1.2" opacity=".5"/><circle cx="15.5" cy="7.2" r="3.2"/><rect x="3" y="15.6" width="18" height="2.4" rx="1.2" opacity=".5"/><circle cx="8.5" cy="16.8" r="3.2"/>',
     caret: '<path d="M6.5 9.5h11L12 15.6z"/>',
+    // Espionage: an eye, the pupil in the second tone.
+    spy: '<path fill-rule="evenodd" d="M12 5C6.6 5 2.8 9.4 1.4 12c1.4 2.6 5.2 7 10.6 7s9.2-4.4 10.6-7C21.2 9.4 17.4 5 12 5zm0 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/><circle cx="12" cy="12" r="2.2" opacity=".6"/>',
     reserve: '<path fill-rule="evenodd" d="M12 2l8.2 3.1v6.4c0 5-3.5 9.1-8.2 10.5-4.7-1.4-8.2-5.5-8.2-10.5V5.1zM8 11v2h8v-2z"/>',
     ships: '<path fill-rule="evenodd" d="M12 1.8c2.9 2.3 4.3 5.6 4.3 9.8v5.6L12 20.3l-4.3-3.1v-5.6c0-4.2 1.4-7.5 4.3-9.8zm0 5.5a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8z"/><path d="M7.3 12.4 3.6 16v4.6l3.7-2.5zM16.7 12.4l3.7 3.6v4.6l-3.7-2.5z" opacity=".6"/>',
     // A gem: a lighter crown over a solid point.
@@ -13156,6 +13330,21 @@ ${L} .fut-fleet svg, ${L} .fut-fleet-peek svg { flex: none; }
   ${L} .fut-name .planet-koords { line-height: 12px !important; }
 }
 ${L} .fut-fleet-m { display: inline-flex; align-items: center; gap: 2px; color: #D8A0A0; }
+/* Third line under name and coordinates: the fleet's worth (touch screens) and the fleets in flight. */
+${L} .fut-line3 { display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; }
+${L} .fut-line3 .fut-fleet { flex: none; margin-top: 0; }
+/* Fleets in flight from or to this row: the mission's glyph in its colour (expedition blue, transport and
+   deploy green, the rest silver), the way (\u2192 leaving, \u2190 coming back, \u2193 arriving here), how many when more
+   than one; the moon's after a moon mark. Details in the tooltip. */
+${L} .fut-flights { display: flex; align-items: center; gap: 4px; min-width: 0; margin-top: 1px; font: 600 11px/12px var(--display); white-space: nowrap; }
+${L} .fut-fl { display: inline-flex; align-items: center; gap: 1px; color: var(--tone, var(--text-2)); }
+${L} .fut-fl svg { flex: none; }
+${L} .fut-fl .w { font: 700 13px/11px Arial, sans-serif; }
+${L} .fut-fl .n { color: var(--text); font-variant-numeric: tabular-nums; }
+${L} .fut-fl-moon { display: inline-flex; margin-left: 2px; color: var(--muted); }
+${L} .fut-fl-moon svg { width: 9px; height: 9px; }
+${L} .fut-has-flights .fut-name .planet-name { font-size: 13px !important; line-height: 13px !important; }
+${L} .fut-has-flights .fut-name .planet-koords { line-height: 12px !important; }
 ${L} .fut-fleet-m svg { flex: none; opacity: 0.8; }
 .fut-totals .fut-fleetrow .fut-tname { color: var(--old); }
 .fut-totals .fut-flyrow, .fut-totals .fut-flyrow .fut-tname, .fut-totals .fut-flyrow .fut-tlabel { color: var(--muted); font-size: 0.92em; }
@@ -13175,6 +13364,21 @@ ${L} a.moonlink .planetBarSpaceObjectContainer {
 ${L} a.moonlink img.icon-moon { position: static !important; width: 16px !important; height: 16px !important; margin: 0 !important; }
 ${L} a.moonlink .fut-res { width: 32px; }
 ${L} .fut-nomoon { flex-shrink: 0; width: ${MOON_W}px; border-left: 1px solid var(--line); background: var(--surface); }
+
+/* An enemy landing here (data/events): the planet or moon tile lights up red, as OGLight does; an attack
+   strongly, an espionage a little softer. Sword or eye over the skin, the time in its tooltip. Both layouts. */
+#planetbarcomponent #planetList a.fut-attack, #planetbarcomponent #planetList a.fut-spy { position: relative; }
+#planetbarcomponent #planetList a.fut-attack {
+  background: rgba(239, 106, 96, 0.24) !important; box-shadow: inset 0 0 0 2px ${STATE_COLORS.bad}, inset 0 0 18px rgba(239, 106, 96, 0.6) !important; }
+#planetbarcomponent #planetList a.fut-spy {
+  background: rgba(239, 106, 96, 0.14) !important; box-shadow: inset 0 0 0 2px rgba(239, 106, 96, 0.85), inset 0 0 12px rgba(239, 106, 96, 0.35) !important; }
+#planetbarcomponent #planetList a.active.fut-attack, #planetbarcomponent #planetList a.active.fut-spy {
+  box-shadow: inset 0 0 0 2px ${STATE_COLORS.bad}, inset 4px 0 0 var(--accent), inset 0 0 18px rgba(239, 106, 96, 0.6) !important; }
+#planetbarcomponent .fut-threat {
+  position: absolute; left: 5px; top: calc(50% - 8px); z-index: 3; display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; border-radius: 50%; background: ${STATE_COLORS.bad}; color: #1A0505; box-shadow: 0 0 6px rgba(239, 106, 96, 0.9); pointer-events: auto; }
+#planetbarcomponent .fut-threat svg { width: 11px; height: 11px; stroke-width: 2.4; }
+#planetbarcomponent a.moonlink .fut-threat { left: 3px; top: 6px; }
 
 /* Skin that failed to load (game CDN 502): a plain sphere keeps the row's shape. */
 ${L} img.fut-noskin { visibility: hidden; }
@@ -13567,9 +13771,9 @@ ${L} .smallplanet a.alert {
     tip.style.top = `${Math.max(4, Math.min(box.top + box.height / 2 - hgt / 2, vh - hgt - 4))}px`;
   }
   function clearPlanetMenu(doc) {
-    doc.querySelectorAll(".fut-res, .fut-fleet, .fut-fleet-peek, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue, .fut-plancol, #fut-plan-tip").forEach((n) => n.remove());
+    doc.querySelectorAll(".fut-res, .fut-line3, .fut-fleet, .fut-fleet-peek, .fut-moon-label, .fut-menu-bar, .fut-toolbar, .fut-settings, .fut-totals, .fut-nomoon, .fut-age, .fut-queue, .fut-plancol, #fut-plan-tip").forEach((n) => n.remove());
     doc.querySelectorAll(".fut-name").forEach((wrap) => wrap.replaceWith(...Array.from(wrap.childNodes)));
-    doc.querySelectorAll(".fut-row").forEach((n) => n.classList.remove("fut-row", "fut-current"));
+    doc.querySelectorAll(".fut-row").forEach((n) => n.classList.remove("fut-row", "fut-current", "fut-has-flights"));
   }
   function canWiden(doc) {
     const banner = doc.getElementById("bannerskyscrapercomponent");
@@ -13656,6 +13860,76 @@ ${L} .smallplanet a.alert {
       }, 0);
     }).observe(bar, { childList: true, subtree: true });
   }
+  var MISSION_LOOK = {
+    1: { icon: "ships" },
+    2: { icon: "ships" },
+    3: { icon: "transport", tone: "collect" },
+    4: { icon: "deploy", tone: "collect" },
+    5: { icon: "reserve" },
+    6: { icon: "spy" },
+    7: { icon: "planet" },
+    8: { icon: "cargo" },
+    9: { icon: "ships" },
+    15: { icon: "expedition", tone: "expedition" },
+    18: { icon: "expedition", tone: "expedition" }
+  };
+  var WAY_MARK = { out: "\u2192", back: "\u2190", in: "\u2193" };
+  function clock(at, locale) {
+    return new Date(at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  }
+  function markThreat(link, ev, o) {
+    if (!link) return;
+    link.classList.remove("fut-attack", "fut-spy");
+    link.querySelector(":scope > .fut-threat")?.remove();
+    if (!ev || ev.attack === null && ev.spy === null) return;
+    const { doc, t } = o;
+    link.classList.add(ev.attack !== null ? "fut-attack" : "fut-spy");
+    const badge = el4(doc, "span", "fut-threat");
+    const lines = [];
+    if (ev.attack !== null) {
+      badge.append(icon(doc, "sword", 12));
+      lines.push(t("threat.attack", { time: clock(ev.attack, o.locale) }));
+    }
+    if (ev.spy !== null) {
+      if (ev.attack === null) badge.append(icon(doc, "eye", 12));
+      lines.push(t("threat.spy", { time: clock(ev.spy, o.locale) }));
+    }
+    badge.title = lines.join("\n");
+    badge.setAttribute("role", "img");
+    badge.setAttribute("aria-label", lines.join(". "));
+    link.append(badge);
+  }
+  function flightChips(doc, planet, moon, o) {
+    const groups = [planet?.own ?? [], moon?.own ?? []];
+    if (!groups[0].length && !groups[1].length) return null;
+    const line = el4(doc, "span", "fut-flights");
+    const lines = [];
+    const order = { out: 0, in: 1, back: 2 };
+    groups.forEach((own, i) => {
+      if (!own.length) return;
+      if (i === 1) {
+        const mark = el4(doc, "span", "fut-fl-moon");
+        mark.innerHTML = MOON_MARK;
+        line.append(mark);
+        lines.push(o.t("flights.moon"));
+      }
+      for (const f of [...own].sort((a, b) => order[a.way] - order[b.way] || a.first - b.first)) {
+        const look = MISSION_LOOK[f.mission] ?? { icon: "ships" };
+        const chip2 = el4(doc, "span", "fut-fl");
+        if (look.tone) chip2.style.setProperty("--tone", MISSION_TONES[look.tone]);
+        chip2.innerHTML = iconSvg(look.icon, 11);
+        chip2.append(el4(doc, "span", "w", WAY_MARK[f.way]));
+        if (f.count > 1) chip2.append(el4(doc, "span", "n", String(f.count)));
+        const text = o.t(`flights.${f.way}`, { mission: o.t(`mission.${f.mission}`), n: f.count, time: clock(f.first, o.locale) });
+        chip2.title = text;
+        lines.push(`${i === 1 ? "  " : ""}${text}`);
+        line.append(chip2);
+      }
+    });
+    line.title = lines.join("\n");
+    line.setAttribute("aria-label", lines.join(". "));
+    return line;
+  }
   function renderPlanetMenu(o) {
     const { doc } = o;
     const list = doc.getElementById("planetList");
@@ -13676,6 +13950,10 @@ ${L} .smallplanet a.alert {
     const view2 = { fleet: o.settings.showFleet === true, t: o.t };
     list.style.removeProperty("--fut-row-h");
     const gameTips = o.settings.gameTips !== false;
+    for (const entry of o.entries) {
+      markThreat(entry.planetLink, o.events?.get(`${entry.coords}|p`), o);
+      markThreat(entry.moonLink, o.events?.get(`${entry.coords}|m`), o);
+    }
     for (const entry of roomy ? o.entries : []) {
       setGameTip(entry.planetLink, gameTips);
       setGameTip(entry.moonLink, gameTips);
@@ -13686,10 +13964,17 @@ ${L} .smallplanet a.alert {
         const wrap = el4(doc, "span", "fut-name");
         link.querySelectorAll(".planet-name, .planet-koords").forEach((n) => wrap.append(n));
         const planetBody = entry.planetId ? byId.get(entry.planetId) : void 0;
+        const third = el4(doc, "span", "fut-line3");
         if (view2.fleet) {
           const line = fleetLine(doc, planetBody, entry.moonId ? byId.get(entry.moonId) : void 0, o.locale, o.t);
-          if (line) wrap.append(line);
+          if (line) third.append(line);
         }
+        const flights = flightChips(doc, o.events?.get(`${entry.coords}|p`), entry.moonId ? o.events?.get(`${entry.coords}|m`) : void 0, o);
+        if (flights) {
+          third.append(flights);
+          entry.element.classList.add("fut-has-flights");
+        }
+        if (third.childElementCount) wrap.append(third);
         link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true, view2));
         const pf = planetBody && view2.fleet ? fleetValue(planetBody) : 0;
         if (pf) link.append(fleetPeek(doc, pf, o, "fut-peek-planet"));
@@ -18734,6 +19019,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
     window.addEventListener("beforeunload", () => saver.saveNow());
     const bodyIds = readPlanetList(document).flatMap((e) => [e.planetId, e.moonId]).filter((id) => id !== null);
     let queues = store.get(QUEUES_KEY, null);
+    const eventDeps = { guard, store, doc: document, offset: clockOffset(document, Date.now()) };
     try {
       const [account, queue, lf, , , importExport] = await Promise.allSettled([
         hydrateAccountOncePerSession({ guard, store, session: window.sessionStorage }),
@@ -18746,7 +19032,8 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
         // only on the fleet page, public API, cached an hour.
         isFleetDispatch(document) ? universeRanks({ guard, store, origin: location.origin }) : Promise.resolve(null),
         // Today's import/export offer, for the Merchant's colour in the menu: once per session.
-        importExportOncePerSession({ guard, store, session: window.sessionStorage })
+        importExportOncePerSession({ guard, store, session: window.sessionStorage }),
+        loadEventsOnPageLoad(eventDeps).catch((e) => console.warn(`[${t("app.name")}]`, e))
       ]);
       if (importExport.status === "fulfilled") markMerchant(document, importExport.value);
       else console.warn(`[${t("app.name")}]`, importExport.reason);
@@ -18903,6 +19190,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
       section: section2,
       rules: { bodies: readPlanetList(document).map(({ planetId, moonId, name, coords }) => ({ planetId, moonId, name, coords })), bodyId: currentId, locale }
     });
+    const ownPlaces = () => new Set(readPlanetList(document).flatMap((e) => [...e.planetId ? [`${e.coords}|p`] : [], ...e.moonId ? [`${e.coords}|m`] : []]));
     let drawDock = null;
     const draw = () => {
       drawDock?.();
@@ -18913,6 +19201,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
         queues,
         visits: store.get(VISITED_KEY, {}),
         flying: flyingTotal(store.get(FLIGHTS_KEY, null), Date.now()),
+        events: eventsByBody(store.get(EVENTS_KEY, null)?.list ?? [], Date.now(), ownPlaces()),
         settings,
         now: Date.now(),
         locale,
@@ -18968,7 +19257,8 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
               syncAccountOnUserClick(deps),
               syncQueuesOnUserClick({ guard, store, ids: bodyIds }),
               fetchLfBonuses({ guard, store }, "user-sync"),
-              fetchImportExport({ guard, store }, "user-sync").then((state) => markMerchant(document, state))
+              fetchImportExport({ guard, store }, "user-sync").then((state) => markMerchant(document, state)),
+              syncEventsOnUserClick(eventDeps)
             ]);
             if (queue.status === "fulfilled") queues = queue.value;
             if (account.status === "rejected") {
@@ -19047,6 +19337,10 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
     watchEventList(reminders);
     watchFlights(document, reminders.offset, (list2) => {
       store.set(FLIGHTS_KEY, { readAt: Date.now(), list: list2 });
+      draw();
+    });
+    watchPageEvents(document, reminders.offset, (list2) => {
+      store.set(EVENTS_KEY, { readAt: Date.now(), list: list2 });
       draw();
     });
     if (!store.get(IMPORTED_KEY, false)) {

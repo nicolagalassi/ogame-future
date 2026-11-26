@@ -30,6 +30,8 @@ export const ICONS = {
   last: '<path fill-rule="evenodd" d="M12 2.5a9.5 9.5 0 1 1 0 19 9.5 9.5 0 0 1 0-19zM11 6.5v6.4l4.4 2.6.9-1.5-3.5-2V6.5z"/>',
   rules: '<rect x="3" y="6" width="18" height="2.4" rx="1.2" opacity=".5"/><circle cx="15.5" cy="7.2" r="3.2"/><rect x="3" y="15.6" width="18" height="2.4" rx="1.2" opacity=".5"/><circle cx="8.5" cy="16.8" r="3.2"/>',
   caret: '<path d="M6.5 9.5h11L12 15.6z"/>',
+  // Espionage: an eye, the pupil in the second tone.
+  spy: '<path fill-rule="evenodd" d="M12 5C6.6 5 2.8 9.4 1.4 12c1.4 2.6 5.2 7 10.6 7s9.2-4.4 10.6-7C21.2 9.4 17.4 5 12 5zm0 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/><circle cx="12" cy="12" r="2.2" opacity=".6"/>',
   reserve: '<path fill-rule="evenodd" d="M12 2l8.2 3.1v6.4c0 5-3.5 9.1-8.2 10.5-4.7-1.4-8.2-5.5-8.2-10.5V5.1zM8 11v2h8v-2z"/>',
   ships: '<path fill-rule="evenodd" d="M12 1.8c2.9 2.3 4.3 5.6 4.3 9.8v5.6L12 20.3l-4.3-3.1v-5.6c0-4.2 1.4-7.5 4.3-9.8zm0 5.5a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8z"/><path d="M7.3 12.4 3.6 16v4.6l3.7-2.5zM16.7 12.4l3.7 3.6v4.6l-3.7-2.5z" opacity=".6"/>',
   // A gem: a lighter crown over a solid point.

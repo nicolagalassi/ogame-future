@@ -27,6 +27,7 @@ import { loadMarks, MARKS_KEY, migrateOld, type Marks } from './engines/marks';
 import { convertOglight, convertOglightStats, isOglightDb } from './engines/oglight-import';
 import { POSITIONS_KEY, type Positions } from './engines/positions';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
+import { EVENTS_KEY, eventsByBody, loadEventsOnPageLoad, syncEventsOnUserClick, watchPageEvents, type Events } from './data/events';
 import { ITEMS_KEY, LF_BONUS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems, type LfBonuses } from './data/bonuses';
 import { openSettings, type Section } from './modules/settings';
 import { dayFigures, openDashboard } from './modules/dashboard';
@@ -95,6 +96,9 @@ async function bootstrap(): Promise<void> {
 
   const bodyIds = readPlanetList(document).flatMap((e) => [e.planetId, e.moonId]).filter((id): id is number => id !== null);
   let queues: QueueSnapshot | null = store.get<QueueSnapshot | null>(QUEUES_KEY, null);
+  // Fleets in flight (event list): read once while the page loads, so an attack shows on the player's
+  // next page and never by itself (AGENTS.md §1.3, §4; Nicola, 2026-11-26).
+  const eventDeps = { guard, store, doc: document, offset: clockOffset(document, Date.now()) };
   try {
     const [account, queue, lf, , , importExport] = await Promise.allSettled([
       hydrateAccountOncePerSession({ guard, store, session: window.sessionStorage }),
@@ -108,6 +112,7 @@ async function bootstrap(): Promise<void> {
       isFleetDispatch(document) ? universeRanks({ guard, store, origin: location.origin }) : Promise.resolve(null),
       // Today's import/export offer, for the Merchant's colour in the menu: once per session.
       importExportOncePerSession({ guard, store, session: window.sessionStorage }),
+      loadEventsOnPageLoad(eventDeps).catch((e: unknown) => console.warn(`[${t('app.name')}]`, e)),
     ]);
     if (importExport.status === 'fulfilled') markMerchant(document, importExport.value);
     else console.warn(`[${t('app.name')}]`, importExport.reason);
@@ -289,6 +294,8 @@ async function bootstrap(): Promise<void> {
       section,
       rules: { bodies: readPlanetList(document).map(({ planetId, moonId, name, coords }) => ({ planetId, moonId, name, coords })), bodyId: currentId, locale },
     });
+  /** The player's planets and moons as event-list places (`coords|p`, `coords|m`). */
+  const ownPlaces = () => new Set(readPlanetList(document).flatMap((e) => [...(e.planetId ? [`${e.coords}|p`] : []), ...(e.moonId ? [`${e.coords}|m`] : [])]));
   /** Draws the dock under the game's menu (set once the targets side bar is ready, below). */
   let drawDock: (() => void) | null = null;
   const draw = () => {
@@ -300,6 +307,7 @@ async function bootstrap(): Promise<void> {
       queues,
       visits: store.get<Visits>(VISITED_KEY, {}),
       flying: flyingTotal(store.get<Flights | null>(FLIGHTS_KEY, null), Date.now()),
+      events: eventsByBody(store.get<Events | null>(EVENTS_KEY, null)?.list ?? [], Date.now(), ownPlaces()),
       settings,
       now: Date.now(),
       locale,
@@ -357,6 +365,7 @@ async function bootstrap(): Promise<void> {
             syncQueuesOnUserClick({ guard, store, ids: bodyIds }),
             fetchLfBonuses({ guard, store }, 'user-sync'),
             fetchImportExport({ guard, store }, 'user-sync').then((state) => markMerchant(document, state)),
+            syncEventsOnUserClick(eventDeps),
           ]);
           if (queue.status === 'fulfilled') queues = queue.value;
           if (account.status === 'rejected') {
@@ -441,6 +450,12 @@ async function bootstrap(): Promise<void> {
   // Cargo of the fleets in flight, from the event list the game shows: counted in the account totals.
   watchFlights(document, reminders.offset, (list) => {
     store.set(FLIGHTS_KEY, { readAt: Date.now(), list } satisfies Flights);
+    draw();
+  });
+  // The same table, per planet and moon: enemies landing and own fleets follow what the player opened
+  // (a DOM read, no call).
+  watchPageEvents(document, reminders.offset, (list) => {
+    store.set(EVENTS_KEY, { readAt: Date.now(), list } satisfies Events);
     draw();
   });
 
