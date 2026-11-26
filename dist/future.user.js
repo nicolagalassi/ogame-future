@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.150
+// @version      0.3.151
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -9454,15 +9454,15 @@ td.spark-cell { width: 90px; }
     { id: "planet.prev", key: "i", label: "shortcut.prev", group: "planet", glyph: { core: "back" } },
     { id: "planet.next", key: "o", label: "shortcut.next", group: "planet", glyph: { core: "next" } },
     { id: "targets.next", key: "m", label: "shortcut.nextTarget", group: "targets", glyph: { core: "target" } },
-    { id: "fleet.moon", key: "l", label: "fleet.btn.moon", group: "fleet", glyph: { fleet: "moon" } },
-    { id: "fleet.transport", key: "t", label: "fleet.btn.transport", group: "fleet", glyph: { fleet: "transport" } },
-    { id: "fleet.deploy", key: "d", label: "fleet.btn.deploy", group: "fleet", glyph: { fleet: "deploy" } },
-    { id: "fleet.collect", key: "c", label: "fleet.btn.collectTransport", group: "fleet", glyph: { fleet: "collect" } },
-    { id: "fleet.collectDeploy", key: "v", label: "fleet.btn.collectDeploy", group: "fleet", glyph: { fleet: "collect" } },
-    { id: "fleet.expedition", key: "x", label: "fleet.btn.expedition", group: "fleet", glyph: { fleet: "expedition" } },
-    { id: "fleet.fleetsave", key: "e", label: "fleet.btn.fleetsave", group: "fleet", glyph: { fleet: "fleetsave" } },
-    { id: "fleet.skip", key: "n", label: "fleet.btn.skip", group: "fleet", glyph: { fleet: "skip" } },
-    { id: "fleet.last", key: "p", label: "fleet.btn.last", group: "fleet", glyph: { fleet: "last" } },
+    { id: "fleet.moon", key: "l", label: "fleet.btn.moon", group: "fleet", glyph: { fleet: "moon" }, keysOnly: true },
+    { id: "fleet.transport", key: "t", label: "fleet.btn.transport", group: "fleet", glyph: { fleet: "transport" }, keysOnly: true },
+    { id: "fleet.deploy", key: "d", label: "fleet.btn.deploy", group: "fleet", glyph: { fleet: "deploy" }, keysOnly: true },
+    { id: "fleet.collect", key: "c", label: "fleet.btn.collectTransport", group: "fleet", glyph: { fleet: "transport" }, touchName: "fleet.btn.touchCollect" },
+    { id: "fleet.collectDeploy", key: "v", label: "fleet.btn.collectDeploy", group: "fleet", glyph: { fleet: "deploy" }, touchName: "fleet.btn.touchDeploy" },
+    { id: "fleet.expedition", key: "x", label: "fleet.btn.expedition", group: "fleet", glyph: { fleet: "expedition" }, touchName: "fleet.btn.expedition" },
+    { id: "fleet.fleetsave", key: "e", label: "fleet.btn.fleetsave", group: "fleet", glyph: { fleet: "fleetsave" }, touchName: "fleet.btn.fleetsave" },
+    { id: "fleet.skip", key: "n", label: "fleet.btn.skip", group: "fleet", glyph: { fleet: "skip" }, keysOnly: true },
+    { id: "fleet.last", key: "p", label: "fleet.btn.last", group: "fleet", glyph: { fleet: "last" }, keysOnly: true },
     { id: "galaxy.left", key: "ArrowLeft", label: "shortcut.galaxyLeft", group: "galaxy", glyph: { core: "back" }, fixed: true, touchOnly: true },
     { id: "galaxy.right", key: "ArrowRight", label: "shortcut.galaxyRight", group: "galaxy", glyph: { core: "next" }, fixed: true, touchOnly: true },
     { id: "galaxy.down", key: "ArrowDown", label: "shortcut.galaxyDown", group: "galaxy", glyph: { core: "chevron" }, fixed: true, touchOnly: true },
@@ -9588,9 +9588,13 @@ td.spark-cell { width: 90px; }
 #${TOUCH_ID} button .k { position: absolute; top: 3px; right: 4px; color: var(--quiet); font-size: 11px; line-height: 11px; }
 #${TOUCH_ID} button:has(.k) .fut-tb-glyph { margin: 6px 6px 0 0; }
 @media (pointer: coarse) { #${TOUCH_ID} button .k { display: none; } #${TOUCH_ID} button:has(.k) .fut-tb-glyph { margin: 0; } }
+/* Named fleet keys: glyph over its name, wider, so each one reads and takes a thumb. */
+#${TOUCH_ID} button.named { flex-direction: column; gap: 3px; width: auto; min-width: 56px; padding: 0 5px; color: var(--text); }
+#${TOUCH_ID} button.named .tn { font: 600 11px/1 var(--display); white-space: nowrap; }
+@media (pointer: coarse) { #${TOUCH_ID} button.named:has(.k) .fut-tb-glyph { margin: 0; } }
 #${TOUCH_ID}[data-page="fleet2"] button.fleet, #${TOUCH_ID}[data-page="fleet2"] .sep.fleet { display: none; }
 /* The one primary action: pawn yellow. Not ready: struck through in quiet grey on an outline, as every disabled button. */
-#${TOUCH_ID} .send { width: auto; min-width: 104px; padding: 0 16px; gap: 8px; background: var(--accent); color: var(--on-accent); font-size: 14px; }
+#${TOUCH_ID} .send { width: auto; min-width: 88px; padding: 0 12px; gap: 6px; background: var(--accent); color: var(--on-accent); font-size: 14px; }
 #${TOUCH_ID} .send:active { background: var(--accent-hi); color: var(--on-accent); }
 #${TOUCH_ID} .send[aria-disabled="true"] { background: transparent; box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--quiet); text-decoration: line-through; }
 .fut-touch-pad { height: 72px; }
@@ -9624,7 +9628,8 @@ td.spark-cell { width: 90px; }
     let group = "";
     for (const def of ACTIONS) {
       const run = runs.get(def.id);
-      if (!run) continue;
+      if (!run || def.keysOnly) continue;
+      if (def.group === "planet" && doc.getElementById("fleetdispatchcomponent")) continue;
       if (group && group !== def.group) {
         const sep = doc.createElement("span");
         sep.className = `sep ${def.group}`;
@@ -9638,6 +9643,13 @@ td.spark-cell { width: 90px; }
       b.title = key && !def.touchOnly ? `${t(def.label)} [${key}]` : t(def.label);
       b.setAttribute("aria-label", t(def.label));
       b.append(glyph(doc, def, 22));
+      if (def.touchName) {
+        b.classList.add("named");
+        const n = doc.createElement("span");
+        n.className = "tn";
+        n.textContent = t(def.touchName);
+        b.append(n);
+      }
       if (key && !def.touchOnly) {
         const k = doc.createElement("span");
         k.className = "k";
@@ -13277,8 +13289,23 @@ table.queues td.acts { width: 1%; text-align: right; }
   function onPlanet(fd) {
     return { metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet };
   }
-  function setSpeedBar(fd, percent) {
+  function speedButton(root, percent) {
+    const leaves = (el6) => Array.from(el6.querySelectorAll("*")).filter((e) => !e.children.length && /^\d{2,3}$/.test(e.textContent?.trim() ?? ""));
+    const hundred = leaves(root).find((e) => e.textContent.trim() === "100");
+    let box = hundred?.parentElement ?? null;
+    while (box && !["10", "50", "90"].every((v) => leaves(box).some((e) => e.textContent.trim() === v))) box = box.parentElement;
+    if (!box) return null;
+    return leaves(box).find((e) => e.textContent.trim() === String(percent)) ?? null;
+  }
+  function setSpeedBar(fd, percent, doc) {
     const step = Math.max(1, Math.min(10, Math.round(percent / 10)));
+    const touch = doc?.defaultView?.matchMedia?.("(pointer: coarse)").matches;
+    const button3 = touch && doc ? speedButton(doc, step * 10) : null;
+    if (button3) {
+      button3.click();
+      fd.speedPercent = step;
+      return;
+    }
     fd.speedPercent = step;
     const $ = pageWindow().jQuery;
     try {
@@ -13348,7 +13375,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const ships = cargoShipsFor(amount, stock(fd, profile), settings.mainShip, settings.secondShip);
     const count2 = selectShips(fd, ships);
     setTarget(fd, doc, target);
-    setSpeedBar(fd, settings.transportSpeed);
+    setSpeedBar(fd, settings.transportSpeed, doc);
     fd.mission = TRANSPORT;
     const cargo = count2 > 0 ? loadCargo(fd, profile, settings.loadOrder) : 0;
     return finish(fd, TRANSPORT, count2, cargo);
@@ -13357,7 +13384,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const ships = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
     const count2 = selectShips(fd, ships);
     setTarget(fd, doc, target);
-    setSpeedBar(fd, settings.transportSpeed);
+    setSpeedBar(fd, settings.transportSpeed, doc);
     fd.mission = DEPLOY;
     const cargo = count2 > 0 && settings.collectDeployRes ? loadCargo(fd, profile, settings.loadOrder) : 0;
     return finish(fd, DEPLOY, count2, cargo);
@@ -13367,7 +13394,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const ships = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
     const count2 = selectShips(fd, ships);
     setTarget(fd, doc, resolveTarget(save, fd.currentPlanet));
-    setSpeedBar(fd, save.speed);
+    setSpeedBar(fd, save.speed, doc);
     fd.mission = save.mission;
     const cargo = count2 > 0 ? loadCargo(fd, profile) : 0;
     return finish(fd, save.mission, count2, cargo);
@@ -13380,7 +13407,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (amount <= 0) return { ok: false, reason: "fleet.err.noResources", ships: 0, cargo: 0 };
     const count2 = selectShips(fd, cargoShipsFor(amount, stock(fd, profile), settings.mainShip, settings.secondShip));
     setTarget(fd, doc, target);
-    setSpeedBar(fd, settings.transportSpeed);
+    setSpeedBar(fd, settings.transportSpeed, doc);
     fd.mission = TRANSPORT;
     let cargo = 0;
     if (count2 > 0) {
@@ -13415,7 +13442,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const here = fd.currentPlanet;
     const system = expeditionSystem(here.system, settings.expeditionSpread, { systems: universe.systems ?? 499, donut: universe.donutSystem ?? true }, rand);
     setTarget(fd, doc, { galaxy: here.galaxy, system, position: 16, type: 1 });
-    setSpeedBar(fd, 100);
+    setSpeedBar(fd, 100, doc);
     fd.expeditionTime = 1;
     const $ = pageWindow().jQuery;
     try {
@@ -13430,7 +13457,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     for (const [id, n] of Object.entries(last2.ships)) ships[Number(id)] = Math.min(n, left[Number(id)] ?? 0);
     const count2 = selectShips(fd, ships);
     setTarget(fd, doc, last2.target);
-    setSpeedBar(fd, last2.speed);
+    setSpeedBar(fd, last2.speed, doc);
     return finish(fd, last2.mission, count2, 0);
   }
   function selectionKey(fd) {
@@ -13458,7 +13485,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const needed = capacity > 0 ? Math.ceil(Math.max(0, amount - othersCapacity) / capacity) : 0;
     const count2 = selectShips(fd, { ...manual, [cargoShip]: n });
     setTarget(fd, doc, target);
-    setSpeedBar(fd, settings.transportSpeed);
+    setSpeedBar(fd, settings.transportSpeed, doc);
     const code = mission === "transport" ? TRANSPORT : DEPLOY;
     fd.mission = code;
     let cargo = 0;
@@ -13741,18 +13768,7 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-fcl.none .pic { opacity: 0.3; filter: grayscale(1); }
 
 /* Fingers: bigger targets, no key letters. */
-/* The collection's two direct tiles exist for touch screens only. */
-.fut-fact.fut-touch { display: none; }
 @media (pointer: coarse) {
-  /* Touch (Nicola): only the most used actions, large and clearly drawn: expedition, fleetsave and the
-     collection's transport and deploy; the rest stays on the computer. */
-  .fut-fact[data-mode="transport"], .fut-fact[data-mode="deploy"], .fut-fact[data-mode="last"], .fut-fact[data-mode="moon"], .fut-fact[data-mode="collect"] { display: none; }
-  .fut-fact.fut-touch { display: inline-flex; }
-  .fut-facts .fut-fact { width: auto; min-width: 76px; height: 62px; padding: 6px 10px 5px; }
-  .fut-facts .fut-fact .ico svg { width: 26px; height: 26px; }
-  .fut-facts .fut-fact .name { font-size: 14px; }
-  .fut-fsecond { margin-left: 0; padding-left: 0; border-left: 0; }
-  .fut-fsecond .fut-fact { background: var(--tile); box-shadow: none; color: var(--ico); }
   .fut-fact { width: 48px; height: 46px; }
   .fut-fcaret { width: 30px; height: 46px; }
   .fut-fact kbd { display: none; }
@@ -15075,13 +15091,6 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const secondary = dest.row;
       if (here?.moonId) secondary.append(act2("moon", "fleet.moon", t("fleet.btn.moon"), to(here.moonId), t("fleet.tip.moon"), () => run.moon()));
       secondary.append(collect);
-      for (const [m, ico, label] of [["collect", "transport", "fleet.btn.touchCollect"], ["collectDeploy", "deploy", "fleet.btn.touchDeploy"]]) {
-        const fav = m === "collect" ? settings.favTransport : settings.favDeploy;
-        const b = act2(ico, `fleet.${m}`, t(label), fav ? to(fav) : "", fav ? t("fleet.tip.collect") : t("fleet.err.noDefault"), favRun[m], !fav);
-        b.classList.add("fut-touch");
-        b.dataset.mode = m === "collect" ? "collect-touch" : "collectDeploy-touch";
-        secondary.append(b);
-      }
       tiles.append(dest.box);
       const skipSlot = el4(doc, "span", "fut-fsecond fut-fskip");
       drawSkip = () => {

@@ -25,21 +25,25 @@ export interface ActionDef {
   fixed?: boolean;
   /** Shown only in the touch bar (the game already reads the key itself). */
   touchOnly?: boolean;
+  /** Keyboard only: not in the touch bar (Nicola: on the phone only the most used fleet actions). */
+  keysOnly?: boolean;
+  /** Short name printed under the glyph in the touch bar. */
+  touchName?: string;
 }
 
 export const ACTIONS: ActionDef[] = [
   { id: 'planet.prev', key: 'i', label: 'shortcut.prev', group: 'planet', glyph: { core: 'back' } },
   { id: 'planet.next', key: 'o', label: 'shortcut.next', group: 'planet', glyph: { core: 'next' } },
   { id: 'targets.next', key: 'm', label: 'shortcut.nextTarget', group: 'targets', glyph: { core: 'target' } },
-  { id: 'fleet.moon', key: 'l', label: 'fleet.btn.moon', group: 'fleet', glyph: { fleet: 'moon' } },
-  { id: 'fleet.transport', key: 't', label: 'fleet.btn.transport', group: 'fleet', glyph: { fleet: 'transport' } },
-  { id: 'fleet.deploy', key: 'd', label: 'fleet.btn.deploy', group: 'fleet', glyph: { fleet: 'deploy' } },
-  { id: 'fleet.collect', key: 'c', label: 'fleet.btn.collectTransport', group: 'fleet', glyph: { fleet: 'collect' } },
-  { id: 'fleet.collectDeploy', key: 'v', label: 'fleet.btn.collectDeploy', group: 'fleet', glyph: { fleet: 'collect' } },
-  { id: 'fleet.expedition', key: 'x', label: 'fleet.btn.expedition', group: 'fleet', glyph: { fleet: 'expedition' } },
-  { id: 'fleet.fleetsave', key: 'e', label: 'fleet.btn.fleetsave', group: 'fleet', glyph: { fleet: 'fleetsave' } },
-  { id: 'fleet.skip', key: 'n', label: 'fleet.btn.skip', group: 'fleet', glyph: { fleet: 'skip' } },
-  { id: 'fleet.last', key: 'p', label: 'fleet.btn.last', group: 'fleet', glyph: { fleet: 'last' } },
+  { id: 'fleet.moon', key: 'l', label: 'fleet.btn.moon', group: 'fleet', glyph: { fleet: 'moon' }, keysOnly: true },
+  { id: 'fleet.transport', key: 't', label: 'fleet.btn.transport', group: 'fleet', glyph: { fleet: 'transport' }, keysOnly: true },
+  { id: 'fleet.deploy', key: 'd', label: 'fleet.btn.deploy', group: 'fleet', glyph: { fleet: 'deploy' }, keysOnly: true },
+  { id: 'fleet.collect', key: 'c', label: 'fleet.btn.collectTransport', group: 'fleet', glyph: { fleet: 'transport' }, touchName: 'fleet.btn.touchCollect' },
+  { id: 'fleet.collectDeploy', key: 'v', label: 'fleet.btn.collectDeploy', group: 'fleet', glyph: { fleet: 'deploy' }, touchName: 'fleet.btn.touchDeploy' },
+  { id: 'fleet.expedition', key: 'x', label: 'fleet.btn.expedition', group: 'fleet', glyph: { fleet: 'expedition' }, touchName: 'fleet.btn.expedition' },
+  { id: 'fleet.fleetsave', key: 'e', label: 'fleet.btn.fleetsave', group: 'fleet', glyph: { fleet: 'fleetsave' }, touchName: 'fleet.btn.fleetsave' },
+  { id: 'fleet.skip', key: 'n', label: 'fleet.btn.skip', group: 'fleet', glyph: { fleet: 'skip' }, keysOnly: true },
+  { id: 'fleet.last', key: 'p', label: 'fleet.btn.last', group: 'fleet', glyph: { fleet: 'last' }, keysOnly: true },
   { id: 'galaxy.left', key: 'ArrowLeft', label: 'shortcut.galaxyLeft', group: 'galaxy', glyph: { core: 'back' }, fixed: true, touchOnly: true },
   { id: 'galaxy.right', key: 'ArrowRight', label: 'shortcut.galaxyRight', group: 'galaxy', glyph: { core: 'next' }, fixed: true, touchOnly: true },
   { id: 'galaxy.down', key: 'ArrowDown', label: 'shortcut.galaxyDown', group: 'galaxy', glyph: { core: 'chevron' }, fixed: true, touchOnly: true },
@@ -216,9 +220,13 @@ const TOUCH_CSS = `
 #${TOUCH_ID} button .k { position: absolute; top: 3px; right: 4px; color: var(--quiet); font-size: 11px; line-height: 11px; }
 #${TOUCH_ID} button:has(.k) .fut-tb-glyph { margin: 6px 6px 0 0; }
 @media (pointer: coarse) { #${TOUCH_ID} button .k { display: none; } #${TOUCH_ID} button:has(.k) .fut-tb-glyph { margin: 0; } }
+/* Named fleet keys: glyph over its name, wider, so each one reads and takes a thumb. */
+#${TOUCH_ID} button.named { flex-direction: column; gap: 3px; width: auto; min-width: 56px; padding: 0 5px; color: var(--text); }
+#${TOUCH_ID} button.named .tn { font: 600 11px/1 var(--display); white-space: nowrap; }
+@media (pointer: coarse) { #${TOUCH_ID} button.named:has(.k) .fut-tb-glyph { margin: 0; } }
 #${TOUCH_ID}[data-page="fleet2"] button.fleet, #${TOUCH_ID}[data-page="fleet2"] .sep.fleet { display: none; }
 /* The one primary action: pawn yellow. Not ready: struck through in quiet grey on an outline, as every disabled button. */
-#${TOUCH_ID} .send { width: auto; min-width: 104px; padding: 0 16px; gap: 8px; background: var(--accent); color: var(--on-accent); font-size: 14px; }
+#${TOUCH_ID} .send { width: auto; min-width: 88px; padding: 0 12px; gap: 6px; background: var(--accent); color: var(--on-accent); font-size: 14px; }
 #${TOUCH_ID} .send:active { background: var(--accent-hi); color: var(--on-accent); }
 #${TOUCH_ID} .send[aria-disabled="true"] { background: transparent; box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--quiet); text-decoration: line-through; }
 .fut-touch-pad { height: 72px; }
@@ -255,7 +263,9 @@ export function mountTouchBar(doc: Document, store: Store, t: (k: string) => str
   let group = '';
   for (const def of ACTIONS) {
     const run = runs.get(def.id);
-    if (!run) continue;
+    if (!run || def.keysOnly) continue;
+    // Fleet page on a phone: the four fleet actions need the room; the planet arrows stay keyboard keys there.
+    if (def.group === 'planet' && doc.getElementById('fleetdispatchcomponent')) continue;
     if (group && group !== def.group) {
       const sep = doc.createElement('span');
       sep.className = `sep ${def.group}`;
@@ -269,6 +279,14 @@ export function mountTouchBar(doc: Document, store: Store, t: (k: string) => str
     b.title = key && !def.touchOnly ? `${t(def.label)} [${key}]` : t(def.label);
     b.setAttribute('aria-label', t(def.label));
     b.append(glyph(doc, def, 22));
+    // The fleet actions carry their name under the glyph: clear at a glance on a phone.
+    if (def.touchName) {
+      b.classList.add('named');
+      const n = doc.createElement('span');
+      n.className = 'tn';
+      n.textContent = t(def.touchName);
+      b.append(n);
+    }
     if (key && !def.touchOnly) {
       const k = doc.createElement('span');
       k.className = 'k';
