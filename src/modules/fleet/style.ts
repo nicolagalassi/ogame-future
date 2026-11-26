@@ -75,8 +75,11 @@ ${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
 
 /* Editors, pushed to the far end of the first row. */
 .fut-fedit { display: inline-flex; gap: 2px; margin-left: auto; }
-.fut-ftool { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 5px; background: none; color: var(--mute); }
+.fut-ftool { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 32px; height: 32px; padding: 0 10px 0 8px; border: 0; border-radius: 5px;
+  background: var(--tile); box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--ico-hi); cursor: pointer; }
+.fut-ftool .name { font: 600 condensed 12px/1 var(--display); white-space: nowrap; color: var(--hi); }
 .fut-ftool:hover { background: var(--tile-hi); color: var(--hi); }
+.fut-ftool:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* Rules: the rule's icon beside a switch track, so on and off read without a word. */
 .fut-frules { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; min-width: 0; }
@@ -204,7 +207,7 @@ ${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
   .fut-fcaret { width: 30px; height: 46px; }
   .fut-fact kbd { display: none; }
   .fut-fact:has(kbd) .ico { margin: 0; }
-  .fut-ftool { width: 44px; height: 44px; }
+  .fut-ftool { min-width: 44px; height: 44px; }
   .fut-frow { flex-wrap: wrap; }
   .fut-frules { flex-wrap: wrap; gap: 6px; }
   /* Riserve and Giro one under the other: one column of switches beside the labels. */

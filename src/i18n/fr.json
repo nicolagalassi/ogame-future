@@ -965,5 +965,6 @@
   "fleet.btn.touchCollect": "Collecter",
   "fleet.btn.touchDeploy": "Collecter",
   "fleet.btn.touchSubTransport": "transport",
-  "fleet.btn.touchSubDeploy": "stationner"
+  "fleet.btn.touchSubDeploy": "stationner",
+  "fleet.rulesShort": "Règles"
 }
