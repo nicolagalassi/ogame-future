@@ -230,7 +230,33 @@ const TOUCH_CSS = `
 #${TOUCH_ID} .send:active { background: var(--accent-hi); color: var(--on-accent); }
 #${TOUCH_ID} .send[aria-disabled="true"] { background: transparent; box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--quiet); text-decoration: line-through; }
 .fut-touch-pad { height: 72px; }
+/* A message carried by the bar, standing on top of its keys (it scales and moves with the bar). */
+#${TOUCH_ID} .note { position: absolute; left: 8px; right: 8px; bottom: calc(100% + 6px); display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 6px; background: var(--raised); box-shadow: inset 0 0 0 1px var(--accent-line), 0 8px 24px rgba(0, 0, 0, 0.6); color: var(--text); font: 600 14px/1.3 var(--display); }
+#${TOUCH_ID} .note .q { flex: 1 1 200px; }
+#${TOUCH_ID} .note button { width: auto; height: 38px; padding: 0 16px; }
+#${TOUCH_ID} .note button.yes { background: var(--accent); color: var(--on-accent); }
 `;
+
+/**
+ * A short message the touch bar carries just above its keys (the fleetsave speed question): it moves and
+ * scales with the bar, so on a zoomed phone page it stays on screen instead of drifting with the page.
+ */
+const notes = new WeakMap<Document, HTMLElement>();
+/** Shows `node` on the touch bar (null takes it away); false when there is no touch bar on this page. */
+export function setTouchNote(doc: Document, node: HTMLElement | null): boolean {
+  doc.getElementById(TOUCH_ID)?.querySelector(':scope > .note')?.remove();
+  if (!node) {
+    notes.delete(doc);
+    return !!doc.getElementById(TOUCH_ID);
+  }
+  const bar = doc.getElementById(TOUCH_ID);
+  if (!bar) return false;
+  node.classList.add('note');
+  notes.set(doc, node);
+  bar.append(node);
+  return true;
+}
 
 let queued = false;
 function scheduleTouchBar(): void {
@@ -330,6 +356,8 @@ export function mountTouchBar(doc: Document, store: Store, t: (k: string) => str
     bar.append(send);
   }
   if (!keys.childElementCount && !fleet) return;
+  const note = notes.get(doc);
+  if (note) bar.append(note);
   doc.body.append(bar);
   const pad = doc.createElement('div');
   pad.className = 'fut-touch-pad';
