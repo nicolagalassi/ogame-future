@@ -966,5 +966,9 @@
   "fleet.btn.touchDeploy": "Collect",
   "fleet.btn.touchSubTransport": "transport",
   "fleet.btn.touchSubDeploy": "deploy",
-  "fleet.rulesShort": "Rules"
+  "fleet.rulesShort": "Rules",
+  "settings.section.bodies": "Planets and moons",
+  "fleet.bodiesHint": "Reserves, jump gate and fleetsave of every planet and moon. Tap a body to change its rules; changes apply at once.",
+  "fleet.bodiesAll": "All bodies",
+  "fleet.rule.saveReserveOnly": "no target"
 }

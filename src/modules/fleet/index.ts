@@ -61,7 +61,8 @@ import { universeOf } from '../messages/spy-table';
 import { SNAPSHOT_KEY, type AccountSnapshot } from '../../data/account-info';
 import { applyPageResources, leftAfterSend } from '../../engines/resources';
 import { applyPageShips, shipsAfterSend } from '../../engines/account';
-import { originCoords, readShipSlots } from '../../data/fleet-page';
+import { FLEET_PAGE_SHIPS, originCoords, readShipSlots } from '../../data/fleet-page';
+import { techName, TECH_NAMES_KEY, type TechNames } from '../../data/tech-names';
 import { getDispatcher, readShipsInfo, shipCapacity as shipCapacityOf, shipsOnPlanet, SHIPS_INFO_KEY, whenDispatcherReady, type FleetDispatcher } from '../../data/fleet-dispatcher';
 import {
   prepareLast,
@@ -81,7 +82,8 @@ import {
 } from './actions';
 import { UNIVERSE_RANKS_KEY, type UniverseRanks } from '../../data/universe-ranks';
 import { hookSend, nextInRound, readRepeatParams, repeatUrl, type RepeatState } from './repeat';
-import { FLEET_CSS, MODAL_CSS } from './style';
+import { FLEET_CSS } from './style';
+export { RULES_CSS } from './style';
 import { keyLabel, keymap, registerActions, setTouchNote } from '../shortcuts';
 import { iconSvg, type IconName } from './icons';
 import { SHIP_ICONS } from '../../data/ship-icons';
@@ -104,12 +106,11 @@ export interface FleetOptions {
   /** Current URL, and how to open another one (overridable in tests). */
   href?: string;
   navigate?: (url: string) => void;
-  /** Opens Future's settings on the fleet section (general fleet settings, keys). */
-  onOpenSettings?: () => void;
+  /** Opens Future's settings: on the fleet section, or on this body's rules ('bodies'). */
+  onOpenSettings?: (section?: 'fleet' | 'bodies') => void;
 }
 
 const STYLE_ID = 'fut-fleet-style';
-const MODAL_ID = 'fut-fleet-modal';
 /** Missions offered for fleetsave, in the game's order codes. */
 export const FLEETSAVE_MISSIONS = [3, 4, 6, 8, 15, 5, 1];
 /** Per page: the round in progress, the options, and the speed (%) Future's last preparation set here. */
@@ -260,8 +261,13 @@ function bodyLabel(o: FleetOptions, id: number): string {
 function shipFields(o: FleetOptions, ships: Record<string, number>): { el: HTMLElement; read: () => Record<string, number> } {
   const grid = el(o.doc, 'div', 'fut-fgrid');
   const inputs: [string, HTMLInputElement][] = [];
-  // Every ship type, not only those on this body: the rule can be copied to other bodies.
-  for (const slot of readShipSlots(o.doc)) {
+  // Every ship type, not only those on this body: the rule can be copied to other bodies. Away from the
+  // fleet page (the settings window opens anywhere) the same list, named as the game names them.
+  const onPage = readShipSlots(o.doc);
+  const info = o.store.get<Record<string, { name: string }>>(SHIPS_INFO_KEY, {});
+  const learned = o.store.get<TechNames>(TECH_NAMES_KEY, {});
+  const slots = onPage.length ? onPage : FLEET_PAGE_SHIPS.map((id) => ({ id: id as string, name: info[id]?.name || techName(Number(id), o.locale, learned) }));
+  for (const slot of slots) {
     const [wrap, input] = numberField(o.doc, slot.name, ships[slot.id] ?? null, '0', o.locale);
     grid.append(wrap);
     inputs.push([slot.id, input]);
@@ -378,6 +384,11 @@ function iconEl(doc: Document): HTMLElement {
   return span;
 }
 
+/** The saved/copied line above an editor, when it sits in the rules panel. */
+function statusOf(panel: HTMLElement): HTMLElement | null {
+  return panel.closest('.fut-frules-panel')?.querySelector<HTMLElement>('.fut-fsaved') ?? null;
+}
+
 function reserveEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLElement {
   const { doc, t } = o;
   const profile = profileFor(loadProfiles(o.store), o.bodyId);
@@ -396,7 +407,9 @@ function reserveEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEle
 
   // Fleetsave: target plus its own ships and resources to keep; no switch, it ignores the others.
   const saveGrid = el(doc, 'div', 'fut-fgrid wide');
-  const origin = originCoords(doc);
+  // The edited body's own coordinates (the settings window opens anywhere, not only on that body).
+  const own = o.bodies.find((b) => b.planetId === o.bodyId || b.moonId === o.bodyId)?.coords.split(':').map(Number);
+  const origin = own && own.length === 3 ? { galaxy: own[0]!, system: own[1]! } : originCoords(doc);
   const [gWrap, gIn] = numberField(doc, t('fleet.galaxy'), profile.save?.galaxy ?? null, origin ? String(origin.galaxy) : '');
   const [sWrap, sIn] = numberField(doc, t('fleet.system'), profile.save?.system ?? null, origin ? String(origin.system) : '');
   const [pWrap, pIn] = numberField(doc, t('fleet.position'), profile.save?.position ?? null, '16');
@@ -458,12 +471,15 @@ function reserveEditor(o: FleetOptions, onSaved: (msg: string) => void): HTMLEle
     onSaved(t('fleet.copied', { count: ids.length }));
   });
   copyBox.hidden = true;
+  // As every choice in the settings window: saved as soon as a field is left, nothing to lose on the way out.
+  panel.addEventListener('change', (e) => {
+    if ((e.target as Element).closest('.fut-fcopy, .fut-fswitch')) return;
+    store();
+    onSaved('');
+    statusOf(panel)?.replaceChildren(doc.createTextNode(t('fleet.saved')));
+  });
   const actions = el(doc, 'div', 'fut-factions');
   actions.append(
-    button(doc, t('fleet.save'), () => {
-      store();
-      onSaved(t('fleet.saved'));
-    }, 'primary'),
     button(doc, t('fleet.copyTo'), () => {
       copyBox.hidden = !copyBox.hidden;
     }),
@@ -545,73 +561,101 @@ function universeSpeed(doc: Document): number {
 
 
 /* ------------------------------------------------------------------ */
-/* Settings window: separate from the action bar                       */
+/* Rules of every planet and moon, shown in Future's settings window  */
 /* ------------------------------------------------------------------ */
 
-let modalKeyHandler: ((e: KeyboardEvent) => void) | null = null;
-
-function closeModal(doc: Document): void {
-  doc.getElementById(MODAL_ID)?.remove();
-  if (modalKeyHandler) doc.removeEventListener('keydown', modalKeyHandler, true);
-  modalKeyHandler = null;
+export interface BodyRulesOptions {
+  doc: Document;
+  store: Store;
+  t: FleetOptions['t'];
+  locale: string;
+  bodies: FleetBody[];
+  /** Body to open on (the fleet page's Regole opens the body it stands on); none = the list. */
+  bodyId?: number | null;
+  /** After a saved change: the fleet bar redraws. */
+  onChange?: () => void;
 }
 
 /**
- * Opens this planet's or moon's rules over the page (reserves, jump gate, fleetsave), in a Shadow
- * DOM so the game's CSS cannot restyle our fields. The general fleet settings and the keys are in
- * Future's settings window.
+ * The "Pianeti e lune" section of the settings window: every body with its reserves, jump gate and
+ * fleetsave at a glance, the empty ones marked; a tap opens that body's rules. One place for them,
+ * from any page (Nicola: before, a window of its own, only on the fleet page and only for the body there).
  */
-function openSettings(o: FleetOptions, _tab: 'body', onChange: () => void): void {
-  const { doc, t } = o;
-  closeModal(doc);
-  const host = el(doc, 'div');
-  host.id = MODAL_ID;
-  const root = host.attachShadow({ mode: 'open' });
-  const style = el(doc, 'style');
-  style.textContent = WINDOW_SHEET + MODAL_CSS;
-  const backdrop = el(doc, 'div', 'backdrop');
-  const panel = el(doc, 'div', 'panel');
-  panel.setAttribute('role', 'dialog');
-  panel.setAttribute('aria-modal', 'true');
-  panel.setAttribute('aria-label', t('fleet.settingsTitle'));
-  const head = el(doc, 'div', 'head');
-  const status = el(doc, 'span', 'sub status');
+export function bodyRulesPanel(r: BodyRulesOptions): HTMLElement {
+  const { doc, t } = r;
+  const root = el(doc, 'div', 'fut-frules-panel');
+  const opts = (id: number): FleetOptions => ({ doc, store: r.store, bodyId: id, bodies: r.bodies, t, locale: r.locale });
+  const ids = r.bodies.flatMap((b) => [b.planetId, b.moonId]).filter((x): x is number => x !== null);
+  const status = el(doc, 'span', 'fut-fsaved');
   status.setAttribute('role', 'status');
-  const body = el(doc, 'div', 'body');
-  const show = () => {
-    // A message means something was saved or copied: redraw so every rule shows where it stands now.
+  const showList = () => {
+    const profiles = loadProfiles(r.store);
+    const table = el(doc, 'div', 'fut-fbodies');
+    table.setAttribute('role', 'list');
+    const head = el(doc, 'div', 'fut-fbrow head');
+    head.setAttribute('aria-hidden', 'true');
+    head.append(el(doc, 'span', '', ''), ...(['ships', 'resources', 'gate', 'fleetsave'] as const).map((s) => el(doc, 'span', '', t(s === 'fleetsave' ? 'fleet.fleetsave' : `fleet.rule.${s}`))));
+    table.append(head);
+    for (const id of ids) {
+      const o = opts(id);
+      const moon = isMoon(r.bodies, id);
+      const p = profileFor(profiles, id);
+      const row = el(doc, 'button', 'fut-fbrow');
+      row.type = 'button';
+      row.setAttribute('role', 'listitem');
+      const name = el(doc, 'span', 'nm');
+      name.append(el(doc, 'b', '', shortLabel(o, id)), el(doc, 'small', '', r.bodies.find((b) => b.planetId === id || b.moonId === id)?.coords ?? ''));
+      const cell = (section: ReserveSection, text: () => string) => {
+        if (section === 'gate' && !moon) return el(doc, 'span', 'na', '');
+        const empty = sectionEmpty(p, section);
+        const c = el(doc, 'span', empty ? 'unset' : 'set', empty ? t('fleet.rule.unset') : text());
+        // On a phone the column heads are gone: each value says what it is.
+        c.dataset.l = t(section === 'fleetsave' ? 'fleet.fleetsave' : `fleet.rule.${section}`);
+        return c;
+      };
+      const shipsSum = (ships: Record<string, number>) => formatUnits(Object.values(ships).reduce((a, n) => a + n, 0), r.locale);
+      row.append(
+        name,
+        cell('ships', () => shipsSum(p.reserve.ships)),
+        cell('resources', () => formatUnits(p.reserve.resources.metal + p.reserve.resources.crystal + p.reserve.resources.deuterium, r.locale)),
+        cell('gate', () => shipsSum(p.gate)),
+        cell('fleetsave', () => {
+          if (!p.save) return t('fleet.rule.saveReserveOnly');
+          // An empty galaxy or system means this body's own, as the fleetsave sends it.
+          const [g, sys] = (r.bodies.find((b) => b.planetId === id || b.moonId === id)?.coords ?? '').split(':');
+          return `${p.save.galaxy ?? g}:${p.save.system ?? sys}:${p.save.position} ${t(`mission.${p.save.mission}`)}`;
+        }),
+      );
+      row.setAttribute('aria-label', bodyLabel(o, id));
+      row.addEventListener('click', () => showBody(id));
+      table.append(row);
+    }
+    root.replaceChildren(el(doc, 'p', 'fut-fnote', t('fleet.bodiesHint')), table);
+  };
+  const showBody = (id: number) => {
+    const o = opts(id);
+    const back = el(doc, 'button', 'fut-fbtn fut-fback', `← ${t('fleet.bodiesAll')}`);
+    back.type = 'button';
+    back.addEventListener('click', () => {
+      status.textContent = '';
+      showList();
+    });
+    const title = el(doc, 'h4', '', t(isMoon(r.bodies, id) ? 'fleet.editTitleMoon' : 'fleet.editTitlePlanet', { body: bodyLabel(o, id) }));
+    const top = el(doc, 'div', 'fut-fbtop');
+    top.append(back, status);
     const saved = (msg: string) => {
-      onChange();
-      if (msg) {
-        const top = backdrop.scrollTop;
-        show();
-        backdrop.scrollTop = top;
-      }
+      r.onChange?.();
       status.textContent = msg;
+      // A copy changes other bodies' badges: redraw this body, keeping the message.
+      if (msg) {
+        root.replaceChildren(top, title, reserveEditor(o, saved));
+      }
     };
-    body.replaceChildren(reserveEditor(o, saved));
+    root.replaceChildren(top, title, reserveEditor(o, saved));
   };
-  const close = el(doc, 'button', 'close');
-  close.type = 'button';
-  close.setAttribute('aria-label', t('fleet.close'));
-  close.addEventListener('click', () => closeModal(doc));
-  close.append(icon(doc, 'close', 16));
-  const titles = el(doc, 'div', 'titles');
-  titles.append(el(doc, 'h2', '', t(isMoon(o.bodies, o.bodyId) ? 'fleet.editTitleMoon' : 'fleet.editTitlePlanet', { body: bodyLabel(o, o.bodyId) })), status);
-  head.append(titles, close);
-  panel.append(head, body);
-  backdrop.append(panel);
-  backdrop.addEventListener('click', (e) => {
-    if (e.target === backdrop) closeModal(doc);
-  });
-  root.append(style, backdrop);
-  doc.body.append(host);
-  modalKeyHandler = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') closeModal(doc);
-  };
-  doc.addEventListener('keydown', modalKeyHandler, true);
-  show();
-  close.focus();
+  if (r.bodyId && ids.includes(r.bodyId)) showBody(r.bodyId);
+  else showList();
+  return root;
 }
 
 /* ------------------------------------------------------------------ */
@@ -1595,7 +1639,7 @@ export function renderFleetTools(o: FleetOptions): void {
         t('fleet.btn.fleetsave'),
         profile.save ? `→ ${profile.save.galaxy ?? '·'}:${profile.save.system ?? '·'}:${profile.save.position}` : '',
         profile.save ? t('fleet.tip.fleetsave') : t('fleet.err.noFleetsave'),
-        () => (profile.save ? run.fleetsave() : openSettings(o, 'body', redraw)),
+        () => (profile.save ? run.fleetsave() : o.onOpenSettings?.('bodies')),
         !profile.save,
       ),
       act('last', 'fleet.last', t('fleet.btn.last'), '', last ? t('fleet.tip.last') : t('fleet.err.noLast'), () => run.last(), !last),
@@ -1697,9 +1741,9 @@ export function renderFleetTools(o: FleetOptions): void {
       out.peek(b, label, hint);
       return b;
     };
-    const rulesTool = tool('rules', t('fleet.editRules', { body: shortLabel(o, o.bodyId) }), t('fleet.editRulesHint'), () => openSettings(o, 'body', redraw), 'fut-frules-open', t('fleet.rulesShort'));
+    const rulesTool = tool('rules', t('fleet.editRules', { body: shortLabel(o, o.bodyId) }), t('fleet.editRulesHint'), () => o.onOpenSettings?.('bodies'), 'fut-frules-open', t('fleet.rulesShort'));
     rulesOut.peek(rulesTool, t('fleet.editRules', { body: shortLabel(o, o.bodyId) }), t('fleet.editRulesHint'));
-    if (o.onOpenSettings) edit.append(tool('settings', t('fleet.general'), t('fleet.generalHint'), () => o.onOpenSettings?.(), '', t('fleet.general')));
+    if (o.onOpenSettings) edit.append(tool('settings', t('fleet.general'), t('fleet.generalHint'), () => o.onOpenSettings?.('fleet'), '', t('fleet.general')));
 
     const top = el(doc, 'div', 'fut-frow');
     top.append(tiles, edit);

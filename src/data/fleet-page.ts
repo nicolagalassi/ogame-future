@@ -16,6 +16,9 @@ export interface ShipSlot {
   input: HTMLInputElement;
 }
 
+/** The ships in the fleet page's own order (warships, then civil), as read on the live page on 2026-11-26. */
+export const FLEET_PAGE_SHIPS = ['204', '205', '206', '207', '215', '211', '213', '214', '218', '219', '202', '203', '208', '209', '210'] as const;
+
 export function readShipSlots(doc: Document): ShipSlot[] {
   return Array.from(doc.querySelectorAll<HTMLElement>('#fleet1 #technologies li[data-technology]')).flatMap((li) => {
     const input = li.querySelector<HTMLInputElement>('input');

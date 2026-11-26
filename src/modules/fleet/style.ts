@@ -259,11 +259,34 @@ ${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
 `;
 
 /** Settings window: inside a Shadow DOM, so the game's CSS cannot reach these rules. */
-export const MODAL_CSS = `
-:host { --panel-w: 720px; }
+/** The rules of the planets and moons, inside the settings window (its Shadow DOM). */
+export const RULES_CSS = `
+.fut-frules-panel { color: var(--text-2); font-size: 12px; }
+.fut-frules-panel > .fut-fnote:first-child { margin: 4px 2px 8px; }
+/* Every body on one line: name, then what each rule keeps; the empty ones in the quiet dashed look. */
+.fut-fbodies { display: flex; flex-direction: column; gap: 4px; }
+.fut-fbrow { display: grid; grid-template-columns: minmax(110px, 1.3fr) repeat(4, minmax(0, 1fr)); align-items: center; gap: 8px; min-height: 40px; padding: 4px 10px;
+  border: 1px solid var(--line); border-radius: 7px; background: var(--raised); color: var(--text-2); font: 12px Arial, sans-serif; text-align: left; cursor: pointer; }
+@media (hover: hover) and (pointer: fine) { .fut-fbrow:hover { border-color: var(--accent); } }
+.fut-fbrow:active { background: var(--hover); }
+.fut-fbrow.head:active { background: none; }
+.fut-fbrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.fut-fbrow.head { min-height: 0; padding: 0 10px; border: 0; background: none; color: var(--muted); font-size: 11px; cursor: default; }
+.fut-fbrow .nm { display: flex; flex-direction: column; min-width: 0; }
+.fut-fbrow .nm b { overflow: hidden; color: var(--text); text-overflow: ellipsis; white-space: nowrap; }
+.fut-fbrow .nm small { color: var(--muted); font-size: 11px; }
+.fut-fbrow .set { color: var(--text); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fut-fbrow .unset { color: var(--muted); font-style: italic; }
+@media (max-width: 560px) {
+  .fut-fbrow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fut-fbrow .nm { grid-column: 1 / -1; }
+  .fut-fbrow.head { display: none; }
+  .fut-fbrow > span:not(.nm):not(.na)::before { content: attr(data-l) ': '; color: var(--muted); font-style: normal; }
+  .fut-fbrow .na { display: none; }
+}
+.fut-fbtop { display: flex; align-items: center; gap: 10px; margin: 2px 0 8px; }
+.fut-fsaved { color: var(--ok); font-size: 11px; }
 .fut-moon-ico { margin-right: 4px; vertical-align: -1px; color: var(--muted); }
-.status { color: var(--ok); min-height: 17px; }
-.body { padding-top: 2px; color: var(--text-2); font-size: 12px; }
 .fut-fbtn {
   height: 28px; padding: 0 12px; border-radius: 7px; border: 1px solid var(--line-strong); background: var(--surface);
   color: var(--text); font: 12px Arial, sans-serif; cursor: pointer;

@@ -966,5 +966,9 @@
   "fleet.btn.touchDeploy": "Accentra",
   "fleet.btn.touchSubTransport": "trasporto",
   "fleet.btn.touchSubDeploy": "schiera",
-  "fleet.rulesShort": "Regole"
+  "fleet.rulesShort": "Regole",
+  "settings.section.bodies": "Pianeti e lune",
+  "fleet.bodiesHint": "Riserve, portale e fleetsave di ogni pianeta e luna. Tocca un corpo per cambiarne le regole; le modifiche valgono subito.",
+  "fleet.bodiesAll": "Tutti i corpi",
+  "fleet.rule.saveReserveOnly": "senza destinazione"
 }

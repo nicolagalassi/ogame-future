@@ -966,5 +966,9 @@
   "fleet.btn.touchDeploy": "Sammeln",
   "fleet.btn.touchSubTransport": "Transport",
   "fleet.btn.touchSubDeploy": "Stationieren",
-  "fleet.rulesShort": "Regeln"
+  "fleet.rulesShort": "Regeln",
+  "settings.section.bodies": "Planeten und Monde",
+  "fleet.bodiesHint": "Reserven, Sprungtor und Fleetsave jedes Planeten und Mondes. Tippe auf einen Körper, um seine Regeln zu ändern; Änderungen gelten sofort.",
+  "fleet.bodiesAll": "Alle Körper",
+  "fleet.rule.saveReserveOnly": "kein Ziel"
 }

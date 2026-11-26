@@ -595,9 +595,13 @@ describe('rules window', () => {
       { planetId: 2, moonId: null, name: 'Colonia', coords: '5:186:8' },
       { planetId: 3, moonId: null, name: 'Terza', coords: '5:187:8' },
     ];
-    renderFleetTools({ doc, store, bodyId: 1, bodies, t: (k, v) => (v ? `${k}:${Object.values(v).join('|')}` : k), locale: 'it', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch' });
+    const opened: (string | undefined)[] = [];
+    renderFleetTools({ doc, store, bodyId: 1, bodies, t: (k, v) => (v ? `${k}:${Object.values(v).join('|')}` : k), locale: 'it', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch', onOpenSettings: (s) => opened.push(s) });
+    // Regole opens the settings window on this body's rules.
     (doc.querySelector('.fut-frules-open') as HTMLButtonElement).click();
-    const root = doc.getElementById('fut-fleet-modal')!.shadowRoot!;
+    expect(opened).toEqual(['bodies']);
+    const { bodyRulesPanel } = await import('../src/modules/fleet/index');
+    const root = doc.body.appendChild(bodyRulesPanel({ doc, store, t: (k, v) => (v ? `${k}:${Object.values(v).join('|')}` : k), locale: 'it', bodies, bodyId: 1 }));
     const badges = [...root.querySelectorAll('.fut-fbadge')].map((b) => b.textContent);
     expect(badges[0]).toBe('fleet.rule.on · fleet.rule.alsoOn:Colonia');
     expect(badges[1]).toBe('fleet.rule.empty');
@@ -847,9 +851,8 @@ describe('thousands in number fields', () => {
     const doc = fleetPage();
     const store = new Store(new MemoryStore(), 'grp');
     store.set('fleet.profiles', { '1': { reserve: reserve({ '203': 50000 }, { metal: 0, crystal: 0, deuterium: 700000000 }), save: null } });
-    renderFleetTools({ doc, store, bodyId: 1, bodies: [{ planetId: 1, moonId: null, name: 'Casa', coords: '5:185:8' }], t: (k: string) => k, locale: 'it', href: 'https://x/game/index.php?page=ingame&component=fleetdispatch' });
-    (doc.querySelector('.fut-frules-open') as HTMLButtonElement).click();
-    const root = doc.getElementById('fut-fleet-modal')!.shadowRoot!;
+    const { bodyRulesPanel } = await import('../src/modules/fleet/index');
+    const root = doc.body.appendChild(bodyRulesPanel({ doc, store, t: (k: string) => k, locale: 'it', bodies: [{ planetId: 1, moonId: null, name: 'Casa', coords: '5:185:8' }], bodyId: 1 }));
     const values = [...root.querySelectorAll<HTMLInputElement>('.fut-ffield input')].map((i) => i.value).filter(Boolean);
     expect(values).toContain('50.000');
     expect(values).toContain('700.000.000');
@@ -1222,5 +1225,37 @@ describe('touch bar Accentra keys', () => {
       ['fleet.btn.touchCollect', 'fleet.btn.touchSubTransport', 'collect'],
       ['fleet.btn.touchDeploy', 'fleet.btn.touchSubDeploy', 'collect'],
     ]);
+  });
+});
+
+describe('rules of every planet and moon (settings window)', () => {
+  it('lists every body with what each rule keeps, opens one, saves a change as soon as the field is left', async () => {
+    const { bodyRulesPanel } = await import('../src/modules/fleet/index');
+    const doc = document.implementation.createHTMLDocument();
+    const store = new Store(new MemoryStore(), 'rules-list');
+    store.set('fleet.profiles', { '1': { reserve: reserve({ '203': 10 }), save: { galaxy: 5, system: 185, position: 16, type: 1, mission: 6, speed: 30 } } });
+    const bodies = [{ planetId: 1, moonId: 11, name: 'Casa', coords: '5:185:8' }, { planetId: 2, moonId: null, name: 'Colonia', coords: '5:186:8' }];
+    let changed = 0;
+    const panel = doc.body.appendChild(bodyRulesPanel({ doc, store, t: (k: string) => k, locale: 'it', bodies, onChange: () => changed++ }));
+    const rows = [...panel.querySelectorAll<HTMLButtonElement>('button.fut-fbrow')];
+    // Casa, Casa ☾, Colonia; the gate only for the moon.
+    expect(rows.map((r) => r.querySelector('.nm b')?.textContent)).toEqual(['Casa', 'Casa ☾', 'Colonia']);
+    expect(rows[0]!.querySelectorAll('.set').length).toBe(2);
+    expect(rows[0]!.querySelector('.na')).not.toBeNull();
+    expect(rows[1]!.querySelector('.na')).toBeNull();
+    expect([...rows[2]!.querySelectorAll('.unset')].length).toBe(3);
+    // The fleetsave with the body's own galaxy and system.
+    expect(rows[0]!.querySelectorAll('.set')[1]!.textContent).toBe('5:185:16 mission.6');
+    // Off the fleet page: every ship type still listed.
+    rows[2]!.click();
+    const inputs = [...panel.querySelectorAll<HTMLInputElement>('.fut-ffield input')];
+    expect(inputs.length).toBeGreaterThan(15);
+    inputs[0]!.value = '7';
+    inputs[0]!.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(Object.values(store.get<Record<string, FleetProfile>>('fleet.profiles', {})['2']!.reserve.ships)).toEqual([7]);
+    expect(changed).toBe(1);
+    expect(panel.querySelector('.fut-fsaved')?.textContent).toBe('fleet.saved');
+    (panel.querySelector('.fut-fback') as HTMLButtonElement).click();
+    expect(panel.querySelectorAll('button.fut-fbrow')[2]!.querySelector('.set')).not.toBeNull();
   });
 });
