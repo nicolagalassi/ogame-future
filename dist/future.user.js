@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.165
+// @version      0.3.166
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1489,7 +1489,8 @@
     "mission.2": "Attacco federale",
     "mission.7": "Colonizzazione",
     "mission.9": "Distruzione luna",
-    "mission.18": "Esplorazione"
+    "mission.18": "Esplorazione",
+    "flights.title": "Flotte in volo"
   };
 
   // src/i18n/en.json
@@ -2475,7 +2476,8 @@
     "mission.2": "ACS attack",
     "mission.7": "Colonisation",
     "mission.9": "Moon destruction",
-    "mission.18": "Discovery"
+    "mission.18": "Discovery",
+    "flights.title": "Fleets in flight"
   };
 
   // src/i18n/fr.json
@@ -3461,7 +3463,8 @@
     "mission.2": "Attaque group\xE9e",
     "mission.7": "Coloniser",
     "mission.9": "D\xE9truire la lune",
-    "mission.18": "Exploration"
+    "mission.18": "Exploration",
+    "flights.title": "Flottes en vol"
   };
 
   // src/i18n/de.json
@@ -4447,7 +4450,8 @@
     "mission.2": "Verbandsangriff",
     "mission.7": "Kolonisieren",
     "mission.9": "Mondzerst\xF6rung",
-    "mission.18": "Erkundung"
+    "mission.18": "Erkundung",
+    "flights.title": "Flotten unterwegs"
   };
 
   // src/core/i18n.ts
@@ -4980,6 +4984,8 @@
   font: 13px/1.4 var(--body); color: var(--text-2);
   /* Chrome on Android enlarges long paragraphs on its own (text autosizing): the window keeps one scale. */
   -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+  /* Firefox for Android (Nicola's phone) inflates text with its own switch. */
+  -moz-text-size-adjust: none;
 }
 /* Fitted to a phone's screen (core/viewport): edge to edge, the head and tabs always in reach. */
 @media (pointer: coarse) {
@@ -10747,10 +10753,11 @@ ${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
 .fut-frules-panel { color: var(--text-2); font-size: 12px; }
 .fut-frules-panel > .fut-fnote:first-child { margin: 4px 2px 8px; }
 /* Every body on one line: name, then what each rule keeps; the empty ones in the quiet dashed look. */
-.fut-fbodies { display: flex; flex-direction: column; gap: 4px; }
+.fut-fbodies { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; background: var(--raised); }
+.fut-fbodies .fut-fbrow + .fut-fbrow { border-top: 1px solid var(--line-soft); }
 .fut-fbrow { display: grid; grid-template-columns: minmax(110px, 1.3fr) repeat(3, minmax(0, 1fr)); align-items: center; gap: 8px; min-height: 40px; padding: 4px 10px;
-  border: 1px solid var(--line); border-radius: 7px; background: var(--raised); color: var(--text-2); font: 12px Arial, sans-serif; text-align: left; cursor: pointer; }
-@media (hover: hover) and (pointer: fine) { .fut-fbrow:hover { border-color: var(--accent); } }
+  border: 0; border-radius: 0; background: none; color: var(--text-2); font: 12px Arial, sans-serif; text-align: left; cursor: pointer; }
+@media (hover: hover) and (pointer: fine) { .fut-fbrow:not(.head):hover { background: var(--hover); } }
 .fut-fbrow:active { background: var(--hover); }
 .fut-fbodies.moons .fut-fbrow { grid-template-columns: minmax(110px, 1.3fr) repeat(4, minmax(0, 1fr)); }
 /* Planets / Moons: the settings window's own pills, each with its symbol and how many. */
@@ -10758,8 +10765,8 @@ ${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
 .fut-fscope .seg i { font-style: normal; color: var(--muted); font-size: 11px; }
 .fut-fscope .seg[aria-pressed="true"] i { color: var(--accent); }
 .fut-fbrow.head:active { background: none; }
-.fut-fbrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.fut-fbrow.head { min-height: 0; padding: 0 10px; border: 0; background: none; color: var(--muted); font-size: 11px; cursor: default; }
+.fut-fbrow:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.fut-fbrow.head { min-height: 0; padding: 6px 10px 4px; background: var(--surface); color: var(--muted); font-size: 11px; cursor: default; }
 .fut-fbrow .nm { display: flex; flex-direction: column; min-width: 0; }
 .fut-fbrow .nm b { overflow: hidden; color: var(--text); text-overflow: ellipsis; white-space: nowrap; }
 .fut-fbrow .nm small { color: var(--muted); font-size: 11px; }
@@ -11043,6 +11050,8 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
 #${TOUCH_ID} .note { position: absolute; left: 8px; right: 8px; bottom: calc(100% + 6px); display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
   padding: 8px 10px; border-radius: 6px; background: var(--raised); box-shadow: inset 0 0 0 1px var(--accent-line), 0 8px 24px rgba(0, 0, 0, 0.6); color: var(--text); font: 600 14px/1.3 var(--display); }
 #${TOUCH_ID} .note .q { flex: 1 1 200px; }
+#${TOUCH_ID} .note .q b, #${TOUCH_ID} .note .q .l { display: block; }
+#${TOUCH_ID} .note .q .l { font-weight: 400; color: var(--text-2); }
 #${TOUCH_ID} .note button { width: auto; height: 38px; padding: 0 16px; }
 #${TOUCH_ID} .note button.yes { background: var(--accent); color: var(--on-accent); }
 `;
@@ -13444,7 +13453,8 @@ ${L} .fut-line3 .fut-fleet { flex: none; margin-top: 0; }
 ${L} .fut-flights { display: flex; align-items: center; gap: 4px; min-width: 0; margin-top: 1px; font: 600 11px/12px var(--display); white-space: nowrap; }
 ${L} .fut-fl { display: inline-flex; align-items: center; gap: 1px; color: var(--tone, var(--text-2)); }
 ${L} .fut-fl svg { flex: none; }
-${L} .fut-fl .w { font: 700 13px/11px Arial, sans-serif; }
+${L} .fut-fl .w { display: inline-flex; }
+${L} .fut-fl .w svg { stroke-width: 3; }
 ${L} .fut-fl .n { color: var(--text); font-variant-numeric: tabular-nums; }
 ${L} .fut-fl-moon { display: inline-flex; margin-left: 2px; color: var(--muted); }
 ${L} .fut-fl-moon svg { width: 9px; height: 9px; }
@@ -13472,7 +13482,8 @@ ${L} .fut-nomoon { flex-shrink: 0; width: ${MOON_W}px; border-left: 1px solid va
 
 /* An enemy landing here (data/events): the planet or moon tile lights up red, as OGLight does; an attack
    strongly, an espionage a little softer. Sword or eye over the skin, the time in its tooltip. Both layouts. */
-#planetbarcomponent #planetList a.fut-attack, #planetbarcomponent #planetList a.fut-spy { position: relative; }
+/* Only in Future's side-by-side menu: in the game's own layout the moon link is placed absolutely. */
+${L} a.fut-attack, ${L} a.fut-spy { position: relative; }
 #planetbarcomponent #planetList a.fut-attack {
   background: rgba(239, 106, 96, 0.24) !important; box-shadow: inset 0 0 0 2px ${STATE_COLORS.bad}, inset 0 0 18px rgba(239, 106, 96, 0.6) !important; }
 #planetbarcomponent #planetList a.fut-spy {
@@ -13481,7 +13492,7 @@ ${L} .fut-nomoon { flex-shrink: 0; width: ${MOON_W}px; border-left: 1px solid va
   box-shadow: inset 0 0 0 2px ${STATE_COLORS.bad}, inset 4px 0 0 var(--accent), inset 0 0 18px rgba(239, 106, 96, 0.6) !important; }
 #planetbarcomponent .fut-threat {
   position: absolute; left: 5px; top: calc(50% - 8px); z-index: 3; display: inline-flex; align-items: center; justify-content: center;
-  width: 16px; height: 16px; border-radius: 50%; background: ${STATE_COLORS.bad}; color: #1A0505; box-shadow: 0 0 6px rgba(239, 106, 96, 0.9); pointer-events: auto; }
+  width: 16px; height: 16px; border-radius: 50%; background: ${STATE_COLORS.bad}; color: #1A0505; pointer-events: auto; }
 #planetbarcomponent .fut-threat svg { width: 11px; height: 11px; stroke-width: 2.4; }
 #planetbarcomponent a.moonlink .fut-threat { left: 3px; top: 6px; }
 
@@ -13617,6 +13628,8 @@ ${L} .smallplanet a.alert {
   border: 1px solid var(--line-strong); border-radius: 6px; background: linear-gradient(180deg, var(--accent-soft) 0%, var(--surface) 100%);
   box-shadow: 0 6px 18px rgba(0,0,0,0.6); color: var(--text-2); font: 11px/1.45 Verdana, Arial, sans-serif; pointer-events: none; }
 .fut-plan-tip .fut-pt-head { display: flex; flex-direction: column; align-items: center; margin-bottom: 6px; }
+.fut-info-tip .fut-pt-items li { color: var(--text-2); }
+${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
 .fut-plan-tip .fut-pt-head b { color: #fff; font-size: 13px; }
 .fut-plan-tip .fut-pt-head span { color: var(--muted); font-size: 10px; }
 .fut-plan-tip .fut-pt-title { display: flex; align-items: center; gap: 5px; padding: 4px 0 3px; border-top: 1px solid var(--line-strong); color: var(--label); font-weight: 700; }
@@ -13978,9 +13991,55 @@ ${L} .smallplanet a.alert {
     15: { icon: "expedition", tone: "expedition" },
     18: { icon: "expedition", tone: "expedition" }
   };
-  var WAY_MARK = { out: "\u2192", back: "\u2190", in: "\u2193" };
+  var WAY_MARK = { out: { icon: "next", turn: 0 }, back: { icon: "back", turn: 0 }, in: { icon: "chevron", turn: 0 } };
   function clock(at, locale) {
     return new Date(at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  }
+  function showInfoTip(doc, anchor, title, lines) {
+    doc.getElementById(TIP_ID)?.remove();
+    const note = el4(doc, "div", "fut-info-note");
+    const shut = el4(doc, "button", "");
+    shut.append(icon(doc, "close", 16));
+    shut.type = "button";
+    shut.setAttribute("aria-label", title);
+    shut.addEventListener("click", (e) => {
+      e.preventDefault();
+      setTouchNote(doc, null);
+    });
+    const text = el4(doc, "span", "q");
+    text.append(el4(doc, "b", "", title));
+    for (const line of lines) text.append(el4(doc, "span", "l", line));
+    note.append(text, shut);
+    if (setTouchNote(doc, note)) return;
+    const tip = el4(doc, "div", "fut-plan-tip fut-info-tip");
+    tip.id = TIP_ID;
+    tip.setAttribute("role", "tooltip");
+    const head = el4(doc, "div", "fut-pt-head");
+    head.append(el4(doc, "b", "", title));
+    const list = el4(doc, "ul", "fut-pt-items");
+    for (const line of lines) list.append(el4(doc, "li", "", line));
+    tip.append(head, list);
+    doc.body.append(tip);
+    const box = anchor.getBoundingClientRect();
+    const view2 = doc.defaultView;
+    const vw = view2?.innerWidth ?? 1200;
+    const vh = view2?.innerHeight ?? 800;
+    const left = box.right + 10 + tip.offsetWidth > vw ? box.left - 10 - tip.offsetWidth : box.right + 10;
+    tip.style.left = `${Math.max(4, left)}px`;
+    tip.style.top = `${Math.max(4, Math.min(box.top + box.height / 2 - tip.offsetHeight / 2, vh - tip.offsetHeight - 4))}px`;
+    const close = () => {
+      tip.remove();
+      doc.removeEventListener("click", close, true);
+    };
+    (view2 ?? globalThis).setTimeout(() => doc.addEventListener("click", close, true), 0);
+  }
+  function detailsOnTap(doc, node, title, lines) {
+    node.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (doc.getElementById(TIP_ID)) return doc.getElementById(TIP_ID)?.remove();
+      showInfoTip(doc, node, title(), lines());
+    });
   }
   function markThreat(link, ev, o) {
     if (!link) return;
@@ -14000,8 +14059,9 @@ ${L} .smallplanet a.alert {
       lines.push(t("threat.spy", { time: clock(ev.spy, o.locale) }));
     }
     badge.title = lines.join("\n");
-    badge.setAttribute("role", "img");
+    badge.setAttribute("role", "button");
     badge.setAttribute("aria-label", lines.join(". "));
+    detailsOnTap(doc, badge, () => link.querySelector(".planet-name")?.textContent?.trim() || link.querySelector("img")?.getAttribute("alt") || "", () => lines);
     link.append(badge);
   }
   function flightChips(doc, planet, moon, o) {
@@ -14021,9 +14081,12 @@ ${L} .smallplanet a.alert {
       for (const f of [...own].sort((a, b) => order[a.way] - order[b.way] || a.first - b.first)) {
         const look = MISSION_LOOK[f.mission] ?? { icon: "ships" };
         const chip2 = el4(doc, "span", "fut-fl");
+        chip2.dataset.way = f.way;
         if (look.tone) chip2.style.setProperty("--tone", MISSION_TONES[look.tone]);
         chip2.innerHTML = iconSvg(look.icon, 11);
-        chip2.append(el4(doc, "span", "w", WAY_MARK[f.way]));
+        const way = el4(doc, "span", "w");
+        way.append(icon(doc, WAY_MARK[f.way].icon, 10));
+        chip2.append(way);
         if (f.count > 1) chip2.append(el4(doc, "span", "n", String(f.count)));
         const text = o.t(`flights.${f.way}`, { mission: o.t(`mission.${f.mission}`), n: f.count, time: clock(f.first, o.locale) });
         chip2.title = text;
@@ -14033,6 +14096,8 @@ ${L} .smallplanet a.alert {
     });
     line.title = lines.join("\n");
     line.setAttribute("aria-label", lines.join(". "));
+    line.setAttribute("role", "button");
+    detailsOnTap(doc, line, () => [line.closest("a")?.querySelector(".planet-name")?.textContent?.trim(), o.t("flights.title")].filter(Boolean).join(" \xB7 "), () => lines);
     return line;
   }
   function renderPlanetMenu(o) {
@@ -19137,8 +19202,9 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
     const bodyIds = readPlanetList(document).flatMap((e) => [e.planetId, e.moonId]).filter((id) => id !== null);
     let queues = store.get(QUEUES_KEY, null);
     const eventDeps = { guard, store, doc: document, offset: clockOffset(document, Date.now()) };
+    let eventsLoad = Promise.resolve();
     try {
-      const [account, queue, lf, , , importExport] = await Promise.allSettled([
+      const boot = Promise.allSettled([
         hydrateAccountOncePerSession({ guard, store, session: window.sessionStorage }),
         loadQueuesOnPageLoad({ guard, store, ids: bodyIds }),
         // Lifeform bonuses for the expedition size: once per session, like accountInfo.
@@ -19149,9 +19215,10 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
         // only on the fleet page, public API, cached an hour.
         isFleetDispatch(document) ? universeRanks({ guard, store, origin: location.origin }) : Promise.resolve(null),
         // Today's import/export offer, for the Merchant's colour in the menu: once per session.
-        importExportOncePerSession({ guard, store, session: window.sessionStorage }),
-        loadEventsOnPageLoad(eventDeps).catch((e) => console.warn(`[${t("app.name")}]`, e))
+        importExportOncePerSession({ guard, store, session: window.sessionStorage })
       ]);
+      eventsLoad = loadEventsOnPageLoad(eventDeps).catch((e) => console.warn(`[${t("app.name")}]`, e));
+      const [account, queue, lf, , , importExport] = await boot;
       if (importExport.status === "fulfilled") markMerchant(document, importExport.value);
       else console.warn(`[${t("app.name")}]`, importExport.reason);
       if (isTraderPage(location.href)) forgetImportExportRead(store, window.sessionStorage);
@@ -19457,6 +19524,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
       store.set(FLIGHTS_KEY, { readAt: Date.now(), list: list2 });
       draw();
     });
+    void eventsLoad.then(() => draw());
     watchPageEvents(document, reminders.offset, (list2) => {
       store.set(EVENTS_KEY, { readAt: Date.now(), list: list2 });
       draw();
