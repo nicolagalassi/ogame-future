@@ -1055,3 +1055,46 @@ describe("the game's select-all ships", () => {
     expect(field(doc, '203')).toBe('5000');
   });
 });
+
+describe("the game's all-resources on page 2", () => {
+  it('caps what leaves so the reserve (and the fuel, on deuterium) stays home', async () => {
+    const { cappedByReserve } = await import('../src/modules/fleet/index');
+    const here = { metal: 150_000, crystal: 50_000, deuterium: 20_000 };
+    expect(cappedByReserve(here, here, { metal: 100_000, crystal: 0, deuterium: 5_000 }, 1_000)).toEqual({ metal: 50_000, crystal: 50_000, deuterium: 14_000 });
+    // Less loaded than allowed: unchanged; a reserve over the stock: nothing.
+    expect(cappedByReserve({ metal: 10_000, crystal: 0, deuterium: 0 }, here, { metal: 100_000, crystal: 0, deuterium: 0 }, 0)).toEqual({ metal: 10_000, crystal: 0, deuterium: 0 });
+    expect(cappedByReserve(here, here, { metal: 999_999, crystal: 0, deuterium: 0 }, 0).metal).toBe(0);
+  });
+
+  it('after the button, the cargo leaves the resources reserve home; not in an expedition round', async () => {
+    const { renderFleetTools } = await import('../src/modules/fleet/index');
+    const run = async (href: string) => {
+      const doc = document.implementation.createHTMLDocument();
+      doc.body.innerHTML = '<div id="fleetdispatchcomponent"><div id="fleet2"><div id="buttonz"></div><a id="allresources"></a></div></div>';
+      const fd = fakeDispatcher();
+      (window as unknown as { fleetDispatcher: unknown }).fleetDispatcher = fd;
+      doc.getElementById('allresources')!.addEventListener('click', () => {
+        fd.cargoMetal = fd.metalOnPlanet;
+        fd.cargoCrystal = fd.crystalOnPlanet;
+        fd.cargoDeuterium = fd.deuteriumOnPlanet - 1000;
+      });
+      const store = new Store(new MemoryStore(), `res-${href.length}`);
+      store.set('fleet.profiles', { 1: { reserve: { ships: {}, resources: { metal: 100_000, crystal: 0, deuterium: 5_000 } } } });
+      renderFleetTools({ doc, store, bodyId: 1, bodies: [{ planetId: 1, moonId: null, name: 'Casa', coords: '5:185:8' }], t: (k: string) => k, locale: 'en', href });
+      doc.getElementById('allresources')!.click();
+      await new Promise((r) => setTimeout(r, 5));
+      return [fd.cargoMetal, fd.cargoCrystal, fd.cargoDeuterium];
+    };
+    expect(await run('https://x/game/index.php?page=ingame&component=fleetdispatch')).toEqual([50_000, 50_000, 14_000]);
+    expect(await run('https://x/game/index.php?page=ingame&component=fleetdispatch&futmode=expedition&futfirst=1')).toEqual([150_000, 50_000, 19_000]);
+  });
+});
+
+describe('resources reserve in the plain Trasporto', () => {
+  it('«Tutto» or a big number: what is above the reserve leaves, the deuterium also keeps the fuel', () => {
+    const fd = fakeDispatcher();
+    const all = { metal: 150_000, crystal: 50_000, deuterium: 20_000 };
+    prepareSend(fd, fleetPage(), DEFAULT_SETTINGS, { galaxy: 1, system: 2, position: 3, type: 1 }, all, 'transport', 203, {}, { metal: 100_000, crystal: 0, deuterium: 5_000 });
+    expect([fd.cargoMetal, fd.cargoCrystal, fd.cargoDeuterium]).toEqual([50_000, 50_000, 14_000]);
+  });
+});

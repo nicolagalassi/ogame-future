@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.145
+// @version      0.3.146
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1077,7 +1077,7 @@
     "fleet.rule.resources": "Risorse",
     "fleet.rule.gate": "Portale",
     "fleet.rule.shipsHint": "Navi che restano sul corpo con Su luna, Trasporto, Schiera, Raccolta, Ultima, Porta qui le risorse e con il pulsante del gioco che seleziona tutte le navi. La spedizione non la usa, il fleetsave ha la sua.",
-    "fleet.rule.resourcesHint": "Risorse che restano sul corpo con Su luna, Trasporto, Schiera, Porta qui le risorse e Risorse \u2212 riserva.",
+    "fleet.rule.resourcesHint": "Risorse che restano sul corpo con Su luna, Trasporto, Schiera, Raccolta, Porta qui le risorse e con il pulsante del gioco che carica tutte le risorse. La spedizione non la usa, il fleetsave ha la sua.",
     "fleet.rule.gateHint": "Navi che restano sulla luna quando usi il portale del gioco.",
     "fleet.rule.saveShips": "Navi da lasciare",
     "fleet.rule.saveResources": "Risorse da lasciare",
@@ -2037,7 +2037,7 @@
     "fleet.rule.resources": "Resources",
     "fleet.rule.gate": "Jump gate",
     "fleet.rule.shipsHint": "Ships that stay on the body with To moon, Transport, Deploy, Collection, Last, Bring the resources here and the game's select-all-ships button. Expeditions do not use it; the fleetsave has its own.",
-    "fleet.rule.resourcesHint": "Resources that stay here with To moon, Transport, Deploy, Bring resources and Resources \u2212 reserve.",
+    "fleet.rule.resourcesHint": "Resources that stay on the body with To moon, Transport, Deploy, Collection, Bring the resources here and the game's load-all-resources button. Expeditions do not use it; the fleetsave has its own.",
     "fleet.rule.gateHint": "Ships that stay on the moon when you use the game's jump gate.",
     "fleet.rule.saveShips": "Ships to keep",
     "fleet.rule.saveResources": "Resources to keep",
@@ -2997,7 +2997,7 @@
     "fleet.rule.resources": "Ressources",
     "fleet.rule.gate": "Porte de saut",
     "fleet.rule.shipsHint": "Vaisseaux qui restent sur le corps avec Vers lune, Transport, Stationner, Collecte, Derni\xE8re, Apporter les ressources ici et le bouton du jeu qui s\xE9lectionne tous les vaisseaux. L'exp\xE9dition ne l'utilise pas ; le fleetsave a la sienne.",
-    "fleet.rule.resourcesHint": "Ressources qui restent ici avec Vers lune, Transport, Stationner, Apporter les ressources et Ressources \u2212 r\xE9serve.",
+    "fleet.rule.resourcesHint": "Ressources qui restent sur le corps avec Vers lune, Transport, Stationner, Collecte, Apporter les ressources ici et le bouton du jeu qui charge toutes les ressources. L'exp\xE9dition ne l'utilise pas ; le fleetsave a la sienne.",
     "fleet.rule.gateHint": "Vaisseaux qui restent sur la lune quand tu utilises la porte de saut du jeu.",
     "fleet.rule.saveShips": "Vaisseaux \xE0 garder",
     "fleet.rule.saveResources": "Ressources \xE0 garder",
@@ -3957,7 +3957,7 @@
     "fleet.rule.resources": "Rohstoffe",
     "fleet.rule.gate": "Sprungtor",
     "fleet.rule.shipsHint": "Schiffe, die bei Zum Mond, Transport, Stationieren, Sammeln, Letzte, Rohstoffe hierher bringen und der Spielschaltfl\xE4che \xABalle Schiffe ausw\xE4hlen\xBB auf dem K\xF6rper bleiben. Expeditionen nutzen sie nicht; der Fleetsave hat seine eigene.",
-    "fleet.rule.resourcesHint": "Rohstoffe, die hier bleiben bei Zum Mond, Transport, Stationieren, Rohstoffe bringen und Rohstoffe \u2212 Reserve.",
+    "fleet.rule.resourcesHint": "Rohstoffe, die bei Zum Mond, Transport, Stationieren, Sammeln, Rohstoffe hierher bringen und der Spielschaltfl\xE4che \xABalle Rohstoffe laden\xBB auf dem K\xF6rper bleiben. Expeditionen nutzen sie nicht; der Fleetsave hat seine eigene.",
     "fleet.rule.gateHint": "Schiffe, die auf dem Mond bleiben, wenn du das Sprungtor des Spiels nutzt.",
     "fleet.rule.saveShips": "Schiffe behalten",
     "fleet.rule.saveResources": "Rohstoffe behalten",
@@ -13373,8 +13373,9 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (!key || key === ourSelection.get(fd)) return null;
     return Object.fromEntries((fd.shipsToSend ?? []).filter((s) => s.number > 0).map((s) => [s.id, s.number]));
   }
-  function prepareSend(fd, doc, settings, target, pick, mission, cargoShip, keep = {}) {
-    const here = onPlanet(fd);
+  function prepareSend(fd, doc, settings, target, pick, mission, cargoShip, keep = {}, keepRes = { metal: 0, crystal: 0, deuterium: 0 }) {
+    const all2 = onPlanet(fd);
+    const here = { metal: Math.max(0, all2.metal - keepRes.metal), crystal: Math.max(0, all2.crystal - keepRes.crystal), deuterium: Math.max(0, all2.deuterium - keepRes.deuterium) };
     const wanted = pickedLoad(here, pick, 0, Number.MAX_SAFE_INTEGER);
     const amount = wanted.metal + wanted.crystal + wanted.deuterium;
     const manual = playerSelection(fd) ?? {};
@@ -14284,6 +14285,39 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       }, 0);
     });
   }
+  function cappedByReserve(loaded, onPlanet2, keep, fuel) {
+    const cap = (k) => Math.max(0, Math.min(loaded[k], Math.floor(onPlanet2[k] - keep[k] - (k === "deuterium" ? fuel : 0))));
+    return { metal: cap("metal"), crystal: cap("crystal"), deuterium: cap("deuterium") };
+  }
+  function keepReserveOnLoadAll(o) {
+    const { doc } = o;
+    const root = doc.documentElement;
+    if (root.dataset.futLoadAll) return;
+    root.dataset.futLoadAll = "1";
+    doc.addEventListener("click", (e) => {
+      const b = e.target?.closest?.("#allresources, #loadAllResources, .allresources");
+      if (!b) return;
+      (doc.defaultView ?? globalThis).setTimeout(() => {
+        const current3 = pageState.get(doc)?.o ?? o;
+        const mode = pageState.get(doc)?.active?.mode;
+        if (mode === "expedition" || mode === "fleetsave") return;
+        const keep = activeProfile(profileFor(loadProfiles(current3.store), current3.bodyId), loadSettings(current3.store)).reserve.resources;
+        if (!keep.metal && !keep.crystal && !keep.deuterium) return;
+        const fd = getDispatcher();
+        if (!fd) return;
+        const left = cappedByReserve(
+          { metal: Number(fd.cargoMetal) || 0, crystal: Number(fd.cargoCrystal) || 0, deuterium: Number(fd.cargoDeuterium) || 0 },
+          { metal: Number(fd.metalOnPlanet) || 0, crystal: Number(fd.crystalOnPlanet) || 0, deuterium: Number(fd.deuteriumOnPlanet) || 0 },
+          keep,
+          Math.ceil(Number(fd.getConsumption()) || 0)
+        );
+        fd.cargoMetal = left.metal;
+        fd.cargoCrystal = left.crystal;
+        fd.cargoDeuterium = left.deuterium;
+        fd.refresh();
+      }, 0);
+    });
+  }
   function popup(doc, anchor, menu) {
     doc.querySelectorAll(".fut-fmenu").forEach((n) => n.remove());
     const r = anchor.getBoundingClientRect();
@@ -14796,7 +14830,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         if (c.galaxy === target.galaxy && c.system === target.system && c.position === target.position && (c.type ?? 1) === target.type)
           return say(t("fleet.err.sameBody"), true);
         begin(now.sendMode);
-        const r = prepareSend(fd, doc, now, target, now.sendPick, now.sendMode, ship, profile.reserve.ships);
+        const r = prepareSend(fd, doc, now, target, now.sendPick, now.sendMode, ship, profile.reserve.ships, profile.reserve.resources);
         if (r.ok && r.missing > 0)
           return say(t("fleet.ok.cargoShort", { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), missing: r.missing.toLocaleString(o.locale) }), true);
         report(r, "fleet.ok.cargo");
@@ -15018,6 +15052,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       host.prepend(strip);
       registerActions(doc, o.store, t, { "fleet.skip": skip });
     }
+    if (fleet2) keepReserveOnLoadAll(o);
     if (fleet2 && anchor2) {
       const bar = el4(doc, "div", "fut-fbar");
       bar.hidden = true;
