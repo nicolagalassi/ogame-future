@@ -1343,7 +1343,8 @@ export function renderFleetTools(o: FleetOptions): void {
       if (c.galaxy === target.galaxy && c.system === target.system && c.position === target.position && (c.type ?? 1) === target.type)
         return say(t('fleet.err.sameBody'), true);
       begin(now.sendMode);
-      const r = prepareSend(fd, doc, now, target, now.sendPick, now.sendMode, ship);
+      // The ships reserve (if switched on) stays home here too: only the expedition and the fleetsave go without it.
+      const r = prepareSend(fd, doc, now, target, now.sendPick, now.sendMode, ship, profile.reserve.ships);
       if (r.ok && r.missing > 0)
         return say(t('fleet.ok.cargoShort', { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), missing: r.missing.toLocaleString(o.locale) }), true);
       report(r, 'fleet.ok.cargo');

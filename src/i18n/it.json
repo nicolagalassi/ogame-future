@@ -567,7 +567,7 @@
   "fleet.rule.ships": "Navi",
   "fleet.rule.resources": "Risorse",
   "fleet.rule.gate": "Portale",
-  "fleet.rule.shipsHint": "Navi che restano sul corpo con Su luna, Trasporto, Schiera, Ultima e Porta qui le risorse. Le spedizioni non la usano.",
+  "fleet.rule.shipsHint": "Navi che restano sul corpo con Su luna, Trasporto, Schiera, Raccolta, Ultima e Porta qui le risorse. La spedizione non la usa, il fleetsave ha la sua.",
   "fleet.rule.resourcesHint": "Risorse che restano sul corpo con Su luna, Trasporto, Schiera, Porta qui le risorse e Risorse − riserva.",
   "fleet.rule.gateHint": "Navi che restano sulla luna quando usi il portale del gioco.",
   "fleet.rule.saveShips": "Navi da lasciare",

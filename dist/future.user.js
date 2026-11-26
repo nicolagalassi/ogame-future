@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.143
+// @version      0.3.144
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1076,7 +1076,7 @@
     "fleet.rule.ships": "Navi",
     "fleet.rule.resources": "Risorse",
     "fleet.rule.gate": "Portale",
-    "fleet.rule.shipsHint": "Navi che restano sul corpo con Su luna, Trasporto, Schiera, Ultima e Porta qui le risorse. Le spedizioni non la usano.",
+    "fleet.rule.shipsHint": "Navi che restano sul corpo con Su luna, Trasporto, Schiera, Raccolta, Ultima e Porta qui le risorse. La spedizione non la usa, il fleetsave ha la sua.",
     "fleet.rule.resourcesHint": "Risorse che restano sul corpo con Su luna, Trasporto, Schiera, Porta qui le risorse e Risorse \u2212 riserva.",
     "fleet.rule.gateHint": "Navi che restano sulla luna quando usi il portale del gioco.",
     "fleet.rule.saveShips": "Navi da lasciare",
@@ -2036,7 +2036,7 @@
     "fleet.rule.ships": "Ships",
     "fleet.rule.resources": "Resources",
     "fleet.rule.gate": "Jump gate",
-    "fleet.rule.shipsHint": "Ships that stay here with To moon, Transport, Deploy, Last fleet and Bring resources. Expeditions do not use it.",
+    "fleet.rule.shipsHint": "Ships that stay on the body with To moon, Transport, Deploy, Collection, Last and Bring the resources here. Expeditions do not use it; the fleetsave has its own.",
     "fleet.rule.resourcesHint": "Resources that stay here with To moon, Transport, Deploy, Bring resources and Resources \u2212 reserve.",
     "fleet.rule.gateHint": "Ships that stay on the moon when you use the game's jump gate.",
     "fleet.rule.saveShips": "Ships to keep",
@@ -2996,7 +2996,7 @@
     "fleet.rule.ships": "Vaisseaux",
     "fleet.rule.resources": "Ressources",
     "fleet.rule.gate": "Porte de saut",
-    "fleet.rule.shipsHint": "Vaisseaux qui restent ici avec Vers lune, Transport, Stationner, Derni\xE8re flotte et Apporter les ressources. Les exp\xE9ditions ne l'utilisent pas.",
+    "fleet.rule.shipsHint": "Vaisseaux qui restent sur le corps avec Vers lune, Transport, Stationner, Collecte, Derni\xE8re et Apporter les ressources ici. L'exp\xE9dition ne l'utilise pas ; le fleetsave a la sienne.",
     "fleet.rule.resourcesHint": "Ressources qui restent ici avec Vers lune, Transport, Stationner, Apporter les ressources et Ressources \u2212 r\xE9serve.",
     "fleet.rule.gateHint": "Vaisseaux qui restent sur la lune quand tu utilises la porte de saut du jeu.",
     "fleet.rule.saveShips": "Vaisseaux \xE0 garder",
@@ -3956,7 +3956,7 @@
     "fleet.rule.ships": "Schiffe",
     "fleet.rule.resources": "Rohstoffe",
     "fleet.rule.gate": "Sprungtor",
-    "fleet.rule.shipsHint": "Schiffe, die hier bleiben bei Zum Mond, Transport, Stationieren, Letzte Flotte und Rohstoffe bringen. Expeditionen nutzen sie nicht.",
+    "fleet.rule.shipsHint": "Schiffe, die bei Zum Mond, Transport, Stationieren, Sammeln, Letzte und Rohstoffe hierher bringen auf dem K\xF6rper bleiben. Expeditionen nutzen sie nicht; der Fleetsave hat seine eigene.",
     "fleet.rule.resourcesHint": "Rohstoffe, die hier bleiben bei Zum Mond, Transport, Stationieren, Rohstoffe bringen und Rohstoffe \u2212 Reserve.",
     "fleet.rule.gateHint": "Schiffe, die auf dem Mond bleiben, wenn du das Sprungtor des Spiels nutzt.",
     "fleet.rule.saveShips": "Schiffe behalten",
@@ -9165,7 +9165,8 @@ td.spark-cell { width: 90px; }
     resourcesOn: true,
     gateOn: true,
     ignoreFood: false,
-    collectIgnoreShips: true,
+    // Off (Nicola, 2026-11-26): the ships reserve holds in every mission but the expedition and the fleetsave.
+    collectIgnoreShips: false,
     collectDeployRes: true,
     loadOrder: ["deuterium", "crystal", "metal"],
     sendMode: null,
@@ -13305,7 +13306,7 @@ table.queues td.acts { width: 1%; text-align: right; }
   }
   function prepareDelivery(fd, doc, base2, settings, target, need, hold = { metal: 0, crystal: 0, deuterium: 0 }) {
     const r = base2.reserve.resources;
-    const profile = { ...base2, reserve: { ships: {}, resources: { ...r, metal: r.metal + hold.metal, crystal: r.crystal + hold.crystal, deuterium: r.deuterium + hold.deuterium } } };
+    const profile = { ...base2, reserve: { ships: base2.reserve.ships, resources: { ...r, metal: r.metal + hold.metal, crystal: r.crystal + hold.crystal, deuterium: r.deuterium + hold.deuterium } } };
     const free = deliveryLoad(onPlanet(fd), profile.reserve, 0, Number.MAX_SAFE_INTEGER, need);
     const amount = free.metal + free.crystal + free.deuterium;
     if (amount <= 0) return { ok: false, reason: "fleet.err.noResources", ships: 0, cargo: 0 };
@@ -13372,7 +13373,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (!key || key === ourSelection.get(fd)) return null;
     return Object.fromEntries((fd.shipsToSend ?? []).filter((s) => s.number > 0).map((s) => [s.id, s.number]));
   }
-  function prepareSend(fd, doc, settings, target, pick, mission, cargoShip) {
+  function prepareSend(fd, doc, settings, target, pick, mission, cargoShip, keep = {}) {
     const here = onPlanet(fd);
     const wanted = pickedLoad(here, pick, 0, Number.MAX_SAFE_INTEGER);
     const amount = wanted.metal + wanted.crystal + wanted.deuterium;
@@ -13380,7 +13381,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const already = manual[cargoShip] ?? 0;
     delete manual[cargoShip];
     const othersCapacity = Object.entries(manual).reduce((sum, [id, n2]) => sum + n2 * shipCapacity(fd, Number(id)), 0);
-    const available = shipsOnPlanet(fd)[String(cargoShip)] ?? 0;
+    const available = Math.max(0, (shipsOnPlanet(fd)[String(cargoShip)] ?? 0) - (keep[String(cargoShip)] ?? 0));
     const capacity = shipCapacity(fd, cargoShip);
     if (!available && !Object.keys(manual).length) return { ok: false, reason: "fleet.err.noCargoShip", ships: 0, cargo: 0, missing: 0 };
     if (mission === "transport" && amount <= 0) return { ok: false, reason: "fleet.err.nothingPicked", ships: 0, cargo: 0, missing: 0 };
@@ -14775,7 +14776,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         if (c.galaxy === target.galaxy && c.system === target.system && c.position === target.position && (c.type ?? 1) === target.type)
           return say(t("fleet.err.sameBody"), true);
         begin(now.sendMode);
-        const r = prepareSend(fd, doc, now, target, now.sendPick, now.sendMode, ship);
+        const r = prepareSend(fd, doc, now, target, now.sendPick, now.sendMode, ship, profile.reserve.ships);
         if (r.ok && r.missing > 0)
           return say(t("fleet.ok.cargoShort", { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), missing: r.missing.toLocaleString(o.locale) }), true);
         report(r, "fleet.ok.cargo");

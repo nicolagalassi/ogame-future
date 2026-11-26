@@ -299,9 +299,10 @@ describe('fleet actions on the game dispatcher', () => {
     expect(fd.selected).toEqual({ 203: 23 });
   });
 
-  it('plan deliveries ignore the ships reserve but keep what queued builds here need', () => {
+  it('plan deliveries keep the ships reserve and what queued builds here need', () => {
     const fd = fakeDispatcher();
-    const all = { reserve: { ships: { '203': 100, '202': 50 }, resources: { metal: 0, crystal: 0, deuterium: 0 } }, save: null };
+    // 100 large cargo here, 70 kept back: 30 can go (25 are needed).
+    const all = { reserve: { ships: { '203': 70, '202': 50 }, resources: { metal: 0, crystal: 0, deuterium: 0 } }, save: null };
     // 150,000 metal here, 100,000 held for a level queued on this planet: 50,000 can leave.
     const r = prepareDelivery(fd, fleetPage(), all, DEFAULT_SETTINGS, { galaxy: 1, system: 2, position: 3, type: 1 }, { metal: 200_000, crystal: 0, deuterium: 0 }, { metal: 100_000, crystal: 0, deuterium: 0 });
     expect(r.ok).toBe(true);
@@ -789,13 +790,18 @@ describe('expedition collection settings', () => {
   const profile = { reserve: { ships: { '203': 10 }, resources: { metal: 0, crystal: 0, deuterium: 5_000 } }, save: null };
   const target = { galaxy: 5, system: 185, position: 8, type: 3 };
 
-  it('transport ignores the ships reserve by default, keeps the resources one, loads in the chosen order', () => {
+  it('transport keeps the ships reserve by default (ignoring it is a setting), keeps the resources one, loads in the chosen order', () => {
     const fd = fakeDispatcher();
     prepareTransport(fd, fleetPage(), profile, DEFAULT_SETTINGS, target);
-    // 215,000 to move: all 100 large cargo (200k) + 30 small (15k); the 10 kept by the ships rule go too.
-    expect(fd.selected).toEqual({ 203: 100, 202: 30 });
+    // 215,000 to move: 90 large cargo (the ships rule keeps 10) + 50 small, 205k of room.
+    expect(fd.selected).toEqual({ 203: 90, 202: 50 });
+    // With «ignore the ships reserve» on: all 100 large cargo (200k) + 30 small (15k).
+    const ignoring = fakeDispatcher();
+    prepareTransport(ignoring, fleetPage(), profile, { ...DEFAULT_SETTINGS, collectIgnoreShips: true }, target);
+    expect(ignoring.selected).toEqual({ 203: 100, 202: 30 });
     expect(fd.cargoDeuterium).toBe(14_000);
-    const metalFirst = fakeDispatcher({ shipsOnPlanet: [{ id: 203, number: 50 }] });
+    // 60 large cargo, 10 kept by the ships rule: 50 go.
+    const metalFirst = fakeDispatcher({ shipsOnPlanet: [{ id: 203, number: 60 }] });
     prepareTransport(metalFirst, fleetPage(), profile, { ...DEFAULT_SETTINGS, loadOrder: ['metal', 'crystal', 'deuterium'] }, target);
     // 100k of room: metal first fills it.
     expect([metalFirst.cargoMetal, metalFirst.cargoCrystal, metalFirst.cargoDeuterium]).toEqual([100_000, 0, 0]);
@@ -1000,5 +1006,16 @@ describe('plain Trasporto: «Tutto», and no bar on page 2', () => {
     const bar = doc.querySelector<HTMLElement>('#fleet2 .fut-fbar')!;
     expect(bar.hidden).toBe(true);
     expect(bar.querySelector('.fut-fact')).toBeNull();
+  });
+});
+
+describe('ships reserve in the plain Trasporto / Schiera', () => {
+  it('the cargo ships Future adds leave the reserve home', () => {
+    const target = { galaxy: 1, system: 2, position: 3, type: 1 };
+    const fd = fakeDispatcher();
+    // 100 large cargo, 80 kept: 20 can go, for 200k of resources (100 would be needed).
+    const r = prepareSend(fd, fleetPage(), DEFAULT_SETTINGS, target, { metal: 150_000, crystal: 50_000, deuterium: null }, 'transport', 203, { '203': 80 });
+    expect(fd.selected).toEqual({ 203: 20 });
+    expect(r).toMatchObject({ ok: true, ships: 20, missing: 80 });
   });
 });
