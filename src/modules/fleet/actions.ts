@@ -66,30 +66,10 @@ function onPlanet(fd: FleetDispatcher) {
   return { metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet };
 }
 
-/**
- * On a phone the game's speed control is a row of buttons 10…100, not the computer's bar: given the
- * bar's value (a step 1–10) it picked 10% and stuck (Nicola, 2026-11-26). There the button of that
- * percentage is pressed, as the player would; null when this page has no such row.
- */
-export function speedButton(root: ParentNode, percent: number): HTMLElement | null {
-  const leaves = (el: ParentNode) => Array.from(el.querySelectorAll<HTMLElement>('*')).filter((e) => !e.children.length && /^\d{2,3}$/.test(e.textContent?.trim() ?? ''));
-  const hundred = leaves(root).find((e) => e.textContent!.trim() === '100');
-  // The row: the closest box around "100" that also holds 10…90, nothing wider (coordinates, distance…).
-  let box: HTMLElement | null = hundred?.parentElement ?? null;
-  while (box && !['10', '50', '90'].every((v) => leaves(box!).some((e) => e.textContent!.trim() === v))) box = box.parentElement;
-  if (!box) return null;
-  return leaves(box).find((e) => e.textContent!.trim() === String(percent)) ?? null;
-}
-
-function setSpeedBar(fd: FleetDispatcher, percent: number, doc?: Document): void {
+function setSpeedBar(fd: FleetDispatcher, percent: number): void {
   const step = Math.max(1, Math.min(10, Math.round(percent / 10)));
-  const touch = doc?.defaultView?.matchMedia?.('(pointer: coarse)').matches;
-  const button = touch && doc ? speedButton(doc, step * 10) : null;
-  if (button) {
-    button.click();
-    fd.speedPercent = step;
-    return;
-  }
+  // The same bar on a phone as on a computer (seen in the Android emulator, 2026-11-26): it reacts to the
+  // pointer's position, not to clicks on its numbers, so its own setValue is what shows the right step.
   fd.speedPercent = step;
   // The game's own speed bar, so what the player sees matches what will be sent.
   const $ = pageWindow().jQuery as ((s: string) => { data(k: string): { setValue?(v: number): void } | undefined }) | undefined;
@@ -185,7 +165,7 @@ export function prepareTransport(fd: FleetDispatcher, doc: Document, profile: Fl
   const ships = cargoShipsFor(amount, stock(fd, profile), settings.mainShip, settings.secondShip);
   const count = selectShips(fd, ships);
   setTarget(fd, doc, target);
-  setSpeedBar(fd, settings.transportSpeed, doc);
+  setSpeedBar(fd, settings.transportSpeed);
   fd.mission = TRANSPORT;
   const cargo = count > 0 ? loadCargo(fd, profile, settings.loadOrder) : 0;
   return finish(fd, TRANSPORT, count, cargo);
@@ -196,7 +176,7 @@ export function prepareDeploy(fd: FleetDispatcher, doc: Document, profile: Fleet
   const ships = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
   const count = selectShips(fd, ships);
   setTarget(fd, doc, target);
-  setSpeedBar(fd, settings.transportSpeed, doc);
+  setSpeedBar(fd, settings.transportSpeed);
   fd.mission = DEPLOY;
   const cargo = count > 0 && settings.collectDeployRes ? loadCargo(fd, profile, settings.loadOrder) : 0;
   return finish(fd, DEPLOY, count, cargo);
@@ -208,7 +188,7 @@ export function prepareFleetsave(fd: FleetDispatcher, doc: Document, base: Fleet
   const ships = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
   const count = selectShips(fd, ships);
   setTarget(fd, doc, resolveTarget(save, fd.currentPlanet));
-  setSpeedBar(fd, save.speed, doc);
+  setSpeedBar(fd, save.speed);
   fd.mission = save.mission;
   const cargo = count > 0 ? loadCargo(fd, profile) : 0;
   return finish(fd, save.mission, count, cargo);
@@ -236,7 +216,7 @@ export function prepareDelivery(
   if (amount <= 0) return { ok: false, reason: 'fleet.err.noResources', ships: 0, cargo: 0 };
   const count = selectShips(fd, cargoShipsFor(amount, stock(fd, profile), settings.mainShip, settings.secondShip));
   setTarget(fd, doc, target);
-  setSpeedBar(fd, settings.transportSpeed, doc);
+  setSpeedBar(fd, settings.transportSpeed);
   fd.mission = TRANSPORT;
   let cargo = 0;
   if (count > 0) {
@@ -286,7 +266,7 @@ export function prepareExpedition(
   // OGLight's random system (±N around the origin): the form is only filled, the player still sends.
   const system = expeditionSystem(here.system, settings.expeditionSpread, { systems: universe.systems ?? 499, donut: universe.donutSystem ?? true }, rand);
   setTarget(fd, doc, { galaxy: here.galaxy, system, position: 16, type: 1 });
-  setSpeedBar(fd, 100, doc);
+  setSpeedBar(fd, 100);
   fd.expeditionTime = 1;
   const $ = pageWindow().jQuery as ((s: string) => { val(v: string): unknown }) | undefined;
   try {
@@ -304,7 +284,7 @@ export function prepareLast(fd: FleetDispatcher, doc: Document, profile: FleetPr
   for (const [id, n] of Object.entries(last.ships)) ships[Number(id)] = Math.min(n, left[Number(id)] ?? 0);
   const count = selectShips(fd, ships);
   setTarget(fd, doc, last.target);
-  setSpeedBar(fd, last.speed, doc);
+  setSpeedBar(fd, last.speed);
   return finish(fd, last.mission, count, 0);
 }
 
@@ -357,7 +337,7 @@ export function prepareSend(
   const needed = capacity > 0 ? Math.ceil(Math.max(0, amount - othersCapacity) / capacity) : 0;
   const count = selectShips(fd, { ...manual, [cargoShip]: n });
   setTarget(fd, doc, target);
-  setSpeedBar(fd, settings.transportSpeed, doc);
+  setSpeedBar(fd, settings.transportSpeed);
   const code = mission === 'transport' ? TRANSPORT : DEPLOY;
   fd.mission = code;
   let cargo = 0;

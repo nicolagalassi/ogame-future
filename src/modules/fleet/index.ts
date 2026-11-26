@@ -822,6 +822,25 @@ function watchSelectedCargo(o: FleetOptions): void {
   });
 }
 
+/**
+ * On a phone the speed question is fixed at the bottom of the screen (style.ts). Future's touch bar sits
+ * there too, scaled up to make up for the page's zoom-out (seen in the Android emulator: ×2.6), and would
+ * cover it: the question takes the same scale and stands just above the bar, as it is on screen now.
+ */
+function placeAboveTouchBar(doc: Document, host: HTMLElement): void {
+  const win = doc.defaultView;
+  const bar = doc.getElementById('fut-touchbar');
+  if (!win || win.getComputedStyle(host).position !== 'fixed') return;
+  const r = bar?.getBoundingClientRect();
+  const k = bar && bar.offsetHeight > 0 && r ? r.height / bar.offsetHeight : 1;
+  host.style.bottom = r ? `${Math.max(8, win.innerHeight - r.top + 8)}px` : '';
+  const scaled = k > 1.05;
+  host.style.transformOrigin = scaled ? 'left bottom' : '';
+  host.style.transform = scaled ? `scale(${k})` : '';
+  host.style.right = scaled ? 'auto' : '';
+  host.style.width = scaled ? `${(win.innerWidth - 16) / k}px` : '';
+}
+
 /** What may leave of each resource with the reserve kept home (deuterium also keeps the flight's fuel). */
 export function cappedByReserve(loaded: Reserve['resources'], onPlanet: Reserve['resources'], keep: Reserve['resources'], fuel: number): Reserve['resources'] {
   const cap = (k: keyof Reserve['resources']) => Math.max(0, Math.min(loaded[k], Math.floor(onPlanet[k] - keep[k] - (k === 'deuterium' ? fuel : 0))));
@@ -1763,7 +1782,13 @@ export function renderFleetTools(o: FleetOptions): void {
         box.hidden = true;
         return;
       }
-      bar.hidden = false;
+      // The bar holding the question as it is on the page now: a redraw replaces it, and this listener,
+      // set once per page, would otherwise show the first one, long gone (seen in the emulator).
+      const host = box.closest<HTMLElement>('.fut-fbar');
+      if (host) {
+        host.hidden = false;
+        placeAboveTouchBar(doc, host);
+      }
       const yes = el(doc, 'button', 'fut-fask-b yes', t('fleet.speedAsk.yes'));
       const no = el(doc, 'button', 'fut-fask-b', t('fleet.speedAsk.no'));
       yes.type = no.type = 'button';
@@ -1771,7 +1796,8 @@ export function renderFleetTools(o: FleetOptions): void {
         e.preventDefault();
         state.active = { ...a, speed: pct };
         box.hidden = true;
-        out2.say(t('fleet.speedAsk.done', { pct }));
+        const said = host?.querySelector<HTMLElement>('.fut-finfo');
+        if (said) said.textContent = t('fleet.speedAsk.done', { pct });
       });
       no.addEventListener('click', (e) => {
         e.preventDefault();
