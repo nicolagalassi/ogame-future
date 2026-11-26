@@ -10,6 +10,13 @@ export const RES_COLORS = { metal: '#B8C2CC', crystal: '#7FB8FF', deuterium: '#4
 /** State colours, one value each everywhere: the player's yellow pawn = chosen / you are here, green = fine (not the deuterium green), orange = look at it, red = missing or lost. */
 export const STATE_COLORS = { accent: '#F2D04A', ok: '#7BC47F', warn: '#F08A3C', bad: '#EF6A60' };
 
+/** One colour per kind of fleet action, the same on the fleet page and the touch bar (Nicola): blue the
+ *  expedition as the game, violet the fleetsave (a colour the game does not use), green Accentra. */
+export const MISSION_TONES = { collect: '#6CC04A', expedition: '#4AA3FF', fleetsave: '#A77BFF' };
+/** `--tone` for each kind, on the elements `sel(kind)` picks. */
+export const toneRules = (sel: (kind: keyof typeof MISSION_TONES) => string): string =>
+  (Object.keys(MISSION_TONES) as (keyof typeof MISSION_TONES)[]).map((k) => `${sel(k)} { --tone: ${MISSION_TONES[k]}; }`).join('\n');
+
 /**
  * The tokens of what Future draws inside the game's own pages (inbox, fleet bar, Orion): the game's
  * Verdana 11px world, text at 4.5:1 or more on the game's dark panels. Each surface adds its own

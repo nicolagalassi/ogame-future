@@ -1,4 +1,4 @@
-import { WINDOW_TOKENS } from '../../core/sheet';
+import { toneRules, WINDOW_TOKENS } from '../../core/sheet';
 /**
  * Shortcuts, as in OGLight: one key or one tap = one action of the player (switch planet, prepare a
  * fleet, the game's own Avanti / Invia, move in the galaxy). The keys can be changed in the
@@ -230,11 +230,9 @@ const TOUCH_CSS = `
 #${TOUCH_ID} button.named:has(.ts) { gap: 2px; }
 #${TOUCH_ID} button.named:has(.ts) .fut-tb-glyph svg { width: 17px; height: 17px; }
 #${TOUCH_ID} button.named .ts { color: var(--text-2); font: 500 10px/1 var(--display); white-space: nowrap; }
-/* One colour per kind of fleet action: blue the expedition (as the game), violet the fleetsave (a colour the
-   game does not use), green Accentra. Glyph and a bottom line in the colour, the key faintly tinted. */
-#${TOUCH_ID} button[data-tone="collect"] { --tone: #6cc04a; }
-#${TOUCH_ID} button[data-tone="expedition"] { --tone: #4aa3ff; }
-#${TOUCH_ID} button[data-tone="fleetsave"] { --tone: #a77bff; }
+/* One colour per kind of fleet action (core/sheet MISSION_TONES): glyph and a bottom line in the colour,
+   the key faintly tinted. */
+${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
 #${TOUCH_ID} button[data-tone] { background: color-mix(in srgb, var(--tone) 14%, var(--surface)); box-shadow: inset 0 -2px 0 var(--tone); }
 #${TOUCH_ID} button[data-tone] .fut-tb-glyph { color: var(--tone); }
 #${TOUCH_ID} button[data-tone]:active { background: color-mix(in srgb, var(--tone) 26%, var(--surface)); }
