@@ -250,6 +250,8 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
 #${TOUCH_ID} .note { position: absolute; left: 8px; right: 8px; bottom: calc(100% + 6px); display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
   padding: 8px 10px; border-radius: 6px; background: var(--raised); box-shadow: inset 0 0 0 1px var(--accent-line), 0 8px 24px rgba(0, 0, 0, 0.6); color: var(--text); font: 600 14px/1.3 var(--display); }
 #${TOUCH_ID} .note .q { flex: 1 1 200px; }
+#${TOUCH_ID} .note .q b, #${TOUCH_ID} .note .q .l { display: block; }
+#${TOUCH_ID} .note .q .l { font-weight: 400; color: var(--text-2); }
 #${TOUCH_ID} .note button { width: auto; height: 38px; padding: 0 16px; }
 #${TOUCH_ID} .note button.yes { background: var(--accent); color: var(--on-accent); }
 `;

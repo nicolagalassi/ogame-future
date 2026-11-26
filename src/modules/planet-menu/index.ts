@@ -20,6 +20,7 @@ import { MENU_WIDTH, NATIVE_WIDTH, PLANET_MENU_CSS } from './style';
 import { iconSvg, type IconName as FleetIcon } from '../fleet/icons';
 import { resIconSvg } from '../../core/res-icons';
 import { MISSION_TONES } from '../../core/sheet';
+import { setTouchNote } from '../shortcuts';
 import type { BodyEvents } from '../../data/events';
 
 export interface MenuSettings {
@@ -509,15 +510,72 @@ const MISSION_LOOK: Record<number, { icon: FleetIcon; tone?: keyof typeof MISSIO
   5: { icon: 'reserve' }, 6: { icon: 'spy' }, 7: { icon: 'planet' }, 8: { icon: 'cargo' }, 9: { icon: 'ships' },
   15: { icon: 'expedition', tone: 'expedition' }, 18: { icon: 'expedition', tone: 'expedition' },
 };
-const WAY_MARK = { out: '→', back: '←', in: '↓' } as const;
+/** The way, as the board's own arrows: leaving (→), coming back (←), arriving here (↓). */
+const WAY_MARK = { out: { icon: 'next', turn: 0 }, back: { icon: 'back', turn: 0 }, in: { icon: 'chevron', turn: 0 } } as const;
 
 function clock(at: number, locale: string): string {
   return new Date(at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
 /**
+ * The details of a red tile or of the fleets line, in the plan's card style: a title and one line each.
+ * Opened by a tap or click on them (a tooltip never shows on a touch screen, and the tap would open the
+ * planet); the next tap anywhere closes it.
+ */
+function showInfoTip(doc: Document, anchor: HTMLElement, title: string, lines: string[]): void {
+  doc.getElementById(TIP_ID)?.remove();
+  // A phone: on the touch bar, which keeps its size on the zoomed-out page (a card here would be tiny).
+  const note = el(doc, 'div', 'fut-info-note');
+  const shut = el(doc, 'button', '');
+  shut.append(icon(doc, 'close', 16));
+  shut.type = 'button';
+  shut.setAttribute('aria-label', title);
+  shut.addEventListener('click', (e) => {
+    e.preventDefault();
+    setTouchNote(doc, null);
+  });
+  const text = el(doc, 'span', 'q');
+  text.append(el(doc, 'b', '', title));
+  for (const line of lines) text.append(el(doc, 'span', 'l', line));
+  note.append(text, shut);
+  if (setTouchNote(doc, note)) return;
+  const tip = el(doc, 'div', 'fut-plan-tip fut-info-tip');
+  tip.id = TIP_ID;
+  tip.setAttribute('role', 'tooltip');
+  const head = el(doc, 'div', 'fut-pt-head');
+  head.append(el(doc, 'b', '', title));
+  const list = el(doc, 'ul', 'fut-pt-items');
+  for (const line of lines) list.append(el(doc, 'li', '', line));
+  tip.append(head, list);
+  doc.body.append(tip);
+  const box = anchor.getBoundingClientRect();
+  const view = doc.defaultView;
+  const vw = view?.innerWidth ?? 1200;
+  const vh = view?.innerHeight ?? 800;
+  const left = box.right + 10 + tip.offsetWidth > vw ? box.left - 10 - tip.offsetWidth : box.right + 10;
+  tip.style.left = `${Math.max(4, left)}px`;
+  tip.style.top = `${Math.max(4, Math.min(box.top + box.height / 2 - tip.offsetHeight / 2, vh - tip.offsetHeight - 4))}px`;
+  const close = () => {
+    tip.remove();
+    doc.removeEventListener('click', close, true);
+  };
+  // After this tap has finished: the next one, anywhere, closes it.
+  (view ?? globalThis).setTimeout(() => doc.addEventListener('click', close, true), 0);
+}
+
+/** A tap on `node` (inside the planet's link) shows its details instead of opening the planet. */
+function detailsOnTap(doc: Document, node: HTMLElement, title: () => string, lines: () => string[]): void {
+  node.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (doc.getElementById(TIP_ID)) return doc.getElementById(TIP_ID)?.remove();
+    showInfoTip(doc, node, title(), lines());
+  });
+}
+
+/**
  * An enemy landing on this planet or moon: the tile lights up red (attack, or espionage a little softer),
- * as OGLight does. Painted from the list read when the page loaded: it shows on the player's next page,
+ * as Nicola reports OGLight does. Painted from the list read when the page loaded: it shows on the player's next page,
  * never by itself (no timer, no alarm: AGENTS.md §1.3, §1.4).
  */
 function markThreat(link: HTMLElement | null, ev: BodyEvents | undefined, o: PlanetMenuOptions): void {
@@ -538,8 +596,9 @@ function markThreat(link: HTMLElement | null, ev: BodyEvents | undefined, o: Pla
     lines.push(t('threat.spy', { time: clock(ev.spy, o.locale) }));
   }
   badge.title = lines.join('\n');
-  badge.setAttribute('role', 'img');
+  badge.setAttribute('role', 'button');
   badge.setAttribute('aria-label', lines.join('. '));
+  detailsOnTap(doc, badge, () => link.querySelector('.planet-name')?.textContent?.trim() || link.querySelector('img')?.getAttribute('alt') || '', () => lines);
   link.append(badge);
 }
 
@@ -564,9 +623,12 @@ function flightChips(doc: Document, planet: BodyEvents | undefined, moon: BodyEv
     for (const f of [...own].sort((a, b) => order[a.way] - order[b.way] || a.first - b.first)) {
       const look = MISSION_LOOK[f.mission] ?? { icon: 'ships' as FleetIcon };
       const chip = el(doc, 'span', 'fut-fl');
+      chip.dataset.way = f.way;
       if (look.tone) chip.style.setProperty('--tone', MISSION_TONES[look.tone]);
       chip.innerHTML = iconSvg(look.icon, 11);
-      chip.append(el(doc, 'span', 'w', WAY_MARK[f.way]));
+      const way = el(doc, 'span', 'w');
+      way.append(icon(doc, WAY_MARK[f.way].icon, 10));
+      chip.append(way);
       if (f.count > 1) chip.append(el(doc, 'span', 'n', String(f.count)));
       const text = o.t(`flights.${f.way}`, { mission: o.t(`mission.${f.mission}`), n: f.count, time: clock(f.first, o.locale) });
       chip.title = text;
@@ -576,6 +638,8 @@ function flightChips(doc: Document, planet: BodyEvents | undefined, moon: BodyEv
   });
   line.title = lines.join('\n');
   line.setAttribute('aria-label', lines.join('. '));
+  line.setAttribute('role', 'button');
+  detailsOnTap(doc, line, () => [line.closest('a')?.querySelector('.planet-name')?.textContent?.trim(), o.t('flights.title')].filter(Boolean).join(' · '), () => lines);
   return line;
 }
 

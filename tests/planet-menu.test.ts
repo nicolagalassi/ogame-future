@@ -357,9 +357,14 @@ describe('fleets in flight on the planet menu', () => {
     expect(e.planetLink!.classList.contains('fut-spy')).toBe(true);
     expect(e.planetLink!.querySelector('.fut-threat')!.getAttribute('aria-label')).toMatch(/^Spionaggio in arrivo alle /);
     const chips = [...e.element.querySelectorAll('.fut-flights .fut-fl')];
-    expect(chips.map((c) => c.textContent)).toEqual(['→2', '←']);
+    expect(chips.map((c) => `${(c as HTMLElement).dataset.way}${c.textContent}`)).toEqual(['out2', 'back']);
     // Expedition in its colour (blue), the transport in Accentra's green.
     expect((chips[0] as HTMLElement).style.getPropertyValue('--tone').toUpperCase()).toBe('#4AA3FF');
+    // A tap on the fleets line shows the details (a tooltip never shows on a touch screen) instead of opening the planet.
+    const tap = new MouseEvent('click', { bubbles: true, cancelable: true });
+    e.element.querySelector('.fut-flights')!.dispatchEvent(tap);
+    expect(tap.defaultPrevented).toBe(true);
+    expect([...document.querySelectorAll('#fut-plan-tip li')].length).toBe(2);
     // Gone once nothing is landing: the next drawing clears the red.
     renderPlanetMenu({ doc: document, entries, snapshot: SNAPSHOT, settings: { showTotals: true }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true), events: new Map() });
     expect(e.moonLink!.classList.contains('fut-attack')).toBe(false);

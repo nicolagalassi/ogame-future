@@ -980,5 +980,6 @@
   "mission.2": "ACS attack",
   "mission.7": "Colonisation",
   "mission.9": "Moon destruction",
-  "mission.18": "Discovery"
+  "mission.18": "Discovery",
+  "flights.title": "Fleets in flight"
 }

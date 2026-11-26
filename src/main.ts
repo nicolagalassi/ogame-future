@@ -99,8 +99,9 @@ async function bootstrap(): Promise<void> {
   // Fleets in flight (event list): read once while the page loads, so an attack shows on the player's
   // next page and never by itself (AGENTS.md §1.3, §4; Nicola, 2026-11-26).
   const eventDeps = { guard, store, doc: document, offset: clockOffset(document, Date.now()) };
+  let eventsLoad: Promise<unknown> = Promise.resolve();
   try {
-    const [account, queue, lf, , , importExport] = await Promise.allSettled([
+    const boot = Promise.allSettled([
       hydrateAccountOncePerSession({ guard, store, session: window.sessionStorage }),
       loadQueuesOnPageLoad({ guard, store, ids: bodyIds }),
       // Lifeform bonuses for the expedition size: once per session, like accountInfo.
@@ -112,8 +113,11 @@ async function bootstrap(): Promise<void> {
       isFleetDispatch(document) ? universeRanks({ guard, store, origin: location.origin }) : Promise.resolve(null),
       // Today's import/export offer, for the Merchant's colour in the menu: once per session.
       importExportOncePerSession({ guard, store, session: window.sessionStorage }),
-      loadEventsOnPageLoad(eventDeps).catch((e: unknown) => console.warn(`[${t('app.name')}]`, e)),
     ]);
+    // Started inside the page-load window (the guard checks it at the call), queued after the reads above and
+    // not awaited: the menu is drawn without waiting for it and redrawn when it lands.
+    eventsLoad = loadEventsOnPageLoad(eventDeps).catch((e: unknown) => console.warn(`[${t('app.name')}]`, e));
+    const [account, queue, lf, , , importExport] = await boot;
     if (importExport.status === 'fulfilled') markMerchant(document, importExport.value);
     else console.warn(`[${t('app.name')}]`, importExport.reason);
     // On the Merchant's pages the offer may be bought or taken now: read it again on the next page.
@@ -455,6 +459,7 @@ async function bootstrap(): Promise<void> {
   });
   // The same table, per planet and moon: enemies landing and own fleets follow what the player opened
   // (a DOM read, no call).
+  void eventsLoad.then(() => draw());
   watchPageEvents(document, reminders.offset, (list) => {
     store.set(EVENTS_KEY, { readAt: Date.now(), list } satisfies Events);
     draw();
