@@ -1748,7 +1748,7 @@ export function renderFleetTools(o: FleetOptions): void {
   if (fleet2 && anchor2) {
     // Page 2 has nothing of Future's own to offer (the resources are chosen on page 1, Nicola): the bar
     // shows only to ask about the speed during a fleetsave round, and is hidden otherwise.
-    const bar = el(doc, 'div', 'fut-fbar');
+    const bar = el(doc, 'div', 'fut-fbar fut-faskbar');
     bar.hidden = true;
     const out2 = readout(doc, '');
     const row = el(doc, 'div', 'fut-frow');

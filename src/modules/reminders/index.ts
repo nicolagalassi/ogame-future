@@ -160,8 +160,9 @@ export function decorateEventList(o: RemindersOptions): void {
 }
 
 const EVENT_CSS = `
-/* Window tokens (core/sheet.ts) for every surface this sheet styles. */
-#eventContent { ${WINDOW_TOKENS} }
+/* Window tokens (core/sheet.ts) on the bells only, never on the game's event list itself: the game's own
+   (mobile) styles may use variables of the same names, and turned red (Nicola, 2026-11-26). */
+#eventContent .fut-bell { ${WINDOW_TOKENS} }
 #eventContent .fut-bell { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-left: 4px; padding: 0;
   border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--muted); cursor: pointer; vertical-align: middle; }
 #eventContent .fut-bell:hover, #eventContent .fut-bell:focus-visible { border-color: var(--accent); color: var(--text); }

@@ -49,6 +49,11 @@ export const FLEET_CSS = `
 .fut-fsecond .fut-fact:hover { background: var(--tile); color: var(--ico-hi); }
 .fut-fskip[hidden] { display: none; }
 .fut-fbar[hidden] { display: none; }
+/* The fleetsave speed question on a touch screen: fixed at the bottom of the screen, so it never moves the
+   page while the finger is still on the game's speed bar (it shifted the bar, which then stuck at 10%). */
+@media (pointer: coarse) {
+  #fleet2 .fut-faskbar { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 100000; margin: 0; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6); }
+}
 /* Main cargo ship, picked on the ship itself (top right; the game keeps the top left). */
 #fleet1 #technologies li[data-technology] { position: relative; }
 .fut-mainship { position: absolute; top: 2px; right: 2px; z-index: 2; width: 20px; height: 20px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--accent-soft); border-radius: 5px; background: rgba(13, 21, 34, 0.85); color: var(--muted); cursor: pointer; opacity: 0.75; }
