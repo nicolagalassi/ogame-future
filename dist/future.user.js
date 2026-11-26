@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.154
+// @version      0.3.155
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -13589,7 +13589,7 @@ table.queues td.acts { width: 1%; text-align: right; }
   // src/modules/fleet/style.ts
   var FLEET_CSS = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
-.fut-fbar, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fclear, .fut-fall, .fut-fcap, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
+.fut-fbar, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fchips, .fut-fclear, .fut-fall, .fut-fcap, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
 /* The fleet bar speaks the inbox's language: Verdana 11px, tabular numbers, one set of tokens. */
 .fut-fbar, .fut-fmenu {
   ${PAGE_TOKENS} --line: var(--line-strong); --line-soft: #1D2531;
@@ -13659,7 +13659,11 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-frules { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; min-width: 0; }
 /* Reserves and round: a strip of their own under the ships, apart from the actions. */
 .fut-freserves { margin-top: 8px; }
-.fut-fgroup { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.fut-fgroup { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; max-width: 100%; }
+/* A labelled group: the label stays on the first line, the switches wrap in their own column beside it. */
+.fut-fgroup:has(> .fut-fchips) { flex-wrap: nowrap; align-items: flex-start; }
+.fut-fgroup > .fut-fzone { line-height: 28px; }
+.fut-fchips { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; }
 /* A rule as a printed chip: pip filled when on, its name, what it keeps back. Off = outline only. */
 .fut-fchip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 8px; border: 1px solid var(--tile-line); border-radius: 4px; background: none; color: var(--mute); }
 .fut-fchip .ico { display: inline-flex; opacity: 0.8; }
@@ -13778,6 +13782,8 @@ table.queues td.acts { width: 1%; text-align: right; }
   .fut-ftool { width: 44px; height: 44px; }
   .fut-frow { flex-wrap: wrap; }
   .fut-frules { flex-wrap: wrap; gap: 6px; }
+  /* Riserve and Giro one under the other: one column of switches beside the labels. */
+  .fut-fgroup > .fut-fzone { min-width: 4em; }
   .fut-fsw { height: 40px; padding: 0 10px 0 12px; border-radius: 20px; }
   .fut-fread { flex-basis: 100%; }
   .fut-fin, .fut-fclear, .fut-fpick { height: 40px; }
@@ -15160,8 +15166,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const reserves = el4(doc, "span", "fut-fgroup");
       reserves.setAttribute("role", "group");
       reserves.setAttribute("aria-label", t("fleet.zone.reserves"));
-      reserves.append(
-        zone(t("fleet.zone.reserves")),
+      const reserveChips = el4(doc, "span", "fut-fchips");
+      reserves.append(zone(t("fleet.zone.reserves")), reserveChips);
+      reserveChips.append(
         sw("ships", t("fleet.rule.ships"), t("fleet.rule.shipsHint"), "shipsOn", void 0, shipsKept ? fmtN(shipsKept) : unset),
         sw("resources", t("fleet.rule.resources"), t("fleet.rule.resourcesHint"), "resourcesOn", void 0, res.metal || res.crystal || res.deuterium ? resValue : unset),
         ...isMoon(o.bodies, o.bodyId) ? [sw("gate", t("fleet.rule.gate"), t("fleet.rule.gateHint"), "gateOn", void 0, gateKept ? fmtN(gateKept) : unset)] : [],
@@ -15170,9 +15177,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const round = el4(doc, "span", "fut-fgroup");
       round.setAttribute("role", "group");
       round.setAttribute("aria-label", t("fleet.zone.round"));
-      round.append(zone(t("fleet.zone.round")), sw("repeat", t("fleet.repeatShort"), t("fleet.repeatHint"), "repeat"));
+      const roundChips = el4(doc, "span", "fut-fchips");
+      round.append(zone(t("fleet.zone.round")), roundChips);
+      roundChips.append(sw("repeat", t("fleet.repeatShort"), t("fleet.repeatHint"), "repeat"));
       rules.append(reserves, round);
-      round.append(skipSwitch(o, rulesOut, redraw));
+      roundChips.append(skipSwitch(o, rulesOut, redraw));
       const edit = el4(doc, "span", "fut-fedit");
       const tool = (ico, label, hint, onClick, cls = "") => {
         const b = el4(doc, "button", `fut-ftool ${cls}`.trim());
