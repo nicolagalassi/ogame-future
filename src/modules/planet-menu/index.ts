@@ -510,7 +510,8 @@ const MISSION_LOOK: Record<number, { icon: FleetIcon; tone?: keyof typeof MISSIO
   5: { icon: 'reserve' }, 6: { icon: 'spy' }, 7: { icon: 'planet' }, 8: { icon: 'cargo' }, 9: { icon: 'ships' },
   15: { icon: 'expedition', tone: 'expedition' }, 18: { icon: 'expedition', tone: 'expedition' },
 };
-const WAY_MARK = { out: '→', back: '←', in: '↓' } as const;
+/** The way, as the board's own arrows: leaving (→), coming back (←), arriving here (↓). */
+const WAY_MARK = { out: { icon: 'next', turn: 0 }, back: { icon: 'back', turn: 0 }, in: { icon: 'chevron', turn: 0 } } as const;
 
 function clock(at: number, locale: string): string {
   return new Date(at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -525,7 +526,8 @@ function showInfoTip(doc: Document, anchor: HTMLElement, title: string, lines: s
   doc.getElementById(TIP_ID)?.remove();
   // A phone: on the touch bar, which keeps its size on the zoomed-out page (a card here would be tiny).
   const note = el(doc, 'div', 'fut-info-note');
-  const shut = el(doc, 'button', '', '×');
+  const shut = el(doc, 'button', '');
+  shut.append(icon(doc, 'close', 16));
   shut.type = 'button';
   shut.setAttribute('aria-label', title);
   shut.addEventListener('click', (e) => {
@@ -621,9 +623,12 @@ function flightChips(doc: Document, planet: BodyEvents | undefined, moon: BodyEv
     for (const f of [...own].sort((a, b) => order[a.way] - order[b.way] || a.first - b.first)) {
       const look = MISSION_LOOK[f.mission] ?? { icon: 'ships' as FleetIcon };
       const chip = el(doc, 'span', 'fut-fl');
+      chip.dataset.way = f.way;
       if (look.tone) chip.style.setProperty('--tone', MISSION_TONES[look.tone]);
       chip.innerHTML = iconSvg(look.icon, 11);
-      chip.append(el(doc, 'span', 'w', WAY_MARK[f.way]));
+      const way = el(doc, 'span', 'w');
+      way.append(icon(doc, WAY_MARK[f.way].icon, 10));
+      chip.append(way);
       if (f.count > 1) chip.append(el(doc, 'span', 'n', String(f.count)));
       const text = o.t(`flights.${f.way}`, { mission: o.t(`mission.${f.mission}`), n: f.count, time: clock(f.first, o.locale) });
       chip.title = text;

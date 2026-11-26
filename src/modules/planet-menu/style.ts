@@ -138,7 +138,8 @@ ${L} .fut-line3 .fut-fleet { flex: none; margin-top: 0; }
 ${L} .fut-flights { display: flex; align-items: center; gap: 4px; min-width: 0; margin-top: 1px; font: 600 11px/12px var(--display); white-space: nowrap; }
 ${L} .fut-fl { display: inline-flex; align-items: center; gap: 1px; color: var(--tone, var(--text-2)); }
 ${L} .fut-fl svg { flex: none; }
-${L} .fut-fl .w { font: 700 13px/11px Arial, sans-serif; }
+${L} .fut-fl .w { display: inline-flex; }
+${L} .fut-fl .w svg { stroke-width: 3; }
 ${L} .fut-fl .n { color: var(--text); font-variant-numeric: tabular-nums; }
 ${L} .fut-fl-moon { display: inline-flex; margin-left: 2px; color: var(--muted); }
 ${L} .fut-fl-moon svg { width: 9px; height: 9px; }
@@ -176,7 +177,7 @@ ${L} a.fut-attack, ${L} a.fut-spy { position: relative; }
   box-shadow: inset 0 0 0 2px ${STATE_COLORS.bad}, inset 4px 0 0 var(--accent), inset 0 0 18px rgba(239, 106, 96, 0.6) !important; }
 #planetbarcomponent .fut-threat {
   position: absolute; left: 5px; top: calc(50% - 8px); z-index: 3; display: inline-flex; align-items: center; justify-content: center;
-  width: 16px; height: 16px; border-radius: 50%; background: ${STATE_COLORS.bad}; color: #1A0505; box-shadow: 0 0 6px rgba(239, 106, 96, 0.9); pointer-events: auto; }
+  width: 16px; height: 16px; border-radius: 50%; background: ${STATE_COLORS.bad}; color: #1A0505; pointer-events: auto; }
 #planetbarcomponent .fut-threat svg { width: 11px; height: 11px; stroke-width: 2.4; }
 #planetbarcomponent a.moonlink .fut-threat { left: 3px; top: 6px; }
 

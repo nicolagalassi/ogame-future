@@ -357,7 +357,7 @@ describe('fleets in flight on the planet menu', () => {
     expect(e.planetLink!.classList.contains('fut-spy')).toBe(true);
     expect(e.planetLink!.querySelector('.fut-threat')!.getAttribute('aria-label')).toMatch(/^Spionaggio in arrivo alle /);
     const chips = [...e.element.querySelectorAll('.fut-flights .fut-fl')];
-    expect(chips.map((c) => c.textContent)).toEqual(['→2', '←']);
+    expect(chips.map((c) => `${(c as HTMLElement).dataset.way}${c.textContent}`)).toEqual(['out2', 'back']);
     // Expedition in its colour (blue), the transport in Accentra's green.
     expect((chips[0] as HTMLElement).style.getPropertyValue('--tone').toUpperCase()).toBe('#4AA3FF');
     // A tap on the fleets line shows the details (a tooltip never shows on a touch screen) instead of opening the planet.

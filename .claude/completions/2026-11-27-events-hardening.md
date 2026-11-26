@@ -13,3 +13,7 @@
 - Firefox Android: `-moz-text-size-adjust: none` nelle finestre.
 - Prova di scrittura nell'emulatore con tastiera vera: finestra sopra la tastiera, salvataggio all'uscita dal campo.
 - Versione 0.3.166.
+- Revisione design (impeccable + emil, regole di DESIGN.md): frecce delle flotte e chiusura come icone SVG del
+  sistema (non caratteri di testo), niente alone sul simbolo rosso, righe di «Pianeti e lune» in un'unica scheda
+  con linee sottili come le altre righe delle Impostazioni. Il riquadro rosso pieno resta (richiesta esplicita
+  di Nicola, «illuminare di rosso» come OGLight).

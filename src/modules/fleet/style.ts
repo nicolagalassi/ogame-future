@@ -264,10 +264,11 @@ export const RULES_CSS = `
 .fut-frules-panel { color: var(--text-2); font-size: 12px; }
 .fut-frules-panel > .fut-fnote:first-child { margin: 4px 2px 8px; }
 /* Every body on one line: name, then what each rule keeps; the empty ones in the quiet dashed look. */
-.fut-fbodies { display: flex; flex-direction: column; gap: 4px; }
+.fut-fbodies { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; background: var(--raised); }
+.fut-fbodies .fut-fbrow + .fut-fbrow { border-top: 1px solid var(--line-soft); }
 .fut-fbrow { display: grid; grid-template-columns: minmax(110px, 1.3fr) repeat(3, minmax(0, 1fr)); align-items: center; gap: 8px; min-height: 40px; padding: 4px 10px;
-  border: 1px solid var(--line); border-radius: 7px; background: var(--raised); color: var(--text-2); font: 12px Arial, sans-serif; text-align: left; cursor: pointer; }
-@media (hover: hover) and (pointer: fine) { .fut-fbrow:hover { border-color: var(--accent); } }
+  border: 0; border-radius: 0; background: none; color: var(--text-2); font: 12px Arial, sans-serif; text-align: left; cursor: pointer; }
+@media (hover: hover) and (pointer: fine) { .fut-fbrow:not(.head):hover { background: var(--hover); } }
 .fut-fbrow:active { background: var(--hover); }
 .fut-fbodies.moons .fut-fbrow { grid-template-columns: minmax(110px, 1.3fr) repeat(4, minmax(0, 1fr)); }
 /* Planets / Moons: the settings window's own pills, each with its symbol and how many. */
@@ -275,8 +276,8 @@ export const RULES_CSS = `
 .fut-fscope .seg i { font-style: normal; color: var(--muted); font-size: 11px; }
 .fut-fscope .seg[aria-pressed="true"] i { color: var(--accent); }
 .fut-fbrow.head:active { background: none; }
-.fut-fbrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.fut-fbrow.head { min-height: 0; padding: 0 10px; border: 0; background: none; color: var(--muted); font-size: 11px; cursor: default; }
+.fut-fbrow:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.fut-fbrow.head { min-height: 0; padding: 6px 10px 4px; background: var(--surface); color: var(--muted); font-size: 11px; cursor: default; }
 .fut-fbrow .nm { display: flex; flex-direction: column; min-width: 0; }
 .fut-fbrow .nm b { overflow: hidden; color: var(--text); text-overflow: ellipsis; white-space: nowrap; }
 .fut-fbrow .nm small { color: var(--muted); font-size: 11px; }
