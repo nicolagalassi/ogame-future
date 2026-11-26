@@ -19,6 +19,7 @@ import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { iconSvg, type IconName as FleetIcon } from '../fleet/icons';
 import { bodyRulesPanel, RULES_CSS, type FleetBody } from '../fleet';
 import { ACTIONS, assignKey, glyph, keyLabel, keymap, resetKeys, TOUCH_KEY, usableKey, type TouchMode } from '../shortcuts';
+import { followViewport } from '../../core/viewport';
 
 export const SETTINGS_ID = 'fut-settings-window';
 const TAB_KEY = 'settings.tab';
@@ -102,7 +103,7 @@ input.field { width: 190px; }
 .mini { height: 28px; padding: 0 8px; border: 0; border-radius: 6px; background: none; color: var(--muted); font: 11px Arial, sans-serif; cursor: pointer; }
 .mini:hover { background: var(--line); color: var(--text); }
 .mini[hidden] { display: inline-block; visibility: hidden; }
-@media (max-width: 520px) { .row { grid-template-columns: 1fr; } .row .control { grid-column: 1; grid-row: auto; } }
+@container (max-width: 520px) { .row { grid-template-columns: 1fr; } .row .control { grid-column: 1; grid-row: auto; } }
 `;
 
 let keyHandler: ((e: KeyboardEvent) => void) | null = null;
@@ -138,6 +139,8 @@ export function openSettings(o: SettingsOptions): void {
   });
   root.append(style, backdrop);
   doc.body.append(host);
+  // On a phone showing the page zoomed out: the window over the whole screen, at the phone's own size.
+  followViewport(doc, backdrop, 'cover');
 
   const sections = SECTIONS.filter((s) => s !== 'bodies' || o.rules);
   let section = o.section ?? store.get<Section>(TAB_KEY, 'menu');
@@ -557,6 +560,8 @@ export function openSettings(o: SettingsOptions): void {
       if (o.notes?.length) body.append(el('div', 'notes', o.notes.join(' · ')));
     }
     panel.replaceChildren(head, tabs, body);
+    // On a phone the tabs scroll sideways: the one in use stays in sight.
+    tabs.querySelector<HTMLElement>('[aria-pressed="true"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
   };
   draw();
 

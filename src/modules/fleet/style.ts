@@ -265,10 +265,15 @@ export const RULES_CSS = `
 .fut-frules-panel > .fut-fnote:first-child { margin: 4px 2px 8px; }
 /* Every body on one line: name, then what each rule keeps; the empty ones in the quiet dashed look. */
 .fut-fbodies { display: flex; flex-direction: column; gap: 4px; }
-.fut-fbrow { display: grid; grid-template-columns: minmax(110px, 1.3fr) repeat(4, minmax(0, 1fr)); align-items: center; gap: 8px; min-height: 40px; padding: 4px 10px;
+.fut-fbrow { display: grid; grid-template-columns: minmax(110px, 1.3fr) repeat(3, minmax(0, 1fr)); align-items: center; gap: 8px; min-height: 40px; padding: 4px 10px;
   border: 1px solid var(--line); border-radius: 7px; background: var(--raised); color: var(--text-2); font: 12px Arial, sans-serif; text-align: left; cursor: pointer; }
 @media (hover: hover) and (pointer: fine) { .fut-fbrow:hover { border-color: var(--accent); } }
 .fut-fbrow:active { background: var(--hover); }
+.fut-fbodies.moons .fut-fbrow { grid-template-columns: minmax(110px, 1.3fr) repeat(4, minmax(0, 1fr)); }
+/* Planets / Moons: the settings window's own pills, each with its symbol and how many. */
+.fut-fscope .seg { display: inline-flex; align-items: center; gap: 6px; height: 32px; }
+.fut-fscope .seg i { font-style: normal; color: var(--muted); font-size: 11px; }
+.fut-fscope .seg[aria-pressed="true"] i { color: var(--accent); }
 .fut-fbrow.head:active { background: none; }
 .fut-fbrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .fut-fbrow.head { min-height: 0; padding: 0 10px; border: 0; background: none; color: var(--muted); font-size: 11px; cursor: default; }
@@ -277,12 +282,14 @@ export const RULES_CSS = `
 .fut-fbrow .nm small { color: var(--muted); font-size: 11px; }
 .fut-fbrow .set { color: var(--text); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fut-fbrow .unset { color: var(--muted); font-style: italic; }
-@media (max-width: 560px) {
-  .fut-fbrow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .fut-fbrow .nm { grid-column: 1 / -1; }
+@container (max-width: 560px) {
+  /* Phone: the name on its own line, then the rules side by side, each with its small label above. */
+  .fut-fbrow { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 4px; padding: 8px 10px; }
+  .fut-fbodies.moons .fut-fbrow { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .fut-fbrow .nm { grid-column: 1 / -1; flex-direction: row; align-items: baseline; gap: 8px; }
   .fut-fbrow.head { display: none; }
-  .fut-fbrow > span:not(.nm):not(.na)::before { content: attr(data-l) ': '; color: var(--muted); font-style: normal; }
-  .fut-fbrow .na { display: none; }
+  .fut-fbrow .set { white-space: normal; }
+  .fut-fbrow > span:not(.nm)::before { content: attr(data-l); display: block; color: var(--muted); font-size: 11px; font-style: normal; }
 }
 .fut-fbtop { display: flex; align-items: center; gap: 10px; margin: 2px 0 8px; }
 .fut-fsaved { color: var(--ok); font-size: 11px; }

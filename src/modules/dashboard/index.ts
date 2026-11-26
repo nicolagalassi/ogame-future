@@ -30,6 +30,7 @@ import { activeLfBuildings, activeLfResearch, type ActiveTech, type LfLocked, ty
 import { SHIP_ICONS, shipIcon } from '../../data/ship-icons';
 import { techIconEl, type TechIcon } from '../../data/tech-icons';
 import { DASHBOARD_CSS } from './style';
+import { followViewport } from '../../core/viewport';
 
 export interface DashboardOptions {
   doc: Document;
@@ -271,6 +272,8 @@ export function openDashboard(o: DashboardOptions): void {
   panel.append(body);
 
   doc.body.append(host);
+  // On a phone showing the page zoomed out: the window over the whole screen, at the phone's own size.
+  followViewport(doc, backdrop, 'cover');
   backdrop.scrollTop = keepScroll;
 }
 

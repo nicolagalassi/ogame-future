@@ -78,7 +78,7 @@ tfoot td { border-top: 1px solid var(--line); border-bottom: 0; font-weight: 700
 .ladder .move { margin: 0; padding: 7px 10px; }
 .ladder .move .pic { width: 24px !important; height: 24px !important; }
 .ladder .roi { font-size: 19px; }
-@media (max-width: 900px) { .ladder { grid-template-columns: 1fr; } }
+@container (max-width: 900px) { .ladder { grid-template-columns: 1fr; } }
 @media (hover: hover) and (pointer: fine) { .card:hover > .move:not(:hover) { opacity: 0.72; } }
 .move .n { width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; background: var(--accent); color: var(--on-accent); font: 600 condensed 12px var(--display); display: flex; align-items: center; justify-content: center; }
 .move-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -188,8 +188,8 @@ table.scrap .unit-label { display: flex; align-items: center; gap: 8px; width: 1
 table.scrap .unit-label:hover { border-color: var(--line); color: var(--text); }
 table.scrap .unit-label[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
 .msu { color: var(--accent); margin-left: 4px; }
-@media (max-width: 1100px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 900px) {
+@container (max-width: 1100px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@container (max-width: 900px) {
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cols { grid-template-columns: 1fr; }
     }

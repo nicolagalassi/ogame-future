@@ -16,6 +16,7 @@ import { shipIcon, shipName } from '../../data/ship-icons';
 import type { T } from '../../core/i18n';
 import { JOURNAL_CSS, OUTCOME_COLORS } from './style';
 import { clearOrion, hasOrion, loadOrion, ORION_CSS, orionCount, orionCsv, orionData, orionState, orionView } from './orion-view';
+import { followViewport } from '../../core/viewport';
 
 export const JOURNAL_ID = 'fut-journal';
 const PERIOD_KEY = 'exp.period';
@@ -63,6 +64,8 @@ export function openJournal(o: JournalOptions): void {
   backdrop.append(panel);
   root.append(style, backdrop);
   doc.body.append(host);
+  // On a phone showing the page zoomed out: the window over the whole screen, at the phone's own size.
+  followViewport(doc, backdrop, 'cover');
 
   const fmt = (n: number) => formatUnits(n, locale);
   const ships = store.get<ShipsInfo>(SHIPS_INFO_KEY, {});

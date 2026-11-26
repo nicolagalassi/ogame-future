@@ -31,6 +31,7 @@ const picked = new Map<number, Set<number>>();
 /** Planets opened onto their rows in the planet view (only those with more than one thing planned). */
 const opened = new Set<number>();
 import type { T } from '../../core/i18n';
+import { followViewport } from '../../core/viewport';
 
 export const PLANNER_ID = 'fut-planner';
 
@@ -97,6 +98,8 @@ export function openPlanner(o: PlannerOptions): void {
   backdrop.append(panel);
   root.append(style, backdrop);
   doc.body.append(host);
+  // On a phone showing the page zoomed out: the window over the whole screen, at the phone's own size.
+  followViewport(doc, backdrop, 'cover');
 
   const fmt = (n: number) => formatUnits(n, locale);
   const byId = new Map((o.snapshot?.bodies ?? []).map((b) => [b.id, b]));

@@ -65,12 +65,26 @@ export const WINDOW_SHEET = `
   position: fixed; inset: 0; z-index: 1000001; display: flex; justify-content: center; align-items: flex-start;
   padding: 40px 16px; background: rgba(4,6,10,0.74); overflow-y: auto;
   font: 13px/1.4 var(--body); color: var(--text-2);
+  /* Chrome on Android enlarges long paragraphs on its own (text autosizing): the window keeps one scale. */
+  -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+}
+/* Fitted to a phone's screen (core/viewport): edge to edge, the head and tabs always in reach. */
+@media (pointer: coarse) {
+  .backdrop[style*="scale"] { padding: 0; align-items: flex-start; overscroll-behavior: contain; }
+  .backdrop[style*="scale"] .panel { width: 100%; min-height: 100%; border-radius: 0; overflow: visible; }
+  .backdrop[style*="scale"] .head { position: sticky; top: 0; z-index: 5; }
+  .backdrop[style*="scale"] .tabs { flex: none; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .backdrop[style*="scale"] .tab { flex: none; height: 40px; }
+  .backdrop[style*="scale"] .close { width: 44px; height: 44px; }
 }
 /* The board: one printed sheet, its head and tab strip on the board-blue band, the zones below as fields of colour. */
 .panel {
   width: min(var(--panel-w), 100%); display: flex; flex-direction: column; gap: 10px; padding: 0 0 14px;
   border-radius: 6px; background: var(--raised); box-shadow: 0 24px 64px rgba(0,0,0,0.6); overflow: hidden;
   animation: fut-panel-in 200ms var(--ease-out);
+  /* Narrow layouts follow the window's own width (@container), not the page's: on a phone the page is
+     980px wide while the window fitted to the screen is about 400. */
+  container-type: inline-size;
 }
 .panel > :not(.head):not(.tabs) { margin-left: 14px; margin-right: 14px; }
 /* Opening: the window settles in from just below, the page dims behind it. Closing is instant. */

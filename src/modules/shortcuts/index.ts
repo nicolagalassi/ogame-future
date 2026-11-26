@@ -1,4 +1,5 @@
 import { toneRules, WINDOW_TOKENS } from '../../core/sheet';
+import { followViewport } from '../../core/viewport';
 /**
  * Shortcuts, as in OGLight: one key or one tap = one action of the player (switch planet, prepare a
  * fleet, the game's own Avanti / Invia, move in the galaxy). The keys can be changed in the
@@ -382,31 +383,8 @@ export function mountTouchBar(doc: Document, store: Store, t: (k: string) => str
   const pad = doc.createElement('div');
   pad.className = 'fut-touch-pad';
   doc.body.append(pad);
-  followViewport(doc, bar);
+  // At the bottom of what is on screen, readable while the page is zoomed (core/viewport, as OGLight does).
+  followViewport(doc, bar, 'bottom');
 }
 
-/**
- * Keeps the bar at the bottom of what is on screen and at a readable size while the page is
- * zoomed (the game's desktop page on a phone), as OGLight does with the visual viewport.
- */
-function followViewport(doc: Document, bar: HTMLElement): void {
-  const vv = doc.defaultView?.visualViewport;
-  if (!vv) {
-    Object.assign(bar.style, { top: 'auto', bottom: '0', width: '100%' });
-    return;
-  }
-  const place = () => {
-    const b = doc.getElementById(TOUCH_ID);
-    if (!b) return;
-    const s = vv.scale || 1;
-    Object.assign(b.style, { left: `${vv.offsetLeft}px`, top: `${vv.offsetTop + vv.height}px`, width: `${vv.width * s}px`, transform: `scale(${1 / s}) translateY(-100%)` });
-  };
-  place();
-  // Moved by the player's own zoom and scroll only: no timer.
-  if (!followers.has(doc)) {
-    followers.add(doc);
-    vv.addEventListener('resize', place);
-    vv.addEventListener('scroll', place);
-  }
-}
-const followers = new WeakSet<Document>();
+

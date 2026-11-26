@@ -293,12 +293,12 @@ ${RARITY.map((c, i) => `.rar-${i} { --rar: ${c}; }`).join(' ')}
 .ship-info { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
 .ship-info b { font-size: 12px; font-variant-numeric: tabular-nums; }
 .ship-name { color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-@media (max-width: 560px) { .res { grid-template-columns: repeat(2, minmax(0, 1fr)); } .res-tile b { font-size: 18px; } }
+@container (max-width: 560px) { .res { grid-template-columns: repeat(2, minmax(0, 1fr)); } .res-tile b { font-size: 18px; } }
 h4.lost { margin: 10px 0 6px; color: var(--bad); }
 .foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
 .opt { position: relative; min-height: 24px; display: flex; gap: 6px; align-items: center; color: var(--text-2); font-size: 12px; cursor: pointer; }
 .acts { display: flex; gap: 6px; }
-@media (max-width: 560px) { .kpi .value { font-size: 15px; } }
+@container (max-width: 560px) { .kpi .value { font-size: 15px; } }
 /* Expeditions as a statement: net gain first, where it came from, then the columns. */
 .gi { display: inline-flex; flex: none; }
 .hero { display: flex; flex-direction: column; gap: 12px; padding: 16px 18px; }
@@ -357,7 +357,7 @@ td.hi { color: var(--text); }
 tr.on td { background: color-mix(in srgb, var(--accent) 10%, transparent); }
 td.spark-cell { width: 90px; }
 .spark { display: block; height: 7px; border-radius: 2px; background: var(--accent); opacity: 0.55; }
-@media (max-width: 640px) { .two { grid-template-columns: 1fr; } .hero-v { font-size: 28px; } .chart:not(.dense) .tot { font-size: 10px; } }
+@container (max-width: 640px) { .two { grid-template-columns: 1fr; } .hero-v { font-size: 28px; } .chart:not(.dense) .tot { font-size: 10px; } }
 
 /* The «API» button right after a click copied the key: a green ring for a moment. */
 .fut-api-copied { box-shadow: 0 0 0 2px #38C56E !important; border-radius: 4px; }

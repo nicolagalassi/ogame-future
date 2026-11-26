@@ -178,5 +178,5 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
 .grow.queued .gbody { align-items: center; padding-left: 2px; color: var(--muted); white-space: nowrap; }
 .grow.queued .gbody > span { white-space: nowrap; }
 .qtag { padding: 0 5px; border: 1px dashed var(--line); border-radius: 4px; color: var(--muted); font-size: 10px; white-space: nowrap; }
-@media (max-width: 640px) { .kpis { grid-template-columns: 1fr; } }
+@container (max-width: 640px) { .kpis { grid-template-columns: 1fr; } }
 `;
