@@ -7,7 +7,7 @@
  * cookies. Only the country and the universe number are sent, plus the tool name; no team key and
  * nothing about the player.
  */
-import { PTRE_RANKS, type NetworkGuard } from '../core/guard';
+import { PTRE_BASE, PTRE_RANKS, type NetworkGuard } from '../core/guard';
 import type { Store } from '../core/storage';
 
 export const PTRE_KEY = 'ptre.ranks';
@@ -55,4 +55,79 @@ export async function ptreRanks(deps: { guard: NetworkGuard; store: Store; host:
   if (!fresh) return stored;
   deps.store.set(PTRE_KEY, fresh);
   return fresh;
+}
+
+/* ---------- The team's PTRE: everything below needs the player's team key ---------- */
+
+/**
+ * The player's PTRE team key, per universe and player (a team lives on one universe). It works as a
+ * password for the team's data: never in a backup file (core/backup), never in the network log (guard).
+ */
+export const TEAM_KEY = 'ptre.teamKey';
+/** PTRE's last answers that were not a success, newest last (shown in Settings › PTRE). */
+export const ERRORS_KEY = 'ptre.errors';
+const ERRORS_MAX = 10;
+
+/** "TM-XXXX-XXXX-XXXX-XXXX": 18 characters without the dashes, starting with TM (as PTRE checks it). */
+export function normalTeamKey(text: string): string | null {
+  const tk = text.trim().toUpperCase();
+  return /^TM[A-Z0-9]{16}$/.test(tk.replace(/-/g, '')) ? tk : null;
+}
+
+export const teamKeyOf = (store: Store): string | null => normalTeamKey(store.get<string>(TEAM_KEY, ''));
+
+export interface PtreDeps {
+  guard: NetworkGuard;
+  store: Store;
+  /** The game's host, e.g. "s269-it.ogame.gameforge.com". */
+  host: string;
+  /** Future's version, sent as OGLight sends its own. */
+  version: string;
+  now?: () => number;
+}
+
+export interface PtreAnswer {
+  ok: boolean;
+  /** PTRE's message, or why Future did not ask. */
+  message: string;
+}
+
+export interface PtreError {
+  at: number;
+  code: string;
+  message: string;
+}
+
+/**
+ * One call of the team's PTRE: the parameters OGLight sends (tool, team key, country, universe,
+ * version), tool = "future". Without a team key nothing is sent. A failure is kept for the errors list.
+ * COMPLIANCE (AGENTS.md §1.9, §4): only from a click of the player ('user-sync'); the guard refuses
+ * any other script and masks the key in its log.
+ */
+export async function ptreCall(deps: PtreDeps, script: string, params: Record<string, string>, init: RequestInit = {}): Promise<PtreAnswer & { data: Record<string, unknown> | null }> {
+  const key = teamKeyOf(deps.store);
+  const server = ptreServer(deps.host);
+  if (!key || !server) return { ok: false, message: key ? 'server' : 'no-key', data: null };
+  const query = new URLSearchParams({ ...params, tool: 'future', team_key: key, country: server.country, univers: server.univers, version: deps.version });
+  let data: Record<string, unknown> | null = null;
+  try {
+    const res = await deps.guard.request(`${PTRE_BASE}${script}?${query}`, 'user-sync', init);
+    data = (await res.json().catch(() => null)) as Record<string, unknown> | null;
+  } catch (e) {
+    data = { code: 'net', message: e instanceof Error ? e.message : String(e) };
+  }
+  const code = String(data?.code ?? '?');
+  const message = String(data?.message_verbose || data?.message || '');
+  const ok = code === '1';
+  if (!ok) {
+    const errors = deps.store.get<PtreError[]>(ERRORS_KEY, []);
+    deps.store.set(ERRORS_KEY, [...errors, { at: deps.now?.() ?? Date.now(), code, message }].slice(-ERRORS_MAX));
+  }
+  return { ok, message, data };
+}
+
+/** Saves one spy report to the team's PTRE by its API id ("sr-…"), as OGLight's button does. */
+export async function ptreSaveSpyReport(deps: PtreDeps, apiKey: string): Promise<PtreAnswer> {
+  const { ok, message } = await ptreCall(deps, 'oglight_import.php', { sr_id: apiKey }, { method: 'POST' });
+  return { ok, message };
 }

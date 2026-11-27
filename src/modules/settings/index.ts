@@ -23,11 +23,12 @@ import { followViewport, revealActiveTabs } from '../../core/viewport';
 import { helpButton } from '../../core/tour';
 import type { CarrySource } from '../../engines/carry-over';
 import type { ResetKind } from '../../engines/reset';
+import { ERRORS_KEY as PTRE_ERRORS_KEY, normalTeamKey, TEAM_KEY as PTRE_TEAM_KEY, type PtreError } from '../../data/ptre';
 
 export const SETTINGS_ID = 'fut-settings-window';
 const TAB_KEY = 'settings.tab';
-export type Section = 'menu' | 'mail' | 'galaxy' | 'fleet' | 'bodies' | 'keys' | 'data' | 'guide';
-const SECTIONS: Section[] = ['menu', 'mail', 'galaxy', 'fleet', 'bodies', 'keys', 'data', 'guide'];
+export type Section = 'menu' | 'mail' | 'galaxy' | 'fleet' | 'bodies' | 'keys' | 'data' | 'ptre' | 'guide';
+const SECTIONS: Section[] = ['menu', 'mail', 'galaxy', 'fleet', 'bodies', 'keys', 'data', 'ptre', 'guide'];
 
 export interface SettingsOptions {
   doc: Document;
@@ -95,6 +96,12 @@ const CSS = `
 .seg.confirm { border-color: var(--warn); color: var(--warn); font-weight: 700; }
 .status { min-height: 16px; padding: 0 4px; color: var(--accent); font-size: 11px; }
 .notes { padding: 2px 4px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.fut-ptre-intro { margin-bottom: 8px; padding: 0 4px; }
+.fut-ptre-intro p, .fut-ptre-errors p { margin: 0 0 6px; }
+.fut-ptre-intro a { color: var(--accent); }
+.fut-ptre-errors { margin-top: 4px; }
+.fut-ptre-errors b { display: block; margin-bottom: 4px; color: var(--text); font-size: 12px; }
+.fut-ptre-key { align-self: center; margin-right: 8px; color: var(--text); font: 12px ui-monospace, Menlo, Consolas, monospace; letter-spacing: 0.04em; }
 .field { height: 26px; width: 190px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: 12px Arial, sans-serif; }
 input.field { width: 190px; }
 .field:hover { border-color: #2B6F7D; }
@@ -403,6 +410,71 @@ export function openSettings(o: SettingsOptions): void {
       return row(t(`settings.reset.${kind}`), t(`settings.reset.${kind}Hint`), box);
     });
 
+  /**
+   * PTRE: what it is and what Future sends, the team key, PTRE's last errors.
+   * COMPLIANCE (AGENTS.md §1.9): nothing goes to PTRE until the player types a key here, after reading
+   * what is sent; the key stays in this browser (never in a backup file).
+   */
+  const ptreRows = (): HTMLElement[] => {
+    const lang = doc.documentElement.lang || 'it';
+    const key = normalTeamKey(store.get<string>(PTRE_TEAM_KEY, ''));
+    const intro = el('div', 'notes fut-ptre-intro');
+    for (const line of t('ptre.consent').split('\n')) intro.append(el('p', '', line));
+    const link = el('a', '', t('ptre.open'));
+    link.href = 'https://ptre.chez.gg/';
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    intro.append(link);
+
+    const box = el('span', 'control');
+    if (key) {
+      // Only the last group shows: enough to tell two keys apart, not enough to read the team's.
+      const shown = el('span', 'fut-ptre-key', `TM-••••-••••-••••-${key.replace(/-/g, '').slice(-4)}`);
+      const drop = el('button', 'seg', t('ptre.remove'));
+      drop.type = 'button';
+      drop.addEventListener('click', () => {
+        store.delete(PTRE_TEAM_KEY);
+        status = t('ptre.removed');
+        draw();
+      });
+      box.append(shown, drop);
+    } else {
+      const input = el('input', 'field');
+      input.type = 'password';
+      input.autocomplete = 'off';
+      input.placeholder = 'TM-XXXX-XXXX-XXXX-XXXX';
+      input.setAttribute('aria-label', t('ptre.key'));
+      input.addEventListener('keydown', (e) => {
+        e.stopPropagation();
+        if (e.key === 'Enter') save.click();
+      });
+      const save = el('button', 'seg', t('ptre.keySave'));
+      save.type = 'button';
+      save.addEventListener('click', () => {
+        const next = normalTeamKey(input.value);
+        if (next) store.set(PTRE_TEAM_KEY, next);
+        status = next ? t('ptre.keySaved') : t('ptre.keyBad');
+        draw();
+      });
+      box.append(input, save);
+    }
+    const rows: HTMLElement[] = [intro, row(t('ptre.key'), t(key ? 'ptre.keyOnHint' : 'ptre.keyHint'), box)];
+    const st = el('div', 'status', status);
+    st.setAttribute('role', 'status');
+    rows.push(st);
+    // PTRE's own words when it refused something (as OGLight's «Display PTRE errors»), newest first.
+    const errors = store.get<PtreError[]>(PTRE_ERRORS_KEY, []);
+    const list = el('div', 'notes fut-ptre-errors');
+    list.append(el('b', '', t('ptre.errors')));
+    if (!errors.length) list.append(el('p', '', t('ptre.noErrors')));
+    for (const e of [...errors].reverse()) {
+      const when = new Date(e.at).toLocaleString(lang, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      list.append(el('p', '', `${when} · ${e.code} · ${e.message || '—'}`));
+    }
+    rows.push(list);
+    return rows;
+  };
+
   const keyRows = (): HTMLElement[] => {
     const map = keymap(store);
     const out: HTMLElement[] = [
@@ -611,6 +683,8 @@ export function openSettings(o: SettingsOptions): void {
       body.append(rulesPanel);
     } else if (section === 'keys') {
       body.append(...keyRows());
+    } else if (section === 'ptre') {
+      body.append(...ptreRows());
     } else if (section === 'guide' && o.guide) {
       body.append(...o.guide(draw));
     } else {

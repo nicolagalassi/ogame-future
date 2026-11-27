@@ -14,4 +14,6 @@ OGLight 5.4.3 è tollerato. Queste regole emergono dal suo codice e valgono anch
 
 9. **Flotte in volo per pianeta e attacchi evidenziati** (chiesto da Nicola il 2026-11-26, **non verificato** nel codice di OGLight se OGLight legga l'elenco eventi con una propria richiesta): Future legge la tabella eventi del gioco (`page=componentOnly&component=eventList&ajax=1`) **una volta al caricamento della pagina** (guard 'page-load', non prima di 10 s dalla lettura precedente, mai a timer), come già fa per le code di produzione (AGENTS.md §4); se la tabella è già aperta nella pagina la legge dal DOM senza chiamate. Il menu pianeti colora il corpo attaccato/spiato: nessuna notifica, nessun suono (§1.4). `src/data/events.ts`.
 
+10. **PTRE con la team key** (chiesto da Nicola il 2026-11-27): solo le funzioni che OGLight ha nella tabella di compatibilità di PTRE, nessun invio senza key, chiamate con la key solo da click (fase 2, invii durante la navigazione, dietro un interruttore spento di default). Dettagli e fasi in [PTRE.md](PTRE.md).
+
 Da verificare con un ToolDev prima di copiarle: "Repeat x" sulla coda e la pulizia automatica dei report.

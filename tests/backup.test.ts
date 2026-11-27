@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { backupFileName, exportBackup, importBackup } from '../src/core/backup';
 import { MemoryStore, Store } from '../src/core/storage';
+import { TEAM_KEY } from '../src/data/ptre';
 
 describe('backup', () => {
   it('exports every Future key of every account, and nothing else', () => {
@@ -8,6 +9,8 @@ describe('backup', () => {
     new Store(kv, 'future:s1-it:7').set('exp.journal', { a: 1 });
     new Store(kv, 'future:s808-en:9').set('planetMenu.mode', 'side');
     kv.set('other-script', 1);
+    // PTRE's team key opens the team's data: never in a file the player may share.
+    new Store(kv, 'future:s1-it:7').set(TEAM_KEY, 'TM-AAAA-BBBB-CCCC-DDDD');
     const file = exportBackup(kv, 5);
     expect(file).toEqual({ app: 'future', version: 1, at: 5, data: { 'future:s1-it:7:exp.journal': { a: 1 }, 'future:s808-en:9:planetMenu.mode': 'side' } });
   });

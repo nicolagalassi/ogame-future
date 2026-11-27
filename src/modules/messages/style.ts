@@ -232,6 +232,10 @@ ${outcomeCss}
 #fut-spypanel .fut-sp-attack { color: var(--attack); }
 #fut-spypanel .fut-sp-attack:hover { color: var(--hi); border-color: var(--attack-line); background: rgba(192, 83, 63, 0.3); }
 #fut-spypanel .fut-sp-sim { color: var(--sim); }
+#fut-spypanel .fut-sp-ptre { color: var(--sim); }
+#fut-spypanel .fut-sp-ptre.ok { color: var(--ok); }
+#fut-spypanel .fut-sp-ptre.bad { color: var(--neg); border-color: rgba(240, 122, 110, 0.5); }
+#fut-spypanel .fut-sp-ptre[aria-busy="true"] { opacity: 0.5; cursor: progress; }
 #fut-spypanel .fut-sp-del:hover { color: var(--neg); border-color: rgba(240, 122, 110, 0.5); background: rgba(240, 122, 110, 0.14); }
 .fut-sp-waves { padding: 6px 8px 8px 34px; background: rgba(79, 209, 232, 0.05); border-radius: 0 0 3px 3px; }
 .fut-sp-wgrid { display: grid; grid-template-columns: 120px repeat(6, minmax(0, 1fr)); align-items: center; column-gap: 6px; row-gap: 0; max-width: 560px; }

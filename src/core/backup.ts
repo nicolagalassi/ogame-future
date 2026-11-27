@@ -8,6 +8,12 @@ import type { KeyValueStore } from './storage';
 
 const PREFIX = 'future:';
 const VERSION = 1;
+/**
+ * Never written to a file the player may share: PTRE's team key (data/ptre TEAM_KEY) opens the whole
+ * team's data, like a password (AGENTS.md §1.9).
+ */
+const SECRETS = ['ptre.teamKey'];
+const secret = (key: string) => SECRETS.some((s) => key.endsWith(`:${s}`));
 
 export interface BackupFile {
   app: 'future';
@@ -18,7 +24,7 @@ export interface BackupFile {
 
 export function exportBackup(kv: KeyValueStore, now: number): BackupFile {
   const data: Record<string, unknown> = {};
-  for (const key of kv.keys().filter((k) => k.startsWith(PREFIX)).sort()) data[key] = kv.get(key, null);
+  for (const key of kv.keys().filter((k) => k.startsWith(PREFIX) && !secret(k)).sort()) data[key] = kv.get(key, null);
   return { app: 'future', version: VERSION, at: now, data };
 }
 

@@ -103,6 +103,31 @@ describe('spy panel in the inbox', () => {
   });
 });
 
+describe('saving a report to PTRE', () => {
+  it('one click saves that report; the mark stays, a refusal shows PTRE\'s words', async () => {
+    document.body.innerHTML = '<div data-subtab-id="20" class="active"></div><div id="messages"><div class="messagesHolder"></div></div>';
+    const store = new Store(new MemoryStore(), 'x');
+    store.set(SPY_BOARD_KEY, { '1:476:11': { key: '1:476:11', id: '9', at: 1000, coords: '1:476:11', moon: false, playerId: 5, playerName: 'Bob', statuses: [], activity: 60, res: { metal: 1e6, crystal: 0, deuterium: 0 }, loot: 0.5, fleetValue: 0, defValue: 0, apiKey: 'sr-en-808-ab' } });
+    const answers = [{ ok: false, message: 'Bad key' }, { ok: true, message: 'ok' }];
+    const ptre = vi.fn(async () => answers.shift()!);
+    const spy = { bases: [], researches: {}, classId: 0, server: 's808-en', lang: 'it' };
+    const o = { doc: document, store, t: translator('it'), locale: 'it', now: () => 61_000, spy: { ...spy, ptre } };
+    mountSpyPanel(o);
+    const button = () => document.querySelector<HTMLButtonElement>('.fut-sp-ptre')!;
+    expect(button().title).toBe('Salva su PTRE');
+    button().click();
+    await vi.waitFor(() => expect(button().classList.contains('bad')).toBe(true));
+    expect(ptre).toHaveBeenCalledWith('sr-en-808-ab');
+    expect(button().title).toContain('Bad key');
+    button().click();
+    await vi.waitFor(() => expect(button().classList.contains('ok')).toBe(true));
+    expect(button().title).toBe('Salvato su PTRE');
+    // Without a team key there is no button.
+    mountSpyPanel({ ...o, spy });
+    expect(document.querySelector('.fut-sp-ptre')).toBeNull();
+  });
+});
+
 describe('spy table columns', () => {
   it('moves columns and rejects a broken saved order', () => {
     expect(moveColumn(['age', 'act', 'coords', 'target', 'loot', 'fleet', 'def'], 'def', 'age')).toEqual(['def', 'age', 'act', 'coords', 'target', 'loot', 'fleet']);
