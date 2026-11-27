@@ -16,6 +16,7 @@ import { VISITED_KEY, markVisited, type Visits } from './data/visits';
 import { FLIGHTS_KEY, flyingTotal, watchFlights, type Flights } from './data/flights';
 import { SCORE_KEY, watchScore, type Score } from './data/score';
 import { HISTORY_KEY, recordDay, type History } from './engines/history';
+import { resetKeys } from './engines/reset';
 import { loadServerDataOnPageLoad } from './data/server-data';
 import { highlightPosition, isGalaxyPage, TARGETS_KEY, watchGalaxy } from './modules/galaxy';
 import { nextInSide, onSideNavigate, openSide, refreshSide, restoreSide, toggleSide } from './modules/marks/side';
@@ -303,6 +304,10 @@ async function bootstrap(): Promise<void> {
           for (const [key, value] of Object.entries(r.writes)) store.set(key, value);
           return t('settings.carryDone', { settings: r.settings, exp: r.journal.toLocaleString(locale), days: r.days, orion: r.orion });
         },
+      },
+      reset: (kind) => {
+        for (const key of resetKeys(gm.keys(), namespace, kind)) gm.delete(key);
+        return t(`settings.resetDone.${kind}`);
       },
       notes: [menuCtx.colonies, snapshot ? t('toolbar.lastSync', { time: new Date(snapshot.fetchedAt).toLocaleString(locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) }) : ''].filter(Boolean),
       onMailChange: () => refreshInbox?.(),

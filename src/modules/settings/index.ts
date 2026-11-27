@@ -22,6 +22,7 @@ import { ACTIONS, assignKey, glyph, keyLabel, keymap, resetKeys, TOUCH_KEY, usab
 import { followViewport, revealActiveTabs } from '../../core/viewport';
 import { helpButton } from '../../core/tour';
 import type { CarrySource } from '../../engines/carry-over';
+import type { ResetKind } from '../../engines/reset';
 
 export const SETTINGS_ID = 'fut-settings-window';
 const TAB_KEY = 'settings.tab';
@@ -43,6 +44,8 @@ export interface SettingsOptions {
    * in a backup file; null when the text is not a backup. `apply` returns the message to show.
    */
   carry?: { list: (text?: string) => CarrySource[] | null; apply: (ns: string) => string };
+  /** Forgets this universe's settings or statistics; returns the message to show. */
+  reset?: (kind: ResetKind) => string;
   /** Facts shown at the bottom of the data section (colonies, last sync). */
   notes?: string[];
   /** Called after an inbox choice, so the open inbox redraws. */
@@ -88,6 +91,8 @@ const CSS = `
 .seg[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--text); font-weight: 700; }
 .seg[aria-pressed="true"] + .seg { border-left: 1px solid var(--line); }
 .seg:disabled { opacity: 0.45; cursor: not-allowed; }
+/* The second press of a reset: the one that deletes, in the warning colour. */
+.seg.confirm { border-color: var(--warn); color: var(--warn); font-weight: 700; }
 .status { min-height: 16px; padding: 0 4px; color: var(--accent); font-size: 11px; }
 .notes { padding: 2px 4px; color: var(--muted); font-size: 11px; line-height: 1.5; }
 .field { height: 26px; width: 190px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: 12px Arial, sans-serif; }
@@ -164,6 +169,8 @@ export function openSettings(o: SettingsOptions): void {
   let menu = { ...o.menu.settings };
   let status = '';
   let carryList: CarrySource[] | null = null;
+  /** The reset waiting for its second press, if any. */
+  let resetAsk: ResetKind | null = null;
 
   /** A choice of two or more: one segmented control, the current value pressed. */
   const choice = <V>(options: [V, string][], current: V, onPick: (v: V) => void, disabled = false) => {
@@ -365,6 +372,36 @@ export function openSettings(o: SettingsOptions): void {
     }
     return rows;
   };
+
+  /** Starting over: one press asks, the second («Sì, azzera») does it; nothing goes on a single click. */
+  const resetRows = (reset: NonNullable<SettingsOptions['reset']>): HTMLElement[] =>
+    (['stats', 'settings'] as const).map((kind) => {
+      const box = el('span', 'control');
+      const button = (label: string, onClick: () => void, cls = '') => {
+        const b = el('button', `seg ${cls}`.trim(), label);
+        b.type = 'button';
+        b.addEventListener('click', onClick);
+        box.append(b);
+      };
+      if (resetAsk === kind) {
+        button(t('settings.resetYes'), () => {
+          resetAsk = null;
+          status = reset(kind);
+          draw();
+        }, 'confirm');
+        button(t('settings.resetNo'), () => {
+          resetAsk = null;
+          draw();
+        });
+      } else {
+        button(t('settings.resetDo'), () => {
+          resetAsk = kind;
+          status = '';
+          draw();
+        });
+      }
+      return row(t(`settings.reset.${kind}`), t(`settings.reset.${kind}Hint`), box);
+    });
 
   const keyRows = (): HTMLElement[] => {
     const map = keymap(store);
@@ -614,6 +651,7 @@ export function openSettings(o: SettingsOptions): void {
           picker,
         );
         if (o.carry) body.append(...carryRows(o.carry));
+        if (o.reset) body.append(...resetRows(o.reset));
         const s = el('div', 'status', status);
         s.setAttribute('role', 'status');
         body.append(s);

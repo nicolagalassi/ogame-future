@@ -21,6 +21,7 @@ const headerFor = (pkg) => `// ==UserScript==
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_listValues
+// @grant        GM_deleteValue
 // @grant        unsafeWindow
 // @run-at       document-start
 // ==/UserScript==
