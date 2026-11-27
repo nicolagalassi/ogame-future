@@ -148,6 +148,38 @@ describe('PTRE while playing, in the galaxy', () => {
   });
 });
 
+describe("the game's tooltip on a name, in the galaxy", () => {
+  it('is replaced by the card, which keeps its actions', async () => {
+    const { watchGalaxy } = await import('../src/modules/galaxy');
+    const { translator } = await import('../src/core/i18n');
+    // The game's tooltip also has its actions: write a message, buddy request.
+    document.querySelector('#player9 .ListLinks')!.insertAdjacentHTML('beforeend', '<li><a href="#" class="sendMail js_openChat" data-playerid="9">Scrivi messaggio</a></li><li><a href="/game/index.php?page=ingame&component=buddies&action=7&id=9" class="overlay">Richiesta amicizia</a></li>');
+    const name = document.querySelector<HTMLElement & { _tippy?: { disable: () => void } }>('#galaxyRow6 .playerName')!;
+    const disable = vi.fn();
+    name._tippy = { disable };
+    const guard = new NetworkGuard((async () => new Response(XML.replace('id="110977"', 'id="9"'))) as never, document.location.origin);
+    guard.closePageLoadWindow();
+    watchGalaxy({ doc: document, store: new Store(new MemoryStore(), 'tip'), guard, ownPlanetIds: new Set([71]), locale: 'it', t: translator('it') });
+    // The game's tooltip: not bound again, the one already bound turned off, again on each pointing.
+    expect(name.classList.contains('tooltipRel')).toBe(false);
+    expect(disable).toHaveBeenCalled();
+    name.dispatchEvent(new MouseEvent('mouseenter'));
+    expect(disable.mock.calls.length).toBeGreaterThan(1);
+    name.dispatchEvent(new FocusEvent('focus'));
+    const card = document.getElementById('fut-player-card')!;
+    expect(card.classList.contains('live')).toBe(true);
+    expect([...card.querySelectorAll('.acts a')].map((a) => a.textContent)).toEqual(['Scrivi messaggio', 'Richiesta amicizia']);
+    expect(card.querySelector<HTMLAnchorElement>('.acts a.js_openChat')!.dataset.playerid).toBe('9');
+    // The pointer crossing from the name to the card keeps it open; leaving the card closes it.
+    name.dispatchEvent(new MouseEvent('mouseleave'));
+    card.dispatchEvent(new MouseEvent('mouseenter'));
+    await new Promise((r) => setTimeout(r, 250));
+    expect(document.getElementById('fut-player-card')).not.toBeNull();
+    card.dispatchEvent(new MouseEvent('mouseleave'));
+    expect(document.getElementById('fut-player-card')).toBeNull();
+  });
+});
+
 describe('military split into fleet and defences', () => {
   it('defences = economy + research + military + lifeform − total, fleet = the rest (real numbers)', async () => {
     const { splitMilitary } = await import('../src/engines/military');

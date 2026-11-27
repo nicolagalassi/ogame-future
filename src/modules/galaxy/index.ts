@@ -130,6 +130,27 @@ export function watchGalaxy(o: GalaxyOptions): void {
 }
 
 /**
+ * Silences the game's tooltip on a player's name (the card replaces it): the class the game looks for when
+ * it binds its tooltips goes, and a tooltip it already bound is turned off, now and on every pointing (the
+ * game may bind after Future's pass). Reads `_tippy`, the game's own handle on the element (as OGLight).
+ */
+function quietGameTooltip(nameEl: HTMLElement): void {
+  nameEl.classList.remove('tooltipRel');
+  const off = () => (nameEl as HTMLElement & { _tippy?: { disable?: () => void } })._tippy?.disable?.();
+  off();
+  if (!nameEl.dataset.futQuiet) {
+    nameEl.dataset.futQuiet = '1';
+    nameEl.addEventListener('mouseenter', off);
+    nameEl.addEventListener('focus', off);
+  }
+}
+
+/** The game tooltip's action links (write, buddy request, ignore…), copied: the rank line is the card's own. */
+function gameActions(tip: Element | null): Node[] {
+  return [...(tip?.querySelectorAll('.ListLinks > li') ?? [])].filter((li) => !li.classList.contains('rank') && li.querySelector('a')).map((li) => li.cloneNode(true));
+}
+
+/**
  * Keeps the system the game drew in Future's position memory, for the players and planets the
  * player marked or opened lately (engines/positions). Only when the game redrew it.
  */
@@ -218,8 +239,13 @@ function decorate(o: GalaxyOptions, content: Element): void {
       const id = r.playerId;
       nameEl.addEventListener('click', () => o.onPlayer?.(id, r.playerName));
     }
-    // Pointing at the name shows the player's card (points and rank in every category), as OGLight.
-    if (nameEl && r.playerId && !own) attachPlayerCard(o, nameEl, r.playerId, r.playerName);
+    // Pointing at the name shows the player's card (points and rank in every category) in place of the
+    // game's tooltip, as OGLight does; the tooltip's own actions (write, buddy request…) move into the card.
+    if (nameEl && r.playerId && !own) {
+      quietGameTooltip(nameEl);
+      const tip = nameEl.querySelector('.htmlTooltip');
+      attachPlayerCard(o, nameEl, r.playerId, r.playerName, () => gameActions(tip));
+    }
     if (playerCell && r.playerId && r.rank && !playerCell.querySelector('.fut-g-rank')) {
       const id = r.playerId;
       // The rank opens the highscore on the player's page (a plain link: the player's click, one navigation);
