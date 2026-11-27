@@ -33,6 +33,7 @@ export const PTRE_RANKS = `${PTRE_BASE}api_get_ranks.php`;
 export const PTRE_SCRIPTS: Record<string, string> = {
   'api_get_ranks.php': "every player's points at PTRE's last reading (highscore page)",
   'oglight_import.php': 'one spy report the player chose to save to the team (its API id only)',
+  'api_sync_target_list.php': "the team's target list: the players the player flagged PTRE go up, the team's come back",
   'oglight_get_player_infos.php': "one player's activity and best spy report in the team's data, when the player asks for them",
 };
 

@@ -28,10 +28,10 @@ import type { Activity } from '../../data/galaxy';
 import { PLAYER_SCORES_KEY, playerScores, type PlayerScores, type ScoreType } from '../../data/player-api';
 import { statusNames, universePlayers, type UniversePlayers } from '../../data/universe-players';
 import { UNIVERSE_RANKS_KEY, universeRanks, type UniverseRanks } from '../../data/universe-ranks';
-import { FLAGS, loadMarks, MARKS_KEY, notePlayer, rememberRecent, renamePlayers, type Flag, type Marks } from '../../engines/marks';
+import { FLAGS, loadMarks, MARKS_KEY, mergePtreTargets, notePlayer, ptreTargets, rememberRecent, renamePlayers, type Flag, type Marks } from '../../engines/marks';
 import { ageParts, planetsOf, POSITIONS_KEY, type Positions, type Seen } from '../../engines/positions';
 import { FLAG_COLORS, flagButton, markIcon, MARKS_CSS } from './picker';
-import { PTRE_FRAMES, ptrePlayerInfo, ptreProfileUrl, teamKeyOf, type PtreDeps, type PtreFrame, type PtrePlayer } from '../../data/ptre';
+import { PTRE_FRAMES, PTRE_TARGETS_PAGE, ptrePlayerInfo, ptreProfileUrl, ptreSyncTargets, teamKeyOf, type PtreDeps, type PtreFrame, type PtrePlayer } from '../../data/ptre';
 import { shipName } from '../../data/ship-icons';
 
 type T = (key: string, vars?: Record<string, string | number>) => string;
@@ -66,6 +66,8 @@ let last: SideOptions | null = null;
 let ptreOpen: number | null = null;
 let ptreFrame: PtreFrame = 'week';
 const ptreAnswers = new Map<string, { info: PtrePlayer | null; message: string } | 'loading'>();
+/** The PTRE target sync: under way, or what it last said (this page only). */
+let ptreSync: { busy: boolean; ok: boolean; text: string } | null = null;
 /** Player sheet data already fetched this page (no second request while redrawing). */
 const sheetData = new Map<number, PlayerScores | null>();
 let uni: UniversePlayers | null = null;
@@ -74,6 +76,7 @@ export function resetSideCache(): void {
   uni = null;
   ranksLoading = false;
   ptreAnswers.clear();
+  ptreSync = null;
   ptreOpen = null;
   ptreFrame = 'week';
 }
@@ -154,6 +157,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .ptre .links { display: flex; gap: 10px; }
 .ptre .links a { color: var(--accent); text-decoration: none; } .ptre .links a:hover { color: var(--accent-hi); }
 .ptre .msg { color: var(--label); line-height: 1.4; } .ptre .msg.err { color: var(--old); }
+/* The PTRE list: sync with the team's target list, manage it on PTRE. */
+.psync { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 6px 8px; border-radius: 4px; background: var(--surface); flex: none; }
+.psync button { all: unset; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 4px; background: var(--raised); color: var(--text); cursor: pointer; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.psync button:hover { background: var(--hover); } .psync button:active { transform: scale(0.97); }
+.psync button[aria-busy="true"] { opacity: 0.5; cursor: progress; }
+.psync a { color: var(--accent); text-decoration: none; } .psync a:hover { color: var(--accent-hi); }
+.psync .msg { flex-basis: 100%; color: var(--label); font-size: 11px; line-height: 1.4; } .psync .msg.err { color: var(--old); }
 /* The player's note. */
 .note { display: flex; align-items: flex-start; gap: 6px; padding: 6px 8px; border-radius: 4px; background: var(--surface); flex: none; }
 .note svg { flex: none; margin-top: 3px; color: var(--warn); }
@@ -403,7 +413,10 @@ function playersList(o: SideOptions, side: HTMLElement, scroll: HTMLElement, vie
   const { doc, t, locale } = o;
   const chips = h(doc, 'div', 'chips');
   const counts = Object.values(marks.players).reduce<Record<string, number>>((c, p) => ((c[p.flag] = (c[p.flag] ?? 0) + 1), c), {});
+  const ptre = o.ptre && teamKeyOf(o.store) ? o.ptre : null;
   for (const f of [...FLAGS, 'recent'] as const) {
+    // The PTRE list only with a team key, or while players still carry the flag.
+    if (f === 'ptre' && !ptre && !counts.ptre) continue;
     const b = h(doc, 'button', 'chip');
     b.type = 'button';
     b.title = t(f === 'recent' ? 'marks.recent' : `mark.flag.${f}`);
@@ -433,6 +446,7 @@ function playersList(o: SideOptions, side: HTMLElement, scroll: HTMLElement, vie
   const byRank = (a: { id: number; name: string }, b: { id: number; name: string }) =>
     (rankOf(a.id) ?? Infinity) - (rankOf(b.id) ?? Infinity) || a.name.localeCompare(b.name);
   // Flag lists by rank; the recent ones stay in the order they were opened.
+  if (view.flagTab === 'ptre' && ptre) side.append(ptreSyncBar(o, ptre));
   const list = view.flagTab === 'recent'
     ? marks.recent
     : Object.entries(marks.players).filter(([, p]) => p.flag === view.flagTab).map(([id, p]) => ({ id: Number(id), name: p.name })).sort(byRank);
@@ -768,4 +782,47 @@ function ptrePanel(o: SideOptions, ptre: PtreDeps, id: number, name: string): HT
   if (profile) link(t('ptre.profile'), profile);
   if (links.childElementCount) box.append(links);
   return box;
+}
+
+/**
+ * The PTRE list's bar: «Sync with PTRE» sends the players flagged PTRE and brings the team's targets back
+ * (one click, one call, as OGLight); «Manage on PTRE» opens PTRE's own page for the list.
+ */
+function ptreSyncBar(o: SideOptions, ptre: PtreDeps): HTMLElement {
+  const { doc, t, store } = o;
+  const bar = h(doc, 'div', 'psync');
+  const b = h(doc, 'button');
+  b.type = 'button';
+  b.append(icon(doc, 'swap', 13), h(doc, 'span', '', t('ptre.sync')));
+  b.title = t('ptre.syncHint');
+  if (ptreSync?.busy) b.setAttribute('aria-busy', 'true');
+  b.addEventListener('click', () => {
+    if (ptreSync?.busy) return;
+    ptreSync = { busy: true, ok: true, text: '' };
+    refreshSide();
+    void ptreSyncTargets(ptre, ptreTargets(readMarks(store)))
+      .catch(() => ({ ok: false, message: '', targets: [] }))
+      .then((r) => {
+        if (r.ok) {
+          const { marks, added } = mergePtreTargets(readMarks(store), r.targets, Date.now());
+          store.set(MARKS_KEY, marks);
+          ptreSync = { busy: false, ok: true, text: t('ptre.synced', { n: r.targets.length, added }) };
+        } else {
+          const why = r.message === 'no-key' ? t('ptre.noKey') : r.message === 'server' ? t('ptre.noServer') : r.message || '?';
+          ptreSync = { busy: false, ok: false, text: t('ptre.failed', { message: why }) };
+        }
+        refreshSide();
+      });
+  });
+  const manage = h(doc, 'a', '', t('ptre.manage'));
+  manage.href = PTRE_TARGETS_PAGE;
+  manage.target = '_blank';
+  manage.rel = 'noopener noreferrer';
+  bar.append(b, manage);
+  if (ptreSync && !ptreSync.busy) {
+    const m = h(doc, 'span', `msg${ptreSync.ok ? '' : ' err'}`, ptreSync.text);
+    m.setAttribute('role', 'status');
+    bar.append(m);
+  }
+  return bar;
 }

@@ -4,8 +4,11 @@
  * Pure functions over Future's own stored data: no DOM, no network.
  */
 
-/** Player flags, in the order the picker shows them. */
-export const FLAGS = ['watch', 'target', 'farm', 'danger', 'friend', 'trade'] as const;
+/**
+ * Player flags, in the order the picker shows them. 'ptre' is the team's target list on PTRE (synced with a
+ * click in the side bar, as OGLight's «ptre» pin): offered only while a PTRE team key is saved.
+ */
+export const FLAGS = ['watch', 'target', 'farm', 'danger', 'friend', 'trade', 'ptre'] as const;
 export type Flag = (typeof FLAGS)[number];
 
 export interface PlayerMark {
@@ -40,6 +43,30 @@ export function flagPlayer(m: Marks, id: number, name: string, flag: Flag | null
   if (flag) players[String(id)] = { ...players[String(id)], flag, name: name || players[String(id)]?.name || '', at: now };
   else delete players[String(id)];
   return { ...m, players, lastFlag: flag ?? m.lastFlag };
+}
+
+/** The players with the PTRE flag, as PTRE's target list takes them. */
+export const ptreTargets = (m: Marks): { id: number; pseudo: string }[] =>
+  Object.entries(m.players).filter(([, p]) => p.flag === 'ptre').map(([id, p]) => ({ id: Number(id), pseudo: p.name }));
+
+/**
+ * The team's targets back from PTRE: a player with no flag of the player's own gets the PTRE flag (as
+ * OGLight does); every one already flagged keeps its flag and takes PTRE's name for it.
+ */
+export function mergePtreTargets(m: Marks, targets: { id: number; name: string }[], now: number): { marks: Marks; added: number } {
+  const players = { ...m.players };
+  let added = 0;
+  for (const { id, name } of targets) {
+    if (!(id > 0)) continue;
+    const mine = players[String(id)];
+    if (mine) {
+      if (name && mine.name !== name) players[String(id)] = { ...mine, name };
+    } else {
+      players[String(id)] = { flag: 'ptre', name, at: now };
+      added++;
+    }
+  }
+  return { marks: { ...m, players }, added };
 }
 
 /** Writes (or clears) the note of a flagged player; a player without a flag has no note. */

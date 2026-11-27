@@ -7,11 +7,12 @@ import { WINDOW_TOKENS } from '../../core/sheet';
  */
 import { icon } from '../../core/icons';
 import type { Store } from '../../core/storage';
+import { teamKeyOf } from '../../data/ptre';
 import { FLAGS, flagPlayer, loadMarks, MARKS_KEY, type Flag, type Marks } from '../../engines/marks';
 
 type T = (key: string, vars?: Record<string, string | number>) => string;
 
-export const FLAG_COLORS: Record<Flag, string> = { watch: '#4FD1E8', target: '#FF7A7A', farm: '#7BC47F', danger: '#F5B547', friend: '#7FB8FF', trade: '#B58CDB' };
+export const FLAG_COLORS: Record<Flag, string> = { watch: '#4FD1E8', target: '#FF7A7A', farm: '#7BC47F', danger: '#F5B547', friend: '#7FB8FF', trade: '#B58CDB', ptre: '#3FC9A0' };
 
 /**
  * The marks drawn solid (24×24, filled with currentColor), a second tone where it helps, instead of
@@ -24,6 +25,8 @@ const MARK_PATHS: Record<Flag | 'none', string> = {
   danger: '<path fill-rule="evenodd" d="M10.3 3.4a2 2 0 0 1 3.4 0l8.6 15.1a2 2 0 0 1-1.7 3H3.4a2 2 0 0 1-1.7-3zM10.8 8.6h2.4l-.35 6.4h-1.7zM12 16.4a1.45 1.45 0 1 0 0 2.9 1.45 1.45 0 0 0 0-2.9z"/>',
   friend: '<circle cx="12" cy="7.4" r="4.6"/><path d="M2.8 21.6c.5-5.1 4.2-8.2 9.2-8.2s8.7 3.1 9.2 8.2z" opacity=".75"/>',
   trade: '<path d="M2.5 6.2h12.3V2.6L21.5 8l-6.7 5.4V9.8H2.5z"/><path d="M21.5 17.8H9.2v3.6L2.5 16l6.7-5.4v3.6h12.3z" opacity=".6"/>',
+  // PTRE: the team, three heads side by side.
+  ptre: '<circle cx="12" cy="7.2" r="3.2"/><path d="M5.6 20.5c.6-4.2 3.1-6.6 6.4-6.6s5.8 2.4 6.4 6.6z"/><circle cx="4.9" cy="9.4" r="2.3" opacity=".6"/><circle cx="19.1" cy="9.4" r="2.3" opacity=".6"/><path d="M.8 18.6c.4-3 2-4.7 4.1-4.7 1 0 1.9.3 2.6 1-1.2 1.1-2 2.6-2.4 4.4H.8zM23.2 18.6c-.4-3-2-4.7-4.1-4.7-1 0-1.9.3-2.6 1 1.2 1.1 2 2.6 2.4 4.4h4.3z" opacity=".6"/>',
   none: '<rect x="4.2" y="2" width="2.2" height="20" rx="1.1"/><path d="M6.4 3.2h13.4l-3.3 4.9 3.3 4.9H6.4z" opacity=".6"/>',
 };
 
@@ -141,7 +144,8 @@ export function flagButton(o: PickerOptions, id: number, name: string): HTMLButt
     const m = readMarks(store);
     const current = m.players[String(id)]?.flag;
     if (e.shiftKey) return set(current === m.lastFlag ? null : m.lastFlag);
-    const items = [...FLAGS, null].map((flag) => {
+    // The PTRE flag only while a team key is saved (as OGLight hides its «ptre» pin without one).
+    const items = [...FLAGS.filter((f) => f !== 'ptre' || current === 'ptre' || teamKeyOf(store)), null].map((flag) => {
       const it = doc.createElement('button');
       it.type = 'button';
       it.setAttribute('role', 'menuitemradio');

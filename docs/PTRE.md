@@ -24,8 +24,8 @@ pianeti e lune, bersagli condivisi. Nicola (2026-11-27) vuole la sincronizzazion
 |---|---|---|---|
 | 0 | guard, client, team key + consenso, errori di PTRE | — | 0.3.179 |
 | 1a | «Salva su PTRE» su un rapporto della tabella spiate (click) | `oglight_import.php` (`sr_id`) | 0.3.179, provato da Nicola sul suo universo (PTRE accetta `tool=future`) |
-| 1b | info giocatore: grafico attività e miglior rapporto (click sulla scheda) | `oglight_get_player_infos.php` | 0.3.181 |
-| 1c | bandierina «PTRE» e sincronizzazione bersagli del team (click) | `api_sync_target_list.php` | da fare |
+| 1b | info giocatore: grafico attività e miglior rapporto (click sulla scheda) | `oglight_get_player_infos.php` | 0.3.181, provato da Nicola |
+| 1c | bandierina «PTRE» (nel menu solo con la key) e sincronizzazione bersagli del team (click, nella lista PTRE della barra laterale); chi torna da PTRE prende la bandierina solo se non ne ha una | `api_sync_target_list.php` | 0.3.182 |
 | 2 | dietro un interruttore a parte, spento di default: attività vista in galassia, pianeti e lune nuovi o cambiati, controspionaggi letti in posta, pianeti del giocatore da PTRE (al massimo ogni ora per giocatore) | `oglight_import_player_activity.php`, `api_galaxy_import_infos.php`, `api_galaxy_get_infos.php` | dopo la prova di 1a |
 
 La prova di 1a è passata il 2026-11-27 sul suo universo (sul server di test PTS i team non sembrano attivi).

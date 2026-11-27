@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.181
+// @version      0.3.182
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -346,6 +346,7 @@
   var PTRE_SCRIPTS = {
     "api_get_ranks.php": "every player's points at PTRE's last reading (highscore page)",
     "oglight_import.php": "one spy report the player chose to save to the team (its API id only)",
+    "api_sync_target_list.php": "the team's target list: the players the player flagged PTRE go up, the team's come back",
     "oglight_get_player_infos.php": "one player's activity and best spy report in the team's data, when the player asks for them"
   };
   function redactUrl(url) {
@@ -2719,11 +2720,11 @@
     "exp.raidAvg": "a raid",
     "exp.raidTargets": "Bersagli migliori",
     "settings.section.ptre": "PTRE",
-    "ptre.consent": "PTRE (ptre.chez.gg) è il database del tuo team: rapporti di spionaggio, attività e pianeti dei giocatori, raccolti dai membri del team.\nCon la team key Future invia a PTRE solo quello che scegli tu con un click: per ora un rapporto di spionaggio dalla tabella spiate (solo il suo id API, la stessa cosa che fa OGLight). Ogni invio porta la team key, il tuo universo e la versione di Future. Senza key non parte niente.\nLa key resta in questo browser e non finisce nei backup.",
+    "ptre.consent": "PTRE (ptre.chez.gg) è il database del tuo team: rapporti di spionaggio, attività e pianeti dei giocatori, raccolti dai membri del team.\nCon la team key Future invia a PTRE solo quello che scegli tu con un click, come fa OGLight: un rapporto di spionaggio dalla tabella spiate (solo il suo id API); id e nome di un giocatore quando apri le sue info PTRE nella scheda; id e nome dei giocatori con la bandierina PTRE quando sincronizzi i bersagli. Ogni invio porta la team key, il tuo universo e la versione di Future. Senza key non parte niente.\nLa key resta in questo browser e non finisce nei backup.",
     "ptre.open": "Apri PTRE",
     "ptre.key": "Team key",
     "ptre.keyHint": "La trovi su PTRE, nella pagina del tuo team. Salvandola accetti gli invii descritti sopra.",
-    "ptre.keyOnHint": "Attiva: nella tabella spiate c'è il pulsante per salvare un rapporto su PTRE.",
+    "ptre.keyOnHint": "Attiva: «Salva su PTRE» nella tabella spiate, il pulsante PTRE nella scheda dei giocatori e la bandierina PTRE con la sincronizzazione dei bersagli.",
     "ptre.keySave": "Salva",
     "ptre.keySaved": "Team key salvata.",
     "ptre.keyBad": "Non è una team key: deve essere TM-XXXX-XXXX-XXXX-XXXX.",
@@ -2752,7 +2753,12 @@
     "ptre.noBest": "Nessun rapporto del team su questo giocatore.",
     "ptre.report": "Rapporto su PTRE",
     "ptre.profile": "Profilo su PTRE",
-    "ptre.failed": "PTRE: {message}"
+    "ptre.failed": "PTRE: {message}",
+    "mark.flag.ptre": "PTRE (team)",
+    "ptre.sync": "Sincronizza con PTRE",
+    "ptre.syncHint": "Manda a PTRE i giocatori con la bandierina PTRE e prende i bersagli del team",
+    "ptre.synced": "Il team ha {n} bersagli su PTRE; {added} nuovi qui.",
+    "ptre.manage": "Gestisci su PTRE"
   };
 
   // src/i18n/en.json
@@ -3860,11 +3866,11 @@
     "exp.raidAvg": "per raid",
     "exp.raidTargets": "Best targets",
     "settings.section.ptre": "PTRE",
-    "ptre.consent": "PTRE (ptre.chez.gg) is your team's database: spy reports, activity and players' planets, gathered by the team's members.\nWith the team key Future sends PTRE only what you choose with a click: for now one spy report from the spy table (its API id only, the same as OGLight does). Every call carries the team key, your universe and Future's version. Without a key nothing is sent.\nThe key stays in this browser and never goes into a backup.",
+    "ptre.consent": "PTRE (ptre.chez.gg) is your team's database: spy reports, activity and players' planets, gathered by the team's members.\nWith the team key Future sends PTRE only what you choose with a click, as OGLight does: a spy report from the spy table (its API id only); a player's id and name when you open their PTRE info on the sheet; id and name of the players flagged PTRE when you sync the targets. Every call carries the team key, your universe and Future's version. Without a key nothing is sent.\nThe key stays in this browser and never goes into a backup.",
     "ptre.open": "Open PTRE",
     "ptre.key": "Team key",
     "ptre.keyHint": "You find it on PTRE, on your team's page. Saving it, you accept the calls described above.",
-    "ptre.keyOnHint": "On: the spy table has a button to save a report to PTRE.",
+    "ptre.keyOnHint": "On: «Save to PTRE» in the spy table, the PTRE button on players' sheets and the PTRE flag with the target sync.",
     "ptre.keySave": "Save",
     "ptre.keySaved": "Team key saved.",
     "ptre.keyBad": "Not a team key: it must look like TM-XXXX-XXXX-XXXX-XXXX.",
@@ -3893,7 +3899,12 @@
     "ptre.noBest": "No team report on this player.",
     "ptre.report": "Report on PTRE",
     "ptre.profile": "Profile on PTRE",
-    "ptre.failed": "PTRE: {message}"
+    "ptre.failed": "PTRE: {message}",
+    "mark.flag.ptre": "PTRE (team)",
+    "ptre.sync": "Sync with PTRE",
+    "ptre.syncHint": "Sends PTRE the players flagged PTRE and takes the team's targets",
+    "ptre.synced": "The team has {n} targets on PTRE; {added} new here.",
+    "ptre.manage": "Manage on PTRE"
   };
 
   // src/i18n/fr.json
@@ -5001,11 +5012,11 @@
     "exp.raidAvg": "par raid",
     "exp.raidTargets": "Meilleures cibles",
     "settings.section.ptre": "PTRE",
-    "ptre.consent": "PTRE (ptre.chez.gg) est la base de données de ton équipe : rapports d'espionnage, activité et planètes des joueurs, réunis par les membres de l'équipe.\nAvec la team key, Future n'envoie à PTRE que ce que tu choisis d'un clic : pour l'instant un rapport d'espionnage depuis le tableau des espionnages (seulement son id API, comme OGLight). Chaque envoi porte la team key, ton univers et la version de Future. Sans key, rien ne part.\nLa key reste dans ce navigateur et ne va jamais dans une sauvegarde.",
+    "ptre.consent": "PTRE (ptre.chez.gg) est la base de données de ton équipe : rapports d'espionnage, activité et planètes des joueurs, réunis par les membres de l'équipe.\nAvec la team key, Future n'envoie à PTRE que ce que tu choisis d'un clic, comme OGLight : un rapport d'espionnage depuis le tableau des espionnages (seulement son id API) ; l'id et le nom d'un joueur quand tu ouvres ses infos PTRE sur sa fiche ; l'id et le nom des joueurs marqués PTRE quand tu synchronises les cibles. Chaque envoi porte la team key, ton univers et la version de Future. Sans key, rien ne part.\nLa key reste dans ce navigateur et ne va jamais dans une sauvegarde.",
     "ptre.open": "Ouvrir PTRE",
     "ptre.key": "Team key",
     "ptre.keyHint": "Tu la trouves sur PTRE, sur la page de ton équipe. En l'enregistrant, tu acceptes les envois décrits ci-dessus.",
-    "ptre.keyOnHint": "Active : le tableau des espionnages a un bouton pour enregistrer un rapport sur PTRE.",
+    "ptre.keyOnHint": "Active : «Enregistrer sur PTRE» dans le tableau des espionnages, le bouton PTRE sur la fiche des joueurs et le drapeau PTRE avec la synchronisation des cibles.",
     "ptre.keySave": "Enregistrer",
     "ptre.keySaved": "Team key enregistrée.",
     "ptre.keyBad": "Ce n'est pas une team key : elle doit être TM-XXXX-XXXX-XXXX-XXXX.",
@@ -5034,7 +5045,12 @@
     "ptre.noBest": "Aucun rapport de l'équipe sur ce joueur.",
     "ptre.report": "Rapport sur PTRE",
     "ptre.profile": "Profil sur PTRE",
-    "ptre.failed": "PTRE : {message}"
+    "ptre.failed": "PTRE : {message}",
+    "mark.flag.ptre": "PTRE (équipe)",
+    "ptre.sync": "Synchroniser avec PTRE",
+    "ptre.syncHint": "Envoie à PTRE les joueurs marqués PTRE et prend les cibles de l'équipe",
+    "ptre.synced": "L'équipe a {n} cibles sur PTRE ; {added} nouvelles ici.",
+    "ptre.manage": "Gérer sur PTRE"
   };
 
   // src/i18n/de.json
@@ -6142,11 +6158,11 @@
     "exp.raidAvg": "pro Raid",
     "exp.raidTargets": "Beste Ziele",
     "settings.section.ptre": "PTRE",
-    "ptre.consent": "PTRE (ptre.chez.gg) ist die Datenbank deines Teams: Spionageberichte, Aktivität und Planeten der Spieler, gesammelt von den Mitgliedern.\nMit dem Team Key sendet Future an PTRE nur, was du mit einem Klick wählst: vorerst einen Spionagebericht aus der Spionagetabelle (nur seine API-ID, wie OGLight). Jede Anfrage trägt den Team Key, dein Universum und die Version von Future. Ohne Key wird nichts gesendet.\nDer Key bleibt in diesem Browser und kommt in kein Backup.",
+    "ptre.consent": "PTRE (ptre.chez.gg) ist die Datenbank deines Teams: Spionageberichte, Aktivität und Planeten der Spieler, gesammelt von den Mitgliedern.\nMit dem Team Key sendet Future an PTRE nur, was du mit einem Klick wählst, wie OGLight: einen Spionagebericht aus der Spionagetabelle (nur seine API-ID); ID und Name eines Spielers, wenn du seine PTRE-Infos im Steckbrief öffnest; ID und Name der Spieler mit der PTRE-Flagge, wenn du die Ziele synchronisierst. Jede Anfrage trägt den Team Key, dein Universum und die Version von Future. Ohne Key wird nichts gesendet.\nDer Key bleibt in diesem Browser und kommt in kein Backup.",
     "ptre.open": "PTRE öffnen",
     "ptre.key": "Team Key",
     "ptre.keyHint": "Du findest ihn auf PTRE, auf der Seite deines Teams. Mit dem Speichern stimmst du den oben beschriebenen Anfragen zu.",
-    "ptre.keyOnHint": "Aktiv: die Spionagetabelle hat einen Knopf, um einen Bericht in PTRE zu speichern.",
+    "ptre.keyOnHint": "Aktiv: «In PTRE speichern» in der Spionagetabelle, der PTRE-Knopf im Steckbrief der Spieler und die PTRE-Flagge mit der Synchronisierung der Ziele.",
     "ptre.keySave": "Speichern",
     "ptre.keySaved": "Team Key gespeichert.",
     "ptre.keyBad": "Kein Team Key: er muss TM-XXXX-XXXX-XXXX-XXXX lauten.",
@@ -6175,7 +6191,12 @@
     "ptre.noBest": "Kein Bericht des Teams über diesen Spieler.",
     "ptre.report": "Bericht auf PTRE",
     "ptre.profile": "Profil auf PTRE",
-    "ptre.failed": "PTRE: {message}"
+    "ptre.failed": "PTRE: {message}",
+    "mark.flag.ptre": "PTRE (Team)",
+    "ptre.sync": "Mit PTRE synchronisieren",
+    "ptre.syncHint": "Sendet PTRE die Spieler mit der PTRE-Flagge und holt die Ziele des Teams",
+    "ptre.synced": "Das Team hat {n} Ziele auf PTRE; {added} neu hier.",
+    "ptre.manage": "Auf PTRE verwalten"
   };
 
   // src/core/i18n.ts
@@ -6629,6 +6650,13 @@
     const u = ptreUniverse(host, lang);
     return u ? `https://ptre.chez.gg/?country=${u.country}&univers=${u.univers}&player_id=${playerId}` : null;
   }
+  var PTRE_TARGETS_PAGE = "https://ptre.chez.gg/?page=players_list";
+  async function ptreSyncTargets(deps, targets) {
+    const r = await ptreCall(deps, "api_sync_target_list.php", {}, { method: "POST", body: JSON.stringify(targets) });
+    const list = Array.isArray(r.data?.targets_array) ? r.data.targets_array : [];
+    const back = r.ok ? list.flatMap((p) => /^\d+$/.test(String(p?.player_id ?? "")) ? [{ id: Number(p.player_id), name: String(p.pseudo ?? "") }] : []) : [];
+    return { ok: r.ok, message: String(r.data?.message || r.message || ""), targets: back };
+  }
 
   // src/data/server-data.ts
   var SERVER_DATA_KEY = "server.data";
@@ -6676,7 +6704,7 @@
   }
 
   // src/engines/marks.ts
-  var FLAGS = ["watch", "target", "farm", "danger", "friend", "trade"];
+  var FLAGS = ["watch", "target", "farm", "danger", "friend", "trade", "ptre"];
   var MARKS_KEY = "marks";
   var RECENT_MAX = 30;
   var EMPTY_MARKS = { players: {}, recent: [], lastFlag: "watch" };
@@ -6690,6 +6718,22 @@
     if (flag) players[String(id)] = { ...players[String(id)], flag, name: name || players[String(id)]?.name || "", at: now };
     else delete players[String(id)];
     return { ...m, players, lastFlag: flag ?? m.lastFlag };
+  }
+  var ptreTargets = (m) => Object.entries(m.players).filter(([, p]) => p.flag === "ptre").map(([id, p]) => ({ id: Number(id), pseudo: p.name }));
+  function mergePtreTargets(m, targets, now) {
+    const players = { ...m.players };
+    let added = 0;
+    for (const { id, name } of targets) {
+      if (!(id > 0)) continue;
+      const mine = players[String(id)];
+      if (mine) {
+        if (name && mine.name !== name) players[String(id)] = { ...mine, name };
+      } else {
+        players[String(id)] = { flag: "ptre", name, at: now };
+        added++;
+      }
+    }
+    return { marks: { ...m, players }, added };
   }
   function notePlayer(m, id, note) {
     const mark = m.players[String(id)];
@@ -6978,7 +7022,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   }
 
   // src/modules/marks/picker.ts
-  var FLAG_COLORS = { watch: "#4FD1E8", target: "#FF7A7A", farm: "#7BC47F", danger: "#F5B547", friend: "#7FB8FF", trade: "#B58CDB" };
+  var FLAG_COLORS = { watch: "#4FD1E8", target: "#FF7A7A", farm: "#7BC47F", danger: "#F5B547", friend: "#7FB8FF", trade: "#B58CDB", ptre: "#3FC9A0" };
   var MARK_PATHS = {
     watch: '<path fill-rule="evenodd" d="M12 4.5C6 4.5 2 12 2 12s4 7.5 10 7.5S22 12 22 12s-4-7.5-10-7.5zm0 3.4a4.1 4.1 0 1 1 0 8.2 4.1 4.1 0 0 1 0-8.2z"/><circle cx="12" cy="12" r="2.1"/>',
     target: '<path fill-rule="evenodd" d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm0 3.3a6.7 6.7 0 1 0 0 13.4 6.7 6.7 0 0 0 0-13.4z"/><circle cx="12" cy="12" r="6.7" opacity=".3"/><circle cx="12" cy="12" r="3.3"/>',
@@ -6986,6 +7030,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     danger: '<path fill-rule="evenodd" d="M10.3 3.4a2 2 0 0 1 3.4 0l8.6 15.1a2 2 0 0 1-1.7 3H3.4a2 2 0 0 1-1.7-3zM10.8 8.6h2.4l-.35 6.4h-1.7zM12 16.4a1.45 1.45 0 1 0 0 2.9 1.45 1.45 0 0 0 0-2.9z"/>',
     friend: '<circle cx="12" cy="7.4" r="4.6"/><path d="M2.8 21.6c.5-5.1 4.2-8.2 9.2-8.2s8.7 3.1 9.2 8.2z" opacity=".75"/>',
     trade: '<path d="M2.5 6.2h12.3V2.6L21.5 8l-6.7 5.4V9.8H2.5z"/><path d="M21.5 17.8H9.2v3.6L2.5 16l6.7-5.4v3.6h12.3z" opacity=".6"/>',
+    // PTRE: the team, three heads side by side.
+    ptre: '<circle cx="12" cy="7.2" r="3.2"/><path d="M5.6 20.5c.6-4.2 3.1-6.6 6.4-6.6s5.8 2.4 6.4 6.6z"/><circle cx="4.9" cy="9.4" r="2.3" opacity=".6"/><circle cx="19.1" cy="9.4" r="2.3" opacity=".6"/><path d="M.8 18.6c.4-3 2-4.7 4.1-4.7 1 0 1.9.3 2.6 1-1.2 1.1-2 2.6-2.4 4.4H.8zM23.2 18.6c-.4-3-2-4.7-4.1-4.7-1 0-1.9.3-2.6 1 1.2 1.1 2 2.6 2.4 4.4h4.3z" opacity=".6"/>',
     none: '<rect x="4.2" y="2" width="2.2" height="20" rx="1.1"/><path d="M6.4 3.2h13.4l-3.3 4.9 3.3 4.9H6.4z" opacity=".6"/>'
   };
   function markIcon(doc, flag, size = 14) {
@@ -7081,7 +7127,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
       const m = readMarks(store);
       const current3 = m.players[String(id)]?.flag;
       if (e.shiftKey) return set(current3 === m.lastFlag ? null : m.lastFlag);
-      const items = [...FLAGS, null].map((flag) => {
+      const items = [...FLAGS.filter((f) => f !== "ptre" || current3 === "ptre" || teamKeyOf(store)), null].map((flag) => {
         const it = doc.createElement("button");
         it.type = "button";
         it.setAttribute("role", "menuitemradio");
@@ -7562,6 +7608,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   var ptreOpen = null;
   var ptreFrame = "week";
   var ptreAnswers = /* @__PURE__ */ new Map();
+  var ptreSync = null;
   var sheetData = /* @__PURE__ */ new Map();
   var uni = null;
   var ranksLoading = false;
@@ -7640,6 +7687,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .ptre .links { display: flex; gap: 10px; }
 .ptre .links a { color: var(--accent); text-decoration: none; } .ptre .links a:hover { color: var(--accent-hi); }
 .ptre .msg { color: var(--label); line-height: 1.4; } .ptre .msg.err { color: var(--old); }
+/* The PTRE list: sync with the team's target list, manage it on PTRE. */
+.psync { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 6px 8px; border-radius: 4px; background: var(--surface); flex: none; }
+.psync button { all: unset; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 4px; background: var(--raised); color: var(--text); cursor: pointer; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.psync button:hover { background: var(--hover); } .psync button:active { transform: scale(0.97); }
+.psync button[aria-busy="true"] { opacity: 0.5; cursor: progress; }
+.psync a { color: var(--accent); text-decoration: none; } .psync a:hover { color: var(--accent-hi); }
+.psync .msg { flex-basis: 100%; color: var(--label); font-size: 11px; line-height: 1.4; } .psync .msg.err { color: var(--old); }
 /* The player's note. */
 .note { display: flex; align-items: flex-start; gap: 6px; padding: 6px 8px; border-radius: 4px; background: var(--surface); flex: none; }
 .note svg { flex: none; margin-top: 3px; color: var(--warn); }
@@ -7854,7 +7908,9 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     const { doc, t, locale } = o;
     const chips = h(doc, "div", "chips");
     const counts = Object.values(marks.players).reduce((c, p) => (c[p.flag] = (c[p.flag] ?? 0) + 1, c), {});
+    const ptre = o.ptre && teamKeyOf(o.store) ? o.ptre : null;
     for (const f of [...FLAGS, "recent"]) {
+      if (f === "ptre" && !ptre && !counts.ptre) continue;
       const b = h(doc, "button", "chip");
       b.type = "button";
       b.title = t(f === "recent" ? "marks.recent" : `mark.flag.${f}`);
@@ -7883,6 +7939,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     const cache = o.store.get(PLAYER_SCORES_KEY, {});
     const rankOf = (id) => ranks?.ranks[String(id)]?.[0] ?? cache[String(id)]?.scores.total?.rank ?? null;
     const byRank = (a, b) => (rankOf(a.id) ?? Infinity) - (rankOf(b.id) ?? Infinity) || a.name.localeCompare(b.name);
+    if (view2.flagTab === "ptre" && ptre) side.append(ptreSyncBar(o, ptre));
     const list = view2.flagTab === "recent" ? marks.recent : Object.entries(marks.players).filter(([, p]) => p.flag === view2.flagTab).map(([id, p]) => ({ id: Number(id), name: p.name })).sort(byRank);
     if (!list.length) {
       scroll.append(h(doc, "p", "empty", t(view2.flagTab === "recent" ? "marks.noRecent" : "marks.noPlayers")));
@@ -8185,6 +8242,42 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     if (profile) link(t("ptre.profile"), profile);
     if (links.childElementCount) box.append(links);
     return box;
+  }
+  function ptreSyncBar(o, ptre) {
+    const { doc, t, store } = o;
+    const bar = h(doc, "div", "psync");
+    const b = h(doc, "button");
+    b.type = "button";
+    b.append(icon(doc, "swap", 13), h(doc, "span", "", t("ptre.sync")));
+    b.title = t("ptre.syncHint");
+    if (ptreSync?.busy) b.setAttribute("aria-busy", "true");
+    b.addEventListener("click", () => {
+      if (ptreSync?.busy) return;
+      ptreSync = { busy: true, ok: true, text: "" };
+      refreshSide();
+      void ptreSyncTargets(ptre, ptreTargets(readMarks2(store))).catch(() => ({ ok: false, message: "", targets: [] })).then((r) => {
+        if (r.ok) {
+          const { marks, added } = mergePtreTargets(readMarks2(store), r.targets, Date.now());
+          store.set(MARKS_KEY, marks);
+          ptreSync = { busy: false, ok: true, text: t("ptre.synced", { n: r.targets.length, added }) };
+        } else {
+          const why = r.message === "no-key" ? t("ptre.noKey") : r.message === "server" ? t("ptre.noServer") : r.message || "?";
+          ptreSync = { busy: false, ok: false, text: t("ptre.failed", { message: why }) };
+        }
+        refreshSide();
+      });
+    });
+    const manage = h(doc, "a", "", t("ptre.manage"));
+    manage.href = PTRE_TARGETS_PAGE;
+    manage.target = "_blank";
+    manage.rel = "noopener noreferrer";
+    bar.append(b, manage);
+    if (ptreSync && !ptreSync.busy) {
+      const m = h(doc, "span", `msg${ptreSync.ok ? "" : " err"}`, ptreSync.text);
+      m.setAttribute("role", "status");
+      bar.append(m);
+    }
+    return bar;
   }
 
   // src/modules/galaxy/index.ts

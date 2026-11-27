@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { EMPTY_MARKS, flagPlayer, loadMarks, MARKS_KEY, migrateOld, rememberRecent, RECENT_MAX, renamePlayers } from '../src/engines/marks';
+import { EMPTY_MARKS, flagPlayer, loadMarks, MARKS_KEY, mergePtreTargets, migrateOld, ptreTargets, rememberRecent, RECENT_MAX, renamePlayers } from '../src/engines/marks';
 import { flagButton } from '../src/modules/marks/picker';
 import { closeSide, isSideOpen, nextInSide, openSide, resetSideCache, restoreSide, SIDE_ID, toggleSide } from '../src/modules/marks/side';
 import { POSITIONS_KEY } from '../src/engines/positions';
@@ -72,6 +72,52 @@ describe('mark pickers', () => {
     expect(loadMarks(store.get(MARKS_KEY, null)).players['6']?.flag).toBe('farm');
     c.dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true }));
     expect(loadMarks(store.get(MARKS_KEY, null)).players['6']).toBeUndefined();
+  });
+});
+
+describe('PTRE targets', () => {
+  it('the PTRE flag is offered only with a team key', () => {
+    const store = new Store(new MemoryStore(), 'pk');
+    const a = flagButton({ doc: document, store, t }, 5, 'Bob');
+    document.body.append(a);
+    a.click();
+    expect(document.getElementById('fut-mk-pop')!.querySelectorAll('button')).toHaveLength(7);
+    a.click();
+    store.set('ptre.teamKey', 'TM-AAAA-BBBB-CCCC-DDDD');
+    a.click();
+    const items = [...document.getElementById('fut-mk-pop')!.querySelectorAll<HTMLButtonElement>('button')];
+    expect(items.map((b) => b.title)).toContain('PTRE (team)');
+    a.remove();
+  });
+
+  it("the team's targets come back flagged PTRE, never over a flag of the player's own", () => {
+    let m = flagPlayer(EMPTY_MARKS, 5, 'Bob', 'ptre', 1);
+    m = flagPlayer(m, 6, 'Al', 'friend', 1);
+    expect(ptreTargets(m)).toEqual([{ id: 5, pseudo: 'Bob' }]);
+    const r = mergePtreTargets(m, [{ id: 5, name: 'Bob2' }, { id: 6, name: 'Al' }, { id: 7, name: 'Cy' }, { id: 0, name: 'x' }], 9);
+    expect(r.added).toBe(1);
+    expect(r.marks.players['5']).toMatchObject({ flag: 'ptre', name: 'Bob2' });
+    expect(r.marks.players['6']!.flag).toBe('friend');
+    expect(r.marks.players['7']).toEqual({ flag: 'ptre', name: 'Cy', at: 9 });
+  });
+
+  it('the side bar syncs the PTRE list with one click', async () => {
+    resetSideCache();
+    const store = new Store(new MemoryStore(), 'psync');
+    store.set('ptre.teamKey', 'TM-AAAA-BBBB-CCCC-DDDD');
+    store.set(MARKS_KEY, flagPlayer(EMPTY_MARKS, 5, 'Bob', 'ptre', 1));
+    const fetchImpl = vi.fn(async (url: string, _init?: RequestInit) => new Response(url.includes('ptre.chez.gg') ? JSON.stringify({ code: 1, message: 'ok', targets_array: [{ player_id: '5', pseudo: 'Bob' }, { player_id: '7', pseudo: 'Cy' }] }) : '<?xml version="1.0"?><players></players>'));
+    const guard = new NetworkGuard(fetchImpl, 'http://localhost:3000');
+    document.body.innerHTML = '';
+    const ptre = { guard, store, host: 's269-it.ogame.gameforge.com', lang: 'it', version: '1' };
+    openSide({ doc: document, store, guard, t, locale: 'it', ptre }, { flagTab: 'ptre', player: null });
+    const root = () => document.getElementById(SIDE_ID)!.shadowRoot!;
+    root().querySelector<HTMLButtonElement>('.psync button')!.click();
+    await vi.waitFor(() => expect(root().querySelector('.psync .msg')?.textContent).toBe('Il team ha 2 bersagli su PTRE; 1 nuovi qui.'));
+    const call = fetchImpl.mock.calls.find(([u]) => u.includes('api_sync_target_list.php'))!;
+    expect(call[1]).toMatchObject({ method: 'POST', body: '[{"id":5,"pseudo":"Bob"}]' });
+    expect(loadMarks(store.get(MARKS_KEY, null)).players['7']?.flag).toBe('ptre');
+    closeSide(document, store);
   });
 });
 
