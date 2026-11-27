@@ -125,7 +125,7 @@ function typing(doc: Document, e?: Event): boolean {
   return isField(a);
 }
 
-const WINDOWS = ['fut-fleet-modal', 'fut-dashboard', 'fut-planner', 'fut-journal', 'fut-settings-window'];
+const WINDOWS = ['fut-tour', 'fut-dashboard', 'fut-planner', 'fut-journal', 'fut-settings-window'];
 
 /** Makes `run` the action `id` on this page: on its key and in the touch bar. */
 export function registerActions(doc: Document, store: Store, t: (k: string) => string, list: Record<string, () => void>): void {

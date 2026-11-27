@@ -6,6 +6,7 @@
  * Shadow DOM, like the dashboard. Data already stored only: no network, no game action.
  */
 import { icon } from '../../core/icons';
+import { helpButton } from '../../core/tour';
 import { WINDOW_SHEET } from '../../core/sheet';
 import type { Store } from '../../core/storage';
 import type { AccountSnapshot } from '../../data/account-info';
@@ -51,6 +52,8 @@ export interface PlannerOptions {
   /** Current page URL and page change, for "Porta qui le risorse" (a normal navigation). */
   href?: string;
   navigate?: (url: string) => void;
+  /** The «?» in the head: this window's own guide (modules/guide). */
+  onHelp?: () => void;
 }
 
 let keyHandler: ((e: KeyboardEvent) => void) | null = null;
@@ -202,6 +205,7 @@ export function openPlanner(o: PlannerOptions): void {
     close.append(icon(doc, 'close', 16));
     close.title = t('fleet.close');
     close.addEventListener('click', () => closePlanner(doc));
+    if (o.onHelp) head.append(helpButton(doc, t('tour.help'), o.onHelp));
     head.append(close);
 
     if (!groups.length) {

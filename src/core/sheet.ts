@@ -108,6 +108,8 @@ h4 { margin: 12px 0 4px; font: 600 condensed 13px/1.2 var(--display); color: var
   border-radius: 4px; border: 0; background: none; color: var(--on-band); line-height: 1; cursor: pointer;
 }
 .close:hover { background: var(--band-2); color: var(--text); }
+/* The «?» beside the close button: this window's guide (core/tour). */
+.head .help + .close { margin-left: -8px; }
 .mono { font-family: var(--mono); }
 .m { color: var(--m); } .c { color: var(--c); } .d { color: var(--d); } .dm { color: var(--dm); }
 .neg { color: var(--bad); } .pos { color: var(--ok); }

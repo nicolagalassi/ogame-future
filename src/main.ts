@@ -29,7 +29,8 @@ import { POSITIONS_KEY, type Positions } from './engines/positions';
 import { QUEUES_KEY, loadQueuesOnPageLoad, syncQueuesOnUserClick, type QueueSnapshot } from './data/queues';
 import { EVENTS_KEY, eventsByBody, loadEventsOnPageLoad, syncEventsOnUserClick, watchPageEvents, type Events } from './data/events';
 import { ITEMS_KEY, LF_BONUS_KEY, fetchLfBonuses, hydrateLfOncePerSession, readActiveItems, type LfBonuses } from './data/bonuses';
-import { openSettings, type Section } from './modules/settings';
+import { closeSettings, openSettings, type Section } from './modules/settings';
+import { FLEET_ZONES, GUIDE_PARAM, guideFromUrl, guideHere, guidePanel, guideUrl, offerGuides, startGuide, startWhenReady, type GuideDeps, type GuideId } from './modules/guide';
 import { dayFigures, openDashboard } from './modules/dashboard';
 import { TECH_NAMES_KEY, learnTechNames, type TechNames } from './data/tech-names';
 import { readTechList } from './data/tech-details';
@@ -40,10 +41,10 @@ import { LF_LEVELS_KEY, readLfLevels, type LfLevels } from './data/lf-production
 const SEEN_LEVELS_KEY = 'tech.seen';
 import { isFleetDispatch } from './data/fleet-page';
 import { universeRanks } from './data/universe-ranks';
-import { renderFleetTools } from './modules/fleet';
+import { loadProfiles, renderFleetTools } from './modules/fleet';
 import { watchJumpgate } from './modules/fleet/jumpgate';
 import { mountTouchBar, registerActions, setTouchSettings, switchBodyUrl } from './modules/shortcuts';
-import { nextBody } from './engines/fleet';
+import { nextBody, SETTINGS_KEY as FLEET_SETTINGS_KEY } from './engines/fleet';
 import { watchTechPages } from './modules/tech';
 import { accountResources, openPlanner } from './modules/tech/planner-view';
 import { accountGap, lessReserved, PLAN_KEY, pendingFor, planCount, planStatus, pruneByQueues, QUEUED_KEY, releaseQueued, reservedFor, SENT_KEY, withQueued, type Plan, type Queued, type Shipment } from './engines/planner';
@@ -85,6 +86,8 @@ async function bootstrap(): Promise<void> {
   for (const type of [0, 1, 2, 3, 8]) if (store.get(`hs.daily.${type}`, null) !== null) store.set(`hs.daily.${type}`, null);
   const locale = detectLocale(document);
   const t = translator(locale);
+  // Guides seen are shared by every universe of this browser: a guide seen once is seen (modules/guide).
+  const guide: GuideDeps = { doc: document, store: new Store(gm, 'future'), t };
   let snapshot: AccountSnapshot | null = store.get<AccountSnapshot | null>(SNAPSHOT_KEY, null);
   const saver = new IdleSaver(() => {
     if (!snapshot) return;
@@ -254,7 +257,7 @@ async function bootstrap(): Promise<void> {
   let refreshFleet: (() => void) | null = null;
   // Planet menu facts the settings show (whether the side view fits, colonies); updated by the menu.
   let menuCtx = { colonies: '' };
-  const openFutureSettings = (section?: Section) =>
+  const openFutureSettings = (section?: Section) => {
     openSettings({
       doc: document,
       store,
@@ -297,9 +300,90 @@ async function bootstrap(): Promise<void> {
       },
       section,
       rules: { bodies: readPlanetList(document).map(({ planetId, moonId, name, coords }) => ({ planetId, moonId, name, coords })), bodyId: currentId, locale },
+      onHelp: () => startGuide(guide, 'settings'),
+      guide: (redraw) => guidePanel({ doc: document, t, store: guide.store, steps: firstSteps(), onStart: runGuide, redraw }),
     });
+    offerGuides(guide, ['settings']);
+  };
   /** The player's planets and moons as event-list places (`coords|p`, `coords|m`). */
   const ownPlaces = () => new Set(readPlanetList(document).flatMap((e) => [...(e.planetId ? [`${e.coords}|p`] : []), ...(e.moonId ? [`${e.coords}|m`] : [])]));
+  // The windows, opened from the planet menu, the dock and the Guide tab; each offers its guide the first time.
+  const openDash = () => {
+    openDashboard({
+      doc: document,
+      snapshot,
+      entries: readPlanetList(document),
+      score: store.get<Score | null>(SCORE_KEY, null),
+      history: store.get<History>(HISTORY_KEY, []),
+      bell: (r) => bellButton(document, store, t, r),
+      queues,
+      names: techNames,
+      lfSlots,
+      lfLevels: store.get<LfLevels | null>(LF_LEVELS_KEY, null),
+      lfLocked: store.get<LfLocked>(LF_LOCKED_KEY, {}),
+      seenLevels: store.get<Record<string, Record<string, number>>>(SEEN_LEVELS_KEY, {}),
+      icons: techIcons(document, store),
+      store,
+      now: Date.now(),
+      locale,
+      t,
+      onHelp: () => startGuide(guide, 'dashboard'),
+    });
+    offerGuides(guide, ['dashboard']);
+  };
+  const openPlan = (focus?: number) => {
+    const id = currentBodyId(document);
+    const resources = readCurrentResources(document);
+    openPlanner({
+      doc: document,
+      store,
+      entries: readPlanetList(document),
+      snapshot,
+      current: id && resources ? { id, resources } : null,
+      now: Date.now(),
+      locale,
+      t,
+      onChange: () => draw(),
+      focus,
+      href: location.href,
+      navigate: (url) => location.assign(url),
+      onHelp: () => startGuide(guide, 'planner'),
+    });
+    offerGuides(guide, ['planner']);
+  };
+  const openJour = () => {
+    openJournal({ doc: document, store, now: Date.now(), locale, t, onHelp: () => startGuide(guide, 'journal') });
+    offerGuides(guide, ['journal']);
+  };
+  /** The first steps to set Future up, as the Guide tab lists them: done or not, and where «Mostrami» leads. */
+  const firstSteps = () => {
+    const onFleet = isFleetDispatch(document);
+    const goTo = (id: GuideId) => {
+      const url = guideUrl(location.href, id);
+      if (url) location.assign(url);
+    };
+    return [
+      { key: 'sync' as const, done: !!snapshot, show: () => (closeSettings(document), startGuide(guide, 'board', [4])) },
+      { key: 'fleetsave' as const, done: Object.values(loadProfiles(store)).some((p) => p?.save), show: () => openFutureSettings('bodies') },
+      {
+        key: 'mainShip' as const,
+        done: store.get<{ mainShip?: number }>(FLEET_SETTINGS_KEY, {}).mainShip !== undefined,
+        show: () => (onFleet ? (closeSettings(document), startGuide(guide, 'fleet', [3])) : goTo('fleet')),
+      },
+      { key: 'plan' as const, done: planCount(store.get<Plan>(PLAN_KEY, {})) > 0, show: () => goTo('tech') },
+      { key: 'journal' as const, done: Object.keys(store.get<Journal>(JOURNAL_KEY, {})).length > 0, show: () => goTo('messages') },
+    ];
+  };
+  /** «Avvia» in the Guide tab: the guide here, its window opened first, or its page (the guide starts there). */
+  const runGuide = (id: GuideId) => {
+    if (id !== 'settings') closeSettings(document);
+    const windows: Partial<Record<GuideId, () => void>> = { dashboard: openDash, planner: () => openPlan(), journal: openJour };
+    windows[id]?.();
+    if (id === 'settings' || windows[id] || guideHere(document, id)) return startGuide(guide, id);
+    const url = guideUrl(location.href, id);
+    if (url) location.assign(url);
+    else startGuide(guide, id);
+  };
   /** Draws the dock under the game's menu (set once the targets side bar is ready, below). */
   let drawDock: (() => void) | null = null;
   const draw = () => {
@@ -320,47 +404,11 @@ async function bootstrap(): Promise<void> {
         menuCtx = ctx;
         openFutureSettings();
       },
-      onOpenDashboard: () =>
-        openDashboard({
-          doc: document,
-          snapshot,
-          entries: readPlanetList(document),
-          score: store.get<Score | null>(SCORE_KEY, null),
-          history: store.get<History>(HISTORY_KEY, []),
-          bell: (r) => bellButton(document, store, t, r),
-          queues,
-          names: techNames,
-          lfSlots,
-          lfLevels: store.get<LfLevels | null>(LF_LEVELS_KEY, null),
-          lfLocked: store.get<LfLocked>(LF_LOCKED_KEY, {}),
-          seenLevels: store.get<Record<string, Record<string, number>>>(SEEN_LEVELS_KEY, {}),
-          icons: techIcons(document, store),
-          store,
-          now: Date.now(),
-          locale,
-          t,
-        }),
+      onOpenDashboard: () => openDash(),
       planCount: planCount(store.get<Plan>(PLAN_KEY, {})),
       planGap: planGap(),
       planMarks: planMarks(),
-      onOpenPlanner: (focus?: number) => {
-        const id = currentBodyId(document);
-        const resources = readCurrentResources(document);
-        openPlanner({
-          doc: document,
-          store,
-          entries: readPlanetList(document),
-          snapshot,
-          current: id && resources ? { id, resources } : null,
-          now: Date.now(),
-          locale,
-          t,
-          onChange: () => draw(),
-          focus,
-          href: location.href,
-          navigate: (url) => location.assign(url),
-        });
-      },
+      onOpenPlanner: (focus?: number) => openPlan(focus),
       // COMPLIANCE: runs only from the Sync button's click (reason 'user-sync', no cp).
       onSync: async () => {
         try {
@@ -433,7 +481,7 @@ async function bootstrap(): Promise<void> {
       locale,
       journal: { today: stats('today'), yesterday: stats('yesterday') },
       marks: loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null)),
-      onOpenJournal: () => openJournal({ doc: document, store, now: Date.now(), locale, t }),
+      onOpenJournal: () => openJour(),
       onOpenTargets: (view) => (view ? openSide(side, view) : toggleSide(side)),
     });
   };
@@ -526,7 +574,8 @@ async function bootstrap(): Promise<void> {
   // Fleet page helpers: reserves and fleetsave, on the game's own form.
   if (isFleetDispatch(document) && currentId) {
     const bodies = readPlanetList(document).map(({ planetId, moonId, name, coords }) => ({ planetId, moonId, name, coords }));
-    const fleet = { doc: document, store, bodyId: currentId, bodies, t, locale, onOpenSettings: (s?: 'fleet' | 'bodies') => openFutureSettings(s ?? 'fleet') };
+    const fleet = { doc: document, store, bodyId: currentId, bodies, t, locale, onOpenSettings: (s?: 'fleet' | 'bodies') => openFutureSettings(s ?? 'fleet'),
+      onHelp: (zone: keyof typeof FLEET_ZONES) => startGuide(guide, 'fleet', [FLEET_ZONES[zone]]) };
     renderFleetTools(fleet);
     refreshFleet = () => renderFleetTools(fleet);
   }
@@ -539,6 +588,16 @@ async function bootstrap(): Promise<void> {
     const arrow = (key: string) => () => document.querySelector<HTMLElement>(`#galaxycomponent .galaxy_icons[onclick*="'${key}'"]`)?.click();
     registerActions(document, store, t, { 'galaxy.left': arrow('ArrowLeft'), 'galaxy.right': arrow('ArrowRight'), 'galaxy.down': arrow('ArrowDown'), 'galaxy.up': arrow('ArrowUp') });
   }
+
+  // Guides: the one the player asked for on another page (Guide tab), else the first-visit invites of what
+  // this page shows. An invite dims and blocks nothing; a guide starts only from a click (modules/guide).
+  const asked = guideFromUrl(location.href);
+  if (asked) {
+    const clean = new URL(location.href);
+    clean.searchParams.delete(GUIDE_PARAM);
+    history.replaceState(history.state, '', clean.toString());
+    startWhenReady(guide, asked);
+  } else offerGuides(guide, ['board', 'fleet', 'galaxy', 'messages', 'tech']);
 }
 
 if (document.readyState === 'loading') {

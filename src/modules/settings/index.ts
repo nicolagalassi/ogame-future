@@ -20,11 +20,12 @@ import { iconSvg, type IconName as FleetIcon } from '../fleet/icons';
 import { bodyRulesPanel, RULES_CSS, type FleetBody } from '../fleet';
 import { ACTIONS, assignKey, glyph, keyLabel, keymap, resetKeys, TOUCH_KEY, usableKey, type TouchMode } from '../shortcuts';
 import { followViewport, revealActiveTabs } from '../../core/viewport';
+import { helpButton } from '../../core/tour';
 
 export const SETTINGS_ID = 'fut-settings-window';
 const TAB_KEY = 'settings.tab';
-export type Section = 'menu' | 'mail' | 'galaxy' | 'fleet' | 'bodies' | 'keys' | 'data';
-const SECTIONS: Section[] = ['menu', 'mail', 'galaxy', 'fleet', 'bodies', 'keys', 'data'];
+export type Section = 'menu' | 'mail' | 'galaxy' | 'fleet' | 'bodies' | 'keys' | 'data' | 'guide';
+const SECTIONS: Section[] = ['menu', 'mail', 'galaxy', 'fleet', 'bodies', 'keys', 'data', 'guide'];
 
 export interface SettingsOptions {
   doc: Document;
@@ -49,6 +50,10 @@ export interface SettingsOptions {
   /** Rules of the planets and moons (reserves, jump gate, fleetsave); without it the section is not shown.
    *  bodyId: the body to open on when the window opens on that section (the fleet page's Regole). */
   rules?: { bodies: FleetBody[]; bodyId?: number | null; locale: string };
+  /** The Guide tab: first steps and every guide (modules/guide); without it the tab is not shown. */
+  guide?: (redraw: () => void) => HTMLElement[];
+  /** The «?» in the head: this window's own guide. */
+  onHelp?: () => void;
 }
 
 const CSS = `
@@ -103,6 +108,9 @@ input.field { width: 190px; }
 .mini { height: 28px; padding: 0 8px; border: 0; border-radius: 6px; background: none; color: var(--muted); font: 11px Arial, sans-serif; cursor: pointer; }
 .mini:hover { background: var(--line); color: var(--text); }
 .mini[hidden] { display: inline-block; visibility: hidden; }
+/* Guide tab: a first step already done reads as done, quietly. */
+.fut-done { align-items: center; gap: 6px; color: var(--ok); font: 600 12px var(--display); }
+.fut-step-done .name { color: var(--muted); }
 @container (max-width: 520px) { .row { grid-template-columns: 1fr; } .row .control { grid-column: 1; grid-row: auto; } }
 `;
 
@@ -142,7 +150,7 @@ export function openSettings(o: SettingsOptions): void {
   // On a phone showing the page zoomed out: the window over the whole screen, at the phone's own size.
   followViewport(doc, backdrop, 'cover');
 
-  const sections = SECTIONS.filter((s) => s !== 'bodies' || o.rules);
+  const sections = SECTIONS.filter((s) => (s !== 'bodies' || o.rules) && (s !== 'guide' || o.guide));
   let section = o.section ?? store.get<Section>(TAB_KEY, 'menu');
   if (!sections.includes(section)) section = 'menu';
   // Built once per opening: it keeps which body is open while the rest of the window redraws.
@@ -415,7 +423,9 @@ export function openSettings(o: SettingsOptions): void {
     close.setAttribute('aria-label', t('fleet.close'));
     close.append(icon(doc, 'close', 16));
     close.addEventListener('click', () => closeSettings(doc));
-    head.append(titles, close);
+    head.append(titles);
+    if (o.onHelp) head.append(helpButton(doc, t('tour.help'), o.onHelp));
+    head.append(close);
 
     const tabs = el('div', 'tabs');
     tabs.setAttribute('role', 'tablist');
@@ -423,6 +433,7 @@ export function openSettings(o: SettingsOptions): void {
       const b = el('button', 'tab', t(`settings.section.${s}`));
       b.type = 'button';
       b.setAttribute('role', 'tab');
+      b.dataset.section = s;
       b.setAttribute('aria-selected', String(s === section));
       b.setAttribute('aria-pressed', String(s === section));
       b.addEventListener('click', () => {
@@ -516,6 +527,8 @@ export function openSettings(o: SettingsOptions): void {
       body.append(rulesPanel);
     } else if (section === 'keys') {
       body.append(...keyRows());
+    } else if (section === 'guide' && o.guide) {
+      body.append(...o.guide(draw));
     } else {
       if (o.backup) {
         const { onExport, onImport } = o.backup;

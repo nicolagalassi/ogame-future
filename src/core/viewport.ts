@@ -5,11 +5,11 @@
  * CSS pixels, then scaled back up by 1/zoom. They follow the player's own pinch and scroll only (no timer).
  */
 
-/** How the element sits: along the bottom edge (the touch bar), or over the whole screen (a window). */
-export type ViewportFit = 'bottom' | 'cover';
+/** How the element sits: along the bottom or top edge (the touch bar, a guide's bubble), or over the whole screen (a window). */
+export type ViewportFit = 'bottom' | 'top' | 'cover';
 
 /** Below this zoom a window is fitted to the screen; at 1 (computers, a page zoomed in) it is left alone. */
-const ZOOMED_OUT = 0.95;
+export const ZOOMED_OUT = 0.95;
 /** A fitted window is drawn this much larger than the phone's own CSS pixels: its 11–13px text, sized for a
  *  computer screen, reads at 13–15px on a phone (Nicola: everything readable without squinting). */
 const PHONE_TEXT = 1.15;
@@ -18,6 +18,10 @@ export function placeOnViewport(el: HTMLElement, vv: VisualViewport, fit: Viewpo
   const s = vv.scale || 1;
   if (fit === 'bottom') {
     Object.assign(el.style, { left: `${vv.offsetLeft}px`, top: `${vv.offsetTop + vv.height}px`, width: `${vv.width * s}px`, transform: `scale(${1 / s}) translateY(-100%)` });
+    return;
+  }
+  if (fit === 'top') {
+    Object.assign(el.style, { left: `${vv.offsetLeft}px`, top: `${vv.offsetTop}px`, width: `${vv.width * s}px`, transform: `scale(${1 / s})` });
     return;
   }
   if (s >= ZOOMED_OUT) {
@@ -44,6 +48,7 @@ export function followViewport(doc: Document, el: HTMLElement, fit: ViewportFit)
   const vv = doc.defaultView?.visualViewport;
   if (!vv) {
     if (fit === 'bottom') Object.assign(el.style, { top: 'auto', bottom: '0', width: '100%' });
+    if (fit === 'top') Object.assign(el.style, { top: '0', bottom: 'auto', width: '100%' });
     return;
   }
   const place = () => {

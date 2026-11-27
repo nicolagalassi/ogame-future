@@ -9,6 +9,7 @@
 import { bodyPicker as sharedPicker } from '../../core/body-picker';
 import { resToken } from '../../core/res-icons';
 import { icon } from '../../core/icons';
+import { helpButton } from '../../core/tour';
 import { WINDOW_SHEET } from '../../core/sheet';
 import type { AccountSnapshot, OwnBody } from '../../data/account-info';
 import { maxTemperatureOf, type PlanetListEntry } from '../../data/planet-list';
@@ -59,6 +60,8 @@ export interface DashboardOptions {
   now: number;
   locale: string;
   t: (key: string, vars?: Record<string, string | number>) => string;
+  /** The «?» in the head: this window's own guide (modules/guide). */
+  onHelp?: () => void;
 }
 
 export const TABS = ['summary', 'investments', 'history', 'mines', 'facilities', 'lifeforms', 'ships', 'defence', 'scrap'] as const;
@@ -219,7 +222,9 @@ export function openDashboard(o: DashboardOptions): void {
   x.type = 'button';
   x.setAttribute('aria-label', t('dash.close'));
   x.addEventListener('click', close);
-  header.append(titles, x);
+  header.append(titles);
+  if (o.onHelp) header.append(helpButton(doc, t('tour.help'), o.onHelp));
+  header.append(x);
   panel.append(header);
 
   // Tabs
