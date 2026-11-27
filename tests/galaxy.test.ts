@@ -171,8 +171,19 @@ describe('military split into fleet and defences', () => {
     guard.closePageLoadWindow();
     watchGalaxy({ doc: document, store: new Store(new MemoryStore(), 'card'), guard, ownPlanetIds: new Set([71]), locale: 'it', t: translator('it') });
     document.querySelector('#galaxyRow6 .fut-g-rank')!.dispatchEvent(new MouseEvent('mouseenter'));
-    await new Promise((r) => setTimeout(r, 20));
-    const rows = [...document.querySelectorAll('#fut-galaxy-card tr')].map((r) => [r.className, r.querySelector('td')!.textContent]);
-    expect(rows).toEqual([['', 'Generale'], ['', 'Economia'], ['', 'Ricerca'], ['', 'Militare'], ['sub', 'Flotta'], ['sub', 'Difese'], ['', 'Forme di vita']]);
+    // A short pause first (a pointer sweeping the list asks for nothing), then the card.
+    expect(document.getElementById('fut-player-card')).toBeNull();
+    await vi.waitFor(() => expect(document.querySelectorAll('#fut-player-card tr').length).toBeGreaterThan(0));
+    const rows = [...document.querySelectorAll('#fut-player-card tr')].map((r) => [r.className, r.querySelector('td')!.textContent]);
+    // In OGLight's order: total, economy, research, lifeforms, military with fleet and defences under it.
+    expect(rows).toEqual([['', 'Generale'], ['', 'Economia'], ['', 'Ricerca'], ['', 'Forme di vita'], ['', 'Militare'], ['sub', 'Flotta'], ['sub', 'Difese']]);
+    expect(document.querySelector('#fut-player-card h4 .rank')?.textContent).toMatch(/^#\d/);
+    // The name opens the same card; leaving it closes the card.
+    document.querySelector('#galaxyRow6 .fut-g-rank')!.dispatchEvent(new MouseEvent('mouseleave'));
+    expect(document.getElementById('fut-player-card')).toBeNull();
+    const name = document.querySelector<HTMLElement>('#galaxyRow6 .playerName')!;
+    expect(name.dataset.futCard).toBe('9');
+    name.dispatchEvent(new FocusEvent('focus'));
+    expect(document.getElementById('fut-player-card')).not.toBeNull();
   });
 });

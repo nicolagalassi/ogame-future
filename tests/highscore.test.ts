@@ -114,3 +114,22 @@ describe('highscore flag placement', () => {
     expect(document.querySelector('#position7 td.sendmsg')!.innerHTML).toBe('<a class="info">i</a>');
   });
 });
+
+describe('player card in the highscore', () => {
+  it("pointing at a name shows that player's points and ranks, from the public API", async () => {
+    page();
+    const xml = '<?xml version="1.0"?><playerData id="3" name="Behind" timestamp="1"><positions><position type="0" score="990000000">12</position><position type="1" score="500000000">20</position><position type="8" score="1000">90</position></positions><planets></planets></playerData>';
+    const fetchImpl = vi.fn(async (_url: string) => new Response(xml));
+    const guard = new NetworkGuard(fetchImpl as never, document.location.origin);
+    guard.closePageLoadWindow();
+    decorateHighscore({ doc: document, store: new Store(new MemoryStore(), 'hc'), locale: 'it', t: translator('it'), guard });
+    const name = document.querySelector<HTMLElement>('#position3 .playername')!;
+    expect(name.dataset.futCard).toBe('3');
+    name.dispatchEvent(new MouseEvent('mouseenter'));
+    await vi.waitFor(() => expect(document.querySelectorAll('#fut-player-card tr')).toHaveLength(3));
+    expect(String(fetchImpl.mock.calls[0]![0])).toContain('/api/playerData.xml?id=3');
+    expect([...document.querySelectorAll('#fut-player-card tr')].map((r) => r.textContent)).toEqual(['Generale990M#12', 'Economia500M#20', 'Forme di vita1,0k#90']);
+    name.dispatchEvent(new MouseEvent('mouseleave'));
+    expect(document.getElementById('fut-player-card')).toBeNull();
+  });
+});

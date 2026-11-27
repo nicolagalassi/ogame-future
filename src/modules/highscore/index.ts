@@ -4,7 +4,7 @@ import { WINDOW_TOKENS } from '../../core/sheet';
  * snapshot (green up, red down) with its age in the column header, as OGLight shows it; a cleaner
  * table in OGLight's manner (compact rows for everyone, small pictures, hairlines, quieter row
  * colours, honour points kept but quiet); the player flag of Future's targets beside the game's
- * "i" button; a button back to the top.
+ * "i" button; the player card on each name (modules/player-card); a button back to the top.
  *
  * COMPLIANCE: reads the page the player opened, Future's stored data and PTRE's ranking
  * (data/ptre: 'user-view', at most every 6 hours, no cookies). The flag only edits Future's own list.
@@ -16,6 +16,7 @@ import { ptreRanks, type PtreRanks } from '../../data/ptre';
 import type { NetworkGuard } from '../../core/guard';
 import { icon } from '../../core/icons';
 import { ensureMarksStyle, flagButton } from '../marks/picker';
+import { attachPlayerCard } from '../player-card';
 
 type T = (key: string, vars?: Record<string, string | number>) => string;
 
@@ -113,6 +114,9 @@ export function decorateHighscore(o: HighscoreOptions): void {
     }
     // The flag sits at the outer edge of the name cell, right next to the game's "i" column, as
     // OGLight's pin. The "i" cell itself is never touched: the game lays it out (and fills it) on its own.
+    // Pointing at the name shows the player's card (points and rank in every category), as OGLight.
+    const nameEl = r.row.querySelector<HTMLElement>('.playername');
+    if (nameEl && o.guard) attachPlayerCard({ doc, store, guard: o.guard, t, locale }, nameEl, r.playerId, r.name);
     const nameCell = r.row.querySelector('td.name');
     if (nameCell && !r.mine && !r.row.querySelector('.fut-mk-flag')) {
       nameCell.classList.add('fut-hs-fl');
