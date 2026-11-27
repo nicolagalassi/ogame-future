@@ -1102,11 +1102,11 @@
   "exp.raidAvg": "a raid",
   "exp.raidTargets": "Bersagli migliori",
   "settings.section.ptre": "PTRE",
-  "ptre.consent": "PTRE (ptre.chez.gg) è il database del tuo team: rapporti di spionaggio, attività e pianeti dei giocatori, raccolti dai membri del team.\nCon la team key Future invia a PTRE solo quello che scegli tu con un click: per ora un rapporto di spionaggio dalla tabella spiate (solo il suo id API, la stessa cosa che fa OGLight). Ogni invio porta la team key, il tuo universo e la versione di Future. Senza key non parte niente.\nLa key resta in questo browser e non finisce nei backup.",
+  "ptre.consent": "PTRE (ptre.chez.gg) è il database del tuo team: rapporti di spionaggio, attività e pianeti dei giocatori, raccolti dai membri del team.\nCon la team key Future invia a PTRE solo quello che scegli tu con un click, come fa OGLight: un rapporto di spionaggio dalla tabella spiate (solo il suo id API); id e nome di un giocatore quando apri le sue info PTRE nella scheda; id e nome dei giocatori con la bandierina PTRE quando sincronizzi i bersagli. Ogni invio porta la team key, il tuo universo e la versione di Future. Senza key non parte niente.\nLa key resta in questo browser e non finisce nei backup.",
   "ptre.open": "Apri PTRE",
   "ptre.key": "Team key",
   "ptre.keyHint": "La trovi su PTRE, nella pagina del tuo team. Salvandola accetti gli invii descritti sopra.",
-  "ptre.keyOnHint": "Attiva: nella tabella spiate c'è il pulsante per salvare un rapporto su PTRE.",
+  "ptre.keyOnHint": "Attiva: «Salva su PTRE» nella tabella spiate, il pulsante PTRE nella scheda dei giocatori e la bandierina PTRE con la sincronizzazione dei bersagli.",
   "ptre.keySave": "Salva",
   "ptre.keySaved": "Team key salvata.",
   "ptre.keyBad": "Non è una team key: deve essere TM-XXXX-XXXX-XXXX-XXXX.",
@@ -1135,5 +1135,10 @@
   "ptre.noBest": "Nessun rapporto del team su questo giocatore.",
   "ptre.report": "Rapporto su PTRE",
   "ptre.profile": "Profilo su PTRE",
-  "ptre.failed": "PTRE: {message}"
+  "ptre.failed": "PTRE: {message}",
+  "mark.flag.ptre": "PTRE (team)",
+  "ptre.sync": "Sincronizza con PTRE",
+  "ptre.syncHint": "Manda a PTRE i giocatori con la bandierina PTRE e prende i bersagli del team",
+  "ptre.synced": "Il team ha {n} bersagli su PTRE; {added} nuovi qui.",
+  "ptre.manage": "Gestisci su PTRE"
 }

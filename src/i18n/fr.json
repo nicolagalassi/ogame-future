@@ -1102,11 +1102,11 @@
   "exp.raidAvg": "par raid",
   "exp.raidTargets": "Meilleures cibles",
   "settings.section.ptre": "PTRE",
-  "ptre.consent": "PTRE (ptre.chez.gg) est la base de données de ton équipe : rapports d'espionnage, activité et planètes des joueurs, réunis par les membres de l'équipe.\nAvec la team key, Future n'envoie à PTRE que ce que tu choisis d'un clic : pour l'instant un rapport d'espionnage depuis le tableau des espionnages (seulement son id API, comme OGLight). Chaque envoi porte la team key, ton univers et la version de Future. Sans key, rien ne part.\nLa key reste dans ce navigateur et ne va jamais dans une sauvegarde.",
+  "ptre.consent": "PTRE (ptre.chez.gg) est la base de données de ton équipe : rapports d'espionnage, activité et planètes des joueurs, réunis par les membres de l'équipe.\nAvec la team key, Future n'envoie à PTRE que ce que tu choisis d'un clic, comme OGLight : un rapport d'espionnage depuis le tableau des espionnages (seulement son id API) ; l'id et le nom d'un joueur quand tu ouvres ses infos PTRE sur sa fiche ; l'id et le nom des joueurs marqués PTRE quand tu synchronises les cibles. Chaque envoi porte la team key, ton univers et la version de Future. Sans key, rien ne part.\nLa key reste dans ce navigateur et ne va jamais dans une sauvegarde.",
   "ptre.open": "Ouvrir PTRE",
   "ptre.key": "Team key",
   "ptre.keyHint": "Tu la trouves sur PTRE, sur la page de ton équipe. En l'enregistrant, tu acceptes les envois décrits ci-dessus.",
-  "ptre.keyOnHint": "Active : le tableau des espionnages a un bouton pour enregistrer un rapport sur PTRE.",
+  "ptre.keyOnHint": "Active : «Enregistrer sur PTRE» dans le tableau des espionnages, le bouton PTRE sur la fiche des joueurs et le drapeau PTRE avec la synchronisation des cibles.",
   "ptre.keySave": "Enregistrer",
   "ptre.keySaved": "Team key enregistrée.",
   "ptre.keyBad": "Ce n'est pas une team key : elle doit être TM-XXXX-XXXX-XXXX-XXXX.",
@@ -1135,5 +1135,10 @@
   "ptre.noBest": "Aucun rapport de l'équipe sur ce joueur.",
   "ptre.report": "Rapport sur PTRE",
   "ptre.profile": "Profil sur PTRE",
-  "ptre.failed": "PTRE : {message}"
+  "ptre.failed": "PTRE : {message}",
+  "mark.flag.ptre": "PTRE (équipe)",
+  "ptre.sync": "Synchroniser avec PTRE",
+  "ptre.syncHint": "Envoie à PTRE les joueurs marqués PTRE et prend les cibles de l'équipe",
+  "ptre.synced": "L'équipe a {n} cibles sur PTRE ; {added} nouvelles ici.",
+  "ptre.manage": "Gérer sur PTRE"
 }

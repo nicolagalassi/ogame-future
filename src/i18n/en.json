@@ -1102,11 +1102,11 @@
   "exp.raidAvg": "per raid",
   "exp.raidTargets": "Best targets",
   "settings.section.ptre": "PTRE",
-  "ptre.consent": "PTRE (ptre.chez.gg) is your team's database: spy reports, activity and players' planets, gathered by the team's members.\nWith the team key Future sends PTRE only what you choose with a click: for now one spy report from the spy table (its API id only, the same as OGLight does). Every call carries the team key, your universe and Future's version. Without a key nothing is sent.\nThe key stays in this browser and never goes into a backup.",
+  "ptre.consent": "PTRE (ptre.chez.gg) is your team's database: spy reports, activity and players' planets, gathered by the team's members.\nWith the team key Future sends PTRE only what you choose with a click, as OGLight does: a spy report from the spy table (its API id only); a player's id and name when you open their PTRE info on the sheet; id and name of the players flagged PTRE when you sync the targets. Every call carries the team key, your universe and Future's version. Without a key nothing is sent.\nThe key stays in this browser and never goes into a backup.",
   "ptre.open": "Open PTRE",
   "ptre.key": "Team key",
   "ptre.keyHint": "You find it on PTRE, on your team's page. Saving it, you accept the calls described above.",
-  "ptre.keyOnHint": "On: the spy table has a button to save a report to PTRE.",
+  "ptre.keyOnHint": "On: «Save to PTRE» in the spy table, the PTRE button on players' sheets and the PTRE flag with the target sync.",
   "ptre.keySave": "Save",
   "ptre.keySaved": "Team key saved.",
   "ptre.keyBad": "Not a team key: it must look like TM-XXXX-XXXX-XXXX-XXXX.",
@@ -1135,5 +1135,10 @@
   "ptre.noBest": "No team report on this player.",
   "ptre.report": "Report on PTRE",
   "ptre.profile": "Profile on PTRE",
-  "ptre.failed": "PTRE: {message}"
+  "ptre.failed": "PTRE: {message}",
+  "mark.flag.ptre": "PTRE (team)",
+  "ptre.sync": "Sync with PTRE",
+  "ptre.syncHint": "Sends PTRE the players flagged PTRE and takes the team's targets",
+  "ptre.synced": "The team has {n} targets on PTRE; {added} new here.",
+  "ptre.manage": "Manage on PTRE"
 }

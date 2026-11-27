@@ -196,3 +196,17 @@ export function ptreProfileUrl(host: string, lang: string, playerId: number): st
   const u = ptreUniverse(host, lang);
   return u ? `https://ptre.chez.gg/?country=${u.country}&univers=${u.univers}&player_id=${playerId}` : null;
 }
+
+/** PTRE's page where the team manages its target list (a plain link). */
+export const PTRE_TARGETS_PAGE = 'https://ptre.chez.gg/?page=players_list';
+
+/**
+ * Syncs the team's target list, as OGLight's «Sync with PTRE»: sends the players flagged PTRE, gets the
+ * team's whole list back. The body is a JSON string with no Content-Type, as OGLight sends it.
+ */
+export async function ptreSyncTargets(deps: PtreDeps, targets: { id: number; pseudo: string }[]): Promise<PtreAnswer & { targets: { id: number; name: string }[] }> {
+  const r = await ptreCall(deps, 'api_sync_target_list.php', {}, { method: 'POST', body: JSON.stringify(targets) });
+  const list = Array.isArray(r.data?.targets_array) ? (r.data.targets_array as { player_id?: unknown; pseudo?: unknown }[]) : [];
+  const back = r.ok ? list.flatMap((p) => (/^\d+$/.test(String(p?.player_id ?? '')) ? [{ id: Number(p.player_id), name: String(p.pseudo ?? '') }] : [])) : [];
+  return { ok: r.ok, message: String(r.data?.message || r.message || ''), targets: back };
+}
