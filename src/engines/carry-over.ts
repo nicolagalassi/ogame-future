@@ -10,7 +10,7 @@
  * COMPLIANCE (AGENTS.md §1.9): local data only, no network.
  */
 import { JOURNAL_KEY, trim, type Journal } from './expeditions';
-import { SETTINGS_KEY, type FleetSettings } from './fleet';
+import { SETTINGS_KEY, settingsFrom, type FleetSettings } from './fleet';
 import { HISTORY_KEY, HISTORY_MAX, type History } from './history';
 import { ARCHIVE_KEY, MULT_KEY, loadArchive, type Archive, type Mults } from './orion';
 
@@ -19,9 +19,11 @@ const KEY = /^(future:[^:]+:\d+):(.+)$/;
 /** Views and choices with nothing of the old universe in them: copied as they are, over this universe's. */
 export const CARRY_COPY = [
   'planetMenu.totals', 'planetMenu.fleet', 'planetMenu.totalView', 'planetMenu.gameTips',
-  'keys.map', 'keys.touch', 'msg.expStyle', 'msg.fold', 'spy.view', 'marks.view',
+  'keys.map', 'keys.touch', 'msg.expStyle', 'msg.fold', 'spy.view', 'spy.shared', 'galaxy.bigDebris',
   'exp.kind', 'exp.period', 'settings.tab', 'sim.tool', 'remind.desktop', 'dash.rates', 'dash.investExclude',
 ];
+/** The targets bar's view: kept, without the old universe's player whose sheet was open. */
+const MARKS_VIEW = 'marks.view';
 
 export interface CarrySource {
   /** `future:<universe>:<player>`. */
@@ -63,7 +65,7 @@ export function carrySources(data: Record<string, unknown>, current: string): Ca
     found.set(ns, s);
   }
   // Only what has something to bring.
-  const brings = (s: CarrySource) => s.journal || s.days || [...CARRY_COPY, SETTINGS_KEY, ARCHIVE_KEY].some((k) => `${s.ns}:${k}` in data);
+  const brings = (s: CarrySource) => s.journal || s.days || [...CARRY_COPY, MARKS_VIEW, SETTINGS_KEY, ARCHIVE_KEY].some((k) => `${s.ns}:${k}` in data);
   return [...found.values()].filter(brings);
 }
 
@@ -85,10 +87,16 @@ export function carryOver(data: Record<string, unknown>, from: string, here: (ke
     writes[key] = src(key);
     settings++;
   }
+  const view = src(MARKS_VIEW);
+  if (view && typeof view === 'object') {
+    writes[MARKS_VIEW] = { ...view, player: null };
+    settings++;
+  }
   const fleet = src(SETTINGS_KEY) as Partial<FleetSettings> | undefined;
   if (fleet && typeof fleet === 'object') {
-    // Favourite destinations, the typed target and the bodies the round skips are the old universe's.
-    writes[SETTINGS_KEY] = { ...fleet, favTransport: null, favDeploy: null, sendTarget: null, skipBodies: [] };
+    // Favourite destinations, the typed target, the mode left on and the bodies the round skips are the
+    // old universe's; only the settings' own fields cross (an old stored shape is read as today's).
+    writes[SETTINGS_KEY] = { ...settingsFrom(fleet), favTransport: null, favDeploy: null, sendTarget: null, sendMode: null, skipBodies: [] };
     settings++;
   }
 
@@ -99,11 +107,12 @@ export function carryOver(data: Record<string, unknown>, from: string, here: (ke
     const next: Journal = { ...mine };
     for (const [id, e] of Object.entries(oldJournal)) {
       const key = tagged(id);
-      if (key in mine) continue;
-      next[key] = { ...e, coords: null };
-      journal++;
+      if (!(key in mine)) next[key] = { ...e, coords: null };
     }
-    if (journal) writes[JOURNAL_KEY] = trim(next, now);
+    // Counted after the journal's own limits: a report too old to keep is not brought.
+    const kept = trim(next, now);
+    journal = Object.keys(kept).filter((k) => !(k in mine)).length;
+    if (journal) writes[JOURNAL_KEY] = kept;
   }
 
   let days = 0;

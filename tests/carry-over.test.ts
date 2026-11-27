@@ -27,8 +27,9 @@ function backup(): Record<string, unknown> {
   return {
     [`${OLD}:planetMenu.totals`]: false,
     [`${OLD}:keys.map`]: { 'fleet.expedition': 'e' },
-    [`${OLD}:fleet.settings`]: { mainShip: 202, transportSpeed: 50, favTransport: 33620000, favDeploy: 33620001, sendTarget: { galaxy: 3, system: 120, position: 8, type: 1 }, skipBodies: [33620000] },
-    [`${OLD}:${JOURNAL_KEY}`]: { 900: expedition(NOW - DAY, '3:120:16'), 901: { ...expedition(NOW - DAY + 1000, '4:10:7'), kind: 'raid' } },
+    [`${OLD}:marks.view`]: { open: true, flagTab: 'target', player: 100999 },
+    [`${OLD}:fleet.settings`]: { mainShip: 202, transportSpeed: 50, favTransport: 33620000, favDeploy: 33620001, sendMode: 'transport', sendTarget: { galaxy: 3, system: 120, position: 8, type: 1 }, skipBodies: [33620000] },
+    [`${OLD}:${JOURNAL_KEY}`]: { 900: expedition(NOW - DAY, '3:120:16'), 901: { ...expedition(NOW - DAY + 1000, '4:10:7'), kind: 'raid' }, 5: expedition(NOW - 600 * DAY, null) },
     [`${OLD}:account.history`]: [day('2026-11-20', 100), day('2026-11-21', 110)],
     [`${OLD}:orion.archive`]: archive,
     [`${OLD}:orion.mult`]: { 'A|pve': 2 },
@@ -45,20 +46,22 @@ function backup(): Record<string, unknown> {
 
 describe('carrying a universe over (server merges)', () => {
   it('lists the other universes in the data, with what they would bring', () => {
-    expect(carrySources(backup(), NEW)).toEqual([{ ns: OLD, universe: 's150-it', player: '100200', journal: 2, days: 2 }]);
+    expect(carrySources(backup(), NEW)).toEqual([{ ns: OLD, universe: 's150-it', player: '100200', journal: 3, days: 2 }]);
     expect(carrySources(backup(), OLD)).toEqual([{ ns: NEW, universe: 's200-it', player: '300400', journal: 0, days: 0 }]);
   });
 
   it('brings settings and statistics, never a coordinate, a body id or the old places', () => {
     const here = new Map<string, unknown>([['account.history', [day('2026-11-21', 999), day('2026-11-26', 120)]]]);
     const r = carryOver(backup(), OLD, (k) => here.get(k), NOW);
-    expect(Object.keys(r.writes).sort()).toEqual(['account.history', 'exp.journal', 'fleet.settings', 'keys.map', 'orion.archive', 'orion.mult', 'planetMenu.totals']);
-    expect(JSON.stringify(r.writes)).not.toMatch(/\d+:\d+:\d+|33620000|33620001/);
-    expect(r.writes['fleet.settings']).toMatchObject({ mainShip: 202, transportSpeed: 50, favTransport: null, favDeploy: null, sendTarget: null, skipBodies: [] });
+    expect(Object.keys(r.writes).sort()).toEqual(['account.history', 'exp.journal', 'fleet.settings', 'keys.map', 'marks.view', 'orion.archive', 'orion.mult', 'planetMenu.totals']);
+    expect(JSON.stringify(r.writes)).not.toMatch(/\d+:\d+:\d+|33620000|33620001|100999/);
+    expect(r.writes['fleet.settings']).toMatchObject({ mainShip: 202, transportSpeed: 50, favTransport: null, favDeploy: null, sendMode: null, sendTarget: null, skipBodies: [] });
+    expect(r.writes['marks.view']).toEqual({ open: true, flagTab: 'target', player: null });
     expect(r.writes['keys.map']).toEqual({ 'fleet.expedition': 'e' });
     // This universe's own day stays; the others join it, in order.
     expect((r.writes['account.history'] as History).map((d) => `${d.day}=${d.points}`)).toEqual(['2026-11-20=100', '2026-11-21=999', '2026-11-26=120']);
-    expect(r).toMatchObject({ settings: 3, journal: 2, days: 1, orion: 1 });
+    // The 600-day-old report is past the journal's limit: not brought, not counted.
+    expect(r).toMatchObject({ settings: 4, journal: 2, days: 1, orion: 1 });
     // The anomaly ended where it was: the new universe never lists it again.
     const moved = r.writes['orion.archive'] as Archive;
     expect(moved.entries['a1@s150-it']).toMatchObject({ id: 'a1@s150-it', status: 'collected', endedAt: NOW - 2 * DAY, located: false, coords: '' });

@@ -1461,7 +1461,8 @@
     "msg.expStyle",
     "msg.fold",
     "spy.view",
-    "marks.view",
+    "spy.shared",
+    "galaxy.bigDebris",
     "exp.kind",
     "exp.period",
     "settings.tab",
@@ -1470,6 +1471,7 @@
     "dash.rates",
     "dash.investExclude"
   ];
+  var MARKS_VIEW = "marks.view";
   var split = (key) => {
     const m = KEY.exec(key);
     return m ? [m[1], m[2]] : null;
@@ -1486,7 +1488,7 @@
       if (sub === HISTORY_KEY && Array.isArray(value)) s.days = value.length;
       found.set(ns, s);
     }
-    const brings = (s) => s.journal || s.days || [...CARRY_COPY, SETTINGS_KEY, ARCHIVE_KEY].some((k) => `${s.ns}:${k}` in data);
+    const brings = (s) => s.journal || s.days || [...CARRY_COPY, MARKS_VIEW, SETTINGS_KEY, ARCHIVE_KEY].some((k) => `${s.ns}:${k}` in data);
     return [...found.values()].filter(brings);
   }
   function carryOver(data, from, here, now) {
@@ -1501,9 +1503,14 @@
       writes[key] = src(key);
       settings++;
     }
+    const view2 = src(MARKS_VIEW);
+    if (view2 && typeof view2 === "object") {
+      writes[MARKS_VIEW] = { ...view2, player: null };
+      settings++;
+    }
     const fleet = src(SETTINGS_KEY);
     if (fleet && typeof fleet === "object") {
-      writes[SETTINGS_KEY] = { ...fleet, favTransport: null, favDeploy: null, sendTarget: null, skipBodies: [] };
+      writes[SETTINGS_KEY] = { ...settingsFrom(fleet), favTransport: null, favDeploy: null, sendTarget: null, sendMode: null, skipBodies: [] };
       settings++;
     }
     let journal = 0;
@@ -1513,11 +1520,11 @@
       const next = { ...mine };
       for (const [id, e] of Object.entries(oldJournal)) {
         const key = tagged(id);
-        if (key in mine) continue;
-        next[key] = { ...e, coords: null };
-        journal++;
+        if (!(key in mine)) next[key] = { ...e, coords: null };
       }
-      if (journal) writes[JOURNAL_KEY] = trim(next, now);
+      const kept = trim(next, now);
+      journal = Object.keys(kept).filter((k) => !(k in mine)).length;
+      if (journal) writes[JOURNAL_KEY] = kept;
     }
     let days2 = 0;
     const oldHistory = src(HISTORY_KEY);
