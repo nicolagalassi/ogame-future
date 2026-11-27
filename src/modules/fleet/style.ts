@@ -91,6 +91,13 @@ ${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
 
 /* Rules: the rule's icon beside a switch track, so on and off read without a word. */
 .fut-frules { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; min-width: 0; }
+/* Riserve and Giro one under the other, in two shared columns: the labels in the first, as wide as the
+   longer one, the switches in the second, so both rows of chips start on the same line (Nicola). */
+.fut-freserves .fut-frules { display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: start; gap: 6px 8px; }
+.fut-freserves .fut-frules > .fut-fgroup { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: start; }
+.fut-freserves .fut-frules > .fut-fgroup > .fut-fzone { margin-right: 0; }
+/* Regole beside the first row, not floating halfway down a row of chips that wrapped. */
+.fut-freserves .fut-frow > .fut-frules-open { align-self: flex-start; }
 /* Reserves and round: a strip of their own under the ships, apart from the actions. */
 .fut-freserves { margin-top: 8px; }
 .fut-fgroup { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; max-width: 100%; }
