@@ -27,7 +27,7 @@ export const FLEET_CSS = `
    Silver on slate; only the three kinds Future runs whole carry a colour, as on the touch bar. */
 .fut-facts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .fut-fact {
-  position: relative; flex: none; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 62px; height: 48px; padding: 4px 8px 3px;
+  position: relative; flex: none; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; width: 68px; height: 48px; padding: 4px 4px 3px;
   border: 0; border-radius: 4px; background: var(--tile); color: var(--ico);
 }
 .fut-fact:hover { background: var(--tile-hi); color: var(--ico-hi); }
@@ -41,8 +41,9 @@ ${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
 .fut-fact[data-mode="collect"] .ico, .fut-fact[data-mode="expedition"] .ico, .fut-fact[data-mode="fleetsave"] .ico { color: var(--tone); }
 .fut-fact[data-mode="collect"]:hover, .fut-fact[data-mode="expedition"]:hover, .fut-fact[data-mode="fleetsave"]:hover {
   background: color-mix(in srgb, var(--tone) 22%, var(--tile-hi)); }
-/* The name under the icon: what the button does, readable without pointing at it. */
-.fut-fact .name { font: 600 condensed 12px/1 var(--display); white-space: nowrap; color: inherit; }
+/* The name under the icon: what the button does, readable without pointing at it. Every tile is as wide as
+   the longest name in the four languages (Stationieren, 59px), so the row reads as one even set. */
+.fut-fact .name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; font: 600 condensed 12px/1 var(--display); white-space: nowrap; color: inherit; }
 /* Zone labels: what a group of buttons is for, printed once at its head. */
 .fut-fzone { color: var(--label); font: 600 condensed 13px var(--display); white-space: nowrap; }
 .fut-fzonebox { display: inline-flex; flex-direction: column; gap: 4px; }
@@ -203,7 +204,7 @@ ${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
 
 /* Fingers: bigger targets, no key letters. */
 @media (pointer: coarse) {
-  .fut-fact { width: 48px; height: 46px; }
+  .fut-fact { height: 52px; }
   .fut-fcaret { width: 30px; height: 46px; }
   .fut-fact kbd { display: none; }
   .fut-fact:has(kbd) .ico { margin: 0; }
