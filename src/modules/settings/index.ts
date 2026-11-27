@@ -23,7 +23,7 @@ import { followViewport, revealActiveTabs } from '../../core/viewport';
 import { helpButton } from '../../core/tour';
 import type { CarrySource } from '../../engines/carry-over';
 import type { ResetKind } from '../../engines/reset';
-import { ERRORS_KEY as PTRE_ERRORS_KEY, normalTeamKey, TEAM_KEY as PTRE_TEAM_KEY, type PtreError } from '../../data/ptre';
+import { AUTO_KEY as PTRE_AUTO_KEY, LAST_KEY as PTRE_LAST_KEY, type PtreLast, ERRORS_KEY as PTRE_ERRORS_KEY, normalTeamKey, TEAM_KEY as PTRE_TEAM_KEY, type PtreError } from '../../data/ptre';
 
 export const SETTINGS_ID = 'fut-settings-window';
 const TAB_KEY = 'settings.tab';
@@ -100,6 +100,7 @@ const CSS = `
 .fut-ptre-intro p, .fut-ptre-errors p { margin: 0 0 6px; }
 .fut-ptre-intro a { color: var(--accent); }
 .fut-ptre-errors { margin-top: 4px; }
+.fut-ptre-errors .bad { color: var(--warn); }
 .fut-ptre-errors b { display: block; margin-bottom: 4px; color: var(--text); font-size: 12px; }
 .fut-ptre-key { align-self: center; margin-right: 8px; color: var(--text); font: 12px ui-monospace, Menlo, Consolas, monospace; letter-spacing: 0.04em; }
 .field { height: 26px; width: 190px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: 12px Arial, sans-serif; }
@@ -459,9 +460,26 @@ export function openSettings(o: SettingsOptions): void {
       box.append(input, save);
     }
     const rows: HTMLElement[] = [intro, row(t('ptre.key'), t(key ? 'ptre.keyOnHint' : 'ptre.keyHint'), box)];
+    // What goes while playing, with no click for each: off until the player turns it on, after reading it.
+    if (key) rows.push(row(t('ptre.auto'), t('ptre.autoHint'), yesNo(store.get<boolean>(PTRE_AUTO_KEY, false), (v) => {
+      store.set(PTRE_AUTO_KEY, v);
+      status = t(v ? 'ptre.autoOn' : 'ptre.autoOff');
+    })));
     const st = el('div', 'status', status);
     st.setAttribute('role', 'status');
     rows.push(st);
+    // The last call, whatever came back: what went and PTRE's answer (sending nothing and working look alike).
+    const last = store.get<PtreLast | null>(PTRE_LAST_KEY, null);
+    const lastBox = el('div', 'notes fut-ptre-errors');
+    lastBox.append(el('b', '', t('ptre.last')));
+    if (!last) lastBox.append(el('p', '', t('ptre.lastNone')));
+    else {
+      const when = new Date(last.at).toLocaleString(lang, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      const whatKey = `ptre.what.${last.script.replace(/\.php$/, '')}`;
+      const what = t(whatKey) === whatKey ? last.script : t(whatKey);
+      lastBox.append(el('p', last.ok ? '' : 'bad', `${when} · ${what} · ${last.ok ? 'ok' : `${t('ptre.lastRefused')} (${last.code})`}${last.message ? ` · ${last.message}` : ''}`));
+    }
+    rows.push(lastBox);
     // PTRE's own words when it refused something (as OGLight's «Display PTRE errors»), newest first.
     const errors = store.get<PtreError[]>(PTRE_ERRORS_KEY, []);
     const list = el('div', 'notes fut-ptre-errors');

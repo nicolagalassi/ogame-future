@@ -14,13 +14,16 @@
  *   highscore page the player opened; the team's own calls (they carry the player's team key) only once
  *   the player has typed a key, and only from a click ('user-sync', e.g. «Save to PTRE» on one report).
  *   The team key never reaches the log: it is masked there (AGENTS.md §1.9).
+ * - 'user-browse' is only for PTRE's scripts in `PTRE_BROWSE`, as OGLight sends them while the player plays:
+ *   once per galaxy system the game drew, once per inbox read, once an hour per player sheet opened. Only
+ *   when the player turned on «Send while playing» in Settings › PTRE (data/ptre checks it); never on timers.
  * - The `cp` (change planet) parameter is refused on every game URL:
  *   it mutates the session's active planet.
  * - Every attempt, allowed or refused, is written to an in-memory log so the
  *   behaviour can be shown to a ToolDev during review.
  */
 
-export type CallReason = 'page-load' | 'user-sync' | 'user-view';
+export type CallReason = 'page-load' | 'user-sync' | 'user-view' | 'user-browse';
 
 /** PTRE's scripts: the only outside addresses Future may call. */
 export const PTRE_BASE = 'https://ptre.chez.gg/scripts/';
@@ -34,8 +37,14 @@ export const PTRE_SCRIPTS: Record<string, string> = {
   'api_get_ranks.php': "every player's points at PTRE's last reading (highscore page)",
   'oglight_import.php': 'one spy report the player chose to save to the team (its API id only)',
   'api_sync_target_list.php': "the team's target list: the players the player flagged PTRE go up, the team's come back",
+  'oglight_import_player_activity.php': 'activity of followed players seen in the galaxy, and counter-espionage read in the inbox',
+  'api_galaxy_import_infos.php': 'planets and moons that appeared, changed or went in a system the game drew',
+  'api_galaxy_get_infos.php': "a player's planets known to the team, when the player opens that player's sheet",
   'oglight_get_player_infos.php': "one player's activity and best spy report in the team's data, when the player asks for them",
 };
+
+/** The PTRE scripts sent to while the player plays ('user-browse'), never from a timer. */
+export const PTRE_BROWSE = new Set(['oglight_import_player_activity.php', 'api_galaxy_import_infos.php', 'api_galaxy_get_infos.php']);
 
 /** A URL as the log shows it: PTRE's team key masked. */
 export function redactUrl(url: string): string {
@@ -117,6 +126,12 @@ export class NetworkGuard {
     }
     if (this.isPtre(url) && reason === 'page-load') {
       return 'Call refused: PTRE only from what the player opens or clicks, never on its own.';
+    }
+    // The scripts sent to while playing go only with 'user-browse' (behind «Send while playing»), and that
+    // reason reaches nothing else: the two kinds of PTRE call never borrow each other's way out.
+    const browse = this.isPtre(url) && PTRE_BROWSE.has(new URL(url).pathname.split('/').pop() ?? '');
+    if ((reason === 'user-browse') !== browse && (reason === 'user-browse' || this.isPtre(url))) {
+      return reason === 'user-browse' ? "Call refused: 'user-browse' reaches only PTRE's scripts sent to while playing (PTRE_BROWSE)." : "Call refused: PTRE's scripts sent to while playing go only as 'user-browse'.";
     }
     // The team's calls carry the player's key: only from a click, never from simply looking at a page.
     if (this.isPtre(url) && reason === 'user-view' && new URL(url).searchParams.has('team_key')) {

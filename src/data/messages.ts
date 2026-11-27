@@ -54,6 +54,8 @@ export interface SpyMessage {
   statuses: string[];
   /** Own planet spied by someone else. */
   counter: boolean;
+  /** Who spied, for a counter-espionage (0 when the report does not say). */
+  sourceId: number;
   sourceName: string;
   sourceCoords: string;
   /** Minutes since last activity, 0 = active now (star), 60 = none seen. */
@@ -239,6 +241,7 @@ export function readMessage(msg: Element, ownPlayerId: number): ParsedMessage | 
       playerName: d.rawPlayername ?? '',
       statuses: (json(d.rawPlayerstatus, []) as unknown[]).filter((x): x is string => typeof x === 'string'),
       counter,
+      sourceId: int(d.rawSourceplayerid),
       sourceName: d.rawSourceplayername ?? '',
       sourceCoords: d.rawSourceplanetcoordinates ?? '',
       activity,

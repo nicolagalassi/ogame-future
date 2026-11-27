@@ -25,8 +25,8 @@ pianeti e lune, bersagli condivisi. Nicola (2026-11-27) vuole la sincronizzazion
 | 0 | guard, client, team key + consenso, errori di PTRE | — | 0.3.179 |
 | 1a | «Salva su PTRE» su un rapporto della tabella spiate (click) | `oglight_import.php` (`sr_id`) | 0.3.179, provato da Nicola sul suo universo (PTRE accetta `tool=future`) |
 | 1b | info giocatore: grafico attività e miglior rapporto (click sulla scheda) | `oglight_get_player_infos.php` | 0.3.181, provato da Nicola |
-| 1c | bandierina «PTRE» (nel menu solo con la key) e sincronizzazione bersagli del team (click, nella lista PTRE della barra laterale); chi torna da PTRE prende la bandierina solo se non ne ha una | `api_sync_target_list.php` | 0.3.182 |
-| 2 | dietro un interruttore a parte, spento di default: attività vista in galassia, pianeti e lune nuovi o cambiati, controspionaggi letti in posta, pianeti del giocatore da PTRE (al massimo ogni ora per giocatore) | `oglight_import_player_activity.php`, `api_galaxy_import_infos.php`, `api_galaxy_get_infos.php` | dopo la prova di 1a |
+| 1c | bandierina «PTRE» (nel menu solo con la key) e sincronizzazione bersagli del team (click, nella lista PTRE della barra laterale); chi torna da PTRE prende la bandierina solo se non ne ha una | `api_sync_target_list.php` | 0.3.182, provato da Nicola su un universo vecchio (su quello appena creato PTRE dava 0 bersagli) |
+| 2 | «Invii mentre giochi» (Impostazioni › PTRE, spento di default): per ogni tabella che il gioco disegna in galassia, pianeti/lune nuovi, cambiati o spariti (memoria `ptre.galaxyIds`) e attività dei giocatori seguiti (bandierina o recenti); controspionaggi letti in posta, una volta per rapporto (`ptre.counterSent`); pianeti del giocatore da PTRE all'apertura della scheda, al massimo ogni ora (`ptre.planetsAt`) | `oglight_import_player_activity.php`, `api_galaxy_import_infos.php`, `api_galaxy_get_infos.php` (motivo guard 'user-browse', solo `PTRE_BROWSE`) | 0.3.184 |
 
 La prova di 1a è passata il 2026-11-27 sul suo universo (sul server di test PTS i team non sembrano attivi).
 In fase 2 un invio per sistema disegnato dal gioco, mai per ridisegno di Future o per giro dell'observer (§1.3).
@@ -36,3 +36,10 @@ In fase 2 un invio per sistema disegnato dal gioco, mai per ridisegno di Future 
 - Parametri comuni in query: `tool`, `team_key`, `country`, `univers`, `version`. Risposta JSON `{code, message, message_verbose}`; `code == 1` = ok.
 - Corpo JSON come stringa, senza `Content-Type` (come OGLight: niente preflight CORS).
 - Key: `TM-XXXX-XXXX-XXXX-XXXX` (18 caratteri senza trattini, inizia con TM).
+
+## Differenze da OGLight (fase 2)
+
+- I propri pianeti non partono: nella tabella del gioco la riga del giocatore non porta il suo id.
+- La dimensione della luna parte come -1: la tabella che Future legge non la mostra.
+- `old_name`, `old_rank`, `old_score`, `old_fleet`, `timestamp_api` partono vuoti (-1/false): Future non
+  tiene lo storico per posizione di tutti i giocatori come il `pdb` di OGLight; `old_player_id` sì.

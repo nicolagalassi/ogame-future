@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.183
+// @version      0.3.184
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -298,8 +298,8 @@
     return sum / (flat ? 1 : Math.max(4 - level2 / 2, 1));
   }
   function scaleDuration(id, shownLevel, shownMs, level2) {
-    const base2 = durationWeight(id, shownLevel);
-    return base2 > 0 ? shownMs * durationWeight(id, level2) / base2 : 0;
+    const base3 = durationWeight(id, shownLevel);
+    return base3 > 0 ? shownMs * durationWeight(id, level2) / base3 : 0;
   }
   function missing(cost, have) {
     return {
@@ -347,8 +347,12 @@
     "api_get_ranks.php": "every player's points at PTRE's last reading (highscore page)",
     "oglight_import.php": "one spy report the player chose to save to the team (its API id only)",
     "api_sync_target_list.php": "the team's target list: the players the player flagged PTRE go up, the team's come back",
+    "oglight_import_player_activity.php": "activity of followed players seen in the galaxy, and counter-espionage read in the inbox",
+    "api_galaxy_import_infos.php": "planets and moons that appeared, changed or went in a system the game drew",
+    "api_galaxy_get_infos.php": "a player's planets known to the team, when the player opens that player's sheet",
     "oglight_get_player_infos.php": "one player's activity and best spy report in the team's data, when the player asks for them"
   };
+  var PTRE_BROWSE = /* @__PURE__ */ new Set(["oglight_import_player_activity.php", "api_galaxy_import_infos.php", "api_galaxy_get_infos.php"]);
   function redactUrl(url) {
     return url.replace(/([?&]team_?key=)[^&#]*/gi, "$1***");
   }
@@ -404,6 +408,10 @@
       }
       if (this.isPtre(url) && reason === "page-load") {
         return "Call refused: PTRE only from what the player opens or clicks, never on its own.";
+      }
+      const browse = this.isPtre(url) && PTRE_BROWSE.has(new URL(url).pathname.split("/").pop() ?? "");
+      if (reason === "user-browse" !== browse && (reason === "user-browse" || this.isPtre(url))) {
+        return reason === "user-browse" ? "Call refused: 'user-browse' reaches only PTRE's scripts sent to while playing (PTRE_BROWSE)." : "Call refused: PTRE's scripts sent to while playing go only as 'user-browse'.";
       }
       if (this.isPtre(url) && reason === "user-view" && new URL(url).searchParams.has("team_key")) {
         return "Call refused: a call with the team key needs a click of the player (user-sync).";
@@ -1083,14 +1091,14 @@
     const last2 = history2.at(-1);
     if (!last2 || history2.length < 2) return null;
     const limit = last2.at - days2 * 864e5;
-    const base2 = [...history2].reverse().find((d) => d.at <= limit + 36e5) ?? history2[0];
-    if (base2 === last2) return null;
-    const span = Math.max(1, Math.round((last2.at - base2.at) / 864e5));
+    const base3 = [...history2].reverse().find((d) => d.at <= limit + 36e5) ?? history2[0];
+    if (base3 === last2) return null;
+    const span = Math.max(1, Math.round((last2.at - base3.at) / 864e5));
     return {
       days: span,
-      points: last2.points - base2.points,
-      rank: last2.rank !== null && base2.rank !== null ? base2.rank - last2.rank : null,
-      perDay: (last2.points - base2.points) / span
+      points: last2.points - base3.points,
+      rank: last2.rank !== null && base3.rank !== null ? base3.rank - last2.rank : null,
+      perDay: (last2.points - base3.points) / span
     };
   }
 
@@ -2720,7 +2728,7 @@
     "exp.raidAvg": "a raid",
     "exp.raidTargets": "Bersagli migliori",
     "settings.section.ptre": "PTRE",
-    "ptre.consent": "PTRE (ptre.chez.gg) è il database del tuo team: rapporti di spionaggio, attività e pianeti dei giocatori, raccolti dai membri del team.\nCon la team key Future invia a PTRE solo quello che scegli tu con un click, come fa OGLight: un rapporto di spionaggio dalla tabella spiate (solo il suo id API); id e nome di un giocatore quando apri le sue info PTRE nella scheda; id e nome dei giocatori con la bandierina PTRE quando sincronizzi i bersagli. Ogni invio porta la team key, il tuo universo e la versione di Future. Senza key non parte niente.\nLa key resta in questo browser e non finisce nei backup.",
+    "ptre.consent": "PTRE (ptre.chez.gg) è il database del tuo team: rapporti di spionaggio, attività e pianeti dei giocatori, raccolti dai membri del team.\nCon la team key Future invia a PTRE solo quello che scegli tu con un click, come fa OGLight: un rapporto di spionaggio dalla tabella spiate (solo il suo id API); id e nome di un giocatore quando apri le sue info PTRE nella scheda; id e nome dei giocatori con la bandierina PTRE quando sincronizzi i bersagli. Ogni invio porta la team key, il tuo universo e la versione di Future. Senza key non parte niente. Con «Invii mentre giochi» acceso parte anche quello descritto sotto.\nLa key resta in questo browser e non finisce nei backup.",
     "ptre.open": "Apri PTRE",
     "ptre.key": "Team key",
     "ptre.keyHint": "La trovi su PTRE, nella pagina del tuo team. Salvandola accetti gli invii descritti sopra.",
@@ -2758,7 +2766,20 @@
     "ptre.sync": "Sincronizza con PTRE",
     "ptre.syncHint": "Manda a PTRE i giocatori con la bandierina PTRE e prende i bersagli del team",
     "ptre.synced": "Il team ha {n} bersagli su PTRE; {added} nuovi qui.",
-    "ptre.manage": "Gestisci su PTRE"
+    "ptre.manage": "Gestisci su PTRE",
+    "ptre.auto": "Invii mentre giochi",
+    "ptre.autoHint": "Spento finché non lo accendi. Acceso, Future manda a PTRE senza un click per ogni invio, come OGLight: per ogni sistema che apri in galassia, i pianeti e le lune nuovi, cambiati o spariti (la prima volta che apri un sistema, tutte le posizioni occupate, di ogni giocatore) (id, giocatore, nome, classifica e stato) e l'attività dei giocatori che segui (bandierina o aperti di recente); i controspionaggi che leggi in posta (chi ti ha spiato, da dove, quando); e quando apri la scheda di un giocatore chiede a PTRE i suoi pianeti, al massimo una volta l'ora.",
+    "ptre.autoOn": "Invii mentre giochi accesi.",
+    "ptre.autoOff": "Invii mentre giochi spenti: parte solo quello che fai con un click.",
+    "ptre.last": "Ultimo invio a PTRE",
+    "ptre.lastNone": "Ancora nessuno.",
+    "ptre.lastRefused": "rifiutato",
+    "ptre.what.oglight_import": "rapporto di spionaggio",
+    "ptre.what.oglight_get_player_infos": "info giocatore",
+    "ptre.what.api_sync_target_list": "bersagli del team",
+    "ptre.what.oglight_import_player_activity": "attività",
+    "ptre.what.api_galaxy_import_infos": "pianeti e lune della galassia",
+    "ptre.what.api_galaxy_get_infos": "pianeti del giocatore"
   };
 
   // src/i18n/en.json
@@ -3866,7 +3887,7 @@
     "exp.raidAvg": "per raid",
     "exp.raidTargets": "Best targets",
     "settings.section.ptre": "PTRE",
-    "ptre.consent": "PTRE (ptre.chez.gg) is your team's database: spy reports, activity and players' planets, gathered by the team's members.\nWith the team key Future sends PTRE only what you choose with a click, as OGLight does: a spy report from the spy table (its API id only); a player's id and name when you open their PTRE info on the sheet; id and name of the players flagged PTRE when you sync the targets. Every call carries the team key, your universe and Future's version. Without a key nothing is sent.\nThe key stays in this browser and never goes into a backup.",
+    "ptre.consent": "PTRE (ptre.chez.gg) is your team's database: spy reports, activity and players' planets, gathered by the team's members.\nWith the team key Future sends PTRE only what you choose with a click, as OGLight does: a spy report from the spy table (its API id only); a player's id and name when you open their PTRE info on the sheet; id and name of the players flagged PTRE when you sync the targets. Every call carries the team key, your universe and Future's version. Without a key nothing is sent. With «Send while playing» on, what is described below goes too.\nThe key stays in this browser and never goes into a backup.",
     "ptre.open": "Open PTRE",
     "ptre.key": "Team key",
     "ptre.keyHint": "You find it on PTRE, on your team's page. Saving it, you accept the calls described above.",
@@ -3904,7 +3925,20 @@
     "ptre.sync": "Sync with PTRE",
     "ptre.syncHint": "Sends PTRE the players flagged PTRE and takes the team's targets",
     "ptre.synced": "The team has {n} targets on PTRE; {added} new here.",
-    "ptre.manage": "Manage on PTRE"
+    "ptre.manage": "Manage on PTRE",
+    "ptre.auto": "Send while playing",
+    "ptre.autoHint": "Off until you turn it on. On, Future sends PTRE without a click for each call, as OGLight does: for every system you open in the galaxy, the planets and moons that are new, changed or gone (the first time you open a system, every occupied position, of every player) (id, player, name, rank and status) and the activity of the players you follow (a flag, or opened lately); the counter-espionage you read in the inbox (who spied on you, from where, when); and when you open a player's sheet it asks PTRE for their planets, at most once an hour.",
+    "ptre.autoOn": "Send while playing is on.",
+    "ptre.autoOff": "Send while playing is off: only what you do with a click is sent.",
+    "ptre.last": "Last call to PTRE",
+    "ptre.lastNone": "None yet.",
+    "ptre.lastRefused": "refused",
+    "ptre.what.oglight_import": "spy report",
+    "ptre.what.oglight_get_player_infos": "player info",
+    "ptre.what.api_sync_target_list": "team targets",
+    "ptre.what.oglight_import_player_activity": "activity",
+    "ptre.what.api_galaxy_import_infos": "galaxy planets and moons",
+    "ptre.what.api_galaxy_get_infos": "player's planets"
   };
 
   // src/i18n/fr.json
@@ -5012,7 +5046,7 @@
     "exp.raidAvg": "par raid",
     "exp.raidTargets": "Meilleures cibles",
     "settings.section.ptre": "PTRE",
-    "ptre.consent": "PTRE (ptre.chez.gg) est la base de données de ton équipe : rapports d'espionnage, activité et planètes des joueurs, réunis par les membres de l'équipe.\nAvec la team key, Future n'envoie à PTRE que ce que tu choisis d'un clic, comme OGLight : un rapport d'espionnage depuis le tableau des espionnages (seulement son id API) ; l'id et le nom d'un joueur quand tu ouvres ses infos PTRE sur sa fiche ; l'id et le nom des joueurs marqués PTRE quand tu synchronises les cibles. Chaque envoi porte la team key, ton univers et la version de Future. Sans key, rien ne part.\nLa key reste dans ce navigateur et ne va jamais dans une sauvegarde.",
+    "ptre.consent": "PTRE (ptre.chez.gg) est la base de données de ton équipe : rapports d'espionnage, activité et planètes des joueurs, réunis par les membres de l'équipe.\nAvec la team key, Future n'envoie à PTRE que ce que tu choisis d'un clic, comme OGLight : un rapport d'espionnage depuis le tableau des espionnages (seulement son id API) ; l'id et le nom d'un joueur quand tu ouvres ses infos PTRE sur sa fiche ; l'id et le nom des joueurs marqués PTRE quand tu synchronises les cibles. Chaque envoi porte la team key, ton univers et la version de Future. Sans key, rien ne part. Avec «Envoyer en jouant» allumé, ce qui est décrit plus bas part aussi.\nLa key reste dans ce navigateur et ne va jamais dans une sauvegarde.",
     "ptre.open": "Ouvrir PTRE",
     "ptre.key": "Team key",
     "ptre.keyHint": "Tu la trouves sur PTRE, sur la page de ton équipe. En l'enregistrant, tu acceptes les envois décrits ci-dessus.",
@@ -5050,7 +5084,20 @@
     "ptre.sync": "Synchroniser avec PTRE",
     "ptre.syncHint": "Envoie à PTRE les joueurs marqués PTRE et prend les cibles de l'équipe",
     "ptre.synced": "L'équipe a {n} cibles sur PTRE ; {added} nouvelles ici.",
-    "ptre.manage": "Gérer sur PTRE"
+    "ptre.manage": "Gérer sur PTRE",
+    "ptre.auto": "Envoyer en jouant",
+    "ptre.autoHint": "Éteint tant que tu ne l'allumes pas. Allumé, Future envoie à PTRE sans un clic par envoi, comme OGLight : pour chaque système que tu ouvres dans la galaxie, les planètes et lunes nouvelles, changées ou disparues (la première fois que tu ouvres un système, toutes les positions occupées, de chaque joueur) (id, joueur, nom, classement et statut) et l'activité des joueurs que tu suis (drapeau ou ouverts récemment) ; les contre-espionnages que tu lis dans la messagerie (qui t'a espionné, d'où, quand) ; et quand tu ouvres la fiche d'un joueur, il demande à PTRE ses planètes, au plus une fois par heure.",
+    "ptre.autoOn": "Envoyer en jouant est allumé.",
+    "ptre.autoOff": "Envoyer en jouant est éteint : seul ce que tu fais d'un clic part.",
+    "ptre.last": "Dernier envoi à PTRE",
+    "ptre.lastNone": "Aucun pour l'instant.",
+    "ptre.lastRefused": "refusé",
+    "ptre.what.oglight_import": "rapport d'espionnage",
+    "ptre.what.oglight_get_player_infos": "infos joueur",
+    "ptre.what.api_sync_target_list": "cibles de l'équipe",
+    "ptre.what.oglight_import_player_activity": "activité",
+    "ptre.what.api_galaxy_import_infos": "planètes et lunes de la galaxie",
+    "ptre.what.api_galaxy_get_infos": "planètes du joueur"
   };
 
   // src/i18n/de.json
@@ -6158,7 +6205,7 @@
     "exp.raidAvg": "pro Raid",
     "exp.raidTargets": "Beste Ziele",
     "settings.section.ptre": "PTRE",
-    "ptre.consent": "PTRE (ptre.chez.gg) ist die Datenbank deines Teams: Spionageberichte, Aktivität und Planeten der Spieler, gesammelt von den Mitgliedern.\nMit dem Team Key sendet Future an PTRE nur, was du mit einem Klick wählst, wie OGLight: einen Spionagebericht aus der Spionagetabelle (nur seine API-ID); ID und Name eines Spielers, wenn du seine PTRE-Infos im Steckbrief öffnest; ID und Name der Spieler mit der PTRE-Flagge, wenn du die Ziele synchronisierst. Jede Anfrage trägt den Team Key, dein Universum und die Version von Future. Ohne Key wird nichts gesendet.\nDer Key bleibt in diesem Browser und kommt in kein Backup.",
+    "ptre.consent": "PTRE (ptre.chez.gg) ist die Datenbank deines Teams: Spionageberichte, Aktivität und Planeten der Spieler, gesammelt von den Mitgliedern.\nMit dem Team Key sendet Future an PTRE nur, was du mit einem Klick wählst, wie OGLight: einen Spionagebericht aus der Spionagetabelle (nur seine API-ID); ID und Name eines Spielers, wenn du seine PTRE-Infos im Steckbrief öffnest; ID und Name der Spieler mit der PTRE-Flagge, wenn du die Ziele synchronisierst. Jede Anfrage trägt den Team Key, dein Universum und die Version von Future. Ohne Key wird nichts gesendet. Mit «Beim Spielen senden» an geht auch das unten Beschriebene.\nDer Key bleibt in diesem Browser und kommt in kein Backup.",
     "ptre.open": "PTRE öffnen",
     "ptre.key": "Team Key",
     "ptre.keyHint": "Du findest ihn auf PTRE, auf der Seite deines Teams. Mit dem Speichern stimmst du den oben beschriebenen Anfragen zu.",
@@ -6196,7 +6243,20 @@
     "ptre.sync": "Mit PTRE synchronisieren",
     "ptre.syncHint": "Sendet PTRE die Spieler mit der PTRE-Flagge und holt die Ziele des Teams",
     "ptre.synced": "Das Team hat {n} Ziele auf PTRE; {added} neu hier.",
-    "ptre.manage": "Auf PTRE verwalten"
+    "ptre.manage": "Auf PTRE verwalten",
+    "ptre.auto": "Beim Spielen senden",
+    "ptre.autoHint": "Aus, bis du es einschaltest. Eingeschaltet sendet Future an PTRE ohne einen Klick pro Anfrage, wie OGLight: für jedes System, das du in der Galaxie öffnest, neue, geänderte oder verschwundene Planeten und Monde (beim ersten Öffnen eines Systems alle besetzten Positionen, jedes Spielers) (ID, Spieler, Name, Rang und Status) und die Aktivität der Spieler, denen du folgst (Flagge oder kürzlich geöffnet); die Spionageabwehr, die du im Posteingang liest (wer dich ausspioniert hat, von wo, wann); und wenn du den Steckbrief eines Spielers öffnest, fragt es PTRE nach seinen Planeten, höchstens einmal pro Stunde.",
+    "ptre.autoOn": "Beim Spielen senden ist an.",
+    "ptre.autoOff": "Beim Spielen senden ist aus: nur was du mit einem Klick tust, wird gesendet.",
+    "ptre.last": "Letzte Anfrage an PTRE",
+    "ptre.lastNone": "Noch keine.",
+    "ptre.lastRefused": "abgelehnt",
+    "ptre.what.oglight_import": "Spionagebericht",
+    "ptre.what.oglight_get_player_infos": "Spielerinfos",
+    "ptre.what.api_sync_target_list": "Ziele des Teams",
+    "ptre.what.oglight_import_player_activity": "Aktivität",
+    "ptre.what.api_galaxy_import_infos": "Planeten und Monde der Galaxie",
+    "ptre.what.api_galaxy_get_infos": "Planeten des Spielers"
   };
 
   // src/core/i18n.ts
@@ -6535,7 +6595,7 @@
   }
 
   // src/engines/reset.ts
-  var RESET_SETTINGS = [...CARRY_COPY, MARKS_VIEW, SETTINGS_KEY, PROFILES_KEY, "ptre.teamKey"];
+  var RESET_SETTINGS = [...CARRY_COPY, MARKS_VIEW, SETTINGS_KEY, PROFILES_KEY, "ptre.teamKey", "ptre.auto"];
   var RESET_STATS = [JOURNAL_KEY, HISTORY_KEY, ARCHIVE_KEY, MULT_KEY];
   function resetKeys(held, namespace, kind) {
     const names = new Set((kind === "settings" ? RESET_SETTINGS : RESET_STATS).map((k) => `${namespace}:${k}`));
@@ -6580,6 +6640,7 @@
     return univers && /^[a-z]{2,}$/.test(country) ? { country, univers } : null;
   }
   var TEAM_KEY = "ptre.teamKey";
+  var LAST_KEY = "ptre.last";
   var ERRORS_KEY = "ptre.errors";
   var ERRORS_MAX = 10;
   function normalTeamKey(text) {
@@ -6587,14 +6648,17 @@
     return /^TM[A-Z0-9]{16}$/.test(tk.replace(/-/g, "")) ? tk : null;
   }
   var teamKeyOf = (store) => normalTeamKey(store.get(TEAM_KEY, ""));
-  async function ptreCall(deps, script, params, init = {}) {
+  var AUTO_KEY = "ptre.auto";
+  var ptreAutoOn = (store) => !!teamKeyOf(store) && store.get(AUTO_KEY, false);
+  async function ptreCall(deps, script, params, init = {}, reason = "user-sync") {
     const key = teamKeyOf(deps.store);
+    if (reason === "user-browse" && !ptreAutoOn(deps.store)) return { ok: false, message: "off", data: null };
     const server = ptreUniverse(deps.host, deps.lang);
     if (!key || !server) return { ok: false, message: key ? "server" : "no-key", data: null };
     const query = new URLSearchParams({ ...params, tool: "future", team_key: key, country: server.country, univers: server.univers, version: deps.version });
     let data = null;
     try {
-      const res = await deps.guard.request(`${PTRE_BASE}${script}?${query}`, "user-sync", init);
+      const res = await deps.guard.request(`${PTRE_BASE}${script}?${query}`, reason, init);
       data = await res.json().catch(() => null);
     } catch (e) {
       data = { code: "net", message: e instanceof Error ? e.message : String(e) };
@@ -6602,6 +6666,7 @@
     const code = String(data?.code ?? "?");
     const message = String(data?.message_verbose || data?.message || "");
     const ok = code === "1";
+    deps.store.set(LAST_KEY, { at: deps.now?.() ?? Date.now(), script, ok, code, message });
     if (!ok) {
       const errors = deps.store.get(ERRORS_KEY, []);
       deps.store.set(ERRORS_KEY, [...errors, { at: deps.now?.() ?? Date.now(), code, message }].slice(-ERRORS_MAX));
@@ -6656,6 +6721,27 @@
     const list = Array.isArray(r.data?.targets_array) ? r.data.targets_array : [];
     const back = r.ok ? list.flatMap((p) => /^\d+$/.test(String(p?.player_id ?? "")) ? [{ id: Number(p.player_id), name: String(p.pseudo ?? "") }] : []) : [];
     return { ok: r.ok, message: String(r.data?.message || r.message || ""), targets: back };
+  }
+  async function ptreSendGalaxy(deps, p) {
+    if (Object.keys(p.positions).length) await ptreCall(deps, "api_galaxy_import_infos.php", {}, { method: "POST", body: JSON.stringify(p.positions) }, "user-browse");
+    if (Object.keys(p.activities).length) await ptreCall(deps, "oglight_import_player_activity.php", {}, { method: "POST", body: JSON.stringify(p.activities) }, "user-browse");
+  }
+  async function ptreSendCounterSpies(deps, reports) {
+    if (!Object.keys(reports).length) return false;
+    const r = await ptreCall(deps, "oglight_import_player_activity.php", {}, { method: "POST", body: JSON.stringify(reports) }, "user-browse");
+    return r.data !== null && r.data.code !== void 0 && r.data.code !== "net";
+  }
+  var PLANETS_AT_KEY = "ptre.planetsAt";
+  var PLANETS_EVERY = 36e5;
+  async function ptrePlayerPlanets(deps, playerId) {
+    const now = deps.now?.() ?? Date.now();
+    const asked = deps.store.get(PLANETS_AT_KEY, {});
+    if (!ptreAutoOn(deps.store) || now - (asked[String(playerId)] ?? 0) < PLANETS_EVERY) return null;
+    const next = Object.fromEntries(Object.entries({ ...asked, [String(playerId)]: now }).filter(([, at]) => now - at < PLANETS_EVERY));
+    deps.store.set(PLANETS_AT_KEY, next);
+    const r = await ptreCall(deps, "api_galaxy_get_infos.php", { player_id: String(playerId) }, {}, "user-browse");
+    const list = r.ok && Array.isArray(r.data?.galaxy_array) ? r.data.galaxy_array : [];
+    return r.ok ? list.map((p) => ({ coords: String(p?.coords ?? ""), playerId: Number(p?.player_id), moon: Number(p?.moon?.id) > 0, at: Number(p?.timestamp_ig) })) : null;
   }
 
   // src/data/server-data.ts
@@ -7427,6 +7513,112 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .fut-g-card .err { color: var(--bad); }
 `;
 
+  // src/engines/ptre-galaxy.ts
+  var GALAXY_IDS_KEY = "ptre.galaxyIds";
+  var IDS_MAX = 3e3;
+  var STATUS_TAGS = [
+    ["vacation", "v"],
+    ["banned", "b"],
+    ["admin", "a"],
+    ["longinactive", "I"],
+    ["inactive", "i"],
+    ["outlaw", "o"],
+    ["noob", "d"],
+    ["honorableTarget", "HONORABLE"]
+  ];
+  var statusTag = (statuses) => STATUS_TAGS.find(([s]) => statuses.includes(s))?.[1] ?? "n";
+  var acti = (a) => a === "*" ? "*" : a ?? 60;
+  function galaxyPayloads(s, memory, c) {
+    const key = `${s.galaxy}:${s.system}`;
+    const before = memory[key] ?? {};
+    const seen2 = {};
+    const positions = {};
+    const activities = {};
+    const byPos = new Map(s.rows.map((r) => [r.position, r]));
+    for (let p = 1; p <= 15; p++) {
+      const coords = `${key}:${p}`;
+      const r = byPos.get(p);
+      const old = before[String(p)] ?? [-1, -1, -1];
+      if (r?.statuses.includes("admin")) {
+        if (before[String(p)]) seen2[String(p)] = before[String(p)];
+        continue;
+      }
+      const player = r?.playerId && r.planetId ? r.playerId : -1;
+      if (!r || player < 0) {
+        if (old[1] > 0) positions[coords] = { ...base(c, s, p, old), id: -1, player_id: -1, name: false, rank: -1, score: -1, fleet: -1, status: false, moon: { id: -1 } };
+        continue;
+      }
+      const planet = r.planetId;
+      const moon = r.moonId ?? -1;
+      seen2[String(p)] = [player, planet, moon];
+      if (old[1] !== planet || old[2] !== moon) {
+        const sc = c.scores(player);
+        positions[coords] = {
+          ...base(c, s, p, old),
+          id: planet,
+          player_id: player,
+          name: r.playerName || false,
+          rank: r.rank ?? -1,
+          score: sc?.score ?? -1,
+          fleet: sc?.fleet ?? -1,
+          status: statusTag(r.statuses),
+          // OGLight also sends the moon's size; the galaxy table Future reads does not show it.
+          ...moon > 0 ? { moon: { id: moon, size: -1 } } : {}
+        };
+      }
+      if (c.follow(player)) {
+        activities[coords] = {
+          id: planet,
+          player_id: player,
+          teamkey: c.teamKey,
+          mv: r.statuses.includes("vacation"),
+          activity: acti(r.activity.planet),
+          galaxy: s.galaxy,
+          system: s.system,
+          position: p,
+          main: c.home(coords),
+          cdr_total_size: r.debris,
+          ...moon > 0 ? { moon: { id: moon, activity: acti(r.activity.moon) } } : {}
+        };
+      }
+    }
+    const changed = JSON.stringify(seen2) !== JSON.stringify(memory[key] ?? null);
+    const ids = { ...memory };
+    delete ids[key];
+    ids[key] = seen2;
+    const keys = Object.keys(ids);
+    for (const k of keys.slice(0, Math.max(0, keys.length - IDS_MAX))) delete ids[k];
+    return { positions, activities, ids, changed };
+  }
+  var base = (c, s, position, old) => ({
+    teamkey: c.teamKey,
+    galaxy: s.galaxy,
+    system: s.system,
+    position,
+    timestamp_ig: c.now,
+    old_player_id: old[0],
+    timestamp_api: -1,
+    old_name: false,
+    old_rank: -1,
+    old_score: -1,
+    old_fleet: -1
+  });
+  function counterSpyPayload(m, teamKey) {
+    const [galaxy, system, position] = m.sourceCoords.split(":").map(Number);
+    if (!(m.sourceId > 0) || !galaxy || !system || !position) return null;
+    return { player_id: m.sourceId, teamkey: teamKey, galaxy, system, position, spy_message_ts: m.at, moon: { activity: "*" }, activity: "*" };
+  }
+  function mergePtrePlanets(db, planets) {
+    let next = null;
+    for (const p of planets) {
+      const mine = db[p.coords];
+      if (!/^\d+:\d+:\d+$/.test(p.coords) || !(p.playerId > 0) || !(p.at > 0) || mine && mine.at >= p.at) continue;
+      next ?? (next = { ...db });
+      next[p.coords] = { player: p.playerId, name: mine?.player === p.playerId ? mine.name : "", moon: p.moon, debris: mine?.debris ?? 0, act: [null, null], at: p.at };
+    }
+    return next;
+  }
+
   // src/modules/footer-links/index.ts
   var OSTATS = "https://ostats.eu/";
   function ostatsUniverse(host) {
@@ -8028,6 +8220,14 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     }
     title.append(flagButton(picker, id, name));
     if (!sheetData.has(id)) {
+      if (o.ptre) {
+        void ptrePlayerPlanets(o.ptre, id).catch(() => null).then((planets) => {
+          const next = planets && mergePtrePlanets(store.get(POSITIONS_KEY, {}), planets);
+          if (!next) return;
+          store.set(POSITIONS_KEY, next);
+          refreshSide();
+        });
+      }
       scroll.append(h(doc, "p", "empty", t("galaxy.loading")));
       void playerScores(o.guard, store, doc.location.origin, id, Date.now()).catch(() => null).then((fresh) => {
         sheetData.set(id, fresh);
@@ -8282,6 +8482,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
 
   // src/modules/galaxy/index.ts
   var TARGETS_KEY = "galaxy.targets";
+  var ptreSent = /* @__PURE__ */ new WeakMap();
   var highlight = "";
   function highlightPosition(coords) {
     highlight = coords;
@@ -8367,6 +8568,29 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     if (next) o.store.set(POSITIONS_KEY, next);
     const renamed = renamePlayers(marks, s.rows.map((r) => [r.playerId ?? 0, r.playerName]));
     if (renamed) o.store.set(MARKS_KEY, renamed);
+    sendToPtre(o, s, marks, recent, cards);
+  }
+  function sendToPtre(o, s, marks, recent, cards) {
+    const first = s.rows[0]?.row;
+    const teamKey = teamKeyOf(o.store);
+    if (!o.ptre || !first || !teamKey || !ptreAutoOn(o.store)) return;
+    const sig = s.rows.map((r) => `${r.position}.${r.playerId ?? ""}.${r.planetId ?? ""}.${r.moonId ?? ""}.${r.activity.planet ?? ""}.${r.activity.moon ?? ""}`).join("|");
+    if (ptreSent.get(first) === sig) return;
+    ptreSent.set(first, sig);
+    const homes = new Set(Object.values(cards).map((c) => (c.planets ?? []).reduce((lo, p2) => p2.id > 0 && (!lo || p2.id < lo.id) ? p2 : lo, null)?.coords));
+    const rows = s.rows.map((r) => ({ ...r, debris: r.debris ? debrisTotal(r.debris) : 0 }));
+    const p = galaxyPayloads({ galaxy: s.galaxy, system: s.system, rows }, o.store.get(GALAXY_IDS_KEY, {}), {
+      teamKey,
+      now: Date.now(),
+      follow: (id) => !!marks.players[String(id)] || recent.has(id),
+      home: (coords) => homes.has(coords),
+      scores: (id) => {
+        const c = cards[String(id)]?.scores;
+        return c?.total ? { score: c.total.points, fleet: c.military?.points ?? -1 } : null;
+      }
+    });
+    if (p.changed) o.store.set(GALAXY_IDS_KEY, p.ids);
+    void ptreSendGalaxy(o.ptre, p).catch(() => void 0);
   }
   function decorate(o, content) {
     const { doc, store, t, locale } = o;
@@ -9230,15 +9454,15 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     const research = {};
     for (const [id, level2] of Object.entries(wave.researches ?? {})) research[id] = { level: level2 };
     const ships = {};
-    const base2 = {};
+    const base3 = {};
     for (const [id, x] of Object.entries(wave.ships ?? {})) {
       if (!x.amount) continue;
       ships[id] = { count: x.amount };
-      base2[id] = { weapon: x.weapon ?? 0, shield: x.shield ?? 0, armor: x.armor ?? 0, cargo: x.cargo ?? 0, speed: x.speed ?? 0 };
+      base3[id] = { weapon: x.weapon ?? 0, shield: x.shield ?? 0, armor: x.armor ?? 0, cargo: x.cargo ?? 0, speed: x.speed ?? 0 };
     }
     const data = {
       settings: { server },
-      0: [{ planet: planetOf(wave.coords), research, class: wave.characterClassId ?? 0, allianceClass: wave.allianceClassId ?? 0, ships, lifeformBonuses: { BaseStatsBooster: base2, CharacterClassBooster: wave.bonuses?.characterClassBooster ?? {} } }],
+      0: [{ planet: planetOf(wave.coords), research, class: wave.characterClassId ?? 0, allianceClass: wave.allianceClassId ?? 0, ships, lifeformBonuses: { BaseStatsBooster: base3, CharacterClassBooster: wave.bonuses?.characterClassBooster ?? {} } }],
       1: [{ planet: planetOf(wave.coords), ...playerSide(player), resources: {}, defence: {} }]
     };
     return btoa(JSON.stringify(data));
@@ -9395,6 +9619,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
         playerName: d.rawPlayername ?? "",
         statuses: json2(d.rawPlayerstatus, []).filter((x) => typeof x === "string"),
         counter,
+        sourceId: int2(d.rawSourceplayerid),
         sourceName: d.rawSourceplayername ?? "",
         sourceCoords: d.rawSourceplanetcoordinates ?? "",
         activity,
@@ -9564,29 +9789,29 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     return Math.round((10 + 3500 * (100 / percent) * Math.sqrt(10 * dist / speed)) / u.fleetSpeed);
   }
   function nearestBase(bases, coords, u) {
-    let base2 = null;
+    let base3 = null;
     let dist = Infinity;
     for (const b of bases) {
       const d = distance(b.coords, coords, u);
       if (d < dist) {
         dist = d;
-        base2 = b;
+        base3 = b;
       }
     }
-    return { base: base2, dist };
+    return { base: base3, dist };
   }
   function targetRows(board, bases, o) {
     return Object.values(board).map((entry) => {
       const lootRes = Math.floor((entry.res.metal + entry.res.crystal + entry.res.deuterium) * entry.loot);
       const lootMsu = (entry.res.metal + entry.res.crystal * 1.5 + entry.res.deuterium * 3) * entry.loot;
-      const { base: base2, dist } = nearestBase(bases, entry.coords, o.universe);
-      const flight = base2 && o.speed > 0 ? flightSeconds(dist, o.speed, o.universe) : null;
+      const { base: base3, dist } = nearestBase(bases, entry.coords, o.universe);
+      const flight = base3 && o.speed > 0 ? flightSeconds(dist, o.speed, o.universe) : null;
       return {
         entry,
         lootRes,
         lootMsu,
         ships: o.capacity > 0 ? Math.ceil(lootRes / o.capacity) : 0,
-        base: base2,
+        base: base3,
         flight,
         msuPerHour: flight ? lootMsu / (2 * flight / 3600) : null,
         ageMinutes: Math.max(0, Math.round((o.now - entry.at) / 6e4))
@@ -10258,8 +10483,8 @@ td.spark-cell { width: 90px; }
       more.setAttribute("aria-controls", `fut-sp-w-${index}`);
       acts.append(more);
       if (from) {
-        const base2 = from;
-        acts.append(iconButton3("fut-sp-attack", "sword", t("spy.attackHint", { name: baseName(base2) }), () => {
+        const base3 = from;
+        acts.append(iconButton3("fut-sp-attack", "sword", t("spy.attackHint", { name: baseName(base3) }), () => {
           doc.location.assign(attackUrl(0, 203));
         }));
       }
@@ -10465,6 +10690,30 @@ td.spark-cell { width: 90px; }
     msg.querySelectorAll(":scope .fut-msg").forEach((n) => n.remove());
     msg.classList.remove("fut-msg-folded", "fut-msgrar", "fut-msgrar-0", "fut-msgrar-1");
     msg.setAttribute("data-fut-quiet", "");
+  }
+  var PTRE_COUNTER_KEY = "ptre.counterSent";
+  var PTRE_COUNTER_MAX = 500;
+  var ptreCounterPending = /* @__PURE__ */ new Set();
+  function sendCounterSpies(store, ptre, counters) {
+    const teamKey = teamKeyOf(store);
+    if (!teamKey || !ptreAutoOn(store)) return;
+    const sent = store.get(PTRE_COUNTER_KEY, {});
+    const reports = {};
+    for (const m of counters) {
+      if (sent[m.id] || ptreCounterPending.has(m.id)) continue;
+      const body = counterSpyPayload(m, teamKey);
+      if (body) reports[m.id] = body;
+    }
+    const ids = Object.keys(reports);
+    if (!ids.length) return;
+    ids.forEach((id) => ptreCounterPending.add(id));
+    void ptreSendCounterSpies(ptre, reports).catch(() => false).then((ok) => {
+      ids.forEach((id) => ptreCounterPending.delete(id));
+      if (!ok) return;
+      const now = Date.now();
+      const all2 = { ...store.get(PTRE_COUNTER_KEY, {}), ...Object.fromEntries(ids.map((id) => [id, now])) };
+      store.set(PTRE_COUNTER_KEY, Object.fromEntries(Object.entries(all2).sort((a, b) => a[1] - b[1]).slice(-PTRE_COUNTER_MAX)));
+    });
   }
   function h2(doc, tag, cls = "", text) {
     const node = doc.createElement(tag);
@@ -10705,6 +10954,7 @@ td.spark-cell { width: 90px; }
     const sharedAny = !!doc.querySelector(["11", "12", "13"].map((n) => `[data-subtab-id="${n}"].active, [data-subtab-id="${n}"][aria-selected="true"]`).join(", "));
     const expeditions = [];
     const spies = [];
+    const counters = [];
     let journal = null;
     let added = 0;
     let dropped = 0;
@@ -10762,6 +11012,7 @@ td.spark-cell { width: 90px; }
       }
       if (parsed.kind === "expedition" || parsed.kind === "discovery") expeditions.push(parsed);
       if (parsed.kind === "spy") spies.push(parsed);
+      if (parsed.kind === "spy" && parsed.counter) counters.push(parsed);
       if (parsed.kind === "recycle" && parsed.coords?.replace(/[[\]]/g, "").split(":")[2] === "16") {
         journal ?? (journal = store.get(JOURNAL_KEY, {}));
         const r = recordDebris(journal, parsed.id, parsed.at, parsed.res, parsed.coords);
@@ -10808,6 +11059,7 @@ td.spark-cell { width: 90px; }
       const board = store.get(SPY_BOARD_KEY, {});
       if (rememberSpies(board, spies, o.now?.() ?? Date.now(), sharedTab, store.get(SPY_DISMISSED_KEY, {}))) store.set(SPY_BOARD_KEY, board);
     }
+    if (o.ptre && counters.length) sendCounterSpies(store, o.ptre, counters);
     if (o.spy) mountSpyPanel({ doc, store, t, locale, spy: o.spy, now: o.now });
     if (archive && archiveChanged) store.set(ARCHIVE_KEY, archive);
     if (journal && (added || dropped)) {
@@ -11525,8 +11777,8 @@ td.spark-cell { width: 90px; }
     const cargo = count2 > 0 && settings.collectDeployRes ? loadCargo(fd, profile, settings.loadOrder) : 0;
     return finish(fd, DEPLOY, count2, cargo);
   }
-  function prepareFleetsave(fd, doc, base2, save) {
-    const profile = { ...base2, reserve: base2.saveReserve ?? EMPTY_RESERVE };
+  function prepareFleetsave(fd, doc, base3, save) {
+    const profile = { ...base3, reserve: base3.saveReserve ?? EMPTY_RESERVE };
     const ships = Object.fromEntries(stock(fd, profile).map((s) => [s.id, s.available]));
     const count2 = selectShips(fd, ships);
     setTarget(fd, doc, resolveTarget(save, fd.currentPlanet));
@@ -11535,9 +11787,9 @@ td.spark-cell { width: 90px; }
     const cargo = count2 > 0 ? loadCargo(fd, profile) : 0;
     return finish(fd, save.mission, count2, cargo);
   }
-  function prepareDelivery(fd, doc, base2, settings, target, need, hold = { metal: 0, crystal: 0, deuterium: 0 }) {
-    const r = base2.reserve.resources;
-    const profile = { ...base2, reserve: { ships: base2.reserve.ships, resources: { ...r, metal: r.metal + hold.metal, crystal: r.crystal + hold.crystal, deuterium: r.deuterium + hold.deuterium } } };
+  function prepareDelivery(fd, doc, base3, settings, target, need, hold = { metal: 0, crystal: 0, deuterium: 0 }) {
+    const r = base3.reserve.resources;
+    const profile = { ...base3, reserve: { ships: base3.reserve.ships, resources: { ...r, metal: r.metal + hold.metal, crystal: r.crystal + hold.crystal, deuterium: r.deuterium + hold.deuterium } } };
     const free = deliveryLoad(onPlanet(fd), profile.reserve, 0, Number.MAX_SAFE_INTEGER, need);
     const amount = free.metal + free.crystal + free.deuterium;
     if (amount <= 0) return { ok: false, reason: "fleet.err.noResources", ships: 0, cargo: 0 };
@@ -11571,9 +11823,9 @@ td.spark-cell { width: 90px; }
     profile = { ...profile, reserve: EMPTY_RESERVE };
     const limits = expeditionLimits(fd, universe);
     const target = expeditionTarget(limits.max, settings.expeditionValue);
-    const base2 = settings.expeditionValue.trim() ? 0 : limits.base;
+    const base3 = settings.expeditionValue.trim() ? 0 : limits.base;
     const slots = settings.expeditionSplit ? freeExpeditionSlots(fd.expeditionCount, fd.maxExpeditionCount) : 0;
-    const ships = expeditionFleet(stock(fd, profile), { ship: settings.expeditionShip, target, base: base2, extras: settings.expeditionExtras, big: settings.expeditionBig, slots });
+    const ships = expeditionFleet(stock(fd, profile), { ship: settings.expeditionShip, target, base: base3, extras: settings.expeditionExtras, big: settings.expeditionBig, slots });
     const count2 = selectShips(fd, ships);
     const here = fd.currentPlanet;
     const system = expeditionSystem(here.system, settings.expeditionSpread, { systems: universe.systems ?? 499, donut: universe.donutSystem ?? true }, rand);
@@ -11659,8 +11911,8 @@ td.spark-cell { width: 90px; }
     if (Number.isInteger(speed) && speed >= 10 && speed <= 100) state.speed = speed;
     return state;
   }
-  function repeatUrl(base2, cp, state) {
-    const u = new URL(base2);
+  function repeatUrl(base3, cp, state) {
+    const u = new URL(base3);
     u.search = "";
     u.searchParams.set("page", "ingame");
     u.searchParams.set("component", "fleetdispatch");
@@ -14374,6 +14626,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 .fut-ptre-intro p, .fut-ptre-errors p { margin: 0 0 6px; }
 .fut-ptre-intro a { color: var(--accent); }
 .fut-ptre-errors { margin-top: 4px; }
+.fut-ptre-errors .bad { color: var(--warn); }
 .fut-ptre-errors b { display: block; margin-bottom: 4px; color: var(--text); font-size: 12px; }
 .fut-ptre-key { align-self: center; margin-right: 8px; color: var(--text); font: 12px ui-monospace, Menlo, Consolas, monospace; letter-spacing: 0.04em; }
 .field { height: 26px; width: 190px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: 12px Arial, sans-serif; }
@@ -14694,9 +14947,24 @@ input.field { width: 190px; }
         box.append(input, save);
       }
       const rows = [intro, row(t("ptre.key"), t(key ? "ptre.keyOnHint" : "ptre.keyHint"), box)];
+      if (key) rows.push(row(t("ptre.auto"), t("ptre.autoHint"), yesNo(store.get(AUTO_KEY, false), (v) => {
+        store.set(AUTO_KEY, v);
+        status = t(v ? "ptre.autoOn" : "ptre.autoOff");
+      })));
       const st = el7("div", "status", status);
       st.setAttribute("role", "status");
       rows.push(st);
+      const last2 = store.get(LAST_KEY, null);
+      const lastBox = el7("div", "notes fut-ptre-errors");
+      lastBox.append(el7("b", "", t("ptre.last")));
+      if (!last2) lastBox.append(el7("p", "", t("ptre.lastNone")));
+      else {
+        const when = new Date(last2.at).toLocaleString(lang, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+        const whatKey = `ptre.what.${last2.script.replace(/\.php$/, "")}`;
+        const what = t(whatKey) === whatKey ? last2.script : t(whatKey);
+        lastBox.append(el7("p", last2.ok ? "" : "bad", `${when} · ${what} · ${last2.ok ? "ok" : `${t("ptre.lastRefused")} (${last2.code})`}${last2.message ? ` · ${last2.message}` : ""}`));
+      }
+      rows.push(lastBox);
       const errors = store.get(ERRORS_KEY, []);
       const list = el7("div", "notes fut-ptre-errors");
       list.append(el7("b", "", t("ptre.errors")));
@@ -16171,10 +16439,10 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     const colonies = (doc.getElementById("countColonies")?.textContent ?? "").replace(/\s+/g, " ").trim();
     list.before(toolbar(o, colonies));
     if (o.snapshot && o.settings.showTotals) {
-      const base2 = totals(o.snapshot, o.now);
-      const perHour = base2.perHour;
+      const base3 = totals(o.snapshot, o.now);
+      const perHour = base3.perHour;
       const fly = o.flying ?? { metal: 0, crystal: 0, deuterium: 0 };
-      const stock2 = { metal: base2.stock.metal + fly.metal, crystal: base2.stock.crystal + fly.crystal, deuterium: base2.stock.deuterium + fly.deuterium };
+      const stock2 = { metal: base3.stock.metal + fly.metal, crystal: base3.stock.crystal + fly.crystal, deuterium: base3.stock.deuterium + fly.deuterium };
       const msu4 = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
       const box = el5(doc, "div", "fut-totals");
       box.setAttribute("role", "table");
@@ -16355,7 +16623,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     return g > 0 ? inMetal(cost, rates) / (g * 24) : Infinity;
   };
   var lvl2 = (p, id) => p.levels[String(id)] ?? 0;
-  var base = (p, k, speed, level2 = lvl2(p, MINE_ID[k])) => mineBase(k, level2, p.position, p.temp, speed);
+  var base2 = (p, k, speed, level2 = lvl2(p, MINE_ID[k])) => mineBase(k, level2, p.position, p.temp, speed);
   function building(p, id, column, level2 = lvl2(p, id)) {
     const row = LF_BUILDING_BONUS[id];
     if (!row || speciesOf(id) !== p.species) return 0;
@@ -16413,7 +16681,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
       };
       const flat = { metal: 30 * speed, crystal: 15 * speed, deuterium: 0 };
       for (const k of KEYS4) {
-        const b = base(p, k, speed);
+        const b = base2(p, k, speed);
         p.mult[k] = b > 0 ? Math.max(1, (body.production[k] - flat[k]) / b) : 1;
       }
       state.push(p);
@@ -16434,14 +16702,14 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     const scale = () => (count2 + extra) / count2;
     const accountBase = () => {
       const out2 = zero();
-      for (const p of state) for (const k of KEYS4) out2[k] += base(p, k, speed);
+      for (const p of state) for (const k of KEYS4) out2[k] += base2(p, k, speed);
       return out2;
     };
     const addEverywhere = (share) => {
       for (const p of state)
         for (const k of KEYS4) {
           p.mult[k] += share[k];
-          p.production[k] += base(p, k, speed) * share[k];
+          p.production[k] += base2(p, k, speed) * share[k];
         }
     };
     const plasmaDiscount = () => {
@@ -16465,7 +16733,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
           const id = MINE_ID[k];
           const L2 = lvl2(p2, id);
           const gain = zero();
-          gain[k] = (base(p2, k, speed, L2 + 1) - base(p2, k, speed, L2)) * p2.mult[k];
+          gain[k] = (base2(p2, k, speed, L2 + 1) - base2(p2, k, speed, L2)) * p2.mult[k];
           consider({ kind: "mine", id, mine: k, ...where(p2), from: L2, to: L2 + 1, cost: levelCost(id, L2 + 1, discount(p2, id)), gain });
         }
         for (const id of LF_PRODUCTION_BUILDINGS) {
@@ -16473,7 +16741,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
           const L2 = lvl2(p2, id);
           if (!open(lfLocked, p2.input.id, id, L2)) continue;
           const gain = zero();
-          KEYS4.forEach((k, c) => gain[k] = (building(p2, id, c, L2 + 1) - building(p2, id, c, L2)) * base(p2, k, speed));
+          KEYS4.forEach((k, c) => gain[k] = (building(p2, id, c, L2 + 1) - building(p2, id, c, L2)) * base2(p2, k, speed));
           consider({ kind: "lfBuilding", id, ...where(p2), from: L2, to: L2 + 1, cost: levelCost(id, L2 + 1, discount(p2, id)), gain });
         }
         const boostersNow = LF_RESEARCH_BOOSTERS.reduce((s, [b, c]) => s + building(p2, b, c), 0);
@@ -16523,7 +16791,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
         if (LF_PRODUCTION_BUILDINGS.includes(step.id)) {
           for (const k of KEYS4) {
             p.mult[k] += share[k];
-            p.production[k] += base(p, k, speed) * share[k];
+            p.production[k] += base2(p, k, speed) * share[k];
           }
         } else {
           addEverywhere({ metal: step.gain.metal / all2.metal || 0, crystal: step.gain.crystal / all2.crystal || 0, deuterium: step.gain.deuterium / all2.deuterium || 0 });
@@ -17432,7 +17700,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const firstPlanet = ctx.bodies.find((b) => b.type === "planet");
     if (!slots.length && !buildings.length && (o.lfLevels || !firstPlanet)) return null;
     const box = h3("div", "needs");
-    const base2 = "index.php?page=ingame&component=";
+    const base3 = "index.php?page=ingame&component=";
     const link = (text, href) => {
       const a = h3("a", "chip", text);
       a.setAttribute("href", href);
@@ -17440,7 +17708,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     };
     if (!o.lfLevels && firstPlanet) {
       const p = h3("p", "");
-      p.append(h3("span", "", `${t("dash.needLevels")} `), link(t("dash.openLfSettings"), `${base2}lfsettings&cp=${firstPlanet.id}`));
+      p.append(h3("span", "", `${t("dash.needLevels")} `), link(t("dash.openLfSettings"), `${base3}lfsettings&cp=${firstPlanet.id}`));
       box.append(p);
     }
     const list = (ids, key, component) => {
@@ -17449,7 +17717,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       p.append(h3("span", "", `${t(key, { count: ids.length })} `));
       for (const id of ids) {
         const name = o.entries.find((e) => e.planetId === id)?.name || ctx.bodies.find((x) => x.id === id)?.name || String(id);
-        p.append(link(name, `${base2}${component}&cp=${id}`));
+        p.append(link(name, `${base3}${component}&cp=${id}`));
       }
       box.append(p);
     };
@@ -18174,11 +18442,11 @@ table.queues td.acts { width: 1%; text-align: right; }
     const own = book[String(bodyId)];
     if (own && own.perUnit > 0) return { value: own.perUnit, exact: true };
     if (maxTemp === null) return null;
-    const base2 = satelliteBase(maxTemp);
-    if (base2 <= 0) return null;
+    const base3 = satelliteBase(maxTemp);
+    if (base3 <= 0) return null;
     const ref = Object.values(book).filter((e) => e.perUnit > 0 && e.maxTemp !== null && satelliteBase(e.maxTemp) > 0).sort((a, b) => b.at - a.at)[0];
     const ratio = ref ? ref.perUnit / satelliteBase(ref.maxTemp) : 1;
-    return { value: base2 * ratio, exact: false };
+    return { value: base3 * ratio, exact: false };
   }
   function satellitesFor(balance2, need, perUnit) {
     const energy = need - balance2;
@@ -20421,9 +20689,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       r.row.querySelectorAll(".fut-hs-gap").forEach((n) => n.remove());
       r.row.classList.toggle("fut-hs-top", r.rank <= 3);
       const scoreCell = r.row.querySelector("td.score");
-      const base2 = snap?.scores[String(r.playerId)];
-      if (scoreCell && base2 !== void 0 && r.score !== base2) {
-        const made = r.score - base2;
+      const base3 = snap?.scores[String(r.playerId)];
+      if (scoreCell && base3 !== void 0 && r.score !== base3) {
+        const made = r.score - base3;
         const g = doc.createElement("span");
         g.className = `fut-hs-gap ${made > 0 ? "up" : "down"}`;
         g.textContent = made > 0 ? `+${fmt(made)}` : `−${fmt(-made)}`;
@@ -21751,6 +22019,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
         t,
         // "Diario oggi" in the toolbar follows the reports as they are read.
         onJournal: () => draw(),
+        ptre: ptreDeps,
         spy: {
           bases: (snapshot?.bodies ?? []).map((b) => ({ id: b.id, name: b.name, coords: b.coords, moon: b.type === "moon" })),
           researches: snapshot?.researches ?? {},
@@ -21780,7 +22049,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
     }
     if (isGalaxyPage(document)) {
       const ownPlanetIds = new Set(readPlanetList(document).flatMap((e) => e.planetId ? [e.planetId] : []));
-      watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, onSystem: refreshSide, onPlayer: (id) => openSide(side, { player: id }) });
+      watchGalaxy({ doc: document, store, guard, ownPlanetIds, locale, t, ptre: ptreDeps, onSystem: refreshSide, onPlayer: (id) => openSide(side, { player: id }) });
       const arrow = (key) => () => document.querySelector(`#galaxycomponent .galaxy_icons[onclick*="'${key}'"]`)?.click();
       registerActions(document, store, t, { "galaxy.left": arrow("ArrowLeft"), "galaxy.right": arrow("ArrowRight"), "galaxy.down": arrow("ArrowDown"), "galaxy.up": arrow("ArrowUp") });
     }

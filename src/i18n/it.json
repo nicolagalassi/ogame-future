@@ -1102,7 +1102,7 @@
   "exp.raidAvg": "a raid",
   "exp.raidTargets": "Bersagli migliori",
   "settings.section.ptre": "PTRE",
-  "ptre.consent": "PTRE (ptre.chez.gg) è il database del tuo team: rapporti di spionaggio, attività e pianeti dei giocatori, raccolti dai membri del team.\nCon la team key Future invia a PTRE solo quello che scegli tu con un click, come fa OGLight: un rapporto di spionaggio dalla tabella spiate (solo il suo id API); id e nome di un giocatore quando apri le sue info PTRE nella scheda; id e nome dei giocatori con la bandierina PTRE quando sincronizzi i bersagli. Ogni invio porta la team key, il tuo universo e la versione di Future. Senza key non parte niente.\nLa key resta in questo browser e non finisce nei backup.",
+  "ptre.consent": "PTRE (ptre.chez.gg) è il database del tuo team: rapporti di spionaggio, attività e pianeti dei giocatori, raccolti dai membri del team.\nCon la team key Future invia a PTRE solo quello che scegli tu con un click, come fa OGLight: un rapporto di spionaggio dalla tabella spiate (solo il suo id API); id e nome di un giocatore quando apri le sue info PTRE nella scheda; id e nome dei giocatori con la bandierina PTRE quando sincronizzi i bersagli. Ogni invio porta la team key, il tuo universo e la versione di Future. Senza key non parte niente. Con «Invii mentre giochi» acceso parte anche quello descritto sotto.\nLa key resta in questo browser e non finisce nei backup.",
   "ptre.open": "Apri PTRE",
   "ptre.key": "Team key",
   "ptre.keyHint": "La trovi su PTRE, nella pagina del tuo team. Salvandola accetti gli invii descritti sopra.",
@@ -1140,5 +1140,18 @@
   "ptre.sync": "Sincronizza con PTRE",
   "ptre.syncHint": "Manda a PTRE i giocatori con la bandierina PTRE e prende i bersagli del team",
   "ptre.synced": "Il team ha {n} bersagli su PTRE; {added} nuovi qui.",
-  "ptre.manage": "Gestisci su PTRE"
+  "ptre.manage": "Gestisci su PTRE",
+  "ptre.auto": "Invii mentre giochi",
+  "ptre.autoHint": "Spento finché non lo accendi. Acceso, Future manda a PTRE senza un click per ogni invio, come OGLight: per ogni sistema che apri in galassia, i pianeti e le lune nuovi, cambiati o spariti (la prima volta che apri un sistema, tutte le posizioni occupate, di ogni giocatore) (id, giocatore, nome, classifica e stato) e l'attività dei giocatori che segui (bandierina o aperti di recente); i controspionaggi che leggi in posta (chi ti ha spiato, da dove, quando); e quando apri la scheda di un giocatore chiede a PTRE i suoi pianeti, al massimo una volta l'ora.",
+  "ptre.autoOn": "Invii mentre giochi accesi.",
+  "ptre.autoOff": "Invii mentre giochi spenti: parte solo quello che fai con un click.",
+  "ptre.last": "Ultimo invio a PTRE",
+  "ptre.lastNone": "Ancora nessuno.",
+  "ptre.lastRefused": "rifiutato",
+  "ptre.what.oglight_import": "rapporto di spionaggio",
+  "ptre.what.oglight_get_player_infos": "info giocatore",
+  "ptre.what.api_sync_target_list": "bersagli del team",
+  "ptre.what.oglight_import_player_activity": "attività",
+  "ptre.what.api_galaxy_import_infos": "pianeti e lune della galassia",
+  "ptre.what.api_galaxy_get_infos": "pianeti del giocatore"
 }

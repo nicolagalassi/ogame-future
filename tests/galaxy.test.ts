@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { debrisMsu, readGalaxy } from '../src/data/galaxy';
 import { parsePlayerData, playerScores } from '../src/data/player-api';
 import { NetworkGuard } from '../src/core/guard';
@@ -109,6 +109,42 @@ describe('rank badge in the galaxy', () => {
     expect(badge.textContent).toMatch(/^#1\.?173$/);
     expect(badge.getAttribute('href')).toBe('/game/index.php?page=ingame&component=highscore&category=1&site=12&searchRelId=9');
     expect(badge.getAttribute('aria-label')).toContain('apri la classifica');
+  });
+});
+
+describe('PTRE while playing, in the galaxy', () => {
+  it('one call per table the game draws, only with the switch on', async () => {
+    const { watchGalaxy } = await import('../src/modules/galaxy');
+    const { translator } = await import('../src/core/i18n');
+    const store = new Store(new MemoryStore(), 'gp');
+    store.set('ptre.teamKey', 'TM-AAAA-BBBB-CCCC-DDDD');
+    store.set('ptre.auto', true);
+    const fetchImpl = vi.fn(async (_url: string, _init?: RequestInit) => new Response('{"code":1}'));
+    const guard = new NetworkGuard(fetchImpl as never, 'https://s1-it.ogame.gameforge.com');
+    guard.closePageLoadWindow();
+    const ptre = { guard, store, host: 's1-it.ogame.gameforge.com', lang: 'it', version: '1' };
+    watchGalaxy({ doc: document, store, guard, ownPlanetIds: new Set([71]), locale: 'it', t: translator('it'), ptre });
+    const ptreCalls = () => fetchImpl.mock.calls.filter(([u]) => String(u).includes('ptre.chez.gg'));
+    await vi.waitFor(() => expect(ptreCalls()).toHaveLength(1));
+    const [url, init] = ptreCalls()[0]!;
+    expect(String(url)).toContain('api_galaxy_import_infos.php');
+    // The player's own planet (row 7) carries no player id in the game's table: never sent.
+    expect(Object.keys(JSON.parse(String(init!.body)))).toEqual(['1:300:4', '1:300:5', '1:300:6']);
+    // The game touches the same table (a tooltip): nothing more goes.
+    document.querySelector('#galaxyRow4')!.append(document.createElement('span'));
+    await new Promise((r) => setTimeout(r, 80));
+    expect(ptreCalls()).toHaveLength(1);
+    // Only the coordinate fields change (the player typing), the rows are the old system's: nothing goes,
+    // so these planets never leave under another system's coordinates.
+    (document.getElementById('system_input') as HTMLInputElement).value = '301';
+    document.querySelector('#galaxyRow5')!.append(document.createElement('span'));
+    await new Promise((r) => setTimeout(r, 80));
+    expect(ptreCalls()).toHaveLength(1);
+    // The game refills the same rows with the next system: it goes, once.
+    document.querySelector('#galaxyRow5 [data-planet-id]')!.replaceWith(Object.assign(document.createElement('div'), { className: 'microplanet' }));
+    document.querySelector('#galaxyRow5 .microplanet')!.setAttribute('data-planet-id', '991');
+    await vi.waitFor(() => expect(ptreCalls()).toHaveLength(2));
+    expect(Object.keys(JSON.parse(String(ptreCalls()[1]![1]!.body)))).toEqual(['1:301:4', '1:301:5', '1:301:6']);
   });
 });
 

@@ -538,3 +538,35 @@ describe('API of a spy report', () => {
     expect(b.classList.contains('fut-api-copied')).toBe(true);
   });
 });
+
+describe('counter-espionage to PTRE', () => {
+  it('goes once per report, only with «Send while playing» on', async () => {
+    const { vi } = await import('vitest');
+    const { NetworkGuard } = await import('../src/core/guard');
+    const store = new Store(new MemoryStore(), 'cs');
+    store.set('ptre.teamKey', 'TM-AAAA-BBBB-CCCC-DDDD');
+    const fetchImpl = vi.fn(async (_url: string, _init?: RequestInit) => new Response('{"code":1}'));
+    const guard = new NetworkGuard(fetchImpl as never, 'https://s269-it.ogame.gameforge.com');
+    guard.closePageLoadWindow();
+    const ptre = { guard, store, host: 's269-it.ogame.gameforge.com', lang: 'it', version: '1' };
+    // A fresh page each time: the inbox reads each message once per page.
+    const page = () => {
+      document.body.innerHTML = '<div id="messages"><div class="messagesHolder"></div></div>';
+      document.querySelector('.messagesHolder')!.append(msg('21', { coordinates: '6:109:7', targetplayerid: String(OWN), sourceplayerid: '555', resources: '-', loot: '-', sourceplayername: 'BOZZY', sourceplanetcoordinates: '6:109:8', timestamp: '1790000000' }));
+    };
+    page();
+    processMessages({ doc: document, store, playerId: OWN, locale: 'it', t, ptre });
+    expect(fetchImpl).not.toHaveBeenCalled();
+    store.set('ptre.auto', true);
+    page();
+    processMessages({ doc: document, store, playerId: OWN, locale: 'it', t, ptre });
+    await vi.waitFor(() => expect(store.get<Record<string, number>>('ptre.counterSent', {})['21']).toBeGreaterThan(0));
+    const [url, init] = fetchImpl.mock.calls[0]!;
+    expect(String(url)).toContain('oglight_import_player_activity.php');
+    expect(JSON.parse(String(init!.body))).toMatchObject({ 21: { player_id: 555, galaxy: 6, system: 109, position: 8, activity: '*' } });
+    // Read again on another page: already sent.
+    page();
+    processMessages({ doc: document, store, playerId: OWN, locale: 'it', t, ptre });
+    expect(fetchImpl).toHaveBeenCalledOnce();
+  });
+});

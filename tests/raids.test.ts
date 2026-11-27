@@ -6,7 +6,7 @@ import { sortRows } from '../src/modules/messages/spy-table';
 const U: Universe = { galaxies: 9, systems: 499, donutGalaxy: true, donutSystem: true, fleetSpeed: 2 };
 const spy = (over: Partial<SpyMessage>): SpyMessage => ({
   kind: 'spy', id: '1', at: 1000, coords: '1:476:11', moon: false, playerId: 5, playerName: 'Bob', statuses: ['inactive'], counter: false,
-  sourceName: '', sourceCoords: '', activity: 60, res: { metal: 1000, crystal: 1000, deuterium: 1000, food: 0 }, loot: 0.5, fleetValue: 0, defValue: 0, attacked: false, apiKey: 'sr-en-808-abc', ...over,
+  sourceId: 0, sourceName: '', sourceCoords: '', activity: 60, res: { metal: 1000, crystal: 1000, deuterium: 1000, food: 0 }, loot: 0.5, fleetValue: 0, defValue: 0, attacked: false, apiKey: 'sr-en-808-abc', ...over,
 });
 
 describe('spy board', () => {

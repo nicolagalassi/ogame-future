@@ -7,7 +7,8 @@
  * cookies. Only the country and the universe number are sent, plus the tool name; no team key and
  * nothing about the player.
  */
-import { PTRE_BASE, PTRE_RANKS, type NetworkGuard } from '../core/guard';
+import { PTRE_BASE, PTRE_RANKS, type CallReason, type NetworkGuard } from '../core/guard';
+import type { PtrePlanet } from '../engines/ptre-galaxy';
 import type { Store } from '../core/storage';
 
 export const PTRE_KEY = 'ptre.ranks';
@@ -74,6 +75,17 @@ export function ptreUniverse(host: string, lang: string): { country: string; uni
  * password for the team's data: never in a backup file (core/backup), never in the network log (guard).
  */
 export const TEAM_KEY = 'ptre.teamKey';
+/** The last call to the team's PTRE, whatever its answer (shown in Settings › PTRE). */
+export const LAST_KEY = 'ptre.last';
+export interface PtreLast {
+  at: number;
+  /** The script called (its file name). */
+  script: string;
+  ok: boolean;
+  code: string;
+  message: string;
+}
+
 /** PTRE's last answers that were not a success, newest last (shown in Settings › PTRE). */
 export const ERRORS_KEY = 'ptre.errors';
 const ERRORS_MAX = 10;
@@ -85,6 +97,13 @@ export function normalTeamKey(text: string): string | null {
 }
 
 export const teamKeyOf = (store: Store): string | null => normalTeamKey(store.get<string>(TEAM_KEY, ''));
+
+/**
+ * «Send while playing» (Settings › PTRE), off until the player turns it on: activity and planets seen in
+ * the galaxy, counter-espionage read in the inbox, a player's planets from PTRE on their sheet.
+ */
+export const AUTO_KEY = 'ptre.auto';
+export const ptreAutoOn = (store: Store): boolean => !!teamKeyOf(store) && store.get<boolean>(AUTO_KEY, false);
 
 export interface PtreDeps {
   guard: NetworkGuard;
@@ -116,14 +135,16 @@ export interface PtreError {
  * COMPLIANCE (AGENTS.md §1.9, §4): only from a click of the player ('user-sync'); the guard refuses
  * any other script and masks the key in its log.
  */
-export async function ptreCall(deps: PtreDeps, script: string, params: Record<string, string>, init: RequestInit = {}): Promise<PtreAnswer & { data: Record<string, unknown> | null }> {
+export async function ptreCall(deps: PtreDeps, script: string, params: Record<string, string>, init: RequestInit = {}, reason: CallReason = 'user-sync'): Promise<PtreAnswer & { data: Record<string, unknown> | null }> {
   const key = teamKeyOf(deps.store);
+  // What goes while the player plays needs «Send while playing» on, besides the key.
+  if (reason === 'user-browse' && !ptreAutoOn(deps.store)) return { ok: false, message: 'off', data: null };
   const server = ptreUniverse(deps.host, deps.lang);
   if (!key || !server) return { ok: false, message: key ? 'server' : 'no-key', data: null };
   const query = new URLSearchParams({ ...params, tool: 'future', team_key: key, country: server.country, univers: server.univers, version: deps.version });
   let data: Record<string, unknown> | null = null;
   try {
-    const res = await deps.guard.request(`${PTRE_BASE}${script}?${query}`, 'user-sync', init);
+    const res = await deps.guard.request(`${PTRE_BASE}${script}?${query}`, reason, init);
     data = (await res.json().catch(() => null)) as Record<string, unknown> | null;
   } catch (e) {
     data = { code: 'net', message: e instanceof Error ? e.message : String(e) };
@@ -131,6 +152,7 @@ export async function ptreCall(deps: PtreDeps, script: string, params: Record<st
   const code = String(data?.code ?? '?');
   const message = String(data?.message_verbose || data?.message || '');
   const ok = code === '1';
+  deps.store.set(LAST_KEY, { at: deps.now?.() ?? Date.now(), script, ok, code, message } satisfies PtreLast);
   if (!ok) {
     const errors = deps.store.get<PtreError[]>(ERRORS_KEY, []);
     deps.store.set(ERRORS_KEY, [...errors, { at: deps.now?.() ?? Date.now(), code, message }].slice(-ERRORS_MAX));
@@ -209,4 +231,42 @@ export async function ptreSyncTargets(deps: PtreDeps, targets: { id: number; pse
   const list = Array.isArray(r.data?.targets_array) ? (r.data.targets_array as { player_id?: unknown; pseudo?: unknown }[]) : [];
   const back = r.ok ? list.flatMap((p) => (/^\d+$/.test(String(p?.player_id ?? '')) ? [{ id: Number(p.player_id), name: String(p.pseudo ?? '') }] : [])) : [];
   return { ok: r.ok, message: String(r.data?.message || r.message || ''), targets: back };
+}
+
+/* ---------- While the player plays (only with «Send while playing» on) ---------- */
+
+/**
+ * One galaxy system the game drew: the positions that changed and the followed players' activity, each
+ * list in one call, as OGLight sends them. JSON as a string body, no Content-Type (as OGLight).
+ */
+export async function ptreSendGalaxy(deps: PtreDeps, p: { positions: Record<string, unknown>; activities: Record<string, unknown> }): Promise<void> {
+  if (Object.keys(p.positions).length) await ptreCall(deps, 'api_galaxy_import_infos.php', {}, { method: 'POST', body: JSON.stringify(p.positions) }, 'user-browse');
+  if (Object.keys(p.activities).length) await ptreCall(deps, 'oglight_import_player_activity.php', {}, { method: 'POST', body: JSON.stringify(p.activities) }, 'user-browse');
+}
+
+/**
+ * Counter-espionage reports just read in the inbox, keyed by message id, in one call (as OGLight). True when
+ * PTRE answered at all (taken, or already there from another tool): only an unanswered call is tried again.
+ */
+export async function ptreSendCounterSpies(deps: PtreDeps, reports: Record<string, Record<string, unknown>>): Promise<boolean> {
+  if (!Object.keys(reports).length) return false;
+  const r = await ptreCall(deps, 'oglight_import_player_activity.php', {}, { method: 'POST', body: JSON.stringify(reports) }, 'user-browse');
+  return r.data !== null && r.data.code !== undefined && r.data.code !== 'net';
+}
+
+/** When each player's planets were last asked of PTRE (ms): at most once an hour per player, as OGLight. */
+export const PLANETS_AT_KEY = 'ptre.planetsAt';
+const PLANETS_EVERY = 3_600_000;
+
+/** A player's planets known to the team, when the player opens that player's sheet (at most hourly). */
+export async function ptrePlayerPlanets(deps: PtreDeps, playerId: number): Promise<PtrePlanet[] | null> {
+  const now = deps.now?.() ?? Date.now();
+  const asked = deps.store.get<Record<string, number>>(PLANETS_AT_KEY, {});
+  if (!ptreAutoOn(deps.store) || now - (asked[String(playerId)] ?? 0) < PLANETS_EVERY) return null;
+  // Remembered before the answer: a second sheet opened meanwhile does not ask again.
+  const next = Object.fromEntries(Object.entries({ ...asked, [String(playerId)]: now }).filter(([, at]) => now - at < PLANETS_EVERY));
+  deps.store.set(PLANETS_AT_KEY, next);
+  const r = await ptreCall(deps, 'api_galaxy_get_infos.php', { player_id: String(playerId) }, {}, 'user-browse');
+  const list = r.ok && Array.isArray(r.data?.galaxy_array) ? (r.data.galaxy_array as { coords?: unknown; player_id?: unknown; moon?: { id?: unknown } | null; timestamp_ig?: unknown }[]) : [];
+  return r.ok ? list.map((p) => ({ coords: String(p?.coords ?? ''), playerId: Number(p?.player_id), moon: Number(p?.moon?.id) > 0, at: Number(p?.timestamp_ig) })) : null;
 }
