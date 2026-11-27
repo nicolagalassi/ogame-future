@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.178
+// @version      0.3.179
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -341,7 +341,15 @@
   }
 
   // src/core/guard.ts
-  var PTRE_RANKS = "https://ptre.chez.gg/scripts/api_get_ranks.php";
+  var PTRE_BASE = "https://ptre.chez.gg/scripts/";
+  var PTRE_RANKS = `${PTRE_BASE}api_get_ranks.php`;
+  var PTRE_SCRIPTS = {
+    "api_get_ranks.php": "every player's points at PTRE's last reading (highscore page)",
+    "oglight_import.php": "one spy report the player chose to save to the team (its API id only)"
+  };
+  function redactUrl(url) {
+    return url.replace(/([?&]team_?key=)[^&#]*/gi, "$1***");
+  }
   var GuardError = class extends Error {
     constructor(message) {
       super(message);
@@ -366,7 +374,7 @@
     }
     async request(url, reason, init = {}) {
       const refusal = this.check(url, reason);
-      this.log.push({ at: this.now(), url, reason, allowed: refusal === null, why: refusal ?? void 0 });
+      this.log.push({ at: this.now(), url: redactUrl(url), reason, allowed: refusal === null, why: refusal ?? void 0 });
       if (refusal !== null) throw new GuardError(refusal);
       const isGame = this.isGameUrl(url) && !this.isPublicApi(url);
       const send = () => this.fetchImpl(url, {
@@ -387,10 +395,16 @@
         return "Background call refused: the page has finished loading (AGENTS.md §4).";
       }
       if (reason === "user-view" && !this.isPublicApi(url) && !this.isPtre(url)) {
-        return "Call refused: 'user-view' reaches only the universe's public API and PTRE's ranking (AGENTS.md §6).";
+        return "Call refused: 'user-view' reaches only the universe's public API and PTRE (AGENTS.md §6).";
       }
-      if (this.isOutside(url) && !(reason === "user-view" && this.isPtre(url))) {
-        return "Call refused: no outside service but PTRE's ranking, and only from what the player opens.";
+      if (this.isOutside(url) && !this.isPtre(url)) {
+        return "Call refused: no outside service but the PTRE scripts Future lists (PTRE_SCRIPTS).";
+      }
+      if (this.isPtre(url) && reason === "page-load") {
+        return "Call refused: PTRE only from what the player opens or clicks, never on its own.";
+      }
+      if (this.isPtre(url) && reason === "user-view" && new URL(url).searchParams.has("team_key")) {
+        return "Call refused: a call with the team key needs a click of the player (user-sync).";
       }
       if (this.isGameUrl(url) && new URL(url, this.gameOrigin).searchParams.has("cp")) {
         return "Call refused: the cp parameter changes the active planet (AGENTS.md §4.2).";
@@ -402,7 +416,8 @@
     }
     isPtre(url) {
       const u = new URL(url, this.gameOrigin);
-      return `${u.origin}${u.pathname}` === PTRE_RANKS;
+      const path = `${u.origin}${u.pathname}`;
+      return path.startsWith(PTRE_BASE) && Object.hasOwn(PTRE_SCRIPTS, path.slice(PTRE_BASE.length));
     }
     isOutside(url) {
       return !this.isGameUrl(url);
@@ -438,6 +453,9 @@
     set(key, value) {
       this.kv.set(`${this.namespace}:${key}`, value);
     }
+    delete(key) {
+      this.kv.delete(`${this.namespace}:${key}`);
+    }
   };
   function serverNamespace(doc) {
     const meta = (name) => doc.querySelector(`meta[name="${name}"]`)?.getAttribute("content") ?? null;
@@ -449,9 +467,11 @@
   // src/core/backup.ts
   var PREFIX = "future:";
   var VERSION = 1;
+  var SECRETS = ["ptre.teamKey"];
+  var secret = (key) => SECRETS.some((s) => key.endsWith(`:${s}`));
   function exportBackup(kv, now) {
     const data = {};
-    for (const key of kv.keys().filter((k) => k.startsWith(PREFIX)).sort()) data[key] = kv.get(key, null);
+    for (const key of kv.keys().filter((k) => k.startsWith(PREFIX) && !secret(k)).sort()) data[key] = kv.get(key, null);
     return { app: "future", version: VERSION, at: now, data };
   }
   function dataOf(file) {
@@ -2159,7 +2179,7 @@
     "settings.reset.stats": "Azzera le statistiche",
     "settings.reset.statsHint": "Svuota diario di spedizioni e raid, storico di punti e produzione e Orion di questo universo. I rapporti ancora nella posta verranno riletti. Prima fai un Esporta.",
     "settings.reset.settings": "Azzera le impostazioni",
-    "settings.reset.settingsHint": "Tutte le scelte di Future in questo universo tornano come all'inizio, regole e fleetsave di pianeti e lune compresi. Bersagli, note, piani e statistiche restano.",
+    "settings.reset.settingsHint": "Tutte le scelte di Future in questo universo tornano come all'inizio, regole e fleetsave di pianeti e lune e team key PTRE compresi. Bersagli, note, piani e statistiche restano.",
     "settings.resetDo": "Azzera",
     "settings.resetYes": "Sì, azzera",
     "settings.resetNo": "Annulla",
@@ -2696,7 +2716,24 @@
     "exp.raidDebris": "di cui detriti",
     "exp.raidHeroCount": "raid",
     "exp.raidAvg": "a raid",
-    "exp.raidTargets": "Bersagli migliori"
+    "exp.raidTargets": "Bersagli migliori",
+    "settings.section.ptre": "PTRE",
+    "ptre.consent": "PTRE (ptre.chez.gg) è il database del tuo team: rapporti di spionaggio, attività e pianeti dei giocatori, raccolti dai membri del team.\nCon la team key Future invia a PTRE solo quello che scegli tu con un click: per ora un rapporto di spionaggio dalla tabella spiate (solo il suo id API, la stessa cosa che fa OGLight). Ogni invio porta la team key, il tuo universo e la versione di Future. Senza key non parte niente.\nLa key resta in questo browser e non finisce nei backup.",
+    "ptre.open": "Apri PTRE",
+    "ptre.key": "Team key",
+    "ptre.keyHint": "La trovi su PTRE, nella pagina del tuo team. Salvandola accetti gli invii descritti sopra.",
+    "ptre.keyOnHint": "Attiva: nella tabella spiate c'è il pulsante per salvare un rapporto su PTRE.",
+    "ptre.keySave": "Salva",
+    "ptre.keySaved": "Team key salvata.",
+    "ptre.keyBad": "Non è una team key: deve essere TM-XXXX-XXXX-XXXX-XXXX.",
+    "ptre.remove": "Rimuovi",
+    "ptre.removed": "Team key rimossa: Future non invia più niente a PTRE.",
+    "ptre.errors": "Ultimi errori di PTRE",
+    "ptre.noErrors": "Nessun errore.",
+    "ptre.save": "Salva su PTRE",
+    "ptre.saving": "Invio a PTRE…",
+    "ptre.saved": "Salvato su PTRE",
+    "ptre.saveFailed": "PTRE non l'ha salvato: {message}. Clic per riprovare."
   };
 
   // src/i18n/en.json
@@ -3265,7 +3302,7 @@
     "settings.reset.stats": "Reset statistics",
     "settings.reset.statsHint": "Empties this universe's expedition and raid journal, points and production history and Orion. Reports still in your inbox will be read again. Export first.",
     "settings.reset.settings": "Reset settings",
-    "settings.reset.settingsHint": "Every Future choice in this universe goes back to the start, planet and moon rules and fleetsave included. Targets, notes, plans and statistics stay.",
+    "settings.reset.settingsHint": "Every Future choice in this universe goes back to the start, planet and moon rules, fleetsave and the PTRE team key included. Targets, notes, plans and statistics stay.",
     "settings.resetDo": "Reset",
     "settings.resetYes": "Yes, reset",
     "settings.resetNo": "Cancel",
@@ -3802,7 +3839,24 @@
     "exp.raidDebris": "of which debris",
     "exp.raidHeroCount": "raids",
     "exp.raidAvg": "per raid",
-    "exp.raidTargets": "Best targets"
+    "exp.raidTargets": "Best targets",
+    "settings.section.ptre": "PTRE",
+    "ptre.consent": "PTRE (ptre.chez.gg) is your team's database: spy reports, activity and players' planets, gathered by the team's members.\nWith the team key Future sends PTRE only what you choose with a click: for now one spy report from the spy table (its API id only, the same as OGLight does). Every call carries the team key, your universe and Future's version. Without a key nothing is sent.\nThe key stays in this browser and never goes into a backup.",
+    "ptre.open": "Open PTRE",
+    "ptre.key": "Team key",
+    "ptre.keyHint": "You find it on PTRE, on your team's page. Saving it, you accept the calls described above.",
+    "ptre.keyOnHint": "On: the spy table has a button to save a report to PTRE.",
+    "ptre.keySave": "Save",
+    "ptre.keySaved": "Team key saved.",
+    "ptre.keyBad": "Not a team key: it must look like TM-XXXX-XXXX-XXXX-XXXX.",
+    "ptre.remove": "Remove",
+    "ptre.removed": "Team key removed: Future sends nothing more to PTRE.",
+    "ptre.errors": "PTRE's last errors",
+    "ptre.noErrors": "No errors.",
+    "ptre.save": "Save to PTRE",
+    "ptre.saving": "Sending to PTRE…",
+    "ptre.saved": "Saved to PTRE",
+    "ptre.saveFailed": "PTRE did not save it: {message}. Click to try again."
   };
 
   // src/i18n/fr.json
@@ -4371,7 +4425,7 @@
     "settings.reset.stats": "Remettre à zéro les statistiques",
     "settings.reset.statsHint": "Vide le journal des expéditions et raids, l'historique des points et de la production et Orion de cet univers. Les rapports encore dans ta messagerie seront relus. Exporte d'abord.",
     "settings.reset.settings": "Remettre à zéro les réglages",
-    "settings.reset.settingsHint": "Tous les choix de Future dans cet univers reviennent au départ, règles et fleetsave des planètes et lunes compris. Cibles, notes, plans et statistiques restent.",
+    "settings.reset.settingsHint": "Tous les choix de Future dans cet univers reviennent au départ, règles et fleetsave des planètes et lunes et team key PTRE compris. Cibles, notes, plans et statistiques restent.",
     "settings.resetDo": "Remettre à zéro",
     "settings.resetYes": "Oui, remettre à zéro",
     "settings.resetNo": "Annuler",
@@ -4908,7 +4962,24 @@
     "exp.raidDebris": "dont débris",
     "exp.raidHeroCount": "raids",
     "exp.raidAvg": "par raid",
-    "exp.raidTargets": "Meilleures cibles"
+    "exp.raidTargets": "Meilleures cibles",
+    "settings.section.ptre": "PTRE",
+    "ptre.consent": "PTRE (ptre.chez.gg) est la base de données de ton équipe : rapports d'espionnage, activité et planètes des joueurs, réunis par les membres de l'équipe.\nAvec la team key, Future n'envoie à PTRE que ce que tu choisis d'un clic : pour l'instant un rapport d'espionnage depuis le tableau des espionnages (seulement son id API, comme OGLight). Chaque envoi porte la team key, ton univers et la version de Future. Sans key, rien ne part.\nLa key reste dans ce navigateur et ne va jamais dans une sauvegarde.",
+    "ptre.open": "Ouvrir PTRE",
+    "ptre.key": "Team key",
+    "ptre.keyHint": "Tu la trouves sur PTRE, sur la page de ton équipe. En l'enregistrant, tu acceptes les envois décrits ci-dessus.",
+    "ptre.keyOnHint": "Active : le tableau des espionnages a un bouton pour enregistrer un rapport sur PTRE.",
+    "ptre.keySave": "Enregistrer",
+    "ptre.keySaved": "Team key enregistrée.",
+    "ptre.keyBad": "Ce n'est pas une team key : elle doit être TM-XXXX-XXXX-XXXX-XXXX.",
+    "ptre.remove": "Retirer",
+    "ptre.removed": "Team key retirée : Future n'envoie plus rien à PTRE.",
+    "ptre.errors": "Dernières erreurs de PTRE",
+    "ptre.noErrors": "Aucune erreur.",
+    "ptre.save": "Enregistrer sur PTRE",
+    "ptre.saving": "Envoi à PTRE…",
+    "ptre.saved": "Enregistré sur PTRE",
+    "ptre.saveFailed": "PTRE ne l'a pas enregistré : {message}. Clic pour réessayer."
   };
 
   // src/i18n/de.json
@@ -5477,7 +5548,7 @@
     "settings.reset.stats": "Statistiken zurücksetzen",
     "settings.reset.statsHint": "Leert das Expeditions- und Raid-Journal, den Punkte- und Produktionsverlauf und Orion dieses Universums. Berichte, die noch im Posteingang liegen, werden erneut gelesen. Vorher exportieren.",
     "settings.reset.settings": "Einstellungen zurücksetzen",
-    "settings.reset.settingsHint": "Alle Entscheidungen in Future für dieses Universum gehen auf den Anfang zurück, auch Regeln und Fleetsave der Planeten und Monde. Ziele, Notizen, Pläne und Statistiken bleiben.",
+    "settings.reset.settingsHint": "Alle Entscheidungen in Future für dieses Universum gehen auf den Anfang zurück, auch Regeln und Fleetsave der Planeten und Monde und der PTRE Team Key. Ziele, Notizen, Pläne und Statistiken bleiben.",
     "settings.resetDo": "Zurücksetzen",
     "settings.resetYes": "Ja, zurücksetzen",
     "settings.resetNo": "Abbrechen",
@@ -6014,7 +6085,24 @@
     "exp.raidDebris": "davon Trümmer",
     "exp.raidHeroCount": "Raids",
     "exp.raidAvg": "pro Raid",
-    "exp.raidTargets": "Beste Ziele"
+    "exp.raidTargets": "Beste Ziele",
+    "settings.section.ptre": "PTRE",
+    "ptre.consent": "PTRE (ptre.chez.gg) ist die Datenbank deines Teams: Spionageberichte, Aktivität und Planeten der Spieler, gesammelt von den Mitgliedern.\nMit dem Team Key sendet Future an PTRE nur, was du mit einem Klick wählst: vorerst einen Spionagebericht aus der Spionagetabelle (nur seine API-ID, wie OGLight). Jede Anfrage trägt den Team Key, dein Universum und die Version von Future. Ohne Key wird nichts gesendet.\nDer Key bleibt in diesem Browser und kommt in kein Backup.",
+    "ptre.open": "PTRE öffnen",
+    "ptre.key": "Team Key",
+    "ptre.keyHint": "Du findest ihn auf PTRE, auf der Seite deines Teams. Mit dem Speichern stimmst du den oben beschriebenen Anfragen zu.",
+    "ptre.keyOnHint": "Aktiv: die Spionagetabelle hat einen Knopf, um einen Bericht in PTRE zu speichern.",
+    "ptre.keySave": "Speichern",
+    "ptre.keySaved": "Team Key gespeichert.",
+    "ptre.keyBad": "Kein Team Key: er muss TM-XXXX-XXXX-XXXX-XXXX lauten.",
+    "ptre.remove": "Entfernen",
+    "ptre.removed": "Team Key entfernt: Future sendet nichts mehr an PTRE.",
+    "ptre.errors": "Letzte Fehler von PTRE",
+    "ptre.noErrors": "Keine Fehler.",
+    "ptre.save": "In PTRE speichern",
+    "ptre.saving": "Wird an PTRE gesendet…",
+    "ptre.saved": "In PTRE gespeichert",
+    "ptre.saveFailed": "PTRE hat ihn nicht gespeichert: {message}. Klick für einen neuen Versuch."
   };
 
   // src/core/i18n.ts
@@ -6353,16 +6441,82 @@
   }
 
   // src/engines/reset.ts
-  var RESET_SETTINGS = [...CARRY_COPY, MARKS_VIEW, SETTINGS_KEY, PROFILES_KEY];
+  var RESET_SETTINGS = [...CARRY_COPY, MARKS_VIEW, SETTINGS_KEY, PROFILES_KEY, "ptre.teamKey"];
   var RESET_STATS = [JOURNAL_KEY, HISTORY_KEY, ARCHIVE_KEY, MULT_KEY];
   function resetKeys(held, namespace, kind) {
     const names = new Set((kind === "settings" ? RESET_SETTINGS : RESET_STATS).map((k) => `${namespace}:${k}`));
     return held.filter((k) => names.has(k));
   }
 
+  // src/data/ptre.ts
+  var PTRE_KEY = "ptre.ranks";
+  var TTL = 6 * 36e5;
+  function parsePtreRanks(json2, readAt) {
+    const d = json2 ?? {};
+    if (Number(d.code) !== 1 || !Array.isArray(d.ranks_array) || !d.ranks_array.length) return null;
+    const scores = {};
+    for (const r of d.ranks_array) {
+      const id = String(r.player_id ?? "");
+      const score = Number(r.total_score);
+      if (/^\d+$/.test(id) && Number.isFinite(score)) scores[id] = score;
+    }
+    const at = Number(d.ranks_array[0]?.timestamp) * 1e3;
+    return Object.keys(scores).length && Number.isFinite(at) ? { readAt, at, scores } : null;
+  }
+  function ptreServer(host) {
+    const m = /^s(\d+)-([a-z]+)\./.exec(host);
+    return m ? { univers: m[1], country: m[2] } : null;
+  }
+  async function ptreRanks(deps) {
+    const now = deps.now ?? Date.now();
+    const stored = deps.store.get(PTRE_KEY, null);
+    if (stored && now - stored.readAt < TTL) return stored;
+    const server = ptreServer(deps.host);
+    if (!server) return stored;
+    const query = new URLSearchParams({ country: server.country, univers: server.univers, timestamp: "-1", tool: "future" });
+    const res = await deps.guard.request(`${PTRE_RANKS}?${query}`, "user-view");
+    const fresh = res.ok ? parsePtreRanks(await res.json().catch(() => null), now) : null;
+    if (!fresh) return stored;
+    deps.store.set(PTRE_KEY, fresh);
+    return fresh;
+  }
+  var TEAM_KEY = "ptre.teamKey";
+  var ERRORS_KEY = "ptre.errors";
+  var ERRORS_MAX = 10;
+  function normalTeamKey(text) {
+    const tk = text.trim().toUpperCase();
+    return /^TM[A-Z0-9]{16}$/.test(tk.replace(/-/g, "")) ? tk : null;
+  }
+  var teamKeyOf = (store) => normalTeamKey(store.get(TEAM_KEY, ""));
+  async function ptreCall(deps, script, params, init = {}) {
+    const key = teamKeyOf(deps.store);
+    const server = ptreServer(deps.host);
+    if (!key || !server) return { ok: false, message: key ? "server" : "no-key", data: null };
+    const query = new URLSearchParams({ ...params, tool: "future", team_key: key, country: server.country, univers: server.univers, version: deps.version });
+    let data = null;
+    try {
+      const res = await deps.guard.request(`${PTRE_BASE}${script}?${query}`, "user-sync", init);
+      data = await res.json().catch(() => null);
+    } catch (e) {
+      data = { code: "net", message: e instanceof Error ? e.message : String(e) };
+    }
+    const code = String(data?.code ?? "?");
+    const message = String(data?.message_verbose || data?.message || "");
+    const ok = code === "1";
+    if (!ok) {
+      const errors = deps.store.get(ERRORS_KEY, []);
+      deps.store.set(ERRORS_KEY, [...errors, { at: deps.now?.() ?? Date.now(), code, message }].slice(-ERRORS_MAX));
+    }
+    return { ok, message, data };
+  }
+  async function ptreSaveSpyReport(deps, apiKey) {
+    const { ok, message } = await ptreCall(deps, "oglight_import.php", { sr_id: apiKey }, { method: "POST" });
+    return { ok, message };
+  }
+
   // src/data/server-data.ts
   var SERVER_DATA_KEY = "server.data";
-  var TTL = 7 * 24 * 36e5;
+  var TTL2 = 7 * 24 * 36e5;
   function parseServerData(xml, now) {
     const doc = new DOMParser().parseFromString(xml, "text/html");
     const root = doc.querySelector("serverdata");
@@ -6382,7 +6536,7 @@
   async function loadServerDataOnPageLoad(deps) {
     const now = deps.now ?? Date.now();
     const cached = deps.store.get(SERVER_DATA_KEY, null);
-    if (cached && now - cached.at < TTL) return cached;
+    if (cached && now - cached.at < TTL2) return cached;
     const res = await deps.guard.request(`${deps.origin}/api/serverData.xml`, "page-load");
     const fresh = res.ok ? parseServerData(await res.text(), now) : null;
     if (!fresh) return cached;
@@ -6687,6 +6841,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     sword: '<path d="M19.5 4.5L9 15M19.5 4.5V9M19.5 4.5H15"/><path d="M6.5 12.5l5 5M8 16l-3.5 3.5"/>',
     play: '<path d="M8 5.5v13l10.5-6.5z"/>',
     trash: '<path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/>',
+    upload: '<path d="M12 15.5V4.5M7.5 9L12 4.5 16.5 9"/><path d="M4.5 15v4.5h15V15"/>',
     more: '<path d="M5.5 12h.01M12 12h.01M18.5 12h.01" stroke-width="3.2"/>',
     help: '<circle cx="12" cy="12" r="9"/><path d="M9.4 9.3a2.7 2.7 0 1 1 3.7 2.5c-.7.3-1.1.9-1.1 1.6v.5M12 16.9v.2"/>'
   };
@@ -6954,7 +7109,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
   // src/data/player-api.ts
   var PLAYER_SCORES_KEY = "galaxy.players";
-  var TTL2 = 60 * 60 * 1e3;
+  var TTL3 = 60 * 60 * 1e3;
   var KEEP = 400;
   var SCORE_TYPES = { total: 0, economy: 1, research: 2, military: 3, lifeform: 8 };
   function parsePlayerData(xml, now) {
@@ -6985,7 +7140,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   async function playerScores(guard, store, origin, id, now) {
     const cache = store.get(PLAYER_SCORES_KEY, {});
     const hit = cache[String(id)];
-    if (hit && hit.planets && now - hit.at < TTL2) return hit;
+    if (hit && hit.planets && now - hit.at < TTL3) return hit;
     const res = await guard.request(`${origin}/api/playerData.xml?id=${id}`, "user-view");
     if (!res.ok) return hit ?? null;
     const fresh = parsePlayerData(await res.text(), now);
@@ -7177,7 +7332,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
   // src/data/universe-players.ts
   var UNIVERSE_PLAYERS_KEY = "universe.players";
-  var TTL3 = 24 * 36e5;
+  var TTL4 = 24 * 36e5;
   function parsePlayersXml(xml, now) {
     const doc = new DOMParser().parseFromString(xml, "text/html");
     const root = doc.querySelector("players");
@@ -7202,7 +7357,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   async function universePlayers(deps) {
     const now = deps.now ?? Date.now();
     const cached = deps.store.get(UNIVERSE_PLAYERS_KEY, null);
-    if (cached && now - cached.at < TTL3) return cached;
+    if (cached && now - cached.at < TTL4) return cached;
     const res = await deps.guard.request(`${deps.origin}/api/players.xml`, "user-view");
     const fresh = res.ok ? parsePlayersXml(await res.text(), now) : null;
     if (!fresh) return cached;
@@ -7212,7 +7367,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
   // src/data/universe-ranks.ts
   var UNIVERSE_RANKS_KEY = "universe.ranks";
-  var TTL4 = 36e5;
+  var TTL5 = 36e5;
   function parseHighscoreXml(xml, now) {
     const doc = new DOMParser().parseFromString(xml, "text/html");
     const root = doc.querySelector("highscore");
@@ -7229,7 +7384,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   async function universeRanks(deps) {
     const now = deps.now ?? Date.now();
     const cached = deps.store.get(UNIVERSE_RANKS_KEY, null);
-    if (cached && now - cached.at < TTL4) return cached;
+    if (cached && now - cached.at < TTL5) return cached;
     const res = await deps.guard.request(`${deps.origin}/api/highscore.xml?category=1&type=0`, "user-view");
     const fresh = res.ok ? parseHighscoreXml(await res.text(), now) : null;
     if (!fresh) return cached;
@@ -9330,6 +9485,10 @@ ${outcomeCss}
 #fut-spypanel .fut-sp-attack { color: var(--attack); }
 #fut-spypanel .fut-sp-attack:hover { color: var(--hi); border-color: var(--attack-line); background: rgba(192, 83, 63, 0.3); }
 #fut-spypanel .fut-sp-sim { color: var(--sim); }
+#fut-spypanel .fut-sp-ptre { color: var(--sim); }
+#fut-spypanel .fut-sp-ptre.ok { color: var(--ok); }
+#fut-spypanel .fut-sp-ptre.bad { color: var(--neg); border-color: rgba(240, 122, 110, 0.5); }
+#fut-spypanel .fut-sp-ptre[aria-busy="true"] { opacity: 0.5; cursor: progress; }
 #fut-spypanel .fut-sp-del:hover { color: var(--neg); border-color: rgba(240, 122, 110, 0.5); background: rgba(240, 122, 110, 0.14); }
 .fut-sp-waves { padding: 6px 8px 8px 34px; background: rgba(79, 209, 232, 0.05); border-radius: 0 0 3px 3px; }
 .fut-sp-wgrid { display: grid; grid-template-columns: 120px repeat(6, minmax(0, 1fr)); align-items: center; column-gap: 6px; row-gap: 0; max-width: 560px; }
@@ -9474,6 +9633,9 @@ td.spark-cell { width: 90px; }
   var RIGHT = ["loot", "fleet", "def"];
   var DEFAULT_VIEW = { sort: "loot", desc: true, cols: COLS, hideDefended: false, inactiveOnly: false, open: true };
   var expanded = /* @__PURE__ */ new Set();
+  var PTRE_SENT_KEY = "ptre.sentReports";
+  var PTRE_SENT_MAX = 500;
+  var ptreState = /* @__PURE__ */ new Map();
   function universeOf2(doc, data) {
     const meta = (name) => doc.querySelector(`meta[name="${name}"]`)?.getAttribute("content") ?? "";
     return {
@@ -9547,7 +9709,7 @@ td.spark-cell { width: 90px; }
     const view2 = { ...DEFAULT_VIEW, ...o.store.get(VIEW_KEY2, {}) };
     if (!COLS.includes(view2.sort)) view2.sort = "loot";
     view2.cols = columnOrder(view2.cols);
-    const prefs = [o.store.get(SPY_SHARED_KEY, true), o.store.get(SIM_KEY, "osims"), [...expanded]];
+    const prefs = [o.store.get(SPY_SHARED_KEY, true), o.store.get(SIM_KEY, "osims"), [...expanded], !!o.spy.ptre, [...ptreState], Object.keys(o.store.get(PTRE_SENT_KEY, {})).length];
     const sig = JSON.stringify([Object.values(board).map((e) => e.id), view2, prefs, Math.floor((o.now?.() ?? Date.now()) / 6e4)]);
     if (old && old.dataset.sig === sig && old.nextElementSibling === anchor) return;
     const focus = doc.activeElement?.closest(`#${SPY_PANEL_ID}`) ? doc.activeElement.dataset.focus : void 0;
@@ -9594,7 +9756,7 @@ td.spark-cell { width: 90px; }
     const meta = (name) => doc.querySelector(`meta[name="ogame-planet-${name}"]`)?.getAttribute("content") ?? "";
     const here = Number(meta("id")) > 0 ? { id: Number(meta("id")), name: meta("name"), coords: meta("coordinates"), moon: meta("type") === "moon" } : null;
     const baseName = (b) => b.name || doc.querySelector(`#planet-${b.id} .planet-name, #planet-${b.id} .moon-name`)?.textContent?.trim() || "";
-    const grid2 = `22px ${view2.cols.map((c) => WIDTH[c]).join(" ")} 104px`;
+    const grid2 = `22px ${view2.cols.map((c) => WIDTH[c]).join(" ")} ${spy.ptre ? 130 : 104}px`;
     const panel = el7("div", "fut-sp");
     panel.id = SPY_PANEL_ID;
     const head = el7("div", "fut-sp-head");
@@ -9769,6 +9931,29 @@ td.spark-cell { width: 90px; }
           const prefill = simPrefill(spy.server, from ? { coords: from.coords, researches: spy.researches, classId: spy.classId, allianceClass: spy.allianceClass, lf: spy.lf ?? void 0 } : null, e.coords);
           doc.defaultView?.open(simLink(tool, key, spy.lang, prefill), "_blank", "noopener");
         }));
+      }
+      if (e.apiKey && spy.ptre) {
+        const key = e.apiKey;
+        const save = spy.ptre;
+        const sent = store.get(PTRE_SENT_KEY, {})[key];
+        const state = ptreState.get(key);
+        const label = state?.busy ? t("ptre.saving") : state?.error ? t("ptre.saveFailed", { message: state.error }) : sent ? t("ptre.saved") : t("ptre.save");
+        const b = iconButton3(`fut-sp-ptre${sent && !state?.error ? " ok" : ""}${state?.error ? " bad" : ""}`, sent && !state?.error ? "check" : "upload", label, () => {
+          if (ptreState.get(key)?.busy) return;
+          ptreState.set(key, { busy: true, error: "" });
+          mountSpyPanel(o);
+          void save(key).then((r2) => {
+            if (r2.ok) {
+              ptreState.delete(key);
+              const all3 = { ...store.get(PTRE_SENT_KEY, {}), [key]: Date.now() };
+              store.set(PTRE_SENT_KEY, Object.fromEntries(Object.entries(all3).sort((a, b2) => a[1] - b2[1]).slice(-PTRE_SENT_MAX)));
+            } else ptreState.set(key, { busy: false, error: r2.message || "?" });
+            mountSpyPanel(o);
+          });
+        });
+        b.dataset.focus = `ptre-${e.key}`;
+        if (state?.busy) b.setAttribute("aria-busy", "true");
+        acts.append(b);
       }
       acts.append(iconButton3("fut-sp-del", "trash", t(e.shared ? "spy.removeShared" : "spy.remove"), () => {
         store.set(SPY_DISMISSED_KEY, dismissSpy(store.get(SPY_DISMISSED_KEY, {}), e.key, e.at, Date.now()));
@@ -13816,7 +14001,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   // src/modules/settings/index.ts
   var SETTINGS_ID = "fut-settings-window";
   var TAB_KEY = "settings.tab";
-  var SECTIONS = ["menu", "mail", "galaxy", "fleet", "bodies", "keys", "data", "guide"];
+  var SECTIONS = ["menu", "mail", "galaxy", "fleet", "bodies", "keys", "data", "ptre", "guide"];
   var CSS5 = `
 :host { --panel-w: 620px; }
 .body { display: flex; flex-direction: column; }
@@ -13847,6 +14032,12 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 .seg.confirm { border-color: var(--warn); color: var(--warn); font-weight: 700; }
 .status { min-height: 16px; padding: 0 4px; color: var(--accent); font-size: 11px; }
 .notes { padding: 2px 4px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.fut-ptre-intro { margin-bottom: 8px; padding: 0 4px; }
+.fut-ptre-intro p, .fut-ptre-errors p { margin: 0 0 6px; }
+.fut-ptre-intro a { color: var(--accent); }
+.fut-ptre-errors { margin-top: 4px; }
+.fut-ptre-errors b { display: block; margin-bottom: 4px; color: var(--text); font-size: 12px; }
+.fut-ptre-key { align-self: center; margin-right: 8px; color: var(--text); font: 12px ui-monospace, Menlo, Consolas, monospace; letter-spacing: 0.04em; }
 .field { height: 26px; width: 190px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: 12px Arial, sans-serif; }
 input.field { width: 190px; }
 .field:hover { border-color: #2B6F7D; }
@@ -14123,6 +14314,62 @@ input.field { width: 190px; }
       }
       return row(t(`settings.reset.${kind}`), t(`settings.reset.${kind}Hint`), box);
     });
+    const ptreRows = () => {
+      const lang = doc.documentElement.lang || "it";
+      const key = normalTeamKey(store.get(TEAM_KEY, ""));
+      const intro = el7("div", "notes fut-ptre-intro");
+      for (const line of t("ptre.consent").split("\n")) intro.append(el7("p", "", line));
+      const link = el7("a", "", t("ptre.open"));
+      link.href = "https://ptre.chez.gg/";
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      intro.append(link);
+      const box = el7("span", "control");
+      if (key) {
+        const shown3 = el7("span", "fut-ptre-key", `TM-••••-••••-••••-${key.replace(/-/g, "").slice(-4)}`);
+        const drop = el7("button", "seg", t("ptre.remove"));
+        drop.type = "button";
+        drop.addEventListener("click", () => {
+          store.delete(TEAM_KEY);
+          status = t("ptre.removed");
+          draw();
+        });
+        box.append(shown3, drop);
+      } else {
+        const input = el7("input", "field");
+        input.type = "password";
+        input.autocomplete = "off";
+        input.placeholder = "TM-XXXX-XXXX-XXXX-XXXX";
+        input.setAttribute("aria-label", t("ptre.key"));
+        input.addEventListener("keydown", (e) => {
+          e.stopPropagation();
+          if (e.key === "Enter") save.click();
+        });
+        const save = el7("button", "seg", t("ptre.keySave"));
+        save.type = "button";
+        save.addEventListener("click", () => {
+          const next = normalTeamKey(input.value);
+          if (next) store.set(TEAM_KEY, next);
+          status = next ? t("ptre.keySaved") : t("ptre.keyBad");
+          draw();
+        });
+        box.append(input, save);
+      }
+      const rows = [intro, row(t("ptre.key"), t(key ? "ptre.keyOnHint" : "ptre.keyHint"), box)];
+      const st = el7("div", "status", status);
+      st.setAttribute("role", "status");
+      rows.push(st);
+      const errors = store.get(ERRORS_KEY, []);
+      const list = el7("div", "notes fut-ptre-errors");
+      list.append(el7("b", "", t("ptre.errors")));
+      if (!errors.length) list.append(el7("p", "", t("ptre.noErrors")));
+      for (const e of [...errors].reverse()) {
+        const when = new Date(e.at).toLocaleString(lang, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+        list.append(el7("p", "", `${when} · ${e.code} · ${e.message || "—"}`));
+      }
+      rows.push(list);
+      return rows;
+    };
     const keyRows = () => {
       const map = keymap(store);
       const out = [
@@ -14324,6 +14571,8 @@ input.field { width: 190px; }
         body.append(rulesPanel);
       } else if (section2 === "keys") {
         body.append(...keyRows());
+      } else if (section2 === "ptre") {
+        body.append(...ptreRows());
       } else if (section2 === "guide" && o.guide) {
         body.append(...o.guide(draw));
       } else {
@@ -19768,39 +20017,6 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     return { category, rows };
   }
 
-  // src/data/ptre.ts
-  var PTRE_KEY = "ptre.ranks";
-  var TTL5 = 6 * 36e5;
-  function parsePtreRanks(json2, readAt) {
-    const d = json2 ?? {};
-    if (Number(d.code) !== 1 || !Array.isArray(d.ranks_array) || !d.ranks_array.length) return null;
-    const scores = {};
-    for (const r of d.ranks_array) {
-      const id = String(r.player_id ?? "");
-      const score = Number(r.total_score);
-      if (/^\d+$/.test(id) && Number.isFinite(score)) scores[id] = score;
-    }
-    const at = Number(d.ranks_array[0]?.timestamp) * 1e3;
-    return Object.keys(scores).length && Number.isFinite(at) ? { readAt, at, scores } : null;
-  }
-  function ptreServer(host) {
-    const m = /^s(\d+)-([a-z]+)\./.exec(host);
-    return m ? { univers: m[1], country: m[2] } : null;
-  }
-  async function ptreRanks(deps) {
-    const now = deps.now ?? Date.now();
-    const stored = deps.store.get(PTRE_KEY, null);
-    if (stored && now - stored.readAt < TTL5) return stored;
-    const server = ptreServer(deps.host);
-    if (!server) return stored;
-    const query = new URLSearchParams({ country: server.country, univers: server.univers, timestamp: "-1", tool: "future" });
-    const res = await deps.guard.request(`${PTRE_RANKS}?${query}`, "user-view");
-    const fresh = res.ok ? parsePtreRanks(await res.json().catch(() => null), now) : null;
-    if (!fresh) return stored;
-    deps.store.set(PTRE_KEY, fresh);
-    return fresh;
-  }
-
   // src/modules/highscore/index.ts
   var ptreSeen = /* @__PURE__ */ new WeakMap();
   var isHighscorePage = (doc) => new URL(doc.location?.href ?? "http://x/").searchParams.get("component") === "highscore";
@@ -20735,6 +20951,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
     const guard = new NetworkGuard((input, init) => fetch(input, init), window.location.origin);
     const gm = new GMStore();
     const store = new Store(gm, namespace);
+    const ptreDeps = { guard, store, host: location.host, version: typeof GM_info === "undefined" ? "" : GM_info?.script.version ?? "" };
     const moved = migrateOld(loadMarks(store.get(MARKS_KEY, null)), {
       targets: store.get(TARGETS_KEY, []),
       rivals: store.get("rivals.list", [])
@@ -21203,7 +21420,9 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
           server: pageMeta("ogame-universe").split(".")[0] ?? "",
           lang: pageMeta("ogame-ui-language") || pageMeta("ogame-language"),
           allianceClass: Number(pageMeta("ogame-allianceclass-id")) || 0,
-          lf: store.get(LF_BONUS_KEY, null)
+          lf: store.get(LF_BONUS_KEY, null),
+          // Only with the player's team key: no key, no PTRE button, nothing sent.
+          ptre: teamKeyOf(store) ? (apiKey) => ptreSaveSpyReport(ptreDeps, apiKey) : void 0
         }
       });
     if (isFleetDispatch(document) && currentId) {

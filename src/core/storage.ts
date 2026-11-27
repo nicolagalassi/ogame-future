@@ -58,6 +58,10 @@ export class Store {
   set(key: string, value: unknown): void {
     this.kv.set(`${this.namespace}:${key}`, value);
   }
+
+  delete(key: string): void {
+    this.kv.delete(`${this.namespace}:${key}`);
+  }
 }
 
 /** Reads universe and player id from the meta tags OGame puts on every game page. */

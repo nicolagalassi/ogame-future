@@ -17,6 +17,7 @@ import { FLIGHTS_KEY, flyingTotal, watchFlights, type Flights } from './data/fli
 import { SCORE_KEY, watchScore, type Score } from './data/score';
 import { HISTORY_KEY, recordDay, type History } from './engines/history';
 import { resetKeys } from './engines/reset';
+import { ptreSaveSpyReport, teamKeyOf } from './data/ptre';
 import { loadServerDataOnPageLoad } from './data/server-data';
 import { highlightPosition, isGalaxyPage, TARGETS_KEY, watchGalaxy } from './modules/galaxy';
 import { nextInSide, onSideNavigate, openSide, refreshSide, restoreSide, toggleSide } from './modules/marks/side';
@@ -73,6 +74,8 @@ async function bootstrap(): Promise<void> {
   const guard = new NetworkGuard((input, init) => fetch(input, init), window.location.origin);
   const gm = new GMStore();
   const store = new Store(gm, namespace);
+  // PTRE (team key in Settings › PTRE): Future's version goes with every call, as OGLight sends its own.
+  const ptreDeps = { guard, store, host: location.host, version: typeof GM_info === 'undefined' ? '' : (GM_info?.script.version ?? '') };
   // One-time move of the galaxy targets and rivals kept before 2026-11-06 into the new marks.
   const moved = migrateOld(loadMarks(store.get<Partial<Marks> | null>(MARKS_KEY, null)), {
     targets: store.get<{ coords: string; planet: string; player: string; at: number }[]>(TARGETS_KEY, []),
@@ -589,6 +592,8 @@ async function bootstrap(): Promise<void> {
         lang: pageMeta('ogame-ui-language') || pageMeta('ogame-language'),
         allianceClass: Number(pageMeta('ogame-allianceclass-id')) || 0,
         lf: store.get<LfBonuses | null>(LF_BONUS_KEY, null),
+        // Only with the player's team key: no key, no PTRE button, nothing sent.
+        ptre: teamKeyOf(store) ? (apiKey: string) => ptreSaveSpyReport(ptreDeps, apiKey) : undefined,
       },
     });
 

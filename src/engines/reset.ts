@@ -13,8 +13,8 @@ import { ARCHIVE_KEY, MULT_KEY } from './orion';
 
 export type ResetKind = 'settings' | 'stats';
 
-/** Every choice made in Future's windows, the planets' and moons' rules included. */
-export const RESET_SETTINGS = [...CARRY_COPY, MARKS_VIEW, SETTINGS_KEY, PROFILES_KEY];
+/** Every choice made in Future's windows, the planets' and moons' rules and PTRE's team key included. */
+export const RESET_SETTINGS = [...CARRY_COPY, MARKS_VIEW, SETTINGS_KEY, PROFILES_KEY, 'ptre.teamKey'];
 /** The expedition and raid journal, the account's history and Orion's statistics. */
 export const RESET_STATS = [JOURNAL_KEY, HISTORY_KEY, ARCHIVE_KEY, MULT_KEY];
 

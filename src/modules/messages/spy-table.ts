@@ -59,7 +59,15 @@ export interface SpyContext {
   /** Alliance class id and lifeform bonuses, for the simulators (as OGLight fills them). */
   allianceClass?: number;
   lf?: LfBonuses | null;
+  /** Saves one report to the team's PTRE (only when the player has set a team key). */
+  ptre?: (apiKey: string) => Promise<{ ok: boolean; message: string }>;
 }
+
+/** Reports saved to PTRE (API id → when), so the mark stays after a reload. */
+export const PTRE_SENT_KEY = 'ptre.sentReports';
+const PTRE_SENT_MAX = 500;
+/** A save under way or refused, for this page only: PTRE's message on the button. */
+const ptreState = new Map<string, { busy: boolean; error: string }>();
 
 export interface SpyPanelOptions {
   doc: Document;
@@ -163,7 +171,7 @@ export function mountSpyPanel(o: SpyPanelOptions): void {
   // A sort saved before 2026-11-10 (MSU per hour, flight) falls back to the loot.
   if (!COLS.includes(view.sort)) view.sort = 'loot';
   view.cols = columnOrder(view.cols);
-  const prefs = [o.store.get<boolean>(SPY_SHARED_KEY, true), o.store.get<string>(SIM_KEY, 'osims'), [...expanded]];
+  const prefs = [o.store.get<boolean>(SPY_SHARED_KEY, true), o.store.get<string>(SIM_KEY, 'osims'), [...expanded], !!o.spy.ptre, [...ptreState], Object.keys(o.store.get<Record<string, number>>(PTRE_SENT_KEY, {})).length];
   const sig = JSON.stringify([Object.values(board).map((e) => e.id), view, prefs, Math.floor((o.now?.() ?? Date.now()) / 60_000)]);
   if (old && old.dataset.sig === sig && old.nextElementSibling === anchor) return;
   // Keep the keyboard where it was across the redraw.
@@ -215,7 +223,7 @@ function renderPanel(o: SpyPanelOptions, board: SpyBoard, view: View): HTMLEleme
   const meta = (name: string) => doc.querySelector(`meta[name="ogame-planet-${name}"]`)?.getAttribute('content') ?? '';
   const here: Base | null = Number(meta('id')) > 0 ? { id: Number(meta('id')), name: meta('name'), coords: meta('coordinates'), moon: meta('type') === 'moon' } : null;
   const baseName = (b: Base) => b.name || doc.querySelector(`#planet-${b.id} .planet-name, #planet-${b.id} .moon-name`)?.textContent?.trim() || '';
-  const grid = `22px ${view.cols.map((c) => WIDTH[c]).join(' ')} 104px`;
+  const grid = `22px ${view.cols.map((c) => WIDTH[c]).join(' ')} ${spy.ptre ? 130 : 104}px`;
 
   const panel = el('div', 'fut-sp');
   panel.id = SPY_PANEL_ID;
@@ -402,6 +410,31 @@ function renderPanel(o: SpyPanelOptions, board: SpyBoard, view: View): HTMLEleme
         const prefill = simPrefill(spy.server, from ? { coords: from.coords, researches: spy.researches, classId: spy.classId, allianceClass: spy.allianceClass, lf: spy.lf ?? undefined } : null, e.coords);
         doc.defaultView?.open(simLink(tool, key, spy.lang, prefill), '_blank', 'noopener');
       }));
+    }
+    // PTRE: one click saves this one report to the team (its API id only), as OGLight's button does.
+    // COMPLIANCE (AGENTS.md §1.1, §1.9): one click, one report; only with the player's team key.
+    if (e.apiKey && spy.ptre) {
+      const key = e.apiKey;
+      const save = spy.ptre;
+      const sent = store.get<Record<string, number>>(PTRE_SENT_KEY, {})[key];
+      const state = ptreState.get(key);
+      const label = state?.busy ? t('ptre.saving') : state?.error ? t('ptre.saveFailed', { message: state.error }) : sent ? t('ptre.saved') : t('ptre.save');
+      const b = iconButton(`fut-sp-ptre${sent && !state?.error ? ' ok' : ''}${state?.error ? ' bad' : ''}`, sent && !state?.error ? 'check' : 'upload', label, () => {
+        if (ptreState.get(key)?.busy) return;
+        ptreState.set(key, { busy: true, error: '' });
+        mountSpyPanel(o);
+        void save(key).then((r) => {
+          if (r.ok) {
+            ptreState.delete(key);
+            const all = { ...store.get<Record<string, number>>(PTRE_SENT_KEY, {}), [key]: Date.now() };
+            store.set(PTRE_SENT_KEY, Object.fromEntries(Object.entries(all).sort((a, b) => a[1] - b[1]).slice(-PTRE_SENT_MAX)));
+          } else ptreState.set(key, { busy: false, error: r.message || '?' });
+          mountSpyPanel(o);
+        });
+      });
+      b.dataset.focus = `ptre-${e.key}`;
+      if (state?.busy) b.setAttribute('aria-busy', 'true');
+      acts.append(b);
     }
     acts.append(iconButton('fut-sp-del', 'trash', t(e.shared ? 'spy.removeShared' : 'spy.remove'), () => {
       // First locally, so a re-read of the inbox (the game's delete changes it) cannot bring the row back.

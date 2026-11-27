@@ -114,6 +114,25 @@ describe('expedition share calculator', () => {
     expect(w.root.textContent).not.toContain('s150-it · giocatore');
   });
 
+  it('PTRE: the key is checked, kept masked, removed on request', () => {
+    const store = new Store(new MemoryStore(), 'x');
+    const w = open(store);
+    w.tab('PTRE').click();
+    const input = () => w.root.querySelector<HTMLInputElement>('input[type="password"]')!;
+    input().value = 'not a key';
+    w.seg('Salva', 'Team key').click();
+    expect(w.root.querySelector('.status')!.textContent).toMatch(/^Non è una team key/);
+    expect(store.get('ptre.teamKey', null)).toBeNull();
+    input().value = 'tm-aaaa-bbbb-cccc-dddd';
+    w.seg('Salva', 'Team key').click();
+    expect(store.get('ptre.teamKey', null)).toBe('TM-AAAA-BBBB-CCCC-DDDD');
+    // Only the last group is shown, never the whole key.
+    expect(w.root.querySelector('.fut-ptre-key')!.textContent).toBe('TM-••••-••••-••••-DDDD');
+    expect(w.root.textContent).not.toContain('AAAA');
+    w.seg('Rimuovi', 'Team key').click();
+    expect(store.get('ptre.teamKey', null)).toBeNull();
+  });
+
   it('resets only on the second press, and «Annulla» leaves everything as it was', () => {
     const reset = vi.fn((kind: string) => `fatto ${kind}`);
     const w = open(new Store(new MemoryStore(), 'x'), { backup: { onExport: () => 0, onImport: () => 0 }, reset });

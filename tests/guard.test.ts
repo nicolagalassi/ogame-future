@@ -55,6 +55,22 @@ describe('NetworkGuard', () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
+  it("calls the team's PTRE only from a click, only on its listed scripts, and never logs the team key", async () => {
+    const fetchImpl = ok();
+    const guard = new NetworkGuard(fetchImpl, ORIGIN);
+    guard.closePageLoadWindow();
+    const save = 'https://ptre.chez.gg/scripts/oglight_import.php?sr_id=sr-it-1-ab&tool=future&team_key=TM-AAAA-BBBB-CCCC-DDDD';
+    await guard.request(save, 'user-sync', { method: 'POST' });
+    expect(fetchImpl.mock.calls[0]?.[1]).toMatchObject({ method: 'POST', credentials: 'omit' });
+    expect(guard.log[0]!.url).toBe('https://ptre.chez.gg/scripts/oglight_import.php?sr_id=sr-it-1-ab&tool=future&team_key=***');
+    // The key never leaves on simply looking at a page, nor on a script Future does not list.
+    await expect(guard.request(save, 'user-view')).rejects.toBeInstanceOf(GuardError);
+    await expect(guard.request('https://ptre.chez.gg/scripts/oglight_update_version.php', 'user-sync')).rejects.toBeInstanceOf(GuardError);
+    await expect(guard.request('https://ptre.chez.gg/scripts/../scripts/api_galaxy_get_infos.php', 'user-sync')).rejects.toBeInstanceOf(GuardError);
+    expect(JSON.stringify(guard.log)).not.toContain('TM-AAAA');
+    expect(fetchImpl).toHaveBeenCalledOnce();
+  });
+
   it('lets what the player points at read the public API only, without cookies', async () => {
     const fetchImpl = ok();
     const guard = new NetworkGuard(fetchImpl, ORIGIN);
