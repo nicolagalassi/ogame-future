@@ -23,7 +23,7 @@ import { icon, type IconName } from '../../core/icons';
 import type { NetworkGuard } from '../../core/guard';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
-import { pageWindow } from '../../data/fleet-dispatcher';
+import { pageWindow, SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import type { Activity } from '../../data/galaxy';
 import { PLAYER_SCORES_KEY, playerScores, type PlayerScores, type ScoreType } from '../../data/player-api';
 import { statusNames, universePlayers, type UniversePlayers } from '../../data/universe-players';
@@ -31,6 +31,8 @@ import { UNIVERSE_RANKS_KEY, universeRanks, type UniverseRanks } from '../../dat
 import { FLAGS, loadMarks, MARKS_KEY, notePlayer, rememberRecent, renamePlayers, type Flag, type Marks } from '../../engines/marks';
 import { ageParts, planetsOf, POSITIONS_KEY, type Positions, type Seen } from '../../engines/positions';
 import { FLAG_COLORS, flagButton, markIcon, MARKS_CSS } from './picker';
+import { PTRE_FRAMES, ptrePlayerInfo, ptreProfileUrl, teamKeyOf, type PtreDeps, type PtreFrame, type PtrePlayer } from '../../data/ptre';
+import { shipName } from '../../data/ship-icons';
 
 type T = (key: string, vars?: Record<string, string | number>) => string;
 
@@ -55,9 +57,15 @@ export interface SideOptions {
   guard: NetworkGuard;
   t: T;
   locale: string;
+  /** The team's PTRE (Settings › PTRE): the player sheet's «PTRE» button, only while a team key is saved. */
+  ptre?: PtreDeps;
 }
 
 let last: SideOptions | null = null;
+/** PTRE on the player sheet: whose panel is open, the frame picked, the answers already read this page. */
+let ptreOpen: number | null = null;
+let ptreFrame: PtreFrame = 'week';
+const ptreAnswers = new Map<string, { info: PtrePlayer | null; message: string } | 'loading'>();
 /** Player sheet data already fetched this page (no second request while redrawing). */
 const sheetData = new Map<number, PlayerScores | null>();
 let uni: UniversePlayers | null = null;
@@ -65,6 +73,9 @@ let uni: UniversePlayers | null = null;
 export function resetSideCache(): void {
   uni = null;
   ranksLoading = false;
+  ptreAnswers.clear();
+  ptreOpen = null;
+  ptreFrame = 'week';
 }
 /** One read of the ranks at a time (the list redraws often). */
 let ranksLoading = false;
@@ -121,6 +132,28 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .actions { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; flex: none; }
 .actions a { display: flex; align-items: center; justify-content: center; gap: 6px; height: 30px; padding: 0 4px; border-radius: 4px; background: var(--surface); color: var(--text-2); text-decoration: none; white-space: nowrap; overflow: hidden; }
 .actions a:hover { background: var(--hover); color: var(--text); }
+.actions button { all: unset; display: flex; align-items: center; justify-content: center; gap: 6px; height: 30px; padding: 0 4px; border-radius: 4px; background: var(--surface); color: var(--text-2); white-space: nowrap; overflow: hidden; cursor: pointer; }
+.actions button:hover { background: var(--hover); color: var(--text); }
+.actions a, .actions button { transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.actions a:active, .actions button:active { transform: scale(0.97); }
+.actions button[aria-expanded="true"] { background: var(--hover); color: var(--text); box-shadow: inset 0 2px 0 var(--accent); }
+/* PTRE: the player's activity through the day and the team's best report on them. */
+.ptre { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; padding: 8px; border-radius: 4px; background: var(--surface); }
+.ptre .chips .chip { min-width: 0; font-size: 11px; background: var(--raised); }
+.ptre .chips .chip:hover { background: var(--hover); }
+.ptre .lbl { color: var(--label); font-size: 11px; }
+.ptre .bars { display: flex; align-items: flex-end; gap: 2px; height: 44px; padding-top: 2px; }
+.ptre .bar { flex: 1 1 0; min-width: 0; height: max(3px, calc(var(--h) * 100%)); border-radius: 2px 2px 0 0; background: var(--fresh); }
+.ptre .bar.mid { background: var(--warm); } .ptre .bar.hot { background: var(--old); }
+.ptre .bar.none { background: var(--line-strong); }
+.ptre .axis { display: flex; justify-content: space-between; color: var(--quiet); font: condensed 11px var(--display); }
+.ptre .best { display: flex; flex-direction: column; gap: 4px; padding-top: 6px; border-top: 1px solid var(--line-soft); }
+.ptre .best b { color: var(--text); font: 600 condensed 14px var(--display); }
+.ptre .ships { display: flex; flex-wrap: wrap; gap: 2px 10px; color: var(--text-2); }
+.ptre .ships span b { font-size: 13px; }
+.ptre .links { display: flex; gap: 10px; }
+.ptre .links a { color: var(--accent); text-decoration: none; } .ptre .links a:hover { color: var(--accent-hi); }
+.ptre .msg { color: var(--label); line-height: 1.4; } .ptre .msg.err { color: var(--old); }
 /* The player's note. */
 .note { display: flex; align-items: flex-start; gap: 6px; padding: 6px 8px; border-radius: 4px; background: var(--surface); flex: none; }
 .note svg { flex: none; margin-top: 3px; color: var(--warn); }
@@ -557,6 +590,21 @@ function playerSheet(o: SideOptions, side: HTMLElement, scroll: HTMLElement, tit
   link('chart', t('marks.rank'), highscoreHref(id, rank));
   // The player's page on ostats.eu (asked by Nicola), in a new tab: a plain link, no request of ours.
   link('eye', 'ostats', ostatsUrl(doc.location?.host ?? '', id), true);
+  // PTRE: the team's data on this player, asked for with a click (AGENTS.md §1.9: only with a team key).
+  const ptre = o.ptre && teamKeyOf(store) ? o.ptre : null;
+  if (ptre) {
+    const b = h(doc, 'button');
+    b.type = 'button';
+    b.title = t('ptre.playerHint');
+    b.setAttribute('aria-expanded', String(ptreOpen === id));
+    b.append(icon(doc, 'chart', 13), h(doc, 'span', '', 'PTRE'));
+    b.addEventListener('click', () => {
+      ptreOpen = ptreOpen === id ? null : id;
+      if (ptreOpen === id) askPtre(ptre, id, name);
+      refreshSide();
+    });
+    actions.append(b);
+  }
   side.append(actions);
 
   // A note of the player's own on this one: kept with the flag, so it needs one.
@@ -576,6 +624,8 @@ function playerSheet(o: SideOptions, side: HTMLElement, scroll: HTMLElement, tit
     noteBox.append(area);
   } else noteBox.append(h(doc, 'span', '', t('marks.noteNeedsFlag')));
   side.append(noteBox);
+
+  if (ptre && ptreOpen === id) scroll.append(ptrePanel(o, ptre, id, name));
 
   if (!data) {
     scroll.append(h(doc, 'p', 'empty err', t('galaxy.apiError')));
@@ -623,4 +673,99 @@ function playerSheet(o: SideOptions, side: HTMLElement, scroll: HTMLElement, tit
   });
   scroll.append(wrap);
   scroll.append(h(doc, 'p', 'foot', t('marks.planets', { n: lines.length, moons: lines.filter((l) => l.moon).length }) + ' · ' + t('galaxy.apiAge', { time: new Date(data.at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) })));
+}
+
+/** Reads one player's PTRE data for the frame picked, once per page (a click asks again only for a new frame). */
+function askPtre(ptre: PtreDeps, id: number, name: string): void {
+  const key = `${id}|${ptreFrame}`;
+  if (ptreAnswers.has(key)) return;
+  ptreAnswers.set(key, 'loading');
+  void ptrePlayerInfo(ptre, { id, name }, ptreFrame)
+    .catch(() => ({ info: null, message: '' }))
+    .then((r) => {
+      ptreAnswers.set(key, r);
+      refreshSide();
+    });
+}
+
+/** The PTRE panel of the player sheet: frames, activity through the day, the team's best report. */
+function ptrePanel(o: SideOptions, ptre: PtreDeps, id: number, name: string): HTMLElement {
+  const { doc, t, locale, store } = o;
+  const box = h(doc, 'div', 'ptre');
+  const frames = h(doc, 'div', 'chips');
+  for (const f of PTRE_FRAMES) {
+    const c = h(doc, 'button', 'chip', t(`ptre.frame.${f}`));
+    c.type = 'button';
+    c.setAttribute('aria-pressed', String(f === ptreFrame));
+    c.addEventListener('click', () => {
+      ptreFrame = f;
+      askPtre(ptre, id, name);
+      refreshSide();
+    });
+    frames.append(c);
+  }
+  box.append(frames);
+  const answer = ptreAnswers.get(`${id}|${ptreFrame}`);
+  if (!answer || answer === 'loading') {
+    box.append(h(doc, 'p', 'msg', t('galaxy.loading')));
+    return box;
+  }
+  const profile = ptreProfileUrl(ptre.host, ptre.lang, id);
+  const links = h(doc, 'div', 'links');
+  const link = (text: string, href: string) => {
+    const a = h(doc, 'a', '', text);
+    a.href = href;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    links.append(a);
+  };
+  const { info } = answer;
+  if (!info) {
+    box.append(h(doc, 'p', 'msg err', t('ptre.failed', { message: answer.message === 'no-key' ? t('ptre.noKey') : answer.message === 'server' ? t('ptre.noServer') : answer.message || '?' })));
+    if (profile) link(t('ptre.profile'), profile);
+    box.append(links);
+    return box;
+  }
+  box.append(h(doc, 'span', 'lbl', t('ptre.activity')));
+  if (info.slots.length) {
+    const bars = h(doc, 'div', 'bars');
+    bars.setAttribute('role', 'img');
+    const busiest = info.max || Math.max(1, ...info.slots.map((s) => s.activity));
+    const words: string[] = [];
+    for (const s of info.slots) {
+      const ratio = Math.min(1, s.activity / busiest);
+      const bar = h(doc, 'span', `bar${!s.checked ? ' none' : s.activity === 0 ? '' : ratio < 0.34 ? ' mid' : ' hot'}`);
+      // Height: how active; strength: how well the team checked that hour (a faint bar says little).
+      bar.style.setProperty('--h', String(s.activity ? Math.max(0.12, ratio) : 0.06));
+      bar.style.opacity = String(0.3 + (0.7 * s.checked) / 100);
+      const tip = t('ptre.slot', { label: s.label, n: s.activity, pct: Math.round(s.checked) });
+      bar.title = tip;
+      words.push(tip);
+      bars.append(bar);
+    }
+    bars.setAttribute('aria-label', words.join('; '));
+    const axis = h(doc, 'div', 'axis');
+    const at = (i: number) => info.slots[Math.min(info.slots.length - 1, i)]?.label ?? '';
+    axis.append(h(doc, 'span', '', at(0)), h(doc, 'span', '', at(Math.floor(info.slots.length / 2))), h(doc, 'span', '', at(info.slots.length - 1)));
+    box.append(bars, axis);
+  } else box.append(h(doc, 'p', 'msg', t('ptre.noActivity')));
+
+  const best = h(doc, 'div', 'best');
+  if (info.best) {
+    const date = new Date(info.best.at).toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: '2-digit' });
+    best.append(h(doc, 'span', 'lbl', t('ptre.best', { date })), h(doc, 'b', '', t('ptre.bestFleet', { points: formatUnits(info.best.fleetPoints, locale) })));
+    const ships = h(doc, 'div', 'ships');
+    const known = store.get<ShipsInfo>(SHIPS_INFO_KEY, {});
+    for (const [ship, n] of Object.entries(info.best.ships).sort((a, b) => Number(a[0]) - Number(b[0]))) {
+      const s = h(doc, 'span', '', `${shipName(Number(ship), known, t)} `);
+      s.append(h(doc, 'b', 'mono', formatUnits(n, locale)));
+      ships.append(s);
+    }
+    if (ships.childElementCount) best.append(ships);
+    if (info.best.link) link(t('ptre.report'), info.best.link);
+  } else best.append(h(doc, 'p', 'msg', t('ptre.noBest')));
+  box.append(best);
+  if (profile) link(t('ptre.profile'), profile);
+  if (links.childElementCount) box.append(links);
+  return box;
 }
