@@ -127,8 +127,11 @@ export class NetworkGuard {
     if (this.isPtre(url) && reason === 'page-load') {
       return 'Call refused: PTRE only from what the player opens or clicks, never on its own.';
     }
-    if (reason === 'user-browse' && !(this.isPtre(url) && PTRE_BROWSE.has(new URL(url).pathname.split('/').pop() ?? ''))) {
-      return "Call refused: 'user-browse' reaches only PTRE's scripts sent to while playing (PTRE_BROWSE).";
+    // The scripts sent to while playing go only with 'user-browse' (behind «Send while playing»), and that
+    // reason reaches nothing else: the two kinds of PTRE call never borrow each other's way out.
+    const browse = this.isPtre(url) && PTRE_BROWSE.has(new URL(url).pathname.split('/').pop() ?? '');
+    if ((reason === 'user-browse') !== browse && (reason === 'user-browse' || this.isPtre(url))) {
+      return reason === 'user-browse' ? "Call refused: 'user-browse' reaches only PTRE's scripts sent to while playing (PTRE_BROWSE)." : "Call refused: PTRE's scripts sent to while playing go only as 'user-browse'.";
     }
     // The team's calls carry the player's key: only from a click, never from simply looking at a page.
     if (this.isPtre(url) && reason === 'user-view' && new URL(url).searchParams.has('team_key')) {
