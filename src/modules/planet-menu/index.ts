@@ -643,6 +643,34 @@ function flightChips(doc: Document, planet: BodyEvents | undefined, moon: BodyEv
   return line;
 }
 
+/**
+ * Many missions do not fit the name's width: first the chips draw closer, then the last ones give way to
+ * a «+N» (the fleets left out); the tooltip and the tap still list them all. Measured when the whole menu
+ * is drawn, and again once the board's font has loaded.
+ */
+function fitFlights(doc: Document, line: HTMLElement): void {
+  line.classList.remove('fut-fl-tight');
+  line.querySelector('.fut-fl-more')?.remove();
+  line.querySelectorAll<HTMLElement>('[hidden]').forEach((n) => (n.hidden = false));
+  const over = () => line.scrollWidth > line.clientWidth;
+  if (!over()) return;
+  line.classList.add('fut-fl-tight');
+  if (!over()) return;
+  const more = el(doc, 'span', 'fut-fl fut-fl-more');
+  line.append(more);
+  const shown = [...line.querySelectorAll<HTMLElement>('.fut-fl:not(.fut-fl-more), .fut-fl-moon')];
+  let left = 0;
+  while (shown.length) {
+    const last = shown.pop()!;
+    last.hidden = true;
+    left += last.classList.contains('fut-fl') ? Number(last.querySelector('.n')?.textContent || 1) : 0;
+    // The moon mark never closes the line.
+    if (shown.at(-1)?.classList.contains('fut-fl-moon')) shown.pop()!.hidden = true;
+    more.textContent = `+${left}`;
+    if (!over()) break;
+  }
+}
+
 export function renderPlanetMenu(o: PlanetMenuOptions): void {
   const { doc } = o;
   const list = doc.getElementById('planetList');
@@ -669,6 +697,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
   list.style.removeProperty('--fut-row-h');
 
   const gameTips = o.settings.gameTips !== false;
+  const crowded: HTMLElement[] = [];
   // Enemies landing: on the game's own planet and moon links, whichever layout is on.
   for (const entry of o.entries) {
     markThreat(entry.planetLink, o.events?.get(`${entry.coords}|p`), o);
@@ -699,6 +728,7 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
       }
       if (third.childElementCount) wrap.append(third);
       link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true, view));
+      if (flights) crowded.push(flights);
       // The planet's fleet: on hover a veil over the whole planet, fading in from the planet's picture,
       // with the value on the right (pointer devices; touch screens keep the third line above). Only
       // when the planet itself has ships.
@@ -761,6 +791,9 @@ export function renderPlanetMenu(o: PlanetMenuOptions): void {
     }
     entry.element.querySelectorAll<HTMLImageElement>('img.planetPic, img.icon-moon').forEach(guardSkin);
   }
+  const fit = () => crowded.forEach((line) => line.isConnected && fitFlights(doc, line));
+  fit();
+  if (doc.fonts?.status === 'loading') void doc.fonts.ready.then(fit);
 
   startAgeClock(doc);
   const colonies = (doc.getElementById('countColonies')?.textContent ?? '').replace(/\s+/g, ' ').trim();
