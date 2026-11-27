@@ -22,7 +22,7 @@ const numeric = (rule, where, msg) => (numericBlocks ? fail : warn)(rule, where,
 const cannot = (what) => { broken = true; console.error(`  ? ${what}`); };
 
 const git = (args) => {
-  try { return execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }); } catch { return null; }
+  try { return execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 64 * 1024 * 1024 }); } catch { return null; }
 };
 const mergeBase = () => git(['merge-base', 'origin/main', 'HEAD'])?.trim() || null;
 
