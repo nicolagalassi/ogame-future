@@ -550,8 +550,6 @@
   "settings.oglightImport": "Import export",
   "settings.oglightDone": "From OGLight: {players} players, {seen} positions, {exp} expeditions and {raids} raids over {days} days. Reload the page.",
   "settings.backupImportHint": "A Future backup or OGLight's “Export data” file (same universe)",
-  "exp.raids": "Raids",
-  "exp.raidCount": "Raids",
   "exp.raidLoot": "Loot and debris",
   "exp.raidLost": "Ships lost",
   "exp.raidNet": "Raid net",
@@ -1080,5 +1078,8 @@
   "tour.fleet.8": "Messages|Here Future says what it prepared or what is missing. Point at a button to read what it does.",
   "tour.fleet.9": "Next and Send|The game's button, within thumb's reach. Pressing it stays your choice.",
   "tour.fleet.10": "Done|Next steps: fleetsave target in Rules, main ship, then try Expedition.\nThe ? beside each zone explains it again.",
-  "exp.raidDebris": "of which debris"
+  "exp.raidDebris": "of which debris",
+  "exp.raidHeroCount": "raids",
+  "exp.raidAvg": "per raid",
+  "exp.raidTargets": "Best targets"
 }

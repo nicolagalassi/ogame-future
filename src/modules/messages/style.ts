@@ -345,6 +345,11 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
 .col.on .lbl { color: var(--accent); font-weight: 700; }
 .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
 .outs { display: grid; grid-template-columns: max-content minmax(40px, 1fr) auto 48px; align-items: center; gap: 5px 10px; font-size: 12px; }
+/* Raid targets: the coordinates open the galaxy there. */
+.outs a.o-l { color: var(--link); text-decoration: none; font-variant-numeric: tabular-nums; }
+.outs a.o-l:hover { color: var(--text); text-decoration: underline; }
+.outs.raids { grid-template-columns: max-content minmax(40px, 1fr) auto auto; }
+.outs.raids .o-p { white-space: nowrap; }
 .outs .track { height: 8px; border-radius: 2px; background: var(--line-soft); overflow: hidden; }
 .outs .track i { display: block; height: 100%; border-radius: 2px; }
 .outs .o-n { text-align: right; font-family: var(--mono); color: var(--text); }

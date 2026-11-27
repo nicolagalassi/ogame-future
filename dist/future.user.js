@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.170
+// @version      0.3.171
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1059,8 +1059,6 @@
     "settings.oglightImport": "Importa export",
     "settings.oglightDone": "Da OGLight: {players} giocatori, {seen} posizioni, {exp} spedizioni e {raids} raid su {days} giorni. Ricarica la pagina.",
     "settings.backupImportHint": "Un backup di Future o il file «Export data» di OGLight (dello stesso universo)",
-    "exp.raids": "Raid",
-    "exp.raidCount": "Raid",
     "exp.raidLoot": "Bottino e detriti",
     "exp.raidLost": "Navi perse",
     "exp.raidNet": "Netto raid",
@@ -1589,7 +1587,10 @@
     "tour.fleet.8": "Messaggi|Qui Future dice cosa ha preparato o cosa manca. Passa il mouse su un pulsante per sapere cosa fa.",
     "tour.fleet.9": "Avanti e Invia|Il pulsante del gioco, a portata di pollice. Premerlo resta una tua scelta.",
     "tour.fleet.10": "Fatto|Prossimi passi: bersaglio del fleetsave in Regole, nave principale, poi prova Spedizione.\nIl ? accanto a ogni zona la rispiega.",
-    "exp.raidDebris": "di cui detriti"
+    "exp.raidDebris": "di cui detriti",
+    "exp.raidHeroCount": "raid",
+    "exp.raidAvg": "a raid",
+    "exp.raidTargets": "Bersagli migliori"
   };
 
   // src/i18n/en.json
@@ -2145,8 +2146,6 @@
     "settings.oglightImport": "Import export",
     "settings.oglightDone": "From OGLight: {players} players, {seen} positions, {exp} expeditions and {raids} raids over {days} days. Reload the page.",
     "settings.backupImportHint": "A Future backup or OGLight's “Export data” file (same universe)",
-    "exp.raids": "Raids",
-    "exp.raidCount": "Raids",
     "exp.raidLoot": "Loot and debris",
     "exp.raidLost": "Ships lost",
     "exp.raidNet": "Raid net",
@@ -2675,7 +2674,10 @@
     "tour.fleet.8": "Messages|Here Future says what it prepared or what is missing. Point at a button to read what it does.",
     "tour.fleet.9": "Next and Send|The game's button, within thumb's reach. Pressing it stays your choice.",
     "tour.fleet.10": "Done|Next steps: fleetsave target in Rules, main ship, then try Expedition.\nThe ? beside each zone explains it again.",
-    "exp.raidDebris": "of which debris"
+    "exp.raidDebris": "of which debris",
+    "exp.raidHeroCount": "raids",
+    "exp.raidAvg": "per raid",
+    "exp.raidTargets": "Best targets"
   };
 
   // src/i18n/fr.json
@@ -3231,8 +3233,6 @@
     "settings.oglightImport": "Importer l'export",
     "settings.oglightDone": "Depuis OGLight : {players} joueurs, {seen} positions, {exp} expéditions et {raids} raids sur {days} jours. Rechargez la page.",
     "settings.backupImportHint": "Une sauvegarde Future ou le fichier « Export data » d'OGLight (même univers)",
-    "exp.raids": "Raids",
-    "exp.raidCount": "Raids",
     "exp.raidLoot": "Butin et débris",
     "exp.raidLost": "Vaisseaux perdus",
     "exp.raidNet": "Net raids",
@@ -3761,7 +3761,10 @@
     "tour.fleet.8": "Messages|Ici Future dit ce qu'il a préparé ou ce qui manque. Survole un bouton pour savoir ce qu'il fait.",
     "tour.fleet.9": "Suivant et Envoyer|Le bouton du jeu, à portée de pouce. Appuyer reste ton choix.",
     "tour.fleet.10": "Terminé|Ensuite : cible du fleetsave dans Règles, vaisseau principal, puis essaie Expédition.\nLe ? à côté de chaque zone la réexplique.",
-    "exp.raidDebris": "dont débris"
+    "exp.raidDebris": "dont débris",
+    "exp.raidHeroCount": "raids",
+    "exp.raidAvg": "par raid",
+    "exp.raidTargets": "Meilleures cibles"
   };
 
   // src/i18n/de.json
@@ -4317,8 +4320,6 @@
     "settings.oglightImport": "Export importieren",
     "settings.oglightDone": "Aus OGLight: {players} Spieler, {seen} Positionen, {exp} Expeditionen und {raids} Raids an {days} Tagen. Seite neu laden.",
     "settings.backupImportHint": "Ein Future-Backup oder die „Export data“-Datei von OGLight (gleiches Universum)",
-    "exp.raids": "Raids",
-    "exp.raidCount": "Raids",
     "exp.raidLoot": "Beute und Trümmer",
     "exp.raidLost": "Verlorene Schiffe",
     "exp.raidNet": "Raids netto",
@@ -4847,7 +4848,10 @@
     "tour.fleet.8": "Meldungen|Hier sagt Future, was es vorbereitet hat oder was fehlt. Zeige auf einen Knopf, um zu lesen, was er macht.",
     "tour.fleet.9": "Weiter und Absenden|Der Knopf des Spiels, in Daumennähe. Ihn zu drücken bleibt deine Wahl.",
     "tour.fleet.10": "Fertig|Nächste Schritte: Fleetsave-Ziel in Regeln, Hauptschiff, dann Expedition ausprobieren.\nDas ? neben jedem Bereich erklärt ihn erneut.",
-    "exp.raidDebris": "davon Trümmer"
+    "exp.raidDebris": "davon Trümmer",
+    "exp.raidHeroCount": "Raids",
+    "exp.raidAvg": "pro Raid",
+    "exp.raidTargets": "Beste Ziele"
   };
 
   // src/core/i18n.ts
@@ -7257,6 +7261,29 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     for (const e of entries) if (e.kind !== "raid") lists.get(dayStart(e.at))?.push(e);
     return starts.map((start) => ({ start, stats: periodStats(lists.get(start)) }));
   }
+  function raidHours(entries, day) {
+    const lists = Array.from({ length: 24 }, () => []);
+    for (const e of entries) if (e.kind === "raid" && dayStart(e.at) === day) lists[new Date(e.at).getHours()].push(e);
+    return lists.map((list, h8) => ({ start: new Date(day).setHours(h8, 0, 0, 0), stats: raidStats(list) }));
+  }
+  function raidDays(entries, last2, n) {
+    const starts = [];
+    for (let i = 0, d = dayStart(last2); i < n; i++, d = dayStart(d - 1)) starts.unshift(d);
+    const lists = new Map(starts.map((s) => [s, []]));
+    for (const e of entries) if (e.kind === "raid") lists.get(dayStart(e.at))?.push(e);
+    return starts.map((start) => ({ start, stats: raidStats(lists.get(start)) }));
+  }
+  function raidTargets(entries) {
+    const by = /* @__PURE__ */ new Map();
+    for (const e of entries) {
+      if (e.kind !== "raid" || e.debris || e.summary || !e.coords) continue;
+      const t = by.get(e.coords) ?? { coords: e.coords, count: 0, msu: 0 };
+      t.count++;
+      t.msu += msu(e.res);
+      by.set(e.coords, t);
+    }
+    return [...by.values()].sort((a, b) => b.msu - a.msu || b.count - a.count);
+  }
   function netRes(s) {
     const of = (k) => s.res[k] + s.shipsValue[k] - s.lostValue[k];
     return { metal: of("metal"), crystal: of("crystal"), deuterium: of("deuterium") };
@@ -8913,6 +8940,11 @@ h4.lost { margin: 10px 0 6px; color: var(--bad); }
 .col.on .lbl { color: var(--accent); font-weight: 700; }
 .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
 .outs { display: grid; grid-template-columns: max-content minmax(40px, 1fr) auto 48px; align-items: center; gap: 5px 10px; font-size: 12px; }
+/* Raid targets: the coordinates open the galaxy there. */
+.outs a.o-l { color: var(--link); text-decoration: none; font-variant-numeric: tabular-nums; }
+.outs a.o-l:hover { color: var(--text); text-decoration: underline; }
+.outs.raids { grid-template-columns: max-content minmax(40px, 1fr) auto auto; }
+.outs.raids .o-p { white-space: nowrap; }
 .outs .track { height: 8px; border-radius: 2px; background: var(--line-soft); overflow: hidden; }
 .outs .track i { display: block; height: 100%; border-radius: 2px; }
 .outs .o-n { text-align: right; font-family: var(--mono); color: var(--text); }
@@ -18981,6 +19013,184 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       }
       return out;
     };
+    const raidView = (entries) => {
+      const out = [];
+      const r = raidStats(entries);
+      const sign = (n) => `${n < 0 ? "−" : ""}${fmt(Math.abs(n))}`;
+      const hero = h6("div", "card hero");
+      const top = h6("div", "hero-top");
+      const net = h6("div", "hero-net");
+      net.append(h6("span", "hero-k", `${t("exp.raidNet")} · ${t(`exp.period.${period}`)}`));
+      const big = h6("b", `hero-v${r.netMsu < 0 ? " neg" : ""}`, sign(r.netMsu));
+      big.append(h6("small", "", "MSU"));
+      const sub = h6("p", "hero-sub");
+      sub.append(h6("b", "", r.count.toLocaleString(locale)), ` ${t("exp.raidHeroCount")} · `, h6("b", "", r.count ? fmt(r.netMsu / r.count) : "—"), ` ${t("exp.raidAvg")}`);
+      net.append(big, sub);
+      const part = (label2, value, note) => {
+        const p = h6("div", "hero-part");
+        const v = h6("b", `hero-pv${value < 0 ? " neg" : ""}`, sign(value));
+        v.append(h6("small", "", "MSU"));
+        p.append(h6("span", "hero-k", label2), v);
+        if (note) p.append(note);
+        return p;
+      };
+      const debrisNote = msu(r.debris) ? h6("span", "hero-note") : void 0;
+      debrisNote?.append(`${t("exp.raidDebris")} `, h6("b", "", fmt(msu(r.debris))));
+      top.append(net, part(t("exp.raidLoot"), msu(r.res), debrisNote), part(t("exp.raidLost"), -msu(r.lostValue)));
+      const mix = { metal: r.res.metal, crystal: r.res.crystal * 1.5, deuterium: r.res.deuterium * 3 };
+      const mixTotal = mix.metal + mix.crystal + mix.deuterium;
+      const bar = h6("div", "mix");
+      for (const k of ["metal", "crystal", "deuterium"]) {
+        if (!mix[k]) continue;
+        const seg = h6("i");
+        seg.style.width = `${mix[k] / mixTotal * 100}%`;
+        seg.style.background = MIX_COLORS[k];
+        seg.title = `${t(`msg.res.${k}`)}: ${fmt(mix[k])} MSU (${Math.round(mix[k] / mixTotal * 100)}%)`;
+        bar.append(seg);
+      }
+      const keys = h6("div", "mix-keys");
+      for (const [k, cls] of [["metal", "m"], ["crystal", "c"], ["deuterium", "d"]]) {
+        const key = h6("span", `mix-key ${cls}`);
+        key.append(svg2(resIconSvg(k, 15)), h6("span", "mk-l", t(`msg.res.${k}`)), h6("b", "", fmt(r.res[k])));
+        keys.append(key);
+      }
+      hero.append(top);
+      if (mixTotal) hero.append(bar);
+      hero.append(keys);
+      out.push(hero);
+      const single = period === "today" || period === "yesterday";
+      const [from] = periodRange(period, o.now);
+      const buckets = single ? raidHours(entries, from) : raidDays(entries, o.now, period === "week" ? 7 : 30);
+      const label = (start, short) => {
+        const d = new Date(start);
+        if (single) return short ? d.getHours() % 3 === 0 ? String(d.getHours()) : "" : `${String(d.getHours()).padStart(2, "0")}:00`;
+        if (buckets.length <= 7) return d.toLocaleDateString(locale, { weekday: "short", day: "2-digit" });
+        return short ? (buckets.length - 1 - buckets.findIndex((b) => b.start === start)) % 5 === 0 ? String(d.getDate()) : "" : d.toLocaleDateString(locale, { weekday: "short", day: "2-digit", month: "2-digit" });
+      };
+      if (focus !== null && !buckets.some((b) => b.start === focus)) focus = null;
+      const chartCard = h6("div", "card");
+      const chartHead = h6("div", "card-head");
+      chartHead.append(h6("h3", "", t(single ? "exp.byHour" : "exp.byDay")));
+      if (focus !== null) {
+        const all2 = h6("button", "act ghost", t("exp.focusAll"));
+        all2.addEventListener("click", () => {
+          focus = null;
+          draw();
+        });
+        chartHead.append(all2);
+      }
+      chartCard.append(chartHead);
+      const chart = h6("div", `chart${buckets.length > 14 ? " dense" : ""}`);
+      chart.style.setProperty("--n", String(buckets.length));
+      const max = Math.max(1, ...buckets.map((b) => msu(b.stats.res)));
+      for (const b of buckets) {
+        const tot = msu(b.stats.res);
+        const busy = b.stats.count || tot;
+        const col = h6("button", `col${focus === b.start ? " on" : ""}${busy ? "" : " empty"}`);
+        col.type = "button";
+        col.title = `${label(b.start, false)} · ${b.stats.count.toLocaleString(locale)} ${t("exp.raidHeroCount")} · ${sign(b.stats.netMsu)} MSU`;
+        col.setAttribute("aria-pressed", String(focus === b.start));
+        if (buckets.length <= 14) col.append(h6("span", "tot", busy ? sign(b.stats.netMsu) : ""));
+        const stack = h6("span", "stack");
+        stack.style.height = `${Math.round(tot / max * 100)}%`;
+        const m = { metal: b.stats.res.metal, crystal: b.stats.res.crystal * 1.5, deuterium: b.stats.res.deuterium * 3 };
+        for (const k of ["metal", "crystal", "deuterium"]) {
+          if (!m[k]) continue;
+          const seg = h6("i");
+          seg.style.height = `${m[k] / tot * 100}%`;
+          seg.style.background = MIX_COLORS[k];
+          stack.append(seg);
+        }
+        const area = h6("span", "area");
+        area.append(stack);
+        col.append(area, h6("span", "lbl", label(b.start, true)));
+        col.addEventListener("click", () => {
+          focus = focus === b.start ? null : b.start;
+          draw();
+        });
+        chart.append(col);
+      }
+      chartCard.append(chart);
+      out.push(chartCard);
+      const picked2 = focus !== null ? buckets.find((b) => b.start === focus) : null;
+      const span = picked2 ? entries.filter((e) => e.at >= picked2.start && e.at < picked2.start + (single ? 36e5 : 864e5)) : entries;
+      const suffix = picked2 ? ` · ${label(picked2.start, false)}` : "";
+      const two = h6("div", "two");
+      const targetsCard = h6("div", "card");
+      targetsCard.append(h6("h3", "", `${t("exp.raidTargets")}${suffix}`));
+      const targets = raidTargets(span).slice(0, 10);
+      if (!targets.length) targetsCard.append(h6("p", "empty", t("exp.noneHere")));
+      const list = h6("div", "outs raids");
+      const best = Math.max(1, ...targets.map((x) => x.msu));
+      for (const x of targets) {
+        const [g, sys] = x.coords.split(":");
+        const link = h6("a", "o-l", `[${x.coords}]`);
+        link.href = `/game/index.php?page=ingame&component=galaxy&galaxy=${g}&system=${sys}`;
+        const track = h6("span", "track");
+        const fill = h6("i");
+        fill.style.width = `${x.msu / best * 100}%`;
+        fill.style.background = "var(--m)";
+        track.append(fill);
+        list.append(link, track, h6("span", "o-n", `×${x.count.toLocaleString(locale)}`), h6("span", "o-p", `${fmt(x.msu)} MSU`));
+      }
+      if (targets.length) targetsCard.append(list);
+      const lostCard = h6("div", "card");
+      lostCard.append(h6("h3", "", `${t("exp.raidLost")}${suffix}`));
+      const lost = Object.entries(raidStats(span).lost);
+      lostCard.append(lost.length ? shipGrid(lost, true) : h6("p", "empty", t("exp.noneHere")));
+      two.append(targetsCard, lostCard);
+      out.push(two);
+      if (!single) {
+        const card = h6("div", "card");
+        card.append(h6("h3", "", t("exp.daysTable")));
+        const scroll = h6("div", "scroll");
+        const table = h6("table");
+        const hr = h6("tr");
+        const th = (content, title = "") => {
+          const c = h6("th");
+          c.append(content);
+          if (title) c.title = title;
+          hr.append(c);
+        };
+        th(t("exp.day"));
+        th(t("exp.countShort"));
+        th(svg2(resIconSvg("metal", 13)), t("msg.res.metal"));
+        th(svg2(resIconSvg("crystal", 13)), t("msg.res.crystal"));
+        th(svg2(resIconSvg("deuterium", 13)), t("msg.res.deuterium"));
+        th(t("exp.raidDebris"));
+        th(t("exp.raidLost"));
+        th("MSU");
+        th("");
+        table.append(hr);
+        const days2 = buckets.filter((b) => b.stats.count || msu(b.stats.res)).reverse();
+        const most = Math.max(1, ...days2.map((d) => d.stats.netMsu));
+        for (const { start, stats } of days2) {
+          const tr = h6("tr");
+          if (focus === start) tr.className = "on";
+          const spark = h6("td", "spark-cell");
+          const sp = h6("i", "spark");
+          sp.style.width = `${Math.max(0, stats.netMsu / most * 100)}%`;
+          spark.append(sp);
+          const lostMsu = msu(stats.lostValue);
+          tr.append(
+            h6("td", "", new Date(start).toLocaleDateString(locale, { weekday: "short", day: "2-digit", month: "2-digit" })),
+            h6("td", "", String(stats.count)),
+            h6("td", "m", fmt(stats.res.metal)),
+            h6("td", "c", fmt(stats.res.crystal)),
+            h6("td", "d", fmt(stats.res.deuterium)),
+            h6("td", "", fmt(msu(stats.debris))),
+            h6("td", lostMsu ? "neg" : "", lostMsu ? `−${fmt(lostMsu)}` : "—"),
+            h6("td", stats.netMsu < 0 ? "neg" : "hi", fmt(stats.netMsu)),
+            spark
+          );
+          table.append(tr);
+        }
+        scroll.append(table);
+        card.append(scroll);
+        out.push(card);
+      }
+      return out;
+    };
     const draw = () => {
       const clean2 = dedupe(store.get(JOURNAL_KEY, {}));
       if (clean2.removed) store.set(JOURNAL_KEY, clean2.journal);
@@ -19038,6 +19248,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         parts.push(h6("p", "empty", Object.keys(journal).length ? t("exp.emptyPeriod") : t("exp.empty")));
       } else if (kind === "expedition") {
         parts.push(...expeditionView(entries, s));
+      } else if (kind === "raid") {
+        parts.push(...raidView(entries));
       } else {
         const kpis = h6("div", "kpis");
         const kpi = (label, value, cls = "", detail) => {
@@ -19046,9 +19258,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           if (detail) box2.append(detail);
           kpis.append(box2);
         };
-        const triple = (r2) => {
+        const triple = (r) => {
           const d = h6("div", "detail");
-          d.append(h6("span", "m", fmt(r2.metal)), h6("span", "c", fmt(r2.crystal)), h6("span", "d", fmt(r2.deuterium)));
+          d.append(h6("span", "m", fmt(r.metal)), h6("span", "c", fmt(r.crystal)), h6("span", "d", fmt(r.deuterium)));
           return d;
         };
         if (isDisc) {
@@ -19057,9 +19269,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           kpi(t("exp.lfXp"), s.lfXp.toLocaleString(locale));
           kpi(t("exp.artefactsAvg"), s.discoveries ? (s.artefacts / s.discoveries).toLocaleString(locale, { maximumFractionDigits: 2 }) : "—");
         }
-        if (kind !== "raid") parts.push(kpis);
+        parts.push(kpis);
         const outs = h6("div", "card");
-        if (kind !== "raid") outs.append(h6("h3", "", t("exp.outcomes")));
+        outs.append(h6("h3", "", t("exp.outcomes")));
         const total = Object.values(s.outcomes).reduce((a, b) => a + (b ?? 0), 0) || 1;
         const bar = h6("div", "bar");
         const legend = h6("div", "legend");
@@ -19077,7 +19289,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           row.append(dot, h6("span", "", t(`msg.out.${key}`)), h6("span", "n", n.toLocaleString(locale)), h6("span", "pct", (n / total).toLocaleString(locale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 })));
           legend.append(row);
         }
-        if (kind !== "raid") outs.append(bar, legend);
+        outs.append(bar, legend);
         const sized = s.sizes[0] + s.sizes[1] + s.sizes[2];
         if (sized) {
           const sizes = h6("div", "detail");
@@ -19085,28 +19297,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           for (const i of [2, 1, 0]) sizes.append(h6("span", `rar rar-${i}`, `${t(`msg.size.${i}`)} ${s.sizes[i].toLocaleString(locale)} (${(s.sizes[i] / sized).toLocaleString(locale, { style: "percent", maximumFractionDigits: 0 })})`));
           outs.append(sizes);
         }
-        if (kind !== "raid") parts.push(outs);
-        const r = raidStats(entries);
-        if (kind === "raid") {
-          const card = h6("div", "card");
-          card.append(h6("h3", "", t("exp.raids")));
-          const strip = h6("div", "kpis");
-          const cell = (label, value, cls = "", detail) => {
-            const box2 = h6("div", "kpi");
-            box2.append(h6("span", "label", label), h6("span", `value ${cls}`, value));
-            if (detail) box2.append(detail);
-            strip.append(box2);
-          };
-          cell(t("exp.raidCount"), r.count.toLocaleString(locale));
-          cell(t("exp.raidLoot"), `${fmt(msu(r.res))} MSU`, "", triple(r.res));
-          if (msu(r.debris)) cell(t("exp.raidDebris"), `${fmt(msu(r.debris))} MSU`, "", triple(r.debris));
-          cell(t("exp.raidLost"), msu(r.lostValue) ? `−${fmt(msu(r.lostValue))} MSU` : "—", msu(r.lostValue) ? "neg" : "");
-          cell(t("exp.raidNet"), `${fmt(r.netMsu)} MSU`, r.netMsu < 0 ? "neg" : "pos");
-          card.append(strip);
-          parts.push(card);
-        }
+        parts.push(outs);
         const days2 = byDay(entries, 31);
-        if (kind !== "raid" && (days2.length > 1 || period !== "today")) {
+        if (days2.length > 1 || period !== "today") {
           const card = h6("div", "card");
           card.append(h6("h3", "", t("exp.byDay")));
           const scroll = h6("div", "scroll");

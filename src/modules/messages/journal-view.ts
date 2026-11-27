@@ -9,7 +9,7 @@ import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import type { Outcome } from '../../data/messages';
-import { byDay, dedupe, daySeries, entriesIn, hourSeries, JOURNAL_KEY, msu, periodRange, periodStats, raidStats, valueMix, type Bucket, type Journal, type Period, type PeriodStats } from '../../engines/expeditions';
+import { byDay, dedupe, daySeries, entriesIn, hourSeries, JOURNAL_KEY, msu, periodRange, periodStats, raidDays, raidHours, raidStats, raidTargets, valueMix, type Bucket, type Journal, type Period, type PeriodStats } from '../../engines/expeditions';
 import { resIconSvg } from '../../core/res-icons';
 import { iconSvg } from '../fleet/icons';
 import { FOLD_KEY } from './index';
@@ -321,6 +321,196 @@ export function openJournal(o: JournalOptions): void {
     return out;
   };
 
+  /**
+   * Raids, as the expeditions: the net first (loot and harvested debris, minus the ships lost); one column
+   * per hour or day, a click showing that column's targets and losses; the days in a table.
+   */
+  const raidView = (entries: Parameters<typeof raidStats>[0]): HTMLElement[] => {
+    const out: HTMLElement[] = [];
+    const r = raidStats(entries);
+    const sign = (n: number) => `${n < 0 ? '−' : ''}${fmt(Math.abs(n))}`;
+    const hero = h('div', 'card hero');
+    const top = h('div', 'hero-top');
+    const net = h('div', 'hero-net');
+    net.append(h('span', 'hero-k', `${t('exp.raidNet')} · ${t(`exp.period.${period}`)}`));
+    const big = h('b', `hero-v${r.netMsu < 0 ? ' neg' : ''}`, sign(r.netMsu));
+    big.append(h('small', '', 'MSU'));
+    const sub = h('p', 'hero-sub');
+    sub.append(h('b', '', r.count.toLocaleString(locale)), ` ${t('exp.raidHeroCount')} · `, h('b', '', r.count ? fmt(r.netMsu / r.count) : '—'), ` ${t('exp.raidAvg')}`);
+    net.append(big, sub);
+    const part = (label: string, value: number, note?: HTMLElement) => {
+      const p = h('div', 'hero-part');
+      const v = h('b', `hero-pv${value < 0 ? ' neg' : ''}`, sign(value));
+      v.append(h('small', '', 'MSU'));
+      p.append(h('span', 'hero-k', label), v);
+      if (note) p.append(note);
+      return p;
+    };
+    const debrisNote = msu(r.debris) ? h('span', 'hero-note') : undefined;
+    debrisNote?.append(`${t('exp.raidDebris')} `, h('b', '', fmt(msu(r.debris))));
+    top.append(net, part(t('exp.raidLoot'), msu(r.res), debrisNote), part(t('exp.raidLost'), -msu(r.lostValue)));
+    // The loot by resource, in MSU, as the expeditions' bar.
+    const mix = { metal: r.res.metal, crystal: r.res.crystal * 1.5, deuterium: r.res.deuterium * 3 };
+    const mixTotal = mix.metal + mix.crystal + mix.deuterium;
+    const bar = h('div', 'mix');
+    for (const k of ['metal', 'crystal', 'deuterium'] as const) {
+      if (!mix[k]) continue;
+      const seg = h('i');
+      seg.style.width = `${(mix[k] / mixTotal) * 100}%`;
+      seg.style.background = MIX_COLORS[k];
+      seg.title = `${t(`msg.res.${k}`)}: ${fmt(mix[k])} MSU (${Math.round((mix[k] / mixTotal) * 100)}%)`;
+      bar.append(seg);
+    }
+    const keys = h('div', 'mix-keys');
+    for (const [k, cls] of [['metal', 'm'], ['crystal', 'c'], ['deuterium', 'd']] as const) {
+      const key = h('span', `mix-key ${cls}`);
+      key.append(svg(resIconSvg(k, 15)), h('span', 'mk-l', t(`msg.res.${k}`)), h('b', '', fmt(r.res[k])));
+      keys.append(key);
+    }
+    hero.append(top);
+    if (mixTotal) hero.append(bar);
+    hero.append(keys);
+    out.push(hero);
+
+    // One column per hour (a single day) or per day: the loot's height, by resource.
+    const single = period === 'today' || period === 'yesterday';
+    const [from] = periodRange(period, o.now);
+    const buckets = single ? raidHours(entries, from) : raidDays(entries, o.now, period === 'week' ? 7 : 30);
+    const label = (start: number, short: boolean) => {
+      const d = new Date(start);
+      if (single) return short ? (d.getHours() % 3 === 0 ? String(d.getHours()) : '') : `${String(d.getHours()).padStart(2, '0')}:00`;
+      if (buckets.length <= 7) return d.toLocaleDateString(locale, { weekday: 'short', day: '2-digit' });
+      return short ? ((buckets.length - 1 - buckets.findIndex((b) => b.start === start)) % 5 === 0 ? String(d.getDate()) : '') : d.toLocaleDateString(locale, { weekday: 'short', day: '2-digit', month: '2-digit' });
+    };
+    if (focus !== null && !buckets.some((b) => b.start === focus)) focus = null;
+    const chartCard = h('div', 'card');
+    const chartHead = h('div', 'card-head');
+    chartHead.append(h('h3', '', t(single ? 'exp.byHour' : 'exp.byDay')));
+    if (focus !== null) {
+      const all = h('button', 'act ghost', t('exp.focusAll'));
+      all.addEventListener('click', () => {
+        focus = null;
+        draw();
+      });
+      chartHead.append(all);
+    }
+    chartCard.append(chartHead);
+    const chart = h('div', `chart${buckets.length > 14 ? ' dense' : ''}`);
+    chart.style.setProperty('--n', String(buckets.length));
+    const max = Math.max(1, ...buckets.map((b) => msu(b.stats.res)));
+    for (const b of buckets) {
+      const tot = msu(b.stats.res);
+      const busy = b.stats.count || tot;
+      const col = h('button', `col${focus === b.start ? ' on' : ''}${busy ? '' : ' empty'}`);
+      col.type = 'button';
+      col.title = `${label(b.start, false)} · ${b.stats.count.toLocaleString(locale)} ${t('exp.raidHeroCount')} · ${sign(b.stats.netMsu)} MSU`;
+      col.setAttribute('aria-pressed', String(focus === b.start));
+      if (buckets.length <= 14) col.append(h('span', 'tot', busy ? sign(b.stats.netMsu) : ''));
+      const stack = h('span', 'stack');
+      stack.style.height = `${Math.round((tot / max) * 100)}%`;
+      const m = { metal: b.stats.res.metal, crystal: b.stats.res.crystal * 1.5, deuterium: b.stats.res.deuterium * 3 };
+      for (const k of ['metal', 'crystal', 'deuterium'] as const) {
+        if (!m[k]) continue;
+        const seg = h('i');
+        seg.style.height = `${(m[k] / tot) * 100}%`;
+        seg.style.background = MIX_COLORS[k];
+        stack.append(seg);
+      }
+      const area = h('span', 'area');
+      area.append(stack);
+      col.append(area, h('span', 'lbl', label(b.start, true)));
+      col.addEventListener('click', () => {
+        focus = focus === b.start ? null : b.start;
+        draw();
+      });
+      chart.append(col);
+    }
+    chartCard.append(chart);
+    out.push(chartCard);
+
+    // Targets and losses: of the column picked, or of the whole period.
+    const picked = focus !== null ? buckets.find((b) => b.start === focus)! : null;
+    const span = picked ? entries.filter((e) => e.at >= picked.start && e.at < picked.start + (single ? 3_600_000 : 86_400_000)) : entries;
+    const suffix = picked ? ` · ${label(picked.start, false)}` : '';
+    const two = h('div', 'two');
+    const targetsCard = h('div', 'card');
+    targetsCard.append(h('h3', '', `${t('exp.raidTargets')}${suffix}`));
+    const targets = raidTargets(span).slice(0, 10);
+    if (!targets.length) targetsCard.append(h('p', 'empty', t('exp.noneHere')));
+    const list = h('div', 'outs raids');
+    const best = Math.max(1, ...targets.map((x) => x.msu));
+    for (const x of targets) {
+      const [g, sys] = x.coords.split(':');
+      const link = h('a', 'o-l', `[${x.coords}]`) as HTMLAnchorElement;
+      link.href = `/game/index.php?page=ingame&component=galaxy&galaxy=${g}&system=${sys}`;
+      const track = h('span', 'track');
+      const fill = h('i');
+      fill.style.width = `${(x.msu / best) * 100}%`;
+      fill.style.background = 'var(--m)';
+      track.append(fill);
+      list.append(link, track, h('span', 'o-n', `×${x.count.toLocaleString(locale)}`), h('span', 'o-p', `${fmt(x.msu)} MSU`));
+    }
+    if (targets.length) targetsCard.append(list);
+    const lostCard = h('div', 'card');
+    lostCard.append(h('h3', '', `${t('exp.raidLost')}${suffix}`));
+    const lost = Object.entries(raidStats(span).lost);
+    lostCard.append(lost.length ? shipGrid(lost, true) : h('p', 'empty', t('exp.noneHere')));
+    two.append(targetsCard, lostCard);
+    out.push(two);
+
+    // The days with raids, in a table (longer periods only: a single day is the chart above).
+    if (!single) {
+      const card = h('div', 'card');
+      card.append(h('h3', '', t('exp.daysTable')));
+      const scroll = h('div', 'scroll');
+      const table = h('table');
+      const hr = h('tr');
+      const th = (content: string | HTMLElement, title = '') => {
+        const c = h('th');
+        c.append(content);
+        if (title) c.title = title;
+        hr.append(c);
+      };
+      th(t('exp.day'));
+      th(t('exp.countShort'));
+      th(svg(resIconSvg('metal', 13)), t('msg.res.metal'));
+      th(svg(resIconSvg('crystal', 13)), t('msg.res.crystal'));
+      th(svg(resIconSvg('deuterium', 13)), t('msg.res.deuterium'));
+      th(t('exp.raidDebris'));
+      th(t('exp.raidLost'));
+      th('MSU');
+      th('');
+      table.append(hr);
+      const days = buckets.filter((b) => b.stats.count || msu(b.stats.res)).reverse();
+      const most = Math.max(1, ...days.map((d) => d.stats.netMsu));
+      for (const { start, stats } of days) {
+        const tr = h('tr');
+        if (focus === start) tr.className = 'on';
+        const spark = h('td', 'spark-cell');
+        const sp = h('i', 'spark');
+        sp.style.width = `${Math.max(0, (stats.netMsu / most) * 100)}%`;
+        spark.append(sp);
+        const lostMsu = msu(stats.lostValue);
+        tr.append(
+          h('td', '', new Date(start).toLocaleDateString(locale, { weekday: 'short', day: '2-digit', month: '2-digit' })),
+          h('td', '', String(stats.count)),
+          h('td', 'm', fmt(stats.res.metal)),
+          h('td', 'c', fmt(stats.res.crystal)),
+          h('td', 'd', fmt(stats.res.deuterium)),
+          h('td', '', fmt(msu(stats.debris))),
+          h('td', lostMsu ? 'neg' : '', lostMsu ? `−${fmt(lostMsu)}` : '—'),
+          h('td', stats.netMsu < 0 ? 'neg' : 'hi', fmt(stats.netMsu)),
+          spark,
+        );
+        table.append(tr);
+      }
+      scroll.append(table);
+      card.append(scroll);
+      out.push(card);
+    }
+    return out;
+  };
+
   const draw = () => {
     // Reports recorded twice under different ids by older versions: counted once, and cleaned up.
     const clean = dedupe(store.get<Journal>(JOURNAL_KEY, {}));
@@ -383,6 +573,8 @@ export function openJournal(o: JournalOptions): void {
       parts.push(h('p', 'empty', Object.keys(journal).length ? t('exp.emptyPeriod') : t('exp.empty')));
     } else if (kind === 'expedition') {
       parts.push(...expeditionView(entries, s));
+    } else if (kind === 'raid') {
+      parts.push(...raidView(entries));
     } else {
       const kpis = h('div', 'kpis');
       const kpi = (label: string, value: string, cls = '', detail?: HTMLElement) => {
@@ -402,11 +594,11 @@ export function openJournal(o: JournalOptions): void {
         kpi(t('exp.lfXp'), s.lfXp.toLocaleString(locale));
         kpi(t('exp.artefactsAvg'), s.discoveries ? (s.artefacts / s.discoveries).toLocaleString(locale, { maximumFractionDigits: 2 }) : '—');
       }
-      if (kind !== 'raid') parts.push(kpis);
+      parts.push(kpis);
 
       // Outcomes: one bar, then each outcome with count and share.
       const outs = h('div', 'card');
-      if (kind !== 'raid') outs.append(h('h3', '', t('exp.outcomes')));
+      outs.append(h('h3', '', t('exp.outcomes')));
       const total = Object.values(s.outcomes).reduce((a, b) => a + (b ?? 0), 0) || 1;
       const bar = h('div', 'bar');
       const legend = h('div', 'legend');
@@ -424,7 +616,7 @@ export function openJournal(o: JournalOptions): void {
         row.append(dot, h('span', '', t(`msg.out.${key}`)), h('span', 'n', n.toLocaleString(locale)), h('span', 'pct', (n / total).toLocaleString(locale, { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 })));
         legend.append(row);
       }
-      if (kind !== 'raid') outs.append(bar, legend);
+      outs.append(bar, legend);
       const sized = s.sizes[0] + s.sizes[1] + s.sizes[2];
       if (sized) {
         const sizes = h('div', 'detail');
@@ -433,33 +625,11 @@ export function openJournal(o: JournalOptions): void {
         for (const i of [2, 1, 0] as const) sizes.append(h('span', `rar rar-${i}`, `${t(`msg.size.${i}`)} ${s.sizes[i].toLocaleString(locale)} (${(s.sizes[i] / sized).toLocaleString(locale, { style: 'percent', maximumFractionDigits: 0 })})`));
         outs.append(sizes);
       }
-      if (kind !== 'raid') parts.push(outs);
-
-      // Raids (own attacks, harvested debris, OGLight imports): their own strip, they are not expeditions.
-      const r = raidStats(entries);
-      if (kind === 'raid') {
-        const card = h('div', 'card');
-        card.append(h('h3', '', t('exp.raids')));
-        const strip = h('div', 'kpis');
-        const cell = (label: string, value: string, cls = '', detail?: HTMLElement) => {
-          const box = h('div', 'kpi');
-          box.append(h('span', 'label', label), h('span', `value ${cls}`, value));
-          if (detail) box.append(detail);
-          strip.append(box);
-        };
-        cell(t('exp.raidCount'), r.count.toLocaleString(locale));
-        cell(t('exp.raidLoot'), `${fmt(msu(r.res))} MSU`, '', triple(r.res));
-        // The part of it harvested from debris fields (recycling reports).
-        if (msu(r.debris)) cell(t('exp.raidDebris'), `${fmt(msu(r.debris))} MSU`, '', triple(r.debris));
-        cell(t('exp.raidLost'), msu(r.lostValue) ? `−${fmt(msu(r.lostValue))} MSU` : '—', msu(r.lostValue) ? 'neg' : '');
-        cell(t('exp.raidNet'), `${fmt(r.netMsu)} MSU`, r.netMsu < 0 ? 'neg' : 'pos');
-        card.append(strip);
-        parts.push(card);
-      }
+      parts.push(outs);
 
       // Day by day.
       const days = byDay(entries, 31);
-      if (kind !== 'raid' && (days.length > 1 || period !== 'today')) {
+      if ((days.length > 1 || period !== 'today')) {
         const card = h('div', 'card');
         card.append(h('h3', '', t('exp.byDay')));
         const scroll = h('div', 'scroll');
