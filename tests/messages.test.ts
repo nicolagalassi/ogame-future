@@ -95,8 +95,11 @@ describe('inbox reports', () => {
     const result = { winner: 'attacker', loot: { resources: [{ resource: 'metal', amount: 500 }] }, debris: { resources: [{ resource: 'crystal', total: 12000, remaining: 9000 }] } };
     const c = readMessage(msg('30', { messagetype: '25', coords: '2:418:16', fleets: JSON.stringify(fleets), combatrounds: JSON.stringify(rounds), result: JSON.stringify(result), defenderspaceobject: '{}' }), OWN);
     expect(c).toMatchObject({ kind: 'combat', winner: 'won', attacker: true, loot: { metal: 500 }, lost: { 204: 10 }, debris: { crystal: 9000 } });
-    const shot = readMessage(msg('31', { messagetype: '48', coords: '2:284:8', shipslost: '{"210":30}' }), OWN);
-    expect(shot).toMatchObject({ kind: 'combat', winner: 'lost', lost: { 210: 30 } });
+    // Probes shot down while spying (counter-espionage): not an attack, left to the game's own text.
+    expect(readMessage(msg('31', { messagetype: '48', coords: '2:284:8', shipslost: '{"210":30}' }), OWN)).toBeNull();
+    // An attacking fleet destroyed in the first round is still a lost combat.
+    const shot = readMessage(msg('32', { messagetype: '48', coords: '2:284:8', shipslost: '{"204":40}' }), OWN);
+    expect(shot).toMatchObject({ kind: 'combat', winner: 'lost', lost: { 204: 40 } });
   });
 });
 
