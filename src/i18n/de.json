@@ -550,7 +550,7 @@
   "settings.oglightImport": "Export importieren",
   "settings.oglightDone": "Aus OGLight: {players} Spieler, {seen} Positionen, {exp} Expeditionen und {raids} Raids an {days} Tagen. Seite neu laden.",
   "settings.backupImportHint": "Ein Future-Backup oder die „Export data“-Datei von OGLight (gleiches Universum)",
-  "exp.raids": "Raids (aus OGLight importiert)",
+  "exp.raids": "Raids",
   "exp.raidCount": "Raids",
   "exp.raidLoot": "Beute und Trümmer",
   "exp.raidLost": "Verlorene Schiffe",
@@ -1079,5 +1079,6 @@
   "tour.fleet.7": "Ziel|Zum Mond: alles zum Mond dieses Planeten. Sammeln: bringt die Rohstoffe der Planeten zu einem Körper, per Transport oder Stationierung.",
   "tour.fleet.8": "Meldungen|Hier sagt Future, was es vorbereitet hat oder was fehlt. Zeige auf einen Knopf, um zu lesen, was er macht.",
   "tour.fleet.9": "Weiter und Absenden|Der Knopf des Spiels, in Daumennähe. Ihn zu drücken bleibt deine Wahl.",
-  "tour.fleet.10": "Fertig|Nächste Schritte: Fleetsave-Ziel in Regeln, Hauptschiff, dann Expedition ausprobieren.\nDas ? neben jedem Bereich erklärt ihn erneut."
+  "tour.fleet.10": "Fertig|Nächste Schritte: Fleetsave-Ziel in Regeln, Hauptschiff, dann Expedition ausprobieren.\nDas ? neben jedem Bereich erklärt ihn erneut.",
+  "exp.raidDebris": "davon Trümmer"
 }

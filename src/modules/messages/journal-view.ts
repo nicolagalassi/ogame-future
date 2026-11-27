@@ -435,7 +435,7 @@ export function openJournal(o: JournalOptions): void {
       }
       if (kind !== 'raid') parts.push(outs);
 
-      // Raids imported from OGLight: their own strip, they are not expeditions.
+      // Raids (own attacks, harvested debris, OGLight imports): their own strip, they are not expeditions.
       const r = raidStats(entries);
       if (kind === 'raid') {
         const card = h('div', 'card');
@@ -449,6 +449,8 @@ export function openJournal(o: JournalOptions): void {
         };
         cell(t('exp.raidCount'), r.count.toLocaleString(locale));
         cell(t('exp.raidLoot'), `${fmt(msu(r.res))} MSU`, '', triple(r.res));
+        // The part of it harvested from debris fields (recycling reports).
+        if (msu(r.debris)) cell(t('exp.raidDebris'), `${fmt(msu(r.debris))} MSU`, '', triple(r.debris));
         cell(t('exp.raidLost'), msu(r.lostValue) ? `−${fmt(msu(r.lostValue))} MSU` : '—', msu(r.lostValue) ? 'neg' : '');
         cell(t('exp.raidNet'), `${fmt(r.netMsu)} MSU`, r.netMsu < 0 ? 'neg' : 'pos');
         card.append(strip);
