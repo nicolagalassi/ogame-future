@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.185
+// @version      0.3.186
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1267,11 +1267,11 @@
   var PENDING_TTL = 6e4;
   var GONE_SETTLE = 3e3;
   var cardValue = (r) => msu(r) + r.lithium;
-  function settle(pending2, archive, cards, dialogFor, now) {
+  function settle(pending3, archive, cards, dialogFor, now) {
     const out = {};
     const entries = { ...archive.entries };
     let changed = false;
-    for (const [id, p] of Object.entries(pending2)) {
+    for (const [id, p] of Object.entries(pending3)) {
       if (p.via === "card" && dialogFor(id)) {
         changed = true;
         continue;
@@ -6383,8 +6383,8 @@
   }
   function readCurrentResources(doc) {
     const raw = (id) => {
-      const el7 = doc.getElementById(id);
-      const value = el7?.getAttribute("data-raw") ?? el7?.textContent?.replace(/\D/g, "");
+      const el8 = doc.getElementById(id);
+      const value = el8?.getAttribute("data-raw") ?? el8?.textContent?.replace(/\D/g, "");
       const n = Number(value);
       return value != null && value !== "" && Number.isFinite(n) ? n : null;
     };
@@ -6394,8 +6394,8 @@
     return metal == null || crystal == null || deuterium == null ? null : { metal, crystal, deuterium };
   }
   function readCurrentEnergy(doc) {
-    const el7 = doc.getElementById("resources_energy");
-    const value = el7?.getAttribute("data-raw") ?? el7?.textContent?.replace(/[^\d-]/g, "");
+    const el8 = doc.getElementById("resources_energy");
+    const value = el8?.getAttribute("data-raw") ?? el8?.textContent?.replace(/[^\d-]/g, "");
     const n = Number(value);
     return value != null && value !== "" && Number.isFinite(n) ? n : null;
   }
@@ -6788,15 +6788,6 @@
     if (!fresh) return cached;
     deps.store.set(SERVER_DATA_KEY, fresh);
     return fresh;
-  }
-
-  // src/engines/military.ts
-  function splitMilitary(scores) {
-    const { total, economy, research, military } = scores;
-    if (!total || !economy || !research || !military) return null;
-    const raw = economy.points + research.points + military.points + (scores.lifeform?.points ?? 0) - total.points;
-    const defence = Math.min(military.points, Math.max(0, raw));
-    return { fleet: military.points - defence, defence };
   }
 
   // src/core/game-links.ts
@@ -7422,7 +7413,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   // src/modules/galaxy/style.ts
   var GALAXY_CSS = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
-.fut-g-name, #galaxycomponent, .fut-g-bar, #galaxyContent, .fut-g-muted, .fut-g-inact, .fut-g-vac, .fut-g-deb, .fut-g-rank, #expeditionDebrisSlotDebrisContainer, .fut-g-dval, .fut-g-card { ${WINDOW_TOKENS} }
+.fut-g-name, #galaxycomponent, .fut-g-bar, #galaxyContent, .fut-g-muted, .fut-g-inact, .fut-g-vac, .fut-g-deb, .fut-g-rank, #expeditionDebrisSlotDebrisContainer, .fut-g-dval { ${WINDOW_TOKENS} }
 .fut-g-name { cursor: pointer; }
 .fut-g-name:hover { text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 2px; }
 /* The game's own header, drawn as the first row of one card with Future's summary under it:
@@ -7512,22 +7503,148 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .fut-g-dval.big { color: var(--warn); font-weight: 700; text-shadow: 0 0 6px rgba(245, 181, 71, 0.45); }
 .fut-g-dval.deep { position: static; display: inline-flex; margin-left: 6px; font-size: 12px; }
 
-.fut-g-card {
-  position: fixed; z-index: 1000002; width: 250px; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: 8px;
-  background: var(--bg); box-shadow: 0 10px 30px rgba(0,0,0,0.6); font: 12px/16px Arial, Helvetica, sans-serif; color: var(--text-2);
+`;
+
+  // src/engines/military.ts
+  function splitMilitary(scores) {
+    const { total, economy, research, military } = scores;
+    if (!total || !economy || !research || !military) return null;
+    const raw = economy.points + research.points + military.points + (scores.lifeform?.points ?? 0) - total.points;
+    const defence = Math.min(military.points, Math.max(0, raw));
+    return { fleet: military.points - defence, defence };
+  }
+
+  // src/modules/player-card/index.ts
+  var CARD_ID = "fut-player-card";
+  var INTENT_MS = 180;
+  var LOOK = [
+    ["total", "star", "#F5B547"],
+    ["economy", "swap", "#7FB8FF"],
+    ["research", "eye", "#4FE0B0"],
+    ["lifeform", "user", "#E58CDB"],
+    ["military", "fleet", "#FF7A7A"]
+  ];
+  var CSS = `
+#${CARD_ID} { ${WINDOW_TOKENS} }
+#${CARD_ID} {
+  position: fixed; z-index: 1000002; width: 260px; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: 8px;
+  background: var(--bg); box-shadow: 0 10px 30px rgba(0,0,0,0.6); font: 12px/16px var(--body); color: var(--text-2);
   text-align: left; pointer-events: none;
 }
-.fut-g-card h4 { margin: 0 0 6px; font-size: 12px; font-weight: 700; color: var(--text); }
-.fut-g-card table { width: 100%; border-collapse: collapse; }
-.fut-g-card td { padding: 2px 0; border-bottom: 1px solid var(--line-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.fut-g-card td + td { text-align: right; font-family: Consolas, "JetBrains Mono", monospace; }
-.fut-g-card td.r { color: var(--accent); padding-left: 10px; }
+#${CARD_ID} h4 { display: flex; align-items: baseline; gap: 8px; margin: 0 0 6px; font-size: 13px; font-weight: 700; color: var(--text); }
+#${CARD_ID} h4 .name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#${CARD_ID} h4 .rank { margin-left: auto; color: var(--accent); font: 600 condensed 14px var(--display); font-variant-numeric: tabular-nums; }
+#${CARD_ID} table { width: 100%; border-collapse: collapse; }
+#${CARD_ID} td { padding: 2px 0; border-bottom: 1px solid var(--line-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
+#${CARD_ID} td .k { display: inline-flex; align-items: center; gap: 6px; vertical-align: middle; }
+#${CARD_ID} td + td { text-align: right; color: var(--text); font: 600 condensed 14px/18px var(--display); }
+#${CARD_ID} td.r { color: var(--accent); padding-left: 10px; font-weight: 400; }
 /* Fleet and defences under Militare: indented and quieter, an estimate without a rank. */
-.fut-g-card tr.sub td { color: var(--muted); font-size: 11px; }
-.fut-g-card tr.sub td:first-child { padding-left: 12px; }
-.fut-g-card p { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
-.fut-g-card .err { color: var(--bad); }
+#${CARD_ID} tr.sub td { color: var(--muted); font-size: 11px; }
+#${CARD_ID} tr.sub td:first-child { padding-left: 18px; }
+#${CARD_ID} p { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
+#${CARD_ID} .err { color: var(--bad); }
 `;
+  var cardFor = 0;
+  var pending;
+  function el(doc, tag, cls = "", text = "") {
+    const n = doc.createElement(tag);
+    if (cls) n.className = cls;
+    if (text) n.textContent = text;
+    return n;
+  }
+  function closePlayerCard(doc) {
+    clearTimeout(pending);
+    cardFor = 0;
+    doc.getElementById(CARD_ID)?.remove();
+  }
+  function attachPlayerCard(o, anchor, id, name) {
+    if (anchor.dataset.futCard) return;
+    anchor.dataset.futCard = String(id);
+    anchor.addEventListener("mouseenter", () => {
+      clearTimeout(pending);
+      pending = setTimeout(() => void openPlayerCard(o, anchor, id, name), INTENT_MS);
+    });
+    anchor.addEventListener("focus", () => void openPlayerCard(o, anchor, id, name));
+    anchor.addEventListener("mouseleave", () => closePlayerCard(o.doc));
+    anchor.addEventListener("blur", () => closePlayerCard(o.doc));
+  }
+  async function openPlayerCard(o, anchor, id, name) {
+    const { doc, t, locale } = o;
+    if (!doc.getElementById("fut-player-card-css")) {
+      const style = el(doc, "style");
+      style.id = "fut-player-card-css";
+      style.textContent = CSS;
+      doc.head.append(style);
+    }
+    closePlayerCard(doc);
+    cardFor = id;
+    const card = el(doc, "div");
+    card.id = CARD_ID;
+    card.setAttribute("role", "tooltip");
+    const head = el(doc, "h4");
+    head.append(el(doc, "span", "name", name));
+    card.append(head);
+    const note = el(doc, "p", "", t("galaxy.loading"));
+    card.append(note);
+    doc.body.append(card);
+    const place2 = () => {
+      const box = anchor.getBoundingClientRect();
+      const view2 = doc.defaultView;
+      const w = card.offsetWidth;
+      const h8 = card.offsetHeight;
+      const vw = view2?.innerWidth ?? 1200;
+      const vh = view2?.innerHeight ?? 800;
+      const left = box.right + 10 + w <= vw - 8 ? box.right + 10 : Math.max(8, box.left - 10 - w);
+      card.style.left = `${left}px`;
+      card.style.top = `${Math.max(8, Math.min(box.top - 8, vh - h8 - 8))}px`;
+    };
+    place2();
+    let data = null;
+    try {
+      data = await playerScores(o.guard, o.store, doc.location.origin, id, Date.now());
+    } catch {
+      data = null;
+    }
+    if (cardFor !== id || !card.isConnected) return;
+    if (!data) {
+      note.textContent = t("galaxy.apiError");
+      note.className = "err";
+      return;
+    }
+    const rank = data.scores.total?.rank;
+    if (rank) head.append(el(doc, "span", "rank", `#${rank.toLocaleString(locale)}`));
+    const table = el(doc, "table");
+    const line = (cls, glyph2, label, value, rankText) => {
+      const tr = el(doc, "tr", cls);
+      const k = el(doc, "span", "k");
+      if (glyph2) k.append(glyph2);
+      k.append(doc.createTextNode(label));
+      const first = el(doc, "td");
+      first.append(k);
+      tr.append(first, el(doc, "td", "", value), el(doc, "td", "r", rankText));
+      table.append(tr);
+      return tr;
+    };
+    for (const [key, ico, color] of LOOK) {
+      const v = data.scores[key];
+      if (!v) continue;
+      const g = icon(doc, ico, 12);
+      g.style.color = color;
+      line("", g, t(`galaxy.score.${key}`), formatUnits(v.points, locale), `#${v.rank.toLocaleString(locale)}`);
+      if (key === "military") {
+        const split2 = splitMilitary(data.scores);
+        if (split2) for (const [part, points] of [["fleet", split2.fleet], ["defence", split2.defence]]) {
+          line("sub", null, t(`galaxy.score.${part}`), formatUnits(points, locale), "").title = t("galaxy.splitHint");
+        }
+      }
+    }
+    note.before(table);
+    const parts = [t("galaxy.apiAge", { time: new Date(data.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) })];
+    if (data.ships) parts.unshift(t("galaxy.ships", { count: data.ships.toLocaleString(locale) }));
+    note.textContent = parts.join(" · ");
+    place2();
+  }
 
   // src/engines/ptre-galaxy.ts
   var GALAXY_IDS_KEY = "ptre.galaxyIds";
@@ -7828,7 +7945,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     ["lifeform", "user", "#E58CDB"],
     ["military", "fleet", "#FF7A7A"]
   ];
-  var CSS = `
+  var CSS2 = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
 :host { ${WINDOW_TOKENS} }
 :host { all: initial; }
@@ -8069,7 +8186,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     }
     const root = host.shadowRoot;
     const style = h(doc, "style");
-    style.textContent = CSS;
+    style.textContent = CSS2;
     const side = h(doc, "aside", "side");
     side.setAttribute("aria-label", t("marks.title"));
     const head = h(doc, "header", "head");
@@ -8209,9 +8326,9 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     if (!seen2) return h(doc, "span", "age none", "—");
     const ms = now - seen2.at;
     const { n, unit } = ageParts(ms);
-    const el7 = h(doc, "span", `age ${ms < HOUR2 ? "fresh" : ms < 3 * 864e5 ? "warm" : "old"}`, t("marks.ago", { n, u: t(`marks.unit.${unit}`) }));
-    el7.title = new Date(seen2.at).toLocaleString(locale);
-    return el7;
+    const el8 = h(doc, "span", `age ${ms < HOUR2 ? "fresh" : ms < 3 * 864e5 ? "warm" : "old"}`, t("marks.ago", { n, u: t(`marks.unit.${unit}`) }));
+    el8.title = new Date(seen2.at).toLocaleString(locale);
+    return el8;
   }
   function coordsButton(doc, t, coords, fresh = false) {
     const b = h(doc, "button", `coords${fresh ? " new" : ""}`, coords);
@@ -8537,7 +8654,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     }
     return { players: players.size, inactive: inactive.size, longInactive: longInactive.size, vacation: vacation.size, moons, debris, fields, deep: s.deepDebris ? debrisTotal(s.deepDebris) : 0 };
   }
-  function el(doc, tag, cls = "", text = "") {
+  function el2(doc, tag, cls = "", text = "") {
     const n = doc.createElement(tag);
     if (cls) n.className = cls;
     if (text) n.textContent = text;
@@ -8549,7 +8666,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     const component = doc.getElementById("galaxycomponent") ?? doc.getElementById("galaxyContent")?.parentElement;
     if (!component || !doc.defaultView) return;
     if (!doc.getElementById("fut-galaxy-css")) {
-      const style = el(doc, "style");
+      const style = el2(doc, "style");
       style.id = "fut-galaxy-css";
       style.textContent = GALAXY_CSS;
       doc.head.append(style);
@@ -8625,7 +8742,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     const redraw = () => decorate(o, content);
     const big = store.get(BIG_DEBRIS_KEY, BIG_DEBRIS);
     const value = (total, cls = "") => {
-      const v = el(doc, "span", `fut-g-dval${total >= big ? " big" : ""}${cls}`, formatUnits(total, locale));
+      const v = el2(doc, "span", `fut-g-dval${total >= big ? " big" : ""}${cls}`, formatUnits(total, locale));
       v.title = total.toLocaleString(locale);
       return v;
     };
@@ -8645,16 +8762,13 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
         const id = r.playerId;
         nameEl.addEventListener("click", () => o.onPlayer?.(id, r.playerName));
       }
+      if (nameEl && r.playerId && !own) attachPlayerCard(o, nameEl, r.playerId, r.playerName);
       if (playerCell && r.playerId && r.rank && !playerCell.querySelector(".fut-g-rank")) {
         const id = r.playerId;
-        const badge = el(doc, "a", "fut-g-rank", `#${r.rank.toLocaleString(locale)}`);
+        const badge = el2(doc, "a", "fut-g-rank", `#${r.rank.toLocaleString(locale)}`);
         badge.href = highscoreHref(id, r.rank);
         badge.setAttribute("aria-label", `${t("galaxy.rankTitle", { name: r.playerName })} · ${t("galaxy.rankOpen")}`);
-        const show2 = () => void openCard(o, badge, id, r.playerName);
-        badge.addEventListener("mouseenter", show2);
-        badge.addEventListener("focus", show2);
-        badge.addEventListener("mouseleave", () => closeCard(doc));
-        badge.addEventListener("blur", () => closeCard(doc));
+        attachPlayerCard(o, badge, id, r.playerName);
         playerCell.querySelector(".playerName")?.after(badge);
         if (!own) badge.after(flagButton(picker, id, r.playerName));
       }
@@ -8671,9 +8785,9 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     const { doc, t, locale } = o;
     const BIG = o.store.get(BIG_DEBRIS_KEY, BIG_DEBRIS);
     const sum = systemSummary(s, o.ownPlanetIds);
-    const bar = el(doc, "div", "fut-g-bar");
+    const bar = el2(doc, "div", "fut-g-bar");
     bar.id = "fut-galaxy-bar";
-    const part = (cls, text) => bar.append(el(doc, "span", cls, text));
+    const part = (cls, text) => bar.append(el2(doc, "span", cls, text));
     part("", t("galaxy.players", { count: sum.players }));
     part("fut-g-inact", t("galaxy.inactive", { count: sum.inactive }) + (sum.longInactive ? ` (${t("galaxy.longInactive", { count: sum.longInactive })})` : ""));
     part("fut-g-vac", t("galaxy.vacation", { count: sum.vacation }));
@@ -8683,74 +8797,11 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     doc.getElementById(bar.id)?.remove();
     content.before(bar);
   }
-  var CARD_ID = "fut-galaxy-card";
-  var cardFor = 0;
-  function closeCard(doc) {
-    cardFor = 0;
-    doc.getElementById(CARD_ID)?.remove();
-  }
-  async function openCard(o, anchor, id, name) {
-    const { doc, t, locale } = o;
-    closeCard(doc);
-    cardFor = id;
-    const card = el(doc, "div", "fut-g-card");
-    card.id = CARD_ID;
-    card.setAttribute("role", "tooltip");
-    card.append(el(doc, "h4", "", t("galaxy.rankTitle", { name })));
-    const note = el(doc, "p", "", t("galaxy.loading"));
-    card.append(note);
-    doc.body.append(card);
-    const place2 = () => {
-      const box = anchor.getBoundingClientRect();
-      const view2 = doc.defaultView;
-      const h8 = card.offsetHeight;
-      const below = box.bottom + 6 + h8 <= (view2?.innerHeight ?? 800);
-      card.style.left = `${Math.max(8, Math.min(box.left, (view2?.innerWidth ?? 1200) - card.offsetWidth - 8))}px`;
-      card.style.top = `${below ? box.bottom + 6 : Math.max(8, box.top - 6 - h8)}px`;
-    };
-    place2();
-    let data = null;
-    try {
-      data = await playerScores(o.guard, o.store, doc.location.origin, id, Date.now());
-    } catch {
-      data = null;
-    }
-    if (cardFor !== id || !card.isConnected) return;
-    if (!data) {
-      note.textContent = t("galaxy.apiError");
-      note.className = "err";
-      return;
-    }
-    const table = el(doc, "table");
-    for (const key of Object.keys(SCORE_TYPES)) {
-      const v = data.scores[key];
-      if (!v) continue;
-      const tr = el(doc, "tr");
-      tr.append(el(doc, "td", "", t(`galaxy.score.${key}`)), el(doc, "td", "", formatUnits(v.points, locale)), el(doc, "td", "r", `#${v.rank.toLocaleString(locale)}`));
-      table.append(tr);
-      if (key === "military") {
-        const split2 = splitMilitary(data.scores);
-        if (split2) {
-          for (const [part, points] of [["fleet", split2.fleet], ["defence", split2.defence]]) {
-            const sub = el(doc, "tr", "sub");
-            sub.title = t("galaxy.splitHint");
-            sub.append(el(doc, "td", "", t(`galaxy.score.${part}`)), el(doc, "td", "", formatUnits(points, locale)), el(doc, "td", "r"));
-            table.append(sub);
-          }
-        }
-      }
-    }
-    note.before(table);
-    const parts = [t("galaxy.apiAge", { time: new Date(data.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) })];
-    if (data.ships) parts.unshift(t("galaxy.ships", { count: data.ships.toLocaleString(locale) }));
-    note.textContent = parts.join(" · ");
-    place2();
-  }
 
   // src/modules/dock/index.ts
   var DOCK_ID = "fut-dock";
   var STYLE_ID = "fut-dock-style";
-  var CSS2 = `
+  var CSS3 = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
 #${DOCK_ID} { ${WINDOW_TOKENS} }
 #${DOCK_ID} {
@@ -8794,7 +8845,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
 #${DOCK_ID} .flag i { font: normal condensed 13px var(--display); color: var(--text); }
 #${DOCK_ID} .hint { margin: 0; padding: 8px; color: var(--label); font-size: 12px; line-height: 1.4; }
 `;
-  function el2(doc, tag, cls = "", text) {
+  function el3(doc, tag, cls = "", text) {
     const n = doc.createElement(tag);
     if (cls) n.className = cls;
     if (text !== void 0) n.textContent = text;
@@ -8807,16 +8858,16 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     const home = menu ?? doc.getElementById("myPlanets");
     if (!home) return;
     if (!doc.getElementById(STYLE_ID)) {
-      const style = el2(doc, "style");
+      const style = el3(doc, "style");
       style.id = STYLE_ID;
-      style.textContent = CSS2;
+      style.textContent = CSS3;
       doc.head.append(style);
     }
-    const dock = el2(doc, "div");
+    const dock = el3(doc, "div");
     dock.id = DOCK_ID;
     const fmt = (n) => formatUnits(n, o.locale);
     const button3 = (cls, title, onClick) => {
-      const b = el2(doc, "button", cls);
+      const b = el3(doc, "button", cls);
       b.type = "button";
       b.title = title;
       b.addEventListener("click", (e) => {
@@ -8827,28 +8878,28 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     };
     const head = (glyph2, name, title, onClick, count2 = "") => {
       const b = button3("head", title, onClick);
-      b.append(icon(doc, glyph2, 14), el2(doc, "b", "", name));
-      if (count2) b.append(el2(doc, "span", "n", count2));
+      b.append(icon(doc, glyph2, 14), el3(doc, "b", "", name));
+      if (count2) b.append(el3(doc, "span", "n", count2));
       return b;
     };
     const { today, yesterday } = o.journal;
-    const journal = el2(doc, "section", "card");
+    const journal = el3(doc, "section", "card");
     journal.append(head("chart", t("dock.journal"), t("exp.title"), o.onOpenJournal, today.count ? String(today.count) : ""));
     const signed = (n) => `${n >= 0 ? "+" : "−"}${fmt(Math.abs(n))}`;
     const day = (cls, label, d) => {
       const b = button3(`jday ${cls}`, t("dock.journalHint", { n: d.count }), o.onOpenJournal);
-      const row = el2(doc, "span", "row");
-      row.append(el2(doc, "span", "k", label), el2(doc, "span", `v${d.count ? d.net < 0 ? " neg" : "" : " none"}`, d.count ? signed(d.net) : "—"));
+      const row = el3(doc, "span", "row");
+      row.append(el3(doc, "span", "k", label), el3(doc, "span", `v${d.count ? d.net < 0 ? " neg" : "" : " none"}`, d.count ? signed(d.net) : "—"));
       b.append(row);
       return b;
     };
     const todayBlock = day("today", t("dock.today"), today);
     if (today.count) {
-      const res = el2(doc, "span", "res");
+      const res = el3(doc, "span", "res");
       for (const k of ["metal", "crystal", "deuterium"]) {
-        const cell = el2(doc, "span");
+        const cell = el3(doc, "span");
         cell.title = `${t(`res.${k}`)}: ${signed(today.res[k])}`;
-        const letter = el2(doc, "b", "", t(`res.short.${k}`));
+        const letter = el3(doc, "b", "", t(`res.short.${k}`));
         letter.style.color = RES_COLORS[k];
         cell.append(letter, today.res[k] < 0 ? signed(today.res[k]) : fmt(today.res[k]));
         res.append(cell);
@@ -8857,17 +8908,17 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     }
     journal.append(todayBlock, day("yesterday", t("exp.period.yesterday"), yesterday));
     const players = Object.values(o.marks.players);
-    const targets = el2(doc, "section", "card");
+    const targets = el3(doc, "section", "card");
     targets.append(head("target", t("bar.targets"), t("bar.targetsHint"), () => o.onOpenTargets(), String(players.length || "")));
-    if (!players.length) targets.append(el2(doc, "p", "hint", t("dock.targetsEmpty")));
-    const flags = el2(doc, "div", "flags");
+    if (!players.length) targets.append(el3(doc, "p", "hint", t("dock.targetsEmpty")));
+    const flags = el3(doc, "div", "flags");
     for (const f of FLAGS) {
       const n = players.filter((p) => p.flag === f).length;
       if (!n) continue;
       const b = button3("flag", `${t(`mark.flag.${f}`)}: ${n}`, () => o.onOpenTargets({ flagTab: f }));
       b.style.color = FLAG_COLORS[f];
       b.setAttribute("aria-label", `${t(`mark.flag.${f}`)}: ${n}`);
-      b.append(markIcon(doc, f, 13), el2(doc, "i", "", String(n)));
+      b.append(markIcon(doc, f, 13), el3(doc, "i", "", String(n)));
       flags.append(b);
     }
     if (flags.childElementCount) targets.append(flags);
@@ -8895,18 +8946,18 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     doc.getElementById(PING_ID)?.remove();
     if (!timing) return null;
     const clock2 = doc.querySelector(".OGameClock");
-    const el7 = doc.createElement(clock2?.tagName === "LI" ? "li" : "span");
-    el7.id = PING_ID;
-    el7.textContent = t("ping.label", { ms: timing.server.toLocaleString(locale) });
-    el7.style.cssText = `display: inline-block; margin-left: 8px; font: 700 11px Verdana, Arial, sans-serif; color: ${COLORS[pingLevel(timing.server)]}; white-space: nowrap; cursor: help;`;
-    el7.title = timing.total ? t("ping.hint", { ms: timing.server.toLocaleString(locale), s: (timing.total / 1e3).toLocaleString(locale, { maximumFractionDigits: 1, minimumFractionDigits: 1 }) }) : t("ping.hintShort", { ms: timing.server.toLocaleString(locale) });
-    if (clock2) clock2.after(el7);
+    const el8 = doc.createElement(clock2?.tagName === "LI" ? "li" : "span");
+    el8.id = PING_ID;
+    el8.textContent = t("ping.label", { ms: timing.server.toLocaleString(locale) });
+    el8.style.cssText = `display: inline-block; margin-left: 8px; font: 700 11px Verdana, Arial, sans-serif; color: ${COLORS[pingLevel(timing.server)]}; white-space: nowrap; cursor: help;`;
+    el8.title = timing.total ? t("ping.hint", { ms: timing.server.toLocaleString(locale), s: (timing.total / 1e3).toLocaleString(locale, { maximumFractionDigits: 1, minimumFractionDigits: 1 }) }) : t("ping.hintShort", { ms: timing.server.toLocaleString(locale) });
+    if (clock2) clock2.after(el8);
     else {
       const row = doc.querySelector("#siteFooter .content .fright");
       if (!row) return null;
-      row.append(doc.createTextNode("|"), el7);
+      row.append(doc.createTextNode("|"), el8);
     }
-    return el7;
+    return el8;
   }
   function showPing(doc, t, locale) {
     const win2 = doc.defaultView;
@@ -8956,13 +9007,13 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   var MERCHANT_CLASS = "fut-ie-open";
   var STYLE_ID2 = "fut-merchant-style";
   var MERCHANT = '.menubutton[data-ipi-hint="ipiToolbarTrader"]';
-  var CSS3 = `body.${MERCHANT_CLASS} #menuTable ${MERCHANT} .textlabel, body.${MERCHANT_CLASS} #leftMenu ${MERCHANT} .textlabel { color: #4FE3FF !important; text-shadow: 0 0 4px rgba(79, 227, 255, 0.65), 0 0 9px rgba(79, 227, 255, 0.35); }`;
+  var CSS4 = `body.${MERCHANT_CLASS} #menuTable ${MERCHANT} .textlabel, body.${MERCHANT_CLASS} #leftMenu ${MERCHANT} .textlabel { color: #4FE3FF !important; text-shadow: 0 0 4px rgba(79, 227, 255, 0.65), 0 0 9px rgba(79, 227, 255, 0.35); }`;
   var isTraderPage = (href) => /[?&]component=trader/i.test(href);
   function markMerchant(doc, state) {
     if (!doc.getElementById(STYLE_ID2)) {
       const style = doc.createElement("style");
       style.id = STYLE_ID2;
-      style.textContent = CSS3;
+      style.textContent = CSS4;
       doc.head.append(style);
     }
     doc.body.classList.toggle(MERCHANT_CLASS, state?.available === true);
@@ -10312,7 +10363,7 @@ td.spark-cell { width: 90px; }
     const now = o.now?.() ?? Date.now();
     const fmt = (n) => formatUnits(n, locale);
     const exact = (n) => Math.round(n).toLocaleString(locale);
-    const el7 = (tag, cls = "", text) => {
+    const el8 = (tag, cls = "", text) => {
       const n = doc.createElement(tag);
       if (cls) n.className = cls;
       if (text !== void 0) n.textContent = text;
@@ -10323,7 +10374,7 @@ td.spark-cell { width: 90px; }
       mountSpyPanel(o);
     };
     const iconButton3 = (cls, name, label, onClick) => {
-      const b = el7("button", `fut-sp-ib ${cls}`);
+      const b = el8("button", `fut-sp-ib ${cls}`);
       b.type = "button";
       b.title = label;
       b.setAttribute("aria-label", label);
@@ -10345,19 +10396,19 @@ td.spark-cell { width: 90px; }
     const here = Number(meta("id")) > 0 ? { id: Number(meta("id")), name: meta("name"), coords: meta("coordinates"), moon: meta("type") === "moon" } : null;
     const baseName = (b) => b.name || doc.querySelector(`#planet-${b.id} .planet-name, #planet-${b.id} .moon-name`)?.textContent?.trim() || "";
     const grid2 = `22px ${view2.cols.map((c) => WIDTH[c]).join(" ")} ${spy.ptre ? 130 : 104}px`;
-    const panel = el7("div", "fut-sp");
+    const panel = el8("div", "fut-sp");
     panel.id = SPY_PANEL_ID;
-    const head = el7("div", "fut-sp-head");
-    const toggle = el7("button", "fut-sp-title");
+    const head = el8("div", "fut-sp-head");
+    const toggle = el8("button", "fut-sp-title");
     toggle.type = "button";
     toggle.dataset.focus = "title";
     toggle.setAttribute("aria-expanded", String(view2.open));
-    toggle.append(icon(doc, "chevron", 12, "fut-sp-chev"), el7("b", "", t("spy.title")), el7("span", "", t("spy.sub", { n: rows.length, loot: fmt(rows.reduce((s, r) => s + r.lootRes, 0)) })));
+    toggle.append(icon(doc, "chevron", 12, "fut-sp-chev"), el8("b", "", t("spy.title")), el8("span", "", t("spy.sub", { n: rows.length, loot: fmt(rows.reduce((s, r) => s + r.lootRes, 0)) })));
     toggle.addEventListener("click", () => redraw({ open: !view2.open }));
     head.append(toggle);
     if (view2.open) {
       const chip2 = (id, text, pressed, next) => {
-        const b = el7("button", "fut-sp-chip", text);
+        const b = el8("button", "fut-sp-chip", text);
         b.type = "button";
         b.dataset.focus = id;
         b.setAttribute("aria-pressed", String(pressed));
@@ -10372,33 +10423,33 @@ td.spark-cell { width: 90px; }
     panel.append(head);
     if (!view2.open) return panel;
     if (!rows.length) {
-      panel.append(el7("p", "fut-sp-note", t(all2.length ? "spy.noneFiltered" : "spy.none")));
+      panel.append(el8("p", "fut-sp-note", t(all2.length ? "spy.noneFiltered" : "spy.none")));
       return panel;
     }
-    const table = el7("div", "fut-sp-table");
+    const table = el8("div", "fut-sp-table");
     table.setAttribute("role", "table");
     table.setAttribute("aria-label", t("spy.title"));
     const line = (cls) => {
-      const r = el7("div", `fut-sp-row ${cls}`.trim());
+      const r = el8("div", `fut-sp-row ${cls}`.trim());
       r.setAttribute("role", "row");
       r.style.gridTemplateColumns = grid2;
       return r;
     };
     const cols = line("fut-sp-cols");
     const fixedHead = (text, label) => {
-      const c = el7("div", "fut-sp-c");
+      const c = el8("div", "fut-sp-c");
       c.setAttribute("role", "columnheader");
-      const s = el7("span", "fut-sp-h", text);
+      const s = el8("span", "fut-sp-h", text);
       s.setAttribute("aria-label", label);
       c.append(s);
       return c;
     };
     cols.append(fixedHead("#", t("spy.col.n")));
     for (const key of view2.cols) {
-      const cell = el7("div", `fut-sp-c${RIGHT.includes(key) ? " fut-sp-r" : ""}`);
+      const cell = el8("div", `fut-sp-c${RIGHT.includes(key) ? " fut-sp-r" : ""}`);
       cell.setAttribute("role", "columnheader");
       cell.setAttribute("aria-sort", view2.sort === key ? view2.desc ? "descending" : "ascending" : "none");
-      const b = el7("button", `fut-sp-h${view2.sort === key ? " sortBy" : ""}`, t(`spy.col.${key}`));
+      const b = el8("button", `fut-sp-h${view2.sort === key ? " sortBy" : ""}`, t(`spy.col.${key}`));
       b.type = "button";
       b.dataset.focus = `col-${key}`;
       b.title = t("spy.colHint");
@@ -10432,7 +10483,7 @@ td.spark-cell { width: 90px; }
     }
     cols.append(fixedHead("", t("spy.col.actionsName")));
     table.append(cols);
-    const list = el7("div", "fut-sp-list");
+    const list = el8("div", "fut-sp-list");
     list.setAttribute("role", "rowgroup");
     rows.forEach((r, index) => {
       const e = r.entry;
@@ -10443,18 +10494,18 @@ td.spark-cell { width: 90px; }
       const attackUrl = (n2, id) => `/game/index.php?page=ingame&component=fleetdispatch&galaxy=${g}&system=${s}&position=${p}&type=${e.moon ? 3 : 1}&mission=1${n2 > 0 ? `&am${id}=${n2}` : ""}`;
       const cellOf = {
         age: () => {
-          const c = el7("div", `fut-sp-c ${r.ageMinutes > 360 ? "old" : r.ageMinutes > 60 ? "warm" : "fresh"}`, r.ageMinutes < 60 ? `${r.ageMinutes}m` : r.ageMinutes < 2880 ? `${Math.floor(r.ageMinutes / 60)}h` : `${Math.floor(r.ageMinutes / 1440)}g`);
+          const c = el8("div", `fut-sp-c ${r.ageMinutes > 360 ? "old" : r.ageMinutes > 60 ? "warm" : "fresh"}`, r.ageMinutes < 60 ? `${r.ageMinutes}m` : r.ageMinutes < 2880 ? `${Math.floor(r.ageMinutes / 60)}h` : `${Math.floor(r.ageMinutes / 1440)}g`);
           c.title = new Date(e.at).toLocaleString(locale);
           return c;
         },
         act: () => {
-          const c = el7("div", `fut-sp-c ${e.activity === 0 ? "bad" : e.activity < 60 ? "warm" : "zero"}`, e.activity === 0 ? "*" : e.activity < 60 ? String(e.activity) : "–");
+          const c = el8("div", `fut-sp-c ${e.activity === 0 ? "bad" : e.activity < 60 ? "warm" : "zero"}`, e.activity === 0 ? "*" : e.activity < 60 ? String(e.activity) : "–");
           c.title = e.activity === 0 ? t("msg.spy.active") : e.activity < 60 ? t("msg.spy.activity", { n: e.activity }) : t("msg.spy.inactive");
           return c;
         },
         coords: () => {
-          const c = el7("div", "fut-sp-c");
-          const gal = el7("a", "fut-sp-coords", e.coords);
+          const c = el8("div", "fut-sp-c");
+          const gal = el8("a", "fut-sp-coords", e.coords);
           gal.href = `/game/index.php?page=ingame&component=galaxy&galaxy=${g}&system=${s}`;
           gal.title = t(e.moon ? "spy.moon" : "spy.planet");
           gal.prepend(icon(doc, e.moon ? "moon" : "planet", 11, "fut-sp-kind"));
@@ -10462,15 +10513,15 @@ td.spark-cell { width: 90px; }
           return c;
         },
         target: () => {
-          const c = el7("div", "fut-sp-c fut-sp-who");
-          const name = el7("a", "fut-sp-name overlay", e.playerName || "?");
+          const c = el8("div", "fut-sp-c fut-sp-who");
+          const name = el8("a", "fut-sp-name overlay", e.playerName || "?");
           name.href = `${doc.location.origin}/game/index.php?page=ajax&component=messagedetails&messageId=${encodeURIComponent(e.id)}`;
           name.dataset.overlayTitle = t("spy.report");
           name.title = t("spy.reportHint", { name: e.playerName || "?" });
           c.append(name);
-          for (const st of e.statuses.filter((x) => x !== "active")) c.append(el7("span", `fut-sp-st st-${st}`, t(`spy.status.${st}`)));
+          for (const st of e.statuses.filter((x) => x !== "active")) c.append(el8("span", `fut-sp-st st-${st}`, t(`spy.status.${st}`)));
           if (e.shared) {
-            const ally = el7("span", "fut-sp-st st-shared", t("spy.shared"));
+            const ally = el8("span", "fut-sp-st st-shared", t("spy.shared"));
             ally.title = t("spy.sharedHint");
             c.append(ally);
           }
@@ -10478,7 +10529,7 @@ td.spark-cell { width: 90px; }
           return c;
         },
         loot: () => {
-          const c = el7("div", "fut-sp-c fut-sp-r fut-sp-loot", fmt(r.lootRes));
+          const c = el8("div", "fut-sp-c fut-sp-r fut-sp-loot", fmt(r.lootRes));
           c.title = t("spy.lootHint", {
             pct: Math.round(e.loot * 100),
             m: fmt(e.res.metal * e.loot),
@@ -10493,11 +10544,11 @@ td.spark-cell { width: 90px; }
         def: () => value(e.defValue, t("msg.spy.def"))
       };
       const value = (v, label) => {
-        const c = el7("div", `fut-sp-c fut-sp-r ${v !== 0 ? "warm" : "zero"}`, v < 0 ? "?" : v > 0 ? fmt(v) : "0");
+        const c = el8("div", `fut-sp-c fut-sp-r ${v !== 0 ? "warm" : "zero"}`, v < 0 ? "?" : v > 0 ? fmt(v) : "0");
         c.title = `${label}: ${v < 0 ? t("spy.hidden") : exact(v)}`;
         return c;
       };
-      const acts = el7("div", "fut-sp-c fut-sp-acts");
+      const acts = el8("div", "fut-sp-c fut-sp-acts");
       const more = iconButton3("fut-sp-more", "more", t("spy.waves"), () => {
         if (open2) expanded.delete(e.key);
         else expanded.add(e.key);
@@ -10556,41 +10607,41 @@ td.spark-cell { width: 90px; }
         (panel2?.querySelector(near ? `[data-focus="del-${near.entry.key}"]` : '[data-focus="title"]') ?? panel2?.querySelector('[data-focus="title"]'))?.focus();
       }));
       acts.lastElementChild.setAttribute("data-focus", `del-${e.key}`);
-      const n = el7("div", "fut-sp-c fut-sp-n", String(index + 1));
+      const n = el8("div", "fut-sp-c fut-sp-n", String(index + 1));
       const cells = [n, ...view2.cols.map((c) => cellOf[c]()), acts];
       for (const c of cells) c.setAttribute("role", "cell");
       row.append(...cells);
       list.append(row);
       if (open2) {
-        const det = el7("div", "fut-sp-waves");
+        const det = el8("div", "fut-sp-waves");
         det.id = `fut-sp-w-${index}`;
         det.setAttribute("role", "row");
-        const cell = el7("div");
+        const cell = el8("div");
         cell.setAttribute("role", "cell");
         cell.setAttribute("aria-colspan", String(view2.cols.length + 2));
         const waves = raidWaves(e.res.metal + e.res.crystal + e.res.deuterium, e.loot, 6);
-        const wgrid = el7("div", "fut-sp-wgrid");
-        wgrid.append(el7("span", "k"), ...waves.map((_, i) => el7("span", "h", t("spy.wave", { n: i + 1 }))));
-        wgrid.append(el7("span", "k", t("spy.col.loot")), ...waves.map((w) => el7("b", "", fmt(w))));
+        const wgrid = el8("div", "fut-sp-wgrid");
+        wgrid.append(el8("span", "k"), ...waves.map((_, i) => el8("span", "h", t("spy.wave", { n: i + 1 }))));
+        wgrid.append(el8("span", "k", t("spy.col.loot")), ...waves.map((w) => el8("b", "", fmt(w))));
         for (const id of [203, 202]) {
-          const label = el7("span", "k");
+          const label = el8("span", "k");
           label.append(shipIcon(doc, id, shipName(id, ships, t), "fut-msg-icon"), shipName(id, ships, t));
           wgrid.append(label);
           for (const [i, w] of waves.entries()) {
             const n2 = Math.ceil(w / cap(id));
             if (!from || n2 === 0) {
-              wgrid.append(el7("span", "cnt", n2.toLocaleString(locale)));
+              wgrid.append(el8("span", "cnt", n2.toLocaleString(locale)));
               continue;
             }
-            const a = el7("a", "cnt", n2.toLocaleString(locale));
+            const a = el8("a", "cnt", n2.toLocaleString(locale));
             a.href = attackUrl(n2, id);
             a.title = t("spy.waveHint", { n: i + 1, count: n2.toLocaleString(locale), ship: shipName(id, ships, t), name: baseName(from) });
             wgrid.append(a);
           }
         }
-        const res = el7("div", "fut-sp-wres");
-        res.append(el7("span", "k", t("spy.onPlanet")), el7("span", "", `M ${fmt(e.res.metal)}`), el7("span", "", `C ${fmt(e.res.crystal)}`), el7("span", "", `D ${fmt(e.res.deuterium)}`));
-        if (from) res.append(el7("span", "from", t("spy.from", { name: baseName(from), coords: from.coords })));
+        const res = el8("div", "fut-sp-wres");
+        res.append(el8("span", "k", t("spy.onPlanet")), el8("span", "", `M ${fmt(e.res.metal)}`), el8("span", "", `C ${fmt(e.res.crystal)}`), el8("span", "", `D ${fmt(e.res.deuterium)}`));
+        if (from) res.append(el8("span", "from", t("spy.from", { name: baseName(from), coords: from.coords })));
         cell.append(wgrid, res);
         det.append(cell);
         list.append(det);
@@ -10598,11 +10649,11 @@ td.spark-cell { width: 90px; }
     });
     table.append(list);
     const foot = line("fut-sp-foot");
-    foot.append(el7("div", "fut-sp-c"));
-    for (const key of view2.cols) foot.append(el7("div", `fut-sp-c${RIGHT.includes(key) ? " fut-sp-r" : ""}`, key === "loot" ? fmt(rows.reduce((s, r) => s + r.lootRes, 0)) : key === "target" ? t("spy.total") : ""));
-    foot.append(el7("div", "fut-sp-c"));
+    foot.append(el8("div", "fut-sp-c"));
+    for (const key of view2.cols) foot.append(el8("div", `fut-sp-c${RIGHT.includes(key) ? " fut-sp-r" : ""}`, key === "loot" ? fmt(rows.reduce((s, r) => s + r.lootRes, 0)) : key === "target" ? t("spy.total") : ""));
+    foot.append(el8("div", "fut-sp-c"));
     table.append(foot);
-    panel.append(table, el7("p", "fut-sp-note", t("spy.hint")));
+    panel.append(table, el8("p", "fut-sp-note", t("spy.hint")));
     return panel;
   }
 
@@ -10630,29 +10681,29 @@ td.spark-cell { width: 90px; }
     const fmt = (n) => formatUnits(n, locale);
     const exact = (n) => Math.round(n).toLocaleString(locale);
     const ships = o.store.get(SHIPS_INFO_KEY, {});
-    const el7 = (tag, cls = "", text) => {
+    const el8 = (tag, cls = "", text) => {
       const n = doc.createElement(tag);
       if (cls) n.className = cls;
       if (text !== void 0) n.textContent = text;
       return n;
     };
-    const panel = el7("section", "fut-fresh");
+    const panel = el8("section", "fut-fresh");
     panel.id = FRESH_ID;
     panel.setAttribute("aria-live", "polite");
     panel.setAttribute("aria-label", t("fresh.title"));
     shown.set(panel, all2);
-    const timer2 = el7("div", "fut-fresh-timer");
-    const bar = el7("i");
+    const timer2 = el8("div", "fut-fresh-timer");
+    const bar = el8("i");
     bar.style.animationDuration = `${FRESH_MS}ms`;
     bar.addEventListener("animationend", () => panel.remove());
     timer2.append(bar);
-    const head = el7("div", "fut-fresh-head");
-    head.append(el7("b", "", t("fresh.title")), el7("span", "fut-fresh-count", t("recap.count", { n: (s.count + s.discoveries).toLocaleString(locale) })));
-    for (const i of [0, 1, 2]) if (s.sizes[i]) head.append(el7("span", `fut-rar-chip fut-rar-${i}`, `${s.sizes[i]} ${t(`msg.size.${i}`).toLowerCase()}`));
-    const total = el7("span", `fut-fresh-total${s.netMsu < 0 ? " fut-neg" : ""}`);
-    total.append(el7("b", "", fmt(s.netMsu)), el7("small", "", "MSU"));
+    const head = el8("div", "fut-fresh-head");
+    head.append(el8("b", "", t("fresh.title")), el8("span", "fut-fresh-count", t("recap.count", { n: (s.count + s.discoveries).toLocaleString(locale) })));
+    for (const i of [0, 1, 2]) if (s.sizes[i]) head.append(el8("span", `fut-rar-chip fut-rar-${i}`, `${s.sizes[i]} ${t(`msg.size.${i}`).toLowerCase()}`));
+    const total = el8("span", `fut-fresh-total${s.netMsu < 0 ? " fut-neg" : ""}`);
+    total.append(el8("b", "", fmt(s.netMsu)), el8("small", "", "MSU"));
     total.title = `${exact(s.netMsu)} MSU`;
-    const close = el7("button", "fut-fresh-close");
+    const close = el8("button", "fut-fresh-close");
     close.type = "button";
     close.title = t("fresh.close");
     close.setAttribute("aria-label", t("fresh.close"));
@@ -10660,25 +10711,25 @@ td.spark-cell { width: 90px; }
     close.addEventListener("click", () => panel.remove());
     head.append(total, close);
     panel.append(timer2, head);
-    const res = el7("div", "fut-fresh-res");
+    const res = el8("div", "fut-fresh-res");
     for (const [key, c] of [["metal", "m"], ["crystal", "c"], ["deuterium", "d"], ["darkMatter", "dm"]]) {
       const v = s.res[key];
-      const tile2 = el7("div", `fut-fresh-tile fut-r-${c}${v ? "" : " zero"}`);
+      const tile2 = el8("div", `fut-fresh-tile fut-r-${c}${v ? "" : " zero"}`);
       tile2.title = `${t(`msg.res.${key}`)}: ${exact(v)}`;
-      const name = el7("span", "fut-fresh-name", t(`msg.res.${key}`));
+      const name = el8("span", "fut-fresh-name", t(`msg.res.${key}`));
       name.insertAdjacentHTML("afterbegin", resIconSvg(key, 13));
-      tile2.append(name, el7("b", "", v ? fmt(v) : "0"));
+      tile2.append(name, el8("b", "", v ? fmt(v) : "0"));
       res.append(tile2);
     }
     panel.append(res);
     const found = Object.entries(s.shipsFound);
     const lost = Object.entries(s.lost);
     if (found.length || lost.length) {
-      const list = el7("div", "fut-fresh-ships");
+      const list = el8("div", "fut-fresh-ships");
       for (const [units, isLost] of [[found, false], [lost, true]]) {
         for (const [id, n] of [...units].sort((a, b) => Number(a[0]) - Number(b[0]))) {
           const name = shipName(Number(id), ships, t);
-          const tile2 = el7("span", `fut-fresh-ship${isLost ? " fut-neg" : ""}`, `${isLost ? "−" : "+"}${n.toLocaleString(locale)}`);
+          const tile2 = el8("span", `fut-fresh-ship${isLost ? " fut-neg" : ""}`, `${isLost ? "−" : "+"}${n.toLocaleString(locale)}`);
           tile2.prepend(shipIcon(doc, Number(id), name, "fut-msg-icon"));
           tile2.title = name;
           list.append(tile2);
@@ -10698,13 +10749,13 @@ td.spark-cell { width: 90px; }
   var FOREIGN_CHECK_MS = 4e3;
   var FOREIGN_NAME = /ogame-?tracker|ogt[-_]|ogk[-_]|ogi[-_]|ogl[-_]|oginfinity|ogame-?infinity/i;
   function foreignTool(msg) {
-    for (const el7 of Array.from(msg.querySelectorAll("*"))) {
-      const ours = el7.closest('[class*="fut-"]');
+    for (const el8 of Array.from(msg.querySelectorAll("*"))) {
+      const ours = el8.closest('[class*="fut-"]');
       if (ours && ours !== msg && msg.contains(ours)) continue;
-      if (el7.shadowRoot) return true;
-      if (Array.from(el7.attributes).some((a) => a.name.startsWith("data-v-"))) return true;
-      const cls = typeof el7.className === "string" ? el7.className : el7.getAttribute("class") ?? "";
-      if (FOREIGN_NAME.test(cls) || FOREIGN_NAME.test(el7.id)) return true;
+      if (el8.shadowRoot) return true;
+      if (Array.from(el8.attributes).some((a) => a.name.startsWith("data-v-"))) return true;
+      const cls = typeof el8.className === "string" ? el8.className : el8.getAttribute("class") ?? "";
+      if (FOREIGN_NAME.test(cls) || FOREIGN_NAME.test(el8.id)) return true;
     }
     return false;
   }
@@ -11244,14 +11295,14 @@ td.spark-cell { width: 90px; }
     }
     return out;
   }
-  function planStatus(items, have, pending2, now) {
+  function planStatus(items, have, pending3, now) {
     if (!have) return { state: "unknown", lack: null };
     const total = planTotal(items);
     const now0 = missing(total, have);
     if (!now0.metal && !now0.crystal && !now0.deuterium) return { state: "ready", lack: null };
-    const lack = missing(total, { metal: have.metal + pending2.metal, crystal: have.crystal + pending2.crystal, deuterium: have.deuterium + pending2.deuterium });
+    const lack = missing(total, { metal: have.metal + pending3.metal, crystal: have.crystal + pending3.crystal, deuterium: have.deuterium + pending3.deuterium });
     if (lack.metal || lack.crystal || lack.deuterium) return { state: "missing", lack };
-    return { state: pending2.arriveAt > now ? "arriving" : "arrived", lack: null };
+    return { state: pending3.arriveAt > now ? "arriving" : "arrived", lack: null };
   }
   function prunePending(list, plan, seenAtOf) {
     return list.filter((s) => (plan[String(s.target)]?.length ?? 0) > 0 && s.arriveAt > seenAtOf(s.target));
@@ -12350,21 +12401,21 @@ input[type="checkbox"] { accent-color: var(--accent); }
   // src/core/viewport.ts
   var ZOOMED_OUT = 0.95;
   var PHONE_TEXT = 1.15;
-  function placeOnViewport(el7, vv, fit) {
+  function placeOnViewport(el8, vv, fit) {
     const s = vv.scale || 1;
     if (fit === "bottom") {
-      Object.assign(el7.style, { left: `${vv.offsetLeft}px`, top: `${vv.offsetTop + vv.height}px`, width: `${vv.width * s}px`, transform: `scale(${1 / s}) translateY(-100%)` });
+      Object.assign(el8.style, { left: `${vv.offsetLeft}px`, top: `${vv.offsetTop + vv.height}px`, width: `${vv.width * s}px`, transform: `scale(${1 / s}) translateY(-100%)` });
       return;
     }
     if (fit === "top") {
-      Object.assign(el7.style, { left: `${vv.offsetLeft}px`, top: `${vv.offsetTop}px`, width: `${vv.width * s}px`, transform: `scale(${1 / s})` });
+      Object.assign(el8.style, { left: `${vv.offsetLeft}px`, top: `${vv.offsetTop}px`, width: `${vv.width * s}px`, transform: `scale(${1 / s})` });
       return;
     }
     if (s >= ZOOMED_OUT) {
-      for (const p of ["left", "top", "width", "height", "transform", "transformOrigin", "inset"]) el7.style[p] = "";
+      for (const p of ["left", "top", "width", "height", "transform", "transformOrigin", "inset"]) el8.style[p] = "";
       return;
     }
-    Object.assign(el7.style, {
+    Object.assign(el8.style, {
       inset: "auto",
       left: `${vv.offsetLeft}px`,
       top: `${vv.offsetTop}px`,
@@ -12374,22 +12425,22 @@ input[type="checkbox"] { accent-color: var(--accent); }
       transform: `scale(${PHONE_TEXT / s})`
     });
   }
-  function followViewport(doc, el7, fit) {
+  function followViewport(doc, el8, fit) {
     const vv = doc.defaultView?.visualViewport;
     if (!vv) {
-      if (fit === "bottom") Object.assign(el7.style, { top: "auto", bottom: "0", width: "100%" });
-      if (fit === "top") Object.assign(el7.style, { top: "0", bottom: "auto", width: "100%" });
+      if (fit === "bottom") Object.assign(el8.style, { top: "auto", bottom: "0", width: "100%" });
+      if (fit === "top") Object.assign(el8.style, { top: "0", bottom: "auto", width: "100%" });
       return;
     }
     const place2 = () => {
-      if (!el7.isConnected) {
+      if (!el8.isConnected) {
         vv.removeEventListener("resize", place2);
         vv.removeEventListener("scroll", place2);
         return;
       }
-      placeOnViewport(el7, vv, fit);
+      placeOnViewport(el8, vv, fit);
     };
-    placeOnViewport(el7, vv, fit);
+    placeOnViewport(el8, vv, fit);
     vv.addEventListener("resize", place2);
     vv.addEventListener("scroll", place2);
   }
@@ -12439,7 +12490,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (pointer: coarse) { .b { height: 40px; padding: 0 16px; } }
 @media (prefers-reduced-motion: reduce) { .card { animation: none; } .b:active { transform: none; } }
 `;
-  var CSS4 = `${CARD_CSS}
+  var CSS5 = `${CARD_CSS}
 /* The page dimmed and softly blurred around the lit control (Nicola: «hover blurrato»). */
 .veil { position: fixed; z-index: ${Z}; background: rgba(4, 6, 10, 0.66); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
 .shield { position: fixed; z-index: ${Z}; }
@@ -12469,7 +12520,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (pointer: coarse) { .x { width: 40px; height: 40px; } }
 @media (prefers-reduced-motion: reduce) { .veil, .shield, .ring { transition: none; } }
 `;
-  var el3 = (doc, tag, cls = "", text = "") => {
+  var el4 = (doc, tag, cls = "", text = "") => {
     const n = doc.createElement(tag);
     if (cls) n.className = cls;
     if (text) n.textContent = text;
@@ -12493,16 +12544,16 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
       return;
     }
     const win2 = doc.defaultView;
-    const host = el3(doc, "div");
+    const host = el4(doc, "div");
     host.id = TOUR_ID;
     const root = host.attachShadow({ mode: "open" });
-    const style = el3(doc, "style");
-    style.textContent = CSS4;
-    const [v0, v1, v2, v3] = [0, 1, 2, 3].map(() => el3(doc, "div", "veil"));
+    const style = el4(doc, "style");
+    style.textContent = CSS5;
+    const [v0, v1, v2, v3] = [0, 1, 2, 3].map(() => el4(doc, "div", "veil"));
     const veils = [v0, v1, v2, v3];
-    const shield = el3(doc, "div", "shield");
-    const ring2 = el3(doc, "div", "ring");
-    const card = el3(doc, "div", "card");
+    const shield = el4(doc, "div", "shield");
+    const ring2 = el4(doc, "div", "ring");
+    const card = el4(doc, "div", "card");
     card.setAttribute("role", "dialog");
     card.setAttribute("aria-modal", "true");
     card.setAttribute("aria-labelledby", "fut-tour-title");
@@ -12590,7 +12641,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     };
     ending = () => finish2(false);
     const button3 = (cls, text, onClick) => {
-      const b = el3(doc, "button", cls, text);
+      const b = el4(doc, "button", cls, text);
       b.type = "button";
       b.addEventListener("click", onClick);
       return b;
@@ -12608,26 +12659,26 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
         if (r.top < topEdge || r.bottom > bottomEdge) target.scrollIntoView?.({ block: "center", inline: "nearest" });
       }
       const last2 = i === live.length - 1;
-      const top = el3(doc, "div", "top");
+      const top = el4(doc, "div", "top");
       if (live.length > 1) {
-        const track = el3(doc, "span", "track");
+        const track = el4(doc, "span", "track");
         track.setAttribute("aria-hidden", "true");
-        live.forEach((_, k) => track.append(el3(doc, "i", k < i ? "done" : k === i ? "on" : "")));
-        top.append(track, el3(doc, "span", "count", labels2.count(i + 1, live.length)));
+        live.forEach((_, k) => track.append(el4(doc, "i", k < i ? "done" : k === i ? "on" : "")));
+        top.append(track, el4(doc, "span", "count", labels2.count(i + 1, live.length)));
       }
       const x = button3("x", "", () => finish2(false));
       x.setAttribute("aria-label", labels2.close);
       x.title = labels2.close;
       x.append(icon(doc, "close", 16));
       top.append(x);
-      const title = el3(doc, "h3", "", step.title);
+      const title = el4(doc, "h3", "", step.title);
       title.id = "fut-tour-title";
       if (live.length === 1) top.prepend(title);
-      const acts = el3(doc, "div", "acts");
+      const acts = el4(doc, "div", "acts");
       if (i > 0) acts.append(button3("b ghost", labels2.back, () => show2(i - 1)));
       const next = button3("b primary", last2 ? labels2.done : labels2.next, () => last2 ? finish2(true) : show2(i + 1));
       acts.append(next);
-      card.replaceChildren(el3(doc, "i", "arrow"), top, ...live.length === 1 ? [] : [title], ...step.text.split("\n").map((p) => el3(doc, "p", "", p)), acts);
+      card.replaceChildren(el4(doc, "i", "arrow"), top, ...live.length === 1 ? [] : [title], ...step.text.split("\n").map((p) => el4(doc, "p", "", p)), acts);
       place2();
       replace();
       next.focus({ preventScroll: true });
@@ -12650,7 +12701,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     show2(0);
   }
   function helpButton(doc, label, onClick, cls = "close help") {
-    const b = el3(doc, "button", cls);
+    const b = el4(doc, "button", cls);
     b.type = "button";
     b.title = label;
     b.setAttribute("aria-label", label);
@@ -12976,7 +13027,7 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
   var pageState = /* @__PURE__ */ new WeakMap();
   var REPEATABLE = ["moon", "collect", "collectDeploy", "expedition", "fleetsave", "plan"];
   var SKIPPABLE = ["moon", "collect", "collectDeploy", "expedition"];
-  function el4(doc, tag, className = "", text) {
+  function el5(doc, tag, className = "", text) {
     const node = doc.createElement(tag);
     if (className) node.className = className;
     if (text !== void 0) node.textContent = text;
@@ -13008,7 +13059,7 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
     return settingsFrom(store.get(SETTINGS_KEY, {}));
   }
   function button(doc, text, onClick, cls = "", title = "") {
-    const b = el4(doc, "button", `fut-fbtn ${cls}`.trim(), text);
+    const b = el5(doc, "button", `fut-fbtn ${cls}`.trim(), text);
     b.type = "button";
     if (title) b.title = title;
     b.addEventListener("click", (e) => {
@@ -13024,9 +13075,9 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
     input.addEventListener("keypress", (e) => e.stopPropagation());
   }
   function numberField(doc, label, value, placeholder = "", locale) {
-    const wrap = el4(doc, "label", "fut-ffield");
-    wrap.append(el4(doc, "span", "", label));
-    const input = el4(doc, "input");
+    const wrap = el5(doc, "label", "fut-ffield");
+    wrap.append(el5(doc, "span", "", label));
+    const input = el5(doc, "input");
     input.type = "text";
     input.inputMode = "numeric";
     input.placeholder = placeholder;
@@ -13037,11 +13088,11 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
     return [wrap, input];
   }
   function selectField(doc, label, options, value) {
-    const wrap = el4(doc, "label", "fut-ffield");
-    wrap.append(el4(doc, "span", "", label));
-    const sel = el4(doc, "select");
+    const wrap = el5(doc, "label", "fut-ffield");
+    wrap.append(el5(doc, "span", "", label));
+    const sel = el5(doc, "select");
     for (const [v, text] of options) {
-      const opt = el4(doc, "option", "", text);
+      const opt = el5(doc, "option", "", text);
       opt.value = v;
       opt.selected = v === value;
       sel.append(opt);
@@ -13051,11 +13102,11 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
     return [wrap, sel];
   }
   function checkField(doc, label, checked) {
-    const wrap = el4(doc, "label", "fut-fcheck");
-    const input = el4(doc, "input");
+    const wrap = el5(doc, "label", "fut-fcheck");
+    const input = el5(doc, "input");
     input.type = "checkbox";
     input.checked = checked;
-    wrap.append(input, el4(doc, "span", "", label));
+    wrap.append(input, el5(doc, "span", "", label));
     return [wrap, input];
   }
   function bodyTarget(bodies, id) {
@@ -13082,7 +13133,7 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
     return `${b.name} [${b.coords}]${b.moonId === id ? ` · ${o.t("fleet.typeMoon")}` : ""}`;
   }
   function shipFields(o, ships) {
-    const grid2 = el4(o.doc, "div", "fut-fgrid");
+    const grid2 = el5(o.doc, "div", "fut-fgrid");
     const inputs = [];
     const onPage = readShipSlots(o.doc);
     const info = o.store.get(SHIPS_INFO_KEY, {});
@@ -13093,7 +13144,7 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
       grid2.append(wrap);
       inputs.push([slot.id, input]);
     }
-    if (!inputs.length) grid2.append(el4(o.doc, "span", "fut-fnote", o.t("fleet.noShips")));
+    if (!inputs.length) grid2.append(el5(o.doc, "span", "fut-fnote", o.t("fleet.noShips")));
     return {
       el: grid2,
       read: () => {
@@ -13107,7 +13158,7 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
     };
   }
   function resourceFields(o, res) {
-    const grid2 = el4(o.doc, "div", "fut-fgrid");
+    const grid2 = el5(o.doc, "div", "fut-fgrid");
     const inputs = ["metal", "crystal", "deuterium"].map((k) => {
       const [wrap, input] = numberField(o.doc, o.t(`res.${k}`), res[k] || null, "0", o.locale);
       grid2.append(wrap);
@@ -13132,7 +13183,7 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
     const profiles = loadProfiles(o.store);
     const settings = loadSettings(o.store);
     const key = SWITCH[section2];
-    const badge = el4(doc, "span", "fut-fbadge");
+    const badge = el5(doc, "span", "fut-fbadge");
     if (sectionEmpty(profileFor(profiles, o.bodyId), section2)) {
       badge.classList.add("empty");
       badge.textContent = t("fleet.rule.empty");
@@ -13151,22 +13202,22 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   }
   function ruleBox(o, section2, title, hint, fields, onSwitch) {
     const { doc, t } = o;
-    const box = el4(doc, "details", "fut-freserve");
+    const box = el5(doc, "details", "fut-freserve");
     box.open = !sectionEmpty(profileFor(loadProfiles(o.store), o.bodyId), section2);
-    const head = el4(doc, "summary", "fut-frulehead");
-    const mark = el4(doc, "span", "fut-fruleico");
+    const head = el5(doc, "summary", "fut-frulehead");
+    const mark = el5(doc, "span", "fut-fruleico");
     mark.innerHTML = iconSvg(section2, 18);
-    head.append(iconEl(doc), mark, el4(doc, "h5", "", title), ruleBadge(o, section2));
+    head.append(iconEl(doc), mark, el5(doc, "h5", "", title), ruleBadge(o, section2));
     const key = SWITCH[section2];
     if (key) {
-      const wrap = el4(doc, "label", "fut-fswitch");
+      const wrap = el5(doc, "label", "fut-fswitch");
       wrap.title = t("fleet.rule.switchHint");
-      const input = el4(doc, "input");
+      const input = el5(doc, "input");
       input.type = "checkbox";
       input.setAttribute("role", "switch");
       input.setAttribute("aria-label", `${title}: ${t("fleet.rule.switch")}`);
       input.checked = loadSettings(o.store)[key];
-      wrap.append(input, el4(doc, "i", "sw-track"));
+      wrap.append(input, el5(doc, "i", "sw-track"));
       input.addEventListener("change", () => {
         o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: input.checked });
         head.querySelector(".fut-fbadge")?.replaceWith(ruleBadge(o, section2));
@@ -13174,13 +13225,13 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       });
       head.append(wrap);
     }
-    const inner = el4(doc, "div", "fut-frulebody");
-    inner.append(el4(doc, "p", "fut-fnote", hint), ...fields);
+    const inner = el5(doc, "div", "fut-frulebody");
+    inner.append(el5(doc, "p", "fut-fnote", hint), ...fields);
     box.append(head, inner);
     return box;
   }
   function iconEl(doc) {
-    const span = el4(doc, "span", "fold");
+    const span = el5(doc, "span", "fold");
     span.innerHTML = iconSvg("caret", 14);
     return span;
   }
@@ -13191,7 +13242,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const { doc, t } = o;
     const profile = profileFor(loadProfiles(o.store), o.bodyId);
     const moon = isMoon(o.bodies, o.bodyId);
-    const panel = el4(doc, "div", "fut-feditor");
+    const panel = el5(doc, "div", "fut-feditor");
     const refresh = () => onSaved("");
     const ships = shipFields(o, profile.reserve.ships);
     panel.append(ruleBox(o, "ships", t("fleet.rule.ships"), t("fleet.rule.shipsHint"), [ships.el], refresh));
@@ -13199,7 +13250,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     panel.append(ruleBox(o, "resources", t("fleet.rule.resources"), t("fleet.rule.resourcesHint"), [res.el], refresh));
     const gate = moon ? shipFields(o, profile.gate) : null;
     if (gate) panel.append(ruleBox(o, "gate", t("fleet.rule.gate"), t("fleet.rule.gateHint"), [gate.el], refresh));
-    const saveGrid = el4(doc, "div", "fut-fgrid wide");
+    const saveGrid = el5(doc, "div", "fut-fgrid wide");
     const own = o.bodies.find((b) => b.planetId === o.bodyId || b.moonId === o.bodyId)?.coords.split(":").map(Number);
     const origin = own && own.length === 3 ? { galaxy: own[0], system: own[1] } : originCoords(doc);
     const [gWrap, gIn] = numberField(doc, t("fleet.galaxy"), profile.save?.galaxy ?? null, origin ? String(origin.galaxy) : "");
@@ -13224,9 +13275,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     panel.append(
       ruleBox(o, "fleetsave", t("fleet.fleetsave"), t("fleet.fleetsaveHint"), [
         saveGrid,
-        el4(doc, "h6", "", t("fleet.rule.saveShips")),
+        el5(doc, "h6", "", t("fleet.rule.saveShips")),
         saveShips.el,
-        el4(doc, "h6", "", t("fleet.rule.saveResources")),
+        el5(doc, "h6", "", t("fleet.rule.saveResources")),
         saveRes.el
       ], refresh)
     );
@@ -13264,7 +13315,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       onSaved("");
       statusOf(panel)?.replaceChildren(doc.createTextNode(t("fleet.saved")));
     });
-    const actions = el4(doc, "div", "fut-factions");
+    const actions = el5(doc, "div", "fut-factions");
     actions.append(
       button(doc, t("fleet.copyTo"), () => {
         copyBox.hidden = !copyBox.hidden;
@@ -13275,17 +13326,17 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   }
   function copyPanel(o, moon, onCopy) {
     const { doc, t } = o;
-    const box = el4(doc, "div", "fut-freserve fut-fcopy");
-    box.append(el4(doc, "h5", "", t("fleet.copyTitle")), el4(doc, "p", "fut-fnote", t("fleet.copyHint")));
-    const secRow = el4(doc, "div", "fut-fchecks");
+    const box = el5(doc, "div", "fut-freserve fut-fcopy");
+    box.append(el5(doc, "h5", "", t("fleet.copyTitle")), el5(doc, "p", "fut-fnote", t("fleet.copyHint")));
+    const secRow = el5(doc, "div", "fut-fchecks");
     const sections = RESERVE_SECTIONS.filter((s) => s !== "gate" || moon).map((s) => {
       const [wrap, input] = checkField(doc, t(s === "fleetsave" ? "fleet.fleetsave" : `fleet.rule.${s}`), true);
       secRow.append(wrap);
       return [s, input];
     });
-    box.append(el4(doc, "h6", "", t("fleet.copyWhat")), secRow);
-    const planetRow = el4(doc, "div", "fut-fchecks");
-    const moonRow = el4(doc, "div", "fut-fchecks");
+    box.append(el5(doc, "h6", "", t("fleet.copyWhat")), secRow);
+    const planetRow = el5(doc, "div", "fut-fchecks");
+    const moonRow = el5(doc, "div", "fut-fchecks");
     const targets = [];
     for (const b of o.bodies) {
       for (const [id, isMoonId] of [[b.planetId, false], [b.moonId, true]]) {
@@ -13295,21 +13346,21 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         targets.push([id, isMoonId, input]);
       }
     }
-    const bodyRow = el4(doc, "div", "fut-fcopywhere");
-    if (planetRow.childElementCount) bodyRow.append(el4(doc, "h6", "", o.t("dash.planets")), planetRow);
-    if (moonRow.childElementCount) bodyRow.append(el4(doc, "h6", "", o.t("dash.moons")), moonRow);
+    const bodyRow = el5(doc, "div", "fut-fcopywhere");
+    if (planetRow.childElementCount) bodyRow.append(el5(doc, "h6", "", o.t("dash.planets")), planetRow);
+    if (moonRow.childElementCount) bodyRow.append(el5(doc, "h6", "", o.t("dash.moons")), moonRow);
     const pick = (which) => {
       for (const [, isMoonId, input] of targets) input.checked = which === "moons" ? isMoonId : which === "planets" ? !isMoonId : false;
     };
-    const quick = el4(doc, "div", "fut-factions");
+    const quick = el5(doc, "div", "fut-factions");
     quick.append(
       button(doc, t("fleet.pickPlanets"), () => pick("planets")),
       button(doc, t("fleet.pickMoons"), () => pick("moons")),
       button(doc, t("fleet.pickNone"), () => pick("none"))
     );
-    box.append(el4(doc, "h6", "", t("fleet.copyWhere")), quick, bodyRow);
-    const status = el4(doc, "span", "fut-fnote");
-    const go = el4(doc, "div", "fut-factions");
+    box.append(el5(doc, "h6", "", t("fleet.copyWhere")), quick, bodyRow);
+    const status = el5(doc, "span", "fut-fnote");
+    const go = el5(doc, "div", "fut-factions");
     go.append(
       button(doc, t("fleet.copyGo"), () => {
         const chosen = sections.filter(([, i]) => i.checked).map(([s]) => s);
@@ -13336,10 +13387,10 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   }
   function bodyRulesPanel(r) {
     const { doc, t } = r;
-    const root = el4(doc, "div", "fut-frules-panel");
+    const root = el5(doc, "div", "fut-frules-panel");
     const opts = (id) => ({ doc, store: r.store, bodyId: id, bodies: r.bodies, t, locale: r.locale });
     const ids = r.bodies.flatMap((b) => [b.planetId, b.moonId]).filter((x) => x !== null);
-    const status = el4(doc, "span", "fut-fsaved");
+    const status = el5(doc, "span", "fut-fsaved");
     status.setAttribute("role", "status");
     const moonIds = ids.filter((id) => isMoon(r.bodies, id));
     let scope = r.bodyId && moonIds.includes(r.bodyId) ? "moon" : "planet";
@@ -13347,14 +13398,14 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const profiles = loadProfiles(r.store);
       if (!moonIds.length) scope = "planet";
       const shown3 = ids.filter((id) => moonIds.includes(id) === (scope === "moon"));
-      const switcher = el4(doc, "span", "control fut-fscope");
+      const switcher = el5(doc, "span", "control fut-fscope");
       switcher.setAttribute("role", "group");
       for (const [key, label, count2] of [["planet", t("dash.planets"), ids.length - moonIds.length], ["moon", t("dash.moons"), moonIds.length]]) {
-        const b = el4(doc, "button", "seg");
+        const b = el5(doc, "button", "seg");
         b.type = "button";
         b.disabled = !count2;
         b.setAttribute("aria-pressed", String(scope === key));
-        b.append(icon(doc, key, 14), el4(doc, "span", "", label), el4(doc, "i", "", String(count2)));
+        b.append(icon(doc, key, 14), el5(doc, "span", "", label), el5(doc, "i", "", String(count2)));
         b.addEventListener("click", () => {
           if (scope === key) return;
           scope = key;
@@ -13363,24 +13414,24 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         switcher.append(b);
       }
       const sections = ["ships", "resources", "gate", "fleetsave"].filter((sec) => sec !== "gate" || scope === "moon");
-      const table = el4(doc, "div", `fut-fbodies ${scope === "moon" ? "moons" : "planets"}`);
+      const table = el5(doc, "div", `fut-fbodies ${scope === "moon" ? "moons" : "planets"}`);
       table.setAttribute("role", "list");
-      const head = el4(doc, "div", "fut-fbrow head");
+      const head = el5(doc, "div", "fut-fbrow head");
       head.setAttribute("aria-hidden", "true");
-      head.append(el4(doc, "span", "", ""), ...sections.map((sec) => el4(doc, "span", "", t(sec === "fleetsave" ? "fleet.fleetsave" : `fleet.rule.${sec}`))));
+      head.append(el5(doc, "span", "", ""), ...sections.map((sec) => el5(doc, "span", "", t(sec === "fleetsave" ? "fleet.fleetsave" : `fleet.rule.${sec}`))));
       table.append(head);
       for (const id of shown3) {
         const o = opts(id);
         const moon = isMoon(r.bodies, id);
         const p = profileFor(profiles, id);
-        const row = el4(doc, "button", "fut-fbrow");
+        const row = el5(doc, "button", "fut-fbrow");
         row.type = "button";
         row.setAttribute("role", "listitem");
-        const name = el4(doc, "span", "nm");
-        name.append(el4(doc, "b", "", shortLabel(o, id)), el4(doc, "small", "", r.bodies.find((b) => b.planetId === id || b.moonId === id)?.coords ?? ""));
+        const name = el5(doc, "span", "nm");
+        name.append(el5(doc, "b", "", shortLabel(o, id)), el5(doc, "small", "", r.bodies.find((b) => b.planetId === id || b.moonId === id)?.coords ?? ""));
         const cell = (section2, text) => {
           const empty = sectionEmpty(p, section2);
-          const c = el4(doc, "span", empty ? "unset" : "set", empty ? t("fleet.rule.unset") : text());
+          const c = el5(doc, "span", empty ? "unset" : "set", empty ? t("fleet.rule.unset") : text());
           c.dataset.l = t(section2 === "fleetsave" ? "fleet.fleetsave" : `fleet.rule.${section2}`);
           return c;
         };
@@ -13400,20 +13451,20 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         row.addEventListener("click", () => showBody(id));
         table.append(row);
       }
-      const top = el4(doc, "div", "fut-fbtop");
+      const top = el5(doc, "div", "fut-fbtop");
       top.append(switcher);
-      root.replaceChildren(el4(doc, "p", "fut-fnote", t("fleet.bodiesHint")), top, table);
+      root.replaceChildren(el5(doc, "p", "fut-fnote", t("fleet.bodiesHint")), top, table);
     };
     const showBody = (id) => {
       const o = opts(id);
-      const back = el4(doc, "button", "fut-fbtn fut-fback", `← ${t("fleet.bodiesAll")}`);
+      const back = el5(doc, "button", "fut-fbtn fut-fback", `← ${t("fleet.bodiesAll")}`);
       back.type = "button";
       back.addEventListener("click", () => {
         status.textContent = "";
         showList();
       });
-      const title = el4(doc, "h4", "", t(isMoon(r.bodies, id) ? "fleet.editTitleMoon" : "fleet.editTitlePlanet", { body: bodyLabel(o, id) }));
-      const top = el4(doc, "div", "fut-fbtop");
+      const title = el5(doc, "h4", "", t(isMoon(r.bodies, id) ? "fleet.editTitleMoon" : "fleet.editTitlePlanet", { body: bodyLabel(o, id) }));
+      const top = el5(doc, "div", "fut-fbtop");
       top.append(back, status);
       const saved = (msg) => {
         r.onChange?.();
@@ -13435,10 +13486,10 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     return `${b.name}${b.moonId === id ? " ☾" : ""}`;
   }
   function readout(doc, text) {
-    const box = el4(doc, "span", "fut-fread");
-    const tip = el4(doc, "span", "tip");
+    const box = el5(doc, "span", "fut-fread");
+    const tip = el5(doc, "span", "tip");
     tip.setAttribute("aria-hidden", "true");
-    const info = el4(doc, "span", "fut-finfo", text);
+    const info = el5(doc, "span", "fut-finfo", text);
     info.setAttribute("role", "status");
     box.append(tip, info);
     const clear = () => tip.replaceChildren();
@@ -13450,7 +13501,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         info.classList.toggle("err", err);
       },
       peek(node, name, detail) {
-        const show2 = () => tip.replaceChildren(el4(doc, "b", "", name), doc.createTextNode(detail ? ` ${detail}` : ""));
+        const show2 = () => tip.replaceChildren(el5(doc, "b", "", name), doc.createTextNode(detail ? ` ${detail}` : ""));
         node.addEventListener("mouseenter", show2);
         node.addEventListener("focus", show2);
         node.addEventListener("mouseleave", clear);
@@ -13459,20 +13510,20 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     };
   }
   function tile(doc, icon2, label, onClick, cls = "", key = "", name = "") {
-    const b = el4(doc, "button", `fut-fact ${cls}`.trim());
+    const b = el5(doc, "button", `fut-fact ${cls}`.trim());
     b.type = "button";
     b.title = key ? `${label} [${keyLabel(key)}]` : label;
     b.setAttribute("aria-label", label);
-    const ico = el4(doc, "span", "ico");
+    const ico = el5(doc, "span", "ico");
     ico.innerHTML = iconSvg(icon2, 20);
     b.append(ico);
     if (name) {
-      const n = el4(doc, "span", "name", name);
+      const n = el5(doc, "span", "name", name);
       n.setAttribute("aria-hidden", "true");
       b.append(n);
     }
     if (key) {
-      const cap = el4(doc, "kbd", "", keyLabel(key));
+      const cap = el5(doc, "kbd", "", keyLabel(key));
       cap.setAttribute("aria-hidden", "true");
       b.append(cap);
     }
@@ -13483,15 +13534,15 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     return b;
   }
   function ruleSwitch(doc, icon2, label, on, onClick, value) {
-    const b = el4(doc, "button", "fut-fchip");
+    const b = el5(doc, "button", "fut-fchip");
     b.type = "button";
     b.setAttribute("role", "switch");
     b.setAttribute("aria-checked", String(on));
-    const ico = el4(doc, "span", "ico");
+    const ico = el5(doc, "span", "ico");
     ico.innerHTML = iconSvg(icon2, 14);
-    b.append(el4(doc, "i", "pip"), ico, el4(doc, "b", "", label));
+    b.append(el5(doc, "i", "pip"), ico, el5(doc, "b", "", label));
     if (value !== void 0) {
-      const v = el4(doc, "span", "val");
+      const v = el5(doc, "span", "val");
       v.append(value);
       b.append(v);
     }
@@ -13507,7 +13558,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     for (const slot of readShipSlots(doc)) {
       const tile2 = slot.input.closest("li");
       if (!tile2 || !slot.available || tile2.querySelector(".fut-finv")) continue;
-      const b = el4(doc, "button", "fut-finv");
+      const b = el5(doc, "button", "fut-finv");
       b.type = "button";
       b.title = t("fleet.invert");
       b.setAttribute("aria-label", `${t("fleet.invert")}: ${slot.name}`);
@@ -13550,7 +13601,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       tile2.querySelector(".fut-fkeep")?.remove();
       const n = keep[slot.id] ?? 0;
       if (n <= 0) continue;
-      const b = el4(doc, "span", "fut-fkeep", `−${formatUnits(n, o.locale)}`);
+      const b = el5(doc, "span", "fut-fkeep", `−${formatUnits(n, o.locale)}`);
       b.title = t("fleet.keepShips", { n: n.toLocaleString(o.locale) });
       tile2.append(b);
     }
@@ -13562,7 +13613,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       if (!input) continue;
       input.parentElement?.querySelector(".fut-fkeepres")?.remove();
       if (keep[k] <= 0) continue;
-      const b = el4(doc, "span", "fut-fkeepres", t("fleet.keepRes", { n: formatUnits(keep[k], o.locale) }));
+      const b = el5(doc, "span", "fut-fkeepres", t("fleet.keepRes", { n: formatUnits(keep[k], o.locale) }));
       b.title = t("fleet.keepResHint", { n: keep[k].toLocaleString(o.locale) });
       input.after(b);
     }
@@ -13579,9 +13630,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const room = fd ? selectedCargo(doc, (id) => shipCapacity(fd, id)) : 0;
       out.replaceChildren();
       if (room > 0) {
-        const ico = el4(doc, "span", "ico");
+        const ico = el5(doc, "span", "ico");
         ico.innerHTML = iconSvg("cargo", 14);
-        out.append(ico, el4(doc, "span", "", t("fleet.cargoPicked", { n: formatUnits(room, o.locale) })));
+        out.append(ico, el5(doc, "span", "", t("fleet.cargoPicked", { n: formatUnits(room, o.locale) })));
       }
       out.title = room > 0 ? t("fleet.cargoPickedHint", { n: room.toLocaleString(o.locale) }) : "";
     };
@@ -13668,13 +13719,13 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   function bodyGrid(o, menu, current3, onPick, allowHere = false) {
     const { doc } = o;
     const cell = (id, moon, b) => {
-      if (id === null) return el4(doc, "span");
+      if (id === null) return el5(doc, "span");
       const item = button(doc, moon ? "" : b.name, () => {
         menu.remove();
         onPick(id);
       }, `${moon ? "moon" : "planet"}${id === current3 ? " on" : ""}`);
       if (moon) item.innerHTML = iconSvg("moon", 14);
-      else item.append(el4(doc, "small", "", b.coords));
+      else item.append(el5(doc, "small", "", b.coords));
       item.setAttribute("aria-label", `${b.name}${moon ? ` (${o.t("fleet.typeMoon")})` : ""} [${b.coords}]`);
       if (moon) item.title = `${b.name} (${o.t("fleet.typeMoon")})`;
       if (id === current3) item.setAttribute("aria-current", "true");
@@ -13684,27 +13735,27 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     return o.bodies.flatMap((b) => [cell(b.planetId, false, b), cell(b.moonId, true, b)]);
   }
   function destinationMenu(o, anchor, current3, onPick) {
-    const menu = el4(o.doc, "div", "fut-fmenu");
+    const menu = el5(o.doc, "div", "fut-fmenu");
     menu.append(...bodyGrid(o, menu, current3, onPick));
     popup(o.doc, anchor, menu);
   }
   function collectMenu(o, anchor, settings, keys, run) {
     const { doc, t } = o;
-    const menu = el4(doc, "div", "fut-fmenu fut-fcollect");
+    const menu = el5(doc, "div", "fut-fmenu fut-fcollect");
     menu.setAttribute("role", "menu");
-    menu.append(el4(doc, "p", "fut-fmhead", t("fleet.btn.collect")));
+    menu.append(el5(doc, "p", "fut-fmhead", t("fleet.btn.collect")));
     const main2 = (mode2, ico, label, fav, key) => {
       const b = button(doc, "", () => {
         menu.remove();
         run(mode2, fav);
       }, "fut-fmain");
       b.setAttribute("role", "menuitem");
-      const i = el4(doc, "span", "ico");
+      const i = el5(doc, "span", "ico");
       i.innerHTML = iconSvg(ico, 18);
-      const text = el4(doc, "span", "txt");
-      text.append(el4(doc, "b", "", label), el4(doc, "span", "", fav ? `→ ${shortLabel(o, fav)}` : t("fleet.collectNoFav")));
+      const text = el5(doc, "span", "txt");
+      text.append(el5(doc, "b", "", label), el5(doc, "span", "", fav ? `→ ${shortLabel(o, fav)}` : t("fleet.collectNoFav")));
       b.append(i, text);
-      if (key) b.append(el4(doc, "kbd", "", keyLabel(key)));
+      if (key) b.append(el5(doc, "kbd", "", keyLabel(key)));
       if (!fav) b.classList.add("dim");
       return b;
     };
@@ -13713,7 +13764,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       main2("collectDeploy", "deploy", t("fleet.collect.deploy"), settings.favDeploy, keys.deploy)
     );
     let mode = "collect";
-    const seg = el4(doc, "div", "fut-fseg");
+    const seg = el5(doc, "div", "fut-fseg");
     seg.setAttribute("role", "group");
     seg.setAttribute("aria-label", t("fleet.collectOnce"));
     const segBtn = (m, label) => {
@@ -13725,7 +13776,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       return b;
     };
     seg.append(segBtn("collect", t("fleet.collect.transport")), segBtn("collectDeploy", t("fleet.collect.deploy")));
-    menu.append(el4(doc, "p", "fut-fmsub", t("fleet.collectOnce")), seg);
+    menu.append(el5(doc, "p", "fut-fmsub", t("fleet.collectOnce")), seg);
     menu.append(...bodyGrid(o, menu, null, (id) => run(mode, id)));
     popup(doc, anchor, menu);
   }
@@ -13744,13 +13795,13 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       if ("sendTarget" in part) onTarget();
     };
     const origin = originCoords(doc);
-    const panel = el4(doc, "div", "fut-fsend");
+    const panel = el5(doc, "div", "fut-fsend");
     panel.setAttribute("role", "group");
     panel.setAttribute("aria-label", t("fleet.send.label"));
     const st = settings.sendTarget;
     let type = st?.type ?? 1;
     const coordIn = (label2, ph, v, cls) => {
-      const input = el4(doc, "input", `fut-fin ${cls}`);
+      const input = el5(doc, "input", `fut-fin ${cls}`);
       input.type = "text";
       input.inputMode = "numeric";
       input.placeholder = ph;
@@ -13763,7 +13814,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const gIn = coordIn(t("fleet.galaxy"), origin ? String(origin.galaxy) : "G", st?.galaxy, "g");
     const sIn = coordIn(t("fleet.system"), origin ? String(origin.system) : "S", st?.system, "s");
     const pIn = coordIn(t("fleet.position"), "P", st?.position, "p");
-    const typeSeg = el4(doc, "span", "fut-fseg");
+    const typeSeg = el5(doc, "span", "fut-fseg");
     typeSeg.setAttribute("role", "group");
     typeSeg.setAttribute("aria-label", t("fleet.type"));
     const showType = () => typeSeg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(Number(x.dataset.type) === type)));
@@ -13787,7 +13838,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       });
     }
     const typeBtn = (v, ico, label2) => {
-      const b = el4(doc, "button", "fut-ftype");
+      const b = el5(doc, "button", "fut-ftype");
       b.type = "button";
       b.dataset.type = String(v);
       b.title = label2;
@@ -13803,8 +13854,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     };
     typeSeg.append(typeBtn(1, "planet", t("fleet.typePlanet")), typeBtn(3, "moon", t("fleet.typeMoon")));
     showType();
-    const dest = el4(doc, "span", "fut-fdest");
-    const pick = el4(doc, "button", "fut-fpick");
+    const dest = el5(doc, "span", "fut-fdest");
+    const pick = el5(doc, "button", "fut-fpick");
     pick.type = "button";
     pick.setAttribute("aria-label", t("fleet.send.pick"));
     pick.setAttribute("aria-haspopup", "menu");
@@ -13821,18 +13872,18 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         store();
       });
     });
-    const sep = () => el4(doc, "span", "colon", ":");
+    const sep = () => el5(doc, "span", "colon", ":");
     dest.append(gIn, sep(), sIn, sep(), pIn, pick, typeSeg);
     for (const input of [gIn, sIn, pIn]) peek(input, t("fleet.send.dest"), t("fleet.send.destHint"));
-    const res = el4(doc, "span", "fut-fres");
+    const res = el5(doc, "span", "fut-fres");
     const inputs = ["metal", "crystal", "deuterium"].map((k) => {
-      const wrap = el4(doc, "span", `fut-fresin ${k}`);
-      const sym = el4(doc, "button", "sym");
+      const wrap = el5(doc, "span", `fut-fresin ${k}`);
+      const sym = el5(doc, "button", "sym");
       sym.type = "button";
       sym.innerHTML = iconSvg(k, 18);
       sym.setAttribute("aria-label", `${t(`res.${k}`)}: ${t("fleet.send.max")}`);
       peek(sym, t(`res.${k}`), t("fleet.send.maxHint"));
-      const input = el4(doc, "input", "fut-fin amount");
+      const input = el5(doc, "input", "fut-fin amount");
       input.type = "text";
       input.inputMode = "numeric";
       input.placeholder = "0";
@@ -13851,31 +13902,31 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       for (const [k, input] of inputs) out[k] = input.value.trim() ? parseAmount(input.value) : null;
       return out;
     };
-    const clear = el4(doc, "button", "fut-fclear");
+    const clear = el5(doc, "button", "fut-fclear");
     clear.type = "button";
     clear.innerHTML = iconSvg("erase", 15);
     clear.title = t("fleet.send.clearBtn");
     clear.setAttribute("aria-label", t("fleet.send.clearHint"));
     peek(clear, t("fleet.send.clearBtn"), t("fleet.send.clearHint"));
-    const all2 = el4(doc, "button", "fut-fall", t("fleet.send.allBtn"));
+    const all2 = el5(doc, "button", "fut-fall", t("fleet.send.allBtn"));
     all2.type = "button";
     all2.setAttribute("aria-label", t("fleet.send.allHint"));
     peek(all2, t("fleet.send.allBtn"), t("fleet.send.allHint"));
     res.append(all2, clear);
-    const cargoBox = el4(doc, "span", "fut-fcargo");
+    const cargoBox = el5(doc, "span", "fut-fcargo");
     const counts = /* @__PURE__ */ new Map();
     for (const id of SEND_CARGO) {
-      const b = el4(doc, "button", "fut-fcl");
+      const b = el5(doc, "button", "fut-fcl");
       b.type = "button";
       const short = t(id === 202 ? "fleet.send.small" : "fleet.send.large");
       const full = t(`ship.${id}`);
       b.setAttribute("aria-label", `${t("fleet.send.cargoWith")} ${full}`);
-      const n = el4(doc, "small", "n");
-      const pic = el4(doc, "img", "pic");
+      const n = el5(doc, "small", "n");
+      const pic = el5(doc, "img", "pic");
       pic.src = SHIP_ICONS[id] ?? "";
       pic.alt = "";
       pic.addEventListener("error", () => pic.remove());
-      b.append(pic, el4(doc, "b", "", short), n);
+      b.append(pic, el5(doc, "b", "", short), n);
       counts.set(id, n);
       peek(b, `${short} · ${full}`, t("fleet.send.cargoHint"));
       b.addEventListener("click", (e) => {
@@ -13932,7 +13983,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     });
     recount();
     void whenDispatcherReady().then(recount);
-    const label = (text) => el4(doc, "span", "lbl", text);
+    const label = (text) => el5(doc, "span", "lbl", text);
     panel.append(label(t("fleet.send.dest")), dest, label(t("fleet.send.res")), res, cargoBox);
     return panel;
   }
@@ -13965,7 +14016,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   function renderFleetTools(o) {
     const { doc, t } = o;
     if (!doc.getElementById(STYLE_ID3)) {
-      const style = el4(doc, "style");
+      const style = el5(doc, "style");
       style.id = STYLE_ID3;
       style.textContent = FLEET_CSS;
       doc.head.append(style);
@@ -14175,7 +14226,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         const id = Number(li.dataset.technology);
         if (!CARGO_SHIPS.includes(id)) continue;
         const main2 = settings.mainShip === id;
-        const pick = el4(doc, "button", `fut-mainship${main2 ? " on" : ""}`);
+        const pick = el5(doc, "button", `fut-mainship${main2 ? " on" : ""}`);
         pick.type = "button";
         pick.innerHTML = iconSvg("cargo", 12);
         pick.title = main2 ? t("fleet.mainShipIs") : t("fleet.mainShipPick");
@@ -14193,10 +14244,10 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         });
         li.append(pick);
       }
-      const bar = el4(doc, "div", "fut-fbar");
+      const bar = el5(doc, "div", "fut-fbar");
       const keys = keymap(o.store);
       const k = (id) => keys.get(id) ?? "";
-      const tiles = el4(doc, "div", "fut-facts");
+      const tiles = el5(doc, "div", "fut-facts");
       tiles.setAttribute("role", "group");
       tiles.setAttribute("aria-label", t("fleet.actionsLabel"));
       const here = o.bodies.find((b) => b.planetId === o.bodyId);
@@ -14217,11 +14268,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       ), "more", "", t("fleet.btn.collectShort"));
       collect.setAttribute("aria-haspopup", "menu");
       collect.dataset.mode = "collect";
-      collect.append(el4(doc, "i", "more-mark"));
+      collect.append(el5(doc, "i", "more-mark"));
       out.peek(collect, t("fleet.btn.collect"), t("fleet.tip.collect"));
       const zone = (text, key) => {
-        const z = el4(doc, "span", "fut-fzone");
-        const name = el4(doc, "span", "", text);
+        const z = el5(doc, "span", "fut-fzone");
+        const name = el5(doc, "span", "", text);
         name.setAttribute("aria-hidden", "true");
         z.append(name);
         if (key && o.onHelp) {
@@ -14231,8 +14282,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         return z;
       };
       const zoneBox = (text, key, cls = "") => {
-        const box = el4(doc, "span", `fut-fzonebox ${cls}`.trim());
-        const row = el4(doc, "span", "fut-ftiles");
+        const box = el5(doc, "span", `fut-fzonebox ${cls}`.trim());
+        const row = el5(doc, "span", "fut-ftiles");
         box.append(zone(text, key), row);
         return { box, row };
       };
@@ -14261,7 +14312,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       if (here?.moonId) secondary.append(act2("moon", "fleet.moon", t("fleet.btn.moon"), to(here.moonId), t("fleet.tip.moon"), () => run.moon()));
       secondary.append(collect);
       tiles.append(dest.box);
-      const skipSlot = el4(doc, "span", "fut-fsecond fut-fskip");
+      const skipSlot = el5(doc, "span", "fut-fsecond fut-fskip");
       drawSkip = () => {
         const next = skipTarget();
         skipTile = next === null ? null : act2("skip", "fleet.skip", t("fleet.btn.skip"), to(next), t("fleet.tip.skip"), skip);
@@ -14281,7 +14332,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         "fleet.last": () => run.last(),
         "fleet.skip": skip
       });
-      const rules = el4(doc, "div", "fut-frules");
+      const rules = el5(doc, "div", "fut-frules");
       rules.setAttribute("role", "group");
       rules.setAttribute("aria-label", t("fleet.rulesLabel"));
       const rulesOut = readout(doc, t("fleet.reservesHint"));
@@ -14298,19 +14349,19 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const sumOf = (r) => Object.values(r ?? {}).reduce((a, b) => a + b, 0);
       const shipsKept = sumOf(stored.reserve.ships);
       const res = stored.reserve.resources;
-      const resValue = el4(doc, "span", "toks");
+      const resValue = el5(doc, "span", "toks");
       for (const [cls, v] of [["m", res.metal], ["c", res.crystal], ["d", res.deuterium]]) {
         if (!v) continue;
-        const tk = el4(doc, "span", "");
+        const tk = el5(doc, "span", "");
         tk.append(resToken(doc, cls, 11), doc.createTextNode(fmtN(v)));
         resValue.append(tk);
       }
       const unset = t("fleet.rule.unset");
       const gateKept = sumOf(stored.gate);
-      const reserves = el4(doc, "span", "fut-fgroup");
+      const reserves = el5(doc, "span", "fut-fgroup");
       reserves.setAttribute("role", "group");
       reserves.setAttribute("aria-label", t("fleet.zone.reserves"));
-      const reserveChips = el4(doc, "span", "fut-fchips");
+      const reserveChips = el5(doc, "span", "fut-fchips");
       reserves.append(zone(t("fleet.zone.reserves"), "reserves"), reserveChips);
       reserveChips.append(
         sw("ships", t("fleet.rule.ships"), t("fleet.rule.shipsHint"), "shipsOn", void 0, shipsKept ? fmtN(shipsKept) : unset),
@@ -14318,22 +14369,22 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         ...isMoon(o.bodies, o.bodyId) ? [sw("gate", t("fleet.rule.gate"), t("fleet.rule.gateHint"), "gateOn", void 0, gateKept ? fmtN(gateKept) : unset)] : [],
         sw("food", t("fleet.foodShort"), t("fleet.foodHint"), "ignoreFood", () => applyFood(o.store))
       );
-      const round = el4(doc, "span", "fut-fgroup");
+      const round = el5(doc, "span", "fut-fgroup");
       round.setAttribute("role", "group");
       round.setAttribute("aria-label", t("fleet.zone.round"));
-      const roundChips = el4(doc, "span", "fut-fchips");
+      const roundChips = el5(doc, "span", "fut-fchips");
       round.append(zone(t("fleet.zone.round"), "round"), roundChips);
       roundChips.append(sw("repeat", t("fleet.repeatShort"), t("fleet.repeatHint"), "repeat"));
       rules.append(reserves, round);
       roundChips.append(skipSwitch(o, rulesOut, redraw));
-      const edit = el4(doc, "span", "fut-fedit");
+      const edit = el5(doc, "span", "fut-fedit");
       const tool = (ico, label, hint, onClick, cls = "", short = "") => {
-        const b = el4(doc, "button", `fut-ftool ${cls}`.trim());
+        const b = el5(doc, "button", `fut-ftool ${cls}`.trim());
         b.type = "button";
         b.title = label;
         b.setAttribute("aria-label", label);
         b.innerHTML = iconSvg(ico, 18);
-        if (short) b.append(el4(doc, "span", "name", short));
+        if (short) b.append(el5(doc, "span", "name", short));
         b.addEventListener("click", (e) => {
           e.preventDefault();
           onClick();
@@ -14344,9 +14395,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const rulesTool = tool("rules", t("fleet.editRules", { body: shortLabel(o, o.bodyId) }), t("fleet.editRulesHint"), () => o.onOpenSettings?.("bodies"), "fut-frules-open", t("fleet.rulesShort"));
       rulesOut.peek(rulesTool, t("fleet.editRules", { body: shortLabel(o, o.bodyId) }), t("fleet.editRulesHint"));
       if (o.onOpenSettings) edit.append(tool("settings", t("fleet.general"), t("fleet.generalHint"), () => o.onOpenSettings?.("fleet"), "", t("fleet.general")));
-      const top = el4(doc, "div", "fut-frow");
+      const top = el5(doc, "div", "fut-frow");
       top.append(tiles, edit);
-      const bottom = el4(doc, "div", "fut-frow");
+      const bottom = el5(doc, "div", "fut-frow");
       bottom.append(out.box);
       bar.append(top);
       if (settings.sendMode) {
@@ -14357,12 +14408,12 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       bar.append(bottom);
       anchor1.before(bar);
       markUsed(state.active?.mode ?? null);
-      const strip = el4(doc, "div", "fut-fbar fut-freserves");
-      const stripRow = el4(doc, "div", "fut-frow");
-      const cap = el4(doc, "span", "fut-fcap");
+      const strip = el5(doc, "div", "fut-fbar fut-freserves");
+      const stripRow = el5(doc, "div", "fut-frow");
+      const cap = el5(doc, "span", "fut-fcap");
       cap.setAttribute("role", "status");
       stripRow.append(rules, rulesTool);
-      const foot = el4(doc, "div", "fut-frow fut-ffoot");
+      const foot = el5(doc, "div", "fut-frow fut-ffoot");
       foot.append(rulesOut.box, cap);
       strip.append(stripRow, foot);
       const below = fleet1.querySelector("#allornone") ?? null;
@@ -14376,10 +14427,10 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const dispatch = doc.getElementById("fleetdispatchcomponent");
     if (!anchor1 && (fleet1 || dispatch) && !fleet2?.offsetParent) {
       const host = fleet1 ?? dispatch;
-      const strip = el4(doc, "div", "fut-fbar fut-freserves fut-fempty");
-      const row = el4(doc, "div", "fut-frow");
+      const strip = el5(doc, "div", "fut-fbar fut-freserves fut-fempty");
+      const row = el5(doc, "div", "fut-frow");
       const rulesOut = readout(doc, t("fleet.emptyHint"));
-      const round = el4(doc, "span", "fut-fgroup");
+      const round = el5(doc, "span", "fut-fgroup");
       round.setAttribute("role", "group");
       round.setAttribute("aria-label", t("fleet.zone.round"));
       round.append(skipSwitch(o, rulesOut, redraw));
@@ -14401,11 +14452,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       markResourceReserve(o, profile.reserve.resources);
     }
     if (fleet2 && anchor2) {
-      const bar = el4(doc, "div", "fut-fbar fut-faskbar");
+      const bar = el5(doc, "div", "fut-fbar fut-faskbar");
       bar.hidden = true;
       const out2 = readout(doc, "");
-      const row = el4(doc, "div", "fut-frow");
-      const ask = el4(doc, "span", "fut-fask");
+      const row = el5(doc, "div", "fut-frow");
+      const ask = el5(doc, "span", "fut-fask");
       ask.hidden = true;
       row.append(out2.box, ask);
       bar.append(row);
@@ -14422,15 +14473,15 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           box.hidden = true;
           return;
         }
-        const note = el4(doc, "div", "");
-        const noteYes = el4(doc, "button", "yes", t("fleet.speedAsk.yes"));
-        const noteNo = el4(doc, "button", "", t("fleet.speedAsk.no"));
+        const note = el5(doc, "div", "");
+        const noteYes = el5(doc, "button", "yes", t("fleet.speedAsk.yes"));
+        const noteNo = el5(doc, "button", "", t("fleet.speedAsk.no"));
         noteYes.type = noteNo.type = "button";
-        note.append(el4(doc, "span", "q", t("fleet.speedAsk.q", { pct })), noteYes, noteNo);
+        note.append(el5(doc, "span", "q", t("fleet.speedAsk.q", { pct })), noteYes, noteNo);
         noteYes.addEventListener("click", (e) => {
           e.preventDefault();
           state.active = { ...a, speed: pct };
-          note.replaceChildren(el4(doc, "span", "q", t("fleet.speedAsk.done", { pct })));
+          note.replaceChildren(el5(doc, "span", "q", t("fleet.speedAsk.done", { pct })));
           (doc.defaultView ?? globalThis).setTimeout(() => setTouchNote(doc, null), 3e3);
         });
         noteNo.addEventListener("click", (e) => {
@@ -14443,8 +14494,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         }
         const host = box.closest(".fut-fbar");
         if (host) host.hidden = false;
-        const yes = el4(doc, "button", "fut-fask-b yes", t("fleet.speedAsk.yes"));
-        const no = el4(doc, "button", "fut-fask-b", t("fleet.speedAsk.no"));
+        const yes = el5(doc, "button", "fut-fask-b yes", t("fleet.speedAsk.yes"));
+        const no = el5(doc, "button", "fut-fask-b", t("fleet.speedAsk.no"));
         yes.type = no.type = "button";
         yes.addEventListener("click", (e) => {
           e.preventDefault();
@@ -14457,7 +14508,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           e.preventDefault();
           box.hidden = true;
         });
-        box.replaceChildren(el4(doc, "span", "fut-fask-q", t("fleet.speedAsk.q", { pct })), yes, no);
+        box.replaceChildren(el5(doc, "span", "fut-fask-q", t("fleet.speedAsk.q", { pct })), yes, no);
         box.title = t("fleet.speedAsk.hint", { pct: current3 });
         box.hidden = false;
       };
@@ -14617,7 +14668,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   var SETTINGS_ID = "fut-settings-window";
   var TAB_KEY = "settings.tab";
   var SECTIONS = ["menu", "mail", "galaxy", "fleet", "bodies", "keys", "data", "ptre", "guide"];
-  var CSS5 = `
+  var CSS6 = `
 :host { --panel-w: 620px; }
 .body { display: flex; flex-direction: column; }
 /* Rows that follow each other read as one card, split by hairlines. */
@@ -14695,16 +14746,16 @@ input.field { width: 190px; }
     const host = doc.createElement("div");
     host.id = SETTINGS_ID;
     const root = host.attachShadow({ mode: "open" });
-    const el7 = (tag, cls = "", text) => {
+    const el8 = (tag, cls = "", text) => {
       const n = doc.createElement(tag);
       if (cls) n.className = cls;
       if (text !== void 0) n.textContent = text;
       return n;
     };
-    const style = el7("style");
-    style.textContent = WINDOW_SHEET + CSS5 + (o.rules ? RULES_CSS : "");
-    const backdrop = el7("div", "backdrop");
-    const panel = el7("div", "panel");
+    const style = el8("style");
+    style.textContent = WINDOW_SHEET + CSS6 + (o.rules ? RULES_CSS : "");
+    const backdrop = el8("div", "backdrop");
+    const panel = el8("div", "panel");
     panel.setAttribute("role", "dialog");
     panel.setAttribute("aria-modal", "true");
     panel.setAttribute("aria-label", t("toolbar.settings"));
@@ -14724,10 +14775,10 @@ input.field { width: 190px; }
     let carryList = null;
     let resetAsk = null;
     const choice = (options, current3, onPick, disabled = false) => {
-      const box = el7("span", "control");
+      const box = el8("span", "control");
       box.setAttribute("role", "group");
       for (const [v, label] of options) {
-        const b = el7("button", "seg", label);
+        const b = el8("button", "seg", label);
         b.type = "button";
         b.disabled = disabled;
         b.setAttribute("aria-pressed", String(v === current3));
@@ -14741,19 +14792,19 @@ input.field { width: 190px; }
       return box;
     };
     const row = (name, desc, control) => {
-      const r = el7("div", "row");
-      r.append(el7("span", "name", name), el7("span", "desc", desc), control);
+      const r = el8("div", "row");
+      r.append(el8("span", "name", name), el8("span", "desc", desc), control);
       control.querySelector(".switch")?.setAttribute("aria-label", name);
       return r;
     };
     const yesNo = (v, onPick) => {
-      const box = el7("span", "control");
-      const b = el7("button", "switch");
+      const box = el8("span", "control");
+      const b = el8("button", "switch");
       b.type = "button";
       b.setAttribute("role", "switch");
       b.setAttribute("aria-checked", String(v));
       b.title = t(v ? "settings.on" : "settings.off");
-      b.append(el7("i", "sw-track"));
+      b.append(el8("i", "sw-track"));
       b.addEventListener("click", () => {
         onPick(!v);
         draw();
@@ -14762,23 +14813,23 @@ input.field { width: 190px; }
       return box;
     };
     const group = (label, glyph2) => {
-      const g = el7("div", "group");
-      const gi = el7("span", "gi");
+      const g = el8("div", "group");
+      const gi = el8("span", "gi");
       gi.append(glyph2);
       g.append(gi, doc.createTextNode(label));
       return g;
     };
     const fleetGlyph = (name) => {
-      const span = el7("span");
+      const span = el8("span");
       span.style.display = "inline-flex";
       span.innerHTML = iconSvg(name, 16);
       return span;
     };
     const select = (options, current3, onPick) => {
-      const box = el7("span", "control");
-      const sel = el7("select", "field");
+      const box = el8("span", "control");
+      const sel = el8("select", "field");
       for (const [v, label] of options) {
-        const opt = el7("option", "", label);
+        const opt = el8("option", "", label);
         opt.value = v;
         opt.selected = v === current3;
         sel.append(opt);
@@ -14798,12 +14849,12 @@ input.field { width: 190px; }
       const cargo = CARGO_SHIPS.map((id) => [String(id), shipName2(id)]);
       const speeds = Array.from({ length: 10 }, (_, i) => [String((i + 1) * 10), `${(i + 1) * 10}%`]);
       const dest = (current3, onPick) => {
-        const box = el7("span", "control");
+        const box = el8("span", "control");
         box.append(bodyPicker(o.doc, { bodies: o.bodies ?? [], current: current3, moonWord: t("fleet.typeMoon"), none: t("fleet.none"), label: t("fleet.none"), onPick }));
         return box;
       };
-      const value = el7("span", "control");
-      const input = el7("input", "field");
+      const value = el8("span", "control");
+      const input = el8("input", "field");
       input.type = "text";
       input.value = f.expeditionValue;
       input.placeholder = t("fleet.auto");
@@ -14811,11 +14862,11 @@ input.field { width: 190px; }
       input.addEventListener("change", () => set({ expeditionValue: input.value.trim() }));
       value.append(input);
       const seen2 = store.get(EXPEDITION_MAX_KEY, null);
-      const calc = el7("small", "calc", seen2 ? t("fleet.expCalc", { value: formatUnits(seen2.max, doc.documentElement.lang || "it") }) : t("fleet.expCalcUnknown"));
+      const calc = el8("small", "calc", seen2 ? t("fleet.expCalc", { value: formatUnits(seen2.max, doc.documentElement.lang || "it") }) : t("fleet.expCalcUnknown"));
       if (seen2) calc.title = new Date(seen2.at).toLocaleString(doc.documentElement.lang || void 0);
       value.append(calc);
-      const spread = el7("span", "control");
-      const spreadIn = el7("input", "field");
+      const spread = el8("span", "control");
+      const spreadIn = el8("input", "field");
       spreadIn.type = "text";
       spreadIn.inputMode = "numeric";
       spreadIn.value = f.expeditionSpread ? String(f.expeditionSpread) : "";
@@ -14826,8 +14877,8 @@ input.field { width: 190px; }
       const split2 = yesNo(f.expeditionSplit, (v) => set({ expeditionSplit: v }));
       const lang = doc.documentElement.lang || "it";
       const shares = seen2?.cargo && seen2.free ? Object.entries(seen2.cargo).filter(([, n]) => n > 0).map(([id, n]) => t("fleet.expSplitCalc", { ship: shipName2(Number(id)), n: n.toLocaleString(lang), slots: seen2.free, each: expeditionShare(n, seen2.free).toLocaleString(lang) })) : [];
-      const splitCalc = el7("div", "calc wide");
-      if (shares.length) for (const line of shares) splitCalc.append(el7("div", "", line));
+      const splitCalc = el8("div", "calc wide");
+      if (shares.length) for (const line of shares) splitCalc.append(el8("div", "", line));
       else splitCalc.textContent = t("fleet.expSplitUnknown");
       return [
         group(t("fleet.transportTitle"), fleetGlyph("transport")),
@@ -14871,7 +14922,7 @@ input.field { width: 190px; }
         status = list === null ? t("settings.backupBad") : list.length ? "" : none;
         draw();
       };
-      const picker = el7("input");
+      const picker = el8("input");
       picker.type = "file";
       picker.hidden = true;
       picker.accept = ".json,application/json";
@@ -14881,17 +14932,17 @@ input.field { width: 190px; }
         if (!file) return;
         file.text().then((text) => show2(carry.list(text), t("settings.carryNoneFile")), () => show2(null, ""));
       });
-      const two = el7("span", "control");
+      const two = el8("span", "control");
       for (const [label, fn] of [[t("settings.carryLocal"), () => show2(carry.list(), t("settings.carryNone"))], [t("settings.carryFile"), () => picker.click()]]) {
-        const b = el7("button", "seg", label);
+        const b = el8("button", "seg", label);
         b.type = "button";
         b.addEventListener("click", fn);
         two.append(b);
       }
       const rows = [row(t("settings.carry"), t("settings.carryHint"), two), picker];
       for (const src of carryList ?? []) {
-        const box = el7("span", "control");
-        const b = el7("button", "seg", t("settings.carryDo"));
+        const box = el8("span", "control");
+        const b = el8("button", "seg", t("settings.carryDo"));
         b.type = "button";
         b.addEventListener("click", () => {
           status = carry.apply(src.ns);
@@ -14904,9 +14955,9 @@ input.field { width: 190px; }
       return rows;
     };
     const resetRows = (reset) => ["stats", "settings"].map((kind) => {
-      const box = el7("span", "control");
+      const box = el8("span", "control");
       const button3 = (label, onClick, cls = "") => {
-        const b = el7("button", `seg ${cls}`.trim(), label);
+        const b = el8("button", `seg ${cls}`.trim(), label);
         b.type = "button";
         b.addEventListener("click", onClick);
         box.append(b);
@@ -14933,17 +14984,17 @@ input.field { width: 190px; }
     const ptreRows = () => {
       const lang = doc.documentElement.lang || "it";
       const key = normalTeamKey(store.get(TEAM_KEY, ""));
-      const intro = el7("div", "notes fut-ptre-intro");
-      for (const line of t("ptre.consent").split("\n")) intro.append(el7("p", "", line));
-      const link = el7("a", "", t("ptre.open"));
+      const intro = el8("div", "notes fut-ptre-intro");
+      for (const line of t("ptre.consent").split("\n")) intro.append(el8("p", "", line));
+      const link = el8("a", "", t("ptre.open"));
       link.href = "https://ptre.chez.gg/";
       link.target = "_blank";
       link.rel = "noopener noreferrer";
       intro.append(link);
-      const box = el7("span", "control");
+      const box = el8("span", "control");
       if (key) {
-        const shown3 = el7("span", "fut-ptre-key", `TM-••••-••••-••••-${key.replace(/-/g, "").slice(-4)}`);
-        const drop = el7("button", "seg", t("ptre.remove"));
+        const shown3 = el8("span", "fut-ptre-key", `TM-••••-••••-••••-${key.replace(/-/g, "").slice(-4)}`);
+        const drop = el8("button", "seg", t("ptre.remove"));
         drop.type = "button";
         drop.addEventListener("click", () => {
           store.delete(TEAM_KEY);
@@ -14952,7 +15003,7 @@ input.field { width: 190px; }
         });
         box.append(shown3, drop);
       } else {
-        const input = el7("input", "field");
+        const input = el8("input", "field");
         input.type = "password";
         input.autocomplete = "off";
         input.placeholder = "TM-XXXX-XXXX-XXXX-XXXX";
@@ -14961,7 +15012,7 @@ input.field { width: 190px; }
           e.stopPropagation();
           if (e.key === "Enter") save.click();
         });
-        const save = el7("button", "seg", t("ptre.keySave"));
+        const save = el8("button", "seg", t("ptre.keySave"));
         save.type = "button";
         save.addEventListener("click", () => {
           const next = normalTeamKey(input.value);
@@ -14976,27 +15027,27 @@ input.field { width: 190px; }
         store.set(AUTO_KEY, v);
         status = t(v ? "ptre.autoOn" : "ptre.autoOff");
       })));
-      const st = el7("div", "status", status);
+      const st = el8("div", "status", status);
       st.setAttribute("role", "status");
       rows.push(st);
       const last2 = store.get(LAST_KEY, null);
-      const lastBox = el7("div", "notes fut-ptre-errors");
-      lastBox.append(el7("b", "", t("ptre.last")));
-      if (!last2) lastBox.append(el7("p", "", t("ptre.lastNone")));
+      const lastBox = el8("div", "notes fut-ptre-errors");
+      lastBox.append(el8("b", "", t("ptre.last")));
+      if (!last2) lastBox.append(el8("p", "", t("ptre.lastNone")));
       else {
         const when = new Date(last2.at).toLocaleString(lang, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
         const whatKey = `ptre.what.${last2.script.replace(/\.php$/, "")}`;
         const what = t(whatKey) === whatKey ? last2.script : t(whatKey);
-        lastBox.append(el7("p", last2.ok ? "" : "bad", `${when} · ${what} · ${last2.ok ? "ok" : `${t("ptre.lastRefused")} (${last2.code})`}${last2.message ? ` · ${last2.message}` : ""}`));
+        lastBox.append(el8("p", last2.ok ? "" : "bad", `${when} · ${what} · ${last2.ok ? "ok" : `${t("ptre.lastRefused")} (${last2.code})`}${last2.message ? ` · ${last2.message}` : ""}`));
       }
       rows.push(lastBox);
       const errors = store.get(ERRORS_KEY, []);
-      const list = el7("div", "notes fut-ptre-errors");
-      list.append(el7("b", "", t("ptre.errors")));
-      if (!errors.length) list.append(el7("p", "", t("ptre.noErrors")));
+      const list = el8("div", "notes fut-ptre-errors");
+      list.append(el8("b", "", t("ptre.errors")));
+      if (!errors.length) list.append(el8("p", "", t("ptre.noErrors")));
       for (const e of [...errors].reverse()) {
         const when = new Date(e.at).toLocaleString(lang, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
-        list.append(el7("p", "", `${when} · ${e.code} · ${e.message || "—"}`));
+        list.append(el8("p", "", `${when} · ${e.code} · ${e.message || "—"}`));
       }
       rows.push(list);
       return rows;
@@ -15010,22 +15061,22 @@ input.field { width: 190px; }
         }))
       ];
       let section3 = "";
-      let grid2 = el7("div", "keygrid");
+      let grid2 = el8("div", "keygrid");
       for (const a of ACTIONS) {
         if (a.group !== section3) {
           section3 = a.group;
-          grid2 = el7("div", "keygrid");
-          out.push(el7("div", "group", t(`settings.keys.${section3}`)), grid2);
+          grid2 = el8("div", "keygrid");
+          out.push(el8("div", "group", t(`settings.keys.${section3}`)), grid2);
         }
-        const r = el7("div", "keyrow");
-        const g = el7("span", "g");
+        const r = el8("div", "keyrow");
+        const g = el8("span", "g");
         g.append(glyph(doc, a, 16));
         const key = map.get(a.id) ?? null;
-        const cap = el7("button", `keycap${key ? "" : " none"}${listening === a.id ? " listening" : ""}`, listening === a.id ? t("settings.keyPress") : key ? keyLabel(key) : t("settings.keyNone"));
+        const cap = el8("button", `keycap${key ? "" : " none"}${listening === a.id ? " listening" : ""}`, listening === a.id ? t("settings.keyPress") : key ? keyLabel(key) : t("settings.keyNone"));
         cap.type = "button";
         cap.dataset.id = a.id;
         cap.setAttribute("aria-label", `${t(a.label)}: ${key ? keyLabel(key) : t("settings.keyNone")}. ${a.fixed ? t("settings.keyFixed") : t("settings.keyChange")}`);
-        const reset = el7("button", "mini", t("settings.keyReset"));
+        const reset = el8("button", "mini", t("settings.keyReset"));
         reset.type = "button";
         if (a.fixed) {
           cap.disabled = true;
@@ -15046,13 +15097,13 @@ input.field { width: 190px; }
             draw();
           });
         }
-        const name = el7("span", "name", t(a.label));
-        if (a.touchOnly) name.append(el7("span", "fixed", t("settings.keyGame")));
+        const name = el8("span", "name", t(a.label));
+        if (a.touchOnly) name.append(el8("span", "fixed", t("settings.keyGame")));
         r.append(g, name, reset, cap);
         grid2.append(r);
       }
-      const all2 = el7("span", "control");
-      const b = el7("button", "seg", t("settings.keysDefault"));
+      const all2 = el8("span", "control");
+      const b = el8("button", "seg", t("settings.keysDefault"));
       b.type = "button";
       b.addEventListener("click", () => {
         resetKeys2(store);
@@ -15063,7 +15114,7 @@ input.field { width: 190px; }
       });
       all2.append(b);
       out.push(row(t("settings.keysDefault"), t("settings.keysHint"), all2));
-      const st = el7("div", "status", status);
+      const st = el8("div", "status", status);
       st.setAttribute("role", "status");
       out.push(st);
       return out;
@@ -15094,10 +15145,10 @@ input.field { width: 190px; }
       root.querySelector(`.keycap[data-id="${id}"]`)?.focus();
     };
     const draw = () => {
-      const head = el7("div", "head");
-      const titles = el7("div", "titles");
-      titles.append(el7("h2", "", t("toolbar.settings")), el7("span", "sub", t("settings.sub")));
-      const close = el7("button", "close");
+      const head = el8("div", "head");
+      const titles = el8("div", "titles");
+      titles.append(el8("h2", "", t("toolbar.settings")), el8("span", "sub", t("settings.sub")));
+      const close = el8("button", "close");
       close.type = "button";
       close.title = t("fleet.close");
       close.setAttribute("aria-label", t("fleet.close"));
@@ -15106,10 +15157,10 @@ input.field { width: 190px; }
       head.append(titles);
       if (o.onHelp) head.append(helpButton(doc, t("tour.help"), o.onHelp));
       head.append(close);
-      const tabs = el7("div", "tabs");
+      const tabs = el8("div", "tabs");
       tabs.setAttribute("role", "tablist");
       for (const s of sections) {
-        const b = el7("button", "tab", t(`settings.section.${s}`));
+        const b = el8("button", "tab", t(`settings.section.${s}`));
         b.type = "button";
         b.setAttribute("role", "tab");
         b.dataset.section = s;
@@ -15124,7 +15175,7 @@ input.field { width: 190px; }
         });
         tabs.append(b);
       }
-      const body = el7("div", "body");
+      const body = el8("div", "body");
       body.setAttribute("role", "tabpanel");
       if (section2 === "menu") {
         const setMenu = (next) => {
@@ -15179,8 +15230,8 @@ input.field { width: 190px; }
         );
       } else if (section2 === "galaxy") {
         const current3 = store.get(BIG_DEBRIS_KEY, BIG_DEBRIS);
-        const box = el7("span", "control");
-        const input = el7("input", "field");
+        const box = el8("span", "control");
+        const input = el8("input", "field");
         input.type = "text";
         input.value = formatUnits(current3, doc.documentElement.lang || "it");
         input.setAttribute("aria-label", t("settings.bigDebris"));
@@ -15192,7 +15243,7 @@ input.field { width: 190px; }
           draw();
         });
         box.append(input);
-        const st = el7("div", "status", status);
+        const st = el8("div", "status", status);
         st.setAttribute("role", "status");
         body.append(row(t("settings.bigDebris"), t("settings.bigDebrisHint"), box), st);
       } else if (section2 === "fleet") {
@@ -15209,7 +15260,7 @@ input.field { width: 190px; }
       } else {
         if (o.backup) {
           const { onExport, onImport } = o.backup;
-          const picker = el7("input");
+          const picker = el8("input");
           picker.type = "file";
           picker.hidden = true;
           picker.title = t("settings.backupImportHint");
@@ -15225,19 +15276,19 @@ input.field { width: 190px; }
             }).finally(draw);
           });
           const action = (label, onClick) => {
-            const box = el7("span", "control");
-            const b = el7("button", "seg", label);
+            const box = el8("span", "control");
+            const b = el8("button", "seg", label);
             b.type = "button";
             b.addEventListener("click", onClick);
             box.append(b);
             return box;
           };
-          const two = el7("span", "control");
+          const two = el8("span", "control");
           for (const [label, fn] of [[t("settings.backupExport"), () => {
             status = t("settings.backupSaved", { n: onExport() });
             draw();
           }], [t("settings.backupImport"), () => picker.click()]]) {
-            const b = el7("button", "seg", label);
+            const b = el8("button", "seg", label);
             b.type = "button";
             b.addEventListener("click", fn);
             two.append(b);
@@ -15249,11 +15300,11 @@ input.field { width: 190px; }
           );
           if (o.carry) body.append(...carryRows(o.carry));
           if (o.reset) body.append(...resetRows(o.reset));
-          const s = el7("div", "status", status);
+          const s = el8("div", "status", status);
           s.setAttribute("role", "status");
           body.append(s);
         }
-        if (o.notes?.length) body.append(el7("div", "notes", o.notes.join(" · ")));
+        if (o.notes?.length) body.append(el8("div", "notes", o.notes.join(" · ")));
       }
       panel.replaceChildren(head, tabs, body);
       revealActiveTabs(panel);
@@ -15355,7 +15406,7 @@ input.field { width: 190px; }
   });
   var seen = (d) => d.store.get(SEEN_KEY, {});
   var markSeen = (d, id) => d.store.set(SEEN_KEY, { ...seen(d), [id]: Date.now() });
-  var pending = /* @__PURE__ */ new WeakMap();
+  var pending2 = /* @__PURE__ */ new WeakMap();
   var LATER_KEY = "tour.later";
   var LATER_MS = 6 * 36e5;
   var putOff = (d, id) => Date.now() - (d.store.get(LATER_KEY, {})[id] ?? 0) < LATER_MS;
@@ -15383,11 +15434,11 @@ input.field { width: 190px; }
 `;
   function offerGuides(d, ids) {
     const { doc, t } = d;
-    pending.set(doc, [.../* @__PURE__ */ new Set([...ids, ...pending.get(doc) ?? []])]);
+    pending2.set(doc, [.../* @__PURE__ */ new Set([...ids, ...pending2.get(doc) ?? []])]);
     if (!d.store.get(OFFER_KEY, true)) return;
     if (doc.getElementById(INVITE_ID) || tourOpen(doc)) return;
     const done = seen(d);
-    const waiting = (pending.get(doc) ?? []).filter((id2) => !done[id2] && !putOff(d, id2));
+    const waiting = (pending2.get(doc) ?? []).filter((id2) => !done[id2] && !putOff(d, id2));
     const id = waiting.find((g) => guideHere(doc, g) && liveSteps(doc, guideSteps(g, t)).length > 1);
     if (!id) {
       if (waiting.length) watchFor(d);
@@ -15452,7 +15503,7 @@ input.field { width: 190px; }
       queued2 = true;
       setTimeout(() => {
         queued2 = false;
-        const left = (pending.get(doc) ?? []).filter((id) => !seen(d)[id] && !putOff(d, id));
+        const left = (pending2.get(doc) ?? []).filter((id) => !seen(d)[id] && !putOff(d, id));
         if (!left.length) {
           observer.disconnect();
           watching.delete(doc);
@@ -15489,28 +15540,28 @@ input.field { width: 190px; }
   }
   function guidePanel(o) {
     const { doc, t } = o;
-    const el7 = (tag, cls = "", text = "") => {
+    const el8 = (tag, cls = "", text = "") => {
       const n = doc.createElement(tag);
       if (cls) n.className = cls;
       if (text) n.textContent = text;
       return n;
     };
     const row = (name, desc, control) => {
-      const r = el7("div", "row");
-      r.append(el7("span", "name", name), el7("span", "desc", desc), control);
+      const r = el8("div", "row");
+      r.append(el8("span", "name", name), el8("span", "desc", desc), control);
       return r;
     };
     const action = (label, onClick) => {
-      const box = el7("span", "control");
-      const b2 = el7("button", "seg", label);
+      const box = el8("span", "control");
+      const b2 = el8("button", "seg", label);
       b2.type = "button";
       b2.addEventListener("click", onClick);
       box.append(b2);
       return box;
     };
     const group = (label, glyph2) => {
-      const g = el7("div", "group");
-      const gi = el7("span", "gi");
+      const g = el8("div", "group");
+      const gi = el8("span", "gi");
       gi.append(icon(doc, glyph2, 16));
       g.append(gi, doc.createTextNode(label));
       return g;
@@ -15519,8 +15570,8 @@ input.field { width: 190px; }
     o.steps.forEach((s, n) => {
       let control;
       if (s.done) {
-        control = el7("span", "control fut-done");
-        control.append(icon(doc, "check", 16), el7("span", "", t("tour.stepDone")));
+        control = el8("span", "control fut-done");
+        control.append(icon(doc, "check", 16), el8("span", "", t("tour.stepDone")));
       } else control = action(t("tour.show"), s.show);
       const r = row(`${n + 1} · ${t(`tour.step.${s.key}`)}`, t(`tour.step.${s.key}Hint`), control);
       if (s.done) r.classList.add("fut-step-done");
@@ -15529,13 +15580,13 @@ input.field { width: 190px; }
     out.push(group(t("tour.all"), "help"));
     for (const id of GUIDES) out.push(row(t(`tour.name.${id}`), t(`tour.where.${id}`), action(t("tour.start"), () => o.onStart(id))));
     const on = o.store.get(OFFER_KEY, true);
-    const sw = el7("span", "control");
-    const b = el7("button", "switch");
+    const sw = el8("span", "control");
+    const b = el8("button", "switch");
     b.type = "button";
     b.setAttribute("role", "switch");
     b.setAttribute("aria-checked", String(on));
     b.setAttribute("aria-label", t("tour.offer"));
-    b.append(el7("i", "sw-track"));
+    b.append(el8("i", "sw-track"));
     b.addEventListener("click", () => {
       o.store.set(OFFER_KEY, !on);
       o.redraw();
@@ -15916,14 +15967,14 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     sync: '<path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9" fill="none" stroke-width="2.2"/><path d="M19 3v5h-5M5 21v-5h5" fill="none" stroke-width="2.2"/>',
     settings: '<path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z" fill="none" stroke-width="2.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" fill="none" stroke-width="2.2"/>'
   };
-  function el5(doc, tag, className, text) {
+  function el6(doc, tag, className, text) {
     const node = doc.createElement(tag);
     node.className = className;
     if (text !== void 0) node.textContent = text;
     return node;
   }
   function iconButton2(doc, icon2, title, onClick) {
-    const button3 = el5(doc, "button", `fut-tool fut-tool-${icon2}`);
+    const button3 = el6(doc, "button", `fut-tool fut-tool-${icon2}`);
     button3.type = "button";
     button3.title = title;
     button3.setAttribute("aria-label", title);
@@ -15935,16 +15986,16 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     return button3;
   }
   function resourceColumn(doc, body, now, locale, withStorage, view2) {
-    const box = el5(doc, "span", "fut-res");
+    const box = el6(doc, "span", "fut-res");
     if (!body) {
-      for (const cls of ["fut-m", "fut-c", "fut-d"]) box.append(el5(doc, "span", `fut-cell ${cls} fut-missing`, "—"));
+      for (const cls of ["fut-m", "fut-c", "fut-d"]) box.append(el6(doc, "span", `fut-cell ${cls} fut-missing`, "—"));
       return box;
     }
     const amount = estimateResources(body, now);
     const fill = withStorage ? storageFill(body, amount) : null;
     const cell = (key, cls) => {
       const full = fill !== null && fill[key] >= 0.9;
-      const node = el5(doc, "span", full ? `fut-cell ${cls} fut-full` : `fut-cell ${cls}`, formatUnits(amount[key], locale));
+      const node = el6(doc, "span", full ? `fut-cell ${cls} fut-full` : `fut-cell ${cls}`, formatUnits(amount[key], locale));
       if (fill !== null) {
         const pct = Math.round(fill[key] * 100);
         node.style.setProperty("--fut-fill", `${pct}%`);
@@ -15962,12 +16013,12 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     const p = planet ? fleetValue(planet) : 0;
     const m = moon ? fleetValue(moon) : 0;
     if (!p && !m) return null;
-    const line = el5(doc, "span", "fut-fleet");
+    const line = el6(doc, "span", "fut-fleet");
     line.title = t("planetMenu.fleetHint");
     if (p || m) line.append(icon(doc, "fleet", 12));
-    if (p) line.append(el5(doc, "span", "fut-fleet-p", formatUnits(p, locale)));
+    if (p) line.append(el6(doc, "span", "fut-fleet-p", formatUnits(p, locale)));
     if (m) {
-      const moonPart = el5(doc, "span", "fut-fleet-m");
+      const moonPart = el6(doc, "span", "fut-fleet-m");
       moonPart.innerHTML = '<svg viewBox="0 0 24 24" width="8" height="8" aria-hidden="true" fill="currentColor"><path d="M14.6 2.6A9.6 9.6 0 1 0 21.4 16 8 8 0 0 1 14.6 2.6z"/></svg>';
       moonPart.append(formatUnits(m, locale));
       line.append(moonPart);
@@ -15976,12 +16027,12 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
   }
   var MOON_MARK = '<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="currentColor"><path d="M14.6 2.6A9.6 9.6 0 1 0 21.4 16 8 8 0 0 1 14.6 2.6z"/></svg>';
   function fleetPeek(doc, value, o, cls, moon = false) {
-    const peek = el5(doc, "span", `fut-fleet-peek ${cls}`);
+    const peek = el6(doc, "span", `fut-fleet-peek ${cls}`);
     peek.setAttribute("aria-hidden", "true");
-    const v = el5(doc, "span", "fut-peek-v");
+    const v = el6(doc, "span", "fut-peek-v");
     v.append(icon(doc, "fleet", 12));
     if (moon) {
-      const mark = el5(doc, "span", "fut-peek-moonmark");
+      const mark = el6(doc, "span", "fut-peek-moonmark");
       mark.innerHTML = MOON_MARK;
       v.append(mark);
     }
@@ -16014,7 +16065,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     if (!id) return null;
     const at = visits?.[String(id)];
     const { text, cls } = at ? dataAge(at, now) : { text: "60", cls: "fut-age-old" };
-    const badge = el5(doc, "span", `fut-age ${cls}`, text);
+    const badge = el6(doc, "span", `fut-age ${cls}`, text);
     if (at) badge.dataset.at = String(at);
     badge.title = t("planetMenu.age");
     return badge;
@@ -16038,13 +16089,13 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
   }
   function queueDots(doc, items, building2, now, t, locale) {
     if (!items.length && !building2) return null;
-    const box = el5(doc, "span", "fut-queue");
+    const box = el6(doc, "span", "fut-queue");
     if (items.length) {
       box.title = items.map((i) => `${t(`queue.${i.kind}`)}: ${queueLabel(i, locale)} · ${remaining(i.end, now)}`).join("\n");
-      for (const kind of new Set(items.map((i) => i.kind))) box.append(el5(doc, "span", `fut-q fut-q-${kind}`));
+      for (const kind of new Set(items.map((i) => i.kind))) box.append(el6(doc, "span", `fut-q fut-q-${kind}`));
     } else {
       box.title = building2?.getAttribute("title") || t("planetMenu.building");
-      box.append(el5(doc, "span", "fut-q fut-q-unknown"));
+      box.append(el6(doc, "span", "fut-q fut-q-unknown"));
     }
     return box;
   }
@@ -16052,7 +16103,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
   var TIP_ID = "fut-plan-tip";
   function planBadge(doc, mark, o, where) {
     if (!mark) return null;
-    const b = el5(doc, "span", `fut-plan fut-plan-${mark.state}`);
+    const b = el6(doc, "span", `fut-plan fut-plan-${mark.state}`);
     b.textContent = String(mark.items.length);
     b.tabIndex = 0;
     b.setAttribute("role", "button");
@@ -16078,30 +16129,30 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
   }
   function showPlanTip(doc, anchor, mark, o, where) {
     doc.getElementById(TIP_ID)?.remove();
-    const tip = el5(doc, "div", `fut-plan-tip fut-plan-${mark.state}`);
+    const tip = el6(doc, "div", `fut-plan-tip fut-plan-${mark.state}`);
     tip.id = TIP_ID;
     tip.setAttribute("role", "tooltip");
-    const head = el5(doc, "div", "fut-pt-head");
-    head.append(el5(doc, "b", "", where.name), el5(doc, "span", "", `[${where.coords}]${where.moon ? ` · ${o.t("planetMenu.moon")}` : ""}`));
-    const title = el5(doc, "div", "fut-pt-title");
+    const head = el6(doc, "div", "fut-pt-head");
+    head.append(el6(doc, "b", "", where.name), el6(doc, "span", "", `[${where.coords}]${where.moon ? ` · ${o.t("planetMenu.moon")}` : ""}`));
+    const title = el6(doc, "div", "fut-pt-title");
     title.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="currentColor">${PLAN_ICON}</svg>`;
     title.append(doc.createTextNode(o.t("plan.title")));
-    const list = el5(doc, "ul", "fut-pt-items");
-    for (const i of mark.items) list.append(el5(doc, "li", "", i));
+    const list = el6(doc, "ul", "fut-pt-items");
+    for (const i of mark.items) list.append(el6(doc, "li", "", i));
     const time = (ms) => new Date(ms).toLocaleTimeString(o.locale, { hour: "2-digit", minute: "2-digit" });
     const resRow = (r) => {
-      const row = el5(doc, "div", "fut-pt-res");
+      const row = el6(doc, "div", "fut-pt-res");
       for (const k of ["metal", "crystal", "deuterium"]) {
         if (!r[k]) continue;
-        const c = el5(doc, "span", `fut-pt-${k}`);
+        const c = el6(doc, "span", `fut-pt-${k}`);
         c.innerHTML = resIconSvg(k, 12);
         c.append(doc.createTextNode(formatUnits(r[k], o.locale)));
         row.append(c);
       }
       return row;
     };
-    const status = el5(doc, "div", "fut-pt-status");
-    const say = (text) => status.append(el5(doc, "div", "fut-pt-say", text));
+    const status = el6(doc, "div", "fut-pt-status");
+    const say = (text) => status.append(el6(doc, "div", "fut-pt-say", text));
     const sent = mark.pending.metal + mark.pending.crystal + mark.pending.deuterium > 0;
     const sentText = mark.pending.arriveAt > o.now ? o.t("plan.sentArriving", { time: time(mark.pending.arriveAt) }) : o.t("plan.sentArrived");
     if (mark.state === "ready") say(o.t("plan.readyHere"));
@@ -16111,7 +16162,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
       status.append(resRow(mark.lack ?? { metal: 0, crystal: 0, deuterium: 0 }));
     }
     if (mark.state !== "ready" && mark.state !== "unknown" && sent) {
-      const line = el5(doc, "div", "fut-pt-say fut-pt-sent", sentText);
+      const line = el6(doc, "div", "fut-pt-say fut-pt-sent", sentText);
       status.append(line, resRow(mark.pending));
     }
     tip.append(head, title, list, status);
@@ -16148,21 +16199,21 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
   }
   function toolbar(o, colonies) {
     const { doc, t } = o;
-    const bar = el5(doc, "div", "fut-toolbar");
+    const bar = el6(doc, "div", "fut-toolbar");
     if (colonies) bar.title = colonies;
     const fmt = (n) => formatUnits(n, o.locale);
     const msu4 = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
     const cell = (glyph2, label, value, unit, cls, title, onClick) => {
-      const b = el5(doc, "button", "fut-cell");
+      const b = el6(doc, "button", "fut-cell");
       b.type = "button";
       b.title = title;
-      const top = el5(doc, "span", "fut-cell-t");
-      const ico = el5(doc, "span", "fut-cell-i");
+      const top = el6(doc, "span", "fut-cell-t");
+      const ico = el6(doc, "span", "fut-cell-i");
       ico.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="currentColor" stroke="currentColor">${ICONS2[glyph2]}</svg>`;
-      top.append(ico, el5(doc, "span", "fut-cell-k", label));
-      const v = el5(doc, "span", `fut-cell-v ${cls}`.trim());
+      top.append(ico, el6(doc, "span", "fut-cell-k", label));
+      const v = el6(doc, "span", `fut-cell-v ${cls}`.trim());
       v.append(value);
-      if (unit) v.append(" ", el5(doc, "small", "", unit));
+      if (unit) v.append(" ", el6(doc, "small", "", unit));
       b.append(top, v);
       if (onClick) b.addEventListener("click", onClick);
       else b.disabled = true;
@@ -16183,7 +16234,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
       `${t("plan.title")}${known && gap > 0 ? ` · ${t("bar.missing")} ${fmt(gap)}` : ""}${count2 && gap ? ` · ${t("bar.planHint")}` : ""}`,
       () => o.onOpenPlanner?.()
     );
-    const side = el5(doc, "div", "fut-side");
+    const side = el6(doc, "div", "fut-side");
     const lastSync = o.snapshot ? t("toolbar.lastSync", { time: formatTime(o.snapshot.fetchedAt, o.locale) }) : "";
     const sync = iconButton2(doc, "sync", [t("sync.button"), lastSync].filter(Boolean).join(" · "), () => {
       if (sync.classList.contains("fut-busy")) return;
@@ -16235,8 +16286,8 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
   }
   function showInfoTip(doc, anchor, title, lines) {
     doc.getElementById(TIP_ID)?.remove();
-    const note = el5(doc, "div", "fut-info-note");
-    const shut = el5(doc, "button", "");
+    const note = el6(doc, "div", "fut-info-note");
+    const shut = el6(doc, "button", "");
     shut.append(icon(doc, "close", 16));
     shut.type = "button";
     shut.setAttribute("aria-label", title);
@@ -16244,18 +16295,18 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
       e.preventDefault();
       setTouchNote(doc, null);
     });
-    const text = el5(doc, "span", "q");
-    text.append(el5(doc, "b", "", title));
-    for (const line of lines) text.append(el5(doc, "span", "l", line));
+    const text = el6(doc, "span", "q");
+    text.append(el6(doc, "b", "", title));
+    for (const line of lines) text.append(el6(doc, "span", "l", line));
     note.append(text, shut);
     if (setTouchNote(doc, note)) return;
-    const tip = el5(doc, "div", "fut-plan-tip fut-info-tip");
+    const tip = el6(doc, "div", "fut-plan-tip fut-info-tip");
     tip.id = TIP_ID;
     tip.setAttribute("role", "tooltip");
-    const head = el5(doc, "div", "fut-pt-head");
-    head.append(el5(doc, "b", "", title));
-    const list = el5(doc, "ul", "fut-pt-items");
-    for (const line of lines) list.append(el5(doc, "li", "", line));
+    const head = el6(doc, "div", "fut-pt-head");
+    head.append(el6(doc, "b", "", title));
+    const list = el6(doc, "ul", "fut-pt-items");
+    for (const line of lines) list.append(el6(doc, "li", "", line));
     tip.append(head, list);
     doc.body.append(tip);
     const box = anchor.getBoundingClientRect();
@@ -16286,7 +16337,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     if (!ev || ev.attack === null && ev.spy === null) return;
     const { doc, t } = o;
     link.classList.add(ev.attack !== null ? "fut-attack" : "fut-spy");
-    const badge = el5(doc, "span", "fut-threat");
+    const badge = el6(doc, "span", "fut-threat");
     const lines = [];
     if (ev.attack !== null) {
       badge.append(icon(doc, "sword", 12));
@@ -16305,27 +16356,27 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
   function flightChips(doc, planet, moon, o) {
     const groups = [planet?.own ?? [], moon?.own ?? []];
     if (!groups[0].length && !groups[1].length) return null;
-    const line = el5(doc, "span", "fut-flights");
+    const line = el6(doc, "span", "fut-flights");
     const lines = [];
     const order = { out: 0, in: 1, back: 2 };
     groups.forEach((own, i) => {
       if (!own.length) return;
       if (i === 1) {
-        const mark = el5(doc, "span", "fut-fl-moon");
+        const mark = el6(doc, "span", "fut-fl-moon");
         mark.innerHTML = MOON_MARK;
         line.append(mark);
         lines.push(o.t("flights.moon"));
       }
       for (const f of [...own].sort((a, b) => order[a.way] - order[b.way] || a.first - b.first)) {
         const look = MISSION_LOOK[f.mission] ?? { icon: "ships" };
-        const chip2 = el5(doc, "span", "fut-fl");
+        const chip2 = el6(doc, "span", "fut-fl");
         chip2.dataset.way = f.way;
         if (look.tone) chip2.style.setProperty("--tone", MISSION_TONES[look.tone]);
         chip2.innerHTML = iconSvg(look.icon, 11);
-        const way = el5(doc, "span", "w");
+        const way = el6(doc, "span", "w");
         way.append(icon(doc, WAY_MARK[f.way].icon, 10));
         chip2.append(way);
-        if (f.count > 1) chip2.append(el5(doc, "span", "n", String(f.count)));
+        if (f.count > 1) chip2.append(el6(doc, "span", "n", String(f.count)));
         const text = o.t(`flights.${f.way}`, { mission: o.t(`mission.${f.mission}`), n: f.count, time: clock(f.first, o.locale) });
         chip2.title = text;
         lines.push(`${i === 1 ? "  " : ""}${text}`);
@@ -16346,7 +16397,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     if (!over()) return;
     line.classList.add("fut-fl-tight");
     if (!over()) return;
-    const more = el5(doc, "span", "fut-fl fut-fl-more");
+    const more = el6(doc, "span", "fut-fl fut-fl-more");
     line.append(more);
     const shown3 = [...line.querySelectorAll(".fut-fl:not(.fut-fl-more), .fut-fl-moon")];
     let left = 0;
@@ -16364,7 +16415,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     const list = doc.getElementById("planetList");
     if (!list) return;
     if (!doc.getElementById(STYLE_ID4)) {
-      const style = el5(doc, "style", "");
+      const style = el6(doc, "style", "");
       style.id = STYLE_ID4;
       style.textContent = PLANET_MENU_CSS;
       doc.head.append(style);
@@ -16391,10 +16442,10 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
       if (entry.current) entry.element.classList.add("fut-current");
       const link = entry.planetLink;
       if (link) {
-        const wrap = el5(doc, "span", "fut-name");
+        const wrap = el6(doc, "span", "fut-name");
         link.querySelectorAll(".planet-name, .planet-koords").forEach((n) => wrap.append(n));
         const planetBody = entry.planetId ? byId.get(entry.planetId) : void 0;
-        const third = el5(doc, "span", "fut-line3");
+        const third = el6(doc, "span", "fut-line3");
         if (view2.fleet) {
           const line = fleetLine(doc, planetBody, entry.moonId ? byId.get(entry.moonId) : void 0, o.locale, o.t);
           if (line) third.append(line);
@@ -16435,22 +16486,22 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
         const mq = queueDots(doc, entry.moonId ? activeItems(o.queues?.bodies[String(entry.moonId)], o.now) : [], entry.construction.moon, o.now, o.t, o.locale);
         if (mq) moon.append(mq);
       } else {
-        gap = el5(doc, "span", "fut-nomoon");
+        gap = el6(doc, "span", "fut-nomoon");
         link?.after(gap);
       }
       {
-        const col = el5(doc, "span", "fut-plancol");
+        const col = el6(doc, "span", "fut-plancol");
         const pb = planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : void 0, o, { id: entry.planetId, name: entry.name, coords: entry.coords, moon: false });
         const moonName = entry.moonLink?.querySelector("img")?.getAttribute("alt") || entry.name;
         const mb = planBadge(doc, entry.moonId ? o.planMarks?.[String(entry.moonId)] : void 0, o, { id: entry.moonId, name: moonName, coords: entry.coords, moon: true });
         if (pb) pb.classList.add("fut-plan-p");
         if (mb) mb.classList.add("fut-plan-m");
         const empty = () => {
-          const slot = el5(doc, "span", "fut-plan-empty");
+          const slot = el6(doc, "span", "fut-plan-empty");
           slot.setAttribute("aria-hidden", "true");
           return slot;
         };
-        col.append(pb ?? (entry.planetId ? empty() : el5(doc, "span", "")), mb ?? (moon ? empty() : el5(doc, "span", "")));
+        col.append(pb ?? (entry.planetId ? empty() : el6(doc, "span", "")), mb ?? (moon ? empty() : el6(doc, "span", "")));
         const after = moon ?? gap;
         if (after) after.after(col);
         else entry.element.append(col);
@@ -16469,24 +16520,24 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
       const fly = o.flying ?? { metal: 0, crystal: 0, deuterium: 0 };
       const stock2 = { metal: base3.stock.metal + fly.metal, crystal: base3.stock.crystal + fly.crystal, deuterium: base3.stock.deuterium + fly.deuterium };
       const msu4 = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
-      const box = el5(doc, "div", "fut-totals");
+      const box = el6(doc, "div", "fut-totals");
       box.setAttribute("role", "table");
       const row = (cls, cells, glyph2) => {
-        const r = el5(doc, "div", `fut-trow ${cls}`.trim());
+        const r = el6(doc, "div", `fut-trow ${cls}`.trim());
         r.setAttribute("role", "row");
         cells.forEach((text, i) => {
-          const c = el5(doc, "span", i ? "fut-tnum" : "fut-tname");
+          const c = el6(doc, "span", i ? "fut-tnum" : "fut-tname");
           c.setAttribute("role", "cell");
           if (i && text) {
             c.title = o.t(i === 1 ? "totals.stock" : "totals.day");
             c.setAttribute("aria-label", `${c.title}: ${text}`);
           }
           if (!i && glyph2) {
-            const ico = el5(doc, "span", "fut-tico");
+            const ico = el6(doc, "span", "fut-tico");
             ico.innerHTML = iconSvg(glyph2, 13);
             c.append(ico);
           }
-          c.append(el5(doc, "span", "fut-tlabel", text));
+          c.append(el6(doc, "span", "fut-tlabel", text));
           r.append(c);
         });
         box.append(r);
@@ -16943,10 +16994,10 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     for (const id of ids) {
       const cls = TILE_CLASS[id] ? `icon sprite sprite_medium medium ${TILE_CLASS[id]}` : LF_IDS.includes(id) ? `queuePic lifeformqueue lifeformTech${id}` : "";
       if (!cls) continue;
-      const el7 = doc.createElement("div");
-      el7.className = cls;
-      box.append(el7);
-      const cs = view2.getComputedStyle(el7);
+      const el8 = doc.createElement("div");
+      el8.className = cls;
+      box.append(el8);
+      const cs = view2.getComputedStyle(el8);
       const url = /url\("?([^")]+)"?\)/.exec(cs.backgroundImage)?.[1];
       const w = parseFloat(cs.width);
       const pos = cs.backgroundPosition;
@@ -18253,21 +18304,21 @@ table.queues td.acts { width: 1%; text-align: right; }
     return Number.isFinite(n) && String(value).trim() !== "" ? n : null;
   };
   function readTechList(doc) {
-    return Array.from(doc.querySelectorAll("#technologies .technology[data-technology]")).flatMap((el7) => {
-      const id = Number(el7.getAttribute("data-technology"));
-      const built = num4(el7.querySelector(".level")?.getAttribute("data-value"));
+    return Array.from(doc.querySelectorAll("#technologies .technology[data-technology]")).flatMap((el8) => {
+      const id = Number(el8.getAttribute("data-technology"));
+      const built = num4(el8.querySelector(".level")?.getAttribute("data-value"));
       if (!id || built === null) return [];
-      const target = num4(el7.querySelector(".targetlevel")?.getAttribute("data-value"));
-      return [{ id, name: el7.getAttribute("aria-label") ?? el7.getAttribute("title") ?? String(id), built, level: Math.max(built, target ?? 0) }];
+      const target = num4(el8.querySelector(".targetlevel")?.getAttribute("data-value"));
+      return [{ id, name: el8.getAttribute("aria-label") ?? el8.getAttribute("title") ?? String(id), built, level: Math.max(built, target ?? 0) }];
     });
   }
   function levelsOf(list) {
     return Object.fromEntries(list.map((e) => [e.id, e.level]));
   }
   function costValue(root, cls) {
-    const el7 = root.querySelector(`.costs .${cls}`);
-    if (!el7) return void 0;
-    const v = num4(el7.getAttribute("data-value")) ?? num4(el7.getAttribute("data-tooltip-title") ?? el7.getAttribute("title")) ?? num4(el7.textContent);
+    const el8 = root.querySelector(`.costs .${cls}`);
+    if (!el8) return void 0;
+    const v = num4(el8.getAttribute("data-value")) ?? num4(el8.getAttribute("data-tooltip-title") ?? el8.getAttribute("title")) ?? num4(el8.textContent);
     return v ?? void 0;
   }
   function readEnergyProduction(root) {
@@ -18667,14 +18718,14 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     ["deuterium", "d"],
     ["energy", "e"]
   ];
-  function el6(doc, tag, cls = "", text) {
+  function el7(doc, tag, cls = "", text) {
     const node = doc.createElement(tag);
     if (cls) node.className = cls;
     if (text !== void 0) node.textContent = text;
     return node;
   }
   function okCell(doc, have, cls) {
-    const c = el6(doc, "span", cls, have ? "" : "—");
+    const c = el7(doc, "span", cls, have ? "" : "—");
     if (have) c.append(icon(doc, "check", 12));
     return c;
   }
@@ -18711,7 +18762,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   }
   var msu3 = (c) => c.metal + c.crystal * 1.5 + c.deuterium * 3;
   function button2(doc, cls, html, title, onClick) {
-    const b = el6(doc, "button", cls);
+    const b = el7(doc, "button", cls);
     b.type = "button";
     b.innerHTML = html;
     b.title = title;
@@ -18742,30 +18793,30 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   };
   function grid(o, view2, have) {
     const { doc, t, locale } = o;
-    const g = el6(doc, "div", "fut-tp-grid");
+    const g = el7(doc, "div", "fut-tp-grid");
     g.style.gridTemplateColumns = `minmax(0, auto) repeat(${view2.cols.length}, minmax(0, 1fr))`;
     const band = (col) => col.short ? msu3(col.cost) > 0 ? " fut-tp-miss" : " fut-tp-miss fut-tp-none" : "";
-    g.append(el6(doc, "span", "fut-tp-h"));
-    view2.heads.forEach((h8, i) => g.append(el6(doc, "span", `fut-tp-h${band(view2.cols[i])}`, h8)));
+    g.append(el7(doc, "span", "fut-tp-h"));
+    view2.heads.forEach((h8, i) => g.append(el7(doc, "span", `fut-tp-h${band(view2.cols[i])}`, h8)));
     const rows = RES.filter(([key]) => view2.cols.some((c) => !c.short && c.cost[key] > 0));
     const cell = (value, cls) => {
-      const c = el6(doc, "span", `fut-tp-v ${cls}`, value ? formatUnits(value, locale) : "—");
+      const c = el7(doc, "span", `fut-tp-v ${cls}`, value ? formatUnits(value, locale) : "—");
       c.title = Math.round(value).toLocaleString(locale);
       return c;
     };
     for (const [key, cls] of rows) {
-      const k = el6(doc, "span", `fut-tp-k fut-${cls}`);
+      const k = el7(doc, "span", `fut-tp-k fut-${cls}`);
       k.innerHTML = ROW_ICON[key];
-      k.append(el6(doc, "span", "", t(`tech.res.${key}`)));
+      k.append(el7(doc, "span", "", t(`tech.res.${key}`)));
       g.append(k);
       for (const col of view2.cols) {
         if (!col.short) g.append(cell(col.cost[key], col.cls ?? ""));
-        else if (key === "energy") g.append(el6(doc, "span", `fut-tp-v${band(col)}`));
+        else if (key === "energy") g.append(el7(doc, "span", `fut-tp-v${band(col)}`));
         else if (col.cost[key] > 0) g.append(cell(-col.cost[key], `fut-tp-short${band(col)}`));
         else g.append(okCell(doc, have, `fut-tp-v fut-tp-ok${band(col)}`));
       }
     }
-    g.append(el6(doc, "span", "fut-tp-k fut-tp-msu fut-tp-total", "MSU"));
+    g.append(el7(doc, "span", "fut-tp-k fut-tp-msu fut-tp-total", "MSU"));
     for (const col of view2.cols) {
       const v = msu3(col.cost);
       if (col.short) g.append(v > 0 ? cell(-v, `fut-tp-short fut-tp-msu fut-tp-total${band(col)}`) : okCell(doc, have, `fut-tp-v fut-tp-ok fut-tp-msu fut-tp-total${band(col)}`));
@@ -18774,9 +18825,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     return g;
   }
   function chip(doc, icon2, text, title, cls = "") {
-    const c = el6(doc, "span", `fut-tp-chip ${cls}`.trim());
+    const c = el7(doc, "span", `fut-tp-chip ${cls}`.trim());
     c.innerHTML = icon2;
-    c.append(el6(doc, "span", "", text));
+    c.append(el7(doc, "span", "", text));
     c.title = title;
     return c;
   }
@@ -18856,7 +18907,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       c.addEventListener("click", () => fillAmount(amountInput, sat.count));
       return c;
     }
-    const a = el6(doc, "a", "fut-tp-sat-link");
+    const a = el7(doc, "a", "fut-tp-sat-link");
     a.href = `index.php?page=ingame&component=supplies&openTech=${SATELLITE}&${SAT_PARAM}=${sat.count}`;
     a.append(c);
     a.addEventListener("click", (e) => {
@@ -18875,8 +18926,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     details.root.querySelectorAll(".fut-tp, .fut-tp-tools").forEach((n) => n.remove());
     const list = readTechList(doc);
     const entry = list.find((e) => e.id === details.id);
-    const box = el6(doc, "div", "fut-tp");
-    const tools = el6(doc, "div", "fut-tp-tools");
+    const box = el7(doc, "div", "fut-tp");
+    const tools = el7(doc, "div", "fut-tp-tools");
     const levelLabel = details.root.querySelector(".information .level");
     const levelText = levelLabel?.textContent ?? "";
     const chips = gameChips(doc, details);
@@ -18905,7 +18956,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           to = start.level;
           draw();
         });
-        range.append(el6(doc, "b", "", String(start.level - 1)), el6(doc, "span", "fut-tp-arrow", "→"), el6(doc, "b", "fut-tp-to", String(to)));
+        range.append(el7(doc, "b", "", String(start.level - 1)), el7(doc, "span", "fut-tp-arrow", "→"), el7(doc, "b", "fut-tp-to", String(to)));
         range.disabled = to <= start.level;
         range.setAttribute("aria-label", `${start.level - 1} → ${to}${to > start.level ? ` · ${t("tech.reset")}` : ""}`);
         const next = button2(doc, "fut-tp-btn fut-tp-step", ICON.plus, t("tech.next"), () => {
@@ -18913,7 +18964,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           draw();
         });
         next.setAttribute("aria-label", t("tech.next"));
-        const stepper = el6(doc, "span", "fut-tp-stepper");
+        const stepper = el7(doc, "span", "fut-tp-stepper");
         stepper.append(prev, range, next);
         const add = button2(doc, planned ? "fut-tp-btn fut-tp-plan on" : "fut-tp-btn fut-tp-plan", planned ? ICON.check : ICON.plus, "", () => {
           let current3 = loadPlan(o.store);
@@ -18934,7 +18985,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           o.onPlanChange?.();
           draw();
         });
-        add.append(el6(doc, "span", "", t("tech.planBtn")));
+        add.append(el7(doc, "span", "", t("tech.planBtn")));
         add.title = planned ? `${t("tech.inPlan")} · ${t("tech.removeHint")}` : to > start.level ? t("tech.addRange", { from: start.level, to }) : t("tech.addOne", { level: to });
         add.setAttribute("aria-label", add.title);
         add.setAttribute("aria-pressed", String(planned));
@@ -18944,7 +18995,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           heads: [t("tech.colLevel", { level: to }), t("tech.rangeShort", { from: start.level - 1, to }), t("tech.colMissing")],
           cols: [{ cost: one }, { cost: total, cls: "fut-tp-sum" }, { cost: gap, short: true }]
         };
-        const row = el6(doc, "div", "fut-tp-chips");
+        const row = el7(doc, "div", "fut-tp-chips");
         if (details.durationMs) {
           row.append(
             chip(
@@ -18981,7 +19032,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     } else {
       const unit = matchShownLevel(details.id, [1], details.shown);
       const discount2 = unit?.discount ?? 0;
-      const amount = el6(doc, "input", "fut-tp-amount");
+      const amount = el7(doc, "input", "fut-tp-amount");
       amount.type = "text";
       amount.inputMode = "numeric";
       amount.value = "";
@@ -19004,7 +19055,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           added = true;
           draw();
         });
-        add.append(el6(doc, "span", "", t("tech.planBtn")));
+        add.append(el7(doc, "span", "", t("tech.planBtn")));
         if (added) add.title = t("tech.added");
         add.setAttribute("aria-label", add.title);
         if (details.amountInput) tools.replaceChildren(add);
@@ -19013,7 +19064,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           heads: [t("tech.colOne"), `×${n < 1e4 ? n.toLocaleString(locale) : formatUnits(n, locale)}`, t("tech.colMissing")],
           cols: [{ cost: one }, { cost: total, cls: "fut-tp-sum" }, { cost: gap, short: true }]
         };
-        const row = el6(doc, "div", "fut-tp-chips");
+        const row = el7(doc, "div", "fut-tp-chips");
         if (details.durationMs) row.append(chip(doc, ICON.time, `${formatDuration(details.durationMs)} · Σ ${formatDuration(details.durationMs * n)}`, t("tech.time")));
         row.append(...chips);
         if (details.id === SATELLITE) {
@@ -19079,7 +19130,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   }
   function injectStyle(doc) {
     if (doc.getElementById("fut-tp-style")) return;
-    const style = el6(doc, "style");
+    const style = el7(doc, "style");
     style.id = "fut-tp-style";
     style.textContent = TECH_CSS;
     doc.head.append(style);
@@ -19672,7 +19723,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   }
   function orionData(doc, store, locale, now) {
     const archive = loadOrion(store);
-    const home = new Set(Array.from(doc.querySelectorAll("#planetList .planet-koords")).map((el7) => /\d+:\d+:\d+/.exec(el7.textContent ?? "")?.[0] ?? ""));
+    const home = new Set(Array.from(doc.querySelectorAll("#planetList .planet-koords")).map((el8) => /\d+:\d+:\d+/.exec(el8.textContent ?? "")?.[0] ?? ""));
     return { archive, events: orionEvents(archive, home, now), shipOf: matcher(store, locale) };
   }
   function orionCount(store, period, now) {
@@ -20651,7 +20702,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   // src/modules/highscore/index.ts
   var ptreSeen = /* @__PURE__ */ new WeakMap();
   var isHighscorePage = (doc) => new URL(doc.location?.href ?? "http://x/").searchParams.get("component") === "highscore";
-  var CSS6 = `
+  var CSS7 = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
 #ranks, #fut-hs-top { ${WINDOW_TOKENS} }
 #ranks { --fut-up: var(--ok); --fut-down: #E57B70; --fut-mute: var(--muted); --fut-line: var(--faint); --fut-btn: var(--surface); --fut-txt: var(--text-2); --fut-hi: #FFFFFF; --fut-link: var(--link); }
@@ -20723,6 +20774,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         g.title = t("hs.sincePtre", { n: made.toLocaleString(locale), time: since });
         scoreCell.append(g);
       }
+      const nameEl = r.row.querySelector(".playername");
+      if (nameEl && o.guard) attachPlayerCard({ doc, store, guard: o.guard, t, locale }, nameEl, r.playerId, r.name);
       const nameCell = r.row.querySelector("td.name");
       if (nameCell && !r.mine && !r.row.querySelector(".fut-mk-flag")) {
         nameCell.classList.add("fut-hs-fl");
@@ -20735,7 +20788,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     if (!o.doc.getElementById("fut-hs-style")) {
       const style = o.doc.createElement("style");
       style.id = "fut-hs-style";
-      style.textContent = CSS6;
+      style.textContent = CSS7;
       o.doc.head.append(style);
     }
     decorateHighscore(o);
@@ -20937,9 +20990,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     return Number(scriptValue(doc, /lithiumProduction\s*=\s*([\d.]+)/, /lithiumPerHour\s*:\s*([\d.]+)/)) || 0;
   }
   function lithiumNow(doc) {
-    const el7 = doc.querySelector("#lithiumAmount, .orionLithiumAmount");
-    if (!el7) return null;
-    return parseNumber(el7.textContent) || Math.floor(Number(el7.getAttribute("data-value")) || 0);
+    const el8 = doc.querySelector("#lithiumAmount, .orionLithiumAmount");
+    if (!el8) return null;
+    return parseNumber(el8.textContent) || Math.floor(Number(el8.getAttribute("data-value")) || 0);
   }
   function depletionHours(doc) {
     const v = scriptValue(doc, /lithiumDepletionSeconds\s*=\s*(\d+)/, /depletionSeconds\s*:\s*(\d+)/);
@@ -20950,8 +21003,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     return v > 0 ? v : Infinity;
   }
   function scanCost(doc) {
-    const el7 = doc.querySelector("#scanCostValue");
-    return el7 ? parseNumber(el7.getAttribute("data-tooltip-title")) || parseNumber(el7.textContent) : 0;
+    const el8 = doc.querySelector("#scanCostValue");
+    return el8 ? parseNumber(el8.getAttribute("data-tooltip-title")) || parseNumber(el8.textContent) : 0;
   }
   var isLithium = (line) => !!line.querySelector("lithium-icon") || /^\s*lit(h)?i/i.test(line.querySelector(".rewardName")?.textContent ?? "");
   function readRewards(box, selector) {
@@ -20977,9 +21030,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     return !!t && words.some((w) => t.split(/\s*\/\s*/).includes(w));
   }
   function modeOf(card) {
-    for (const el7 of Array.from(card.querySelectorAll("span, div"))) {
-      const t = clean(el7.textContent);
-      if ((t === "PvP" || t === "PvE") && !el7.children.length) return t;
+    for (const el8 of Array.from(card.querySelectorAll("span, div"))) {
+      const t = clean(el8.textContent);
+      if ((t === "PvP" || t === "PvE") && !el8.children.length) return t;
     }
     return "";
   }
@@ -21040,7 +21093,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       cost
     };
   }
-  var isDisabled = (el7) => !!(el7.disabled || el7.classList.contains("disabled") || el7.getAttribute("aria-disabled") === "true");
+  var isDisabled = (el8) => !!(el8.disabled || el8.classList.contains("disabled") || el8.getAttribute("aria-disabled") === "true");
   var WAVE_SIM = ".waveSimButton";
   var WAVE_API = ".waveApiButton";
   function readWaveFleet(apiButton) {
@@ -21061,7 +21114,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
 
   // src/modules/orion/index.ts
   var STYLE_ID5 = "fut-orion-style";
-  var CSS7 = `
+  var CSS8 = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
 .fut-or, .fut-or-box, .fut-or-tiles, .fut-or-t, .fut-or-m, .fut-or-c, .fut-or-d, .fut-or-li, .fut-or-val, .fut-or-x, .fut-or-cap, .fut-or-sim, .fut-or-best, .fut-or-line, .fut-or-dot, .fut-or-sw, .fut-or-head, .fut-or-kpis, .fut-or-kpi, .fut-or-rows, .fut-or-row, .fut-or-empty, .fut-or-warn { ${WINDOW_TOKENS_NO_LINES} }
 .fut-or, .fut-or-box {
@@ -21137,7 +21190,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     if (minutes >= 24 * 60) return `${Math.floor(minutes / 1440)}d ${Math.floor(minutes % 1440 / 60)}h`;
     return `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}m`;
   };
-  var isShown = (el7) => el7.isConnected && el7.getClientRects().length > 0;
+  var isShown = (el8) => el8.isConnected && el8.getClientRects().length > 0;
   function watchOrion(o) {
     const { doc, store, t, locale } = o;
     const win2 = pageWindow();
@@ -21165,7 +21218,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     if (!doc.getElementById(STYLE_ID5)) {
       const style = h7(doc, "style");
       style.id = STYLE_ID5;
-      style.textContent = CSS7;
+      style.textContent = CSS8;
       doc.head.append(style);
     }
     const loadLedger = () => store.get(LEDGER_KEY, {});
@@ -21187,9 +21240,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       if (!tab2) return;
       tab2.setAttribute("data-fut-or-synced", "1");
       const read = Array.from(doc.querySelectorAll(MISSION_CARD)).map((c) => readMissionCard(c));
-      const pending2 = store.get(PENDING_KEY, {});
+      const pending3 = store.get(PENDING_KEY, {});
       const print = read.map((m) => `${m.id}:${m.cost}:${cardValue(m.rewards)}:${m.incoming}/${m.total}`).join("#");
-      if (print === lastPrint && !Object.keys(pending2).length) return;
+      if (print === lastPrint && !Object.keys(pending3).length) return;
       lastPrint = print;
       const now = Date.now();
       const ledger = syncLedger(loadLedger(), read.map((m) => ({ ...m, lithium: m.rewards.lithium })), now);
@@ -21198,7 +21251,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       if (Object.keys(ignored).some((c) => !ledger[c])) store.set(IGNORED_KEY, Object.fromEntries(Object.keys(ignored).filter((c) => ledger[c]).map((c) => [c, true])));
       let archive = syncArchive(loadArch(), read.filter((m) => m.id).map((m) => ({ id: m.id, name: m.name, coords: m.coords, level: m.level, stars: m.stars, mode: m.mode, kind: m.kind, spawnedAt: m.spawnedAt, wave: m.incoming, waves: m.total, possibleMsu: msu(m.possible), combat: isCombat(m.kind, win2) })), now);
       const states = new Map(read.filter((m) => m.id).map((m) => [m.id, { cost: m.cost, value: cardValue(m.rewards), rewards: m.rewards }]));
-      const s = settle(pending2, archive, states, (id) => !!doc.querySelector(`${COLLECT_DIALOG}[data-space-object-id="${CSS_ESCAPE(id)}"]`), now);
+      const s = settle(pending3, archive, states, (id) => !!doc.querySelector(`${COLLECT_DIALOG}[data-space-object-id="${CSS_ESCAPE(id)}"]`), now);
       archive = s.archive;
       if (s.changed) store.set(PENDING_KEY, s.pending);
       store.set(ARCHIVE_KEY, archive);
@@ -21244,8 +21297,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         if (confirm && dialog && !isDisabled(confirm)) {
           const d = readCollectDialog(dialog);
           if (!d.id) return;
-          const el7 = cardOf(d.id);
-          const m2 = el7 ? readMissionCard(el7) : null;
+          const el8 = cardOf(d.id);
+          const m2 = el8 ? readMissionCard(el8) : null;
           addPending(d.id, { at: Date.now(), via: "dialog", cost: d.cost, rewards: d.rewards, before: m2?.rewards ?? null, cardCost: m2?.cost ?? 0, cardValue: m2 ? cardValue(m2.rewards) : 0, wave: d.waves.length ? Math.max(...d.waves) : m2?.incoming ?? 0, waves: d.waves.length });
           return;
         }
@@ -21697,8 +21750,8 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
         const body = snapshot?.bodies.find((b) => b.id === id);
         const stock2 = here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
         const have = stock2 ? lessReserved(stock2, reservedFor(queued2, id)) : null;
-        const pending2 = pendingFor(sent, id, here === id ? now : body?.resourcesAt ?? 0);
-        const { state, lack } = planStatus(items2, have, pending2, now);
+        const pending3 = pendingFor(sent, id, here === id ? now : body?.resourcesAt ?? 0);
+        const { state, lack } = planStatus(items2, have, pending3, now);
         const lines = [];
         for (const i of items2) {
           const last2 = lines[lines.length - 1];
@@ -21706,7 +21759,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
           else lines.push({ name: i.name, from: i.level, to: i.level, amount: i.amount });
         }
         const label = (l) => l.amount !== void 0 ? `${l.name} ×${l.amount.toLocaleString(locale)}` : `${l.name} ${l.from === l.to ? t("plan.level", { level: l.from ?? 0 }) : t("plan.levels", { from: l.from ?? 0, to: l.to ?? 0 })}`;
-        out[key] = { state, lack, pending: pending2, items: lines.map(label) };
+        out[key] = { state, lack, pending: pending3, items: lines.map(label) };
       }
       return out;
     };
