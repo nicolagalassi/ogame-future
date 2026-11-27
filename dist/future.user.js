@@ -2768,9 +2768,18 @@
     "ptre.synced": "Il team ha {n} bersagli su PTRE; {added} nuovi qui.",
     "ptre.manage": "Gestisci su PTRE",
     "ptre.auto": "Invii mentre giochi",
-    "ptre.autoHint": "Spento finché non lo accendi. Acceso, Future manda a PTRE senza un click per ogni invio, come OGLight: per ogni sistema che apri in galassia, i pianeti e le lune nuovi, cambiati o spariti (id, giocatore, nome, classifica e stato) e l'attività dei giocatori che segui (bandierina o aperti di recente); i controspionaggi che leggi in posta (chi ti ha spiato, da dove, quando); e quando apri la scheda di un giocatore chiede a PTRE i suoi pianeti, al massimo una volta l'ora.",
+    "ptre.autoHint": "Spento finché non lo accendi. Acceso, Future manda a PTRE senza un click per ogni invio, come OGLight: per ogni sistema che apri in galassia, i pianeti e le lune nuovi, cambiati o spariti (la prima volta che apri un sistema, tutte le posizioni occupate, di ogni giocatore) (id, giocatore, nome, classifica e stato) e l'attività dei giocatori che segui (bandierina o aperti di recente); i controspionaggi che leggi in posta (chi ti ha spiato, da dove, quando); e quando apri la scheda di un giocatore chiede a PTRE i suoi pianeti, al massimo una volta l'ora.",
     "ptre.autoOn": "Invii mentre giochi accesi.",
-    "ptre.autoOff": "Invii mentre giochi spenti: parte solo quello che fai con un click."
+    "ptre.autoOff": "Invii mentre giochi spenti: parte solo quello che fai con un click.",
+    "ptre.last": "Ultimo invio a PTRE",
+    "ptre.lastNone": "Ancora nessuno.",
+    "ptre.lastRefused": "rifiutato",
+    "ptre.what.oglight_import": "rapporto di spionaggio",
+    "ptre.what.oglight_get_player_infos": "info giocatore",
+    "ptre.what.api_sync_target_list": "bersagli del team",
+    "ptre.what.oglight_import_player_activity": "attività",
+    "ptre.what.api_galaxy_import_infos": "pianeti e lune della galassia",
+    "ptre.what.api_galaxy_get_infos": "pianeti del giocatore"
   };
 
   // src/i18n/en.json
@@ -3918,9 +3927,18 @@
     "ptre.synced": "The team has {n} targets on PTRE; {added} new here.",
     "ptre.manage": "Manage on PTRE",
     "ptre.auto": "Send while playing",
-    "ptre.autoHint": "Off until you turn it on. On, Future sends PTRE without a click for each call, as OGLight does: for every system you open in the galaxy, the planets and moons that are new, changed or gone (id, player, name, rank and status) and the activity of the players you follow (a flag, or opened lately); the counter-espionage you read in the inbox (who spied on you, from where, when); and when you open a player's sheet it asks PTRE for their planets, at most once an hour.",
+    "ptre.autoHint": "Off until you turn it on. On, Future sends PTRE without a click for each call, as OGLight does: for every system you open in the galaxy, the planets and moons that are new, changed or gone (the first time you open a system, every occupied position, of every player) (id, player, name, rank and status) and the activity of the players you follow (a flag, or opened lately); the counter-espionage you read in the inbox (who spied on you, from where, when); and when you open a player's sheet it asks PTRE for their planets, at most once an hour.",
     "ptre.autoOn": "Send while playing is on.",
-    "ptre.autoOff": "Send while playing is off: only what you do with a click is sent."
+    "ptre.autoOff": "Send while playing is off: only what you do with a click is sent.",
+    "ptre.last": "Last call to PTRE",
+    "ptre.lastNone": "None yet.",
+    "ptre.lastRefused": "refused",
+    "ptre.what.oglight_import": "spy report",
+    "ptre.what.oglight_get_player_infos": "player info",
+    "ptre.what.api_sync_target_list": "team targets",
+    "ptre.what.oglight_import_player_activity": "activity",
+    "ptre.what.api_galaxy_import_infos": "galaxy planets and moons",
+    "ptre.what.api_galaxy_get_infos": "player's planets"
   };
 
   // src/i18n/fr.json
@@ -5068,9 +5086,18 @@
     "ptre.synced": "L'équipe a {n} cibles sur PTRE ; {added} nouvelles ici.",
     "ptre.manage": "Gérer sur PTRE",
     "ptre.auto": "Envoyer en jouant",
-    "ptre.autoHint": "Éteint tant que tu ne l'allumes pas. Allumé, Future envoie à PTRE sans un clic par envoi, comme OGLight : pour chaque système que tu ouvres dans la galaxie, les planètes et lunes nouvelles, changées ou disparues (id, joueur, nom, classement et statut) et l'activité des joueurs que tu suis (drapeau ou ouverts récemment) ; les contre-espionnages que tu lis dans la messagerie (qui t'a espionné, d'où, quand) ; et quand tu ouvres la fiche d'un joueur, il demande à PTRE ses planètes, au plus une fois par heure.",
+    "ptre.autoHint": "Éteint tant que tu ne l'allumes pas. Allumé, Future envoie à PTRE sans un clic par envoi, comme OGLight : pour chaque système que tu ouvres dans la galaxie, les planètes et lunes nouvelles, changées ou disparues (la première fois que tu ouvres un système, toutes les positions occupées, de chaque joueur) (id, joueur, nom, classement et statut) et l'activité des joueurs que tu suis (drapeau ou ouverts récemment) ; les contre-espionnages que tu lis dans la messagerie (qui t'a espionné, d'où, quand) ; et quand tu ouvres la fiche d'un joueur, il demande à PTRE ses planètes, au plus une fois par heure.",
     "ptre.autoOn": "Envoyer en jouant est allumé.",
-    "ptre.autoOff": "Envoyer en jouant est éteint : seul ce que tu fais d'un clic part."
+    "ptre.autoOff": "Envoyer en jouant est éteint : seul ce que tu fais d'un clic part.",
+    "ptre.last": "Dernier envoi à PTRE",
+    "ptre.lastNone": "Aucun pour l'instant.",
+    "ptre.lastRefused": "refusé",
+    "ptre.what.oglight_import": "rapport d'espionnage",
+    "ptre.what.oglight_get_player_infos": "infos joueur",
+    "ptre.what.api_sync_target_list": "cibles de l'équipe",
+    "ptre.what.oglight_import_player_activity": "activité",
+    "ptre.what.api_galaxy_import_infos": "planètes et lunes de la galaxie",
+    "ptre.what.api_galaxy_get_infos": "planètes du joueur"
   };
 
   // src/i18n/de.json
@@ -6218,9 +6245,18 @@
     "ptre.synced": "Das Team hat {n} Ziele auf PTRE; {added} neu hier.",
     "ptre.manage": "Auf PTRE verwalten",
     "ptre.auto": "Beim Spielen senden",
-    "ptre.autoHint": "Aus, bis du es einschaltest. Eingeschaltet sendet Future an PTRE ohne einen Klick pro Anfrage, wie OGLight: für jedes System, das du in der Galaxie öffnest, neue, geänderte oder verschwundene Planeten und Monde (ID, Spieler, Name, Rang und Status) und die Aktivität der Spieler, denen du folgst (Flagge oder kürzlich geöffnet); die Spionageabwehr, die du im Posteingang liest (wer dich ausspioniert hat, von wo, wann); und wenn du den Steckbrief eines Spielers öffnest, fragt es PTRE nach seinen Planeten, höchstens einmal pro Stunde.",
+    "ptre.autoHint": "Aus, bis du es einschaltest. Eingeschaltet sendet Future an PTRE ohne einen Klick pro Anfrage, wie OGLight: für jedes System, das du in der Galaxie öffnest, neue, geänderte oder verschwundene Planeten und Monde (beim ersten Öffnen eines Systems alle besetzten Positionen, jedes Spielers) (ID, Spieler, Name, Rang und Status) und die Aktivität der Spieler, denen du folgst (Flagge oder kürzlich geöffnet); die Spionageabwehr, die du im Posteingang liest (wer dich ausspioniert hat, von wo, wann); und wenn du den Steckbrief eines Spielers öffnest, fragt es PTRE nach seinen Planeten, höchstens einmal pro Stunde.",
     "ptre.autoOn": "Beim Spielen senden ist an.",
-    "ptre.autoOff": "Beim Spielen senden ist aus: nur was du mit einem Klick tust, wird gesendet."
+    "ptre.autoOff": "Beim Spielen senden ist aus: nur was du mit einem Klick tust, wird gesendet.",
+    "ptre.last": "Letzte Anfrage an PTRE",
+    "ptre.lastNone": "Noch keine.",
+    "ptre.lastRefused": "abgelehnt",
+    "ptre.what.oglight_import": "Spionagebericht",
+    "ptre.what.oglight_get_player_infos": "Spielerinfos",
+    "ptre.what.api_sync_target_list": "Ziele des Teams",
+    "ptre.what.oglight_import_player_activity": "Aktivität",
+    "ptre.what.api_galaxy_import_infos": "Planeten und Monde der Galaxie",
+    "ptre.what.api_galaxy_get_infos": "Planeten des Spielers"
   };
 
   // src/core/i18n.ts
@@ -6604,6 +6640,7 @@
     return univers && /^[a-z]{2,}$/.test(country) ? { country, univers } : null;
   }
   var TEAM_KEY = "ptre.teamKey";
+  var LAST_KEY = "ptre.last";
   var ERRORS_KEY = "ptre.errors";
   var ERRORS_MAX = 10;
   function normalTeamKey(text) {
@@ -6629,6 +6666,7 @@
     const code = String(data?.code ?? "?");
     const message = String(data?.message_verbose || data?.message || "");
     const ok = code === "1";
+    deps.store.set(LAST_KEY, { at: deps.now?.() ?? Date.now(), script, ok, code, message });
     if (!ok) {
       const errors = deps.store.get(ERRORS_KEY, []);
       deps.store.set(ERRORS_KEY, [...errors, { at: deps.now?.() ?? Date.now(), code, message }].slice(-ERRORS_MAX));
@@ -6690,7 +6728,8 @@
   }
   async function ptreSendCounterSpies(deps, reports) {
     if (!Object.keys(reports).length) return false;
-    return (await ptreCall(deps, "oglight_import_player_activity.php", {}, { method: "POST", body: JSON.stringify(reports) }, "user-browse")).ok;
+    const r = await ptreCall(deps, "oglight_import_player_activity.php", {}, { method: "POST", body: JSON.stringify(reports) }, "user-browse");
+    return r.data !== null && r.data.code !== void 0 && r.data.code !== "net";
   }
   var PLANETS_AT_KEY = "ptre.planetsAt";
   var PLANETS_EVERY = 36e5;
@@ -7500,6 +7539,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
       const coords = `${key}:${p}`;
       const r = byPos.get(p);
       const old = before[String(p)] ?? [-1, -1, -1];
+      if (r?.statuses.includes("admin")) {
+        if (before[String(p)]) seen2[String(p)] = before[String(p)];
+        continue;
+      }
       const player = r?.playerId && r.planetId ? r.playerId : -1;
       if (!r || player < 0) {
         if (old[1] > 0) positions[coords] = { ...base(c, s, p, old), id: -1, player_id: -1, name: false, rank: -1, score: -1, fleet: -1, status: false, moon: { id: -1 } };
@@ -7539,12 +7582,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
         };
       }
     }
+    const changed = JSON.stringify(seen2) !== JSON.stringify(memory[key] ?? null);
     const ids = { ...memory };
     delete ids[key];
     ids[key] = seen2;
     const keys = Object.keys(ids);
     for (const k of keys.slice(0, Math.max(0, keys.length - IDS_MAX))) delete ids[k];
-    return { positions, activities, ids };
+    return { positions, activities, ids, changed };
   }
   var base = (c, s, position, old) => ({
     teamkey: c.teamKey,
@@ -8438,7 +8482,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
 
   // src/modules/galaxy/index.ts
   var TARGETS_KEY = "galaxy.targets";
-  var ptreSent = /* @__PURE__ */ new WeakSet();
+  var ptreSent = /* @__PURE__ */ new WeakMap();
   var highlight = "";
   function highlightPosition(coords) {
     highlight = coords;
@@ -8529,8 +8573,10 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   function sendToPtre(o, s, marks, recent, cards) {
     const first = s.rows[0]?.row;
     const teamKey = teamKeyOf(o.store);
-    if (!o.ptre || !first || !teamKey || !ptreAutoOn(o.store) || ptreSent.has(first)) return;
-    ptreSent.add(first);
+    if (!o.ptre || !first || !teamKey || !ptreAutoOn(o.store)) return;
+    const sig = s.rows.map((r) => `${r.position}.${r.playerId ?? ""}.${r.planetId ?? ""}.${r.moonId ?? ""}.${r.activity.planet ?? ""}.${r.activity.moon ?? ""}`).join("|");
+    if (ptreSent.get(first) === sig) return;
+    ptreSent.set(first, sig);
     const homes = new Set(Object.values(cards).map((c) => (c.planets ?? []).reduce((lo, p2) => p2.id > 0 && (!lo || p2.id < lo.id) ? p2 : lo, null)?.coords));
     const rows = s.rows.map((r) => ({ ...r, debris: r.debris ? debrisTotal(r.debris) : 0 }));
     const p = galaxyPayloads({ galaxy: s.galaxy, system: s.system, rows }, o.store.get(GALAXY_IDS_KEY, {}), {
@@ -8543,7 +8589,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
         return c?.total ? { score: c.total.points, fleet: c.military?.points ?? -1 } : null;
       }
     });
-    o.store.set(GALAXY_IDS_KEY, p.ids);
+    if (p.changed) o.store.set(GALAXY_IDS_KEY, p.ids);
     void ptreSendGalaxy(o.ptre, p).catch(() => void 0);
   }
   function decorate(o, content) {
@@ -14580,6 +14626,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 .fut-ptre-intro p, .fut-ptre-errors p { margin: 0 0 6px; }
 .fut-ptre-intro a { color: var(--accent); }
 .fut-ptre-errors { margin-top: 4px; }
+.fut-ptre-errors .bad { color: var(--warn); }
 .fut-ptre-errors b { display: block; margin-bottom: 4px; color: var(--text); font-size: 12px; }
 .fut-ptre-key { align-self: center; margin-right: 8px; color: var(--text); font: 12px ui-monospace, Menlo, Consolas, monospace; letter-spacing: 0.04em; }
 .field { height: 26px; width: 190px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: 12px Arial, sans-serif; }
@@ -14907,6 +14954,17 @@ input.field { width: 190px; }
       const st = el7("div", "status", status);
       st.setAttribute("role", "status");
       rows.push(st);
+      const last2 = store.get(LAST_KEY, null);
+      const lastBox = el7("div", "notes fut-ptre-errors");
+      lastBox.append(el7("b", "", t("ptre.last")));
+      if (!last2) lastBox.append(el7("p", "", t("ptre.lastNone")));
+      else {
+        const when = new Date(last2.at).toLocaleString(lang, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+        const whatKey = `ptre.what.${last2.script.replace(/\.php$/, "")}`;
+        const what = t(whatKey) === whatKey ? last2.script : t(whatKey);
+        lastBox.append(el7("p", last2.ok ? "" : "bad", `${when} · ${what} · ${last2.ok ? "ok" : `${t("ptre.lastRefused")} (${last2.code})`}${last2.message ? ` · ${last2.message}` : ""}`));
+      }
+      rows.push(lastBox);
       const errors = store.get(ERRORS_KEY, []);
       const list = el7("div", "notes fut-ptre-errors");
       list.append(el7("b", "", t("ptre.errors")));
