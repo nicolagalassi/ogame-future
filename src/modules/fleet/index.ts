@@ -83,6 +83,7 @@ import {
 import { UNIVERSE_RANKS_KEY, type UniverseRanks } from '../../data/universe-ranks';
 import { hookSend, nextInRound, readRepeatParams, repeatUrl, type RepeatState } from './repeat';
 import { FLEET_CSS } from './style';
+import { helpButton } from '../../core/tour';
 export { RULES_CSS } from './style';
 import { keyLabel, keymap, registerActions, setTouchNote } from '../shortcuts';
 import { iconSvg, type IconName } from './icons';
@@ -108,6 +109,8 @@ export interface FleetOptions {
   navigate?: (url: string) => void;
   /** Opens Future's settings: on the fleet section, or on this body's rules ('bodies'). */
   onOpenSettings?: (section?: 'fleet' | 'bodies') => void;
+  /** The «?» beside each zone's name: what that zone does (modules/guide). */
+  onHelp?: (zone: 'mission' | 'dest' | 'reserves' | 'round') => void;
 }
 
 const STYLE_ID = 'fut-fleet-style';
@@ -1639,19 +1642,26 @@ export function renderFleetTools(o: FleetOptions): void {
     collect.dataset.mode = 'collect';
     collect.append(el(doc, 'i', 'more-mark'));
     out.peek(collect, t('fleet.btn.collect'), t('fleet.tip.collect'));
-    const zone = (text: string) => {
-      const z = el(doc, 'span', 'fut-fzone', text);
-      z.setAttribute('aria-hidden', 'true');
+    const zone = (text: string, key?: 'mission' | 'dest' | 'reserves' | 'round') => {
+      const z = el(doc, 'span', 'fut-fzone');
+      // The name repeats the group's label: hidden from screen readers; the «?» is not.
+      const name = el(doc, 'span', '', text);
+      name.setAttribute('aria-hidden', 'true');
+      z.append(name);
+      if (key && o.onHelp) {
+        const help = o.onHelp;
+        z.append(helpButton(doc, `${t('tour.zoneHelp')}: ${text}`, () => help(key), 'fut-fhelp'));
+      }
       return z;
     };
     // Each zone: its name printed over its buttons.
-    const zoneBox = (text: string, cls = '') => {
+    const zoneBox = (text: string, key: 'mission' | 'dest', cls = '') => {
       const box = el(doc, 'span', `fut-fzonebox ${cls}`.trim());
       const row = el(doc, 'span', 'fut-ftiles');
-      box.append(zone(text), row);
+      box.append(zone(text, key), row);
       return { box, row };
     };
-    const mission = zoneBox(t('fleet.zone.mission'));
+    const mission = zoneBox(t('fleet.zone.mission'), 'mission');
     tiles.append(mission.box);
     mission.row.append(
       ...(['transport', 'deploy'] as const).map((m) => {
@@ -1671,7 +1681,7 @@ export function renderFleetTools(o: FleetOptions): void {
       ),
       act('last', 'fleet.last', t('fleet.btn.last'), '', last ? t('fleet.tip.last') : t('fleet.err.noLast'), () => run.last(), !last),
     );
-    const dest = zoneBox(t('fleet.zone.dest'), 'fut-fsecond');
+    const dest = zoneBox(t('fleet.zone.dest'), 'dest', 'fut-fsecond');
     const secondary = dest.row;
     if (here?.moonId) secondary.append(act('moon', 'fleet.moon', t('fleet.btn.moon'), to(here.moonId), t('fleet.tip.moon'), () => run.moon()));
     secondary.append(collect);
@@ -1734,7 +1744,7 @@ export function renderFleetTools(o: FleetOptions): void {
     // The label in its own column, the switches in theirs: on a narrow screen they wrap under each other,
     // not back under the label (Ignora cibo sat alone below «Riserve» on a phone).
     const reserveChips = el(doc, 'span', 'fut-fchips');
-    reserves.append(zone(t('fleet.zone.reserves')), reserveChips);
+    reserves.append(zone(t('fleet.zone.reserves'), 'reserves'), reserveChips);
     reserveChips.append(
       sw('ships', t('fleet.rule.ships'), t('fleet.rule.shipsHint'), 'shipsOn', undefined, shipsKept ? fmtN(shipsKept) : unset),
       sw('resources', t('fleet.rule.resources'), t('fleet.rule.resourcesHint'), 'resourcesOn', undefined, res.metal || res.crystal || res.deuterium ? resValue : unset),
@@ -1745,7 +1755,7 @@ export function renderFleetTools(o: FleetOptions): void {
     round.setAttribute('role', 'group');
     round.setAttribute('aria-label', t('fleet.zone.round'));
     const roundChips = el(doc, 'span', 'fut-fchips');
-    round.append(zone(t('fleet.zone.round')), roundChips);
+    round.append(zone(t('fleet.zone.round'), 'round'), roundChips);
     roundChips.append(sw('repeat', t('fleet.repeatShort'), t('fleet.repeatHint'), 'repeat'));
     rules.append(reserves, round);
     // This body only: the expedition round (Ripeti, Salta) passes over it.

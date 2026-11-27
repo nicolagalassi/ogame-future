@@ -3,6 +3,7 @@
  * lost, day by day. Shadow DOM, like the planner. Stored data only: no network, no game action.
  */
 import { icon } from '../../core/icons';
+import { helpButton } from '../../core/tour';
 import { WINDOW_SHEET } from '../../core/sheet';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
@@ -34,6 +35,8 @@ export interface JournalOptions {
   t: T;
   /** The tab to open on (the Orion pages open the Orion one). */
   kind?: Kind;
+  /** The «?» in the head: this window's own guide (modules/guide). */
+  onHelp?: () => void;
 }
 
 let keyHandler: ((e: KeyboardEvent) => void) | null = null;
@@ -339,7 +342,9 @@ export function openJournal(o: JournalOptions): void {
     close.append(icon(doc, 'close', 16));
     close.title = t('fleet.close');
     close.addEventListener('click', () => closeJournal(doc));
-    head.append(titles, close);
+    head.append(titles);
+    if (o.onHelp) head.append(helpButton(doc, t('tour.help'), o.onHelp));
+    head.append(close);
 
     const tabs = h('div', 'tabs');
     for (const p of PERIODS) {

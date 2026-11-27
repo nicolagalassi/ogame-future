@@ -29,6 +29,7 @@ const PATHS = {
   play: '<path d="M8 5.5v13l10.5-6.5z"/>',
   trash: '<path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/>',
   more: '<path d="M5.5 12h.01M12 12h.01M18.5 12h.01" stroke-width="3.2"/>',
+  help: '<circle cx="12" cy="12" r="9"/><path d="M9.4 9.3a2.7 2.7 0 1 1 3.7 2.5c-.7.3-1.1.9-1.1 1.6v.5M12 16.9v.2"/>',
 } as const;
 
 export type IconName = keyof typeof PATHS;

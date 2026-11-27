@@ -35,6 +35,9 @@ const ctx = await context({
   target: 'es2020',
   minify: false,
   legalComments: 'inline',
+  // Accented letters as they are (à, é, ü), not as \u escapes: the same text, half the bytes. Tampermonkey
+  // reads scripts as UTF-8 (GitHub serves dist/ as text/plain; charset=utf-8).
+  charset: 'utf8',
   // The board's font travels inside the script (src/core/fonts.ts): no network.
   loader: { '.woff2': 'base64' },
   outfile: 'dist/future.user.js',

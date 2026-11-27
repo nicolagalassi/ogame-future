@@ -19,6 +19,6 @@ describe('i18n', () => {
   });
 
   it('fills placeholders', () => {
-    expect(translator('it')('data.missing', { count: 3 })).toContain('3 pianeti');
+    expect(translator('it')('tour.count', { n: 2, total: 7 })).toBe('2 di 7');
   });
 });

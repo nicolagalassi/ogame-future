@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.167
+// @version      0.3.168
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -244,20 +244,20 @@
     for (const key of KEYS) if (cost[key] > 0 && (best === null || cost[key] > cost[best])) best = key;
     return best;
   }
-  function discountFrom(id, level2, shown2) {
+  function discountFrom(id, level2, shown3) {
     const raw = rawCost(id, level2);
     const key = main(raw);
     if (!key) return null;
-    const value = shown2[key];
+    const value = shown3[key];
     if (value === void 0 || !(value > 0)) return null;
     const ratio = value / raw[key];
     if (ratio > 1.001 || ratio < 0.2) return null;
     return Math.max(0, 1 - ratio);
   }
-  function matchShownLevel(id, candidates, shown2) {
+  function matchShownLevel(id, candidates, shown3) {
     let best = null;
     for (const level2 of new Set(candidates.filter((l) => l >= 1))) {
-      const discount2 = discountFrom(id, level2, shown2);
+      const discount2 = discountFrom(id, level2, shown3);
       if (discount2 === null) continue;
       if (!best || discount2 < best.discount) best = { level: level2, discount: discount2 };
     }
@@ -383,16 +383,16 @@
     }
     check(url, reason) {
       if (reason === "page-load" && !this.pageLoadOpen) {
-        return "Background call refused: the page has finished loading (AGENTS.md \xA74).";
+        return "Background call refused: the page has finished loading (AGENTS.md §4).";
       }
       if (reason === "user-view" && !this.isPublicApi(url) && !this.isPtre(url)) {
-        return "Call refused: 'user-view' reaches only the universe's public API and PTRE's ranking (AGENTS.md \xA76).";
+        return "Call refused: 'user-view' reaches only the universe's public API and PTRE's ranking (AGENTS.md §6).";
       }
       if (this.isOutside(url) && !(reason === "user-view" && this.isPtre(url))) {
         return "Call refused: no outside service but PTRE's ranking, and only from what the player opens.";
       }
       if (this.isGameUrl(url) && new URL(url, this.gameOrigin).searchParams.has("cp")) {
-        return "Call refused: the cp parameter changes the active planet (AGENTS.md \xA74.2).";
+        return "Call refused: the cp parameter changes the active planet (AGENTS.md §4.2).";
       }
       return null;
     }
@@ -512,8 +512,6 @@
     "sync.button": "Sincronizza dati account",
     "sync.done": "Dati aggiornati",
     "sync.failed": "Aggiornamento non riuscito: il gioco non ha risposto con i dati. Riprova",
-    "data.missing": "Dati mancanti su {count} pianeti: apri la loro panoramica",
-    "guard.refused": "Chiamata bloccata per rispettare le regole di OGame",
     "planetMenu.moon": "Luna",
     "res.metal": "Metallo",
     "res.crystal": "Cristallo",
@@ -521,7 +519,7 @@
     "toolbar.settings": "Impostazioni",
     "toolbar.lastSync": "ultimo aggiornamento {time}",
     "settings.totals": "Totali risorse",
-    "settings.on": "S\xEC",
+    "settings.on": "Sì",
     "settings.off": "No",
     "planetMenu.age": "Minuti dall'ultima volta che hai aperto questo pianeta o luna (la sincronizzazione non lo azzera)",
     "dash.title": "Dashboard",
@@ -541,7 +539,7 @@
     "dash.production": "Produzione",
     "dash.dayShort": "g",
     "dash.daysShort": "g",
-    "alert.stale.one": "Dati vecchi pi\xF9 di un'ora su 1 corpo",
+    "alert.stale.one": "Dati vecchi più di un'ora su 1 corpo",
     "alert.idle.one": "1 pianeta senza costruzioni",
     "alert.soonFull.one": "1 pianeta pieno entro 6 ore",
     "alert.full.one": "Depositi pieni su 1 pianeta",
@@ -554,26 +552,26 @@
     "dash.factPoints": "punti",
     "dash.nextRung": "Dopo il prossimo investimento: {value} al giorno",
     "dash.now": "ora",
-    "dash.msuHint": "Barre in MSU (3:2:1): metallo, cristallo \xD71,5, deuterio \xD73.",
+    "dash.msuHint": "Barre in MSU (3:2:1): metallo, cristallo ×1,5, deuterio ×3.",
     "dash.checks": "Da controllare",
     "dash.allGood": "Tutto a posto.",
     "dash.bodiesTable": "Pianeti e lune",
     "dash.showMoons": "Mostra lune",
     "dash.hideMoons": "Nascondi lune",
     "dash.colBody": "Corpo",
-    "dash.colMines": "Miniere M\xB7C\xB7D",
+    "dash.colMines": "Miniere M·C·D",
     "dash.colProd": "MSU/giorno",
     "dash.colFull": "Pieno tra",
     "dash.colAge": "Dati",
     "dash.full": "pieno",
     "dash.idleTag": "fermo",
     "dash.total": "Totale",
-    "dash.tableHint": "Clicca un titolo per ordinare. Le risorse sono stimate dall'ultima lettura pi\xF9 la produzione; apri un pianeta per avere il valore esatto.",
+    "dash.tableHint": "Clicca un titolo per ordinare. Le risorse sono stimate dall'ultima lettura più la produzione; apri un pianeta per avere il valore esatto.",
     "alert.missing": "Dati mancanti su {count} pianeti",
     "alert.full": "Depositi pieni su {count} pianeti",
     "alert.soonFull": "{count} pianeti pieni entro 6 ore",
     "alert.idle": "{count} pianeti senza costruzioni",
-    "alert.stale": "Dati vecchi pi\xF9 di un'ora su {count} corpi",
+    "alert.stale": "Dati vecchi più di un'ora su {count} corpi",
     "queue.building": "Edificio",
     "queue.research": "Ricerca",
     "queue.ship": "Cantiere",
@@ -582,12 +580,12 @@
     "dash.queues": "Code attive",
     "dash.queuesNone": "nessuna costruzione in corso",
     "dash.queuesUnknown": "non ancora lette",
-    "dash.moves": "Investimenti pi\xF9 convenienti",
+    "dash.moves": "Investimenti più convenienti",
     "dash.rates": "Tassi M : C : D",
     "dash.newColony": "nuova colonia",
     "dash.account": "Account",
     "dash.lfGuessed": "slot da confermare",
-    "dash.lfGuessedHint": "Ricerca dedotta dai livelli: apri la pagina Ricerche FV di questo pianeta per sapere quale \xE8 attiva.",
+    "dash.lfGuessedHint": "Ricerca dedotta dai livelli: apri la pagina Ricerche FV di questo pianeta per sapere quale è attiva.",
     "dash.needLevels": "Per il bonus del livello delle specie apri:",
     "dash.openLfSettings": "Impostazioni forme di vita",
     "dash.needBuildings": "Edifici FV a livello 0 da controllare (requisiti) su {count} pianeti, apri la pagina di:",
@@ -606,7 +604,7 @@
     "dash.invest.plasma": "Plasma",
     "dash.invest.astro": "Astrofisica",
     "dash.movesNone": "Servono i livelli delle miniere: premi Sincronizza.",
-    "dash.movesHint": "Come gli ammortamenti di InfoCompte: miniere, plasma e nuova colonia (astrofisica + attrezzatura media di un pianeta) per giorni di ritorno ai tassi scelti; ogni passo conta i precedenti. Non conta energia n\xE9 sconti delle forme di vita.",
+    "dash.movesHint": "Come gli ammortamenti di InfoCompte: miniere, plasma e nuova colonia (astrofisica + attrezzatura media di un pianeta) per giorni di ritorno ai tassi scelti; ogni passo conta i precedenti. Non conta energia né sconti delle forme di vita.",
     "dash.colQueue": "In corso",
     "mine.metal": "Miniera di metallo",
     "mine.crystal": "Miniera di cristallo",
@@ -621,14 +619,14 @@
     "fleet.typeMoon": "Luna",
     "fleet.typeDebris": "Campo detriti",
     "fleet.mission": "Missione",
-    "fleet.speed": "Velocit\xE0",
-    "fleet.fleetsaveHint": "Ha le sue navi e risorse da lasciare e ignora gli interruttori di navi, risorse e portale. Galassia e sistema vuoti = quelli del pianeta da cui parti, come in PrOGect. Senza posizione il fleetsave \xE8 spento.",
+    "fleet.speed": "Velocità",
+    "fleet.fleetsaveHint": "Ha le sue navi e risorse da lasciare e ignora gli interruttori di navi, risorse e portale. Galassia e sistema vuoti = quelli del pianeta da cui parti, come in PrOGect. Senza posizione il fleetsave è spento.",
     "fleet.save": "Salva",
     "fleet.saved": "Salvato.",
     "fleet.copied": "Copiato su {count} corpi.",
     "fleet.reserve": "Riserva",
     "fleet.noReserve": "Nessuna regola attiva",
-    "fleet.resMinusReserve": "Risorse \u2212 riserva",
+    "fleet.resMinusReserve": "Risorse − riserva",
     "fleet.resLoaded": "Caricate {cargo} risorse: controlla e premi Invia flotta",
     "mission.1": "Attacco",
     "mission.3": "Trasporto",
@@ -652,24 +650,24 @@
     "fleet.expCalc": "Massimo del gioco: {value}",
     "fleet.auto": "automatico",
     "fleet.expeditionExtras": "Aggiungi 1 sonda e 1 pathfinder",
-    "settings.expBigHint": "Una nave da battaglia in pi\xF9 nella spedizione. Automatica = la pi\xF9 grossa che hai; se quella scelta manca, si usa la pi\xF9 grossa.",
-    "fleet.biggestShip": "Automatica: la pi\xF9 grossa",
+    "settings.expBigHint": "Una nave da battaglia in più nella spedizione. Automatica = la più grossa che hai; se quella scelta manca, si usa la più grossa.",
+    "fleet.biggestShip": "Automatica: la più grossa",
     "fleet.expeditionBig": "Nave grande",
-    "fleet.expeditionHint": "Automatico = il massimo che una spedizione pu\xF2 riportare (classe, velocit\xE0 universo, bonus classe). Puoi scrivere un valore fisso (es. 150M) o una percentuale (es. 50%).",
+    "fleet.expeditionHint": "Automatico = il massimo che una spedizione può riportare (classe, velocità universo, bonus classe). Puoi scrivere un valore fisso (es. 150M) o una percentuale (es. 50%).",
     "fleet.repeatTitle": "Ripeti",
-    "fleet.repeat": "Dopo l'invio passa al pianeta o luna successivo, gi\xE0 pronto",
+    "fleet.repeat": "Dopo l'invio passa al pianeta o luna successivo, già pronto",
     "fleet.repeatHint": "Vale per Luna, Trasporto, Schiera, Spedizione e Fleetsave. L'invio resta sempre un tuo click; il giro si ferma quando torna al primo.",
     "fleet.repeatShort": "Ripeti",
-    "fleet.speedAsk.q": "Velocit\xE0 {pct}% anche per i prossimi fleetsave del giro?",
-    "fleet.speedAsk.yes": "S\xEC",
+    "fleet.speedAsk.q": "Velocità {pct}% anche per i prossimi fleetsave del giro?",
+    "fleet.speedAsk.yes": "Sì",
     "fleet.speedAsk.no": "No",
     "fleet.speedAsk.done": "I prossimi fleetsave del giro partiranno al {pct}%. Il preset generale non cambia.",
-    "fleet.speedAsk.hint": "Il giro finora usa il {pct}%. Vale solo per questo giro: il preset nelle impostazioni resta com'\xE8.",
+    "fleet.speedAsk.hint": "Il giro finora usa il {pct}%. Vale solo per questo giro: il preset nelle impostazioni resta com'è.",
     "fleet.rule.skip": "Salta nelle spedizioni",
-    "fleet.rule.skipHint": "Solo per le spedizioni: Ripeti e Salta passano oltre questo pianeta o luna, anche se \xE8 vuoto.",
-    "fleet.on": "s\xEC",
+    "fleet.rule.skipHint": "Solo per le spedizioni: Ripeti e Salta passano oltre questo pianeta o luna, anche se è vuoto.",
+    "fleet.on": "sì",
     "fleet.off": "no",
-    "fleet.repeatNext": "Inviata. Passo a {body}\u2026",
+    "fleet.repeatNext": "Inviata. Passo a {body}…",
     "fleet.repeatDone": "Giro completato.",
     "fleet.pickDest": "scegli destinazione",
     "fleet.btn.moon": "Su luna",
@@ -693,15 +691,15 @@
     "fleet.err.noMoon": "Questo pianeta non ha una luna",
     "fleet.err.noDest": "Scegli prima la destinazione",
     "fleet.err.noFleetsave": "Nessun fleetsave impostato: aprilo da Riserve e fleetsave",
-    "fleet.err.notReady": "La pagina flotta non \xE8 ancora pronta, riprova",
+    "fleet.err.notReady": "La pagina flotta non è ancora pronta, riprova",
     "fleet.err.page1": "Torna alla prima pagina della flotta per usare questi pulsanti",
     "fleet.close": "Chiudi",
     "fleet.favTitle": "Accentra: luna principale",
-    "fleet.favTransport": "1 \xB7 Trasporto verso",
-    "fleet.favDeploy": "2 \xB7 Schieramento verso",
+    "fleet.favTransport": "1 · Trasporto verso",
+    "fleet.favDeploy": "2 · Schieramento verso",
     "fleet.tip.cargo": "Carica le risorse lasciando la riserva e il deuterio per il volo",
     "fleet.btn.last": "Ultima",
-    "fleet.tip.last": "Ripete l'ultima flotta inviata: stesse navi, destinazione, missione e velocit\xE0",
+    "fleet.tip.last": "Ripete l'ultima flotta inviata: stesse navi, destinazione, missione e velocità",
     "fleet.err.noLast": "Nessuna flotta inviata finora",
     "fleet.jumpgateKeep": "Riserva portale di questa luna",
     "shortcut.prev": "Pianeta precedente",
@@ -710,12 +708,12 @@
     "tech.next": "Livello successivo",
     "tech.reset": "Torna al prossimo livello",
     "tech.level": "Liv. {level}",
-    "tech.range": "da {from} \u2192 {to}",
+    "tech.range": "da {from} → {to}",
     "tech.fromNow": "ora {from}",
     "tech.colLevel": "Liv. {level}",
     "tech.colTotal": "Totale",
     "tech.colMissing": "Mancano",
-    "tech.colOne": "Per unit\xE0",
+    "tech.colOne": "Per unità",
     "tech.res.metal": "Metallo",
     "tech.res.crystal": "Cristallo",
     "tech.res.deuterium": "Deuterio",
@@ -723,17 +721,17 @@
     "tech.time": "Tempo",
     "tech.planBtn": "Piano",
     "tech.addOne": "Pianifica liv. {level}",
-    "tech.addRange": "Pianifica liv. {from}\u2013{to}",
-    "tech.inPlan": "Nel piano \u2713",
+    "tech.addRange": "Pianifica liv. {from}–{to}",
+    "tech.inPlan": "Nel piano ✓",
     "tech.addHint": "Aggiunge al piano di costruzione di questo pianeta/luna",
     "tech.removeHint": "Clic per togliere questi livelli dal piano",
     "tech.discount": "Sconto applicato dal gioco: {pct}%",
-    "tech.amount": "Quantit\xE0: {n}",
-    "tech.addUnits": "Pianifica \xD7{n}",
-    "tech.added": "Aggiunto \u2713",
+    "tech.amount": "Quantità: {n}",
+    "tech.addUnits": "Pianifica ×{n}",
+    "tech.added": "Aggiunto ✓",
     "plan.title": "Piano di costruzione",
     "plan.titleCount": "Piano di costruzione ({n})",
-    "plan.sub": "Un tasto per pianeta porta l\xEC quello che manca. Le costruzioni in coda nel gioco tengono da parte le loro risorse.",
+    "plan.sub": "Un tasto per pianeta porta lì quello che manca. Le costruzioni in coda nel gioco tengono da parte le loro risorse.",
     "plan.moonOf": "Luna di {name}",
     "plan.clear": "Svuota",
     "plan.colItem": "Cosa",
@@ -741,29 +739,29 @@
     "plan.remove": "Togli dal piano",
     "plan.total": "Totale",
     "plan.missingHere": "Mancano qui",
-    "plan.ready": "Risorse sufficienti \u2713",
-    "plan.empty": "Il piano \xE8 vuoto. Apri un edificio o una ricerca e usa \xABPianifica\xBB.",
+    "plan.ready": "Risorse sufficienti ✓",
+    "plan.empty": "Il piano è vuoto. Apri un edificio o una ricerca e usa «Pianifica».",
     "plan.grandTotal": "Costo totale del piano",
     "plan.grandMissing": "Mancano in totale",
-    "tech.rangeShort": "{from}\u2192{to}",
+    "tech.rangeShort": "{from}→{to}",
     "tech.rangeHint": "Totale dei livelli da {from} a {to}",
-    "tech.discountShort": "\u2212{pct}%",
+    "tech.discountShort": "−{pct}%",
     "fleet.foodShort": "Ignora cibo",
     "fleet.foodHint": "Il cibo resta sul pianeta in ogni flotta, anche con i tasti del gioco.",
     "fleet.err.noDelivery": "Nessuna consegna del piano in corso.",
     "fleet.ok.delivery": "Consegna pronta: {ships} navi con {cargo} risorse (mancavano {left}). Premi Avanti e Invia flotta.",
-    "tech.timeHint": "Tempo del liv. {level} \xB7 totale da {from} a {to}",
-    "tech.amountHint": "Quante unit\xE0: per il piano vale qualsiasi numero; per costruire ne vanno in coda al massimo 99.999, e non pi\xF9 di quante il gioco ne permette (max).",
+    "tech.timeHint": "Tempo del liv. {level} · totale da {from} a {to}",
+    "tech.amountHint": "Quante unità: per il piano vale qualsiasi numero; per costruire ne vanno in coda al massimo 99.999, e non più di quante il gioco ne permette (max).",
     "plan.items": "{n} voci",
-    "plan.levels": "liv. {from}\u2013{to}",
+    "plan.levels": "liv. {from}–{to}",
     "plan.bring": "Porta qui le risorse",
-    "plan.bringHint": "Apre la flotta sul prossimo pianeta con un trasporto verso qui di quello che manca. Dopo ogni invio passa al pianeta successivo finch\xE9 non manca pi\xF9 niente.",
+    "plan.bringHint": "Apre la flotta sul prossimo pianeta con un trasporto verso qui di quello che manca. Dopo ogni invio passa al pianeta successivo finché non manca più niente.",
     "plan.unknownHere": "Risorse qui non note: premi Aggiorna",
     "plan.complete": "Completa l'invio",
-    "plan.sentArriving": "Inviate \xB7 arrivo {time}",
-    "plan.sentArrived": "Inviate \xB7 arrivate (non ancora lette)",
+    "plan.sentArriving": "Inviate · arrivo {time}",
+    "plan.sentArrived": "Inviate · arrivate (non ancora lette)",
     "plan.missingAfterSent": "Mancano ancora",
-    "plan.allSent": "Tutto inviato \u2713",
+    "plan.allSent": "Tutto inviato ✓",
     "msg.out.resource": "Risorse",
     "msg.out.darkmatter": "Materia oscura",
     "msg.out.ship": "Navi",
@@ -791,11 +789,11 @@
     "recap.count": "{n} spedizioni",
     "recap.ships": "Navi",
     "recap.shipsHint": "Navi trovate meno perse: {n} MSU",
-    "recap.open": "Spedizioni di oggi, aggiornate mentre leggi i rapporti \xB7 clic: apri il diario",
+    "recap.open": "Spedizioni di oggi, aggiornate mentre leggi i rapporti · clic: apri il diario",
     "fresh.title": "Appena lette",
     "fresh.close": "Chiudi",
     "msg.artefacts": "{n} artefatti",
-    "msg.msuHint": "Valore in unit\xE0 metallo (1 cristallo = 1,5, 1 deuterio = 3)",
+    "msg.msuHint": "Valore in unità metallo (1 cristallo = 1,5, 1 deuterio = 3)",
     "msg.toggle": "Clic: mostra o nasconde il testo del gioco",
     "msg.res.metal": "Metallo",
     "msg.res.crystal": "Cristallo",
@@ -803,14 +801,14 @@
     "msg.res.food": "Cibo",
     "msg.res.darkMatter": "Materia oscura",
     "msg.spy.loot": "Bottino",
-    "msg.spy.cargo": "{n}\xD7 {ship}",
+    "msg.spy.cargo": "{n}× {ship}",
     "msg.spy.fleet": "Flotta",
     "msg.spy.def": "Difesa",
     "msg.spy.active": "Attivo ora",
     "msg.spy.activity": "Attivo {n}m fa",
-    "msg.spy.inactive": "Nessuna attivit\xE0",
+    "msg.spy.inactive": "Nessuna attività",
     "msg.spy.counter": "Spiato da {name} [{coords}]",
-    "msg.spy.attacked": "Gi\xE0 attaccato",
+    "msg.spy.attacked": "Già attaccato",
     "msg.transport": "Consegna",
     "msg.deploy": "Schieramento",
     "msg.recycle": "Riciclaggio",
@@ -831,7 +829,7 @@
     "exp.period.week": "7 giorni",
     "exp.period.month": "30 giorni",
     "exp.period.all": "Tutto",
-    "exp.empty": "Ancora nessuna spedizione: apri la posta, scheda Flotte \u2192 Spedizioni, e i report entrano qui.",
+    "exp.empty": "Ancora nessuna spedizione: apri la posta, scheda Flotte → Spedizioni, e i report entrano qui.",
     "exp.emptyPeriod": "Niente in questo periodo.",
     "exp.count": "Spedizioni",
     "exp.discoveries": "+ {n} scoperte",
@@ -876,7 +874,7 @@
     "bar.dash": "Dashboard",
     "bar.perDay": "/g",
     "bar.dashHint": "produzione al giorno in MSU",
-    "bar.plan": "Piano \xB7 {n}",
+    "bar.plan": "Piano · {n}",
     "bar.planEmpty": "Piano",
     "bar.ready": "Pronto",
     "bar.planHint": "quanto manca all'account, in MSU, contando le risorse in viaggio",
@@ -893,13 +891,13 @@
     "dash.prodHourNote": "{value} all'ora",
     "dash.fleetValue": "Flotta (risorse)",
     "dash.defValue": "Difese (risorse)",
-    "dash.unitsNote": "{n} unit\xE0, a costo pieno",
+    "dash.unitsNote": "{n} unità, a costo pieno",
     "dash.research": "Ricerche",
     "dash.average": "Media",
     "dash.planets": "Pianeti",
     "dash.moons": "Lune",
     "dash.moon": "Luna",
-    "dash.minesHint": "In azzurro il livello pi\xF9 alto dell'account. Produzione dall'ultima lettura di accountInfo.",
+    "dash.minesHint": "In azzurro il livello più alto dell'account. Produzione dall'ultima lettura di accountInfo.",
     "dash.lfHint": "Ogni pianeta mostra le proprie tecnologie attive: edifici della sua specie e, per ogni slot, la ricerca in uso. Le ricerche in corsivo sono stimate: apri la pagina Ricerca forme di vita del pianeta per leggerle esatte.",
     "dash.lfGuess": "Stimata: apri la pagina Ricerca forme di vita di questo pianeta per il dato esatto.",
     "dash.lfNone": "Nessun livello di questa specie nei dati del gioco.",
@@ -909,13 +907,13 @@
     "lf.2": "Rock'tal",
     "lf.3": "Mecha",
     "lf.4": "Kaelesh",
-    "dash.unitsNone": "Nessuna unit\xE0 nei dati salvati.",
+    "dash.unitsNone": "Nessuna unità nei dati salvati.",
     "dash.valueMsu": "Valore",
     "dash.scrapHint": "Solo calcolo: il Rottamatore del gioco restituisce dal 35% del costo in su, contrattando (qui fino al 90%). La vendita la fai nella pagina del Mercante.",
     "dash.scrapRate": "Resa",
     "dash.scrapAll": "Tutto",
     "dash.scrapNone": "Azzera",
-    "dash.unit": "Unit\xE0",
+    "dash.unit": "Unità",
     "dash.owned": "Presenti",
     "dash.toScrap": "Da rottamare",
     "galaxy.players": "{count} giocatori",
@@ -936,10 +934,10 @@
     "galaxy.score.lifeform": "Forme di vita",
     "galaxy.score.fleet": "Flotta",
     "galaxy.score.defence": "Difese",
-    "galaxy.splitHint": "Stima dalle classifiche: le difese contano sia in Economia sia in Militare, quindi difese = Economia + Ricerca + Militare + Forme di vita \u2212 Generale; flotta = Militare \u2212 difese.",
+    "galaxy.splitHint": "Stima dalle classifiche: le difese contano sia in Economia sia in Militare, quindi difese = Economia + Ricerca + Militare + Forme di vita − Generale; flotta = Militare − difese.",
     "galaxy.ships": "{count} navi",
-    "galaxy.loading": "Lettura dall'API pubblica\u2026",
-    "galaxy.apiError": "API pubblica non raggiungibile. Riprova pi\xF9 tardi.",
+    "galaxy.loading": "Lettura dall'API pubblica…",
+    "galaxy.apiError": "API pubblica non raggiungibile. Riprova più tardi.",
     "galaxy.apiAge": "API pubblica, ore {time}",
     "galaxy.own": "Tuo",
     "settings.backup": "Backup dati",
@@ -947,13 +945,13 @@
     "settings.backupImport": "Importa",
     "settings.backupSaved": "Salvati {n} valori nel file",
     "settings.backupRestored": "Ripristinati {n} valori: ricarica la pagina",
-    "settings.backupBad": "Il file non \xE8 un backup di Future",
+    "settings.backupBad": "Il file non è un backup di Future",
     "dash.tab.history": "Storico",
     "dash.historyEmpty": "Lo storico si riempie da solo: un punto al giorno ogni volta che apri la Panoramica. Torna domani per vedere le prime variazioni.",
     "dash.historySpan": "Ultimi {n} g",
     "dash.historyPerDay": "{v}/g",
-    "dash.historyUp": "\u2191{n} posizioni",
-    "dash.historyDown": "\u2193{n} posizioni",
+    "dash.historyUp": "↑{n} posizioni",
+    "dash.historyDown": "↓{n} posizioni",
     "dash.historyReal": "su {n} g",
     "dash.historyFew": "pochi giorni registrati",
     "dash.historyProd": "Produzione al giorno (MSU)",
@@ -962,23 +960,23 @@
     "dash.historyDelta": "Variazione",
     "dash.historyRank": "Posizione",
     "spy.title": "Tabella spiate",
-    "spy.sub": "{n} bersagli \xB7 bottino {loot}",
+    "spy.sub": "{n} bersagli · bottino {loot}",
     "spy.hideDefended": "Nascondi difesi",
     "spy.inactiveOnly": "Solo inattivi",
     "spy.none": "Nessun report di spionaggio negli ultimi 3 giorni. I report che apri in posta finiscono qui da soli.",
     "spy.noneFiltered": "Nessun bersaglio con questi filtri.",
     "spy.col.target": "Nome",
-    "spy.col.age": "Et\xE0",
+    "spy.col.age": "Età",
     "spy.col.loot": "Bottino",
     "spy.col.def": "Difesa",
-    "spy.attackHint": "Attacca da {name}: apre la pagina Flotta con il bersaglio gi\xE0 inserito; le navi le scegli tu (i link delle razzie mettono anche i cargo)",
+    "spy.attackHint": "Attacca da {name}: apre la pagina Flotta con il bersaglio già inserito; le navi le scegli tu (i link delle razzie mettono anche i cargo)",
     "spy.attack": "Attacca",
     "spy.lootHint": "Bottino {pct}%: metallo {m}, cristallo {c}, deuterio {d}. Servono {large} cargo pesanti o {small} leggeri",
     "msg.spy.counterPill": "Spiato",
     "msg.combat.netHint": "bottino meno perdite",
     "spy.remove": "Togli dalla tabella e cancella il messaggio della spiata",
     "spy.removeShared": "Togli dalla tabella (spiata condivisa: il messaggio resta)",
-    "spy.hint": "Un bersaglio per pianeta o luna, resta 3 giorni anche se cancelli i report. Bottino: risorse che puoi portare via. Nome: apre il report. \u22EF: le 6 razzie del giorno, un clic sulle navi apre Flotta.",
+    "spy.hint": "Un bersaglio per pianeta o luna, resta 3 giorni anche se cancelli i report. Bottino: risorse che puoi portare via. Nome: apre il report. ⋯: le 6 razzie del giorno, un clic sulle navi apre Flotta.",
     "spy.status.inactive": "i",
     "spy.status.longinactive": "I",
     "spy.status.vacation": "v",
@@ -1013,7 +1011,7 @@
     "mark.change": "clic per cambiare, Maiusc+clic per l'ultimo usato",
     "mark.flagAdd": "Segna il giocatore (Maiusc+clic: l'ultima bandierina)",
     "marks.title": "Bersagli",
-    "marks.sub": "{players} giocatori \xB7 {planets} pianeti",
+    "marks.sub": "{players} giocatori · {planets} pianeti",
     "marks.recent": "Recenti",
     "marks.noRecent": "Nessun giocatore aperto di recente.",
     "marks.noPlayers": "Nessun giocatore con questa bandierina. Mettila dalla galassia, dalla classifica o dalla tabella spiate.",
@@ -1025,16 +1023,16 @@
     "marks.rank": "Classifica",
     "marks.ships": "Navi",
     "marks.estimate": "stima",
-    "marks.planets": "Pianeti {n} \xB7 lune {moons}",
+    "marks.planets": "Pianeti {n} · lune {moons}",
     "marks.keyNext": "prossima posizione",
     "marks.footData": "galassia + API pubblica",
-    "marks.fleetPlanet": "Flotta verso il pianeta {coords} (attivit\xE0 del pianeta)",
-    "marks.fleetMoon": "Flotta verso la luna {coords} (attivit\xE0 della luna)",
+    "marks.fleetPlanet": "Flotta verso il pianeta {coords} (attività del pianeta)",
+    "marks.fleetMoon": "Flotta verso la luna {coords} (attività della luna)",
     "marks.ago": "{n}{u}",
     "marks.unit.m": "m",
     "marks.unit.h": "h",
     "marks.unit.d": "g",
-    "marks.seenOnly": "Visto in galassia, l'API non lo elenca ancora \xB7 clic: mostra il sistema",
+    "marks.seenOnly": "Visto in galassia, l'API non lo elenca ancora · clic: mostra il sistema",
     "marks.showSystem": "Mostra il sistema in galassia",
     "marks.col.coords": "Coord.",
     "marks.col.debris": "CD",
@@ -1056,11 +1054,11 @@
     "plan.removeAll": "Togli da tutti i {n} corpi",
     "plan.readyHere": "Qui le risorse bastano",
     "bar.targets": "Bersagli",
-    "bar.targetsHint": "Barra laterale dei bersagli (giocatori segnati) \xB7 M: prossima posizione",
+    "bar.targetsHint": "Barra laterale dei bersagli (giocatori segnati) · M: prossima posizione",
     "settings.oglight": "Da OGLight",
     "settings.oglightImport": "Importa export",
     "settings.oglightDone": "Da OGLight: {players} giocatori, {seen} posizioni, {exp} spedizioni e {raids} raid su {days} giorni. Ricarica la pagina.",
-    "settings.backupImportHint": "Un backup di Future o il file \xABExport data\xBB di OGLight (dello stesso universo)",
+    "settings.backupImportHint": "Un backup di Future o il file «Export data» di OGLight (dello stesso universo)",
     "exp.raids": "Raid (importati da OGLight)",
     "exp.raidCount": "Raid",
     "exp.raidLoot": "Bottino e detriti",
@@ -1091,7 +1089,7 @@
     "fleet.rule.switch": "Attiva",
     "fleet.rule.switchHint": "Interruttore unico per tutti i pianeti e le lune: spegne la regola senza cancellarla.",
     "fleet.rule.offList": "spente: {list}",
-    "fleet.copyTo": "Copia su\u2026",
+    "fleet.copyTo": "Copia su…",
     "fleet.copyTitle": "Copia su altri pianeti o lune",
     "fleet.copyHint": "Prima salva quello che hai scritto qui, poi copia solo le regole scelte. Le altre regole dei corpi scelti restano come sono.",
     "fleet.copyWhat": "Regole da copiare",
@@ -1105,7 +1103,7 @@
     "spy.report": "Rapporto di spionaggio",
     "spy.reportHint": "Apre il report completo su {name}",
     "spy.shared": "ally",
-    "spy.sharedHint": "Report condiviso dall\u2019alleanza (Comunicazione \u203A Rapporti di spionaggio condivisi)",
+    "spy.sharedHint": "Report condiviso dall’alleanza (Comunicazione › Rapporti di spionaggio condivisi)",
     "spy.hidden": "nascosta",
     "spy.simulate": "Simula",
     "spy.simulateHint": "Simula con {tool} in una nuova scheda, con le tue ricerche e i tuoi bonus",
@@ -1113,11 +1111,11 @@
     "settings.section.menu": "Menu pianeti",
     "settings.section.mail": "Posta e spiate",
     "settings.section.data": "Dati",
-    "settings.totalsHint": "Il riquadro sotto i pianeti con le risorse di tutto l\u2019account e la produzione al giorno.",
+    "settings.totalsHint": "Il riquadro sotto i pianeti con le risorse di tutto l’account e la produzione al giorno.",
     "settings.sim": "Simulatore",
-    "settings.simHint": "Si apre con il pulsante Simula nella tabella spiate e nei rapporti, gi\xE0 compilato con le tue ricerche.",
-    "settings.shared": "Spiate condivise dall\u2019alleanza",
-    "settings.sharedHint": "Mostra nella tabella spiate anche i rapporti condivisi in Comunicazione, segnati con \xABally\xBB.",
+    "settings.simHint": "Si apre con il pulsante Simula nella tabella spiate e nei rapporti, già compilato con le tue ricerche.",
+    "settings.shared": "Spiate condivise dall’alleanza",
+    "settings.sharedHint": "Mostra nella tabella spiate anche i rapporti condivisi in Comunicazione, segnati con «ally».",
     "settings.fold": "Testo del gioco ripiegato",
     "settings.foldHint": "Nasconde il testo lungo di spedizioni e trasporti sotto il riepilogo; un clic sul riepilogo lo riapre.",
     "settings.backupHint": "Esporta tutti i dati di Future in un file, o li ripristina da un file.",
@@ -1132,11 +1130,11 @@
     "spy.moon": "Luna",
     "spy.planet": "Pianeta",
     "spy.waves": "Le 6 razzie del giorno",
-    "spy.wave": "{n}\xAA",
+    "spy.wave": "{n}ª",
     "spy.onPlanet": "Sul pianeta",
     "spy.from": "da {name} [{coords}]",
     "spy.total": "Totale",
-    "spy.waveHint": "{n}\xAA razzia: apre Flotta da {name} con {count} {ship} e il bersaglio gi\xE0 inseriti",
+    "spy.waveHint": "{n}ª razzia: apre Flotta da {name} con {count} {ship} e il bersaglio già inseriti",
     "shortcut.galaxyLeft": "Sistema precedente",
     "shortcut.galaxyRight": "Sistema successivo",
     "shortcut.galaxyDown": "Galassia precedente",
@@ -1146,7 +1144,7 @@
     "touch.next": "Avanti",
     "fleet.cap.expedition": "posizione 16",
     "fleet.cap.setUp": "da impostare",
-    "fleet.cap.last": "ripete l\u2019ultima",
+    "fleet.cap.last": "ripete l’ultima",
     "fleet.cap.cargo": "meno riserva e volo",
     "fleet.rulesLabel": "Regole",
     "fleet.editRules": "Regole di {body}",
@@ -1156,9 +1154,9 @@
     "settings.section.keys": "Tasti",
     "settings.mainShipHint": "La nave da carico usata per prima da Trasporto, Schiera e Su luna.",
     "settings.secondShipHint": "Copre quello che la prima non riesce a portare.",
-    "settings.speedHint": "Velocit\xE0 di Trasporto, Schiera e Su luna.",
+    "settings.speedHint": "Velocità di Trasporto, Schiera e Su luna.",
     "settings.favHint": "Dove Accentra porta flotta e risorse in eccesso, con i limiti delle riserve.",
-    "settings.expValueHint": "Vuoto = calcolato; 50% = met\xE0 del calcolato; un numero = carico fisso.",
+    "settings.expValueHint": "Vuoto = calcolato; 50% = metà del calcolato; un numero = carico fisso.",
     "settings.extrasHint": "Aggiunge una sonda e un pathfinder, come OGLight.",
     "settings.touch": "Barra da toccare",
     "settings.touchHint": "In basso sullo schermo: le scorciatoie di questa pagina e, in Flotta, il pulsante Avanti / Invia del gioco.",
@@ -1169,20 +1167,20 @@
     "settings.keys.targets": "Bersagli",
     "settings.keys.fleet": "Flotta",
     "settings.keys.galaxy": "Galassia (barra da toccare)",
-    "settings.keyPress": "Premi un tasto\u2026",
+    "settings.keyPress": "Premi un tasto…",
     "settings.keyNone": "nessuno",
     "settings.keyFixed": "Tasto del gioco, non modificabile.",
     "settings.keyChange": "Clic per cambiarlo.",
     "settings.keyReset": "Predefinito",
     "settings.keyResetHint": "Torna a {key}",
-    "settings.keyTaken": "Fatto. {key} era di \u201C{other}\u201D, che ora \xE8 senza tasto.",
+    "settings.keyTaken": "Fatto. {key} era di “{other}”, che ora è senza tasto.",
     "settings.keySaved": "Tasto salvato.",
     "settings.keyGame": "frecce del gioco",
     "settings.keysDefault": "Tasti predefiniti",
-    "settings.keysHint": "Rimette tutti i tasti come all\u2019inizio.",
+    "settings.keysHint": "Rimette tutti i tasti come all’inizio.",
     "settings.keysDefaultDone": "Tasti predefiniti ripristinati.",
-    "settings.keyListen": "Premi il nuovo tasto per \u201C{name}\u201D: una lettera o un numero. Esc annulla, Canc lo toglie.",
-    "settings.keyCleared": "\u201C{name}\u201D \xE8 ora senza tasto.",
+    "settings.keyListen": "Premi il nuovo tasto per “{name}”: una lettera o un numero. Esc annulla, Canc lo toglie.",
+    "settings.keyCleared": "“{name}” è ora senza tasto.",
     "settings.keyBad": "Usa una lettera o un numero, senza Ctrl o Alt.",
     "settings.expShipHint": "Automatica = la migliore che hai su quel pianeta o luna.",
     "fleet.actionsLabel": "Prepara una flotta",
@@ -1193,7 +1191,7 @@
     "totals.stock": "In cassa",
     "totals.day": "Al giorno",
     "totals.flying": "di cui in volo",
-    "totals.flyingHint": "Carico delle tue flotte in volo (gi\xE0 compreso nelle righe sopra): metallo {metal}, cristallo {crystal}, deuterio {deuterium}. Letto dalla lista eventi del gioco: aprila per aggiornarlo.",
+    "totals.flyingHint": "Carico delle tue flotte in volo (già compreso nelle righe sopra): metallo {metal}, cristallo {crystal}, deuterio {deuterium}. Letto dalla lista eventi del gioco: aprila per aggiornarlo.",
     "dock.journal": "Diario",
     "dock.today": "Oggi",
     "dock.journalHint": "{n} spedizioni lette dalla posta; guadagno netto in MSU. Clic: apre il diario.",
@@ -1207,7 +1205,7 @@
     "plan.pickHint": "Clic: scegli questa riga, il tasto in alto porta solo le righe scelte",
     "plan.removeBody": "Togli tutto il piano di questo corpo",
     "planetMenu.fleet": "Flotta",
-    "planetMenu.fleetHint": "Valore delle navi su questo corpo (costo in risorse, 1:1:1), all\u2019ultimo aggiornamento dei suoi dati",
+    "planetMenu.fleetHint": "Valore delle navi su questo corpo (costo in risorse, 1:1:1), all’ultimo aggiornamento dei suoi dati",
     "settings.fleetPill": "Valore della flotta",
     "settings.fleetPillHint": "Una pillola sotto le risorse con il valore delle navi ferme su quel pianeta o luna (costo in risorse, 1:1:1).",
     "settings.gameTipsHint": "La scheda con dati e collegamenti che il gioco apre quando il mouse si ferma su un pianeta o una luna. Spenta, il pianeta si apre sempre con un clic.",
@@ -1222,13 +1220,13 @@
     "fleet.invert": "Inverti la selezione di questa nave",
     "settings.section.galaxy": "Galassia",
     "settings.bigDebris": "Detriti da evidenziare",
-    "settings.bigDebrisHint": "Da questo valore in su (metallo + cristallo + deuterio) il campo detriti \xE8 evidenziato, in galassia, nello spazio profondo e nella barra dei bersagli. Esempi: 500k, 1M, 2,5G.",
+    "settings.bigDebrisHint": "Da questo valore in su (metallo + cristallo + deuterio) il campo detriti è evidenziato, in galassia, nello spazio profondo e nella barra dei bersagli. Esempi: 500k, 1M, 2,5G.",
     "settings.bigDebrisSaved": "Evidenziati da {n} in su.",
     "settings.bigDebrisBad": "Scrivi un numero, per esempio 1M.",
     "marks.home": "Pianeta madre",
     "marks.col.name": "Nome",
     "marks.note": "Nota",
-    "marks.notePlaceholder": "Nota su questo giocatore\u2026",
+    "marks.notePlaceholder": "Nota su questo giocatore…",
     "marks.noteNeedsFlag": "Metti una bandierina per scrivere una nota.",
     "marks.writeShort": "Scrivi",
     "tech.population": "Popolazione richiesta per il livello {level}",
@@ -1238,9 +1236,9 @@
     "tech.satDeficit": "Servono {n} satelliti solari ({energy} energia) per riportare l'energia in positivo",
     "tech.satBalance": "energia ora {energy}",
     "tech.satPer": "1 satellite = {energy} su questo pianeta",
-    "tech.satPerGuess": "1 satellite \u2248 {energy} (stima: apri il Satellite Solare su questo pianeta per il valore esatto)",
-    "tech.satFill": "clic: scrive il numero nella quantit\xE0",
-    "tech.satGo": "clic: apre il Satellite Solare nelle Risorse con il numero gi\xE0 scritto",
+    "tech.satPerGuess": "1 satellite ≈ {energy} (stima: apri il Satellite Solare su questo pianeta per il valore esatto)",
+    "tech.satFill": "clic: scrive il numero nella quantità",
+    "tech.satGo": "clic: apre il Satellite Solare nelle Risorse con il numero già scritto",
     "fleet.btn.collect": "Accentra",
     "fleet.readyHint": "Scegli cosa preparare: l'invio resta sempre un tuo clic.",
     "fleet.reservesHint": "Cosa resta sul corpo quando prepari una flotta. Un clic accende o spegne; i valori si cambiano con il pulsante delle regole a destra.",
@@ -1254,21 +1252,21 @@
     "fleet.btn.collectTransport": "Accentra: trasporto",
     "fleet.btn.collectDeploy": "Accentra: schieramento",
     "fleet.btn.skip": "Salta",
-    "fleet.tip.skip": "Qui non c'\xE8 niente da portare: apre il prossimo pianeta o luna del giro con la stessa azione gi\xE0 pronta. Da qui non parte nulla.",
-    "fleet.tip.collect": "Per chi fa spedizioni da pi\xF9 lune: porta navi e risorse in eccesso alla luna principale, rispettando le riserve",
-    "fleet.collect.transport": "1 \xB7 Trasporto",
-    "fleet.collect.deploy": "2 \xB7 Schieramento",
+    "fleet.tip.skip": "Qui non c'è niente da portare: apre il prossimo pianeta o luna del giro con la stessa azione già pronta. Da qui non parte nulla.",
+    "fleet.tip.collect": "Per chi fa spedizioni da più lune: porta navi e risorse in eccesso alla luna principale, rispettando le riserve",
+    "fleet.collect.transport": "1 · Trasporto",
+    "fleet.collect.deploy": "2 · Schieramento",
     "fleet.collectOnce": "Una volta sola verso:",
     "fleet.collectNoFav": "nessuna luna principale (Impostazioni)",
     "fleet.send.label": "Trasporto e Schiera: destinazione e risorse",
     "fleet.send.dest": "Destinazione",
-    "fleet.send.destHint": "galassia, sistema, posizione (vuoti = quelli di questo corpo); si pu\xF2 incollare 1:234:5",
+    "fleet.send.destHint": "galassia, sistema, posizione (vuoti = quelli di questo corpo); si può incollare 1:234:5",
     "fleet.send.pick": "I tuoi pianeti e lune",
     "fleet.send.pickHint": "scrive le coordinate e il tipo del corpo scelto",
-    "fleet.send.resHint": "vuoto = niente, si pu\xF2 scrivere 2m o 500k; clic sul simbolo = tutto",
+    "fleet.send.resHint": "vuoto = niente, si può scrivere 2m o 500k; clic sul simbolo = tutto",
     "fleet.err.noTarget": "Scrivi la destinazione (galassia:sistema:posizione) o sceglila tra i tuoi corpi",
-    "fleet.err.sameBody": "La destinazione \xE8 il corpo da cui parte la flotta",
-    "fleet.err.nothingPicked": "Nessuna risorsa da trasportare con le quantit\xE0 scelte",
+    "fleet.err.sameBody": "La destinazione è il corpo da cui parte la flotta",
+    "fleet.err.nothingPicked": "Nessuna risorsa da trasportare con le quantità scelte",
     "fleet.send.res": "Risorse",
     "fleet.send.small": "CL",
     "fleet.send.large": "CP",
@@ -1279,25 +1277,25 @@
     "fleet.ok.cargoShort": "{ships} navi, {cargo} risorse caricate: mancano {missing} cargo per il resto",
     "fleet.err.noCargoShip": "Nessun cargo di questo tipo su questo corpo",
     "fleet.send.max": "tutto",
-    "fleet.send.maxHint": "clic: tutto quello che c'\xE8 qui",
+    "fleet.send.maxHint": "clic: tutto quello che c'è qui",
     "fleet.send.clearBtn": "Svuota",
     "fleet.send.clearHint": "svuota i campi delle risorse",
     "res.short.metal": "M",
     "res.short.crystal": "C",
     "res.short.deuterium": "D",
     "fleet.collectIgnoreShips": "Trasporto: ignora la riserva navi",
-    "settings.collectIgnoreShipsHint": 'Il trasporto di Accentra (e "Su luna") pu\xF2 usare anche le navi tenute dalla riserva: i cargo tornano indietro. La riserva risorse vale sempre.',
+    "settings.collectIgnoreShipsHint": 'Il trasporto di Accentra (e "Su luna") può usare anche le navi tenute dalla riserva: i cargo tornano indietro. La riserva risorse vale sempre.',
     "fleet.collectDeployRes": "Schieramento: porta anche le risorse",
     "settings.collectDeployResHint": "Spento: lo schieramento di Accentra manda solo le navi, le risorse restano.",
     "fleet.loadOrder": "Ordine di carico",
-    "settings.loadOrderHint": "Quale risorsa riempie per prima i cargo di Accentra, poi la seconda e la terza (il gioco fa D \u2192 C \u2192 M).",
-    "msg.say.late": "la flotta rientra pi\xF9 tardi",
+    "settings.loadOrderHint": "Quale risorsa riempie per prima i cargo di Accentra, poi la seconda e la terza (il gioco fa D → C → M).",
+    "msg.say.late": "la flotta rientra più tardi",
     "msg.say.early": "la flotta rientra prima",
-    "msg.say.nothing": "non \xE8 stato trovato niente",
+    "msg.say.nothing": "non è stato trovato niente",
     "msg.say.trader": "un mercante offre uno scambio",
     "msg.say.pirate": "scontro con i pirati",
     "msg.say.alien": "scontro con gli alieni",
-    "msg.say.blackhole": "la flotta \xE8 finita in un buco nero",
+    "msg.say.blackhole": "la flotta è finita in un buco nero",
     "exp.heroCount": "spedizioni",
     "exp.heroAvg": "a spedizione",
     "exp.heroLost": "navi perse",
@@ -1317,22 +1315,22 @@
     "plan.sec.arriving": "In arrivo",
     "plan.sec.unknown": "Risorse non note",
     "plan.sec.ready": "Pronti",
-    "plan.colMissing": "mancano (metallo \xB7 cristallo \xB7 deuterio)",
+    "plan.colMissing": "mancano (metallo · cristallo · deuterio)",
     "plan.colCost": "costo",
     "plan.queued": "in coda",
-    "plan.queuedHint": "In coda nel gioco, non ancora pagato: le sue risorse restano da parte e non contano per il piano n\xE9 per i trasporti",
-    "plan.unhold": "Non tenere pi\xF9 da parte (gi\xE0 partito o annullato)",
+    "plan.queuedHint": "In coda nel gioco, non ancora pagato: le sue risorse restano da parte e non contano per il piano né per i trasporti",
+    "plan.unhold": "Non tenere più da parte (già partito o annullato)",
     "fleet.mainShipIs": "Nave principale dei trasporti automatici",
     "fleet.mainShipPick": "Usa questa nave per i trasporti automatici (luna, Accentra, piano)",
     "settings.expStyle": "Riepilogo spedizioni",
-    "settings.expStyleHint": "Con un altro tool che decora i messaggi (OGame Tracker, OGLight, \u2026) Future si fa da parte e registra soltanto, come OGLight. Il diario registra sempre.",
+    "settings.expStyleHint": "Con un altro tool che decora i messaggi (OGame Tracker, OGLight, …) Future si fa da parte e registra soltanto, come OGLight. Il diario registra sempre.",
     "settings.expStyle.auto": "Automatico",
     "settings.expStyle.always": "Sempre Future",
     "settings.expStyle.never": "Solo registra",
-    "tech.labShort": "Rete {total} \xB7 {n} lab",
+    "tech.labShort": "Rete {total} · {n} lab",
     "tech.labNet": "Laboratori al lavoro su questa ricerca: {total} = qui {here} + {linked} (Rete di ricerca intergalattica liv. {irn})",
     "tech.labNeed": "contano i laboratori dal liv. {need}",
-    "tech.labHereShort": "il laboratorio di questo pianeta \xE8 sotto il liv. {need}: qui non si pu\xF2 avviare",
+    "tech.labHereShort": "il laboratorio di questo pianeta è sotto il liv. {need}: qui non si può avviare",
     "exp.heroRes": "Risorse",
     "exp.heroFleet": "Flotta",
     "exp.heroFound": "trovate",
@@ -1343,27 +1341,27 @@
     "orion.rewards": "ricompense {v} MSU",
     "orion.freeWord": "gratis",
     "orion.paidBack": "litio {paid} pagato, {back} reso",
-    "orion.planAll": "lancio ora: {free} di litio libero alla fine{held} riscatta tutte le {waves} ondate, \u2248{msu} MSU",
-    "orion.planSome": "lancio ora: {free} di litio libero alla fine{held} riscatta {covered}/{waves} ondate, \u2248{msu} MSU",
+    "orion.planAll": "lancio ora: {free} di litio libero alla fine{held} riscatta tutte le {waves} ondate, ≈{msu} MSU",
+    "orion.planSome": "lancio ora: {free} di litio libero alla fine{held} riscatta {covered}/{waves} ondate, ≈{msu} MSU",
     "orion.held": " ({v} tenuti per {n} in corso)",
     "orion.planNever": "non tutte le {waves}: la produzione di litio si ferma prima",
-    "orion.planWait": "tutte le {waves} se lanci tra {h} o pi\xF9 tardi",
-    "orion.planTitle": "Litio ora pi\xF9 {h} di produzione, riscattato alla fine, tenendo da parte quello che serviranno le anomalie in corso quando finiscono:",
+    "orion.planWait": "tutte le {waves} se lanci tra {h} o più tardi",
+    "orion.planTitle": "Litio ora più {h} di produzione, riscattato alla fine, tenendo da parte quello che serviranno le anomalie in corso quando finiscono:",
     "orion.planNone": "nessuna in memoria.",
-    "orion.planOwnBack": "Il litio reso da questa ({v}) arriva con il riscatto: non pu\xF2 pagarla.",
+    "orion.planOwnBack": "Il litio reso da questa ({v}) arriva con il riscatto: non può pagarla.",
     "orion.toggleHint": "Se il litio che questa anomalia deve ancora pagare va tenuto da parte nei piani dello scanner",
     "orion.soFar": "finora",
     "orion.back": "reso",
     "orion.paid": "pagato",
     "orion.over": "finita, da pagare ora",
     "orion.endsIn": "finisce tra {h}",
-    "orion.warnShort": "Attenzione: scansionare ora lascia troppo poco litio per riscattare le anomalie in corso. Mancano gi\xE0 {v}, prima di qualsiasi scansione.",
+    "orion.warnShort": "Attenzione: scansionare ora lascia troppo poco litio per riscattare le anomalie in corso. Mancano già {v}, prima di qualsiasi scansione.",
     "orion.warnFree": "Attenzione: scansionare ora lascia troppo poco litio per riscattare le anomalie in corso. Sono liberi solo {free} e una scansione costa {cost}.",
     "orion.noneRemembered": "Nessuna anomalia in corso in memoria. Se ne hai, apri una volta la panoramica delle missioni.",
     "orion.partial": "costo finora, totale non ancora noto",
     "orion.empty": "Ancora nessuna anomalia registrata. Apri la panoramica delle missioni di Orion: le anomalie elencate vengono salvate qui.",
     "orion.balance": "Bilancio",
-    "orion.balanceHint": "ricompense + navi ricevute \u2212 navi perse \u2212 carburante (litio a parte)",
+    "orion.balanceHint": "ricompense + navi ricevute − navi perse − carburante (litio a parte)",
     "orion.rewardsK": "Ricompense",
     "orion.shipsGot": "Navi ricevute",
     "orion.lost": "Navi perse",
@@ -1377,7 +1375,7 @@
     "orion.legendDown": "Costi: navi perse + carburante (MSU)",
     "orion.other": "Altro",
     "orion.anomalies": "Anomalie apparse",
-    "orion.search": "Cerca nome o coordinate\u2026",
+    "orion.search": "Cerca nome o coordinate…",
     "orion.all": "tutte",
     "orion.rowsHint": "cifre della riga = solo il periodo scelto",
     "orion.noneInPeriod": "Nessuna anomalia apparsa in questo periodo.",
@@ -1386,7 +1384,7 @@
     "orion.col.coords": "Coord.",
     "orion.col.level": "Liv.",
     "orion.col.stars": "Stelle",
-    "orion.col.mode": "Modalit\xE0",
+    "orion.col.mode": "Modalità",
     "orion.col.kind": "Tipo",
     "orion.col.waves": "Ondate",
     "orion.col.status": "Stato",
@@ -1410,11 +1408,11 @@
     "orion.collectCost": "da pagare ora",
     "orion.lithiumBack": "litio reso",
     "orion.notCountedHint": "Ricompense non contate nel valore: la pagina dice solo quante, non quali",
-    "orion.msuNoCost": "MSU \xB7 nessun costo",
+    "orion.msuNoCost": "MSU · nessun costo",
     "orion.freeHint": "il litio reso copre il costo",
     "orion.unitH": "MSU per ora di litio",
     "orion.unitM": "MSU per 1M di litio",
-    "orion.planNoProd": "non tutte le {waves}: la produzione di litio \xE8 ferma",
+    "orion.planNoProd": "non tutte le {waves}: la produzione di litio è ferma",
     "orion.totalCost": "costo totale {v}",
     "orion.boxTitle": "Litio",
     "orion.prod": "+{v}/h",
@@ -1432,35 +1430,35 @@
     "orion.kBarSub": "deposito {v}",
     "orion.wholeMission": "intera missione",
     "orion.extraValue": "altre ricompense (stima)",
-    "orion.extraHint": "Budget della scheda \u2248{budget} MSU (dal moltiplicatore imparato per questo tipo e modalit\xE0); le risorse ne prendono una parte, il resto \u2248{extra} va alle altre ricompense, contate al {rate}%.",
-    "orion.withExtra": "di cui \u2248{v} stimati per le altre ricompense",
-    "orion.perMissionHour": "\u2248{v} MSU/h di missione",
-    "orion.lowRoll": "se esce basso \u2248{v}",
+    "orion.extraHint": "Budget della scheda ≈{budget} MSU (dal moltiplicatore imparato per questo tipo e modalità); le risorse ne prendono una parte, il resto ≈{extra} va alle altre ricompense, contate al {rate}%.",
+    "orion.withExtra": "di cui ≈{v} stimati per le altre ricompense",
+    "orion.perMissionHour": "≈{v} MSU/h di missione",
+    "orion.lowRoll": "se esce basso ≈{v}",
     "orion.lowRollHint": "Combattimento: al riscatto si prende tutto oppure il 37,5% delle ricompense (le consegne danno sempre tutto). Dato della community, verificato dal diario Orion.",
     "orion.lowRolls": "esiti bassi",
     "tech.iasShort": "Litio +{v}/h",
-    "tech.ias": "Produzione di litio di questo scanner durante la conversione: {from}/h \u2192 {to}/h al livello {level} (formula della community: 15,36 \xD7 L \xD7 1,1^L \xD7 velocit\xE0 economica)",
-    "orion.simOpen": "Simula questa ondata in {tool} (nuova scheda): l\u2019ondata attacca, la tua flotta all\u2019anomalia difende; aggiungi le tue navi nel simulatore",
+    "tech.ias": "Produzione di litio di questo scanner durante la conversione: {from}/h → {to}/h al livello {level} (formula della community: 15,36 × L × 1,1^L × velocità economica)",
+    "orion.simOpen": "Simula questa ondata in {tool} (nuova scheda): l’ondata attacca, la tua flotta all’anomalia difende; aggiungi le tue navi nel simulatore",
     "orion.expected": "Previste alla ricerca (intera missione)",
     "orion.nowLabel": "Da riscattare ora:",
     "orion.nowCost": "per {v} di litio",
-    "orion.cargoNeed": "Consegna: solo cargo, con capacit\xE0 almeno pari alla flotta in arrivo. La pi\xF9 grande: {cap} (ondata {wave}) \u2248 {lc} cargo pesanti o {sc} cargo leggeri",
-    "orion.cargoHint": "Capacit\xE0 delle flotte NPC in arrivo (capacit\xE0 base delle loro navi, col loro bonus), dai dati dell\u2019ondata; i cargo del giocatore con la capacit\xE0 letta dalla pagina flotta. Navi da guerra nella flotta = nessuna ricompensa.",
+    "orion.cargoNeed": "Consegna: solo cargo, con capacità almeno pari alla flotta in arrivo. La più grande: {cap} (ondata {wave}) ≈ {lc} cargo pesanti o {sc} cargo leggeri",
+    "orion.cargoHint": "Capacità delle flotte NPC in arrivo (capacità base delle loro navi, col loro bonus), dai dati dell’ondata; i cargo del giocatore con la capacità letta dalla pagina flotta. Navi da guerra nella flotta = nessuna ricompensa.",
     "orion.waveN": "Ondata {n}",
-    "fleet.expeditionSpread": "Sistema casuale \xB1",
-    "settings.expSpreadHint": "Come OGLight: la spedizione va in un sistema a caso tra quello di partenza meno N e pi\xF9 N. 0 = sempre il sistema di partenza.",
+    "fleet.expeditionSpread": "Sistema casuale ±",
+    "settings.expSpreadHint": "Come OGLight: la spedizione va in un sistema a caso tra quello di partenza meno N e più N. 0 = sempre il sistema di partenza.",
     "fleet.expeditionSplit": "Dividi i cargo tra gli slot",
-    "settings.expSplitHint": "Per gli universi giovani: ogni spedizione prende al massimo i cargo del pianeta divisi per gli slot spedizione ancora liberi, cos\xEC la prima non li porta via tutti.",
-    "fleet.expSplitCalc": "{ship}: {n} \xF7 {slots} slot = {each} a spedizione",
+    "settings.expSplitHint": "Per gli universi giovani: ogni spedizione prende al massimo i cargo del pianeta divisi per gli slot spedizione ancora liberi, così la prima non li porta via tutti.",
+    "fleet.expSplitCalc": "{ship}: {n} ÷ {slots} slot = {each} a spedizione",
     "fleet.expSplitUnknown": "Il calcolo compare dopo aver aperto la pagina Flotta.",
     "fleet.expeditionStay": "Spedizioni dallo stesso pianeta",
-    "settings.expStayHint": "Con Ripeti attivo, dopo una spedizione riapre lo stesso pianeta o luna con la spedizione gi\xE0 pronta, finch\xE9 restano slot liberi. Spento = passa al pianeta successivo.",
-    "fleet.ok.expSystem": "verso {coords} (\xB1{n})",
+    "settings.expStayHint": "Con Ripeti attivo, dopo una spedizione riapre lo stesso pianeta o luna con la spedizione già pronta, finché restano slot liberi. Spento = passa al pianeta successivo.",
+    "fleet.ok.expSystem": "verso {coords} (±{n})",
     "fleet.ok.expSplit": "cargo divisi per {slots} slot",
     "fleet.emptyHint": "Nessuna nave qui. Puoi segnare questo corpo da saltare nelle spedizioni.",
-    "fleet.tip.skipEmpty": "Qui non ci sono navi: apre il prossimo pianeta o luna del giro con la spedizione gi\xE0 pronta. Da qui non parte nulla.",
+    "fleet.tip.skipEmpty": "Qui non ci sono navi: apre il prossimo pianeta o luna del giro con la spedizione già pronta. Da qui non parte nulla.",
     "ping.label": "Ping {ms} ms",
-    "ping.hint": "Il server ha risposto in {ms} ms; la pagina si \xE8 caricata in {s} s. Misurato al caricamento di questa pagina: un invio fatto ora arriva al server con un ritardo simile.",
+    "ping.hint": "Il server ha risposto in {ms} ms; la pagina si è caricata in {s} s. Misurato al caricamento di questa pagina: un invio fatto ora arriva al server con un ritardo simile.",
     "ping.hintShort": "Il server ha risposto in {ms} ms. Misurato al caricamento di questa pagina.",
     "fleet.send.allBtn": "Tutto",
     "fleet.send.allHint": "Tutte le risorse di questo pianeta o luna (il carburante del volo resta a casa)",
@@ -1490,7 +1488,107 @@
     "mission.7": "Colonizzazione",
     "mission.9": "Distruzione luna",
     "mission.18": "Esplorazione",
-    "flights.title": "Flotte in volo"
+    "flights.title": "Flotte in volo",
+    "settings.section.guide": "Guida",
+    "tour.next": "Avanti",
+    "tour.back": "Indietro",
+    "tour.done": "Fine",
+    "tour.close": "Chiudi la guida",
+    "tour.count": "{n} di {total}",
+    "tour.help": "Guida di questa finestra",
+    "tour.zoneHelp": "Cosa fa questa zona",
+    "tour.inviteTitle": "Prima volta qui?",
+    "tour.inviteText": "Guida di un minuto su «{name}»: illumino ogni funzione e ti dico cosa fa e come si usa.",
+    "tour.show": "Mostrami",
+    "tour.later": "Più tardi",
+    "tour.no": "No, grazie",
+    "tour.name.board": "Plancia e menu pianeti",
+    "tour.name.fleet": "Pagina Flotta",
+    "tour.name.settings": "Impostazioni",
+    "tour.name.dashboard": "Dashboard",
+    "tour.name.planner": "Piano",
+    "tour.name.journal": "Diario",
+    "tour.name.galaxy": "Galassia",
+    "tour.name.messages": "Posta",
+    "tour.name.tech": "Costruzioni e ricerca",
+    "tour.where.board": "Ogni pagina.",
+    "tour.where.fleet": "Navi, missioni, riserve.",
+    "tour.where.settings": "Ingranaggio.",
+    "tour.where.dashboard": "Clic su Produzione.",
+    "tour.where.planner": "Clic su Piano.",
+    "tour.where.journal": "Clic su Diario.",
+    "tour.where.galaxy": "Bandierine, classifica, detriti.",
+    "tour.where.messages": "Rapporti e spiate.",
+    "tour.where.tech": "Costruzioni, con un edificio scelto.",
+    "tour.firstSteps": "Primi passi",
+    "tour.stepDone": "Fatto",
+    "tour.step.sync": "Sincronizza i dati",
+    "tour.step.syncHint": "Il pulsante con le frecce sopra i pianeti: livelli e ricerche di tutto l'account.",
+    "tour.step.fleetsave": "Bersaglio del fleetsave",
+    "tour.step.fleetsaveHint": "In Pianeti e lune: dove fugge la flotta di ogni corpo.",
+    "tour.step.mainShip": "Nave principale",
+    "tour.step.mainShipHint": "Nella pagina Flotta, il simbolo sul cargo che usi di più.",
+    "tour.step.plan": "Una costruzione nel Piano",
+    "tour.step.planHint": "Nelle pagine di costruzione: scegli un edificio e premi Piano.",
+    "tour.step.journal": "Diario delle spedizioni",
+    "tour.step.journalHint": "Apri i rapporti di spedizione nella posta: il diario si riempie da solo.",
+    "tour.all": "Tutte le guide",
+    "tour.start": "Avvia",
+    "tour.invites": "Inviti",
+    "tour.offer": "Proponi le guide",
+    "tour.offerHint": "Al primo uso di una funzione compare un invito; la guida parte solo da Mostrami.",
+    "tour.reset": "Guide già viste",
+    "tour.resetHint": "Fa tornare gli inviti anche per le guide già viste o rifiutate.",
+    "tour.resetDo": "Ripristina",
+    "tour.settings.0": "Impostazioni|Divise per argomento. Ogni scelta vale subito e resta in questo browser.",
+    "tour.settings.1": "Una riga, una scelta|Il nome, sotto la spiegazione, a destra l'interruttore o il valore.",
+    "tour.settings.2": "Pianeti e lune|Fleetsave e riserve di ogni corpo. Scegli Pianeti o Lune, poi tocca un corpo per modificarlo.",
+    "tour.settings.3": "Tasti|Cambia le scorciatoie e scegli quando mostrare la barra da toccare.",
+    "tour.settings.4": "Dati|Salva o ripristina tutto ciò che Future ricorda; importa i dati di OGLight.",
+    "tour.settings.5": "Guida|I primi passi da completare, tutte le guide e gli inviti.",
+    "tour.dashboard.0": "Dashboard|Tutto l'account su una plancia. I numeri vengono dall'ultima sincronizzazione.",
+    "tour.dashboard.1": "Investimenti|Cosa costruire prima: ogni gradino ha costo e giorni per ripagarsi; in cima il più conveniente.",
+    "tour.dashboard.2": "Storico|Come crescono punti e produzione, giorno per giorno.",
+    "tour.dashboard.3": "Miniere e strutture|I livelli di tutti i pianeti in tabella; le celle colorate sono le code in corso.",
+    "tour.planner.0": "Piano|Quanto costa ciò che hai in piano, quanto hai già e quanto manca.",
+    "tour.planner.1": "Due viste|Per pianeta: cosa portare dove. Per tecnologia: l'elenco delle costruzioni.",
+    "tour.planner.2": "Porta tutto|Prepara in Flotta il trasporto delle risorse che mancano su quel pianeta. L'invio resta un tuo clic.",
+    "tour.planner.3": "Piano vuoto|Apri una pagina di costruzione o ricerca, scegli cosa costruire e premi Piano.",
+    "tour.journal.0": "Diario|Le spedizioni lette nella posta: risorse, navi, materia oscura, perdite.",
+    "tour.journal.1": "Periodo|Oggi, ieri, 7 o 30 giorni, o tutto.",
+    "tour.journal.2": "Risultato|Quanto hanno reso le spedizioni nel periodo, in MSU.",
+    "tour.journal.3": "Andamento|Come è andato il periodo, giorno per giorno.",
+    "tour.galaxy.0": "Il sistema in breve|Giocatori, inattivi e detriti del sistema, in una riga.",
+    "tour.galaxy.1": "Bandierine|Passa sopra un giocatore: accanto al nome compare la bandierina per segnarlo. Lo ritrovi in Bersagli, sotto il menu.",
+    "tour.galaxy.2": "Scheda del giocatore|Clic sul nome: i suoi pianeti e le tue note nella barra laterale.",
+    "tour.galaxy.3": "Classifica|Passa sopra per i punti; clic apre la classifica sulla sua posizione.",
+    "tour.galaxy.4": "Detriti in MSU|Il valore del campo detriti, convertito in metallo.",
+    "tour.messages.0": "Rapporti in breve|Ogni rapporto ha il suo riassunto: bottino, perdite, valore. Clic: mostra o nasconde il testo del gioco.",
+    "tour.messages.1": "Spiate in tabella|Le spiate a confronto, ordinabili: chi rende di più, chi è difeso.",
+    "tour.tech.0": "Metti nel piano|Aggiunge questa costruzione al Piano: Future tiene il conto delle risorse che mancano.",
+    "tour.tech.1": "Più livelli|Scegli fino a che livello: costo e tempo si sommano.",
+    "tour.tech.2": "Costo e tempo|Quanto costa, quanto ci vuole e quanto manca con le risorse di adesso.",
+    "tour.board.0": "Benvenuto in Future|Future aggiunge al gioco una plancia con numeri, piani e scorciatoie. Non gioca al posto tuo: ogni invio resta un tuo clic.",
+    "tour.board.1": "Produzione|Quanto rende l'account al giorno, in MSU (tutto convertito in metallo). Clic: apre la Dashboard con investimenti, miniere e storico.",
+    "tour.board.2": "Piano|Le costruzioni che vuoi fare e quante risorse mancano. Le aggiungi con il pulsante Piano nelle pagine di costruzione e ricerca. Clic: apre il Piano.",
+    "tour.board.3": "Una riga per pianeta|Risorse in cassa (la barra è il deposito), minuti dall'ultima visita, code in corso. Sotto, le flotte in volo da e per quel corpo.\nRosso con spada o occhio: attacco o spiata in arrivo. Si aggiorna quando carichi una pagina.",
+    "tour.board.4": "Sincronizza|Rilegge dal gioco i dati di tutto l'account: livelli, ricerche, forme di vita. Premilo dopo aver costruito o ricercato.",
+    "tour.board.5": "Impostazioni|Tutte le scelte di Future, divise per schede. Nella scheda Guida trovi i primi passi e ogni guida da rivedere.",
+    "tour.board.6": "Diario spedizioni|Spedizioni di oggi e di ieri e cosa hanno reso. Si riempie da solo quando apri i rapporti nella posta. Clic: il diario completo.",
+    "tour.board.7": "Bersagli|I giocatori segnati con le bandierine in Galassia. Clic: la barra laterale; tasto M: la prossima posizione.",
+    "tour.board.8": "Barra dei tasti|Le scorciatoie da toccare: pianeta precedente e successivo, missioni della flotta, ingranaggio delle impostazioni.",
+    "tour.board.9": "Primo passo: la Flotta|Apri la pagina Flotta: lì ti guido a impostare fleetsave, nave principale e riserve.\nOgni finestra di Future ha un ? in alto per rivedere la sua guida.",
+    "tour.fleet.0": "La pagina Flotta|Future prepara la flotta: navi, destinazione, missione. Avanti e Invia del gioco restano tuoi.\nImpostiamo tutto in 5 passi.",
+    "tour.fleet.1": "1 · Impostazioni flotta|Destinazioni preferite di Trasporto e Schiera, spedizioni, giro dei pianeti. Basta farlo una volta.",
+    "tour.fleet.2": "2 · Regole e fleetsave|Per ogni pianeta e luna: dove va il fleetsave e cosa resta a casa. Finché manca il bersaglio, Fleetsave resta tratteggiato.",
+    "tour.fleet.3": "3 · Nave principale|Tocca questo simbolo sul cargo che usi di più: Future calcola quanti ne servono per le risorse.",
+    "tour.fleet.4": "4 · Riserve|Cosa non parte mai da questo corpo: navi, risorse, deuterio del portale. Un clic accende o spegne; i valori si cambiano in Regole.",
+    "tour.fleet.5": "5 · Giro|Ripeti: dopo un invio passi al corpo successivo, per fare il giro di tutti. Salta questo corpo: il giro lo salta.",
+    "tour.fleet.6": "Missione|Trasporto e Schiera chiedono dove; Spedizione prepara la spedizione; Fleetsave la fuga; Ultima ripete l'ultima flotta. La lettera in alto è il tasto.",
+    "tour.fleet.7": "Destinazione|Su luna: tutto verso la luna di questo pianeta. Accentra: porta le risorse dei pianeti su un solo corpo, con trasporto o schieramento.",
+    "tour.fleet.8": "Messaggi|Qui Future dice cosa ha preparato o cosa manca. Passa il mouse su un pulsante per sapere cosa fa.",
+    "tour.fleet.9": "Avanti e Invia|Il pulsante del gioco, a portata di pollice. Premerlo resta una tua scelta.",
+    "tour.fleet.10": "Fatto|Prossimi passi: bersaglio del fleetsave in Regole, nave principale, poi prova Spedizione.\nI ? accanto a Missione, Destinazione, Riserve e Giro rispiegano ogni zona."
   };
 
   // src/i18n/en.json
@@ -1499,8 +1597,6 @@
     "sync.button": "Sync account data",
     "sync.done": "Data updated",
     "sync.failed": "Sync failed: the game did not send the data. Try again",
-    "data.missing": "Missing data on {count} planets: open their overview",
-    "guard.refused": "Call blocked to respect OGame rules",
     "planetMenu.moon": "Moon",
     "res.metal": "Metal",
     "res.crystal": "Crystal",
@@ -1541,14 +1637,14 @@
     "dash.factPoints": "points",
     "dash.nextRung": "After the next investment: {value} a day",
     "dash.now": "now",
-    "dash.msuHint": "Bars in MSU (3:2:1): metal, crystal \xD71.5, deuterium \xD73.",
+    "dash.msuHint": "Bars in MSU (3:2:1): metal, crystal ×1.5, deuterium ×3.",
     "dash.checks": "To check",
     "dash.allGood": "All good.",
     "dash.bodiesTable": "Planets and moons",
     "dash.showMoons": "Show moons",
     "dash.hideMoons": "Hide moons",
     "dash.colBody": "Body",
-    "dash.colMines": "Mines M\xB7C\xB7D",
+    "dash.colMines": "Mines M·C·D",
     "dash.colProd": "MSU/day",
     "dash.colFull": "Full in",
     "dash.colAge": "Data",
@@ -1615,7 +1711,7 @@
     "fleet.copied": "Copied to {count} bodies.",
     "fleet.reserve": "Reserve",
     "fleet.noReserve": "No rule active",
-    "fleet.resMinusReserve": "Resources \u2212 reserve",
+    "fleet.resMinusReserve": "Resources − reserve",
     "fleet.resLoaded": "Loaded {cargo} resources: check and press Send fleet",
     "mission.1": "Attack",
     "mission.3": "Transport",
@@ -1656,7 +1752,7 @@
     "fleet.rule.skipHint": "Expeditions only: Repeat and Skip pass over this planet or moon, empty or not.",
     "fleet.on": "on",
     "fleet.off": "off",
-    "fleet.repeatNext": "Sent. Moving to {body}\u2026",
+    "fleet.repeatNext": "Sent. Moving to {body}…",
     "fleet.repeatDone": "Round complete.",
     "fleet.pickDest": "pick destination",
     "fleet.btn.moon": "To moon",
@@ -1684,8 +1780,8 @@
     "fleet.err.page1": "Go back to fleet page 1 to use these buttons",
     "fleet.close": "Close",
     "fleet.favTitle": "Expedition collection: main moon",
-    "fleet.favTransport": "1 \xB7 Transport to",
-    "fleet.favDeploy": "2 \xB7 Deploy to",
+    "fleet.favTransport": "1 · Transport to",
+    "fleet.favDeploy": "2 · Deploy to",
     "fleet.tip.cargo": "Load the resources, keeping the reserve and the flight's deuterium",
     "fleet.btn.last": "Last",
     "fleet.tip.last": "Repeat the last fleet sent: same ships, target, mission and speed",
@@ -1697,7 +1793,7 @@
     "tech.next": "Next level",
     "tech.reset": "Back to the next level",
     "tech.level": "Lv. {level}",
-    "tech.range": "from {from} \u2192 {to}",
+    "tech.range": "from {from} → {to}",
     "tech.fromNow": "now {from}",
     "tech.colLevel": "Lv. {level}",
     "tech.colTotal": "Total",
@@ -1710,14 +1806,14 @@
     "tech.time": "Time",
     "tech.planBtn": "Plan",
     "tech.addOne": "Plan lv. {level}",
-    "tech.addRange": "Plan lv. {from}\u2013{to}",
-    "tech.inPlan": "In plan \u2713",
+    "tech.addRange": "Plan lv. {from}–{to}",
+    "tech.inPlan": "In plan ✓",
     "tech.addHint": "Adds to this planet/moon's construction plan",
     "tech.removeHint": "Click to remove these levels from the plan",
     "tech.discount": "Discount applied by the game: {pct}%",
     "tech.amount": "Amount: {n}",
-    "tech.addUnits": "Plan \xD7{n}",
-    "tech.added": "Added \u2713",
+    "tech.addUnits": "Plan ×{n}",
+    "tech.added": "Added ✓",
     "plan.title": "Construction plan",
     "plan.titleCount": "Construction plan ({n})",
     "plan.sub": "One button per planet brings what it lacks. Builds queued in the game keep their resources aside.",
@@ -1728,29 +1824,29 @@
     "plan.remove": "Remove from plan",
     "plan.total": "Total",
     "plan.missingHere": "Missing here",
-    "plan.ready": "Enough resources \u2713",
-    "plan.empty": "The plan is empty. Open a building or research and use \u201CPlan\u201D.",
+    "plan.ready": "Enough resources ✓",
+    "plan.empty": "The plan is empty. Open a building or research and use “Plan”.",
     "plan.grandTotal": "Total plan cost",
     "plan.grandMissing": "Missing overall",
-    "tech.rangeShort": "{from}\u2192{to}",
+    "tech.rangeShort": "{from}→{to}",
     "tech.rangeHint": "Total of levels {from} to {to}",
-    "tech.discountShort": "\u2212{pct}%",
+    "tech.discountShort": "−{pct}%",
     "fleet.foodShort": "Ignore food",
     "fleet.foodHint": "Food stays on the planet in every fleet, also with the game's own buttons.",
     "fleet.err.noDelivery": "No plan delivery in progress.",
     "fleet.ok.delivery": "Delivery ready: {ships} ships with {cargo} resources ({left} were missing). Press Next and Send fleet.",
-    "tech.timeHint": "Time of lv. {level} \xB7 total {from} to {to}",
+    "tech.timeHint": "Time of lv. {level} · total {from} to {to}",
     "tech.amountHint": "How many: any number for the plan; for building, at most 99,999 go into the queue, and no more than the game allows (max).",
     "plan.items": "{n} items",
-    "plan.levels": "lv. {from}\u2013{to}",
+    "plan.levels": "lv. {from}–{to}",
     "plan.bring": "Bring resources here",
     "plan.bringHint": "Opens the fleet page on the next planet with a transport of what is missing to here. After each send it moves to the next planet until nothing is missing.",
     "plan.unknownHere": "Resources here unknown: press Sync",
     "plan.complete": "Complete the delivery",
-    "plan.sentArriving": "Sent \xB7 arriving {time}",
-    "plan.sentArrived": "Sent \xB7 arrived (not read yet)",
+    "plan.sentArriving": "Sent · arriving {time}",
+    "plan.sentArrived": "Sent · arrived (not read yet)",
     "plan.missingAfterSent": "Still missing",
-    "plan.allSent": "All sent \u2713",
+    "plan.allSent": "All sent ✓",
     "msg.out.resource": "Resources",
     "msg.out.darkmatter": "Dark Matter",
     "msg.out.ship": "Ships",
@@ -1778,7 +1874,7 @@
     "recap.count": "{n} expeditions",
     "recap.ships": "Ships",
     "recap.shipsHint": "Ships found minus lost: {n} MSU",
-    "recap.open": "Today\u2019s expeditions, updated as you read the reports \xB7 click: open the journal",
+    "recap.open": "Today’s expeditions, updated as you read the reports · click: open the journal",
     "fresh.title": "Just read",
     "fresh.close": "Close",
     "msg.artefacts": "{n} artefacts",
@@ -1790,7 +1886,7 @@
     "msg.res.food": "Food",
     "msg.res.darkMatter": "Dark Matter",
     "msg.spy.loot": "Loot",
-    "msg.spy.cargo": "{n}\xD7 {ship}",
+    "msg.spy.cargo": "{n}× {ship}",
     "msg.spy.fleet": "Fleet",
     "msg.spy.def": "Defence",
     "msg.spy.active": "Active now",
@@ -1818,7 +1914,7 @@
     "exp.period.week": "7 days",
     "exp.period.month": "30 days",
     "exp.period.all": "All",
-    "exp.empty": "No expeditions yet: open the inbox, Fleets \u2192 Expeditions, and the reports land here.",
+    "exp.empty": "No expeditions yet: open the inbox, Fleets → Expeditions, and the reports land here.",
     "exp.emptyPeriod": "Nothing in this period.",
     "exp.count": "Expeditions",
     "exp.discoveries": "+ {n} discoveries",
@@ -1863,7 +1959,7 @@
     "bar.dash": "Dashboard",
     "bar.perDay": "/d",
     "bar.dashHint": "production per day in MSU",
-    "bar.plan": "Plan \xB7 {n}",
+    "bar.plan": "Plan · {n}",
     "bar.planEmpty": "Plan",
     "bar.ready": "Ready",
     "bar.planHint": "what the account still misses, in MSU, resources on the way included",
@@ -1923,9 +2019,9 @@
     "galaxy.score.lifeform": "Lifeforms",
     "galaxy.score.fleet": "Fleet",
     "galaxy.score.defence": "Defence",
-    "galaxy.splitHint": "Estimate from the highscores: defences count in both Economy and Military, so defences = Economy + Research + Military + Lifeforms \u2212 Total; fleet = Military \u2212 defences.",
+    "galaxy.splitHint": "Estimate from the highscores: defences count in both Economy and Military, so defences = Economy + Research + Military + Lifeforms − Total; fleet = Military − defences.",
     "galaxy.ships": "{count} ships",
-    "galaxy.loading": "Reading the public API\u2026",
+    "galaxy.loading": "Reading the public API…",
     "galaxy.apiError": "Public API unreachable. Try again later.",
     "galaxy.apiAge": "Public API, {time}",
     "galaxy.own": "Yours",
@@ -1939,8 +2035,8 @@
     "dash.historyEmpty": "The history fills itself: one point a day whenever you open the Overview. Come back tomorrow to see the first changes.",
     "dash.historySpan": "Last {n} d",
     "dash.historyPerDay": "{v}/d",
-    "dash.historyUp": "\u2191{n} places",
-    "dash.historyDown": "\u2193{n} places",
+    "dash.historyUp": "↑{n} places",
+    "dash.historyDown": "↓{n} places",
     "dash.historyReal": "over {n} d",
     "dash.historyFew": "few days recorded",
     "dash.historyProd": "Production per day (MSU)",
@@ -1949,7 +2045,7 @@
     "dash.historyDelta": "Change",
     "dash.historyRank": "Rank",
     "spy.title": "Spy table",
-    "spy.sub": "{n} targets \xB7 loot {loot}",
+    "spy.sub": "{n} targets · loot {loot}",
     "spy.hideDefended": "Hide defended",
     "spy.inactiveOnly": "Inactive only",
     "spy.none": "No espionage reports in the last 3 days. Reports you open in the inbox land here by themselves.",
@@ -1965,7 +2061,7 @@
     "msg.combat.netHint": "loot minus losses",
     "spy.remove": "Remove from the table and delete the report message",
     "spy.removeShared": "Remove from the table (shared report: the message stays)",
-    "spy.hint": "One target per planet or moon, kept 3 days even if you delete the reports. Loot: resources you can carry away. Name: opens the report. \u22EF: the day\u2019s 6 raids, a click on the ships opens Fleet.",
+    "spy.hint": "One target per planet or moon, kept 3 days even if you delete the reports. Loot: resources you can carry away. Name: opens the report. ⋯: the day’s 6 raids, a click on the ships opens Fleet.",
     "spy.status.inactive": "i",
     "spy.status.longinactive": "I",
     "spy.status.vacation": "v",
@@ -2000,7 +2096,7 @@
     "mark.change": "click to change, Shift+click for the last one used",
     "mark.flagAdd": "Flag the player (Shift+click: last flag)",
     "marks.title": "Targets",
-    "marks.sub": "{players} players \xB7 {planets} planets",
+    "marks.sub": "{players} players · {planets} planets",
     "marks.recent": "Recent",
     "marks.noRecent": "No player opened lately.",
     "marks.noPlayers": "No player with this flag. Set it from the galaxy, the highscore or the spy table.",
@@ -2012,7 +2108,7 @@
     "marks.rank": "Highscore",
     "marks.ships": "Ships",
     "marks.estimate": "estimate",
-    "marks.planets": "Planets {n} \xB7 moons {moons}",
+    "marks.planets": "Planets {n} · moons {moons}",
     "marks.keyNext": "next position",
     "marks.footData": "galaxy + public API",
     "marks.fleetPlanet": "Fleet to planet {coords} (planet activity)",
@@ -2021,7 +2117,7 @@
     "marks.unit.m": "m",
     "marks.unit.h": "h",
     "marks.unit.d": "d",
-    "marks.seenOnly": "Seen in the galaxy, not in the API yet \xB7 click: show the system",
+    "marks.seenOnly": "Seen in the galaxy, not in the API yet · click: show the system",
     "marks.showSystem": "Show the system in the galaxy",
     "marks.col.coords": "Coords",
     "marks.col.debris": "DF",
@@ -2043,11 +2139,11 @@
     "plan.removeAll": "Remove from all {n} bodies",
     "plan.readyHere": "Enough resources here",
     "bar.targets": "Targets",
-    "bar.targetsHint": "Targets side bar (flagged players) \xB7 M: next position",
+    "bar.targetsHint": "Targets side bar (flagged players) · M: next position",
     "settings.oglight": "From OGLight",
     "settings.oglightImport": "Import export",
     "settings.oglightDone": "From OGLight: {players} players, {seen} positions, {exp} expeditions and {raids} raids over {days} days. Reload the page.",
-    "settings.backupImportHint": "A Future backup or OGLight's \u201CExport data\u201D file (same universe)",
+    "settings.backupImportHint": "A Future backup or OGLight's “Export data” file (same universe)",
     "exp.raids": "Raids (imported from OGLight)",
     "exp.raidCount": "Raids",
     "exp.raidLoot": "Loot and debris",
@@ -2078,7 +2174,7 @@
     "fleet.rule.switch": "On",
     "fleet.rule.switchHint": "One switch for every planet and moon: turns the rule off without deleting it.",
     "fleet.rule.offList": "off: {list}",
-    "fleet.copyTo": "Copy to\u2026",
+    "fleet.copyTo": "Copy to…",
     "fleet.copyTitle": "Copy to other planets or moons",
     "fleet.copyHint": "What you typed here is saved first, then only the chosen rules are copied. The other rules of the chosen bodies stay as they are.",
     "fleet.copyWhat": "Rules to copy",
@@ -2092,7 +2188,7 @@
     "spy.report": "Espionage report",
     "spy.reportHint": "Opens the full report on {name}",
     "spy.shared": "ally",
-    "spy.sharedHint": "Report shared by the alliance (Communication \u203A Shared espionage reports)",
+    "spy.sharedHint": "Report shared by the alliance (Communication › Shared espionage reports)",
     "spy.hidden": "hidden",
     "spy.simulate": "Simulate",
     "spy.simulateHint": "Simulate with {tool} in a new tab, with your research and bonuses",
@@ -2100,11 +2196,11 @@
     "settings.section.menu": "Planet menu",
     "settings.section.mail": "Inbox and spying",
     "settings.section.data": "Data",
-    "settings.totalsHint": "The box under the planets with the whole account\u2019s resources and daily production.",
+    "settings.totalsHint": "The box under the planets with the whole account’s resources and daily production.",
     "settings.sim": "Simulator",
     "settings.simHint": "Opens from the Simulate button in the spy table and in the reports, already filled with your research.",
     "settings.shared": "Spy reports shared by the alliance",
-    "settings.sharedHint": "Also shows in the spy table the reports shared in Communication, marked \xABally\xBB.",
+    "settings.sharedHint": "Also shows in the spy table the reports shared in Communication, marked «ally».",
     "settings.fold": "Game text folded",
     "settings.foldHint": "Hides the long text of expeditions and transports under the summary; a click on the summary opens it.",
     "settings.backupHint": "Saves all Future data to a file, or restores it from one.",
@@ -2138,7 +2234,7 @@
     "fleet.rulesLabel": "Rules",
     "fleet.editRules": "Rules of {body}",
     "fleet.general": "Settings",
-    "fleet.generalHint": "Cargo ships, favourites, expedition, Repeat and keys: in Future\u2019s settings",
+    "fleet.generalHint": "Cargo ships, favourites, expedition, Repeat and keys: in Future’s settings",
     "settings.section.fleet": "Fleet",
     "settings.section.keys": "Keys",
     "settings.mainShipHint": "The cargo ship Transport, Deploy and To moon use first.",
@@ -2148,7 +2244,7 @@
     "settings.expValueHint": "Empty = calculated; 50% = half of it; a number = fixed cargo.",
     "settings.extrasHint": "Adds one probe and one pathfinder, like OGLight.",
     "settings.touch": "Touch bar",
-    "settings.touchHint": "At the bottom of the screen: this page\u2019s shortcuts and, on the Fleet page, the game\u2019s Next / Send button.",
+    "settings.touchHint": "At the bottom of the screen: this page’s shortcuts and, on the Fleet page, the game’s Next / Send button.",
     "settings.touchAuto": "On touch",
     "settings.touchOn": "Always",
     "settings.touchOff": "Never",
@@ -2156,20 +2252,20 @@
     "settings.keys.targets": "Targets",
     "settings.keys.fleet": "Fleet",
     "settings.keys.galaxy": "Galaxy (touch bar)",
-    "settings.keyPress": "Press a key\u2026",
+    "settings.keyPress": "Press a key…",
     "settings.keyNone": "none",
-    "settings.keyFixed": "The game\u2019s key, cannot change.",
+    "settings.keyFixed": "The game’s key, cannot change.",
     "settings.keyChange": "Click to change it.",
     "settings.keyReset": "Default",
     "settings.keyResetHint": "Back to {key}",
-    "settings.keyTaken": "Done. {key} was on \u201C{other}\u201D, which now has no key.",
+    "settings.keyTaken": "Done. {key} was on “{other}”, which now has no key.",
     "settings.keySaved": "Key saved.",
-    "settings.keyGame": "the game\u2019s arrows",
+    "settings.keyGame": "the game’s arrows",
     "settings.keysDefault": "Default keys",
     "settings.keysHint": "Puts every key back as it was.",
     "settings.keysDefaultDone": "Default keys restored.",
-    "settings.keyListen": "Press the new key for \u201C{name}\u201D: a letter or a digit. Esc cancels, Delete removes it.",
-    "settings.keyCleared": "\u201C{name}\u201D now has no key.",
+    "settings.keyListen": "Press the new key for “{name}”: a letter or a digit. Esc cancels, Delete removes it.",
+    "settings.keyCleared": "“{name}” now has no key.",
     "settings.keyBad": "Use a letter or a digit, without Ctrl or Alt.",
     "settings.expShipHint": "Automatic = the best one you have on that planet or moon.",
     "fleet.actionsLabel": "Prepare a fleet",
@@ -2215,7 +2311,7 @@
     "marks.home": "Home planet",
     "marks.col.name": "Name",
     "marks.note": "Note",
-    "marks.notePlaceholder": "Note about this player\u2026",
+    "marks.notePlaceholder": "Note about this player…",
     "marks.noteNeedsFlag": "Flag the player to write a note.",
     "marks.writeShort": "Write",
     "tech.population": "Population needed for level {level}",
@@ -2225,7 +2321,7 @@
     "tech.satDeficit": "{n} solar satellites ({energy} energy) needed to bring energy back above zero",
     "tech.satBalance": "energy now {energy}",
     "tech.satPer": "1 satellite = {energy} on this planet",
-    "tech.satPerGuess": "1 satellite \u2248 {energy} (estimate: open the Solar Satellite on this planet for the exact value)",
+    "tech.satPerGuess": "1 satellite ≈ {energy} (estimate: open the Solar Satellite on this planet for the exact value)",
     "tech.satFill": "click: types the number in the amount",
     "tech.satGo": "click: opens the Solar Satellite in Resources with the number already typed in",
     "fleet.btn.collect": "Expedition collection",
@@ -2243,8 +2339,8 @@
     "fleet.btn.skip": "Skip",
     "fleet.tip.skip": "Nothing to move here: opens the next planet or moon of the round with the same action ready. Nothing leaves from here.",
     "fleet.tip.collect": "For expeditions from several moons: brings the spare ships and resources to the main moon, keeping the reserves",
-    "fleet.collect.transport": "1 \xB7 Transport",
-    "fleet.collect.deploy": "2 \xB7 Deploy",
+    "fleet.collect.transport": "1 · Transport",
+    "fleet.collect.deploy": "2 · Deploy",
     "fleet.collectOnce": "Just once, towards:",
     "fleet.collectNoFav": "no main moon (Settings)",
     "fleet.send.label": "Transport and Deploy: destination and resources",
@@ -2277,7 +2373,7 @@
     "fleet.collectDeployRes": "Deploy: take resources too",
     "settings.collectDeployResHint": "Off: the Collection deploy sends only the ships, the resources stay.",
     "fleet.loadOrder": "Loading order",
-    "settings.loadOrderHint": "Which resource fills the Collection cargo first, then second and third (the game does D \u2192 C \u2192 M).",
+    "settings.loadOrderHint": "Which resource fills the Collection cargo first, then second and third (the game does D → C → M).",
     "msg.say.late": "the fleet comes back later",
     "msg.say.early": "the fleet comes back early",
     "msg.say.nothing": "nothing was found",
@@ -2304,7 +2400,7 @@
     "plan.sec.arriving": "On the way",
     "plan.sec.unknown": "Resources unknown",
     "plan.sec.ready": "Ready",
-    "plan.colMissing": "missing (metal \xB7 crystal \xB7 deuterium)",
+    "plan.colMissing": "missing (metal · crystal · deuterium)",
     "plan.colCost": "cost",
     "plan.queued": "queued",
     "plan.queuedHint": "Queued in the game, not paid yet: its resources are held back and count neither for the plan nor for transports",
@@ -2312,11 +2408,11 @@
     "fleet.mainShipIs": "Main ship for automatic transports",
     "fleet.mainShipPick": "Use this ship for automatic transports (moon, collection, plan)",
     "settings.expStyle": "Expedition summary",
-    "settings.expStyleHint": "With another tool decorating the reports (OGame Tracker, OGLight, \u2026) Future steps aside and only records, as OGLight does. The journal always records.",
+    "settings.expStyleHint": "With another tool decorating the reports (OGame Tracker, OGLight, …) Future steps aside and only records, as OGLight does. The journal always records.",
     "settings.expStyle.auto": "Automatic",
     "settings.expStyle.always": "Always Future",
     "settings.expStyle.never": "Record only",
-    "tech.labShort": "Network {total} \xB7 {n} labs",
+    "tech.labShort": "Network {total} · {n} labs",
     "tech.labNet": "Labs working on this research: {total} = here {here} + {linked} (Intergalactic Research Network level {irn})",
     "tech.labNeed": "labs from level {need} count",
     "tech.labHereShort": "this planet's lab is below level {need}: it cannot start here",
@@ -2330,15 +2426,15 @@
     "orion.rewards": "rewards {v} MSU",
     "orion.freeWord": "free",
     "orion.paidBack": "lithium {paid} paid, {back} back",
-    "orion.planAll": "launch now: {free} lithium free at the end{held} collects all {waves} waves, \u2248{msu} MSU",
-    "orion.planSome": "launch now: {free} lithium free at the end{held} collects {covered}/{waves} waves, \u2248{msu} MSU",
+    "orion.planAll": "launch now: {free} lithium free at the end{held} collects all {waves} waves, ≈{msu} MSU",
+    "orion.planSome": "launch now: {free} lithium free at the end{held} collects {covered}/{waves} waves, ≈{msu} MSU",
     "orion.held": " ({v} held back for {n} under way)",
     "orion.planNever": "not all {waves}: lithium production stops before it gets there",
     "orion.planWait": "all {waves} if launched {h} from now or later",
     "orion.planTitle": "Lithium now plus {h} of production, collected at the end, keeping back what the anomalies under way will need when they end:",
     "orion.planNone": "none remembered.",
-    "orion.planOwnBack": "This anomaly\u2019s own {v} lithium back arrives with the collection, so it cannot pay for it.",
-    "orion.toggleHint": "Whether the lithium this anomaly still needs is held back in the scanner\u2019s plans",
+    "orion.planOwnBack": "This anomaly’s own {v} lithium back arrives with the collection, so it cannot pay for it.",
+    "orion.toggleHint": "Whether the lithium this anomaly still needs is held back in the scanner’s plans",
     "orion.soFar": "so far",
     "orion.back": "back",
     "orion.paid": "paid",
@@ -2350,7 +2446,7 @@
     "orion.partial": "cost so far, total not known yet",
     "orion.empty": "No anomaly recorded yet. Open the Orion missions overview: the anomalies listed there are saved here.",
     "orion.balance": "Balance",
-    "orion.balanceHint": "rewards + ships received \u2212 ships lost \u2212 fuel (lithium apart)",
+    "orion.balanceHint": "rewards + ships received − ships lost − fuel (lithium apart)",
     "orion.rewardsK": "Rewards",
     "orion.shipsGot": "Ships received",
     "orion.lost": "Ships lost",
@@ -2364,7 +2460,7 @@
     "orion.legendDown": "Costs: ships lost + fuel (MSU)",
     "orion.other": "Other",
     "orion.anomalies": "Anomalies appeared",
-    "orion.search": "Search name or coordinates\u2026",
+    "orion.search": "Search name or coordinates…",
     "orion.all": "all",
     "orion.rowsHint": "row figures = chosen period only",
     "orion.noneInPeriod": "No anomaly appeared in this period.",
@@ -2397,7 +2493,7 @@
     "orion.collectCost": "to pay now",
     "orion.lithiumBack": "lithium back",
     "orion.notCountedHint": "Rewards not counted in the value: the page gives only how many, not which",
-    "orion.msuNoCost": "MSU \xB7 no cost",
+    "orion.msuNoCost": "MSU · no cost",
     "orion.freeHint": "the lithium back covers the cost",
     "orion.unitH": "MSU per hour of lithium",
     "orion.unitM": "MSU per 1M lithium",
@@ -2419,30 +2515,30 @@
     "orion.kBarSub": "storage {v}",
     "orion.wholeMission": "whole mission",
     "orion.extraValue": "other rewards (estimate)",
-    "orion.extraHint": "Card budget \u2248{budget} MSU (from the multiplier learned for this type and mode); the resources take part of it, the rest \u2248{extra} goes to the other rewards, counted at {rate}%.",
-    "orion.withExtra": "\u2248{v} of it estimated for the other rewards",
-    "orion.perMissionHour": "\u2248{v} MSU per mission hour",
-    "orion.lowRoll": "low roll \u2248{v}",
+    "orion.extraHint": "Card budget ≈{budget} MSU (from the multiplier learned for this type and mode); the resources take part of it, the rest ≈{extra} goes to the other rewards, counted at {rate}%.",
+    "orion.withExtra": "≈{v} of it estimated for the other rewards",
+    "orion.perMissionHour": "≈{v} MSU per mission hour",
+    "orion.lowRoll": "low roll ≈{v}",
     "orion.lowRollHint": "Combat: a collection pays everything or 37.5% of the rewards (deliveries always pay everything). Community figure, checked by the Orion journal.",
     "orion.lowRolls": "low rolls",
     "tech.iasShort": "Lithium +{v}/h",
-    "tech.ias": "Lithium production of this scanner while converting: {from}/h \u2192 {to}/h at level {level} (community formula: 15.36 \xD7 L \xD7 1.1^L \xD7 economy speed)",
+    "tech.ias": "Lithium production of this scanner while converting: {from}/h → {to}/h at level {level} (community formula: 15.36 × L × 1.1^L × economy speed)",
     "orion.simOpen": "Simulate this wave in {tool} (new tab): the wave attacks, your fleet at the anomaly defends; add your ships in the simulator",
     "orion.expected": "Expected when scanned (whole mission)",
     "orion.nowLabel": "To collect now:",
     "orion.nowCost": "for {v} lithium",
-    "orion.cargoNeed": "Delivery: cargo ships only, with at least the incoming fleet\u2019s capacity. The largest: {cap} (wave {wave}) \u2248 {lc} large or {sc} small cargoes",
-    "orion.cargoHint": "Capacity of the incoming NPC fleets (their ships\u2019 base capacity, with their bonus), from the wave data; the player\u2019s cargoes at the capacity read on the fleet page. Warships in the fleet = no reward.",
+    "orion.cargoNeed": "Delivery: cargo ships only, with at least the incoming fleet’s capacity. The largest: {cap} (wave {wave}) ≈ {lc} large or {sc} small cargoes",
+    "orion.cargoHint": "Capacity of the incoming NPC fleets (their ships’ base capacity, with their bonus), from the wave data; the player’s cargoes at the capacity read on the fleet page. Warships in the fleet = no reward.",
     "orion.waveN": "Wave {n}",
-    "fleet.expeditionSpread": "Random system \xB1",
+    "fleet.expeditionSpread": "Random system ±",
     "settings.expSpreadHint": "Like OGLight: the expedition goes to a random system between the origin minus N and plus N. 0 = always the origin system.",
     "fleet.expeditionSplit": "Share cargo over the slots",
     "settings.expSplitHint": "For young universes: each expedition takes at most the cargo ships here divided by the expedition slots still free, so the first one does not take them all.",
-    "fleet.expSplitCalc": "{ship}: {n} \xF7 {slots} slots = {each} per expedition",
+    "fleet.expSplitCalc": "{ship}: {n} ÷ {slots} slots = {each} per expedition",
     "fleet.expSplitUnknown": "The calculation shows after opening the Fleet page.",
     "fleet.expeditionStay": "Expeditions from the same planet",
     "settings.expStayHint": "With Repeat on, after an expedition the same planet or moon opens again with the expedition prepared, while slots are free. Off = the next planet.",
-    "fleet.ok.expSystem": "to {coords} (\xB1{n})",
+    "fleet.ok.expSystem": "to {coords} (±{n})",
     "fleet.ok.expSplit": "cargo shared over {slots} slots",
     "fleet.emptyHint": "No ships here. You can mark this body to be skipped in expeditions.",
     "fleet.tip.skipEmpty": "No ships here: opens the next planet or moon of the round with the expedition prepared. Nothing leaves from here.",
@@ -2477,81 +2573,179 @@
     "mission.7": "Colonisation",
     "mission.9": "Moon destruction",
     "mission.18": "Discovery",
-    "flights.title": "Fleets in flight"
+    "flights.title": "Fleets in flight",
+    "settings.section.guide": "Guide",
+    "tour.next": "Next",
+    "tour.back": "Back",
+    "tour.done": "Done",
+    "tour.close": "Close the guide",
+    "tour.count": "{n} of {total}",
+    "tour.help": "Guide to this window",
+    "tour.zoneHelp": "What this zone does",
+    "tour.inviteTitle": "First time here?",
+    "tour.inviteText": "A one-minute guide to «{name}»: I light up each feature and tell you what it does and how to use it.",
+    "tour.show": "Show me",
+    "tour.later": "Later",
+    "tour.no": "No, thanks",
+    "tour.name.board": "Board and planet menu",
+    "tour.name.fleet": "Fleet page",
+    "tour.name.settings": "Settings",
+    "tour.name.dashboard": "Dashboard",
+    "tour.name.planner": "Plan",
+    "tour.name.journal": "Journal",
+    "tour.name.galaxy": "Galaxy",
+    "tour.name.messages": "Messages",
+    "tour.name.tech": "Buildings and research",
+    "tour.where.board": "Every page.",
+    "tour.where.fleet": "Ships, missions, reserves.",
+    "tour.where.settings": "Gear.",
+    "tour.where.dashboard": "Click Production.",
+    "tour.where.planner": "Click Plan.",
+    "tour.where.journal": "Click Journal.",
+    "tour.where.galaxy": "Flags, ranking, debris.",
+    "tour.where.messages": "Reports and spy reports.",
+    "tour.where.tech": "Buildings, with one picked.",
+    "tour.firstSteps": "First steps",
+    "tour.stepDone": "Done",
+    "tour.step.sync": "Sync the data",
+    "tour.step.syncHint": "The arrows button above the planets: levels and research of the whole account.",
+    "tour.step.fleetsave": "Fleetsave target",
+    "tour.step.fleetsaveHint": "In Planets and moons: where each body's fleet flees.",
+    "tour.step.mainShip": "Main ship",
+    "tour.step.mainShipHint": "On the Fleet page, the mark on the cargo ship you use most.",
+    "tour.step.plan": "A building in the Plan",
+    "tour.step.planHint": "On the building pages: pick a building and press Plan.",
+    "tour.step.journal": "Expedition journal",
+    "tour.step.journalHint": "Open expedition reports in your messages: the journal fills itself.",
+    "tour.all": "All guides",
+    "tour.start": "Start",
+    "tour.invites": "Invites",
+    "tour.offer": "Offer the guides",
+    "tour.offerHint": "On first use of a feature an invite shows up; the guide starts only from Show me.",
+    "tour.reset": "Guides already seen",
+    "tour.resetHint": "Brings the invites back for guides already seen or declined.",
+    "tour.resetDo": "Reset",
+    "tour.settings.0": "Settings|Split by topic. Each choice applies at once and stays in this browser.",
+    "tour.settings.1": "One row, one choice|The name, the explanation below, the switch or value on the right.",
+    "tour.settings.2": "Planets and moons|Fleetsave and reserves of each body. Pick Planets or Moons, then tap a body to edit it.",
+    "tour.settings.3": "Keys|Change the shortcuts and choose when to show the touch bar.",
+    "tour.settings.4": "Data|Save or restore everything Future remembers; import OGLight's data.",
+    "tour.settings.5": "Guide|First steps to complete, every guide and the invites.",
+    "tour.dashboard.0": "Dashboard|The whole account on one board. Figures come from the last sync.",
+    "tour.dashboard.1": "Investments|What to build first: each rung has its cost and days to pay back; the best deal on top.",
+    "tour.dashboard.2": "History|How points and production grow, day by day.",
+    "tour.dashboard.3": "Mines and facilities|Levels of every planet in a table; coloured cells are running queues.",
+    "tour.planner.0": "Plan|What everything in the plan costs, what you have and what is missing.",
+    "tour.planner.1": "Two views|By planet: what to bring where. By technology: the list of buildings.",
+    "tour.planner.2": "Bring all|Prepares in Fleet the transport of the resources missing on that planet. Sending stays your click.",
+    "tour.planner.3": "Empty plan|Open a building or research page, pick what to build and press Plan.",
+    "tour.journal.0": "Journal|Expeditions read in your messages: resources, ships, dark matter, losses.",
+    "tour.journal.1": "Period|Today, yesterday, 7 or 30 days, or all.",
+    "tour.journal.2": "Result|What the expeditions brought in the period, in MSU.",
+    "tour.journal.3": "Trend|How the period went, day by day.",
+    "tour.galaxy.0": "The system at a glance|Players, inactives and debris of the system, on one line.",
+    "tour.galaxy.1": "Flags|Point at a player: a flag shows next to the name to mark them. You find them in Targets, under the menu.",
+    "tour.galaxy.2": "Player sheet|Click the name: their planets and your notes in the side bar.",
+    "tour.galaxy.3": "Ranking|Point at it for the points; click opens the highscore at their position.",
+    "tour.galaxy.4": "Debris in MSU|The debris field's value, converted to metal.",
+    "tour.messages.0": "Reports at a glance|Each report has its summary: loot, losses, value. Click: shows or hides the game's text.",
+    "tour.messages.1": "Spy reports in a table|Spy reports side by side, sortable: who pays most, who is defended.",
+    "tour.tech.0": "Add to the plan|Adds this building to the Plan: Future keeps count of the resources missing.",
+    "tour.tech.1": "Several levels|Pick up to which level: cost and time add up.",
+    "tour.tech.2": "Cost and time|What it costs, how long it takes and what is missing with what you have now.",
+    "tour.board.0": "Welcome to Future|Future adds a board of figures, plans and shortcuts to the game. It never plays for you: every send stays your click.",
+    "tour.board.1": "Production|What the account makes per day, in MSU (all converted to metal). Click: opens the Dashboard with investments, mines and history.",
+    "tour.board.2": "Plan|The buildings you want and the resources still missing. Add them with the Plan button on building and research pages. Click: opens the Plan.",
+    "tour.board.3": "One row per planet|Resources in stock (the bar is the storage), minutes since your last visit, running queues. Below, fleets flying from and to that body.\nRed with a sword or an eye: attack or spy probe incoming. Updated when you load a page.",
+    "tour.board.4": "Sync|Reads the whole account again from the game: levels, research, lifeforms. Press it after building or researching.",
+    "tour.board.5": "Settings|All of Future's choices, in tabs. The Guide tab has the first steps and every guide to see again.",
+    "tour.board.6": "Expedition journal|Today's and yesterday's expeditions and what they brought. It fills itself when you open reports in your messages. Click: the full journal.",
+    "tour.board.7": "Targets|Players you marked with flags in Galaxy. Click: the side bar; M key: the next position.",
+    "tour.board.8": "Key bar|Shortcuts to tap: previous and next planet, fleet missions, the settings gear.",
+    "tour.board.9": "First step: the Fleet|Open the Fleet page: there I'll help you set fleetsave, main ship and reserves.\nEvery Future window has a ? at the top to see its guide again.",
+    "tour.fleet.0": "The Fleet page|Future prepares the fleet: ships, destination, mission. The game's Next and Send stay yours.\nLet's set everything up in 5 steps.",
+    "tour.fleet.1": "1 · Fleet settings|Favourite Transport and Deploy targets, expeditions, the round of planets. Once is enough.",
+    "tour.fleet.2": "2 · Rules and fleetsave|For each planet and moon: where the fleetsave goes and what stays home. Until a target is set, Fleetsave stays dashed.",
+    "tour.fleet.3": "3 · Main ship|Tap this mark on the cargo ship you use most: Future works out how many are needed for the resources.",
+    "tour.fleet.4": "4 · Reserves|What never leaves this body: ships, resources, jump gate deuterium. A click turns each on or off; values are changed in Rules.",
+    "tour.fleet.5": "5 · Round|Repeat: after a send you move to the next body, to go round all of them. Skip this body: the round skips it.",
+    "tour.fleet.6": "Mission|Transport and Deploy ask where; Expedition prepares the expedition; Fleetsave the escape; Last repeats the last fleet. The letter at the top is the key.",
+    "tour.fleet.7": "Destination|To moon: everything to this planet's moon. Collect: brings the planets' resources to one body, by transport or deployment.",
+    "tour.fleet.8": "Messages|Here Future says what it prepared or what is missing. Point at a button to read what it does.",
+    "tour.fleet.9": "Next and Send|The game's button, within thumb's reach. Pressing it stays your choice.",
+    "tour.fleet.10": "Done|Next steps: fleetsave target in Rules, main ship, then try Expedition.\nThe ? next to Mission, Destination, Reserves and Round explain each zone again."
   };
 
   // src/i18n/fr.json
   var fr_default = {
     "app.name": "Future",
     "sync.button": "Synchroniser le compte",
-    "sync.done": "Donn\xE9es mises \xE0 jour",
-    "sync.failed": "\xC9chec de la synchronisation : le jeu n\u2019a pas envoy\xE9 les donn\xE9es. R\xE9essayez",
-    "data.missing": "Donn\xE9es manquantes sur {count} plan\xE8tes : ouvrez leur vue d'ensemble",
-    "guard.refused": "Appel bloqu\xE9 pour respecter les r\xE8gles d'OGame",
+    "sync.done": "Données mises à jour",
+    "sync.failed": "Échec de la synchronisation : le jeu n’a pas envoyé les données. Réessayez",
     "planetMenu.moon": "Lune",
-    "res.metal": "M\xE9tal",
+    "res.metal": "Métal",
     "res.crystal": "Cristal",
-    "res.deuterium": "Deut\xE9rium",
-    "toolbar.settings": "Param\xE8tres",
-    "toolbar.lastSync": "derni\xE8re mise \xE0 jour {time}",
+    "res.deuterium": "Deutérium",
+    "toolbar.settings": "Paramètres",
+    "toolbar.lastSync": "dernière mise à jour {time}",
     "settings.totals": "Totaux des ressources",
     "settings.on": "Oui",
     "settings.off": "Non",
-    "planetMenu.age": "Minutes depuis votre derni\xE8re visite de cette plan\xE8te ou lune (la synchronisation ne la remet pas \xE0 z\xE9ro)",
+    "planetMenu.age": "Minutes depuis votre dernière visite de cette planète ou lune (la synchronisation ne la remet pas à zéro)",
     "dash.title": "Tableau de bord",
     "dash.close": "Fermer",
-    "dash.noData": "aucune donn\xE9e : appuyez sur Synchroniser",
+    "dash.noData": "aucune donnée : appuyez sur Synchroniser",
     "dash.points": "Points",
     "dash.rank": "Rang {rank} sur {of}",
     "dash.pointsHint": "ouvrez la Vue d'ensemble pour les lire",
     "dash.stock": "Ressources (MSU)",
-    "dash.stockNote": "plan\xE8tes et lunes, estimation",
+    "dash.stockNote": "planètes et lunes, estimation",
     "dash.prodHour": "Production horaire (MSU)",
     "dash.prodDay": "{value} par jour",
-    "dash.bodies": "Plan\xE8tes / Lunes",
-    "dash.bodiesNote": "avec donn\xE9es",
-    "dash.idle": "Plan\xE8tes \xE0 l'arr\xEAt",
+    "dash.bodies": "Planètes / Lunes",
+    "dash.bodiesNote": "avec données",
+    "dash.idle": "Planètes à l'arrêt",
     "dash.idleNote": "aucune construction",
     "dash.production": "Production",
     "dash.dayShort": "j",
     "dash.daysShort": "j",
-    "alert.stale.one": "Donn\xE9es de plus d'une heure sur 1 corps",
-    "alert.idle.one": "1 plan\xE8te sans construction",
-    "alert.soonFull.one": "1 plan\xE8te pleine d'ici 6 heures",
-    "alert.full.one": "Hangars pleins sur 1 plan\xE8te",
-    "alert.missing.one": "Donn\xE9es manquantes sur 1 plan\xE8te",
+    "alert.stale.one": "Données de plus d'une heure sur 1 corps",
+    "alert.idle.one": "1 planète sans construction",
+    "alert.soonFull.one": "1 planète pleine d'ici 6 heures",
+    "alert.full.one": "Hangars pleins sur 1 planète",
+    "alert.missing.one": "Données manquantes sur 1 planète",
     "dash.factProdDay": "MSU par jour",
-    "dash.factDefence": "d\xE9fense",
+    "dash.factDefence": "défense",
     "dash.factFleet": "flotte",
     "dash.factStock": "sur les corps",
     "dash.factRank": "sur {of}",
     "dash.factPoints": "points",
-    "dash.nextRung": "Apr\xE8s le prochain investissement : {value} par jour",
+    "dash.nextRung": "Après le prochain investissement : {value} par jour",
     "dash.now": "maint.",
-    "dash.msuHint": "Barres en MSU (3:2:1) : m\xE9tal, cristal \xD71,5, deut\xE9rium \xD73.",
-    "dash.checks": "\xC0 v\xE9rifier",
+    "dash.msuHint": "Barres en MSU (3:2:1) : métal, cristal ×1,5, deutérium ×3.",
+    "dash.checks": "À vérifier",
     "dash.allGood": "Tout va bien.",
-    "dash.bodiesTable": "Plan\xE8tes et lunes",
+    "dash.bodiesTable": "Planètes et lunes",
     "dash.showMoons": "Afficher les lunes",
     "dash.hideMoons": "Masquer les lunes",
     "dash.colBody": "Corps",
-    "dash.colMines": "Mines M\xB7C\xB7D",
+    "dash.colMines": "Mines M·C·D",
     "dash.colProd": "MSU/jour",
     "dash.colFull": "Plein dans",
-    "dash.colAge": "Donn\xE9es",
+    "dash.colAge": "Données",
     "dash.full": "plein",
-    "dash.idleTag": "arr\xEAt",
+    "dash.idleTag": "arrêt",
     "dash.total": "Total",
-    "dash.tableHint": "Cliquez un titre pour trier. Ressources estim\xE9es depuis la derni\xE8re lecture plus la production.",
-    "alert.missing": "Donn\xE9es manquantes sur {count} plan\xE8tes",
-    "alert.full": "Hangars pleins sur {count} plan\xE8tes",
-    "alert.soonFull": "{count} plan\xE8tes pleines d'ici 6 heures",
-    "alert.idle": "{count} plan\xE8tes sans construction",
-    "alert.stale": "Donn\xE9es de plus d'une heure sur {count} corps",
-    "queue.building": "B\xE2timent",
+    "dash.tableHint": "Cliquez un titre pour trier. Ressources estimées depuis la dernière lecture plus la production.",
+    "alert.missing": "Données manquantes sur {count} planètes",
+    "alert.full": "Hangars pleins sur {count} planètes",
+    "alert.soonFull": "{count} planètes pleines d'ici 6 heures",
+    "alert.idle": "{count} planètes sans construction",
+    "alert.stale": "Données de plus d'une heure sur {count} corps",
+    "queue.building": "Bâtiment",
     "queue.research": "Recherche",
     "queue.ship": "Chantier",
-    "queue.lfbuilding": "B\xE2timent forme de vie",
+    "queue.lfbuilding": "Bâtiment forme de vie",
     "queue.lfresearch": "Recherche forme de vie",
     "dash.queues": "Files actives",
     "dash.queuesNone": "aucune construction",
@@ -2560,154 +2754,154 @@
     "dash.rates": "Taux M : C : D",
     "dash.newColony": "nouvelle colonie",
     "dash.account": "Compte",
-    "dash.lfGuessed": "emplacement \xE0 confirmer",
-    "dash.lfGuessedHint": "Recherche d\xE9duite des niveaux : ouvrez la page Recherches FDV de cette plan\xE8te pour savoir laquelle est active.",
-    "dash.needLevels": "Pour le bonus du niveau des esp\xE8ces, ouvrez :",
+    "dash.lfGuessed": "emplacement à confirmer",
+    "dash.lfGuessedHint": "Recherche déduite des niveaux : ouvrez la page Recherches FDV de cette planète pour savoir laquelle est active.",
+    "dash.needLevels": "Pour le bonus du niveau des espèces, ouvrez :",
     "dash.openLfSettings": "Options des formes de vie",
-    "dash.needBuildings": "B\xE2timents FDV au niveau 0 \xE0 v\xE9rifier (pr\xE9requis) sur {count} plan\xE8tes, ouvrez la page de :",
-    "dash.needSlots": "Recherches FDV actives \xE0 confirmer sur {count} plan\xE8tes, ouvrez la page de :",
+    "dash.needBuildings": "Bâtiments FDV au niveau 0 à vérifier (prérequis) sur {count} planètes, ouvrez la page de :",
+    "dash.needSlots": "Recherches FDV actives à confirmer sur {count} planètes, ouvrez la page de :",
     "dash.tab.investments": "Investissements",
     "dash.movesOpen": "Ouvrir l'onglet Investissements",
     "dash.stepDone": "fait",
-    "dash.planetsCount": "{count} plan\xE8tes",
+    "dash.planetsCount": "{count} planètes",
     "dash.doneCount": "{done} sur {count} faits",
     "dash.investKinds": "Que proposer",
-    "dash.invest.metal": "M\xE9tal",
+    "dash.invest.metal": "Métal",
     "dash.invest.crystal": "Cristal",
-    "dash.invest.deuterium": "Deut\xE9rium",
-    "dash.invest.lfBuilding": "B\xE2timents FDV",
+    "dash.invest.deuterium": "Deutérium",
+    "dash.invest.lfBuilding": "Bâtiments FDV",
     "dash.invest.lfResearch": "Recherches FDV",
     "dash.invest.plasma": "Plasma",
     "dash.invest.astro": "Astrophysique",
     "dash.movesNone": "Niveaux des mines requis : Synchroniser.",
-    "dash.movesHint": "Comme les amortissements d'InfoCompte : mines, plasma et nouvelle colonie (astrophysique + \xE9quipement moyen d'une plan\xE8te) par jours d'amortissement \xE0 vos taux ; chaque \xE9tape compte les pr\xE9c\xE9dentes. Sans \xE9nergie ni r\xE9ductions formes de vie.",
+    "dash.movesHint": "Comme les amortissements d'InfoCompte : mines, plasma et nouvelle colonie (astrophysique + équipement moyen d'une planète) par jours d'amortissement à vos taux ; chaque étape compte les précédentes. Sans énergie ni réductions formes de vie.",
     "dash.colQueue": "En cours",
-    "mine.metal": "Mine de m\xE9tal",
+    "mine.metal": "Mine de métal",
     "mine.crystal": "Mine de cristal",
-    "mine.deuterium": "Synth\xE9tiseur de deut\xE9rium",
+    "mine.deuterium": "Synthétiseur de deutérium",
     "fleet.noShips": "Aucun vaisseau ici.",
     "fleet.fleetsave": "Fleetsave",
     "fleet.galaxy": "Galaxie",
-    "fleet.system": "Syst\xE8me",
+    "fleet.system": "Système",
     "fleet.position": "Position",
     "fleet.type": "Type",
-    "fleet.typePlanet": "Plan\xE8te",
+    "fleet.typePlanet": "Planète",
     "fleet.typeMoon": "Lune",
-    "fleet.typeDebris": "Champ de d\xE9bris",
+    "fleet.typeDebris": "Champ de débris",
     "fleet.mission": "Mission",
     "fleet.speed": "Vitesse",
-    "fleet.fleetsaveHint": "Il a ses propres vaisseaux et ressources \xE0 garder et ignore les interrupteurs vaisseaux, ressources et porte de saut. Galaxie et syst\xE8me vides = ceux de la plan\xE8te de d\xE9part. Sans position, fleetsave d\xE9sactiv\xE9.",
+    "fleet.fleetsaveHint": "Il a ses propres vaisseaux et ressources à garder et ignore les interrupteurs vaisseaux, ressources et porte de saut. Galaxie et système vides = ceux de la planète de départ. Sans position, fleetsave désactivé.",
     "fleet.save": "Enregistrer",
-    "fleet.saved": "Enregistr\xE9.",
-    "fleet.copied": "Copi\xE9 sur {count} corps.",
-    "fleet.reserve": "R\xE9serve",
-    "fleet.noReserve": "Aucune r\xE8gle active",
-    "fleet.resMinusReserve": "Ressources \u2212 r\xE9serve",
-    "fleet.resLoaded": "{cargo} ressources charg\xE9es : v\xE9rifiez et envoyez",
+    "fleet.saved": "Enregistré.",
+    "fleet.copied": "Copié sur {count} corps.",
+    "fleet.reserve": "Réserve",
+    "fleet.noReserve": "Aucune règle active",
+    "fleet.resMinusReserve": "Ressources − réserve",
+    "fleet.resLoaded": "{cargo} ressources chargées : vérifiez et envoyez",
     "mission.1": "Attaquer",
     "mission.3": "Transporter",
     "mission.4": "Stationner",
-    "mission.5": "Stationner (alli\xE9)",
+    "mission.5": "Stationner (allié)",
     "mission.6": "Espionner",
     "mission.8": "Recycler",
-    "mission.15": "Exp\xE9dition",
-    "fleet.editTitlePlanet": "R\xE9serves et fleetsave de {body}",
-    "fleet.editTitleMoon": "R\xE9serves et fleetsave de la lune {body}",
-    "fleet.settingsTitle": "R\xE8gles de cette plan\xE8te ou lune",
+    "mission.15": "Expédition",
+    "fleet.editTitlePlanet": "Réserves et fleetsave de {body}",
+    "fleet.editTitleMoon": "Réserves et fleetsave de la lune {body}",
+    "fleet.settingsTitle": "Règles de cette planète ou lune",
     "fleet.transportTitle": "Transports et stationnements",
     "fleet.mainShip": "Vaisseau principal",
     "fleet.secondShip": "Vaisseau secondaire (si le premier ne suffit pas)",
     "fleet.none": "Aucun",
-    "fleet.expeditionTitle": "Exp\xE9ditions",
+    "fleet.expeditionTitle": "Expéditions",
     "fleet.expeditionShip": "Vaisseau cargo",
     "fleet.bestShip": "Le meilleur disponible",
-    "fleet.expeditionValue": "Fret \xE0 couvrir",
+    "fleet.expeditionValue": "Fret à couvrir",
     "fleet.expCalcUnknown": "Ouvrez la page flotte pour voir la valeur du jeu",
     "fleet.expCalc": "Maximum du jeu : {value}",
     "fleet.auto": "automatique",
-    "fleet.expeditionExtras": "Ajouter 1 sonde et 1 \xE9claireur",
-    "settings.expBigHint": "Un vaisseau de combat en plus dans l'exp\xE9dition. Automatique = le plus gros que vous avez ; si celui choisi manque, le plus gros est utilis\xE9.",
+    "fleet.expeditionExtras": "Ajouter 1 sonde et 1 éclaireur",
+    "settings.expBigHint": "Un vaisseau de combat en plus dans l'expédition. Automatique = le plus gros que vous avez ; si celui choisi manque, le plus gros est utilisé.",
     "fleet.biggestShip": "Automatique : le plus gros",
     "fleet.expeditionBig": "Gros vaisseau",
-    "fleet.expeditionHint": "Automatique = le maximum qu'une exp\xE9dition peut rapporter (classe, vitesse de l'univers, bonus de classe). Vous pouvez saisir une valeur fixe (ex. 150M) ou un pourcentage (ex. 50%).",
-    "fleet.repeatTitle": "R\xE9p\xE9ter",
-    "fleet.repeat": "Apr\xE8s l'envoi, ouvrir la plan\xE8te ou lune suivante d\xE9j\xE0 pr\xEAte",
-    "fleet.repeatHint": "Pour Lune, Transport, Stationner, Exp\xE9dition et Fleetsave. L'envoi reste votre clic ; le tour s'arr\xEAte au retour au premier.",
-    "fleet.repeatShort": "R\xE9p\xE9ter",
-    "fleet.speedAsk.q": "Vitesse {pct}% aussi pour les fleetsaves suivants de la tourn\xE9e ?",
+    "fleet.expeditionHint": "Automatique = le maximum qu'une expédition peut rapporter (classe, vitesse de l'univers, bonus de classe). Vous pouvez saisir une valeur fixe (ex. 150M) ou un pourcentage (ex. 50%).",
+    "fleet.repeatTitle": "Répéter",
+    "fleet.repeat": "Après l'envoi, ouvrir la planète ou lune suivante déjà prête",
+    "fleet.repeatHint": "Pour Lune, Transport, Stationner, Expédition et Fleetsave. L'envoi reste votre clic ; le tour s'arrête au retour au premier.",
+    "fleet.repeatShort": "Répéter",
+    "fleet.speedAsk.q": "Vitesse {pct}% aussi pour les fleetsaves suivants de la tournée ?",
     "fleet.speedAsk.yes": "Oui",
     "fleet.speedAsk.no": "Non",
-    "fleet.speedAsk.done": "Les fleetsaves suivants de la tourn\xE9e partiront \xE0 {pct}%. Le pr\xE9r\xE9glage g\xE9n\xE9ral ne change pas.",
-    "fleet.speedAsk.hint": "La tourn\xE9e utilise {pct}% jusqu'ici. Seulement pour cette tourn\xE9e : le pr\xE9r\xE9glage des param\xE8tres reste tel quel.",
-    "fleet.rule.skip": "Ignorer en exp\xE9dition",
-    "fleet.rule.skipHint": "Exp\xE9ditions uniquement : R\xE9p\xE9ter et Passer ignorent cette plan\xE8te ou lune, m\xEAme vide.",
+    "fleet.speedAsk.done": "Les fleetsaves suivants de la tournée partiront à {pct}%. Le préréglage général ne change pas.",
+    "fleet.speedAsk.hint": "La tournée utilise {pct}% jusqu'ici. Seulement pour cette tournée : le préréglage des paramètres reste tel quel.",
+    "fleet.rule.skip": "Ignorer en expédition",
+    "fleet.rule.skipHint": "Expéditions uniquement : Répéter et Passer ignorent cette planète ou lune, même vide.",
     "fleet.on": "oui",
     "fleet.off": "non",
-    "fleet.repeatNext": "Envoy\xE9e. Passage \xE0 {body}\u2026",
-    "fleet.repeatDone": "Tour termin\xE9.",
+    "fleet.repeatNext": "Envoyée. Passage à {body}…",
+    "fleet.repeatDone": "Tour terminé.",
     "fleet.pickDest": "choisir la destination",
     "fleet.btn.moon": "Vers lune",
     "fleet.btn.transport": "Transport",
     "fleet.btn.deploy": "Stationner",
-    "fleet.btn.expedition": "Exp\xE9dition",
+    "fleet.btn.expedition": "Expédition",
     "fleet.btn.fleetsave": "Fleetsave",
-    "fleet.tip.moon": "Transporter les ressources vers la lune de cette plan\xE8te avec les cargos n\xE9cessaires",
-    "fleet.tip.transport": "Active le transport : saisissez destination et ressources, puis PT ou GT ajoute les bons transporteurs. Encore pour le d\xE9sactiver",
-    "fleet.tip.deploy": "Active le stationnement : choisissez les vaisseaux, destination et ressources, puis PT ou GT ajoute les transporteurs. Encore pour le d\xE9sactiver",
-    "fleet.tip.expedition": "Exp\xE9dition en position 16 de ce syst\xE8me avec le meilleur vaisseau",
-    "fleet.tip.fleetsave": "Pr\xE9parer le fleetsave de cette plan\xE8te ou lune",
-    "fleet.ok.cargo": "Pr\xEAt : {ships} vaisseaux, {cargo} ressources. Appuyez sur Suivant puis Envoyer",
-    "fleet.ok.ships": "{ships} vaisseaux s\xE9lectionn\xE9s",
-    "fleet.ok.expedition": "Exp\xE9dition pr\xEAte : {ships} vaisseaux pour {target} de fret. Suivant puis Envoyer",
-    "fleet.err.noShips": "Aucun vaisseau disponible au-del\xE0 de la r\xE9serve",
-    "fleet.err.noResources": "Aucune ressource \xE0 transporter au-del\xE0 de la r\xE9serve",
-    "fleet.err.noSkip": "Aucun tour de collecte en cours \xE0 faire avancer",
-    "fleet.skipOffer": "appuyez sur Passer pour aller \xE0 {body}",
-    "fleet.err.noExpSlots": "Aucun emplacement d'exp\xE9dition libre",
-    "fleet.err.noMoon": "Cette plan\xE8te n'a pas de lune",
+    "fleet.tip.moon": "Transporter les ressources vers la lune de cette planète avec les cargos nécessaires",
+    "fleet.tip.transport": "Active le transport : saisissez destination et ressources, puis PT ou GT ajoute les bons transporteurs. Encore pour le désactiver",
+    "fleet.tip.deploy": "Active le stationnement : choisissez les vaisseaux, destination et ressources, puis PT ou GT ajoute les transporteurs. Encore pour le désactiver",
+    "fleet.tip.expedition": "Expédition en position 16 de ce système avec le meilleur vaisseau",
+    "fleet.tip.fleetsave": "Préparer le fleetsave de cette planète ou lune",
+    "fleet.ok.cargo": "Prêt : {ships} vaisseaux, {cargo} ressources. Appuyez sur Suivant puis Envoyer",
+    "fleet.ok.ships": "{ships} vaisseaux sélectionnés",
+    "fleet.ok.expedition": "Expédition prête : {ships} vaisseaux pour {target} de fret. Suivant puis Envoyer",
+    "fleet.err.noShips": "Aucun vaisseau disponible au-delà de la réserve",
+    "fleet.err.noResources": "Aucune ressource à transporter au-delà de la réserve",
+    "fleet.err.noSkip": "Aucun tour de collecte en cours à faire avancer",
+    "fleet.skipOffer": "appuyez sur Passer pour aller à {body}",
+    "fleet.err.noExpSlots": "Aucun emplacement d'expédition libre",
+    "fleet.err.noMoon": "Cette planète n'a pas de lune",
     "fleet.err.noDest": "Choisissez d'abord la destination",
-    "fleet.err.noFleetsave": "Aucun fleetsave d\xE9fini : ouvrez R\xE9serves et fleetsave",
-    "fleet.err.notReady": "La page flotte n'est pas encore pr\xEAte, r\xE9essayez",
-    "fleet.err.page1": "Revenez \xE0 la page 1 de la flotte pour ces boutons",
+    "fleet.err.noFleetsave": "Aucun fleetsave défini : ouvrez Réserves et fleetsave",
+    "fleet.err.notReady": "La page flotte n'est pas encore prête, réessayez",
+    "fleet.err.page1": "Revenez à la page 1 de la flotte pour ces boutons",
     "fleet.close": "Fermer",
-    "fleet.favTitle": "Collecte des exp\xE9ditions : lune principale",
-    "fleet.favTransport": "1 \xB7 Transport vers",
-    "fleet.favDeploy": "2 \xB7 Stationner vers",
-    "fleet.tip.cargo": "Charger les ressources en gardant la r\xE9serve et le deut\xE9rium du vol",
-    "fleet.btn.last": "Derni\xE8re",
-    "fleet.tip.last": "R\xE9p\xE9ter la derni\xE8re flotte : m\xEAmes vaisseaux, cible, mission et vitesse",
-    "fleet.err.noLast": "Aucune flotte envoy\xE9e",
-    "fleet.jumpgateKeep": "R\xE9serve porte de saut de cette lune",
-    "shortcut.prev": "Plan\xE8te pr\xE9c\xE9dente",
-    "shortcut.next": "Plan\xE8te suivante",
-    "tech.prev": "Niveau pr\xE9c\xE9dent",
+    "fleet.favTitle": "Collecte des expéditions : lune principale",
+    "fleet.favTransport": "1 · Transport vers",
+    "fleet.favDeploy": "2 · Stationner vers",
+    "fleet.tip.cargo": "Charger les ressources en gardant la réserve et le deutérium du vol",
+    "fleet.btn.last": "Dernière",
+    "fleet.tip.last": "Répéter la dernière flotte : mêmes vaisseaux, cible, mission et vitesse",
+    "fleet.err.noLast": "Aucune flotte envoyée",
+    "fleet.jumpgateKeep": "Réserve porte de saut de cette lune",
+    "shortcut.prev": "Planète précédente",
+    "shortcut.next": "Planète suivante",
+    "tech.prev": "Niveau précédent",
     "tech.next": "Niveau suivant",
     "tech.reset": "Revenir au prochain niveau",
     "tech.level": "Niv. {level}",
-    "tech.range": "de {from} \u2192 {to}",
+    "tech.range": "de {from} → {to}",
     "tech.fromNow": "actuel {from}",
     "tech.colLevel": "Niv. {level}",
     "tech.colTotal": "Total",
     "tech.colMissing": "Manque",
-    "tech.colOne": "Par unit\xE9",
-    "tech.res.metal": "M\xE9tal",
+    "tech.colOne": "Par unité",
+    "tech.res.metal": "Métal",
     "tech.res.crystal": "Cristal",
-    "tech.res.deuterium": "Deut\xE9rium",
-    "tech.res.energy": "\xC9nergie",
-    "tech.time": "Dur\xE9e",
+    "tech.res.deuterium": "Deutérium",
+    "tech.res.energy": "Énergie",
+    "tech.time": "Durée",
     "tech.planBtn": "Plan",
     "tech.addOne": "Planifier niv. {level}",
-    "tech.addRange": "Planifier niv. {from}\u2013{to}",
-    "tech.inPlan": "Planifi\xE9 \u2713",
-    "tech.addHint": "Ajoute au plan de construction de cette plan\xE8te/lune",
+    "tech.addRange": "Planifier niv. {from}–{to}",
+    "tech.inPlan": "Planifié ✓",
+    "tech.addHint": "Ajoute au plan de construction de cette planète/lune",
     "tech.removeHint": "Cliquer pour retirer ces niveaux du plan",
-    "tech.discount": "R\xE9duction appliqu\xE9e par le jeu : {pct}%",
-    "tech.amount": "Quantit\xE9 : {n}",
-    "tech.addUnits": "Planifier \xD7{n}",
-    "tech.added": "Ajout\xE9 \u2713",
+    "tech.discount": "Réduction appliquée par le jeu : {pct}%",
+    "tech.amount": "Quantité : {n}",
+    "tech.addUnits": "Planifier ×{n}",
+    "tech.added": "Ajouté ✓",
     "plan.title": "Plan de construction",
     "plan.titleCount": "Plan de construction ({n})",
-    "plan.sub": "Un bouton par plan\xE8te y apporte ce qui manque. Les constructions en file gardent leurs ressources de c\xF4t\xE9.",
+    "plan.sub": "Un bouton par planète y apporte ce qui manque. Les constructions en file gardent leurs ressources de côté.",
     "plan.moonOf": "Lune de {name}",
     "plan.clear": "Vider",
     "plan.colItem": "Quoi",
@@ -2715,123 +2909,123 @@
     "plan.remove": "Retirer du plan",
     "plan.total": "Total",
     "plan.missingHere": "Manque ici",
-    "plan.ready": "Ressources suffisantes \u2713",
-    "plan.empty": "Le plan est vide. Ouvrez un b\xE2timent ou une recherche et utilisez \xAB Planifier \xBB.",
-    "plan.grandTotal": "Co\xFBt total du plan",
+    "plan.ready": "Ressources suffisantes ✓",
+    "plan.empty": "Le plan est vide. Ouvrez un bâtiment ou une recherche et utilisez « Planifier ».",
+    "plan.grandTotal": "Coût total du plan",
     "plan.grandMissing": "Manque au total",
-    "tech.rangeShort": "{from}\u2192{to}",
-    "tech.rangeHint": "Total des niveaux {from} \xE0 {to}",
-    "tech.discountShort": "\u2212{pct}%",
+    "tech.rangeShort": "{from}→{to}",
+    "tech.rangeHint": "Total des niveaux {from} à {to}",
+    "tech.discountShort": "−{pct}%",
     "fleet.foodShort": "Ignorer la nourriture",
-    "fleet.foodHint": "La nourriture reste sur la plan\xE8te dans chaque flotte, m\xEAme avec les boutons du jeu.",
+    "fleet.foodHint": "La nourriture reste sur la planète dans chaque flotte, même avec les boutons du jeu.",
     "fleet.err.noDelivery": "Aucune livraison du plan en cours.",
-    "fleet.ok.delivery": "Livraison pr\xEAte : {ships} vaisseaux avec {cargo} ressources (il manquait {left}). Appuyez sur Suivant puis Envoyer.",
-    "tech.timeHint": "Dur\xE9e du niv. {level} \xB7 total de {from} \xE0 {to}",
+    "fleet.ok.delivery": "Livraison prête : {ships} vaisseaux avec {cargo} ressources (il manquait {left}). Appuyez sur Suivant puis Envoyer.",
+    "tech.timeHint": "Durée du niv. {level} · total de {from} à {to}",
     "tech.amountHint": "Combien : n'importe quel nombre pour le plan ; pour construire, au plus 99 999 vont en file, et pas plus que le jeu n'en permet (max).",
-    "plan.items": "{n} \xE9l\xE9ments",
-    "plan.levels": "niv. {from}\u2013{to}",
+    "plan.items": "{n} éléments",
+    "plan.levels": "niv. {from}–{to}",
     "plan.bring": "Amener les ressources ici",
-    "plan.bringHint": "Ouvre la flotte sur la plan\xE8te suivante avec un transport de ce qui manque vers ici. Apr\xE8s chaque envoi, passe \xE0 la plan\xE8te suivante jusqu'\xE0 ce que rien ne manque.",
+    "plan.bringHint": "Ouvre la flotte sur la planète suivante avec un transport de ce qui manque vers ici. Après chaque envoi, passe à la planète suivante jusqu'à ce que rien ne manque.",
     "plan.unknownHere": "Ressources ici inconnues : appuyez sur Actualiser",
-    "plan.complete": "Compl\xE9ter l'envoi",
-    "plan.sentArriving": "Envoy\xE9es \xB7 arriv\xE9e {time}",
-    "plan.sentArrived": "Envoy\xE9es \xB7 arriv\xE9es (pas encore lues)",
+    "plan.complete": "Compléter l'envoi",
+    "plan.sentArriving": "Envoyées · arrivée {time}",
+    "plan.sentArrived": "Envoyées · arrivées (pas encore lues)",
     "plan.missingAfterSent": "Manque encore",
-    "plan.allSent": "Tout envoy\xE9 \u2713",
+    "plan.allSent": "Tout envoyé ✓",
     "msg.out.resource": "Ressources",
-    "msg.out.darkmatter": "Antimati\xE8re",
+    "msg.out.darkmatter": "Antimatière",
     "msg.out.ship": "Vaisseaux",
     "msg.out.nothing": "Rien",
     "msg.out.trader": "Marchand",
     "msg.out.item": "Objet",
     "msg.out.blackhole": "Trou noir",
-    "msg.out.early": "Retour anticip\xE9",
+    "msg.out.early": "Retour anticipé",
     "msg.out.late": "Retard",
     "msg.out.pirate": "Pirates",
     "msg.out.alien": "Aliens",
     "msg.out.artefact": "Artefacts",
-    "msg.out.lifeform": "Exp\xE9rience forme de vie",
+    "msg.out.lifeform": "Expérience forme de vie",
     "msg.out.unknown": "Autre",
-    "msg.size.0": "\xC9norme",
+    "msg.size.0": "Énorme",
     "msg.size.1": "Grand",
     "msg.size.2": "Normal",
-    "msg.depletion": "\xC9puisement {n}",
-    "msg.discovery": "D\xE9couverte",
+    "msg.depletion": "Épuisement {n}",
+    "msg.discovery": "Découverte",
     "msg.lfXp": "+{n} XP",
     "msg.dmUnit": "MN",
     "msg.pill.lifeform": "Forme de vie",
     "msg.pill.early": "En avance",
-    "recap.title": "Aujourd\u2019hui",
-    "recap.count": "{n} exp\xE9ditions",
+    "recap.title": "Aujourd’hui",
+    "recap.count": "{n} expéditions",
     "recap.ships": "Vaisseaux",
-    "recap.shipsHint": "Vaisseaux trouv\xE9s moins perdus : {n} MSU",
-    "recap.open": "Exp\xE9ditions du jour, mises \xE0 jour pendant la lecture des rapports \xB7 clic : ouvrir le journal",
-    "fresh.title": "Lues \xE0 l\u2019instant",
+    "recap.shipsHint": "Vaisseaux trouvés moins perdus : {n} MSU",
+    "recap.open": "Expéditions du jour, mises à jour pendant la lecture des rapports · clic : ouvrir le journal",
+    "fresh.title": "Lues à l’instant",
     "fresh.close": "Fermer",
     "msg.artefacts": "{n} artefacts",
-    "msg.msuHint": "Valeur en unit\xE9s m\xE9tal (1 cristal = 1,5, 1 deut\xE9rium = 3)",
+    "msg.msuHint": "Valeur en unités métal (1 cristal = 1,5, 1 deutérium = 3)",
     "msg.toggle": "Clic : afficher ou masquer le texte du jeu",
-    "msg.res.metal": "M\xE9tal",
+    "msg.res.metal": "Métal",
     "msg.res.crystal": "Cristal",
-    "msg.res.deuterium": "Deut\xE9rium",
+    "msg.res.deuterium": "Deutérium",
     "msg.res.food": "Nourriture",
-    "msg.res.darkMatter": "Antimati\xE8re",
+    "msg.res.darkMatter": "Antimatière",
     "msg.spy.loot": "Butin",
-    "msg.spy.cargo": "{n}\xD7 {ship}",
+    "msg.spy.cargo": "{n}× {ship}",
     "msg.spy.fleet": "Flotte",
-    "msg.spy.def": "D\xE9fense",
+    "msg.spy.def": "Défense",
     "msg.spy.active": "Actif",
     "msg.spy.activity": "Actif il y a {n}m",
     "msg.spy.inactive": "Inactif",
-    "msg.spy.counter": "Espionn\xE9 par {name} [{coords}]",
-    "msg.spy.attacked": "D\xE9j\xE0 attaqu\xE9",
+    "msg.spy.counter": "Espionné par {name} [{coords}]",
+    "msg.spy.attacked": "Déjà attaqué",
     "msg.transport": "Livraison",
-    "msg.deploy": "Arriv\xE9e",
+    "msg.deploy": "Arrivée",
     "msg.recycle": "Recyclage",
     "msg.empty": "Sans ressources",
     "msg.debrisLeft": "Reste {n}",
-    "msg.combat.won": "Gagn\xE9e",
+    "msg.combat.won": "Gagnée",
     "msg.combat.lost": "Perdue",
-    "msg.combat.draw": "\xC9galit\xE9",
+    "msg.combat.draw": "Égalité",
     "msg.combat.unknown": "Combat",
     "msg.combat.loot": "Butin",
-    "msg.combat.raided": "Pill\xE9",
+    "msg.combat.raided": "Pillé",
     "msg.combat.losses": "Pertes",
-    "msg.combat.debris": "D\xE9bris",
-    "exp.title": "Journal des exp\xE9ditions",
-    "exp.sub": "D'apr\xE8s les rapports d'exp\xE9dition ouverts dans la messagerie : aucune requ\xEAte au serveur",
+    "msg.combat.debris": "Débris",
+    "exp.title": "Journal des expéditions",
+    "exp.sub": "D'après les rapports d'expédition ouverts dans la messagerie : aucune requête au serveur",
     "exp.period.today": "Aujourd'hui",
     "exp.period.yesterday": "Hier",
     "exp.period.week": "7 jours",
     "exp.period.month": "30 jours",
     "exp.period.all": "Tout",
-    "exp.empty": "Aucune exp\xE9dition : ouvrez la messagerie, Flottes \u2192 Exp\xE9ditions, et les rapports arrivent ici.",
-    "exp.emptyPeriod": "Rien sur cette p\xE9riode.",
-    "exp.count": "Exp\xE9ditions",
-    "exp.discoveries": "+ {n} d\xE9couvertes",
+    "exp.empty": "Aucune expédition : ouvrez la messagerie, Flottes → Expéditions, et les rapports arrivent ici.",
+    "exp.emptyPeriod": "Rien sur cette période.",
+    "exp.count": "Expéditions",
+    "exp.discoveries": "+ {n} découvertes",
     "exp.resources": "Ressources",
-    "exp.resourcesFound": "Ressources trouv\xE9es",
-    "exp.dm": "Antimati\xE8re",
-    "exp.shipsFound": "Vaisseaux trouv\xE9s",
+    "exp.resourcesFound": "Ressources trouvées",
+    "exp.dm": "Antimatière",
+    "exp.shipsFound": "Vaisseaux trouvés",
     "exp.lost": "Vaisseaux perdus",
     "exp.net": "Total (ressources + flotte)",
-    "exp.average": "Moyenne par exp\xE9dition",
-    "exp.lfXp": "Exp\xE9rience FV",
-    "exp.outcomes": "R\xE9sultats",
+    "exp.average": "Moyenne par expédition",
+    "exp.lfXp": "Expérience FV",
+    "exp.outcomes": "Résultats",
     "exp.ships": "Vaisseaux",
     "exp.byDay": "Jour par jour",
     "exp.day": "Jour",
     "exp.countShort": "Nb",
     "exp.dmShort": "AM",
     "exp.shipsShort": "Vaisseaux (MSU)",
-    "exp.fold": "Dans la messagerie, replier le texte du jeu sous le r\xE9sum\xE9",
+    "exp.fold": "Dans la messagerie, replier le texte du jeu sous le résumé",
     "exp.export": "Exporter",
-    "exp.exportHint": "T\xE9l\xE9charger le journal en JSON (sauvegarde)",
+    "exp.exportHint": "Télécharger le journal en JSON (sauvegarde)",
     "exp.clear": "Vider",
     "exp.clearConfirm": "Cliquez encore pour tout effacer",
     "ship.202": "Petit transporteur",
     "ship.203": "Grand transporteur",
-    "ship.204": "Chasseur l\xE9ger",
+    "ship.204": "Chasseur léger",
     "ship.205": "Chasseur lourd",
     "ship.206": "Croiseur",
     "ship.207": "Vaisseau de bataille",
@@ -2841,118 +3035,118 @@
     "ship.211": "Bombardier",
     "ship.212": "Satellite solaire",
     "ship.213": "Destructeur",
-    "ship.214": "\xC9toile de la mort",
+    "ship.214": "Étoile de la mort",
     "ship.215": "Traqueur",
     "ship.217": "Foreuse",
     "ship.218": "Faucheur",
-    "ship.219": "\xC9claireur",
+    "ship.219": "Éclaireur",
     "msg.return": "Retour",
     "bar.dash": "Tableau",
     "bar.perDay": "/j",
     "bar.dashHint": "production par jour en MSU",
-    "bar.plan": "Plan \xB7 {n}",
+    "bar.plan": "Plan · {n}",
     "bar.planEmpty": "Plan",
-    "bar.ready": "Pr\xEAt",
+    "bar.ready": "Prêt",
     "bar.planHint": "ce qui manque au compte, en MSU, ressources en route comprises",
     "bar.journal": "Aujourd'hui",
-    "bar.journalHint": "{n} exp\xE9ditions aujourd'hui, gain net en MSU",
-    "dash.tab.summary": "R\xE9sum\xE9",
+    "bar.journalHint": "{n} expéditions aujourd'hui, gain net en MSU",
+    "dash.tab.summary": "Résumé",
     "dash.tab.mines": "Mines",
     "dash.tab.facilities": "Installations",
     "dash.tab.lifeforms": "Formes de vie",
     "dash.tab.ships": "Vaisseaux",
-    "dash.tab.defence": "D\xE9fense",
+    "dash.tab.defence": "Défense",
     "dash.tab.scrap": "Ferrailleur",
     "dash.prodDayK": "Production par jour (MSU)",
     "dash.prodHourNote": "{value} par heure",
     "dash.fleetValue": "Flotte (ressources)",
-    "dash.defValue": "D\xE9fense (ressources)",
-    "dash.unitsNote": "{n} unit\xE9s, au co\xFBt plein",
+    "dash.defValue": "Défense (ressources)",
+    "dash.unitsNote": "{n} unités, au coût plein",
     "dash.research": "Recherches",
     "dash.average": "Moyenne",
-    "dash.planets": "Plan\xE8tes",
+    "dash.planets": "Planètes",
     "dash.moons": "Lunes",
     "dash.moon": "Lune",
-    "dash.minesHint": "En bleu, le niveau le plus haut du compte. Production depuis la derni\xE8re lecture d'accountInfo.",
-    "dash.lfHint": "Chaque plan\xE8te montre ses propres technologies actives : b\xE2timents de son esp\xE8ce et, par emplacement, la recherche utilis\xE9e. Les recherches en italique sont estim\xE9es : ouvrez la page Recherche formes de vie de la plan\xE8te pour les lire exactement.",
-    "dash.lfGuess": "Estimation : ouvrez la page Recherche formes de vie de cette plan\xE8te pour la donn\xE9e exacte.",
-    "dash.lfNone": "Aucun niveau de cette esp\xE8ce dans les donn\xE9es du jeu.",
-    "dash.lfBuildings": "B\xE2timents",
+    "dash.minesHint": "En bleu, le niveau le plus haut du compte. Production depuis la dernière lecture d'accountInfo.",
+    "dash.lfHint": "Chaque planète montre ses propres technologies actives : bâtiments de son espèce et, par emplacement, la recherche utilisée. Les recherches en italique sont estimées : ouvrez la page Recherche formes de vie de la planète pour les lire exactement.",
+    "dash.lfGuess": "Estimation : ouvrez la page Recherche formes de vie de cette planète pour la donnée exacte.",
+    "dash.lfNone": "Aucun niveau de cette espèce dans les données du jeu.",
+    "dash.lfBuildings": "Bâtiments",
     "dash.lfResearch": "Recherches",
     "lf.1": "Humains",
     "lf.2": "Rock'tal",
-    "lf.3": "M\xE9cas",
+    "lf.3": "Mécas",
     "lf.4": "Kaelesh",
-    "dash.unitsNone": "Aucune unit\xE9 dans les donn\xE9es.",
+    "dash.unitsNone": "Aucune unité dans les données.",
     "dash.valueMsu": "Valeur",
-    "dash.scrapHint": "Calcul uniquement : le ferrailleur rend \xE0 partir de 35 % du co\xFBt en n\xE9gociant (jusqu'\xE0 90 % ici). La vente se fait sur la page du Marchand.",
+    "dash.scrapHint": "Calcul uniquement : le ferrailleur rend à partir de 35 % du coût en négociant (jusqu'à 90 % ici). La vente se fait sur la page du Marchand.",
     "dash.scrapRate": "Taux",
     "dash.scrapAll": "Tout",
     "dash.scrapNone": "Vider",
-    "dash.unit": "Unit\xE9",
-    "dash.owned": "Pr\xE9sents",
-    "dash.toScrap": "\xC0 ferrailler",
+    "dash.unit": "Unité",
+    "dash.owned": "Présents",
+    "dash.toScrap": "À ferrailler",
     "galaxy.players": "{count} joueurs",
     "galaxy.inactive": "{count} inactifs",
     "galaxy.longInactive": "dont {count} depuis 28 jours",
     "galaxy.vacation": "{count} en vacances",
     "galaxy.moons": "{count} lunes",
-    "galaxy.debris": "D\xE9bris {msu} dans {count} champs",
+    "galaxy.debris": "Débris {msu} dans {count} champs",
     "galaxy.deep": "Espace lointain {msu}",
-    "galaxy.noDebris": "Aucun champ de d\xE9bris",
+    "galaxy.noDebris": "Aucun champ de débris",
     "galaxy.targets": "Cibles ({count})",
     "galaxy.rankTitle": "Points et classements de {name}",
     "galaxy.rankOpen": "ouvrir le classement",
-    "galaxy.score.total": "G\xE9n\xE9ral",
-    "galaxy.score.economy": "\xC9conomie",
+    "galaxy.score.total": "Général",
+    "galaxy.score.economy": "Économie",
     "galaxy.score.research": "Recherche",
     "galaxy.score.military": "Militaire",
     "galaxy.score.lifeform": "Formes de vie",
     "galaxy.score.fleet": "Flotte",
-    "galaxy.score.defence": "D\xE9fense",
-    "galaxy.splitHint": "Estimation \xE0 partir des classements : la d\xE9fense compte \xE0 la fois en \xC9conomie et en Militaire, donc d\xE9fense = \xC9conomie + Recherche + Militaire + Formes de vie \u2212 G\xE9n\xE9ral ; flotte = Militaire \u2212 d\xE9fense.",
+    "galaxy.score.defence": "Défense",
+    "galaxy.splitHint": "Estimation à partir des classements : la défense compte à la fois en Économie et en Militaire, donc défense = Économie + Recherche + Militaire + Formes de vie − Général ; flotte = Militaire − défense.",
     "galaxy.ships": "{count} vaisseaux",
-    "galaxy.loading": "Lecture de l'API publique\u2026",
-    "galaxy.apiError": "API publique injoignable. R\xE9essayez plus tard.",
+    "galaxy.loading": "Lecture de l'API publique…",
+    "galaxy.apiError": "API publique injoignable. Réessayez plus tard.",
     "galaxy.apiAge": "API publique, {time}",
-    "galaxy.own": "\xC0 vous",
-    "settings.backup": "Sauvegarde des donn\xE9es",
+    "galaxy.own": "À vous",
+    "settings.backup": "Sauvegarde des données",
     "settings.backupExport": "Exporter",
     "settings.backupImport": "Importer",
-    "settings.backupSaved": "{n} valeurs enregistr\xE9es dans le fichier",
-    "settings.backupRestored": "{n} valeurs restaur\xE9es : rechargez la page",
+    "settings.backupSaved": "{n} valeurs enregistrées dans le fichier",
+    "settings.backupRestored": "{n} valeurs restaurées : rechargez la page",
     "settings.backupBad": "Ce fichier n'est pas une sauvegarde de Future",
     "dash.tab.history": "Historique",
-    "dash.historyEmpty": "L'historique se remplit tout seul : un point par jour chaque fois que vous ouvrez la Vue d'ensemble. Revenez demain pour voir les premi\xE8res variations.",
+    "dash.historyEmpty": "L'historique se remplit tout seul : un point par jour chaque fois que vous ouvrez la Vue d'ensemble. Revenez demain pour voir les premières variations.",
     "dash.historySpan": "{n} derniers j",
     "dash.historyPerDay": "{v}/j",
-    "dash.historyUp": "\u2191{n} places",
-    "dash.historyDown": "\u2193{n} places",
+    "dash.historyUp": "↑{n} places",
+    "dash.historyDown": "↓{n} places",
     "dash.historyReal": "sur {n} j",
-    "dash.historyFew": "peu de jours enregistr\xE9s",
+    "dash.historyFew": "peu de jours enregistrés",
     "dash.historyProd": "Production par jour (MSU)",
-    "dash.historyDays": "Jours enregistr\xE9s",
+    "dash.historyDays": "Jours enregistrés",
     "dash.historyDay": "Jour",
     "dash.historyDelta": "Variation",
     "dash.historyRank": "Classement",
     "spy.title": "Tableau d'espionnage",
-    "spy.sub": "{n} cibles \xB7 butin {loot}",
-    "spy.hideDefended": "Masquer les d\xE9fendus",
+    "spy.sub": "{n} cibles · butin {loot}",
+    "spy.hideDefended": "Masquer les défendus",
     "spy.inactiveOnly": "Inactifs seulement",
     "spy.none": "Aucun rapport d'espionnage ces 3 derniers jours. Les rapports ouverts dans la messagerie arrivent ici tout seuls.",
     "spy.noneFiltered": "Aucune cible avec ces filtres.",
     "spy.col.target": "Nom",
-    "spy.col.age": "\xC2ge",
+    "spy.col.age": "Âge",
     "spy.col.loot": "Butin",
-    "spy.col.def": "D\xE9fense",
+    "spy.col.def": "Défense",
     "spy.attackHint": "Attaquer depuis {name} : ouvre la page Flotte avec la cible remplie ; vous choisissez les vaisseaux (les liens des pillages ajoutent aussi les transporteurs)",
     "spy.attack": "Attaquer",
-    "spy.lootHint": "Butin {pct} % : m\xE9tal {m}, cristal {c}, deut\xE9rium {d}. Il faut {large} grands ou {small} petits transporteurs",
-    "msg.spy.counterPill": "Espionn\xE9",
+    "spy.lootHint": "Butin {pct} % : métal {m}, cristal {c}, deutérium {d}. Il faut {large} grands ou {small} petits transporteurs",
+    "msg.spy.counterPill": "Espionné",
     "msg.combat.netHint": "butin moins pertes",
     "spy.remove": "Retirer du tableau et supprimer le message du rapport",
-    "spy.removeShared": "Retirer du tableau (rapport partag\xE9 : le message reste)",
-    "spy.hint": "Une cible par plan\xE8te ou lune, gard\xE9e 3 jours m\xEAme si vous supprimez les rapports. Butin : ressources emportables. Nom : ouvre le rapport. \u22EF : les 6 pillages du jour, un clic sur les vaisseaux ouvre Flotte.",
+    "spy.removeShared": "Retirer du tableau (rapport partagé : le message reste)",
+    "spy.hint": "Une cible par planète ou lune, gardée 3 jours même si vous supprimez les rapports. Butin : ressources emportables. Nom : ouvre le rapport. ⋯ : les 6 pillages du jour, un clic sur les vaisseaux ouvre Flotte.",
     "spy.status.inactive": "i",
     "spy.status.longinactive": "I",
     "spy.status.vacation": "v",
@@ -2963,53 +3157,53 @@
     "spy.status.outlaw": "hors-la-loi",
     "spy.status.admin": "admin",
     "dash.queuesTitle": "Files en cours",
-    "dash.queuesHint": "Cloche : un message sur la page \xE0 la fin.",
-    "remind.add": "Me pr\xE9venir \xE0 la fin",
+    "dash.queuesHint": "Cloche : un message sur la page à la fin.",
+    "remind.add": "Me prévenir à la fin",
     "remind.remove": "Retirer le rappel",
     "remind.now": "Maintenant ({time})",
-    "remind.late": "Termin\xE9 \xE0 {time}",
+    "remind.late": "Terminé à {time}",
     "remind.ok": "OK",
     "settings.remindNoSupport": "Ce navigateur n'affiche pas de notifications depuis les pages : le message dans la page reste.",
-    "settings.remindBlocked": "Le navigateur a bloqu\xE9 les notifications pour ce site : r\xE9activez-les dans les param\xE8tres du site (ic\xF4ne \xE0 gauche de l'adresse).",
-    "settings.remindDesktopHint": "Quand une cloche que vous avez pos\xE9e arrive \xE0 \xE9ch\xE9ance, la notification du navigateur s'affiche aussi sur l'ordinateur, en plus du message dans la page. Seulement avec la page du jeu ouverte ; le navigateur demande l'autorisation la premi\xE8re fois.",
+    "settings.remindBlocked": "Le navigateur a bloqué les notifications pour ce site : réactivez-les dans les paramètres du site (icône à gauche de l'adresse).",
+    "settings.remindDesktopHint": "Quand une cloche que vous avez posée arrive à échéance, la notification du navigateur s'affiche aussi sur l'ordinateur, en plus du message dans la page. Seulement avec la page du jeu ouverte ; le navigateur demande l'autorisation la première fois.",
     "settings.remindDesktop": "Avertir aussi par une notification de l'ordinateur",
     "settings.remindGroup": "Rappels",
     "remind.return": "(retour)",
     "msg.combat.converter": "Convertisseur",
     "msg.combat.converterHint": "Ouvre le rapport dans le convertisseur Ogotcha (nouvel onglet)",
-    "mark.flag.watch": "\xC0 surveiller",
+    "mark.flag.watch": "À surveiller",
     "mark.flag.target": "Cible",
     "mark.flag.farm": "Ferme",
     "mark.flag.danger": "Danger",
     "mark.flag.friend": "Ami",
     "mark.flag.trade": "Commerce",
     "mark.none": "Retirer",
-    "mark.change": "clic pour changer, Maj+clic pour le dernier utilis\xE9",
+    "mark.change": "clic pour changer, Maj+clic pour le dernier utilisé",
     "mark.flagAdd": "Marquer le joueur (Maj+clic : dernier drapeau)",
     "marks.title": "Cibles",
-    "marks.sub": "{players} joueurs \xB7 {planets} plan\xE8tes",
-    "marks.recent": "R\xE9cents",
-    "marks.noRecent": "Aucun joueur ouvert r\xE9cemment.",
+    "marks.sub": "{players} joueurs · {planets} planètes",
+    "marks.recent": "Récents",
+    "marks.noRecent": "Aucun joueur ouvert récemment.",
     "marks.noPlayers": "Aucun joueur avec ce drapeau. Ajoutez-le depuis la galaxie, le classement ou le tableau d'espionnage.",
     "marks.openSheet": "Ouvrir la fiche du joueur",
-    "marks.playersHint": "Clic sur un nom : points, classements et toutes les plan\xE8tes et lunes depuis l'API publique.",
-    "marks.back": "Retour \xE0 la liste",
-    "marks.write": "\xC9crire un message",
+    "marks.playersHint": "Clic sur un nom : points, classements et toutes les planètes et lunes depuis l'API publique.",
+    "marks.back": "Retour à la liste",
+    "marks.write": "Écrire un message",
     "marks.profile": "Profil",
     "marks.rank": "Classement",
     "marks.ships": "Vaisseaux",
     "marks.estimate": "estimation",
-    "marks.planets": "Plan\xE8tes {n} \xB7 lunes {moons}",
+    "marks.planets": "Planètes {n} · lunes {moons}",
     "marks.keyNext": "position suivante",
     "marks.footData": "galaxie + API publique",
-    "marks.fleetPlanet": "Flotte vers la plan\xE8te {coords} (activit\xE9 de la plan\xE8te)",
-    "marks.fleetMoon": "Flotte vers la lune {coords} (activit\xE9 de la lune)",
+    "marks.fleetPlanet": "Flotte vers la planète {coords} (activité de la planète)",
+    "marks.fleetMoon": "Flotte vers la lune {coords} (activité de la lune)",
     "marks.ago": "{n}{u}",
     "marks.unit.m": "m",
     "marks.unit.h": "h",
     "marks.unit.d": "j",
-    "marks.seenOnly": "Vue en galaxie, pas encore dans l'API \xB7 clic : afficher le syst\xE8me",
-    "marks.showSystem": "Afficher le syst\xE8me en galaxie",
+    "marks.seenOnly": "Vue en galaxie, pas encore dans l'API · clic : afficher le système",
+    "marks.showSystem": "Afficher le système en galaxie",
     "marks.col.coords": "Coord.",
     "marks.col.debris": "CDR",
     "marks.col.planet": "Plan.",
@@ -3018,162 +3212,162 @@
     "shortcut.nextTarget": "Cibles : position suivante",
     "plan.lacksHere": "il manque {n} ici",
     "plan.clearAll": "Vider le plan",
-    "plan.clearConfirm": "S\xFBr ? Cliquez encore",
+    "plan.clearConfirm": "Sûr ? Cliquez encore",
     "plan.account": "Ressources du compte",
-    "plan.accountNote": "toutes les plan\xE8tes et lunes + en route",
+    "plan.accountNote": "toutes les planètes et lunes + en route",
     "plan.accountUnknown": "appuyez sur Actualiser",
     "plan.accountCovered": "Le compte couvre le plan",
     "plan.accountMissing": "Manque au compte",
     "plan.onBodies": "sur {n} corps",
-    "plan.collapse": "Masquer les plan\xE8tes",
-    "plan.expand": "Afficher les plan\xE8tes",
+    "plan.collapse": "Masquer les planètes",
+    "plan.expand": "Afficher les planètes",
     "plan.removeAll": "Retirer des {n} corps",
     "plan.readyHere": "Ressources suffisantes ici",
     "bar.targets": "Cibles",
-    "bar.targetsHint": "Barre lat\xE9rale des cibles (joueurs marqu\xE9s) \xB7 M : position suivante",
+    "bar.targetsHint": "Barre latérale des cibles (joueurs marqués) · M : position suivante",
     "settings.oglight": "Depuis OGLight",
     "settings.oglightImport": "Importer l'export",
-    "settings.oglightDone": "Depuis OGLight : {players} joueurs, {seen} positions, {exp} exp\xE9ditions et {raids} raids sur {days} jours. Rechargez la page.",
-    "settings.backupImportHint": "Une sauvegarde Future ou le fichier \xAB Export data \xBB d'OGLight (m\xEAme univers)",
-    "exp.raids": "Raids (import\xE9s d'OGLight)",
+    "settings.oglightDone": "Depuis OGLight : {players} joueurs, {seen} positions, {exp} expéditions et {raids} raids sur {days} jours. Rechargez la page.",
+    "settings.backupImportHint": "Une sauvegarde Future ou le fichier « Export data » d'OGLight (même univers)",
+    "exp.raids": "Raids (importés d'OGLight)",
     "exp.raidCount": "Raids",
-    "exp.raidLoot": "Butin et d\xE9bris",
+    "exp.raidLoot": "Butin et débris",
     "exp.raidLost": "Vaisseaux perdus",
     "exp.raidNet": "Net raids",
-    "exp.kind.expedition": "Exp\xE9ditions",
+    "exp.kind.expedition": "Expéditions",
     "exp.kind.discovery": "Missions d'exploration",
     "exp.kind.raid": "Raids",
     "exp.artefacts": "Artefacts",
     "exp.artefactsAvg": "Artefacts par mission",
     "fleet.jumpgateKept": "{count} vaisseaux restent ici",
-    "fleet.jumpgateOff": "R\xE9serve porte de saut d\xE9sactiv\xE9e : tous les vaisseaux peuvent sauter",
+    "fleet.jumpgateOff": "Réserve porte de saut désactivée : tous les vaisseaux peuvent sauter",
     "fleet.rule.ships": "Vaisseaux",
     "fleet.rule.resources": "Ressources",
     "fleet.rule.gate": "Porte de saut",
-    "fleet.rule.shipsHint": "Vaisseaux qui restent sur le corps avec Vers lune, Transport, Stationner, Collecte, Derni\xE8re, Apporter les ressources ici et le bouton du jeu qui s\xE9lectionne tous les vaisseaux. L'exp\xE9dition ne l'utilise pas ; le fleetsave a la sienne.",
-    "fleet.rule.resourcesHint": "Ressources qui restent sur le corps avec Vers lune, Transport, Stationner, Collecte, Apporter les ressources ici et le bouton du jeu qui charge toutes les ressources. L'exp\xE9dition ne l'utilise pas ; le fleetsave a la sienne.",
+    "fleet.rule.shipsHint": "Vaisseaux qui restent sur le corps avec Vers lune, Transport, Stationner, Collecte, Dernière, Apporter les ressources ici et le bouton du jeu qui sélectionne tous les vaisseaux. L'expédition ne l'utilise pas ; le fleetsave a la sienne.",
+    "fleet.rule.resourcesHint": "Ressources qui restent sur le corps avec Vers lune, Transport, Stationner, Collecte, Apporter les ressources ici et le bouton du jeu qui charge toutes les ressources. L'expédition ne l'utilise pas ; le fleetsave a la sienne.",
     "fleet.rule.gateHint": "Vaisseaux qui restent sur la lune quand tu utilises la porte de saut du jeu.",
-    "fleet.rule.saveShips": "Vaisseaux \xE0 garder",
-    "fleet.rule.saveResources": "Ressources \xE0 garder",
+    "fleet.rule.saveShips": "Vaisseaux à garder",
+    "fleet.rule.saveResources": "Ressources à garder",
     "fleet.rule.empty": "Vide",
     "fleet.rule.on": "Active",
-    "fleet.rule.off": "D\xE9sactiv\xE9e",
+    "fleet.rule.off": "Désactivée",
     "fleet.rule.onlyHere": "seulement ici",
     "fleet.rule.alsoOn": "identique sur {list}",
-    "fleet.rule.sameTitle": "La m\xEAme r\xE8gle est enregistr\xE9e sur :",
-    "fleet.rule.onlyHereTitle": "Aucune autre plan\xE8te ou lune n'a cette r\xE8gle.",
+    "fleet.rule.sameTitle": "La même règle est enregistrée sur :",
+    "fleet.rule.onlyHereTitle": "Aucune autre planète ou lune n'a cette règle.",
     "fleet.rule.switch": "Active",
-    "fleet.rule.switchHint": "Un seul interrupteur pour toutes les plan\xE8tes et lunes : d\xE9sactive la r\xE8gle sans l'effacer.",
-    "fleet.rule.offList": "d\xE9sactiv\xE9es : {list}",
-    "fleet.copyTo": "Copier sur\u2026",
-    "fleet.copyTitle": "Copier sur d'autres plan\xE8tes ou lunes",
-    "fleet.copyHint": "Ce que tu as saisi ici est d'abord enregistr\xE9, puis seules les r\xE8gles choisies sont copi\xE9es. Les autres r\xE8gles des corps choisis ne changent pas.",
-    "fleet.copyWhat": "R\xE8gles \xE0 copier",
+    "fleet.rule.switchHint": "Un seul interrupteur pour toutes les planètes et lunes : désactive la règle sans l'effacer.",
+    "fleet.rule.offList": "désactivées : {list}",
+    "fleet.copyTo": "Copier sur…",
+    "fleet.copyTitle": "Copier sur d'autres planètes ou lunes",
+    "fleet.copyHint": "Ce que tu as saisi ici est d'abord enregistré, puis seules les règles choisies sont copiées. Les autres règles des corps choisis ne changent pas.",
+    "fleet.copyWhat": "Règles à copier",
     "fleet.copyWhere": "Sur quels corps",
-    "fleet.pickPlanets": "Toutes les plan\xE8tes",
+    "fleet.pickPlanets": "Toutes les planètes",
     "fleet.pickMoons": "Toutes les lunes",
     "fleet.pickNone": "Aucun",
     "fleet.copyGo": "Copier",
-    "fleet.copyNothing": "Choisis au moins une r\xE8gle et un corps.",
+    "fleet.copyNothing": "Choisis au moins une règle et un corps.",
     "spy.col.fleet": "Flotte",
-    "spy.report": "Rapport d\u2019espionnage",
+    "spy.report": "Rapport d’espionnage",
     "spy.reportHint": "Ouvre le rapport complet sur {name}",
     "spy.shared": "ally",
-    "spy.sharedHint": "Rapport partag\xE9 par l\u2019alliance (Communication \u203A Rapports d\u2019espionnage partag\xE9s)",
-    "spy.hidden": "cach\xE9e",
+    "spy.sharedHint": "Rapport partagé par l’alliance (Communication › Rapports d’espionnage partagés)",
+    "spy.hidden": "cachée",
     "spy.simulate": "Simuler",
     "spy.simulateHint": "Simuler avec {tool} dans un nouvel onglet, avec vos recherches et bonus",
-    "settings.sub": "Les choix s\u2019appliquent tout de suite et restent dans ce navigateur",
-    "settings.section.menu": "Menu des plan\xE8tes",
+    "settings.sub": "Les choix s’appliquent tout de suite et restent dans ce navigateur",
+    "settings.section.menu": "Menu des planètes",
     "settings.section.mail": "Messagerie et espionnage",
-    "settings.section.data": "Donn\xE9es",
-    "settings.totalsHint": "Le cadre sous les plan\xE8tes avec les ressources de tout le compte et la production par jour.",
+    "settings.section.data": "Données",
+    "settings.totalsHint": "Le cadre sous les planètes avec les ressources de tout le compte et la production par jour.",
     "settings.sim": "Simulateur",
-    "settings.simHint": "S\u2019ouvre avec le bouton Simuler du tableau d\u2019espionnage et des rapports, d\xE9j\xE0 rempli avec vos recherches.",
-    "settings.shared": "Rapports partag\xE9s par l\u2019alliance",
-    "settings.sharedHint": "Affiche aussi dans le tableau les rapports partag\xE9s dans Communication, marqu\xE9s \xAB ally \xBB.",
-    "settings.fold": "Texte du jeu repli\xE9",
-    "settings.foldHint": "Cache le long texte des exp\xE9ditions et transports sous le r\xE9sum\xE9 ; un clic sur le r\xE9sum\xE9 le rouvre.",
-    "settings.backupHint": "Enregistre toutes les donn\xE9es de Future dans un fichier, ou les restaure.",
+    "settings.simHint": "S’ouvre avec le bouton Simuler du tableau d’espionnage et des rapports, déjà rempli avec vos recherches.",
+    "settings.shared": "Rapports partagés par l’alliance",
+    "settings.sharedHint": "Affiche aussi dans le tableau les rapports partagés dans Communication, marqués « ally ».",
+    "settings.fold": "Texte du jeu replié",
+    "settings.foldHint": "Cache le long texte des expéditions et transports sous le résumé ; un clic sur le résumé le rouvre.",
+    "settings.backupHint": "Enregistre toutes les données de Future dans un fichier, ou les restaure.",
     "spy.col.actionsName": "Actions",
-    "hs.ptreAge": "Diff\xE9rence depuis le classement PTRE du {time}",
+    "hs.ptreAge": "Différence depuis le classement PTRE du {time}",
     "hs.sincePtre": "{n} points depuis le classement PTRE du {time}",
     "hs.top": "Haut de page",
-    "spy.col.n": "Num\xE9ro",
+    "spy.col.n": "Numéro",
     "spy.col.act": "Act.",
     "spy.col.coords": "Coord.",
-    "spy.colHint": "Clic : trier. Glisser, ou Alt + fl\xE8ches : d\xE9placer la colonne",
+    "spy.colHint": "Clic : trier. Glisser, ou Alt + flèches : déplacer la colonne",
     "spy.moon": "Lune",
-    "spy.planet": "Plan\xE8te",
+    "spy.planet": "Planète",
     "spy.waves": "Les 6 pillages du jour",
-    "spy.wave": "n\xB0{n}",
-    "spy.onPlanet": "Sur la plan\xE8te",
+    "spy.wave": "n°{n}",
+    "spy.onPlanet": "Sur la planète",
     "spy.from": "depuis {name} [{coords}]",
     "spy.total": "Total",
     "spy.waveHint": "Pillage {n} : ouvre Flotte depuis {name} avec {count} {ship} et la cible remplie",
-    "shortcut.galaxyLeft": "Syst\xE8me pr\xE9c\xE9dent",
-    "shortcut.galaxyRight": "Syst\xE8me suivant",
-    "shortcut.galaxyDown": "Galaxie pr\xE9c\xE9dente",
+    "shortcut.galaxyLeft": "Système précédent",
+    "shortcut.galaxyRight": "Système suivant",
+    "shortcut.galaxyDown": "Galaxie précédente",
     "shortcut.galaxyUp": "Galaxie suivante",
     "touch.bar": "Raccourcis",
     "touch.send": "Envoyer",
     "touch.next": "Suivant",
     "fleet.cap.expedition": "position 16",
-    "fleet.cap.setUp": "\xE0 configurer",
-    "fleet.cap.last": "r\xE9p\xE8te la derni\xE8re",
-    "fleet.cap.cargo": "moins r\xE9serve et carburant",
-    "fleet.rulesLabel": "R\xE8gles",
-    "fleet.editRules": "R\xE8gles de {body}",
-    "fleet.general": "Param\xE8tres",
-    "fleet.generalHint": "Transporteurs, favoris, exp\xE9dition, R\xE9p\xE9ter et touches : dans les param\xE8tres de Future",
+    "fleet.cap.setUp": "à configurer",
+    "fleet.cap.last": "répète la dernière",
+    "fleet.cap.cargo": "moins réserve et carburant",
+    "fleet.rulesLabel": "Règles",
+    "fleet.editRules": "Règles de {body}",
+    "fleet.general": "Paramètres",
+    "fleet.generalHint": "Transporteurs, favoris, expédition, Répéter et touches : dans les paramètres de Future",
     "settings.section.fleet": "Flotte",
     "settings.section.keys": "Touches",
-    "settings.mainShipHint": "Le transporteur utilis\xE9 d\u2019abord par Transport, Stationner et Vers la lune.",
+    "settings.mainShipHint": "Le transporteur utilisé d’abord par Transport, Stationner et Vers la lune.",
     "settings.secondShipHint": "Porte ce que le premier ne peut pas.",
     "settings.speedHint": "Vitesse de Transport, Stationner et Vers la lune.",
-    "settings.favHint": "O\xF9 la Collecte des exp\xE9ditions am\xE8ne la flotte et les ressources en trop, dans les limites des r\xE9serves.",
-    "settings.expValueHint": "Vide = calcul\xE9 ; 50% = la moiti\xE9 ; un nombre = chargement fixe.",
-    "settings.extrasHint": "Ajoute une sonde et un \xE9claireur, comme OGLight.",
+    "settings.favHint": "Où la Collecte des expéditions amène la flotte et les ressources en trop, dans les limites des réserves.",
+    "settings.expValueHint": "Vide = calculé ; 50% = la moitié ; un nombre = chargement fixe.",
+    "settings.extrasHint": "Ajoute une sonde et un éclaireur, comme OGLight.",
     "settings.touch": "Barre tactile",
-    "settings.touchHint": "En bas de l\u2019\xE9cran : les raccourcis de cette page et, sur Flotte, le bouton Suivant / Envoyer du jeu.",
+    "settings.touchHint": "En bas de l’écran : les raccourcis de cette page et, sur Flotte, le bouton Suivant / Envoyer du jeu.",
     "settings.touchAuto": "Sur tactile",
     "settings.touchOn": "Toujours",
     "settings.touchOff": "Jamais",
-    "settings.keys.planet": "Plan\xE8tes",
+    "settings.keys.planet": "Planètes",
     "settings.keys.targets": "Cibles",
     "settings.keys.fleet": "Flotte",
     "settings.keys.galaxy": "Galaxie (barre tactile)",
-    "settings.keyPress": "Appuyez sur une touche\u2026",
+    "settings.keyPress": "Appuyez sur une touche…",
     "settings.keyNone": "aucune",
     "settings.keyFixed": "Touche du jeu, non modifiable.",
     "settings.keyChange": "Cliquez pour la changer.",
-    "settings.keyReset": "D\xE9faut",
-    "settings.keyResetHint": "Revenir \xE0 {key}",
-    "settings.keyTaken": "Fait. {key} \xE9tait sur \xAB {other} \xBB, qui n\u2019a plus de touche.",
-    "settings.keySaved": "Touche enregistr\xE9e.",
-    "settings.keyGame": "fl\xE8ches du jeu",
-    "settings.keysDefault": "Touches par d\xE9faut",
-    "settings.keysHint": "Remet toutes les touches comme au d\xE9but.",
-    "settings.keysDefaultDone": "Touches par d\xE9faut r\xE9tablies.",
-    "settings.keyListen": "Appuyez sur la nouvelle touche pour \xAB {name} \xBB : une lettre ou un chiffre. \xC9chap annule, Suppr l\u2019enl\xE8ve.",
-    "settings.keyCleared": "\xAB {name} \xBB n\u2019a plus de touche.",
+    "settings.keyReset": "Défaut",
+    "settings.keyResetHint": "Revenir à {key}",
+    "settings.keyTaken": "Fait. {key} était sur « {other} », qui n’a plus de touche.",
+    "settings.keySaved": "Touche enregistrée.",
+    "settings.keyGame": "flèches du jeu",
+    "settings.keysDefault": "Touches par défaut",
+    "settings.keysHint": "Remet toutes les touches comme au début.",
+    "settings.keysDefaultDone": "Touches par défaut rétablies.",
+    "settings.keyListen": "Appuyez sur la nouvelle touche pour « {name} » : une lettre ou un chiffre. Échap annule, Suppr l’enlève.",
+    "settings.keyCleared": "« {name} » n’a plus de touche.",
     "settings.keyBad": "Utilisez une lettre ou un chiffre, sans Ctrl ni Alt.",
-    "settings.expShipHint": "Automatique = le meilleur que vous avez sur cette plan\xE8te ou lune.",
-    "fleet.actionsLabel": "Pr\xE9parer une flotte",
-    "fleet.editRulesHint": "Vaisseaux et ressources \xE0 garder ici, porte de saut et fleetsave.",
+    "settings.expShipHint": "Automatique = le meilleur que vous avez sur cette planète ou lune.",
+    "fleet.actionsLabel": "Préparer une flotte",
+    "fleet.editRulesHint": "Vaisseaux et ressources à garder ici, porte de saut et fleetsave.",
     "bar.prod": "Production",
     "bar.msuDay": "MSU/j",
     "bar.missing": "manque",
     "totals.stock": "En stock",
     "totals.day": "Par jour",
     "totals.flying": "dont en vol",
-    "totals.flyingHint": "Cargaison de vos flottes en vol (d\xE9j\xE0 comprise dans les lignes ci-dessus) : m\xE9tal {metal}, cristal {crystal}, deut\xE9rium {deuterium}. Lue dans la liste des \xE9v\xE9nements du jeu : ouvrez-la pour la mettre \xE0 jour.",
+    "totals.flyingHint": "Cargaison de vos flottes en vol (déjà comprise dans les lignes ci-dessus) : métal {metal}, cristal {crystal}, deutérium {deuterium}. Lue dans la liste des événements du jeu : ouvrez-la pour la mettre à jour.",
     "dock.journal": "Journal",
     "dock.today": "Aujourd'hui",
-    "dock.journalHint": "{n} exp\xE9ditions lues dans la messagerie ; gain net en MSU. Clic : ouvre le journal.",
-    "dock.targetsEmpty": "Aucune cible : marquez joueurs et plan\xE8tes dans la galaxie.",
+    "dock.journalHint": "{n} expéditions lues dans la messagerie ; gain net en MSU. Clic : ouvre le journal.",
+    "dock.targetsEmpty": "Aucune cible : marquez joueurs et planètes dans la galaxie.",
     "dash.scrapPick": "Clic : tous, nouveau clic : aucun",
-    "plan.byBody": "Par plan\xE8te",
+    "plan.byBody": "Par planète",
     "plan.byTech": "Par technologie",
     "plan.bringAll": "Tout apporter",
     "plan.bringSome": "Apporter {n} choisis",
@@ -3181,76 +3375,76 @@
     "plan.pickHint": "Clic : choisit cette ligne, le bouton en haut n'apporte que les lignes choisies",
     "plan.removeBody": "Retirer tout le plan de ce corps",
     "planetMenu.fleet": "Flotte",
-    "planetMenu.fleetHint": "Valeur des vaisseaux sur ce corps (co\xFBt en ressources, 1:1:1), \xE0 la derni\xE8re mise \xE0 jour de ses donn\xE9es",
+    "planetMenu.fleetHint": "Valeur des vaisseaux sur ce corps (coût en ressources, 1:1:1), à la dernière mise à jour de ses données",
     "settings.fleetPill": "Valeur de la flotte",
-    "settings.fleetPillHint": "Une pastille sous les ressources avec la valeur des vaisseaux stationn\xE9s sur cette plan\xE8te ou lune (co\xFBt en ressources, 1:1:1).",
-    "settings.gameTipsHint": "La fiche avec donn\xE9es et liens que le jeu ouvre quand la souris s'arr\xEAte sur une plan\xE8te ou une lune. D\xE9sactiv\xE9e, la plan\xE8te s'ouvre toujours d'un clic.",
-    "settings.gameTips": "Fiche du jeu sur les plan\xE8tes",
+    "settings.fleetPillHint": "Une pastille sous les ressources avec la valeur des vaisseaux stationnés sur cette planète ou lune (coût en ressources, 1:1:1).",
+    "settings.gameTipsHint": "La fiche avec données et liens que le jeu ouvre quand la souris s'arrête sur une planète ou une lune. Désactivée, la planète s'ouvre toujours d'un clic.",
+    "settings.gameTips": "Fiche du jeu sur les planètes",
     "totals.sum": "Total",
     "settings.totalView": "Somme dans les totaux",
-    "settings.totalViewHint": "La ligne de somme sous les plan\xE8tes : en MSU (m\xE9tal:cristal:deut\xE9rium 3:2:1) ou les trois ressources additionn\xE9es \xE0 parts \xE9gales.",
+    "settings.totalViewHint": "La ligne de somme sous les planètes : en MSU (métal:cristal:deutérium 3:2:1) ou les trois ressources additionnées à parts égales.",
     "planetMenu.building": "Construction en cours",
     "fleet.jumpgateStay": "restent",
-    "fleet.jumpgateEdit": "R\xE9serve de la porte de saut : choisissez combien de vaisseaux restent sur cette lune",
-    "fleet.err.noDefault": "Collecte des exp\xE9ditions : pas de lune principale. Choisissez-la dans les Param\xE8tres (engrenage) ou choisissez un corps dans le menu Collecte.",
-    "fleet.invert": "Inverser la s\xE9lection de ce vaisseau",
+    "fleet.jumpgateEdit": "Réserve de la porte de saut : choisissez combien de vaisseaux restent sur cette lune",
+    "fleet.err.noDefault": "Collecte des expéditions : pas de lune principale. Choisissez-la dans les Paramètres (engrenage) ou choisissez un corps dans le menu Collecte.",
+    "fleet.invert": "Inverser la sélection de ce vaisseau",
     "settings.section.galaxy": "Galaxie",
-    "settings.bigDebris": "D\xE9bris \xE0 mettre en \xE9vidence",
-    "settings.bigDebrisHint": "\xC0 partir de cette taille (m\xE9tal + cristal + deut\xE9rium) le champ de d\xE9bris est mis en \xE9vidence, dans la galaxie, l'espace profond et la barre des cibles. Exemples : 500k, 1M, 2,5G.",
-    "settings.bigDebrisSaved": "Mis en \xE9vidence \xE0 partir de {n}.",
-    "settings.bigDebrisBad": "\xC9crivez un nombre, par exemple 1M.",
-    "marks.home": "Plan\xE8te m\xE8re",
+    "settings.bigDebris": "Débris à mettre en évidence",
+    "settings.bigDebrisHint": "À partir de cette taille (métal + cristal + deutérium) le champ de débris est mis en évidence, dans la galaxie, l'espace profond et la barre des cibles. Exemples : 500k, 1M, 2,5G.",
+    "settings.bigDebrisSaved": "Mis en évidence à partir de {n}.",
+    "settings.bigDebrisBad": "Écrivez un nombre, par exemple 1M.",
+    "marks.home": "Planète mère",
     "marks.col.name": "Nom",
     "marks.note": "Note",
-    "marks.notePlaceholder": "Note sur ce joueur\u2026",
-    "marks.noteNeedsFlag": "Marquez le joueur pour \xE9crire une note.",
-    "marks.writeShort": "\xC9crire",
+    "marks.notePlaceholder": "Note sur ce joueur…",
+    "marks.noteNeedsFlag": "Marquez le joueur pour écrire une note.",
+    "marks.writeShort": "Écrire",
     "tech.population": "Population requise pour le niveau {level}",
-    "tech.populationShort": "insuffisante sur cette plan\xE8te",
+    "tech.populationShort": "insuffisante sur cette planète",
     "tech.satShort": "sat.",
-    "tech.satNeed": "Il faut {n} satellites solaires ({energy} \xE9nergie) pour construire ces niveaux sans passer sous z\xE9ro",
-    "tech.satDeficit": "Il faut {n} satellites solaires ({energy} \xE9nergie) pour repasser l'\xE9nergie au-dessus de z\xE9ro",
-    "tech.satBalance": "\xE9nergie actuelle {energy}",
-    "tech.satPer": "1 satellite = {energy} sur cette plan\xE8te",
-    "tech.satPerGuess": "1 satellite \u2248 {energy} (estimation : ouvrez le Satellite solaire sur cette plan\xE8te pour la valeur exacte)",
-    "tech.satFill": "clic : saisit le nombre dans la quantit\xE9",
-    "tech.satGo": "clic : ouvre le Satellite solaire dans Ressources avec le nombre d\xE9j\xE0 saisi",
-    "fleet.btn.collect": "Collecte des exp\xE9ditions",
-    "fleet.readyHint": "Choisissez quoi pr\xE9parer : l'envoi reste toujours votre clic.",
-    "fleet.reservesHint": "Ce qui reste sur le corps quand vous pr\xE9parez une flotte. Un clic l'active ou la coupe ; les quantit\xE9s se changent avec le bouton des r\xE8gles \xE0 droite.",
+    "tech.satNeed": "Il faut {n} satellites solaires ({energy} énergie) pour construire ces niveaux sans passer sous zéro",
+    "tech.satDeficit": "Il faut {n} satellites solaires ({energy} énergie) pour repasser l'énergie au-dessus de zéro",
+    "tech.satBalance": "énergie actuelle {energy}",
+    "tech.satPer": "1 satellite = {energy} sur cette planète",
+    "tech.satPerGuess": "1 satellite ≈ {energy} (estimation : ouvrez le Satellite solaire sur cette planète pour la valeur exacte)",
+    "tech.satFill": "clic : saisit le nombre dans la quantité",
+    "tech.satGo": "clic : ouvre le Satellite solaire dans Ressources avec le nombre déjà saisi",
+    "fleet.btn.collect": "Collecte des expéditions",
+    "fleet.readyHint": "Choisissez quoi préparer : l'envoi reste toujours votre clic.",
+    "fleet.reservesHint": "Ce qui reste sur le corps quand vous préparez une flotte. Un clic l'active ou la coupe ; les quantités se changent avec le bouton des règles à droite.",
     "fleet.rule.skipHere": "Sauter ce corps",
-    "fleet.rule.unset": "\xE0 d\xE9finir",
-    "fleet.zone.round": "Tourn\xE9e",
-    "fleet.zone.reserves": "R\xE9serves",
+    "fleet.rule.unset": "à définir",
+    "fleet.zone.round": "Tournée",
+    "fleet.zone.reserves": "Réserves",
     "fleet.zone.dest": "Destination",
     "fleet.zone.mission": "Mission",
     "fleet.btn.collectShort": "Collecte",
     "fleet.btn.collectTransport": "Collecte : transport",
     "fleet.btn.collectDeploy": "Collecte : stationnement",
     "fleet.btn.skip": "Passer",
-    "fleet.tip.skip": "Rien \xE0 d\xE9placer ici : ouvre la plan\xE8te ou la lune suivante du tour avec la m\xEAme action pr\xEAte. Rien ne part d'ici.",
-    "fleet.tip.collect": "Pour les exp\xE9ditions depuis plusieurs lunes : am\xE8ne vaisseaux et ressources en trop sur la lune principale, en gardant les r\xE9serves",
-    "fleet.collect.transport": "1 \xB7 Transport",
-    "fleet.collect.deploy": "2 \xB7 Stationnement",
+    "fleet.tip.skip": "Rien à déplacer ici : ouvre la planète ou la lune suivante du tour avec la même action prête. Rien ne part d'ici.",
+    "fleet.tip.collect": "Pour les expéditions depuis plusieurs lunes : amène vaisseaux et ressources en trop sur la lune principale, en gardant les réserves",
+    "fleet.collect.transport": "1 · Transport",
+    "fleet.collect.deploy": "2 · Stationnement",
     "fleet.collectOnce": "Une seule fois, vers :",
-    "fleet.collectNoFav": "pas de lune principale (Param\xE8tres)",
+    "fleet.collectNoFav": "pas de lune principale (Paramètres)",
     "fleet.send.label": "Transport et Stationner : destination et ressources",
     "fleet.send.dest": "Destination",
-    "fleet.send.destHint": "galaxie, syst\xE8me, position (vides = ceux de ce corps) ; on peut coller 1:234:5",
-    "fleet.send.pick": "Vos plan\xE8tes et lunes",
-    "fleet.send.pickHint": "\xE9crit les coordonn\xE9es et le type du corps choisi",
-    "fleet.send.resHint": "vide = rien, 2m ou 500k accept\xE9s ; clic sur le symbole = tout",
-    "fleet.err.noTarget": "Saisissez la destination (galaxie:syst\xE8me:position) ou choisissez un de vos corps",
-    "fleet.err.sameBody": "La destination est le corps de d\xE9part de la flotte",
-    "fleet.err.nothingPicked": "Aucune ressource \xE0 transporter avec les quantit\xE9s choisies",
+    "fleet.send.destHint": "galaxie, système, position (vides = ceux de ce corps) ; on peut coller 1:234:5",
+    "fleet.send.pick": "Vos planètes et lunes",
+    "fleet.send.pickHint": "écrit les coordonnées et le type du corps choisi",
+    "fleet.send.resHint": "vide = rien, 2m ou 500k acceptés ; clic sur le symbole = tout",
+    "fleet.err.noTarget": "Saisissez la destination (galaxie:système:position) ou choisissez un de vos corps",
+    "fleet.err.sameBody": "La destination est le corps de départ de la flotte",
+    "fleet.err.nothingPicked": "Aucune ressource à transporter avec les quantités choisies",
     "fleet.send.res": "Ressources",
     "fleet.send.small": "PT",
     "fleet.send.large": "GT",
-    "fleet.send.cargoWith": "Pr\xE9parer avec",
-    "fleet.send.cargoHint": "s\xE9lectionne les transporteurs n\xE9cessaires aux ressources choisies, r\xE8gle destination et mission, charge",
+    "fleet.send.cargoWith": "Préparer avec",
+    "fleet.send.cargoHint": "sélectionne les transporteurs nécessaires aux ressources choisies, règle destination et mission, charge",
     "fleet.send.onTransport": "Transport : saisissez destination et ressources, puis PT ou GT",
     "fleet.send.onDeploy": "Stationner : choisissez les vaisseaux, destination et ressources, puis PT ou GT",
-    "fleet.ok.cargoShort": "{ships} vaisseaux, {cargo} ressources charg\xE9es : il manque {missing} transporteurs pour le reste",
+    "fleet.ok.cargoShort": "{ships} vaisseaux, {cargo} ressources chargées : il manque {missing} transporteurs pour le reste",
     "fleet.err.noCargoShip": "Aucun transporteur de ce type sur ce corps",
     "fleet.send.max": "tout",
     "fleet.send.maxHint": "clic : tout ce qu'il y a ici",
@@ -3259,24 +3453,24 @@
     "res.short.metal": "M",
     "res.short.crystal": "C",
     "res.short.deuterium": "D",
-    "fleet.collectIgnoreShips": "Transport : ignorer la r\xE9serve de vaisseaux",
-    "settings.collectIgnoreShipsHint": "Le transport de la Collecte (et \xAB Vers lune \xBB) peut utiliser aussi les vaisseaux gard\xE9s par la r\xE9serve : les transporteurs reviennent. La r\xE9serve de ressources s'applique toujours.",
+    "fleet.collectIgnoreShips": "Transport : ignorer la réserve de vaisseaux",
+    "settings.collectIgnoreShipsHint": "Le transport de la Collecte (et « Vers lune ») peut utiliser aussi les vaisseaux gardés par la réserve : les transporteurs reviennent. La réserve de ressources s'applique toujours.",
     "fleet.collectDeployRes": "Stationnement : prendre aussi les ressources",
-    "settings.collectDeployResHint": "D\xE9sactiv\xE9 : le stationnement de la Collecte n'envoie que les vaisseaux, les ressources restent.",
+    "settings.collectDeployResHint": "Désactivé : le stationnement de la Collecte n'envoie que les vaisseaux, les ressources restent.",
     "fleet.loadOrder": "Ordre de chargement",
-    "settings.loadOrderHint": "Quelle ressource remplit d'abord les transporteurs de la Collecte, puis la deuxi\xE8me et la troisi\xE8me (le jeu fait D \u2192 C \u2192 M).",
+    "settings.loadOrderHint": "Quelle ressource remplit d'abord les transporteurs de la Collecte, puis la deuxième et la troisième (le jeu fait D → C → M).",
     "msg.say.late": "la flotte rentre plus tard",
-    "msg.say.early": "la flotte rentre plus t\xF4t",
-    "msg.say.nothing": "rien n'a \xE9t\xE9 trouv\xE9",
-    "msg.say.trader": "un marchand propose un \xE9change",
+    "msg.say.early": "la flotte rentre plus tôt",
+    "msg.say.nothing": "rien n'a été trouvé",
+    "msg.say.trader": "un marchand propose un échange",
     "msg.say.pirate": "combat contre des pirates",
     "msg.say.alien": "combat contre des aliens",
     "msg.say.blackhole": "la flotte a disparu dans un trou noir",
-    "exp.heroCount": "exp\xE9ditions",
-    "exp.heroAvg": "par exp\xE9dition",
+    "exp.heroCount": "expéditions",
+    "exp.heroAvg": "par expédition",
     "exp.heroLost": "vaisseaux perdus",
     "exp.byHour": "Heure par heure",
-    "exp.focusAll": "Toute la p\xE9riode",
+    "exp.focusAll": "Toute la période",
     "exp.noneHere": "Rien ici.",
     "exp.daysTable": "Les jours",
     "marks.st.vacation": "en vacances",
@@ -3285,186 +3479,286 @@
     "marks.st.longinactive": "inactif depuis 28 jours",
     "marks.st.outlaw": "hors-la-loi",
     "marks.st.admin": "administrateur",
-    "marks.lastCheck": "Dernier contr\xF4le en galaxie : {time}",
+    "marks.lastCheck": "Dernier contrôle en galaxie : {time}",
     "marks.neverChecked": "Jamais vu en galaxie",
-    "plan.sec.missing": "\xC0 approvisionner",
+    "plan.sec.missing": "À approvisionner",
     "plan.sec.arriving": "En route",
     "plan.sec.unknown": "Ressources inconnues",
-    "plan.sec.ready": "Pr\xEAts",
-    "plan.colMissing": "manque (m\xE9tal \xB7 cristal \xB7 deut\xE9rium)",
-    "plan.colCost": "co\xFBt",
+    "plan.sec.ready": "Prêts",
+    "plan.colMissing": "manque (métal · cristal · deutérium)",
+    "plan.colCost": "coût",
     "plan.queued": "en file",
-    "plan.queuedHint": "En file d'attente dans le jeu, pas encore pay\xE9 : ses ressources sont mises de c\xF4t\xE9 et ne comptent ni pour le plan ni pour les transports",
-    "plan.unhold": "Ne plus mettre de c\xF4t\xE9 (d\xE9j\xE0 lanc\xE9 ou annul\xE9)",
+    "plan.queuedHint": "En file d'attente dans le jeu, pas encore payé : ses ressources sont mises de côté et ne comptent ni pour le plan ni pour les transports",
+    "plan.unhold": "Ne plus mettre de côté (déjà lancé ou annulé)",
     "fleet.mainShipIs": "Vaisseau principal des transports automatiques",
     "fleet.mainShipPick": "Utiliser ce vaisseau pour les transports automatiques (lune, collecte, plan)",
-    "settings.expStyle": "R\xE9sum\xE9 des exp\xE9ditions",
-    "settings.expStyleHint": "Si un autre outil d\xE9core les rapports (OGame Tracker, OGLight, \u2026), Future s'efface et enregistre seulement, comme OGLight. Le journal enregistre toujours.",
+    "settings.expStyle": "Résumé des expéditions",
+    "settings.expStyleHint": "Si un autre outil décore les rapports (OGame Tracker, OGLight, …), Future s'efface et enregistre seulement, comme OGLight. Le journal enregistre toujours.",
     "settings.expStyle.auto": "Automatique",
     "settings.expStyle.always": "Toujours Future",
     "settings.expStyle.never": "Enregistrer seulement",
-    "tech.labShort": "R\xE9seau {total} \xB7 {n} labos",
-    "tech.labNet": "Laboratoires sur cette recherche : {total} = ici {here} + {linked} (R\xE9seau de recherche intergalactique niv. {irn})",
-    "tech.labNeed": "comptent les labos d\xE8s le niv. {need}",
-    "tech.labHereShort": "le labo de cette plan\xE8te est sous le niv. {need} : impossible de la lancer ici",
+    "tech.labShort": "Réseau {total} · {n} labos",
+    "tech.labNet": "Laboratoires sur cette recherche : {total} = ici {here} + {linked} (Réseau de recherche intergalactique niv. {irn})",
+    "tech.labNeed": "comptent les labos dès le niv. {need}",
+    "tech.labHereShort": "le labo de cette planète est sous le niv. {need} : impossible de la lancer ici",
     "exp.heroRes": "Ressources",
     "exp.heroFleet": "Flotte",
-    "exp.heroFound": "trouv\xE9s",
+    "exp.heroFound": "trouvés",
     "exp.heroLostShort": "perdus",
-    "exp.heroDebris": "dont d\xE9bris en 16",
+    "exp.heroDebris": "dont débris en 16",
     "exp.kind.orion": "Anomalies Orion",
     "orion.redeemHours": "rachat = {h} de production",
-    "orion.rewards": "r\xE9compenses {v} MSU",
+    "orion.rewards": "récompenses {v} MSU",
     "orion.freeWord": "gratuit",
-    "orion.paidBack": "lithium {paid} pay\xE9, {back} rendu",
-    "orion.planAll": "lancement maintenant : {free} de lithium libre \xE0 la fin{held} rach\xE8te les {waves} vagues, \u2248{msu} MSU",
-    "orion.planSome": "lancement maintenant : {free} de lithium libre \xE0 la fin{held} rach\xE8te {covered}/{waves} vagues, \u2248{msu} MSU",
-    "orion.held": " ({v} r\xE9serv\xE9s pour {n} en cours)",
-    "orion.planNever": "pas les {waves} : la production de lithium s\u2019arr\xEAte avant",
-    "orion.planWait": "les {waves} si lanc\xE9 dans {h} ou plus tard",
-    "orion.planTitle": "Lithium actuel plus {h} de production, rachet\xE9 \xE0 la fin, en gardant ce qu\u2019il faudra aux anomalies en cours \xE0 leur fin :",
-    "orion.planNone": "aucune en m\xE9moire.",
+    "orion.paidBack": "lithium {paid} payé, {back} rendu",
+    "orion.planAll": "lancement maintenant : {free} de lithium libre à la fin{held} rachète les {waves} vagues, ≈{msu} MSU",
+    "orion.planSome": "lancement maintenant : {free} de lithium libre à la fin{held} rachète {covered}/{waves} vagues, ≈{msu} MSU",
+    "orion.held": " ({v} réservés pour {n} en cours)",
+    "orion.planNever": "pas les {waves} : la production de lithium s’arrête avant",
+    "orion.planWait": "les {waves} si lancé dans {h} ou plus tard",
+    "orion.planTitle": "Lithium actuel plus {h} de production, racheté à la fin, en gardant ce qu’il faudra aux anomalies en cours à leur fin :",
+    "orion.planNone": "aucune en mémoire.",
     "orion.planOwnBack": "Le lithium rendu par celle-ci ({v}) arrive avec le rachat : il ne peut pas la payer.",
-    "orion.toggleHint": "Si le lithium que cette anomalie doit encore payer est r\xE9serv\xE9 dans les plans du scanner",
-    "orion.soFar": "jusqu\u2019ici",
+    "orion.toggleHint": "Si le lithium que cette anomalie doit encore payer est réservé dans les plans du scanner",
+    "orion.soFar": "jusqu’ici",
     "orion.back": "rendu",
-    "orion.paid": "pay\xE9",
-    "orion.over": "termin\xE9e, \xE0 payer maintenant",
+    "orion.paid": "payé",
+    "orion.over": "terminée, à payer maintenant",
     "orion.endsIn": "se termine dans {h}",
-    "orion.warnShort": "Attention : scanner maintenant laisse trop peu de lithium pour racheter les anomalies en cours. Il manque d\xE9j\xE0 {v}, avant tout scan.",
-    "orion.warnFree": "Attention : scanner maintenant laisse trop peu de lithium pour racheter les anomalies en cours. Seuls {free} sont libres et un scan co\xFBte {cost}.",
-    "orion.noneRemembered": "Aucune anomalie en cours en m\xE9moire. Si tu en as, ouvre une fois l\u2019aper\xE7u des missions.",
-    "orion.partial": "co\xFBt jusqu\u2019ici, total pas encore connu",
-    "orion.empty": "Aucune anomalie enregistr\xE9e. Ouvre l\u2019aper\xE7u des missions Orion : les anomalies list\xE9es sont enregistr\xE9es ici.",
+    "orion.warnShort": "Attention : scanner maintenant laisse trop peu de lithium pour racheter les anomalies en cours. Il manque déjà {v}, avant tout scan.",
+    "orion.warnFree": "Attention : scanner maintenant laisse trop peu de lithium pour racheter les anomalies en cours. Seuls {free} sont libres et un scan coûte {cost}.",
+    "orion.noneRemembered": "Aucune anomalie en cours en mémoire. Si tu en as, ouvre une fois l’aperçu des missions.",
+    "orion.partial": "coût jusqu’ici, total pas encore connu",
+    "orion.empty": "Aucune anomalie enregistrée. Ouvre l’aperçu des missions Orion : les anomalies listées sont enregistrées ici.",
     "orion.balance": "Bilan",
-    "orion.balanceHint": "r\xE9compenses + vaisseaux re\xE7us \u2212 vaisseaux perdus \u2212 carburant (lithium \xE0 part)",
-    "orion.rewardsK": "R\xE9compenses",
-    "orion.shipsGot": "Vaisseaux re\xE7us",
+    "orion.balanceHint": "récompenses + vaisseaux reçus − vaisseaux perdus − carburant (lithium à part)",
+    "orion.rewardsK": "Récompenses",
+    "orion.shipsGot": "Vaisseaux reçus",
     "orion.lost": "Vaisseaux perdus",
     "orion.fuel": "Carburant",
     "orion.shipsN": "vaisseaux",
     "orion.battlesN": "combats",
     "orion.collectionsN": "rachats",
     "orion.wavesN": "vagues",
-    "orion.lithiumNet": "lithium net d\xE9pens\xE9",
-    "orion.legendUp": "R\xE9compenses + vaisseaux re\xE7us (MSU)",
-    "orion.legendDown": "Co\xFBts : vaisseaux perdus + carburant (MSU)",
+    "orion.lithiumNet": "lithium net dépensé",
+    "orion.legendUp": "Récompenses + vaisseaux reçus (MSU)",
+    "orion.legendDown": "Coûts : vaisseaux perdus + carburant (MSU)",
     "orion.other": "Autre",
     "orion.anomalies": "Anomalies apparues",
-    "orion.search": "Chercher nom ou coordonn\xE9es\u2026",
+    "orion.search": "Chercher nom ou coordonnées…",
     "orion.all": "toutes",
-    "orion.rowsHint": "chiffres de la ligne = p\xE9riode choisie seulement",
-    "orion.noneInPeriod": "Aucune anomalie apparue dans cette p\xE9riode.",
+    "orion.rowsHint": "chiffres de la ligne = période choisie seulement",
+    "orion.noneInPeriod": "Aucune anomalie apparue dans cette période.",
     "orion.col.spawned": "Apparue",
     "orion.col.name": "Nom",
     "orion.col.coords": "Coord.",
     "orion.col.level": "Niv.",
-    "orion.col.stars": "\xC9toiles",
+    "orion.col.stars": "Étoiles",
     "orion.col.mode": "Mode",
     "orion.col.kind": "Type",
     "orion.col.waves": "Vagues",
-    "orion.col.status": "\xC9tat",
-    "orion.col.paid": "Lithium pay\xE9",
+    "orion.col.status": "État",
+    "orion.col.paid": "Lithium payé",
     "orion.col.back": "Lithium rendu",
     "orion.status.running": "en cours",
-    "orion.status.collected": "rachet\xE9e",
-    "orion.status.expired": "expir\xE9e",
+    "orion.status.collected": "rachetée",
+    "orion.status.expired": "expirée",
     "orion.del": "Retirer cette anomalie du journal",
     "orion.delConfirm": "Retirer ?",
     "orion.csv": "CSV par jour",
     "orion.json": "Exporter JSON",
-    "orion.clear": "Vider l\u2019archive Orion",
-    "orion.costs": "Co\xFBts",
+    "orion.clear": "Vider l’archive Orion",
+    "orion.costs": "Coûts",
     "orion.title": "Journal Orion",
-    "orion.sub": "Des pages Orion, de tes rachats, des flottes envoy\xE9es et des rapports ouverts : aucune requ\xEAte au serveur",
+    "orion.sub": "Des pages Orion, de tes rachats, des flottes envoyées et des rapports ouverts : aucune requête au serveur",
     "orion.countSwitch": "Compter dans le plan du lithium",
-    "orion.waiting": "En attente de la premi\xE8re vague : rien \xE0 racheter",
+    "orion.waiting": "En attente de la première vague : rien à racheter",
     "orion.waitingShort": "en attente",
-    "orion.redeemCost": "co\xFBt r\xE9compense",
-    "orion.collectCost": "\xE0 payer maintenant",
+    "orion.redeemCost": "coût récompense",
+    "orion.collectCost": "à payer maintenant",
     "orion.lithiumBack": "lithium rendu",
-    "orion.notCountedHint": "R\xE9compenses non compt\xE9es : la page dit combien, pas lesquelles",
-    "orion.msuNoCost": "MSU \xB7 sans co\xFBt",
-    "orion.freeHint": "le lithium rendu couvre le co\xFBt",
+    "orion.notCountedHint": "Récompenses non comptées : la page dit combien, pas lesquelles",
+    "orion.msuNoCost": "MSU · sans coût",
+    "orion.freeHint": "le lithium rendu couvre le coût",
     "orion.unitH": "MSU par heure de lithium",
     "orion.unitM": "MSU par 1M de lithium",
-    "orion.planNoProd": "pas les {waves} : la production de lithium est arr\xEAt\xE9e",
-    "orion.totalCost": "co\xFBt total {v}",
+    "orion.planNoProd": "pas les {waves} : la production de lithium est arrêtée",
+    "orion.totalCost": "coût total {v}",
     "orion.boxTitle": "Lithium",
     "orion.prod": "+{v}/h",
-    "orion.stopsIn": "conversion termin\xE9e dans {h}",
+    "orion.stopsIn": "conversion terminée dans {h}",
     "orion.fullIn": "stockage plein dans {h}",
-    "orion.prodFull": "stockage plein : production arr\xEAt\xE9e",
-    "orion.prodStopped": "production arr\xEAt\xE9e : aucune conversion en cours",
+    "orion.prodFull": "stockage plein : production arrêtée",
+    "orion.prodStopped": "production arrêtée : aucune conversion en cours",
     "orion.kScans": "Scans possibles",
     "orion.kScansSub": "{v} chacun",
     "orion.kFree": "Lithium libre",
-    "orion.kFreeSub": "apr\xE8s les anomalies en cours",
-    "orion.kHeld": "R\xE9serv\xE9",
+    "orion.kFreeSub": "après les anomalies en cours",
+    "orion.kHeld": "Réservé",
     "orion.kHeldSub": "pour {n} anomalies en cours",
     "orion.kBar": "En stock",
     "orion.kBarSub": "stockage {v}",
-    "orion.wholeMission": "mission enti\xE8re",
-    "orion.extraValue": "autres r\xE9compenses (estimation)",
-    "orion.extraHint": "Budget de la carte \u2248{budget} MSU (multiplicateur appris pour ce type et ce mode) ; les ressources en prennent une partie, le reste \u2248{extra} va aux autres r\xE9compenses, compt\xE9es \xE0 {rate} %.",
-    "orion.withExtra": "dont \u2248{v} estim\xE9s pour les autres r\xE9compenses",
-    "orion.perMissionHour": "\u2248{v} MSU/h de mission",
-    "orion.lowRoll": "si tirage bas \u2248{v}",
-    "orion.lowRollHint": "Combat : un rachat paie tout ou 37,5 % des r\xE9compenses (les livraisons paient toujours tout). Donn\xE9e de la communaut\xE9, v\xE9rifi\xE9e par le journal Orion.",
+    "orion.wholeMission": "mission entière",
+    "orion.extraValue": "autres récompenses (estimation)",
+    "orion.extraHint": "Budget de la carte ≈{budget} MSU (multiplicateur appris pour ce type et ce mode) ; les ressources en prennent une partie, le reste ≈{extra} va aux autres récompenses, comptées à {rate} %.",
+    "orion.withExtra": "dont ≈{v} estimés pour les autres récompenses",
+    "orion.perMissionHour": "≈{v} MSU/h de mission",
+    "orion.lowRoll": "si tirage bas ≈{v}",
+    "orion.lowRollHint": "Combat : un rachat paie tout ou 37,5 % des récompenses (les livraisons paient toujours tout). Donnée de la communauté, vérifiée par le journal Orion.",
     "orion.lowRolls": "tirages bas",
     "tech.iasShort": "Lithium +{v}/h",
-    "tech.ias": "Production de lithium de ce scanner pendant la conversion : {from}/h \u2192 {to}/h au niveau {level} (formule de la communaut\xE9 : 15,36 \xD7 L \xD7 1,1^L \xD7 vitesse \xE9conomique)",
-    "orion.simOpen": "Simuler cette vague dans {tool} (nouvel onglet) : la vague attaque, ta flotte \xE0 l\u2019anomalie d\xE9fend ; ajoute tes vaisseaux dans le simulateur",
-    "orion.expected": "Pr\xE9vu au scan (mission enti\xE8re)",
-    "orion.nowLabel": "\xC0 racheter maintenant :",
+    "tech.ias": "Production de lithium de ce scanner pendant la conversion : {from}/h → {to}/h au niveau {level} (formule de la communauté : 15,36 × L × 1,1^L × vitesse économique)",
+    "orion.simOpen": "Simuler cette vague dans {tool} (nouvel onglet) : la vague attaque, ta flotte à l’anomalie défend ; ajoute tes vaisseaux dans le simulateur",
+    "orion.expected": "Prévu au scan (mission entière)",
+    "orion.nowLabel": "À racheter maintenant :",
     "orion.nowCost": "pour {v} de lithium",
-    "orion.cargoNeed": "Livraison : uniquement des transporteurs, avec au moins la capacit\xE9 de la flotte entrante. La plus grande : {cap} (vague {wave}) \u2248 {lc} grands ou {sc} petits transporteurs",
-    "orion.cargoHint": "Capacit\xE9 des flottes PNJ entrantes (capacit\xE9 de base de leurs vaisseaux, avec leur bonus), d\u2019apr\xE8s les donn\xE9es de la vague ; tes transporteurs \xE0 la capacit\xE9 lue sur la page flotte. Vaisseaux de guerre dans la flotte = aucune r\xE9compense.",
+    "orion.cargoNeed": "Livraison : uniquement des transporteurs, avec au moins la capacité de la flotte entrante. La plus grande : {cap} (vague {wave}) ≈ {lc} grands ou {sc} petits transporteurs",
+    "orion.cargoHint": "Capacité des flottes PNJ entrantes (capacité de base de leurs vaisseaux, avec leur bonus), d’après les données de la vague ; tes transporteurs à la capacité lue sur la page flotte. Vaisseaux de guerre dans la flotte = aucune récompense.",
     "orion.waveN": "Vague {n}",
-    "fleet.expeditionSpread": "Syst\xE8me al\xE9atoire \xB1",
-    "settings.expSpreadHint": "Comme OGLight : l'exp\xE9dition part vers un syst\xE8me au hasard entre celui de d\xE9part moins N et plus N. 0 = toujours le syst\xE8me de d\xE9part.",
-    "fleet.expeditionSplit": "R\xE9partir les transporteurs",
-    "settings.expSplitHint": "Pour les univers jeunes : chaque exp\xE9dition prend au plus les transporteurs de la plan\xE8te divis\xE9s par les emplacements d'exp\xE9dition encore libres, pour que la premi\xE8re ne les prenne pas tous.",
-    "fleet.expSplitCalc": "{ship} : {n} \xF7 {slots} empl. = {each} par exp\xE9dition",
-    "fleet.expSplitUnknown": "Le calcul appara\xEEt apr\xE8s avoir ouvert la page Flotte.",
-    "fleet.expeditionStay": "Exp\xE9ditions depuis la m\xEAme plan\xE8te",
-    "settings.expStayHint": "Avec R\xE9p\xE9ter actif, apr\xE8s une exp\xE9dition la m\xEAme plan\xE8te ou lune se rouvre avec l'exp\xE9dition pr\xEAte, tant qu'il reste des emplacements. D\xE9sactiv\xE9 = plan\xE8te suivante.",
-    "fleet.ok.expSystem": "vers {coords} (\xB1{n})",
-    "fleet.ok.expSplit": "transporteurs r\xE9partis sur {slots} empl.",
-    "fleet.emptyHint": "Aucun vaisseau ici. Vous pouvez marquer ce corps \xE0 ignorer pendant les exp\xE9ditions.",
-    "fleet.tip.skipEmpty": "Aucun vaisseau ici : ouvre la plan\xE8te ou lune suivante du tour avec l'exp\xE9dition pr\xEAte. Rien ne part d'ici.",
+    "fleet.expeditionSpread": "Système aléatoire ±",
+    "settings.expSpreadHint": "Comme OGLight : l'expédition part vers un système au hasard entre celui de départ moins N et plus N. 0 = toujours le système de départ.",
+    "fleet.expeditionSplit": "Répartir les transporteurs",
+    "settings.expSplitHint": "Pour les univers jeunes : chaque expédition prend au plus les transporteurs de la planète divisés par les emplacements d'expédition encore libres, pour que la première ne les prenne pas tous.",
+    "fleet.expSplitCalc": "{ship} : {n} ÷ {slots} empl. = {each} par expédition",
+    "fleet.expSplitUnknown": "Le calcul apparaît après avoir ouvert la page Flotte.",
+    "fleet.expeditionStay": "Expéditions depuis la même planète",
+    "settings.expStayHint": "Avec Répéter actif, après une expédition la même planète ou lune se rouvre avec l'expédition prête, tant qu'il reste des emplacements. Désactivé = planète suivante.",
+    "fleet.ok.expSystem": "vers {coords} (±{n})",
+    "fleet.ok.expSplit": "transporteurs répartis sur {slots} empl.",
+    "fleet.emptyHint": "Aucun vaisseau ici. Vous pouvez marquer ce corps à ignorer pendant les expéditions.",
+    "fleet.tip.skipEmpty": "Aucun vaisseau ici : ouvre la planète ou lune suivante du tour avec l'expédition prête. Rien ne part d'ici.",
     "ping.label": "Ping {ms} ms",
-    "ping.hint": "Le serveur a r\xE9pondu en {ms} ms ; la page s'est charg\xE9e en {s} s. Mesur\xE9 au chargement de cette page : un envoi fait maintenant arrive au serveur avec un retard semblable.",
-    "ping.hintShort": "Le serveur a r\xE9pondu en {ms} ms. Mesur\xE9 au chargement de cette page.",
+    "ping.hint": "Le serveur a répondu en {ms} ms ; la page s'est chargée en {s} s. Mesuré au chargement de cette page : un envoi fait maintenant arrive au serveur avec un retard semblable.",
+    "ping.hintShort": "Le serveur a répondu en {ms} ms. Mesuré au chargement de cette page.",
     "fleet.send.allBtn": "Tout",
-    "fleet.send.allHint": "Toutes les ressources de cette plan\xE8te ou lune (le carburant du vol reste)",
-    "msg.apiCopied": "API copi\xE9e",
+    "fleet.send.allHint": "Toutes les ressources de cette planète ou lune (le carburant du vol reste)",
+    "msg.apiCopied": "API copiée",
     "msg.apiCopyFailed": "Impossible de copier l'API : le navigateur ne le permet pas",
-    "fleet.keepShips": "R\xE9serve de vaisseaux : {n} restent sur ce corps (pas pour l'exp\xE9dition et le fleetsave)",
-    "fleet.keepRes": "r\xE9serve {n}",
-    "fleet.keepResHint": "R\xE9serve de ressources : {n} restent sur ce corps (pas pour l'exp\xE9dition et le fleetsave)",
+    "fleet.keepShips": "Réserve de vaisseaux : {n} restent sur ce corps (pas pour l'expédition et le fleetsave)",
+    "fleet.keepRes": "réserve {n}",
+    "fleet.keepResHint": "Réserve de ressources : {n} restent sur ce corps (pas pour l'expédition et le fleetsave)",
     "fleet.cargoPicked": "Fret {n}",
-    "fleet.cargoPickedHint": "Capacit\xE9 de fret des vaisseaux choisis : {n}",
+    "fleet.cargoPickedHint": "Capacité de fret des vaisseaux choisis : {n}",
     "fleet.btn.touchCollect": "Collecter",
     "fleet.btn.touchDeploy": "Collecter",
     "fleet.btn.touchSubTransport": "transport",
     "fleet.btn.touchSubDeploy": "stationner",
-    "fleet.rulesShort": "R\xE8gles",
-    "settings.section.bodies": "Plan\xE8tes et lunes",
-    "fleet.bodiesHint": "R\xE9serves, porte de saut et fleetsave de chaque plan\xE8te et lune. Touchez un corps pour changer ses r\xE8gles ; les changements s\u2019appliquent tout de suite.",
+    "fleet.rulesShort": "Règles",
+    "settings.section.bodies": "Planètes et lunes",
+    "fleet.bodiesHint": "Réserves, porte de saut et fleetsave de chaque planète et lune. Touchez un corps pour changer ses règles ; les changements s’appliquent tout de suite.",
     "fleet.bodiesAll": "Tous les corps",
     "fleet.rule.saveReserveOnly": "sans cible",
-    "threat.attack": "Attaque \xE0 {time}",
-    "threat.spy": "Espionnage \xE0 {time}",
-    "flights.out": "{mission} : {n} \xE0 l\u2019aller, premi\xE8re arriv\xE9e {time}",
-    "flights.back": "{mission} : {n} au retour, premier \xE0 {time}",
-    "flights.in": "{mission} : {n} arrive ici \xE0 {time}",
+    "threat.attack": "Attaque à {time}",
+    "threat.spy": "Espionnage à {time}",
+    "flights.out": "{mission} : {n} à l’aller, première arrivée {time}",
+    "flights.back": "{mission} : {n} au retour, premier à {time}",
+    "flights.in": "{mission} : {n} arrive ici à {time}",
     "flights.moon": "Lune :",
-    "mission.2": "Attaque group\xE9e",
+    "mission.2": "Attaque groupée",
     "mission.7": "Coloniser",
-    "mission.9": "D\xE9truire la lune",
+    "mission.9": "Détruire la lune",
     "mission.18": "Exploration",
-    "flights.title": "Flottes en vol"
+    "flights.title": "Flottes en vol",
+    "settings.section.guide": "Guide",
+    "tour.next": "Suivant",
+    "tour.back": "Retour",
+    "tour.done": "Terminé",
+    "tour.close": "Fermer le guide",
+    "tour.count": "{n} sur {total}",
+    "tour.help": "Guide de cette fenêtre",
+    "tour.zoneHelp": "Ce que fait cette zone",
+    "tour.inviteTitle": "Première visite ?",
+    "tour.inviteText": "Un guide d'une minute sur «{name}» : j'éclaire chaque fonction et je dis ce qu'elle fait et comment s'en servir.",
+    "tour.show": "Montre-moi",
+    "tour.later": "Plus tard",
+    "tour.no": "Non, merci",
+    "tour.name.board": "Plateau et menu des planètes",
+    "tour.name.fleet": "Page Flotte",
+    "tour.name.settings": "Réglages",
+    "tour.name.dashboard": "Tableau de bord",
+    "tour.name.planner": "Plan",
+    "tour.name.journal": "Journal",
+    "tour.name.galaxy": "Galaxie",
+    "tour.name.messages": "Messages",
+    "tour.name.tech": "Bâtiments et recherche",
+    "tour.where.board": "Chaque page.",
+    "tour.where.fleet": "Vaisseaux, missions, réserves.",
+    "tour.where.settings": "Roue dentée.",
+    "tour.where.dashboard": "Clic sur Production.",
+    "tour.where.planner": "Clic sur Plan.",
+    "tour.where.journal": "Clic sur Journal.",
+    "tour.where.galaxy": "Drapeaux, classement, débris.",
+    "tour.where.messages": "Rapports et espionnages.",
+    "tour.where.tech": "Bâtiments, un choisi.",
+    "tour.firstSteps": "Premiers pas",
+    "tour.stepDone": "Fait",
+    "tour.step.sync": "Synchroniser les données",
+    "tour.step.syncHint": "Le bouton à flèches au-dessus des planètes : niveaux et recherches de tout le compte.",
+    "tour.step.fleetsave": "Cible du fleetsave",
+    "tour.step.fleetsaveHint": "Dans Planètes et lunes : où fuit la flotte de chaque corps.",
+    "tour.step.mainShip": "Vaisseau principal",
+    "tour.step.mainShipHint": "Sur la page Flotte, la marque sur le transporteur que tu utilises le plus.",
+    "tour.step.plan": "Un bâtiment dans le Plan",
+    "tour.step.planHint": "Sur les pages bâtiments : choisis un bâtiment et appuie sur Plan.",
+    "tour.step.journal": "Journal des expéditions",
+    "tour.step.journalHint": "Ouvre les rapports d'expédition dans tes messages : le journal se remplit seul.",
+    "tour.all": "Tous les guides",
+    "tour.start": "Lancer",
+    "tour.invites": "Invitations",
+    "tour.offer": "Proposer les guides",
+    "tour.offerHint": "Au premier usage d'une fonction, une invitation apparaît ; le guide ne part que par Montre-moi.",
+    "tour.reset": "Guides déjà vus",
+    "tour.resetHint": "Fait revenir les invitations des guides déjà vus ou refusés.",
+    "tour.resetDo": "Réinitialiser",
+    "tour.settings.0": "Réglages|Rangés par thème. Chaque choix s'applique tout de suite et reste dans ce navigateur.",
+    "tour.settings.1": "Une ligne, un choix|Le nom, l'explication dessous, l'interrupteur ou la valeur à droite.",
+    "tour.settings.2": "Planètes et lunes|Fleetsave et réserves de chaque corps. Choisis Planètes ou Lunes, puis touche un corps.",
+    "tour.settings.3": "Touches|Change les raccourcis et choisis quand montrer la barre tactile.",
+    "tour.settings.4": "Données|Sauvegarde ou restaure tout ce que Future retient ; importe les données d'OGLight.",
+    "tour.settings.5": "Guide|Premiers pas, tous les guides et les invitations.",
+    "tour.dashboard.0": "Tableau de bord|Tout le compte sur un plateau. Les chiffres viennent de la dernière synchronisation.",
+    "tour.dashboard.1": "Investissements|Quoi construire d'abord : chaque échelon avec son coût et ses jours d'amortissement ; le meilleur en haut.",
+    "tour.dashboard.2": "Historique|Comment points et production grandissent, jour après jour.",
+    "tour.dashboard.3": "Mines et installations|Niveaux de toutes les planètes en tableau ; les cases colorées sont les files en cours.",
+    "tour.planner.0": "Plan|Ce que coûte tout le plan, ce que tu as et ce qui manque.",
+    "tour.planner.1": "Deux vues|Par planète : quoi apporter où. Par technologie : la liste des bâtiments.",
+    "tour.planner.2": "Tout apporter|Prépare dans Flotte le transport des ressources manquantes. L'envoi reste ton clic.",
+    "tour.planner.3": "Plan vide|Ouvre une page bâtiments ou recherche, choisis et appuie sur Plan.",
+    "tour.journal.0": "Journal|Les expéditions lues dans les messages : ressources, vaisseaux, antimatière, pertes.",
+    "tour.journal.1": "Période|Aujourd'hui, hier, 7 ou 30 jours, ou tout.",
+    "tour.journal.2": "Résultat|Ce qu'ont rapporté les expéditions sur la période, en MSU.",
+    "tour.journal.3": "Évolution|Comment s'est passée la période, jour après jour.",
+    "tour.galaxy.0": "Le système en bref|Joueurs, inactifs et débris du système, sur une ligne.",
+    "tour.galaxy.1": "Drapeaux|Survole un joueur : un drapeau apparaît à côté du nom pour le marquer. Tu le retrouves dans Cibles, sous le menu.",
+    "tour.galaxy.2": "Fiche du joueur|Clic sur le nom : ses planètes et tes notes dans la barre latérale.",
+    "tour.galaxy.3": "Classement|Survole pour les points ; clic ouvre le classement à sa position.",
+    "tour.galaxy.4": "Débris en MSU|La valeur du champ de débris, convertie en métal.",
+    "tour.messages.0": "Rapports en bref|Chaque rapport a son résumé : butin, pertes, valeur. Clic : montre ou cache le texte du jeu.",
+    "tour.messages.1": "Espionnages en tableau|Les espionnages côte à côte, triables : qui rapporte le plus, qui est défendu.",
+    "tour.tech.0": "Ajouter au plan|Ajoute ce bâtiment au Plan : Future compte les ressources qui manquent.",
+    "tour.tech.1": "Plusieurs niveaux|Choisis jusqu'à quel niveau : coût et temps s'additionnent.",
+    "tour.tech.2": "Coût et temps|Ce que ça coûte, combien de temps et ce qui manque avec le stock actuel.",
+    "tour.board.0": "Bienvenue dans Future|Future ajoute au jeu un plateau de chiffres, de plans et de raccourcis. Il ne joue jamais à ta place : chaque envoi reste ton clic.",
+    "tour.board.1": "Production|Ce que rapporte le compte par jour, en MSU (tout converti en métal). Clic : ouvre le tableau de bord avec investissements, mines et historique.",
+    "tour.board.2": "Plan|Les bâtiments voulus et les ressources qui manquent. Ajoute-les avec le bouton Plan des pages bâtiments et recherche. Clic : ouvre le Plan.",
+    "tour.board.3": "Une ligne par planète|Ressources en stock (la barre est le hangar), minutes depuis ta dernière visite, files en cours. Dessous, les flottes en vol depuis et vers ce corps.\nRouge avec épée ou œil : attaque ou espionnage en approche. Mis à jour au chargement d'une page.",
+    "tour.board.4": "Synchroniser|Relit tout le compte depuis le jeu : niveaux, recherches, formes de vie. À faire après une construction ou une recherche.",
+    "tour.board.5": "Réglages|Tous les choix de Future, en onglets. L'onglet Guide contient les premiers pas et chaque guide à revoir.",
+    "tour.board.6": "Journal des expéditions|Les expéditions d'aujourd'hui et d'hier et leur gain. Se remplit seul quand tu ouvres les rapports. Clic : le journal complet.",
+    "tour.board.7": "Cibles|Les joueurs marqués de drapeaux dans la Galaxie. Clic : la barre latérale ; touche M : la position suivante.",
+    "tour.board.8": "Barre de touches|Les raccourcis à toucher : planète précédente et suivante, missions de flotte, roue des réglages.",
+    "tour.board.9": "Premier pas : la Flotte|Ouvre la page Flotte : je t'y aide à régler fleetsave, vaisseau principal et réserves.\nChaque fenêtre de Future a un ? en haut pour revoir son guide.",
+    "tour.fleet.0": "La page Flotte|Future prépare la flotte : vaisseaux, destination, mission. Suivant et Envoyer du jeu restent à toi.\nRéglons tout en 5 étapes.",
+    "tour.fleet.1": "1 · Réglages de flotte|Destinations préférées de Transport et Stationner, expéditions, tour des planètes. Une fois suffit.",
+    "tour.fleet.2": "2 · Règles et fleetsave|Pour chaque planète et lune : où va le fleetsave et ce qui reste. Tant qu'il n'y a pas de cible, Fleetsave reste en pointillé.",
+    "tour.fleet.3": "3 · Vaisseau principal|Touche cette marque sur ton transporteur préféré : Future calcule combien il en faut.",
+    "tour.fleet.4": "4 · Réserves|Ce qui ne quitte jamais ce corps : vaisseaux, ressources, deutérium du portail. Un clic allume ou éteint ; les valeurs se changent dans Règles.",
+    "tour.fleet.5": "5 · Tour|Répéter : après un envoi tu passes au corps suivant, pour faire le tour. Sauter ce corps : le tour le saute.",
+    "tour.fleet.6": "Mission|Transport et Stationner demandent où ; Expédition prépare l'expédition ; Fleetsave la fuite ; Dernière répète la dernière flotte. La lettre en haut est la touche.",
+    "tour.fleet.7": "Destination|Vers lune : tout vers la lune de cette planète. Collecte : réunit les ressources des planètes sur un corps, en transport ou stationnement.",
+    "tour.fleet.8": "Messages|Ici Future dit ce qu'il a préparé ou ce qui manque. Survole un bouton pour savoir ce qu'il fait.",
+    "tour.fleet.9": "Suivant et Envoyer|Le bouton du jeu, à portée de pouce. Appuyer reste ton choix.",
+    "tour.fleet.10": "Terminé|Ensuite : cible du fleetsave dans Règles, vaisseau principal, puis essaie Expédition.\nLes ? à côté de Mission, Destination, Réserves et Tour réexpliquent chaque zone."
   };
 
   // src/i18n/de.json
@@ -3473,8 +3767,6 @@
     "sync.button": "Kontodaten synchronisieren",
     "sync.done": "Daten aktualisiert",
     "sync.failed": "Synchronisierung fehlgeschlagen: Das Spiel hat keine Daten geschickt. Erneut versuchen",
-    "data.missing": "Fehlende Daten auf {count} Planeten: \xF6ffne ihre \xDCbersicht",
-    "guard.refused": "Aufruf blockiert, um die OGame-Regeln einzuhalten",
     "planetMenu.moon": "Mond",
     "res.metal": "Metall",
     "res.crystal": "Kristall",
@@ -3484,25 +3776,25 @@
     "settings.totals": "Rohstoffsummen",
     "settings.on": "An",
     "settings.off": "Aus",
-    "planetMenu.age": "Minuten seit du diesen Planeten oder Mond zuletzt ge\xF6ffnet hast (eine Synchronisierung setzt das nicht zur\xFCck)",
+    "planetMenu.age": "Minuten seit du diesen Planeten oder Mond zuletzt geöffnet hast (eine Synchronisierung setzt das nicht zurück)",
     "dash.title": "Dashboard",
-    "dash.close": "Schlie\xDFen",
-    "dash.noData": "keine Daten: Synchronisieren dr\xFCcken",
+    "dash.close": "Schließen",
+    "dash.noData": "keine Daten: Synchronisieren drücken",
     "dash.points": "Punkte",
     "dash.rank": "Platz {rank} von {of}",
-    "dash.pointsHint": "\xDCbersicht \xF6ffnen, um sie zu lesen",
+    "dash.pointsHint": "Übersicht öffnen, um sie zu lesen",
     "dash.stock": "Rohstoffe (MSU)",
-    "dash.stockNote": "Planeten und Monde, Sch\xE4tzung",
-    "dash.prodHour": "St\xFCndliche Produktion (MSU)",
+    "dash.stockNote": "Planeten und Monde, Schätzung",
+    "dash.prodHour": "Stündliche Produktion (MSU)",
     "dash.prodDay": "{value} pro Tag",
     "dash.bodies": "Planeten / Monde",
     "dash.bodiesNote": "mit Daten",
-    "dash.idle": "Unt\xE4tige Planeten",
+    "dash.idle": "Untätige Planeten",
     "dash.idleNote": "kein Bau im Gange",
     "dash.production": "Produktion",
     "dash.dayShort": "T",
     "dash.daysShort": "T",
-    "alert.stale.one": "Daten \xE4lter als eine Stunde auf 1 K\xF6rper",
+    "alert.stale.one": "Daten älter als eine Stunde auf 1 Körper",
     "alert.idle.one": "1 Planet ohne Bau",
     "alert.soonFull.one": "1 Planet in 6 Stunden voll",
     "alert.full.one": "Speicher voll auf 1 Planeten",
@@ -3510,51 +3802,51 @@
     "dash.factProdDay": "MSU pro Tag",
     "dash.factDefence": "Verteidigung",
     "dash.factFleet": "Flotte",
-    "dash.factStock": "auf den K\xF6rpern",
+    "dash.factStock": "auf den Körpern",
     "dash.factRank": "von {of}",
     "dash.factPoints": "Punkte",
-    "dash.nextRung": "Nach der n\xE4chsten Investition: {value} pro Tag",
+    "dash.nextRung": "Nach der nächsten Investition: {value} pro Tag",
     "dash.now": "jetzt",
-    "dash.msuHint": "Balken in MSU (3:2:1): Metall, Kristall \xD71,5, Deuterium \xD73.",
-    "dash.checks": "Zu pr\xFCfen",
+    "dash.msuHint": "Balken in MSU (3:2:1): Metall, Kristall ×1,5, Deuterium ×3.",
+    "dash.checks": "Zu prüfen",
     "dash.allGood": "Alles in Ordnung.",
     "dash.bodiesTable": "Planeten und Monde",
     "dash.showMoons": "Monde zeigen",
     "dash.hideMoons": "Monde ausblenden",
-    "dash.colBody": "K\xF6rper",
-    "dash.colMines": "Minen M\xB7K\xB7D",
+    "dash.colBody": "Körper",
+    "dash.colMines": "Minen M·K·D",
     "dash.colProd": "MSU/Tag",
     "dash.colFull": "Voll in",
     "dash.colAge": "Daten",
     "dash.full": "voll",
-    "dash.idleTag": "unt\xE4tig",
+    "dash.idleTag": "untätig",
     "dash.total": "Summe",
-    "dash.tableHint": "Zum Sortieren auf eine \xDCberschrift klicken. Rohstoffe gesch\xE4tzt aus letzter Lesung plus Produktion.",
+    "dash.tableHint": "Zum Sortieren auf eine Überschrift klicken. Rohstoffe geschätzt aus letzter Lesung plus Produktion.",
     "alert.missing": "Fehlende Daten auf {count} Planeten",
     "alert.full": "Speicher voll auf {count} Planeten",
     "alert.soonFull": "{count} Planeten in 6 Stunden voll",
     "alert.idle": "{count} Planeten ohne Bau",
-    "alert.stale": "Daten \xE4lter als eine Stunde auf {count} K\xF6rpern",
-    "queue.building": "Geb\xE4ude",
+    "alert.stale": "Daten älter als eine Stunde auf {count} Körpern",
+    "queue.building": "Gebäude",
     "queue.research": "Forschung",
     "queue.ship": "Werft",
-    "queue.lfbuilding": "Lebensform-Geb\xE4ude",
+    "queue.lfbuilding": "Lebensform-Gebäude",
     "queue.lfresearch": "Lebensform-Forschung",
-    "dash.queues": "Aktive Auftr\xE4ge",
+    "dash.queues": "Aktive Aufträge",
     "dash.queuesNone": "kein Bau im Gange",
     "dash.queuesUnknown": "noch nicht gelesen",
     "dash.moves": "Lohnendste Investitionen",
     "dash.rates": "Kurse M : K : D",
     "dash.newColony": "neue Kolonie",
     "dash.account": "Konto",
-    "dash.lfGuessed": "Platz zu best\xE4tigen",
-    "dash.lfGuessedHint": "Forschung aus den Stufen gesch\xE4tzt: \xD6ffne die Lebensform-Forschungsseite dieses Planeten, um die aktive zu sehen.",
-    "dash.needLevels": "F\xFCr den Bonus der Lebensform-Stufe \xF6ffne:",
+    "dash.lfGuessed": "Platz zu bestätigen",
+    "dash.lfGuessedHint": "Forschung aus den Stufen geschätzt: Öffne die Lebensform-Forschungsseite dieses Planeten, um die aktive zu sehen.",
+    "dash.needLevels": "Für den Bonus der Lebensform-Stufe öffne:",
     "dash.openLfSettings": "Lebensform-Einstellungen",
-    "dash.needBuildings": "Lebensform-Geb\xE4ude auf Stufe 0 zu pr\xFCfen (Voraussetzungen) auf {count} Planeten, \xF6ffne die Seite von:",
-    "dash.needSlots": "Aktive Lebensform-Forschung auf {count} Planeten zu best\xE4tigen, \xF6ffne die Seite von:",
+    "dash.needBuildings": "Lebensform-Gebäude auf Stufe 0 zu prüfen (Voraussetzungen) auf {count} Planeten, öffne die Seite von:",
+    "dash.needSlots": "Aktive Lebensform-Forschung auf {count} Planeten zu bestätigen, öffne die Seite von:",
     "dash.tab.investments": "Investitionen",
-    "dash.movesOpen": "Reiter Investitionen \xF6ffnen",
+    "dash.movesOpen": "Reiter Investitionen öffnen",
     "dash.stepDone": "erledigt",
     "dash.planetsCount": "{count} Planeten",
     "dash.doneCount": "{done} von {count} erledigt",
@@ -3562,13 +3854,13 @@
     "dash.invest.metal": "Metall",
     "dash.invest.crystal": "Kristall",
     "dash.invest.deuterium": "Deuterium",
-    "dash.invest.lfBuilding": "LF-Geb\xE4ude",
+    "dash.invest.lfBuilding": "LF-Gebäude",
     "dash.invest.lfResearch": "LF-Forschung",
     "dash.invest.plasma": "Plasma",
     "dash.invest.astro": "Astrophysik",
-    "dash.movesNone": "Minenstufen n\xF6tig: Synchronisieren.",
-    "dash.movesHint": "Wie die Amortisation von InfoCompte: Minen, Plasma und neue Kolonie (Astrophysik + durchschnittliche Ausstattung eines Planeten) nach Amortisationstagen zu deinen Kursen; jeder Schritt z\xE4hlt die vorherigen. Ohne Energie und Lebensform-Rabatte.",
-    "dash.colQueue": "L\xE4uft",
+    "dash.movesNone": "Minenstufen nötig: Synchronisieren.",
+    "dash.movesHint": "Wie die Amortisation von InfoCompte: Minen, Plasma und neue Kolonie (Astrophysik + durchschnittliche Ausstattung eines Planeten) nach Amortisationstagen zu deinen Kursen; jeder Schritt zählt die vorherigen. Ohne Energie und Lebensform-Rabatte.",
+    "dash.colQueue": "Läuft",
     "mine.metal": "Metallmine",
     "mine.crystal": "Kristallmine",
     "mine.deuterium": "Deuteriumsynthetisierer",
@@ -3580,17 +3872,17 @@
     "fleet.type": "Typ",
     "fleet.typePlanet": "Planet",
     "fleet.typeMoon": "Mond",
-    "fleet.typeDebris": "Tr\xFCmmerfeld",
+    "fleet.typeDebris": "Trümmerfeld",
     "fleet.mission": "Auftrag",
     "fleet.speed": "Geschwindigkeit",
-    "fleet.fleetsaveHint": "Er hat eigene Schiffe und Rohstoffe zum Behalten und ignoriert die Schalter f\xFCr Schiffe, Rohstoffe und Sprungtor. Galaxie und System leer = die des Startplaneten. Ohne Position ist Fleetsave aus.",
+    "fleet.fleetsaveHint": "Er hat eigene Schiffe und Rohstoffe zum Behalten und ignoriert die Schalter für Schiffe, Rohstoffe und Sprungtor. Galaxie und System leer = die des Startplaneten. Ohne Position ist Fleetsave aus.",
     "fleet.save": "Speichern",
     "fleet.saved": "Gespeichert.",
-    "fleet.copied": "Auf {count} K\xF6rper kopiert.",
+    "fleet.copied": "Auf {count} Körper kopiert.",
     "fleet.reserve": "Reserve",
     "fleet.noReserve": "Keine Regel aktiv",
-    "fleet.resMinusReserve": "Rohstoffe \u2212 Reserve",
-    "fleet.resLoaded": "{cargo} Rohstoffe geladen: pr\xFCfen und senden",
+    "fleet.resMinusReserve": "Rohstoffe − Reserve",
+    "fleet.resLoaded": "{cargo} Rohstoffe geladen: prüfen und senden",
     "mission.1": "Angreifen",
     "mission.3": "Transport",
     "mission.4": "Stationieren",
@@ -3607,71 +3899,71 @@
     "fleet.none": "Keins",
     "fleet.expeditionTitle": "Expeditionen",
     "fleet.expeditionShip": "Frachtschiff",
-    "fleet.bestShip": "Bestes verf\xFCgbares",
+    "fleet.bestShip": "Bestes verfügbares",
     "fleet.expeditionValue": "Abzudeckende Ladung",
-    "fleet.expCalcUnknown": "\xD6ffne die Flottenseite, um den Wert des Spiels zu sehen",
+    "fleet.expCalcUnknown": "Öffne die Flottenseite, um den Wert des Spiels zu sehen",
     "fleet.expCalc": "Maximum des Spiels: {value}",
     "fleet.auto": "automatisch",
-    "fleet.expeditionExtras": "1 Spionagesonde und 1 Pathfinder hinzuf\xFCgen",
-    "settings.expBigHint": "Ein zus\xE4tzliches Kampfschiff in der Expedition. Automatisch = das gr\xF6\xDFte, das du hast; fehlt das gew\xE4hlte, wird das gr\xF6\xDFte genommen.",
-    "fleet.biggestShip": "Automatisch: das gr\xF6\xDFte",
-    "fleet.expeditionBig": "Gro\xDFes Schiff",
+    "fleet.expeditionExtras": "1 Spionagesonde und 1 Pathfinder hinzufügen",
+    "settings.expBigHint": "Ein zusätzliches Kampfschiff in der Expedition. Automatisch = das größte, das du hast; fehlt das gewählte, wird das größte genommen.",
+    "fleet.biggestShip": "Automatisch: das größte",
+    "fleet.expeditionBig": "Großes Schiff",
     "fleet.expeditionHint": "Automatisch = das Maximum, das eine Expedition bringen kann (Klasse, Universumsgeschwindigkeit, Klassenbonus). Du kannst einen festen Wert (z. B. 150M) oder Prozent (z. B. 50%) eingeben.",
     "fleet.repeatTitle": "Wiederholen",
-    "fleet.repeat": "Nach dem Senden den n\xE4chsten Planeten oder Mond vorbereitet \xF6ffnen",
-    "fleet.repeatHint": "F\xFCr Mond, Transport, Stationieren, Expedition und Fleetsave. Senden bleibt dein Klick; die Runde endet beim ersten.",
+    "fleet.repeat": "Nach dem Senden den nächsten Planeten oder Mond vorbereitet öffnen",
+    "fleet.repeatHint": "Für Mond, Transport, Stationieren, Expedition und Fleetsave. Senden bleibt dein Klick; die Runde endet beim ersten.",
     "fleet.repeatShort": "Wiederholen",
-    "fleet.speedAsk.q": "Geschwindigkeit {pct}% auch f\xFCr die n\xE4chsten Fleetsaves der Runde?",
+    "fleet.speedAsk.q": "Geschwindigkeit {pct}% auch für die nächsten Fleetsaves der Runde?",
     "fleet.speedAsk.yes": "Ja",
     "fleet.speedAsk.no": "Nein",
-    "fleet.speedAsk.done": "Die n\xE4chsten Fleetsaves der Runde fliegen mit {pct}%. Die allgemeine Vorgabe bleibt.",
-    "fleet.speedAsk.hint": "Die Runde nutzt bisher {pct}%. Nur f\xFCr diese Runde: die Vorgabe in den Einstellungen bleibt unver\xE4ndert.",
-    "fleet.rule.skip": "Bei Expeditionen \xFCberspringen",
-    "fleet.rule.skipHint": "Nur Expeditionen: Wiederholen und \xDCberspringen lassen diesen Planeten oder Mond aus, auch wenn er leer ist.",
+    "fleet.speedAsk.done": "Die nächsten Fleetsaves der Runde fliegen mit {pct}%. Die allgemeine Vorgabe bleibt.",
+    "fleet.speedAsk.hint": "Die Runde nutzt bisher {pct}%. Nur für diese Runde: die Vorgabe in den Einstellungen bleibt unverändert.",
+    "fleet.rule.skip": "Bei Expeditionen überspringen",
+    "fleet.rule.skipHint": "Nur Expeditionen: Wiederholen und Überspringen lassen diesen Planeten oder Mond aus, auch wenn er leer ist.",
     "fleet.on": "an",
     "fleet.off": "aus",
-    "fleet.repeatNext": "Gesendet. Weiter zu {body}\u2026",
+    "fleet.repeatNext": "Gesendet. Weiter zu {body}…",
     "fleet.repeatDone": "Runde abgeschlossen.",
-    "fleet.pickDest": "Ziel w\xE4hlen",
+    "fleet.pickDest": "Ziel wählen",
     "fleet.btn.moon": "Zum Mond",
     "fleet.btn.transport": "Transport",
     "fleet.btn.deploy": "Stationieren",
     "fleet.btn.expedition": "Expedition",
     "fleet.btn.fleetsave": "Fleetsave",
-    "fleet.tip.moon": "Rohstoffe mit den n\xF6tigen Frachtern auf den Mond dieses Planeten bringen",
+    "fleet.tip.moon": "Rohstoffe mit den nötigen Frachtern auf den Mond dieses Planeten bringen",
     "fleet.tip.transport": "Schaltet Transport ein: Ziel und Rohstoffe eingeben, dann setzt KT oder GT die passenden Frachter. Nochmal zum Ausschalten",
-    "fleet.tip.deploy": "Schaltet Stationieren ein: Schiffe, Ziel und Rohstoffe w\xE4hlen, dann erg\xE4nzt KT oder GT die Frachter. Nochmal zum Ausschalten",
+    "fleet.tip.deploy": "Schaltet Stationieren ein: Schiffe, Ziel und Rohstoffe wählen, dann ergänzt KT oder GT die Frachter. Nochmal zum Ausschalten",
     "fleet.tip.expedition": "Expedition auf Position 16 dieses Systems mit dem besten Schiff",
     "fleet.tip.fleetsave": "Fleetsave dieses Planeten oder Mondes vorbereiten",
-    "fleet.ok.cargo": "Bereit: {ships} Schiffe, {cargo} Rohstoffe. Weiter und Flotte senden dr\xFCcken",
-    "fleet.ok.ships": "{ships} Schiffe ausgew\xE4hlt",
-    "fleet.ok.expedition": "Expedition bereit: {ships} Schiffe f\xFCr {target} Ladung. Weiter und Senden",
-    "fleet.err.noShips": "Keine Schiffe \xFCber die Reserve hinaus",
-    "fleet.err.noResources": "Keine Rohstoffe \xFCber die Reserve hinaus",
+    "fleet.ok.cargo": "Bereit: {ships} Schiffe, {cargo} Rohstoffe. Weiter und Flotte senden drücken",
+    "fleet.ok.ships": "{ships} Schiffe ausgewählt",
+    "fleet.ok.expedition": "Expedition bereit: {ships} Schiffe für {target} Ladung. Weiter und Senden",
+    "fleet.err.noShips": "Keine Schiffe über die Reserve hinaus",
+    "fleet.err.noResources": "Keine Rohstoffe über die Reserve hinaus",
     "fleet.err.noSkip": "Keine laufende Sammelrunde zum Weiterschalten",
-    "fleet.skipOffer": "\xDCberspringen dr\xFCcken, um zu {body} zu wechseln",
+    "fleet.skipOffer": "Überspringen drücken, um zu {body} zu wechseln",
     "fleet.err.noExpSlots": "Kein freier Expeditionsslot",
     "fleet.err.noMoon": "Dieser Planet hat keinen Mond",
-    "fleet.err.noDest": "Zuerst ein Ziel w\xE4hlen",
-    "fleet.err.noFleetsave": "Kein Fleetsave gesetzt: Reserven und Fleetsave \xF6ffnen",
+    "fleet.err.noDest": "Zuerst ein Ziel wählen",
+    "fleet.err.noFleetsave": "Kein Fleetsave gesetzt: Reserven und Fleetsave öffnen",
     "fleet.err.notReady": "Flottenseite noch nicht bereit, nochmal versuchen",
-    "fleet.err.page1": "F\xFCr diese Kn\xF6pfe zur\xFCck zu Flottenseite 1",
-    "fleet.close": "Schlie\xDFen",
+    "fleet.err.page1": "Für diese Knöpfe zurück zu Flottenseite 1",
+    "fleet.close": "Schließen",
     "fleet.favTitle": "Expeditionssammlung: Hauptmond",
-    "fleet.favTransport": "1 \xB7 Transport nach",
-    "fleet.favDeploy": "2 \xB7 Stationieren nach",
+    "fleet.favTransport": "1 · Transport nach",
+    "fleet.favDeploy": "2 · Stationieren nach",
     "fleet.tip.cargo": "Rohstoffe laden, Reserve und Flug-Deuterium bleiben",
     "fleet.btn.last": "Letzte",
     "fleet.tip.last": "Letzte Flotte wiederholen: gleiche Schiffe, Ziel, Mission und Geschwindigkeit",
     "fleet.err.noLast": "Noch keine Flotte gesendet",
     "fleet.jumpgateKeep": "Sprungtor-Reserve dieses Mondes",
     "shortcut.prev": "Vorheriger Planet",
-    "shortcut.next": "N\xE4chster Planet",
+    "shortcut.next": "Nächster Planet",
     "tech.prev": "Vorherige Stufe",
-    "tech.next": "N\xE4chste Stufe",
-    "tech.reset": "Zur\xFCck zur n\xE4chsten Stufe",
+    "tech.next": "Nächste Stufe",
+    "tech.reset": "Zurück zur nächsten Stufe",
     "tech.level": "St. {level}",
-    "tech.range": "von {from} \u2192 {to}",
+    "tech.range": "von {from} → {to}",
     "tech.fromNow": "jetzt {from}",
     "tech.colLevel": "St. {level}",
     "tech.colTotal": "Gesamt",
@@ -3684,17 +3976,17 @@
     "tech.time": "Dauer",
     "tech.planBtn": "Plan",
     "tech.addOne": "St. {level} planen",
-    "tech.addRange": "St. {from}\u2013{to} planen",
-    "tech.inPlan": "Geplant \u2713",
-    "tech.addHint": "F\xFCgt zum Bauplan dieses Planeten/Mondes hinzu",
+    "tech.addRange": "St. {from}–{to} planen",
+    "tech.inPlan": "Geplant ✓",
+    "tech.addHint": "Fügt zum Bauplan dieses Planeten/Mondes hinzu",
     "tech.removeHint": "Klicken, um diese Stufen aus dem Plan zu entfernen",
     "tech.discount": "Vom Spiel angewendeter Rabatt: {pct}%",
     "tech.amount": "Anzahl: {n}",
-    "tech.addUnits": "\xD7{n} planen",
-    "tech.added": "Hinzugef\xFCgt \u2713",
+    "tech.addUnits": "×{n} planen",
+    "tech.added": "Hinzugefügt ✓",
     "plan.title": "Bauplan",
     "plan.titleCount": "Bauplan ({n})",
-    "plan.sub": "Ein Knopf pro Planet bringt, was dort fehlt. Bauten in der Warteschlange halten ihre Ressourcen zur\xFCck.",
+    "plan.sub": "Ein Knopf pro Planet bringt, was dort fehlt. Bauten in der Warteschlange halten ihre Ressourcen zurück.",
     "plan.moonOf": "Mond von {name}",
     "plan.clear": "Leeren",
     "plan.colItem": "Was",
@@ -3702,59 +3994,59 @@
     "plan.remove": "Aus dem Plan entfernen",
     "plan.total": "Gesamt",
     "plan.missingHere": "Fehlt hier",
-    "plan.ready": "Genug Ressourcen \u2713",
-    "plan.empty": "Der Plan ist leer. \xD6ffne ein Geb\xE4ude oder eine Forschung und nutze \u201EPlanen\u201C.",
+    "plan.ready": "Genug Ressourcen ✓",
+    "plan.empty": "Der Plan ist leer. Öffne ein Gebäude oder eine Forschung und nutze „Planen“.",
     "plan.grandTotal": "Gesamtkosten des Plans",
     "plan.grandMissing": "Fehlt insgesamt",
-    "tech.rangeShort": "{from}\u2192{to}",
+    "tech.rangeShort": "{from}→{to}",
     "tech.rangeHint": "Summe der Stufen {from} bis {to}",
-    "tech.discountShort": "\u2212{pct}%",
+    "tech.discountShort": "−{pct}%",
     "fleet.foodShort": "Nahrung ignorieren",
-    "fleet.foodHint": "Nahrung bleibt bei jeder Flotte auf dem Planeten, auch mit den Kn\xF6pfen des Spiels.",
+    "fleet.foodHint": "Nahrung bleibt bei jeder Flotte auf dem Planeten, auch mit den Knöpfen des Spiels.",
     "fleet.err.noDelivery": "Keine Plan-Lieferung aktiv.",
-    "fleet.ok.delivery": "Lieferung bereit: {ships} Schiffe mit {cargo} Ressourcen (es fehlten {left}). Weiter und Flotte senden dr\xFCcken.",
-    "tech.timeHint": "Dauer St. {level} \xB7 gesamt {from} bis {to}",
-    "tech.amountHint": "Wie viele: f\xFCr den Plan jede Zahl; zum Bauen kommen h\xF6chstens 99.999 in die Warteschlange, und nicht mehr, als das Spiel erlaubt (max).",
-    "plan.items": "{n} Eintr\xE4ge",
-    "plan.levels": "St. {from}\u2013{to}",
+    "fleet.ok.delivery": "Lieferung bereit: {ships} Schiffe mit {cargo} Ressourcen (es fehlten {left}). Weiter und Flotte senden drücken.",
+    "tech.timeHint": "Dauer St. {level} · gesamt {from} bis {to}",
+    "tech.amountHint": "Wie viele: für den Plan jede Zahl; zum Bauen kommen höchstens 99.999 in die Warteschlange, und nicht mehr, als das Spiel erlaubt (max).",
+    "plan.items": "{n} Einträge",
+    "plan.levels": "St. {from}–{to}",
     "plan.bring": "Ressourcen hierher bringen",
-    "plan.bringHint": "\xD6ffnet die Flotte auf dem n\xE4chsten Planeten mit einem Transport des Fehlenden hierher. Nach jedem Senden geht es zum n\xE4chsten Planeten, bis nichts mehr fehlt.",
-    "plan.unknownHere": "Ressourcen hier unbekannt: Aktualisieren dr\xFCcken",
-    "plan.complete": "Lieferung vervollst\xE4ndigen",
-    "plan.sentArriving": "Gesendet \xB7 Ankunft {time}",
-    "plan.sentArrived": "Gesendet \xB7 angekommen (noch nicht gelesen)",
+    "plan.bringHint": "Öffnet die Flotte auf dem nächsten Planeten mit einem Transport des Fehlenden hierher. Nach jedem Senden geht es zum nächsten Planeten, bis nichts mehr fehlt.",
+    "plan.unknownHere": "Ressourcen hier unbekannt: Aktualisieren drücken",
+    "plan.complete": "Lieferung vervollständigen",
+    "plan.sentArriving": "Gesendet · Ankunft {time}",
+    "plan.sentArrived": "Gesendet · angekommen (noch nicht gelesen)",
     "plan.missingAfterSent": "Fehlt noch",
-    "plan.allSent": "Alles gesendet \u2713",
+    "plan.allSent": "Alles gesendet ✓",
     "msg.out.resource": "Rohstoffe",
     "msg.out.darkmatter": "Dunkle Materie",
     "msg.out.ship": "Schiffe",
     "msg.out.nothing": "Nichts",
-    "msg.out.trader": "H\xE4ndler",
+    "msg.out.trader": "Händler",
     "msg.out.item": "Gegenstand",
     "msg.out.blackhole": "Schwarzes Loch",
-    "msg.out.early": "Fr\xFChe R\xFCckkehr",
-    "msg.out.late": "Versp\xE4tung",
+    "msg.out.early": "Frühe Rückkehr",
+    "msg.out.late": "Verspätung",
     "msg.out.pirate": "Piraten",
     "msg.out.alien": "Aliens",
     "msg.out.artefact": "Artefakte",
     "msg.out.lifeform": "Lebensform-Erfahrung",
     "msg.out.unknown": "Sonstiges",
     "msg.size.0": "Riesig",
-    "msg.size.1": "Gro\xDF",
+    "msg.size.1": "Groß",
     "msg.size.2": "Normal",
-    "msg.depletion": "Ersch\xF6pfung {n}",
+    "msg.depletion": "Erschöpfung {n}",
     "msg.discovery": "Entdeckung",
     "msg.lfXp": "+{n} EP",
     "msg.dmUnit": "DM",
     "msg.pill.lifeform": "Lebensform",
-    "msg.pill.early": "Fr\xFCh",
+    "msg.pill.early": "Früh",
     "recap.title": "Heute",
     "recap.count": "{n} Expeditionen",
     "recap.ships": "Schiffe",
     "recap.shipsHint": "Gefundene minus verlorene Schiffe: {n} MSU",
-    "recap.open": "Heutige Expeditionen, aktualisiert beim Lesen der Berichte \xB7 Klick: Tagebuch \xF6ffnen",
+    "recap.open": "Heutige Expeditionen, aktualisiert beim Lesen der Berichte · Klick: Tagebuch öffnen",
     "fresh.title": "Gerade gelesen",
-    "fresh.close": "Schlie\xDFen",
+    "fresh.close": "Schließen",
     "msg.artefacts": "{n} Artefakte",
     "msg.msuHint": "Wert in Metalleinheiten (1 Kristall = 1,5, 1 Deuterium = 3)",
     "msg.toggle": "Klick: Text des Spiels ein- oder ausblenden",
@@ -3764,7 +4056,7 @@
     "msg.res.food": "Nahrung",
     "msg.res.darkMatter": "Dunkle Materie",
     "msg.spy.loot": "Beute",
-    "msg.spy.cargo": "{n}\xD7 {ship}",
+    "msg.spy.cargo": "{n}× {ship}",
     "msg.spy.fleet": "Flotte",
     "msg.spy.def": "Verteidigung",
     "msg.spy.active": "Jetzt aktiv",
@@ -3776,23 +4068,23 @@
     "msg.deploy": "Angekommen",
     "msg.recycle": "Recycling",
     "msg.empty": "Ohne Rohstoffe",
-    "msg.debrisLeft": "{n} \xFCbrig",
+    "msg.debrisLeft": "{n} übrig",
     "msg.combat.won": "Gewonnen",
     "msg.combat.lost": "Verloren",
     "msg.combat.draw": "Unentschieden",
     "msg.combat.unknown": "Kampf",
     "msg.combat.loot": "Beute",
-    "msg.combat.raided": "Gepl\xFCndert",
+    "msg.combat.raided": "Geplündert",
     "msg.combat.losses": "Verluste",
-    "msg.combat.debris": "Tr\xFCmmer",
+    "msg.combat.debris": "Trümmer",
     "exp.title": "Expeditionstagebuch",
-    "exp.sub": "Aus den Expeditionsberichten, die du im Postfach \xF6ffnest: keine Serveranfragen",
+    "exp.sub": "Aus den Expeditionsberichten, die du im Postfach öffnest: keine Serveranfragen",
     "exp.period.today": "Heute",
     "exp.period.yesterday": "Gestern",
     "exp.period.week": "7 Tage",
     "exp.period.month": "30 Tage",
     "exp.period.all": "Alles",
-    "exp.empty": "Noch keine Expeditionen: \xD6ffne das Postfach, Flotten \u2192 Expeditionen, dann landen die Berichte hier.",
+    "exp.empty": "Noch keine Expeditionen: Öffne das Postfach, Flotten → Expeditionen, dann landen die Berichte hier.",
     "exp.emptyPeriod": "Nichts in diesem Zeitraum.",
     "exp.count": "Expeditionen",
     "exp.discoveries": "+ {n} Entdeckungen",
@@ -3806,7 +4098,7 @@
     "exp.lfXp": "LF-Erfahrung",
     "exp.outcomes": "Ergebnisse",
     "exp.ships": "Schiffe",
-    "exp.byDay": "Tag f\xFCr Tag",
+    "exp.byDay": "Tag für Tag",
     "exp.day": "Tag",
     "exp.countShort": "Anz.",
     "exp.dmShort": "DM",
@@ -3815,11 +4107,11 @@
     "exp.export": "Exportieren",
     "exp.exportHint": "Tagebuch als JSON-Datei herunterladen (Backup)",
     "exp.clear": "Leeren",
-    "exp.clearConfirm": "Nochmal klicken, um alles zu l\xF6schen",
+    "exp.clearConfirm": "Nochmal klicken, um alles zu löschen",
     "ship.202": "Kleiner Transporter",
-    "ship.203": "Gro\xDFer Transporter",
-    "ship.204": "Leichter J\xE4ger",
-    "ship.205": "Schwerer J\xE4ger",
+    "ship.203": "Großer Transporter",
+    "ship.204": "Leichter Jäger",
+    "ship.205": "Schwerer Jäger",
     "ship.206": "Kreuzer",
     "ship.207": "Schlachtschiff",
     "ship.208": "Kolonieschiff",
@@ -3827,29 +4119,29 @@
     "ship.210": "Spionagesonde",
     "ship.211": "Bomber",
     "ship.212": "Solarsatellit",
-    "ship.213": "Zerst\xF6rer",
+    "ship.213": "Zerstörer",
     "ship.214": "Todesstern",
     "ship.215": "Schlachtkreuzer",
     "ship.217": "Crawler",
     "ship.218": "Reaper",
     "ship.219": "Pathfinder",
-    "msg.return": "R\xFCckkehr",
+    "msg.return": "Rückkehr",
     "bar.dash": "Dashboard",
     "bar.perDay": "/T",
     "bar.dashHint": "Produktion pro Tag in MSU",
-    "bar.plan": "Plan \xB7 {n}",
+    "bar.plan": "Plan · {n}",
     "bar.planEmpty": "Plan",
     "bar.ready": "Bereit",
     "bar.planHint": "was dem Konto fehlt, in MSU, inkl. unterwegs",
     "bar.journal": "Heute",
     "bar.journalHint": "{n} Expeditionen heute, Nettogewinn in MSU",
-    "dash.tab.summary": "\xDCbersicht",
+    "dash.tab.summary": "Übersicht",
     "dash.tab.mines": "Minen",
     "dash.tab.facilities": "Anlagen",
     "dash.tab.lifeforms": "Lebensformen",
     "dash.tab.ships": "Schiffe",
     "dash.tab.defence": "Verteidigung",
-    "dash.tab.scrap": "Schrotth\xE4ndler",
+    "dash.tab.scrap": "Schrotthändler",
     "dash.prodDayK": "Produktion pro Tag (MSU)",
     "dash.prodHourNote": "{value} pro Stunde",
     "dash.fleetValue": "Flotte (Rohstoffe)",
@@ -3860,11 +4152,11 @@
     "dash.planets": "Planeten",
     "dash.moons": "Monde",
     "dash.moon": "Mond",
-    "dash.minesHint": "Blau: h\xF6chste Stufe im Account. Produktion aus der letzten accountInfo-Abfrage.",
-    "dash.lfHint": "Jeder Planet zeigt seine eigenen aktiven Technologien: Geb\xE4ude seiner Spezies und je Slot die genutzte Forschung. Kursive Forschung ist gesch\xE4tzt: \xF6ffne die Lebensform-Forschungsseite des Planeten f\xFCr den genauen Wert.",
-    "dash.lfGuess": "Sch\xE4tzung: \xF6ffne die Lebensform-Forschungsseite dieses Planeten f\xFCr den genauen Wert.",
+    "dash.minesHint": "Blau: höchste Stufe im Account. Produktion aus der letzten accountInfo-Abfrage.",
+    "dash.lfHint": "Jeder Planet zeigt seine eigenen aktiven Technologien: Gebäude seiner Spezies und je Slot die genutzte Forschung. Kursive Forschung ist geschätzt: öffne die Lebensform-Forschungsseite des Planeten für den genauen Wert.",
+    "dash.lfGuess": "Schätzung: öffne die Lebensform-Forschungsseite dieses Planeten für den genauen Wert.",
     "dash.lfNone": "Keine Stufe dieser Spezies in den Spieldaten.",
-    "dash.lfBuildings": "Geb\xE4ude",
+    "dash.lfBuildings": "Gebäude",
     "dash.lfResearch": "Forschung",
     "lf.1": "Menschen",
     "lf.2": "Rock'tal",
@@ -3872,7 +4164,7 @@
     "lf.4": "Kaelesh",
     "dash.unitsNone": "Keine Einheiten in den gespeicherten Daten.",
     "dash.valueMsu": "Wert",
-    "dash.scrapHint": "Nur Berechnung: der Schrotth\xE4ndler gibt ab 35 % der Kosten zur\xFCck, mit Verhandeln mehr (hier bis 90 %). Verkauft wird auf der H\xE4ndlerseite.",
+    "dash.scrapHint": "Nur Berechnung: der Schrotthändler gibt ab 35 % der Kosten zurück, mit Verhandeln mehr (hier bis 90 %). Verkauft wird auf der Händlerseite.",
     "dash.scrapRate": "Quote",
     "dash.scrapAll": "Alle",
     "dash.scrapNone": "Leeren",
@@ -3884,24 +4176,24 @@
     "galaxy.longInactive": "davon {count} seit 28 Tagen",
     "galaxy.vacation": "{count} im Urlaub",
     "galaxy.moons": "{count} Monde",
-    "galaxy.debris": "Tr\xFCmmer {msu} in {count} Feldern",
+    "galaxy.debris": "Trümmer {msu} in {count} Feldern",
     "galaxy.deep": "Tiefer Raum {msu}",
-    "galaxy.noDebris": "Keine Tr\xFCmmerfelder",
+    "galaxy.noDebris": "Keine Trümmerfelder",
     "galaxy.targets": "Ziele ({count})",
-    "galaxy.rankTitle": "Punkte und R\xE4nge von {name}",
-    "galaxy.rankOpen": "Rangliste \xF6ffnen",
+    "galaxy.rankTitle": "Punkte und Ränge von {name}",
+    "galaxy.rankOpen": "Rangliste öffnen",
     "galaxy.score.total": "Gesamt",
     "galaxy.score.economy": "Wirtschaft",
     "galaxy.score.research": "Forschung",
-    "galaxy.score.military": "Milit\xE4r",
+    "galaxy.score.military": "Militär",
     "galaxy.score.lifeform": "Lebensformen",
     "galaxy.score.fleet": "Flotte",
     "galaxy.score.defence": "Verteidigung",
-    "galaxy.splitHint": "Sch\xE4tzung aus den Ranglisten: Verteidigung z\xE4hlt in Wirtschaft und Milit\xE4r, also Verteidigung = Wirtschaft + Forschung + Milit\xE4r + Lebensformen \u2212 Gesamt; Flotte = Milit\xE4r \u2212 Verteidigung.",
+    "galaxy.splitHint": "Schätzung aus den Ranglisten: Verteidigung zählt in Wirtschaft und Militär, also Verteidigung = Wirtschaft + Forschung + Militär + Lebensformen − Gesamt; Flotte = Militär − Verteidigung.",
     "galaxy.ships": "{count} Schiffe",
-    "galaxy.loading": "Lese die \xF6ffentliche API\u2026",
-    "galaxy.apiError": "\xD6ffentliche API nicht erreichbar. Sp\xE4ter erneut versuchen.",
-    "galaxy.apiAge": "\xD6ffentliche API, {time}",
+    "galaxy.loading": "Lese die öffentliche API…",
+    "galaxy.apiError": "Öffentliche API nicht erreichbar. Später erneut versuchen.",
+    "galaxy.apiAge": "Öffentliche API, {time}",
     "galaxy.own": "Deins",
     "settings.backup": "Datensicherung",
     "settings.backupExport": "Exportieren",
@@ -3910,36 +4202,36 @@
     "settings.backupRestored": "{n} Werte wiederhergestellt: Seite neu laden",
     "settings.backupBad": "Die Datei ist keine Future-Sicherung",
     "dash.tab.history": "Verlauf",
-    "dash.historyEmpty": "Der Verlauf f\xFCllt sich von selbst: ein Punkt pro Tag, wann immer du die \xDCbersicht \xF6ffnest. Komm morgen wieder, um die ersten \xC4nderungen zu sehen.",
+    "dash.historyEmpty": "Der Verlauf füllt sich von selbst: ein Punkt pro Tag, wann immer du die Übersicht öffnest. Komm morgen wieder, um die ersten Änderungen zu sehen.",
     "dash.historySpan": "Letzte {n} T",
     "dash.historyPerDay": "{v}/T",
-    "dash.historyUp": "\u2191{n} Pl\xE4tze",
-    "dash.historyDown": "\u2193{n} Pl\xE4tze",
-    "dash.historyReal": "\xFCber {n} T",
+    "dash.historyUp": "↑{n} Plätze",
+    "dash.historyDown": "↓{n} Plätze",
+    "dash.historyReal": "über {n} T",
     "dash.historyFew": "wenige Tage erfasst",
     "dash.historyProd": "Produktion pro Tag (MSU)",
     "dash.historyDays": "Erfasste Tage",
     "dash.historyDay": "Tag",
-    "dash.historyDelta": "\xC4nderung",
+    "dash.historyDelta": "Änderung",
     "dash.historyRank": "Platz",
     "spy.title": "Spionagetabelle",
-    "spy.sub": "{n} Ziele \xB7 Beute {loot}",
+    "spy.sub": "{n} Ziele · Beute {loot}",
     "spy.hideDefended": "Verteidigte ausblenden",
     "spy.inactiveOnly": "Nur Inaktive",
-    "spy.none": "Keine Spionageberichte in den letzten 3 Tagen. Berichte, die du im Postfach \xF6ffnest, landen von selbst hier.",
+    "spy.none": "Keine Spionageberichte in den letzten 3 Tagen. Berichte, die du im Postfach öffnest, landen von selbst hier.",
     "spy.noneFiltered": "Kein Ziel passt zu diesen Filtern.",
     "spy.col.target": "Name",
     "spy.col.age": "Alter",
     "spy.col.loot": "Beute",
     "spy.col.def": "Verteid.",
-    "spy.attackHint": "Von {name} angreifen: \xF6ffnet die Flottenseite mit dem Ziel; die Schiffe w\xE4hlst du (die Raid-Links tragen auch die Transporter ein)",
+    "spy.attackHint": "Von {name} angreifen: öffnet die Flottenseite mit dem Ziel; die Schiffe wählst du (die Raid-Links tragen auch die Transporter ein)",
     "spy.attack": "Angreifen",
-    "spy.lootHint": "Beute {pct} %: Metall {m}, Kristall {c}, Deuterium {d}. Ben\xF6tigt {large} gro\xDFe oder {small} kleine Transporter",
+    "spy.lootHint": "Beute {pct} %: Metall {m}, Kristall {c}, Deuterium {d}. Benötigt {large} große oder {small} kleine Transporter",
     "msg.spy.counterPill": "Ausspioniert",
     "msg.combat.netHint": "Beute minus Verluste",
-    "spy.remove": "Aus der Tabelle entfernen und die Berichtsnachricht l\xF6schen",
+    "spy.remove": "Aus der Tabelle entfernen und die Berichtsnachricht löschen",
     "spy.removeShared": "Aus der Tabelle entfernen (geteilter Bericht: die Nachricht bleibt)",
-    "spy.hint": "Ein Ziel pro Planet oder Mond, 3 Tage gespeichert, auch wenn du die Berichte l\xF6schst. Beute: Rohstoffe zum Mitnehmen. Name: \xF6ffnet den Bericht. \u22EF: die 6 Raids des Tages, ein Klick auf die Schiffe \xF6ffnet die Flotte.",
+    "spy.hint": "Ein Ziel pro Planet oder Mond, 3 Tage gespeichert, auch wenn du die Berichte löschst. Beute: Rohstoffe zum Mitnehmen. Name: öffnet den Bericht. ⋯: die 6 Raids des Tages, ein Klick auf die Schiffe öffnet die Flotte.",
     "spy.status.inactive": "i",
     "spy.status.longinactive": "I",
     "spy.status.vacation": "u",
@@ -3947,9 +4239,9 @@
     "spy.status.noob": "n",
     "spy.status.strong": "s",
     "spy.status.honorableTarget": "e",
-    "spy.status.outlaw": "Ge\xE4chtet",
+    "spy.status.outlaw": "Geächtet",
     "spy.status.admin": "Admin",
-    "dash.queuesTitle": "Laufende Auftr\xE4ge",
+    "dash.queuesTitle": "Laufende Aufträge",
     "dash.queuesHint": "Glocke: eine Meldung auf der Seite, wenn es fertig ist.",
     "remind.add": "Erinnere mich, wenn es fertig ist",
     "remind.remove": "Erinnerung entfernen",
@@ -3957,13 +4249,13 @@
     "remind.late": "Fertig um {time}",
     "remind.ok": "OK",
     "settings.remindNoSupport": "Dieser Browser zeigt keine Benachrichtigungen von Seiten: die Meldung auf der Seite bleibt.",
-    "settings.remindBlocked": "Der Browser hat Benachrichtigungen f\xFCr diese Seite blockiert: schalte sie in den Website-Einstellungen wieder ein (Symbol links neben der Adresse).",
-    "settings.remindDesktopHint": "Wenn eine von dir gesetzte Glocke f\xE4llig ist, kommt neben der Meldung auf der Seite auch die Browser-Benachrichtigung am Computer. Nur bei ge\xF6ffneter Spielseite; der Browser fragt beim ersten Mal nach der Erlaubnis.",
+    "settings.remindBlocked": "Der Browser hat Benachrichtigungen für diese Seite blockiert: schalte sie in den Website-Einstellungen wieder ein (Symbol links neben der Adresse).",
+    "settings.remindDesktopHint": "Wenn eine von dir gesetzte Glocke fällig ist, kommt neben der Meldung auf der Seite auch die Browser-Benachrichtigung am Computer. Nur bei geöffneter Spielseite; der Browser fragt beim ersten Mal nach der Erlaubnis.",
     "settings.remindDesktop": "Auch als Benachrichtigung am PC",
     "settings.remindGroup": "Erinnerungen",
-    "remind.return": "(R\xFCckflug)",
+    "remind.return": "(Rückflug)",
     "msg.combat.converter": "Konverter",
-    "msg.combat.converterHint": "\xD6ffnet den Bericht im Ogotcha-Konverter (neuer Tab)",
+    "msg.combat.converterHint": "Öffnet den Bericht im Ogotcha-Konverter (neuer Tab)",
     "mark.flag.watch": "Beobachten",
     "mark.flag.target": "Ziel",
     "mark.flag.farm": "Farm",
@@ -3971,60 +4263,60 @@
     "mark.flag.friend": "Freund",
     "mark.flag.trade": "Handel",
     "mark.none": "Entfernen",
-    "mark.change": "Klick zum \xC4ndern, Umschalt+Klick f\xFCr die zuletzt benutzte",
+    "mark.change": "Klick zum Ändern, Umschalt+Klick für die zuletzt benutzte",
     "mark.flagAdd": "Spieler markieren (Umschalt+Klick: letzte Flagge)",
     "marks.title": "Ziele",
-    "marks.sub": "{players} Spieler \xB7 {planets} Planeten",
+    "marks.sub": "{players} Spieler · {planets} Planeten",
     "marks.recent": "Zuletzt",
-    "marks.noRecent": "Zuletzt kein Spieler ge\xF6ffnet.",
+    "marks.noRecent": "Zuletzt kein Spieler geöffnet.",
     "marks.noPlayers": "Kein Spieler mit dieser Flagge. Setze sie in der Galaxie, der Rangliste oder der Spionagetabelle.",
-    "marks.openSheet": "Spielerblatt \xF6ffnen",
-    "marks.playersHint": "Klick auf einen Namen: Punkte, R\xE4nge und alle Planeten und Monde aus der \xF6ffentlichen API.",
-    "marks.back": "Zur\xFCck zur Liste",
+    "marks.openSheet": "Spielerblatt öffnen",
+    "marks.playersHint": "Klick auf einen Namen: Punkte, Ränge und alle Planeten und Monde aus der öffentlichen API.",
+    "marks.back": "Zurück zur Liste",
     "marks.write": "Nachricht schreiben",
     "marks.profile": "Profil",
     "marks.rank": "Rangliste",
     "marks.ships": "Schiffe",
-    "marks.estimate": "Sch\xE4tzung",
-    "marks.planets": "Planeten {n} \xB7 Monde {moons}",
-    "marks.keyNext": "n\xE4chste Position",
-    "marks.footData": "Galaxie + \xF6ffentliche API",
-    "marks.fleetPlanet": "Flotte zum Planeten {coords} (Aktivit\xE4t des Planeten)",
-    "marks.fleetMoon": "Flotte zum Mond {coords} (Aktivit\xE4t des Mondes)",
+    "marks.estimate": "Schätzung",
+    "marks.planets": "Planeten {n} · Monde {moons}",
+    "marks.keyNext": "nächste Position",
+    "marks.footData": "Galaxie + öffentliche API",
+    "marks.fleetPlanet": "Flotte zum Planeten {coords} (Aktivität des Planeten)",
+    "marks.fleetMoon": "Flotte zum Mond {coords} (Aktivität des Mondes)",
     "marks.ago": "{n}{u}",
     "marks.unit.m": "m",
     "marks.unit.h": "h",
     "marks.unit.d": "T",
-    "marks.seenOnly": "In der Galaxie gesehen, noch nicht in der API \xB7 Klick: System zeigen",
+    "marks.seenOnly": "In der Galaxie gesehen, noch nicht in der API · Klick: System zeigen",
     "marks.showSystem": "System in der Galaxie zeigen",
     "marks.col.coords": "Koord.",
     "marks.col.debris": "TF",
     "marks.col.planet": "Plan.",
     "marks.col.moon": "Mond",
     "marks.col.seen": "Gesehen",
-    "shortcut.nextTarget": "Ziele: n\xE4chste Position",
+    "shortcut.nextTarget": "Ziele: nächste Position",
     "plan.lacksHere": "hier fehlen {n}",
     "plan.clearAll": "Plan leeren",
     "plan.clearConfirm": "Sicher? Nochmal klicken",
     "plan.account": "Ressourcen des Kontos",
     "plan.accountNote": "alle Planeten und Monde + unterwegs",
-    "plan.accountUnknown": "Aktualisieren dr\xFCcken",
+    "plan.accountUnknown": "Aktualisieren drücken",
     "plan.accountCovered": "Das Konto deckt den Plan",
     "plan.accountMissing": "Dem Konto fehlen",
-    "plan.onBodies": "auf {n} K\xF6rpern",
+    "plan.onBodies": "auf {n} Körpern",
     "plan.collapse": "Planeten ausblenden",
     "plan.expand": "Planeten zeigen",
-    "plan.removeAll": "Von allen {n} K\xF6rpern entfernen",
+    "plan.removeAll": "Von allen {n} Körpern entfernen",
     "plan.readyHere": "Hier reichen die Ressourcen",
     "bar.targets": "Ziele",
-    "bar.targetsHint": "Seitenleiste der Ziele (markierte Spieler) \xB7 M: n\xE4chste Position",
+    "bar.targetsHint": "Seitenleiste der Ziele (markierte Spieler) · M: nächste Position",
     "settings.oglight": "Aus OGLight",
     "settings.oglightImport": "Export importieren",
     "settings.oglightDone": "Aus OGLight: {players} Spieler, {seen} Positionen, {exp} Expeditionen und {raids} Raids an {days} Tagen. Seite neu laden.",
-    "settings.backupImportHint": "Ein Future-Backup oder die \u201EExport data\u201C-Datei von OGLight (gleiches Universum)",
+    "settings.backupImportHint": "Ein Future-Backup oder die „Export data“-Datei von OGLight (gleiches Universum)",
     "exp.raids": "Raids (aus OGLight importiert)",
     "exp.raidCount": "Raids",
-    "exp.raidLoot": "Beute und Tr\xFCmmer",
+    "exp.raidLoot": "Beute und Trümmer",
     "exp.raidLost": "Verlorene Schiffe",
     "exp.raidNet": "Raids netto",
     "exp.kind.expedition": "Expeditionen",
@@ -4033,12 +4325,12 @@
     "exp.artefacts": "Artefakte",
     "exp.artefactsAvg": "Artefakte pro Mission",
     "fleet.jumpgateKept": "{count} Schiffe bleiben hier",
-    "fleet.jumpgateOff": "Sprungtor-Reserve aus: alle Schiffe k\xF6nnen springen",
+    "fleet.jumpgateOff": "Sprungtor-Reserve aus: alle Schiffe können springen",
     "fleet.rule.ships": "Schiffe",
     "fleet.rule.resources": "Rohstoffe",
     "fleet.rule.gate": "Sprungtor",
-    "fleet.rule.shipsHint": "Schiffe, die bei Zum Mond, Transport, Stationieren, Sammeln, Letzte, Rohstoffe hierher bringen und der Spielschaltfl\xE4che \xABalle Schiffe ausw\xE4hlen\xBB auf dem K\xF6rper bleiben. Expeditionen nutzen sie nicht; der Fleetsave hat seine eigene.",
-    "fleet.rule.resourcesHint": "Rohstoffe, die bei Zum Mond, Transport, Stationieren, Sammeln, Rohstoffe hierher bringen und der Spielschaltfl\xE4che \xABalle Rohstoffe laden\xBB auf dem K\xF6rper bleiben. Expeditionen nutzen sie nicht; der Fleetsave hat seine eigene.",
+    "fleet.rule.shipsHint": "Schiffe, die bei Zum Mond, Transport, Stationieren, Sammeln, Letzte, Rohstoffe hierher bringen und der Spielschaltfläche «alle Schiffe auswählen» auf dem Körper bleiben. Expeditionen nutzen sie nicht; der Fleetsave hat seine eigene.",
+    "fleet.rule.resourcesHint": "Rohstoffe, die bei Zum Mond, Transport, Stationieren, Sammeln, Rohstoffe hierher bringen und der Spielschaltfläche «alle Rohstoffe laden» auf dem Körper bleiben. Expeditionen nutzen sie nicht; der Fleetsave hat seine eigene.",
     "fleet.rule.gateHint": "Schiffe, die auf dem Mond bleiben, wenn du das Sprungtor des Spiels nutzt.",
     "fleet.rule.saveShips": "Schiffe behalten",
     "fleet.rule.saveResources": "Rohstoffe behalten",
@@ -4050,37 +4342,37 @@
     "fleet.rule.sameTitle": "Dieselbe Regel ist auch gespeichert auf:",
     "fleet.rule.onlyHereTitle": "Kein anderer Planet oder Mond hat dieselbe Regel.",
     "fleet.rule.switch": "Aktiv",
-    "fleet.rule.switchHint": "Ein Schalter f\xFCr alle Planeten und Monde: schaltet die Regel aus, ohne sie zu l\xF6schen.",
+    "fleet.rule.switchHint": "Ein Schalter für alle Planeten und Monde: schaltet die Regel aus, ohne sie zu löschen.",
     "fleet.rule.offList": "aus: {list}",
-    "fleet.copyTo": "Kopieren auf\u2026",
+    "fleet.copyTo": "Kopieren auf…",
     "fleet.copyTitle": "Auf andere Planeten oder Monde kopieren",
-    "fleet.copyHint": "Was du hier eingegeben hast, wird zuerst gespeichert, dann werden nur die gew\xE4hlten Regeln kopiert. Die anderen Regeln der gew\xE4hlten K\xF6rper bleiben unver\xE4ndert.",
+    "fleet.copyHint": "Was du hier eingegeben hast, wird zuerst gespeichert, dann werden nur die gewählten Regeln kopiert. Die anderen Regeln der gewählten Körper bleiben unverändert.",
     "fleet.copyWhat": "Zu kopierende Regeln",
-    "fleet.copyWhere": "Auf welche K\xF6rper",
+    "fleet.copyWhere": "Auf welche Körper",
     "fleet.pickPlanets": "Alle Planeten",
     "fleet.pickMoons": "Alle Monde",
     "fleet.pickNone": "Keiner",
     "fleet.copyGo": "Kopieren",
-    "fleet.copyNothing": "W\xE4hle mindestens eine Regel und einen K\xF6rper.",
+    "fleet.copyNothing": "Wähle mindestens eine Regel und einen Körper.",
     "spy.col.fleet": "Flotte",
     "spy.report": "Spionagebericht",
-    "spy.reportHint": "\xD6ffnet den ganzen Bericht \xFCber {name}",
+    "spy.reportHint": "Öffnet den ganzen Bericht über {name}",
     "spy.shared": "ally",
-    "spy.sharedHint": "Von der Allianz geteilter Bericht (Kommunikation \u203A Geteilte Spionageberichte)",
+    "spy.sharedHint": "Von der Allianz geteilter Bericht (Kommunikation › Geteilte Spionageberichte)",
     "spy.hidden": "versteckt",
     "spy.simulate": "Simulieren",
     "spy.simulateHint": "Mit {tool} in einem neuen Tab simulieren, mit deinen Forschungen und Boni",
-    "settings.sub": "\xC4nderungen gelten sofort und bleiben in diesem Browser",
-    "settings.section.menu": "Planetenmen\xFC",
+    "settings.sub": "Änderungen gelten sofort und bleiben in diesem Browser",
+    "settings.section.menu": "Planetenmenü",
     "settings.section.mail": "Posteingang und Spionage",
     "settings.section.data": "Daten",
     "settings.totalsHint": "Der Kasten unter den Planeten mit den Rohstoffen des ganzen Kontos und der Tagesproduktion.",
     "settings.sim": "Simulator",
-    "settings.simHint": "\xD6ffnet sich mit Simulieren in der Spionagetabelle und in den Berichten, schon mit deinen Forschungen ausgef\xFCllt.",
+    "settings.simHint": "Öffnet sich mit Simulieren in der Spionagetabelle und in den Berichten, schon mit deinen Forschungen ausgefüllt.",
     "settings.shared": "Von der Allianz geteilte Berichte",
-    "settings.sharedHint": "Zeigt in der Tabelle auch die in Kommunikation geteilten Berichte, markiert mit \xABally\xBB.",
+    "settings.sharedHint": "Zeigt in der Tabelle auch die in Kommunikation geteilten Berichte, markiert mit «ally».",
     "settings.fold": "Spieltext eingeklappt",
-    "settings.foldHint": "Versteckt den langen Text von Expeditionen und Transporten unter der Zusammenfassung; ein Klick \xF6ffnet ihn.",
+    "settings.foldHint": "Versteckt den langen Text von Expeditionen und Transporten unter der Zusammenfassung; ein Klick öffnet ihn.",
     "settings.backupHint": "Speichert alle Future-Daten in einer Datei oder stellt sie wieder her.",
     "spy.col.actionsName": "Aktionen",
     "hs.ptreAge": "Unterschied zur PTRE-Rangliste vom {time}",
@@ -4097,11 +4389,11 @@
     "spy.onPlanet": "Auf dem Planeten",
     "spy.from": "von {name} [{coords}]",
     "spy.total": "Summe",
-    "spy.waveHint": "Raid {n}: \xF6ffnet Flotte von {name} mit {count} {ship} und dem Ziel eingetragen",
+    "spy.waveHint": "Raid {n}: öffnet Flotte von {name} mit {count} {ship} und dem Ziel eingetragen",
     "shortcut.galaxyLeft": "Vorheriges System",
-    "shortcut.galaxyRight": "N\xE4chstes System",
+    "shortcut.galaxyRight": "Nächstes System",
     "shortcut.galaxyDown": "Vorherige Galaxie",
-    "shortcut.galaxyUp": "N\xE4chste Galaxie",
+    "shortcut.galaxyUp": "Nächste Galaxie",
     "touch.bar": "Kurzbefehle",
     "touch.send": "Senden",
     "touch.next": "Weiter",
@@ -4116,11 +4408,11 @@
     "settings.section.fleet": "Flotte",
     "settings.section.keys": "Tasten",
     "settings.mainShipHint": "Der Transporter, den Transport, Stationieren und Zum Mond zuerst nutzen.",
-    "settings.secondShipHint": "Tr\xE4gt, was der erste nicht schafft.",
+    "settings.secondShipHint": "Trägt, was der erste nicht schafft.",
     "settings.speedHint": "Geschwindigkeit von Transport, Stationieren und Zum Mond.",
-    "settings.favHint": "Wohin die Expeditionssammlung \xFCbersch\xFCssige Flotte und Rohstoffe bringt, innerhalb der Reserven.",
-    "settings.expValueHint": "Leer = berechnet; 50% = die H\xE4lfte; eine Zahl = feste Ladung.",
-    "settings.extrasHint": "F\xFCgt eine Spionagesonde und einen Pathfinder hinzu, wie OGLight.",
+    "settings.favHint": "Wohin die Expeditionssammlung überschüssige Flotte und Rohstoffe bringt, innerhalb der Reserven.",
+    "settings.expValueHint": "Leer = berechnet; 50% = die Hälfte; eine Zahl = feste Ladung.",
+    "settings.extrasHint": "Fügt eine Spionagesonde und einen Pathfinder hinzu, wie OGLight.",
     "settings.touch": "Touch-Leiste",
     "settings.touchHint": "Unten am Bildschirm: die Kurzbefehle dieser Seite und auf der Flottenseite der Weiter-/Senden-Knopf des Spiels.",
     "settings.touchAuto": "Bei Touch",
@@ -4130,20 +4422,20 @@
     "settings.keys.targets": "Ziele",
     "settings.keys.fleet": "Flotte",
     "settings.keys.galaxy": "Galaxie (Touch-Leiste)",
-    "settings.keyPress": "Taste dr\xFCcken\u2026",
+    "settings.keyPress": "Taste drücken…",
     "settings.keyNone": "keine",
-    "settings.keyFixed": "Taste des Spiels, nicht \xE4nderbar.",
-    "settings.keyChange": "Klicken zum \xC4ndern.",
+    "settings.keyFixed": "Taste des Spiels, nicht änderbar.",
+    "settings.keyChange": "Klicken zum Ändern.",
     "settings.keyReset": "Standard",
-    "settings.keyResetHint": "Zur\xFCck zu {key}",
-    "settings.keyTaken": "Erledigt. {key} lag auf \u201E{other}\u201C, das jetzt keine Taste hat.",
+    "settings.keyResetHint": "Zurück zu {key}",
+    "settings.keyTaken": "Erledigt. {key} lag auf „{other}“, das jetzt keine Taste hat.",
     "settings.keySaved": "Taste gespeichert.",
     "settings.keyGame": "Pfeile des Spiels",
     "settings.keysDefault": "Standardtasten",
-    "settings.keysHint": "Setzt alle Tasten zur\xFCck.",
+    "settings.keysHint": "Setzt alle Tasten zurück.",
     "settings.keysDefaultDone": "Standardtasten wiederhergestellt.",
-    "settings.keyListen": "Neue Taste f\xFCr \u201E{name}\u201C dr\xFCcken: ein Buchstabe oder eine Ziffer. Esc bricht ab, Entf entfernt sie.",
-    "settings.keyCleared": "\u201E{name}\u201C hat jetzt keine Taste.",
+    "settings.keyListen": "Neue Taste für „{name}“ drücken: ein Buchstabe oder eine Ziffer. Esc bricht ab, Entf entfernt sie.",
+    "settings.keyCleared": "„{name}“ hat jetzt keine Taste.",
     "settings.keyBad": "Einen Buchstaben oder eine Ziffer, ohne Strg oder Alt.",
     "settings.expShipHint": "Automatisch = das beste, das du auf dem Planeten oder Mond hast.",
     "fleet.actionsLabel": "Flotte vorbereiten",
@@ -4154,58 +4446,58 @@
     "totals.stock": "Auf Lager",
     "totals.day": "Pro Tag",
     "totals.flying": "davon unterwegs",
-    "totals.flyingHint": "Ladung deiner Flotten unterwegs (schon in den Zeilen oben enthalten): Metall {metal}, Kristall {crystal}, Deuterium {deuterium}. Aus der Ereignisliste des Spiels gelesen: \xF6ffne sie zum Aktualisieren.",
+    "totals.flyingHint": "Ladung deiner Flotten unterwegs (schon in den Zeilen oben enthalten): Metall {metal}, Kristall {crystal}, Deuterium {deuterium}. Aus der Ereignisliste des Spiels gelesen: öffne sie zum Aktualisieren.",
     "dock.journal": "Tagebuch",
     "dock.today": "Heute",
-    "dock.journalHint": "{n} Expeditionen aus dem Postfach; Nettogewinn in MSU. Klick: \xF6ffnet das Tagebuch.",
+    "dock.journalHint": "{n} Expeditionen aus dem Postfach; Nettogewinn in MSU. Klick: öffnet das Tagebuch.",
     "dock.targetsEmpty": "Noch keine Ziele: markiere Spieler und Planeten in der Galaxie.",
     "dash.scrapPick": "Klick: alle, erneut klicken: keine",
     "plan.byBody": "Nach Planet",
     "plan.byTech": "Nach Technologie",
     "plan.bringAll": "Alles bringen",
-    "plan.bringSome": "{n} gew\xE4hlte bringen",
-    "plan.pickedOf": "{n} von {of} gew\xE4hlt",
-    "plan.pickHint": "Klick: w\xE4hlt diese Zeile, der Knopf oben bringt nur die gew\xE4hlten Zeilen",
-    "plan.removeBody": "Ganzen Plan dieses K\xF6rpers entfernen",
+    "plan.bringSome": "{n} gewählte bringen",
+    "plan.pickedOf": "{n} von {of} gewählt",
+    "plan.pickHint": "Klick: wählt diese Zeile, der Knopf oben bringt nur die gewählten Zeilen",
+    "plan.removeBody": "Ganzen Plan dieses Körpers entfernen",
     "planetMenu.fleet": "Flotte",
-    "planetMenu.fleetHint": "Wert der Schiffe auf diesem K\xF6rper (Kosten in Rohstoffen, 1:1:1), Stand der letzten Datenaktualisierung",
+    "planetMenu.fleetHint": "Wert der Schiffe auf diesem Körper (Kosten in Rohstoffen, 1:1:1), Stand der letzten Datenaktualisierung",
     "settings.fleetPill": "Flottenwert",
     "settings.fleetPillHint": "Eine Pille unter den Rohstoffen mit dem Wert der Schiffe auf diesem Planeten oder Mond (Kosten in Rohstoffen, 1:1:1).",
-    "settings.gameTipsHint": "Die Karte mit Daten und Links, die das Spiel \xF6ffnet, wenn der Mauszeiger auf einem Planeten oder Mond ruht. Aus: Der Planet \xF6ffnet sich weiterhin per Klick.",
+    "settings.gameTipsHint": "Die Karte mit Daten und Links, die das Spiel öffnet, wenn der Mauszeiger auf einem Planeten oder Mond ruht. Aus: Der Planet öffnet sich weiterhin per Klick.",
     "settings.gameTips": "Spielkarte auf Planeten",
     "totals.sum": "Summe",
-    "settings.totalView": "Summe in der \xDCbersicht",
+    "settings.totalView": "Summe in der Übersicht",
     "settings.totalViewHint": "Die Summenzeile unter den Planeten: in MSU (Metall:Kristall:Deuterium 3:2:1) oder die drei Rohstoffe gleich gewichtet addiert.",
-    "planetMenu.building": "Bau l\xE4uft",
+    "planetMenu.building": "Bau läuft",
     "fleet.jumpgateStay": "bleiben",
     "fleet.jumpgateEdit": "Sprungtor-Reserve: wie viele Schiffe auf diesem Mond bleiben",
-    "fleet.err.noDefault": "Expeditionssammlung: kein Hauptmond. In den Einstellungen (Zahnrad) w\xE4hlen oder im Sammlungsmen\xFC einen K\xF6rper w\xE4hlen.",
+    "fleet.err.noDefault": "Expeditionssammlung: kein Hauptmond. In den Einstellungen (Zahnrad) wählen oder im Sammlungsmenü einen Körper wählen.",
     "fleet.invert": "Auswahl dieses Schiffs umkehren",
     "settings.section.galaxy": "Galaxie",
-    "settings.bigDebris": "Hervorzuhebende Tr\xFCmmer",
-    "settings.bigDebrisHint": "Ab dieser Gr\xF6\xDFe (Metall + Kristall + Deuterium) wird ein Tr\xFCmmerfeld hervorgehoben: in der Galaxie, im Tiefenraum und in der Zielleiste. Beispiele: 500k, 1M, 2,5G.",
+    "settings.bigDebris": "Hervorzuhebende Trümmer",
+    "settings.bigDebrisHint": "Ab dieser Größe (Metall + Kristall + Deuterium) wird ein Trümmerfeld hervorgehoben: in der Galaxie, im Tiefenraum und in der Zielleiste. Beispiele: 500k, 1M, 2,5G.",
     "settings.bigDebrisSaved": "Hervorgehoben ab {n}.",
     "settings.bigDebrisBad": "Gib eine Zahl ein, zum Beispiel 1M.",
     "marks.home": "Heimatplanet",
     "marks.col.name": "Name",
     "marks.note": "Notiz",
-    "marks.notePlaceholder": "Notiz zu diesem Spieler\u2026",
+    "marks.notePlaceholder": "Notiz zu diesem Spieler…",
     "marks.noteNeedsFlag": "Markiere den Spieler, um eine Notiz zu schreiben.",
     "marks.writeShort": "Schreiben",
-    "tech.population": "Ben\xF6tigte Bev\xF6lkerung f\xFCr Stufe {level}",
+    "tech.population": "Benötigte Bevölkerung für Stufe {level}",
     "tech.populationShort": "reicht auf diesem Planeten nicht",
     "tech.satShort": "Sat.",
-    "tech.satNeed": "{n} Solarsatelliten ({energy} Energie) n\xF6tig, um diese Stufen ohne Minus zu bauen",
-    "tech.satDeficit": "{n} Solarsatelliten ({energy} Energie) n\xF6tig, um die Energie wieder ins Plus zu bringen",
+    "tech.satNeed": "{n} Solarsatelliten ({energy} Energie) nötig, um diese Stufen ohne Minus zu bauen",
+    "tech.satDeficit": "{n} Solarsatelliten ({energy} Energie) nötig, um die Energie wieder ins Plus zu bringen",
     "tech.satBalance": "Energie jetzt {energy}",
     "tech.satPer": "1 Satellit = {energy} auf diesem Planeten",
-    "tech.satPerGuess": "1 Satellit \u2248 {energy} (Sch\xE4tzung: Solarsatellit auf diesem Planeten \xF6ffnen f\xFCr den genauen Wert)",
-    "tech.satFill": "Klick: tr\xE4gt die Zahl als Menge ein",
-    "tech.satGo": "Klick: \xF6ffnet den Solarsatelliten unter Rohstoffe mit bereits eingetragener Zahl",
+    "tech.satPerGuess": "1 Satellit ≈ {energy} (Schätzung: Solarsatellit auf diesem Planeten öffnen für den genauen Wert)",
+    "tech.satFill": "Klick: trägt die Zahl als Menge ein",
+    "tech.satGo": "Klick: öffnet den Solarsatelliten unter Rohstoffe mit bereits eingetragener Zahl",
     "fleet.btn.collect": "Expeditionssammlung",
-    "fleet.readyHint": "W\xE4hle, was vorbereitet wird: Senden bleibt immer dein Klick.",
-    "fleet.reservesHint": "Was beim Vorbereiten einer Flotte auf dem K\xF6rper bleibt. Ein Klick schaltet es an oder aus; die Mengen \xE4nderst du mit dem Regel-Knopf rechts.",
-    "fleet.rule.skipHere": "Diesen K\xF6rper \xFCberspringen",
+    "fleet.readyHint": "Wähle, was vorbereitet wird: Senden bleibt immer dein Klick.",
+    "fleet.reservesHint": "Was beim Vorbereiten einer Flotte auf dem Körper bleibt. Ein Klick schaltet es an oder aus; die Mengen änderst du mit dem Regel-Knopf rechts.",
+    "fleet.rule.skipHere": "Diesen Körper überspringen",
     "fleet.rule.unset": "nicht gesetzt",
     "fleet.zone.round": "Runde",
     "fleet.zone.reserves": "Reserven",
@@ -4214,31 +4506,31 @@
     "fleet.btn.collectShort": "Sammeln",
     "fleet.btn.collectTransport": "Sammlung: Transport",
     "fleet.btn.collectDeploy": "Sammlung: Stationieren",
-    "fleet.btn.skip": "\xDCberspringen",
-    "fleet.tip.skip": "Hier gibt es nichts zu bewegen: \xF6ffnet den n\xE4chsten Planeten oder Mond der Runde mit derselben Aktion vorbereitet. Von hier startet nichts.",
-    "fleet.tip.collect": "F\xFCr Expeditionen von mehreren Monden: bringt \xFCbersch\xFCssige Schiffe und Rohstoffe zum Hauptmond, Reserven bleiben",
-    "fleet.collect.transport": "1 \xB7 Transport",
-    "fleet.collect.deploy": "2 \xB7 Stationieren",
+    "fleet.btn.skip": "Überspringen",
+    "fleet.tip.skip": "Hier gibt es nichts zu bewegen: öffnet den nächsten Planeten oder Mond der Runde mit derselben Aktion vorbereitet. Von hier startet nichts.",
+    "fleet.tip.collect": "Für Expeditionen von mehreren Monden: bringt überschüssige Schiffe und Rohstoffe zum Hauptmond, Reserven bleiben",
+    "fleet.collect.transport": "1 · Transport",
+    "fleet.collect.deploy": "2 · Stationieren",
     "fleet.collectOnce": "Nur einmal, nach:",
     "fleet.collectNoFav": "kein Hauptmond (Einstellungen)",
     "fleet.send.label": "Transport und Stationieren: Ziel und Rohstoffe",
     "fleet.send.dest": "Ziel",
-    "fleet.send.destHint": "Galaxie, System, Position (leer = die dieses K\xF6rpers); 1:234:5 kann eingef\xFCgt werden",
+    "fleet.send.destHint": "Galaxie, System, Position (leer = die dieses Körpers); 1:234:5 kann eingefügt werden",
     "fleet.send.pick": "Deine Planeten und Monde",
-    "fleet.send.pickHint": "tr\xE4gt Koordinaten und Typ des gew\xE4hlten K\xF6rpers ein",
+    "fleet.send.pickHint": "trägt Koordinaten und Typ des gewählten Körpers ein",
     "fleet.send.resHint": "leer = nichts, 2m oder 500k gehen; Klick aufs Symbol = alles",
-    "fleet.err.noTarget": "Ziel eingeben (Galaxie:System:Position) oder einen eigenen K\xF6rper w\xE4hlen",
-    "fleet.err.sameBody": "Das Ziel ist der Startk\xF6rper der Flotte",
-    "fleet.err.nothingPicked": "Mit den gew\xE4hlten Mengen gibt es nichts zu transportieren",
+    "fleet.err.noTarget": "Ziel eingeben (Galaxie:System:Position) oder einen eigenen Körper wählen",
+    "fleet.err.sameBody": "Das Ziel ist der Startkörper der Flotte",
+    "fleet.err.nothingPicked": "Mit den gewählten Mengen gibt es nichts zu transportieren",
     "fleet.send.res": "Rohstoffe",
     "fleet.send.small": "KT",
     "fleet.send.large": "GT",
     "fleet.send.cargoWith": "Vorbereiten mit",
-    "fleet.send.cargoHint": "w\xE4hlt die f\xFCr die Rohstoffe n\xF6tigen Frachter, setzt Ziel und Auftrag und bel\xE4dt",
+    "fleet.send.cargoHint": "wählt die für die Rohstoffe nötigen Frachter, setzt Ziel und Auftrag und belädt",
     "fleet.send.onTransport": "Transport: Ziel und Rohstoffe eingeben, dann KT oder GT",
-    "fleet.send.onDeploy": "Stationieren: Schiffe, Ziel und Rohstoffe w\xE4hlen, dann KT oder GT",
-    "fleet.ok.cargoShort": "{ships} Schiffe, {cargo} Rohstoffe geladen: es fehlen {missing} Frachter f\xFCr den Rest",
-    "fleet.err.noCargoShip": "Keine Frachter dieser Art auf diesem K\xF6rper",
+    "fleet.send.onDeploy": "Stationieren: Schiffe, Ziel und Rohstoffe wählen, dann KT oder GT",
+    "fleet.ok.cargoShort": "{ships} Schiffe, {cargo} Rohstoffe geladen: es fehlen {missing} Frachter für den Rest",
+    "fleet.err.noCargoShip": "Keine Frachter dieser Art auf diesem Körper",
     "fleet.send.max": "alles",
     "fleet.send.maxHint": "Klick: alles, was hier ist",
     "fleet.send.clearBtn": "Leeren",
@@ -4247,22 +4539,22 @@
     "res.short.crystal": "K",
     "res.short.deuterium": "D",
     "fleet.collectIgnoreShips": "Transport: Schiffsreserve ignorieren",
-    "settings.collectIgnoreShipsHint": "Der Transport der Sammlung (und \u201EZum Mond\u201C) darf auch die von der Reserve gehaltenen Schiffe nutzen: Frachter kommen zur\xFCck. Die Rohstoffreserve gilt immer.",
+    "settings.collectIgnoreShipsHint": "Der Transport der Sammlung (und „Zum Mond“) darf auch die von der Reserve gehaltenen Schiffe nutzen: Frachter kommen zurück. Die Rohstoffreserve gilt immer.",
     "fleet.collectDeployRes": "Stationieren: auch Rohstoffe mitnehmen",
     "settings.collectDeployResHint": "Aus: das Stationieren der Sammlung schickt nur die Schiffe, die Rohstoffe bleiben.",
     "fleet.loadOrder": "Ladereihenfolge",
-    "settings.loadOrderHint": "Welcher Rohstoff die Frachter der Sammlung zuerst f\xFCllt, dann der zweite und dritte (das Spiel macht D \u2192 K \u2192 M).",
-    "msg.say.late": "die Flotte kehrt sp\xE4ter zur\xFCck",
-    "msg.say.early": "die Flotte kehrt fr\xFCher zur\xFCck",
+    "settings.loadOrderHint": "Welcher Rohstoff die Frachter der Sammlung zuerst füllt, dann der zweite und dritte (das Spiel macht D → K → M).",
+    "msg.say.late": "die Flotte kehrt später zurück",
+    "msg.say.early": "die Flotte kehrt früher zurück",
     "msg.say.nothing": "es wurde nichts gefunden",
-    "msg.say.trader": "ein H\xE4ndler bietet einen Tausch an",
+    "msg.say.trader": "ein Händler bietet einen Tausch an",
     "msg.say.pirate": "Kampf mit Piraten",
     "msg.say.alien": "Kampf mit Aliens",
     "msg.say.blackhole": "die Flotte ging in einem Schwarzen Loch verloren",
     "exp.heroCount": "Expeditionen",
     "exp.heroAvg": "pro Expedition",
     "exp.heroLost": "Schiffe verloren",
-    "exp.byHour": "Stunde f\xFCr Stunde",
+    "exp.byHour": "Stunde für Stunde",
     "exp.focusAll": "Ganzer Zeitraum",
     "exp.noneHere": "Nichts hier.",
     "exp.daysTable": "Die Tage",
@@ -4272,75 +4564,75 @@
     "marks.st.longinactive": "seit 28 Tagen inaktiv",
     "marks.st.outlaw": "Outlaw",
     "marks.st.admin": "Administrator",
-    "marks.lastCheck": "Zuletzt in der Galaxie gepr\xFCft: {time}",
+    "marks.lastCheck": "Zuletzt in der Galaxie geprüft: {time}",
     "marks.neverChecked": "Noch nie in der Galaxie gesehen",
     "plan.sec.missing": "Zu beliefern",
     "plan.sec.arriving": "Unterwegs",
     "plan.sec.unknown": "Ressourcen unbekannt",
     "plan.sec.ready": "Bereit",
-    "plan.colMissing": "fehlt (Metall \xB7 Kristall \xB7 Deuterium)",
+    "plan.colMissing": "fehlt (Metall · Kristall · Deuterium)",
     "plan.colCost": "Kosten",
     "plan.queued": "in Warteschlange",
-    "plan.queuedHint": "Im Spiel in der Warteschlange, noch nicht bezahlt: seine Ressourcen werden zur\xFCckgehalten und z\xE4hlen weder f\xFCr den Plan noch f\xFCr Transporte",
-    "plan.unhold": "Nicht mehr zur\xFCckhalten (schon gestartet oder abgebrochen)",
-    "fleet.mainShipIs": "Hauptschiff f\xFCr automatische Transporte",
-    "fleet.mainShipPick": "Dieses Schiff f\xFCr automatische Transporte nutzen (Mond, Sammeln, Plan)",
-    "settings.expStyle": "Expeditions\xFCbersicht",
-    "settings.expStyleHint": "Schm\xFCckt ein anderes Tool die Berichte (OGame Tracker, OGLight, \u2026), tritt Future zur\xFCck und zeichnet nur auf, wie OGLight. Das Journal zeichnet immer auf.",
+    "plan.queuedHint": "Im Spiel in der Warteschlange, noch nicht bezahlt: seine Ressourcen werden zurückgehalten und zählen weder für den Plan noch für Transporte",
+    "plan.unhold": "Nicht mehr zurückhalten (schon gestartet oder abgebrochen)",
+    "fleet.mainShipIs": "Hauptschiff für automatische Transporte",
+    "fleet.mainShipPick": "Dieses Schiff für automatische Transporte nutzen (Mond, Sammeln, Plan)",
+    "settings.expStyle": "Expeditionsübersicht",
+    "settings.expStyleHint": "Schmückt ein anderes Tool die Berichte (OGame Tracker, OGLight, …), tritt Future zurück und zeichnet nur auf, wie OGLight. Das Journal zeichnet immer auf.",
     "settings.expStyle.auto": "Automatisch",
     "settings.expStyle.always": "Immer Future",
     "settings.expStyle.never": "Nur aufzeichnen",
-    "tech.labShort": "Netz {total} \xB7 {n} Labore",
+    "tech.labShort": "Netz {total} · {n} Labore",
     "tech.labNet": "Labore an dieser Forschung: {total} = hier {here} + {linked} (Intergalaktisches Forschungsnetzwerk Stufe {irn})",
-    "tech.labNeed": "es z\xE4hlen Labore ab Stufe {need}",
+    "tech.labNeed": "es zählen Labore ab Stufe {need}",
     "tech.labHereShort": "das Labor dieses Planeten ist unter Stufe {need}: hier nicht startbar",
     "exp.heroRes": "Ressourcen",
     "exp.heroFleet": "Flotte",
     "exp.heroFound": "gefunden",
     "exp.heroLostShort": "verloren",
-    "exp.heroDebris": "davon Tr\xFCmmer auf 16",
+    "exp.heroDebris": "davon Trümmer auf 16",
     "exp.kind.orion": "Orion-Anomalien",
-    "orion.redeemHours": "Einl\xF6sen = {h} Produktion",
+    "orion.redeemHours": "Einlösen = {h} Produktion",
     "orion.rewards": "Belohnungen {v} MSU",
     "orion.freeWord": "gratis",
-    "orion.paidBack": "Lithium {paid} bezahlt, {back} zur\xFCck",
-    "orion.planAll": "jetzt starten: {free} Lithium frei am Ende{held} l\xF6st alle {waves} Wellen ein, \u2248{msu} MSU",
-    "orion.planSome": "jetzt starten: {free} Lithium frei am Ende{held} l\xF6st {covered}/{waves} Wellen ein, \u2248{msu} MSU",
-    "orion.held": " ({v} zur\xFCckgehalten f\xFCr {n} laufende)",
+    "orion.paidBack": "Lithium {paid} bezahlt, {back} zurück",
+    "orion.planAll": "jetzt starten: {free} Lithium frei am Ende{held} löst alle {waves} Wellen ein, ≈{msu} MSU",
+    "orion.planSome": "jetzt starten: {free} Lithium frei am Ende{held} löst {covered}/{waves} Wellen ein, ≈{msu} MSU",
+    "orion.held": " ({v} zurückgehalten für {n} laufende)",
     "orion.planNever": "nicht alle {waves}: die Lithiumproduktion stoppt vorher",
-    "orion.planWait": "alle {waves}, wenn in {h} oder sp\xE4ter gestartet",
-    "orion.planTitle": "Lithium jetzt plus {h} Produktion, am Ende eingel\xF6st, abz\xFCglich dessen, was laufende Anomalien am Ende brauchen:",
+    "orion.planWait": "alle {waves}, wenn in {h} oder später gestartet",
+    "orion.planTitle": "Lithium jetzt plus {h} Produktion, am Ende eingelöst, abzüglich dessen, was laufende Anomalien am Ende brauchen:",
     "orion.planNone": "keine gespeichert.",
-    "orion.planOwnBack": "Das von dieser Anomalie zur\xFCckgegebene Lithium ({v}) kommt erst mit der Einl\xF6sung und kann sie nicht bezahlen.",
-    "orion.toggleHint": "Ob das Lithium, das diese Anomalie noch braucht, in den Pl\xE4nen des Scanners zur\xFCckgehalten wird",
+    "orion.planOwnBack": "Das von dieser Anomalie zurückgegebene Lithium ({v}) kommt erst mit der Einlösung und kann sie nicht bezahlen.",
+    "orion.toggleHint": "Ob das Lithium, das diese Anomalie noch braucht, in den Plänen des Scanners zurückgehalten wird",
     "orion.soFar": "bisher",
-    "orion.back": "zur\xFCck",
+    "orion.back": "zurück",
     "orion.paid": "bezahlt",
-    "orion.over": "vorbei, jetzt f\xE4llig",
+    "orion.over": "vorbei, jetzt fällig",
     "orion.endsIn": "endet in {h}",
-    "orion.warnShort": "Achtung: Ein Scan jetzt l\xE4sst zu wenig Lithium, um alle laufenden Anomalien einzul\xF6sen. Es fehlen schon {v}, vor jedem Scan.",
-    "orion.warnFree": "Achtung: Ein Scan jetzt l\xE4sst zu wenig Lithium, um alle laufenden Anomalien einzul\xF6sen. Nur {free} sind frei, ein Scan kostet {cost}.",
-    "orion.noneRemembered": "Keine laufende Anomalie gespeichert. Falls du welche hast, \xF6ffne einmal die Missions\xFCbersicht.",
+    "orion.warnShort": "Achtung: Ein Scan jetzt lässt zu wenig Lithium, um alle laufenden Anomalien einzulösen. Es fehlen schon {v}, vor jedem Scan.",
+    "orion.warnFree": "Achtung: Ein Scan jetzt lässt zu wenig Lithium, um alle laufenden Anomalien einzulösen. Nur {free} sind frei, ein Scan kostet {cost}.",
+    "orion.noneRemembered": "Keine laufende Anomalie gespeichert. Falls du welche hast, öffne einmal die Missionsübersicht.",
     "orion.partial": "bisherige Kosten, Gesamt noch unbekannt",
-    "orion.empty": "Noch keine Anomalie gespeichert. \xD6ffne die Orion-Missions\xFCbersicht: die dort gelisteten Anomalien werden hier gespeichert.",
+    "orion.empty": "Noch keine Anomalie gespeichert. Öffne die Orion-Missionsübersicht: die dort gelisteten Anomalien werden hier gespeichert.",
     "orion.balance": "Bilanz",
-    "orion.balanceHint": "Belohnungen + erhaltene Schiffe \u2212 verlorene Schiffe \u2212 Treibstoff (Lithium separat)",
+    "orion.balanceHint": "Belohnungen + erhaltene Schiffe − verlorene Schiffe − Treibstoff (Lithium separat)",
     "orion.rewardsK": "Belohnungen",
     "orion.shipsGot": "Erhaltene Schiffe",
     "orion.lost": "Verlorene Schiffe",
     "orion.fuel": "Treibstoff",
     "orion.shipsN": "Schiffe",
-    "orion.battlesN": "K\xE4mpfe",
-    "orion.collectionsN": "Einl\xF6sungen",
+    "orion.battlesN": "Kämpfe",
+    "orion.collectionsN": "Einlösungen",
     "orion.wavesN": "Wellen",
     "orion.lithiumNet": "netto ausgegebenes Lithium",
     "orion.legendUp": "Belohnungen + erhaltene Schiffe (MSU)",
     "orion.legendDown": "Kosten: verlorene Schiffe + Treibstoff (MSU)",
     "orion.other": "Sonstiges",
     "orion.anomalies": "Erschienene Anomalien",
-    "orion.search": "Name oder Koordinaten suchen\u2026",
+    "orion.search": "Name oder Koordinaten suchen…",
     "orion.all": "alle",
-    "orion.rowsHint": "Zeilenwerte = nur der gew\xE4hlte Zeitraum",
+    "orion.rowsHint": "Zeilenwerte = nur der gewählte Zeitraum",
     "orion.noneInPeriod": "In diesem Zeitraum ist keine Anomalie erschienen.",
     "orion.col.spawned": "Erschienen",
     "orion.col.name": "Name",
@@ -4352,9 +4644,9 @@
     "orion.col.waves": "Wellen",
     "orion.col.status": "Status",
     "orion.col.paid": "Lithium bezahlt",
-    "orion.col.back": "Lithium zur\xFCck",
-    "orion.status.running": "l\xE4uft",
-    "orion.status.collected": "eingel\xF6st",
+    "orion.col.back": "Lithium zurück",
+    "orion.status.running": "läuft",
+    "orion.status.collected": "eingelöst",
     "orion.status.expired": "abgelaufen",
     "orion.del": "Diese Anomalie aus dem Tagebuch entfernen",
     "orion.delConfirm": "Entfernen?",
@@ -4363,16 +4655,16 @@
     "orion.clear": "Orion-Archiv leeren",
     "orion.costs": "Kosten",
     "orion.title": "Orion-Tagebuch",
-    "orion.sub": "Aus den Orion-Seiten, deinen Einl\xF6sungen, gesendeten Flotten und ge\xF6ffneten Berichten: keine Serveranfrage",
-    "orion.countSwitch": "In der Lithiumplanung z\xE4hlen",
-    "orion.waiting": "Warten auf die erste Welle: noch nichts einzul\xF6sen",
+    "orion.sub": "Aus den Orion-Seiten, deinen Einlösungen, gesendeten Flotten und geöffneten Berichten: keine Serveranfrage",
+    "orion.countSwitch": "In der Lithiumplanung zählen",
+    "orion.waiting": "Warten auf die erste Welle: noch nichts einzulösen",
     "orion.waitingShort": "wartet",
     "orion.redeemCost": "Belohnungskosten",
     "orion.collectCost": "jetzt zu zahlen",
-    "orion.lithiumBack": "Lithium zur\xFCck",
-    "orion.notCountedHint": "Nicht gez\xE4hlte Belohnungen: die Seite nennt nur die Anzahl, nicht welche",
-    "orion.msuNoCost": "MSU \xB7 ohne Kosten",
-    "orion.freeHint": "das Lithium zur\xFCck deckt die Kosten",
+    "orion.lithiumBack": "Lithium zurück",
+    "orion.notCountedHint": "Nicht gezählte Belohnungen: die Seite nennt nur die Anzahl, nicht welche",
+    "orion.msuNoCost": "MSU · ohne Kosten",
+    "orion.freeHint": "das Lithium zurück deckt die Kosten",
     "orion.unitH": "MSU pro Stunde Lithium",
     "orion.unitM": "MSU pro 1 Mio. Lithium",
     "orion.planNoProd": "nicht alle {waves}: die Lithiumproduktion steht",
@@ -4383,75 +4675,175 @@
     "orion.fullIn": "Speicher voll in {h}",
     "orion.prodFull": "Speicher voll: Produktion gestoppt",
     "orion.prodStopped": "Produktion gestoppt: keine Umwandlung aktiv",
-    "orion.kScans": "M\xF6gliche Scans",
+    "orion.kScans": "Mögliche Scans",
     "orion.kScansSub": "je {v}",
     "orion.kFree": "Freies Lithium",
     "orion.kFreeSub": "nach den laufenden Anomalien",
-    "orion.kHeld": "Zur\xFCckgehalten",
-    "orion.kHeldSub": "f\xFCr {n} laufende Anomalien",
+    "orion.kHeld": "Zurückgehalten",
+    "orion.kHeldSub": "für {n} laufende Anomalien",
     "orion.kBar": "Vorrat",
     "orion.kBarSub": "Speicher {v}",
     "orion.wholeMission": "ganze Mission",
-    "orion.extraValue": "andere Belohnungen (Sch\xE4tzung)",
-    "orion.extraHint": "Budget der Karte \u2248{budget} MSU (gelernter Multiplikator f\xFCr Typ und Modus); die Rohstoffe nehmen einen Teil, der Rest \u2248{extra} geht an andere Belohnungen, zu {rate} % gez\xE4hlt.",
-    "orion.withExtra": "davon \u2248{v} gesch\xE4tzt f\xFCr andere Belohnungen",
-    "orion.perMissionHour": "\u2248{v} MSU/h Mission",
-    "orion.lowRoll": "bei niedrigem Wurf \u2248{v}",
-    "orion.lowRollHint": "Kampf: eine Einl\xF6sung zahlt alles oder 37,5 % der Belohnungen (Lieferungen zahlen immer alles). Community-Wert, vom Orion-Tagebuch gepr\xFCft.",
-    "orion.lowRolls": "niedrige W\xFCrfe",
+    "orion.extraValue": "andere Belohnungen (Schätzung)",
+    "orion.extraHint": "Budget der Karte ≈{budget} MSU (gelernter Multiplikator für Typ und Modus); die Rohstoffe nehmen einen Teil, der Rest ≈{extra} geht an andere Belohnungen, zu {rate} % gezählt.",
+    "orion.withExtra": "davon ≈{v} geschätzt für andere Belohnungen",
+    "orion.perMissionHour": "≈{v} MSU/h Mission",
+    "orion.lowRoll": "bei niedrigem Wurf ≈{v}",
+    "orion.lowRollHint": "Kampf: eine Einlösung zahlt alles oder 37,5 % der Belohnungen (Lieferungen zahlen immer alles). Community-Wert, vom Orion-Tagebuch geprüft.",
+    "orion.lowRolls": "niedrige Würfe",
     "tech.iasShort": "Lithium +{v}/h",
-    "tech.ias": "Lithiumproduktion dieses Scanners beim Umwandeln: {from}/h \u2192 {to}/h auf Stufe {level} (Community-Formel: 15,36 \xD7 L \xD7 1,1^L \xD7 Wirtschaftsgeschwindigkeit)",
-    "orion.simOpen": "Diese Welle in {tool} simulieren (neuer Tab): die Welle greift an, deine Flotte an der Anomalie verteidigt; f\xFCge deine Schiffe im Simulator hinzu",
+    "tech.ias": "Lithiumproduktion dieses Scanners beim Umwandeln: {from}/h → {to}/h auf Stufe {level} (Community-Formel: 15,36 × L × 1,1^L × Wirtschaftsgeschwindigkeit)",
+    "orion.simOpen": "Diese Welle in {tool} simulieren (neuer Tab): die Welle greift an, deine Flotte an der Anomalie verteidigt; füge deine Schiffe im Simulator hinzu",
     "orion.expected": "Beim Scan erwartet (ganze Mission)",
-    "orion.nowLabel": "Jetzt einl\xF6sbar:",
-    "orion.nowCost": "f\xFCr {v} Lithium",
-    "orion.cargoNeed": "Lieferung: nur Transporter, mit mindestens der Kapazit\xE4t der ankommenden Flotte. Die gr\xF6\xDFte: {cap} (Welle {wave}) \u2248 {lc} gro\xDFe oder {sc} kleine Transporter",
-    "orion.cargoHint": "Kapazit\xE4t der ankommenden NPC-Flotten (Grundkapazit\xE4t ihrer Schiffe, mit Bonus), aus den Wellendaten; deine Transporter mit der Kapazit\xE4t von der Flottenseite. Kriegsschiffe in der Flotte = keine Belohnung.",
+    "orion.nowLabel": "Jetzt einlösbar:",
+    "orion.nowCost": "für {v} Lithium",
+    "orion.cargoNeed": "Lieferung: nur Transporter, mit mindestens der Kapazität der ankommenden Flotte. Die größte: {cap} (Welle {wave}) ≈ {lc} große oder {sc} kleine Transporter",
+    "orion.cargoHint": "Kapazität der ankommenden NPC-Flotten (Grundkapazität ihrer Schiffe, mit Bonus), aus den Wellendaten; deine Transporter mit der Kapazität von der Flottenseite. Kriegsschiffe in der Flotte = keine Belohnung.",
     "orion.waveN": "Welle {n}",
-    "fleet.expeditionSpread": "Zuf\xE4lliges System \xB1",
-    "settings.expSpreadHint": "Wie OGLight: die Expedition fliegt in ein zuf\xE4lliges System zwischen Start minus N und plus N. 0 = immer das Startsystem.",
+    "fleet.expeditionSpread": "Zufälliges System ±",
+    "settings.expSpreadHint": "Wie OGLight: die Expedition fliegt in ein zufälliges System zwischen Start minus N und plus N. 0 = immer das Startsystem.",
     "fleet.expeditionSplit": "Transporter auf Slots verteilen",
-    "settings.expSplitHint": "F\xFCr junge Universen: jede Expedition nimmt h\xF6chstens die Transporter hier geteilt durch die noch freien Expeditionsslots, damit die erste nicht alle mitnimmt.",
-    "fleet.expSplitCalc": "{ship}: {n} \xF7 {slots} Slots = {each} pro Expedition",
-    "fleet.expSplitUnknown": "Die Berechnung erscheint nach dem \xD6ffnen der Flottenseite.",
+    "settings.expSplitHint": "Für junge Universen: jede Expedition nimmt höchstens die Transporter hier geteilt durch die noch freien Expeditionsslots, damit die erste nicht alle mitnimmt.",
+    "fleet.expSplitCalc": "{ship}: {n} ÷ {slots} Slots = {each} pro Expedition",
+    "fleet.expSplitUnknown": "Die Berechnung erscheint nach dem Öffnen der Flottenseite.",
     "fleet.expeditionStay": "Expeditionen vom selben Planeten",
-    "settings.expStayHint": "Mit Wiederholen: nach einer Expedition \xF6ffnet sich derselbe Planet oder Mond mit vorbereiteter Expedition, solange Slots frei sind. Aus = n\xE4chster Planet.",
-    "fleet.ok.expSystem": "nach {coords} (\xB1{n})",
+    "settings.expStayHint": "Mit Wiederholen: nach einer Expedition öffnet sich derselbe Planet oder Mond mit vorbereiteter Expedition, solange Slots frei sind. Aus = nächster Planet.",
+    "fleet.ok.expSystem": "nach {coords} (±{n})",
     "fleet.ok.expSplit": "Transporter auf {slots} Slots verteilt",
-    "fleet.emptyHint": "Hier sind keine Schiffe. Du kannst diesen K\xF6rper bei Expeditionen \xFCberspringen lassen.",
-    "fleet.tip.skipEmpty": "Hier sind keine Schiffe: \xF6ffnet den n\xE4chsten Planeten oder Mond der Runde mit vorbereiteter Expedition. Von hier startet nichts.",
+    "fleet.emptyHint": "Hier sind keine Schiffe. Du kannst diesen Körper bei Expeditionen überspringen lassen.",
+    "fleet.tip.skipEmpty": "Hier sind keine Schiffe: öffnet den nächsten Planeten oder Mond der Runde mit vorbereiteter Expedition. Von hier startet nichts.",
     "ping.label": "Ping {ms} ms",
-    "ping.hint": "Der Server hat in {ms} ms geantwortet; die Seite war in {s} s geladen. Beim Laden dieser Seite gemessen: ein jetzt gesendeter Flug erreicht den Server mit \xE4hnlicher Verz\xF6gerung.",
+    "ping.hint": "Der Server hat in {ms} ms geantwortet; die Seite war in {s} s geladen. Beim Laden dieser Seite gemessen: ein jetzt gesendeter Flug erreicht den Server mit ähnlicher Verzögerung.",
     "ping.hintShort": "Der Server hat in {ms} ms geantwortet. Beim Laden dieser Seite gemessen.",
     "fleet.send.allBtn": "Alles",
     "fleet.send.allHint": "Alle Rohstoffe dieses Planeten oder Mondes (der Treibstoff des Flugs bleibt)",
     "msg.apiCopied": "API kopiert",
     "msg.apiCopyFailed": "API konnte nicht kopiert werden: der Browser erlaubt es nicht",
-    "fleet.keepShips": "Schiffsreserve: {n} bleiben auf diesem K\xF6rper (nicht f\xFCr Expeditionen und den Fleetsave)",
+    "fleet.keepShips": "Schiffsreserve: {n} bleiben auf diesem Körper (nicht für Expeditionen und den Fleetsave)",
     "fleet.keepRes": "Reserve {n}",
-    "fleet.keepResHint": "Rohstoffreserve: {n} bleiben auf diesem K\xF6rper (nicht f\xFCr Expeditionen und den Fleetsave)",
+    "fleet.keepResHint": "Rohstoffreserve: {n} bleiben auf diesem Körper (nicht für Expeditionen und den Fleetsave)",
     "fleet.cargoPicked": "Laderaum {n}",
-    "fleet.cargoPickedHint": "Laderaum der gew\xE4hlten Schiffe: {n}",
+    "fleet.cargoPickedHint": "Laderaum der gewählten Schiffe: {n}",
     "fleet.btn.touchCollect": "Sammeln",
     "fleet.btn.touchDeploy": "Sammeln",
     "fleet.btn.touchSubTransport": "Transport",
     "fleet.btn.touchSubDeploy": "Stationieren",
     "fleet.rulesShort": "Regeln",
     "settings.section.bodies": "Planeten und Monde",
-    "fleet.bodiesHint": "Reserven, Sprungtor und Fleetsave jedes Planeten und Mondes. Tippe auf einen K\xF6rper, um seine Regeln zu \xE4ndern; \xC4nderungen gelten sofort.",
-    "fleet.bodiesAll": "Alle K\xF6rper",
+    "fleet.bodiesHint": "Reserven, Sprungtor und Fleetsave jedes Planeten und Mondes. Tippe auf einen Körper, um seine Regeln zu ändern; Änderungen gelten sofort.",
+    "fleet.bodiesAll": "Alle Körper",
     "fleet.rule.saveReserveOnly": "kein Ziel",
     "threat.attack": "Angriff landet um {time}",
     "threat.spy": "Spionage landet um {time}",
     "flights.out": "{mission}: {n} auf dem Hinflug, erste Ankunft {time}",
-    "flights.back": "{mission}: {n} auf dem R\xFCckflug, erste um {time}",
+    "flights.back": "{mission}: {n} auf dem Rückflug, erste um {time}",
     "flights.in": "{mission}: {n} kommt hier an um {time}",
     "flights.moon": "Mond:",
     "mission.2": "Verbandsangriff",
     "mission.7": "Kolonisieren",
-    "mission.9": "Mondzerst\xF6rung",
+    "mission.9": "Mondzerstörung",
     "mission.18": "Erkundung",
-    "flights.title": "Flotten unterwegs"
+    "flights.title": "Flotten unterwegs",
+    "settings.section.guide": "Anleitung",
+    "tour.next": "Weiter",
+    "tour.back": "Zurück",
+    "tour.done": "Fertig",
+    "tour.close": "Anleitung schließen",
+    "tour.count": "{n} von {total}",
+    "tour.help": "Anleitung zu diesem Fenster",
+    "tour.zoneHelp": "Was dieser Bereich macht",
+    "tour.inviteTitle": "Zum ersten Mal hier?",
+    "tour.inviteText": "Eine Minute zu «{name}»: Ich hebe jede Funktion hervor und erkläre, was sie macht und wie man sie nutzt.",
+    "tour.show": "Zeig es mir",
+    "tour.later": "Später",
+    "tour.no": "Nein, danke",
+    "tour.name.board": "Brett und Planetenmenü",
+    "tour.name.fleet": "Flottenseite",
+    "tour.name.settings": "Einstellungen",
+    "tour.name.dashboard": "Dashboard",
+    "tour.name.planner": "Plan",
+    "tour.name.journal": "Tagebuch",
+    "tour.name.galaxy": "Galaxie",
+    "tour.name.messages": "Nachrichten",
+    "tour.name.tech": "Gebäude und Forschung",
+    "tour.where.board": "Jede Seite.",
+    "tour.where.fleet": "Schiffe, Missionen, Reserven.",
+    "tour.where.settings": "Zahnrad.",
+    "tour.where.dashboard": "Klick auf Produktion.",
+    "tour.where.planner": "Klick auf Plan.",
+    "tour.where.journal": "Klick auf Tagebuch.",
+    "tour.where.galaxy": "Fähnchen, Rangliste, Trümmer.",
+    "tour.where.messages": "Berichte und Spionage.",
+    "tour.where.tech": "Gebäude, eines gewählt.",
+    "tour.firstSteps": "Erste Schritte",
+    "tour.stepDone": "Erledigt",
+    "tour.step.sync": "Daten abgleichen",
+    "tour.step.syncHint": "Der Pfeil-Knopf über den Planeten: Stufen und Forschung des ganzen Kontos.",
+    "tour.step.fleetsave": "Ziel des Fleetsave",
+    "tour.step.fleetsaveHint": "In Planeten und Monde: wohin die Flotte jedes Körpers flieht.",
+    "tour.step.mainShip": "Hauptschiff",
+    "tour.step.mainShipHint": "Auf der Flottenseite das Zeichen auf dem meistgenutzten Transporter.",
+    "tour.step.plan": "Ein Gebäude im Plan",
+    "tour.step.planHint": "Auf den Gebäudeseiten: Gebäude wählen und Plan drücken.",
+    "tour.step.journal": "Expeditionstagebuch",
+    "tour.step.journalHint": "Öffne Expeditionsberichte in den Nachrichten: das Tagebuch füllt sich selbst.",
+    "tour.all": "Alle Anleitungen",
+    "tour.start": "Starten",
+    "tour.invites": "Einladungen",
+    "tour.offer": "Anleitungen anbieten",
+    "tour.offerHint": "Beim ersten Nutzen einer Funktion erscheint eine Einladung; die Anleitung startet nur mit Zeig es mir.",
+    "tour.reset": "Gesehene Anleitungen",
+    "tour.resetHint": "Holt die Einladungen auch für gesehene oder abgelehnte Anleitungen zurück.",
+    "tour.resetDo": "Zurücksetzen",
+    "tour.settings.0": "Einstellungen|Nach Thema geordnet. Jede Wahl gilt sofort und bleibt in diesem Browser.",
+    "tour.settings.1": "Eine Zeile, eine Wahl|Der Name, darunter die Erklärung, rechts Schalter oder Wert.",
+    "tour.settings.2": "Planeten und Monde|Fleetsave und Reserven jedes Körpers. Wähle Planeten oder Monde, dann tippe einen Körper an.",
+    "tour.settings.3": "Tasten|Kürzel ändern und wählen, wann die Tastenleiste erscheint.",
+    "tour.settings.4": "Daten|Alles sichern oder wiederherstellen, was Future speichert; OGLight-Daten importieren.",
+    "tour.settings.5": "Anleitung|Erste Schritte, alle Anleitungen und die Einladungen.",
+    "tour.dashboard.0": "Dashboard|Das ganze Konto auf einem Brett. Die Zahlen stammen vom letzten Abgleich.",
+    "tour.dashboard.1": "Investitionen|Was zuerst bauen: jede Stufe mit Kosten und Tagen bis zur Amortisation; oben das beste Angebot.",
+    "tour.dashboard.2": "Verlauf|Wie Punkte und Produktion wachsen, Tag für Tag.",
+    "tour.dashboard.3": "Minen und Anlagen|Stufen aller Planeten in einer Tabelle; farbige Zellen sind laufende Aufträge.",
+    "tour.planner.0": "Plan|Was alles im Plan kostet, was du hast und was fehlt.",
+    "tour.planner.1": "Zwei Ansichten|Nach Planet: was wohin bringen. Nach Technologie: die Liste der Gebäude.",
+    "tour.planner.2": "Alles bringen|Bereitet in der Flotte den Transport der fehlenden Rohstoffe vor. Absenden bleibt dein Klick.",
+    "tour.planner.3": "Leerer Plan|Öffne eine Gebäude- oder Forschungsseite, wähle etwas und drücke Plan.",
+    "tour.journal.0": "Tagebuch|In den Nachrichten gelesene Expeditionen: Rohstoffe, Schiffe, Dunkle Materie, Verluste.",
+    "tour.journal.1": "Zeitraum|Heute, gestern, 7 oder 30 Tage, oder alles.",
+    "tour.journal.2": "Ergebnis|Was die Expeditionen im Zeitraum eingebracht haben, in MSU.",
+    "tour.journal.3": "Verlauf|Wie der Zeitraum lief, Tag für Tag.",
+    "tour.galaxy.0": "Das System auf einen Blick|Spieler, Inaktive und Trümmer des Systems in einer Zeile.",
+    "tour.galaxy.1": "Fähnchen|Zeige auf einen Spieler: neben dem Namen erscheint das Fähnchen zum Markieren. Du findest ihn unter Ziele.",
+    "tour.galaxy.2": "Spielerblatt|Klick auf den Namen: seine Planeten und deine Notizen in der Seitenleiste.",
+    "tour.galaxy.3": "Rangliste|Zeige darauf für die Punkte; Klick öffnet die Rangliste an seiner Position.",
+    "tour.galaxy.4": "Trümmer in MSU|Der Wert des Trümmerfelds, in Metall umgerechnet.",
+    "tour.messages.0": "Berichte auf einen Blick|Jeder Bericht mit Zusammenfassung: Beute, Verluste, Wert. Klick: zeigt oder verbirgt den Text des Spiels.",
+    "tour.messages.1": "Spionage als Tabelle|Spionageberichte nebeneinander, sortierbar: wer am meisten bringt, wer verteidigt ist.",
+    "tour.tech.0": "In den Plan|Fügt dieses Gebäude dem Plan hinzu: Future zählt die fehlenden Rohstoffe.",
+    "tour.tech.1": "Mehrere Stufen|Wähle bis zu welcher Stufe: Kosten und Zeit werden addiert.",
+    "tour.tech.2": "Kosten und Zeit|Was es kostet, wie lange es dauert und was mit dem jetzigen Lager fehlt.",
+    "tour.board.0": "Willkommen bei Future|Future ergänzt das Spiel um ein Brett mit Zahlen, Plänen und Kürzeln. Es spielt nie für dich: jeder Versand bleibt dein Klick.",
+    "tour.board.1": "Produktion|Was das Konto pro Tag einbringt, in MSU (alles in Metall umgerechnet). Klick: öffnet das Dashboard mit Investitionen, Minen und Verlauf.",
+    "tour.board.2": "Plan|Die Gebäude, die du willst, und die fehlenden Rohstoffe. Hinzufügen mit dem Plan-Knopf auf Gebäude- und Forschungsseiten. Klick: öffnet den Plan.",
+    "tour.board.3": "Eine Zeile pro Planet|Rohstoffe im Lager (der Balken ist der Speicher), Minuten seit dem letzten Besuch, laufende Aufträge. Darunter die Flotten von und zu diesem Körper.\nRot mit Schwert oder Auge: Angriff oder Spionage im Anflug. Aktualisiert beim Laden einer Seite.",
+    "tour.board.4": "Abgleichen|Liest das ganze Konto neu aus dem Spiel: Stufen, Forschung, Lebensformen. Drücke es nach dem Bauen oder Forschen.",
+    "tour.board.5": "Einstellungen|Alle Optionen von Future, in Reitern. Im Reiter Anleitung findest du die ersten Schritte und jede Anleitung.",
+    "tour.board.6": "Expeditionstagebuch|Expeditionen von heute und gestern und ihr Ertrag. Füllt sich selbst, wenn du Berichte öffnest. Klick: das ganze Tagebuch.",
+    "tour.board.7": "Ziele|Spieler, die du in der Galaxie markiert hast. Klick: die Seitenleiste; Taste M: die nächste Position.",
+    "tour.board.8": "Tastenleiste|Kürzel zum Tippen: vorheriger und nächster Planet, Flottenmissionen, das Zahnrad der Einstellungen.",
+    "tour.board.9": "Erster Schritt: die Flotte|Öffne die Flottenseite: dort helfe ich dir mit Fleetsave, Hauptschiff und Reserven.\nJedes Future-Fenster hat oben ein ? für seine Anleitung.",
+    "tour.fleet.0": "Die Flottenseite|Future bereitet die Flotte vor: Schiffe, Ziel, Mission. Weiter und Absenden im Spiel bleiben deine.\nRichten wir alles in 5 Schritten ein.",
+    "tour.fleet.1": "1 · Flotteneinstellungen|Lieblingsziele für Transport und Stationieren, Expeditionen, die Runde der Planeten. Einmal genügt.",
+    "tour.fleet.2": "2 · Regeln und Fleetsave|Für jeden Planeten und Mond: wohin der Fleetsave geht und was daheim bleibt. Ohne Ziel bleibt Fleetsave gestrichelt.",
+    "tour.fleet.3": "3 · Hauptschiff|Tippe dieses Zeichen auf deinem meistgenutzten Transporter an: Future rechnet aus, wie viele es braucht.",
+    "tour.fleet.4": "4 · Reserven|Was diesen Körper nie verlässt: Schiffe, Rohstoffe, Deuterium des Sprungtors. Ein Klick schaltet ein oder aus; Werte änderst du in Regeln.",
+    "tour.fleet.5": "5 · Runde|Wiederholen: nach einem Versand geht es zum nächsten Körper, reihum. Diesen Körper überspringen: die Runde lässt ihn aus.",
+    "tour.fleet.6": "Mission|Transport und Stationieren fragen wohin; Expedition bereitet die Expedition vor; Fleetsave die Flucht; Letzte wiederholt die letzte Flotte. Der Buchstabe oben ist die Taste.",
+    "tour.fleet.7": "Ziel|Zum Mond: alles zum Mond dieses Planeten. Sammeln: bringt die Rohstoffe der Planeten zu einem Körper, per Transport oder Stationierung.",
+    "tour.fleet.8": "Meldungen|Hier sagt Future, was es vorbereitet hat oder was fehlt. Zeige auf einen Knopf, um zu lesen, was er macht.",
+    "tour.fleet.9": "Weiter und Absenden|Der Knopf des Spiels, in Daumennähe. Ihn zu drücken bleibt deine Wahl.",
+    "tour.fleet.10": "Fertig|Nächste Schritte: Fleetsave-Ziel in Regeln, Hauptschiff, dann Expedition ausprobieren.\nDie ? neben Mission, Ziel, Reserven und Runde erklären jeden Bereich erneut."
   };
 
   // src/core/i18n.ts
@@ -4570,8 +4962,8 @@
   }
   function readCurrentResources(doc) {
     const raw = (id) => {
-      const el6 = doc.getElementById(id);
-      const value = el6?.getAttribute("data-raw") ?? el6?.textContent?.replace(/\D/g, "");
+      const el7 = doc.getElementById(id);
+      const value = el7?.getAttribute("data-raw") ?? el7?.textContent?.replace(/\D/g, "");
       const n = Number(value);
       return value != null && value !== "" && Number.isFinite(n) ? n : null;
     };
@@ -4581,8 +4973,8 @@
     return metal == null || crystal == null || deuterium == null ? null : { metal, crystal, deuterium };
   }
   function readCurrentEnergy(doc) {
-    const el6 = doc.getElementById("resources_energy");
-    const value = el6?.getAttribute("data-raw") ?? el6?.textContent?.replace(/[^\d-]/g, "");
+    const el7 = doc.getElementById("resources_energy");
+    const value = el7?.getAttribute("data-raw") ?? el7?.textContent?.replace(/[^\d-]/g, "");
     const n = Number(value);
     return value != null && value !== "" && Number.isFinite(n) ? n : null;
   }
@@ -4776,8 +5168,8 @@
     const field = doc.getElementById("scoreContentField");
     if (!field) return;
     const typed = () => /\)\s*$/.test(field.textContent ?? "");
-    const seen = typed() ? readScore(doc, now()) : null;
-    if (seen) return onScore(seen);
+    const seen2 = typed() ? readScore(doc, now()) : null;
+    if (seen2) return onScore(seen2);
     const view2 = doc.defaultView;
     if (!view2) return;
     const observer = new view2.MutationObserver(() => {
@@ -4796,18 +5188,18 @@
     const d = new Date(at);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   };
-  function recordDay(history, entry) {
+  function recordDay(history2, entry) {
     const day = dayKey(entry.at);
-    const prev = history.find((d) => d.day === day);
+    const prev = history2.find((d) => d.day === day);
     const next = { ...entry, day, prodDay: entry.prodDay || prev?.prodDay || 0, fleet: entry.fleet || prev?.fleet || 0 };
-    const out = history.filter((d) => d.day !== day).concat(next).sort((a, b) => a.day < b.day ? -1 : a.day > b.day ? 1 : 0);
+    const out = history2.filter((d) => d.day !== day).concat(next).sort((a, b) => a.day < b.day ? -1 : a.day > b.day ? 1 : 0);
     return out.slice(-HISTORY_MAX);
   }
-  function changeOver(history, days2) {
-    const last2 = history.at(-1);
-    if (!last2 || history.length < 2) return null;
+  function changeOver(history2, days2) {
+    const last2 = history2.at(-1);
+    if (!last2 || history2.length < 2) return null;
     const limit = last2.at - days2 * 864e5;
-    const base2 = [...history].reverse().find((d) => d.at <= limit + 36e5) ?? history[0];
+    const base2 = [...history2].reverse().find((d) => d.at <= limit + 36e5) ?? history2[0];
     if (base2 === last2) return null;
     const span = Math.max(1, Math.round((last2.at - base2.at) / 864e5));
     return {
@@ -4903,9 +5295,9 @@
   var MAX = 4e3;
   function recordSystem(db, galaxy, system, rows, keep, now) {
     let next = null;
-    const put = (coords, seen) => {
+    const put = (coords, seen2) => {
       next ?? (next = { ...db });
-      if (seen) next[coords] = seen;
+      if (seen2) next[coords] = seen2;
       else delete next[coords];
     };
     const byPos = new Map(rows.map((r) => [r.position, r]));
@@ -4931,12 +5323,12 @@
     const apiAt = api?.updated ?? api?.at ?? 0;
     const listAt = api?.planetsSince ?? apiAt;
     for (const p of api?.planets ?? []) {
-      const seen = db[p.coords];
-      if (seen && seen.player !== id && seen.at > listAt) continue;
-      out.set(p.coords, { coords: p.coords, name: seen?.player === id ? seen.name || p.name : p.name, moon: seen?.player === id && seen.at > apiAt ? seen.moon : !!p.moon, seen: seen?.player === id ? seen : null, fresh: false });
+      const seen2 = db[p.coords];
+      if (seen2 && seen2.player !== id && seen2.at > listAt) continue;
+      out.set(p.coords, { coords: p.coords, name: seen2?.player === id ? seen2.name || p.name : p.name, moon: seen2?.player === id && seen2.at > apiAt ? seen2.moon : !!p.moon, seen: seen2?.player === id ? seen2 : null, fresh: false });
     }
-    for (const [coords, seen] of Object.entries(db)) {
-      if (seen.player === id && !out.has(coords)) out.set(coords, { coords, name: seen.name, moon: seen.moon, seen, fresh: true });
+    for (const [coords, seen2] of Object.entries(db)) {
+      if (seen2.player === id && !out.has(coords)) out.set(coords, { coords, name: seen2.name, moon: seen2.moon, seen: seen2, fresh: true });
     }
     return [...out.values()].sort((a, b) => coordsValue(a.coords) - coordsValue(b.coords));
   }
@@ -5025,6 +5417,8 @@ h4 { margin: 12px 0 4px; font: 600 condensed 13px/1.2 var(--display); color: var
   border-radius: 4px; border: 0; background: none; color: var(--on-band); line-height: 1; cursor: pointer;
 }
 .close:hover { background: var(--band-2); color: var(--text); }
+/* The «?» beside the close button: this window's guide (core/tour). */
+.head .help + .close { margin-left: -8px; }
 .mono { font-family: var(--mono); }
 .m { color: var(--m); } .c { color: var(--c); } .d { color: var(--d); } .dm { color: var(--dm); }
 .neg { color: var(--bad); } .pos { color: var(--ok); }
@@ -5126,7 +5520,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     sword: '<path d="M19.5 4.5L9 15M19.5 4.5V9M19.5 4.5H15"/><path d="M6.5 12.5l5 5M8 16l-3.5 3.5"/>',
     play: '<path d="M8 5.5v13l10.5-6.5z"/>',
     trash: '<path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/>',
-    more: '<path d="M5.5 12h.01M12 12h.01M18.5 12h.01" stroke-width="3.2"/>'
+    more: '<path d="M5.5 12h.01M12 12h.01M18.5 12h.01" stroke-width="3.2"/>',
+    help: '<circle cx="12" cy="12" r="9"/><path d="M9.4 9.3a2.7 2.7 0 1 1 3.7 2.5c-.7.3-1.1.9-1.1 1.6v.5M12 16.9v.2"/>'
   };
   function icon(doc, name, size = 14, cls = "fut-ico") {
     const svg2 = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -5221,7 +5616,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     b.replaceChildren(markIcon(b.ownerDocument, flag ?? "none", 15));
     b.classList.toggle("on", !!flag);
     b.style.color = flag ? FLAG_COLORS[flag] : "";
-    b.title = flag ? `${t(`mark.flag.${flag}`)} \xB7 ${t("mark.change")}` : t("mark.flagAdd");
+    b.title = flag ? `${t(`mark.flag.${flag}`)} · ${t("mark.change")}` : t("mark.flagAdd");
     b.setAttribute("aria-label", `${b.title}: ${name}`);
   }
   var all = (root, sel) => [...root.querySelectorAll(sel)];
@@ -5310,7 +5705,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
       if (out === raw) return;
       input.value = out;
       let pos = 0;
-      for (let seen = 0; pos < out.length && seen < before; pos++) if (/\d/.test(out[pos])) seen++;
+      for (let seen2 = 0; pos < out.length && seen2 < before; pos++) if (/\d/.test(out[pos])) seen2++;
       try {
         input.setSelectionRange(pos, pos);
       } catch {
@@ -5580,16 +5975,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   function pageWindow() {
     return typeof unsafeWindow !== "undefined" && unsafeWindow || window;
   }
-  function getDispatcher(win = pageWindow()) {
-    return win.fleetDispatcher ?? null;
+  function getDispatcher(win2 = pageWindow()) {
+    return win2.fleetDispatcher ?? null;
   }
-  function whenDispatcherReady(win = pageWindow(), timeoutMs = 5e3) {
-    const ready = getDispatcher(win);
+  function whenDispatcherReady(win2 = pageWindow(), timeoutMs = 5e3) {
+    const ready = getDispatcher(win2);
     if (ready) return Promise.resolve(ready);
     return new Promise((resolve) => {
       const started = Date.now();
       const check = () => {
-        const fd = getDispatcher(win);
+        const fd = getDispatcher(win2);
         if (fd) return resolve(fd);
         if (Date.now() - started > timeoutMs) return resolve(null);
         setTimeout(check, 50);
@@ -5834,16 +6229,16 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   }
   function showInGalaxy(doc, coords) {
     const [g, s] = coords.split(":").map(Number);
-    const win = pageWindow();
-    if (shownSystem(doc) && typeof win.loadContentNew === "function" && g && s) {
+    const win2 = pageWindow();
+    if (shownSystem(doc) && typeof win2.loadContentNew === "function" && g && s) {
       onGo?.(coords);
       const gi = doc.getElementById("galaxy_input");
       const si = doc.getElementById("system_input");
       if (gi) gi.value = String(g);
       if (si) si.value = String(s);
-      win.galaxy = g;
-      win.system = s;
-      win.loadContentNew(g, s);
+      win2.galaxy = g;
+      win2.system = s;
+      win2.loadContentNew(g, s);
     } else doc.location.assign(galaxyHref(coords));
   }
   function isSideOpen(doc) {
@@ -5988,7 +6383,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
       return;
     }
     const checked = /* @__PURE__ */ new Map();
-    for (const seen of Object.values(positions)) if (seen.player && seen.at > (checked.get(seen.player) ?? 0)) checked.set(seen.player, seen.at);
+    for (const seen2 of Object.values(positions)) if (seen2.player && seen2.at > (checked.get(seen2.player) ?? 0)) checked.set(seen2.player, seen2.at);
     const now = Date.now();
     const wrap = h(doc, "div", "ps");
     list.forEach((p, i) => {
@@ -6025,12 +6420,12 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     });
     scroll.append(wrap);
   }
-  function activityCell(doc, t, coords, type, value, seen, now) {
+  function activityCell(doc, t, coords, type, value, seen2, now) {
     const a = h(doc, "a", "act");
     a.href = fleetHref(coords, type);
     a.title = t(type === 1 ? "marks.fleetPlanet" : "marks.fleetMoon", { coords });
     a.append(icon(doc, type === 1 ? "planet" : "moon", 12));
-    if (!seen || now - seen.at > HOUR) {
+    if (!seen2 || now - seen2.at > HOUR) {
       a.classList.add("unknown");
       a.append(doc.createTextNode("?"));
     } else {
@@ -6039,13 +6434,13 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     }
     return a;
   }
-  function ageCell(doc, t, seen, now, locale) {
-    if (!seen) return h(doc, "span", "age none", "\u2014");
-    const ms = now - seen.at;
+  function ageCell(doc, t, seen2, now, locale) {
+    if (!seen2) return h(doc, "span", "age none", "—");
+    const ms = now - seen2.at;
     const { n, unit } = ageParts(ms);
-    const el6 = h(doc, "span", `age ${ms < HOUR ? "fresh" : ms < 3 * 864e5 ? "warm" : "old"}`, t("marks.ago", { n, u: t(`marks.unit.${unit}`) }));
-    el6.title = new Date(seen.at).toLocaleString(locale);
-    return el6;
+    const el7 = h(doc, "span", `age ${ms < HOUR ? "fresh" : ms < 3 * 864e5 ? "warm" : "old"}`, t("marks.ago", { n, u: t(`marks.unit.${unit}`) }));
+    el7.title = new Date(seen2.at).toLocaleString(locale);
+    return el7;
   }
   function coordsButton(doc, t, coords, fresh = false) {
     const b = h(doc, "button", `coords${fresh ? " new" : ""}`, coords);
@@ -6097,9 +6492,9 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     };
     for (const [key, ico, color] of SCORE_LOOK) {
       const v = data?.scores[key];
-      score(ico, color, t(`galaxy.score.${key}`), v ? formatUnits(v.points, locale) : "\u2014", v ? `#${v.rank.toLocaleString(locale)}` : "");
+      score(ico, color, t(`galaxy.score.${key}`), v ? formatUnits(v.points, locale) : "—", v ? `#${v.rank.toLocaleString(locale)}` : "");
     }
-    score("fleet", "#C9D4E2", t("marks.ships"), data?.ships ? data.ships.toLocaleString(locale) : "\u2014", "");
+    score("fleet", "#C9D4E2", t("marks.ships"), data?.ships ? data.ships.toLocaleString(locale) : "—", "");
     const split = data ? splitMilitary(data.scores) : null;
     if (split) {
       for (const [key, ico, value] of [["fleet", "fleet", split.fleet], ["defence", "shield", split.defence]]) {
@@ -6170,12 +6565,12 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
         where.append(mark);
       }
       const pn = h(doc, "span", "pn", p.name);
-      pn.title = isHome ? `${p.name} \xB7 ${t("marks.home")}` : p.name;
+      pn.title = isHome ? `${p.name} · ${t("marks.home")}` : p.name;
       row.append(
         h(doc, "span", "idx", String(i + 1)),
         where,
         pn,
-        h(doc, "span", `cell-r${debris ? " has" : ""}${debris >= big ? " big" : ""}`, p.seen ? formatUnits(debris, locale) : "\u2014"),
+        h(doc, "span", `cell-r${debris ? " has" : ""}${debris >= big ? " big" : ""}`, p.seen ? formatUnits(debris, locale) : "—"),
         activityCell(doc, t, p.coords, 1, p.seen?.act[0] ?? null, p.seen, now),
         p.moon ? activityCell(doc, t, p.coords, 3, p.seen?.act[1] ?? null, p.seen, now) : h(doc, "span", ""),
         ageCell(doc, t, p.seen, now, locale)
@@ -6183,7 +6578,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
       wrap.append(row);
     });
     scroll.append(wrap);
-    scroll.append(h(doc, "p", "foot", t("marks.planets", { n: lines.length, moons: lines.filter((l) => l.moon).length }) + " \xB7 " + t("galaxy.apiAge", { time: new Date(data.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) })));
+    scroll.append(h(doc, "p", "foot", t("marks.planets", { n: lines.length, moons: lines.filter((l) => l.moon).length }) + " · " + t("galaxy.apiAge", { time: new Date(data.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) })));
   }
 
   // src/modules/galaxy/index.ts
@@ -6236,8 +6631,8 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     }
     ensureMarksStyle(doc);
     highlight = (() => {
-      const q = new URL(doc.location.href).searchParams;
-      return q.get("galaxy") && q.get("system") && q.get("position") ? `${q.get("galaxy")}:${q.get("system")}:${q.get("position")}` : "";
+      const q2 = new URL(doc.location.href).searchParams;
+      return q2.get("galaxy") && q2.get("system") && q2.get("position") ? `${q2.get("galaxy")}:${q2.get("system")}:${q2.get("position")}` : "";
     })();
     let queued2 = false;
     const run = () => {
@@ -6304,7 +6699,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
         const id = r.playerId;
         const badge = el(doc, "a", "fut-g-rank", `#${r.rank.toLocaleString(locale)}`);
         badge.href = highscoreHref(id, r.rank);
-        badge.setAttribute("aria-label", `${t("galaxy.rankTitle", { name: r.playerName })} \xB7 ${t("galaxy.rankOpen")}`);
+        badge.setAttribute("aria-label", `${t("galaxy.rankTitle", { name: r.playerName })} · ${t("galaxy.rankOpen")}`);
         const show2 = () => void openCard(o, badge, id, r.playerName);
         badge.addEventListener("mouseenter", show2);
         badge.addEventListener("focus", show2);
@@ -6398,7 +6793,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     note.before(table);
     const parts = [t("galaxy.apiAge", { time: new Date(data.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) })];
     if (data.ships) parts.unshift(t("galaxy.ships", { count: data.ships.toLocaleString(locale) }));
-    note.textContent = parts.join(" \xB7 ");
+    note.textContent = parts.join(" · ");
     place2();
   }
 
@@ -6489,11 +6884,11 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     const { today, yesterday } = o.journal;
     const journal = el2(doc, "section", "card");
     journal.append(head("chart", t("dock.journal"), t("exp.title"), o.onOpenJournal, today.count ? String(today.count) : ""));
-    const signed = (n) => `${n >= 0 ? "+" : "\u2212"}${fmt(Math.abs(n))}`;
+    const signed = (n) => `${n >= 0 ? "+" : "−"}${fmt(Math.abs(n))}`;
     const day = (cls, label, d) => {
       const b = button3(`jday ${cls}`, t("dock.journalHint", { n: d.count }), o.onOpenJournal);
       const row = el2(doc, "span", "row");
-      row.append(el2(doc, "span", "k", label), el2(doc, "span", `v${d.count ? d.net < 0 ? " neg" : "" : " none"}`, d.count ? signed(d.net) : "\u2014"));
+      row.append(el2(doc, "span", "k", label), el2(doc, "span", `v${d.count ? d.net < 0 ? " neg" : "" : " none"}`, d.count ? signed(d.net) : "—"));
       b.append(row);
       return b;
     };
@@ -6550,24 +6945,24 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     doc.getElementById(PING_ID)?.remove();
     if (!timing) return null;
     const clock2 = doc.querySelector(".OGameClock");
-    const el6 = doc.createElement(clock2?.tagName === "LI" ? "li" : "span");
-    el6.id = PING_ID;
-    el6.textContent = t("ping.label", { ms: timing.server.toLocaleString(locale) });
-    el6.style.cssText = `display: inline-block; margin-left: 8px; font: 700 11px Verdana, Arial, sans-serif; color: ${COLORS[pingLevel(timing.server)]}; white-space: nowrap; cursor: help;`;
-    el6.title = timing.total ? t("ping.hint", { ms: timing.server.toLocaleString(locale), s: (timing.total / 1e3).toLocaleString(locale, { maximumFractionDigits: 1, minimumFractionDigits: 1 }) }) : t("ping.hintShort", { ms: timing.server.toLocaleString(locale) });
-    if (clock2) clock2.after(el6);
+    const el7 = doc.createElement(clock2?.tagName === "LI" ? "li" : "span");
+    el7.id = PING_ID;
+    el7.textContent = t("ping.label", { ms: timing.server.toLocaleString(locale) });
+    el7.style.cssText = `display: inline-block; margin-left: 8px; font: 700 11px Verdana, Arial, sans-serif; color: ${COLORS[pingLevel(timing.server)]}; white-space: nowrap; cursor: help;`;
+    el7.title = timing.total ? t("ping.hint", { ms: timing.server.toLocaleString(locale), s: (timing.total / 1e3).toLocaleString(locale, { maximumFractionDigits: 1, minimumFractionDigits: 1 }) }) : t("ping.hintShort", { ms: timing.server.toLocaleString(locale) });
+    if (clock2) clock2.after(el7);
     else {
       const row = doc.querySelector("#siteFooter .content .fright");
       if (!row) return null;
-      row.append(doc.createTextNode("|"), el6);
+      row.append(doc.createTextNode("|"), el7);
     }
-    return el6;
+    return el7;
   }
   function showPing(doc, t, locale) {
-    const win = doc.defaultView;
-    const draw = () => drawPing(doc, t, pageTiming(win?.performance), locale);
+    const win2 = doc.defaultView;
+    const draw = () => drawPing(doc, t, pageTiming(win2?.performance), locale);
     if (doc.readyState === "complete") draw();
-    else win?.addEventListener("load", () => win.setTimeout(draw, 0), { once: true });
+    else win2?.addEventListener("load", () => win2.setTimeout(draw, 0), { once: true });
   }
 
   // src/data/import-export.ts
@@ -6632,12 +7027,12 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   function record2(journal, messages) {
     let added = 0;
     let next = journal;
-    const seen = new Set(Object.values(journal).map(signature).filter(Boolean));
+    const seen2 = new Set(Object.values(journal).map(signature).filter(Boolean));
     for (const { id, ...entry } of messages) {
       if (next[id]) continue;
       const sig = signature(entry);
-      if (sig && seen.has(sig)) continue;
-      if (sig) seen.add(sig);
+      if (sig && seen2.has(sig)) continue;
+      if (sig) seen2.add(sig);
       if (next === journal) next = { ...journal };
       next[id] = entry;
       added++;
@@ -6650,16 +7045,16 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     return [e.at, e.coords ?? "", e.result, e.size, e.res.metal, e.res.crystal, e.res.deuterium, e.res.darkMatter, units(e.ships), units(e.lost), e.item ?? ""].join("|");
   }
   function dedupe(journal) {
-    const seen = /* @__PURE__ */ new Set();
+    const seen2 = /* @__PURE__ */ new Set();
     let removed = 0;
     const next = {};
     for (const [id, e] of Object.entries(journal).sort(([a], [b]) => a.localeCompare(b, void 0, { numeric: true }))) {
       const sig = signature(e);
-      if (sig && seen.has(sig)) {
+      if (sig && seen2.has(sig)) {
         removed++;
         continue;
       }
-      if (sig) seen.add(sig);
+      if (sig) seen2.add(sig);
       next[id] = e;
     }
     return { journal: removed ? next : journal, removed };
@@ -6859,14 +7254,14 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     for (const id of db.lastPinnedList ?? []) if (!recent.some((r) => r.id === Number(id))) recent.push({ id: Number(id), name: udb[String(id)]?.name ?? "" });
     m = { ...m, recent: recent.slice(0, RECENT_MAX), lastFlag: marks.lastFlag };
     const next = { ...positions };
-    let seen = 0;
+    let seen2 = 0;
     for (const [coords, x] of Object.entries(pdb)) {
       const uid = Number(x.uid);
       if (!coordsOk(coords) || !(uid > 0) || next[coords] || !(m.players[String(uid)] || m.recent.some((r) => r.id === uid))) continue;
       next[coords] = { player: uid, name: "", moon: (x.mid ?? -1) > 0, debris: Math.round(Number(x.debris) || 0), act: [act(x.acti?.[0]), act(x.acti?.[1])], at: Number(x.acti?.[2]) || Number(x.api) || 0 };
-      seen++;
+      seen2++;
     }
-    return { marks: m, positions: next, players, seen };
+    return { marks: m, positions: next, players, seen: seen2 };
   }
   var OUTCOMES = ["resource", "darkmatter", "ship", "nothing", "trader", "item", "blackhole", "early", "late", "pirate", "alien", "artefact", "lifeform"];
   function gains(g = {}) {
@@ -6970,7 +7365,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     }
     return { at: now, bodies };
   }
-  var queueLabel = (i, locale) => i.kind === "ship" ? `${i.level ? `${i.level.toLocaleString(locale)}\xD7 ` : ""}${i.name}` : `${i.name}${i.level ? ` \u2192 ${i.level}` : ""}`;
+  var queueLabel = (i, locale) => i.kind === "ship" ? `${i.level ? `${i.level.toLocaleString(locale)}× ` : ""}${i.name}` : `${i.name}${i.level ? ` → ${i.level}` : ""}`;
   function activeItems(items, now) {
     return (items ?? []).filter((i) => i.end > now).sort((a, b) => QUEUE_KINDS.indexOf(a.kind) - QUEUE_KINDS.indexOf(b.kind));
   }
@@ -7515,10 +7910,10 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   function loadArchive(raw) {
     return { entries: raw?.entries ?? {}, fuel: raw?.fuel ?? [], battles: raw?.battles ?? {} };
   }
-  function syncArchive(archive, seen, now) {
+  function syncArchive(archive, seen2, now) {
     const entries = { ...archive.entries };
     const listed = /* @__PURE__ */ new Set();
-    for (const s of seen) {
+    for (const s of seen2) {
       if (!s.id) continue;
       listed.add(s.id);
       const old = entries[s.id] ?? { id: s.id, name: "", coords: "", level: 0, stars: 0, mode: "", kind: "", spawnedAt: 0, wave: 0, waves: 0, firstSeen: now, lastSeen: now, status: "running", endedAt: 0, collections: [] };
@@ -7560,23 +7955,23 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   var PENDING_TTL = 6e4;
   var GONE_SETTLE = 3e3;
   var cardValue = (r) => msu(r) + r.lithium;
-  function settle(pending, archive, cards, dialogFor, now) {
+  function settle(pending2, archive, cards, dialogFor, now) {
     const out = {};
     const entries = { ...archive.entries };
     let changed = false;
-    for (const [id, p] of Object.entries(pending)) {
+    for (const [id, p] of Object.entries(pending2)) {
       if (p.via === "card" && dialogFor(id)) {
         changed = true;
         continue;
       }
       const card = cards.get(id);
       if (card) {
-        const q = p.goneSince ? (({ goneSince: _g, ...rest }) => rest)(p) : p;
+        const q2 = p.goneSince ? (({ goneSince: _g, ...rest }) => rest)(p) : p;
         if (p.goneSince) changed = true;
-        const paid = q.cardCost ? card.cost < q.cardCost : card.value < q.cardValue;
+        const paid = q2.cardCost ? card.cost < q2.cardCost : card.value < q2.cardValue;
         if (!paid) {
-          if (now - q.at > PENDING_TTL) changed = true;
-          else out[id] = q;
+          if (now - q2.at > PENDING_TTL) changed = true;
+          else out[id] = q2;
           continue;
         }
       } else {
@@ -7700,7 +8095,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
       cur.times++;
       sums.set(key, cur);
     }
-    return [...sums].map(([name, v]) => v.counted ? `${name} ${v.n.toLocaleString(locale)}` : name + (v.times > 1 ? ` \xD7${v.times}` : "")).join(", ");
+    return [...sums].map(([name, v]) => v.counted ? `${name} ${v.n.toLocaleString(locale)}` : name + (v.times > 1 ? ` ×${v.times}` : "")).join(", ");
   }
   function importLegacy(cur, old) {
     const a = old.archive ?? {};
@@ -7942,8 +8337,8 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     if (type === 33 || type === 34 || cargo.metal + cargo.crystal + cargo.deuterium + cargo.food > 0) {
       let from = place2("source");
       if (!from) {
-        const seen = /\[(\d+:\d+:\d+)\]/.exec(msg.querySelector(".msgContent")?.textContent ?? "");
-        if (seen) from = { name: "", coords: seen[1], moon: false };
+        const seen2 = /\[(\d+:\d+:\d+)\]/.exec(msg.querySelector(".msgContent")?.textContent ?? "");
+        if (seen2) from = { name: "", coords: seen2[1], moon: false };
       }
       const back = type === 34 && from?.coords.split(":")[2] === "16";
       return {
@@ -7991,8 +8386,8 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     return int2(doc.querySelector('meta[name="ogame-player-id"]')?.getAttribute("content") ?? "");
   }
   function isMessagesPage(doc) {
-    const q = new URLSearchParams(doc.location?.search ?? "");
-    return q.get("page") === "messages" || q.get("component") === "messages" || !!doc.querySelector("#messagecontainercomponent, #messagescomponent");
+    const q2 = new URLSearchParams(doc.location?.search ?? "");
+    return q2.get("page") === "messages" || q2.get("component") === "messages" || !!doc.querySelector("#messagecontainercomponent, #messagescomponent");
   }
 
   // src/data/ship-icons.ts
@@ -8206,7 +8601,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
 .fut-fresh-ship { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; color: var(--ship); }
 .fut-fresh-ship.fut-neg { color: var(--neg); }
 @media (max-width: 640px) { .fut-fresh-res { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-/* B \xB7 Loot: each thing found is a tile, its symbol over its amount; an outcome the tiles do not show
+/* B · Loot: each thing found is a tile, its symbol over its amount; an outcome the tiles do not show
    gets a wide tile with its word and what happened; the value stands on the right, after a rule. */
 .fut-msg.fut-msg-b { grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: stretch; column-gap: 8px; margin: 2px 0 4px; padding: 8px 12px 10px; background: none; }
 .fut-msg.fut-msg-b:hover { background: rgba(120, 150, 180, 0.05); }
@@ -8483,7 +8878,7 @@ td.spark-cell { width: 90px; }
 .spark { display: block; height: 7px; border-radius: 2px; background: var(--accent); opacity: 0.55; }
 @container (max-width: 640px) { .two { grid-template-columns: 1fr; } .hero-v { font-size: 28px; } .chart:not(.dense) .tot { font-size: 10px; } }
 
-/* The \xABAPI\xBB button right after a click copied the key: a green ring for a moment. */
+/* The «API» button right after a click copied the key: a green ring for a moment. */
 .fut-api-copied { box-shadow: 0 0 0 2px #38C56E !important; border-radius: 4px; }
 `;
 
@@ -8583,7 +8978,7 @@ td.spark-cell { width: 90px; }
     const now = o.now?.() ?? Date.now();
     const fmt = (n) => formatUnits(n, locale);
     const exact = (n) => Math.round(n).toLocaleString(locale);
-    const el6 = (tag, cls = "", text) => {
+    const el7 = (tag, cls = "", text) => {
       const n = doc.createElement(tag);
       if (cls) n.className = cls;
       if (text !== void 0) n.textContent = text;
@@ -8594,7 +8989,7 @@ td.spark-cell { width: 90px; }
       mountSpyPanel(o);
     };
     const iconButton3 = (cls, name, label, onClick) => {
-      const b = el6("button", `fut-sp-ib ${cls}`);
+      const b = el7("button", `fut-sp-ib ${cls}`);
       b.type = "button";
       b.title = label;
       b.setAttribute("aria-label", label);
@@ -8616,19 +9011,19 @@ td.spark-cell { width: 90px; }
     const here = Number(meta("id")) > 0 ? { id: Number(meta("id")), name: meta("name"), coords: meta("coordinates"), moon: meta("type") === "moon" } : null;
     const baseName = (b) => b.name || doc.querySelector(`#planet-${b.id} .planet-name, #planet-${b.id} .moon-name`)?.textContent?.trim() || "";
     const grid2 = `22px ${view2.cols.map((c) => WIDTH[c]).join(" ")} 104px`;
-    const panel = el6("div", "fut-sp");
+    const panel = el7("div", "fut-sp");
     panel.id = SPY_PANEL_ID;
-    const head = el6("div", "fut-sp-head");
-    const toggle = el6("button", "fut-sp-title");
+    const head = el7("div", "fut-sp-head");
+    const toggle = el7("button", "fut-sp-title");
     toggle.type = "button";
     toggle.dataset.focus = "title";
     toggle.setAttribute("aria-expanded", String(view2.open));
-    toggle.append(icon(doc, "chevron", 12, "fut-sp-chev"), el6("b", "", t("spy.title")), el6("span", "", t("spy.sub", { n: rows.length, loot: fmt(rows.reduce((s, r) => s + r.lootRes, 0)) })));
+    toggle.append(icon(doc, "chevron", 12, "fut-sp-chev"), el7("b", "", t("spy.title")), el7("span", "", t("spy.sub", { n: rows.length, loot: fmt(rows.reduce((s, r) => s + r.lootRes, 0)) })));
     toggle.addEventListener("click", () => redraw({ open: !view2.open }));
     head.append(toggle);
     if (view2.open) {
       const chip2 = (id, text, pressed, next) => {
-        const b = el6("button", "fut-sp-chip", text);
+        const b = el7("button", "fut-sp-chip", text);
         b.type = "button";
         b.dataset.focus = id;
         b.setAttribute("aria-pressed", String(pressed));
@@ -8643,33 +9038,33 @@ td.spark-cell { width: 90px; }
     panel.append(head);
     if (!view2.open) return panel;
     if (!rows.length) {
-      panel.append(el6("p", "fut-sp-note", t(all2.length ? "spy.noneFiltered" : "spy.none")));
+      panel.append(el7("p", "fut-sp-note", t(all2.length ? "spy.noneFiltered" : "spy.none")));
       return panel;
     }
-    const table = el6("div", "fut-sp-table");
+    const table = el7("div", "fut-sp-table");
     table.setAttribute("role", "table");
     table.setAttribute("aria-label", t("spy.title"));
     const line = (cls) => {
-      const r = el6("div", `fut-sp-row ${cls}`.trim());
+      const r = el7("div", `fut-sp-row ${cls}`.trim());
       r.setAttribute("role", "row");
       r.style.gridTemplateColumns = grid2;
       return r;
     };
     const cols = line("fut-sp-cols");
     const fixedHead = (text, label) => {
-      const c = el6("div", "fut-sp-c");
+      const c = el7("div", "fut-sp-c");
       c.setAttribute("role", "columnheader");
-      const s = el6("span", "fut-sp-h", text);
+      const s = el7("span", "fut-sp-h", text);
       s.setAttribute("aria-label", label);
       c.append(s);
       return c;
     };
     cols.append(fixedHead("#", t("spy.col.n")));
     for (const key of view2.cols) {
-      const cell = el6("div", `fut-sp-c${RIGHT.includes(key) ? " fut-sp-r" : ""}`);
+      const cell = el7("div", `fut-sp-c${RIGHT.includes(key) ? " fut-sp-r" : ""}`);
       cell.setAttribute("role", "columnheader");
       cell.setAttribute("aria-sort", view2.sort === key ? view2.desc ? "descending" : "ascending" : "none");
-      const b = el6("button", `fut-sp-h${view2.sort === key ? " sortBy" : ""}`, t(`spy.col.${key}`));
+      const b = el7("button", `fut-sp-h${view2.sort === key ? " sortBy" : ""}`, t(`spy.col.${key}`));
       b.type = "button";
       b.dataset.focus = `col-${key}`;
       b.title = t("spy.colHint");
@@ -8703,7 +9098,7 @@ td.spark-cell { width: 90px; }
     }
     cols.append(fixedHead("", t("spy.col.actionsName")));
     table.append(cols);
-    const list = el6("div", "fut-sp-list");
+    const list = el7("div", "fut-sp-list");
     list.setAttribute("role", "rowgroup");
     rows.forEach((r, index) => {
       const e = r.entry;
@@ -8714,18 +9109,18 @@ td.spark-cell { width: 90px; }
       const attackUrl = (n2, id) => `/game/index.php?page=ingame&component=fleetdispatch&galaxy=${g}&system=${s}&position=${p}&type=${e.moon ? 3 : 1}&mission=1${n2 > 0 ? `&am${id}=${n2}` : ""}`;
       const cellOf = {
         age: () => {
-          const c = el6("div", `fut-sp-c ${r.ageMinutes > 360 ? "old" : r.ageMinutes > 60 ? "warm" : "fresh"}`, r.ageMinutes < 60 ? `${r.ageMinutes}m` : r.ageMinutes < 2880 ? `${Math.floor(r.ageMinutes / 60)}h` : `${Math.floor(r.ageMinutes / 1440)}g`);
+          const c = el7("div", `fut-sp-c ${r.ageMinutes > 360 ? "old" : r.ageMinutes > 60 ? "warm" : "fresh"}`, r.ageMinutes < 60 ? `${r.ageMinutes}m` : r.ageMinutes < 2880 ? `${Math.floor(r.ageMinutes / 60)}h` : `${Math.floor(r.ageMinutes / 1440)}g`);
           c.title = new Date(e.at).toLocaleString(locale);
           return c;
         },
         act: () => {
-          const c = el6("div", `fut-sp-c ${e.activity === 0 ? "bad" : e.activity < 60 ? "warm" : "zero"}`, e.activity === 0 ? "*" : e.activity < 60 ? String(e.activity) : "\u2013");
+          const c = el7("div", `fut-sp-c ${e.activity === 0 ? "bad" : e.activity < 60 ? "warm" : "zero"}`, e.activity === 0 ? "*" : e.activity < 60 ? String(e.activity) : "–");
           c.title = e.activity === 0 ? t("msg.spy.active") : e.activity < 60 ? t("msg.spy.activity", { n: e.activity }) : t("msg.spy.inactive");
           return c;
         },
         coords: () => {
-          const c = el6("div", "fut-sp-c");
-          const gal = el6("a", "fut-sp-coords", e.coords);
+          const c = el7("div", "fut-sp-c");
+          const gal = el7("a", "fut-sp-coords", e.coords);
           gal.href = `/game/index.php?page=ingame&component=galaxy&galaxy=${g}&system=${s}`;
           gal.title = t(e.moon ? "spy.moon" : "spy.planet");
           gal.prepend(icon(doc, e.moon ? "moon" : "planet", 11, "fut-sp-kind"));
@@ -8733,15 +9128,15 @@ td.spark-cell { width: 90px; }
           return c;
         },
         target: () => {
-          const c = el6("div", "fut-sp-c fut-sp-who");
-          const name = el6("a", "fut-sp-name overlay", e.playerName || "?");
+          const c = el7("div", "fut-sp-c fut-sp-who");
+          const name = el7("a", "fut-sp-name overlay", e.playerName || "?");
           name.href = `${doc.location.origin}/game/index.php?page=ajax&component=messagedetails&messageId=${encodeURIComponent(e.id)}`;
           name.dataset.overlayTitle = t("spy.report");
           name.title = t("spy.reportHint", { name: e.playerName || "?" });
           c.append(name);
-          for (const st of e.statuses.filter((x) => x !== "active")) c.append(el6("span", `fut-sp-st st-${st}`, t(`spy.status.${st}`)));
+          for (const st of e.statuses.filter((x) => x !== "active")) c.append(el7("span", `fut-sp-st st-${st}`, t(`spy.status.${st}`)));
           if (e.shared) {
-            const ally = el6("span", "fut-sp-st st-shared", t("spy.shared"));
+            const ally = el7("span", "fut-sp-st st-shared", t("spy.shared"));
             ally.title = t("spy.sharedHint");
             c.append(ally);
           }
@@ -8749,7 +9144,7 @@ td.spark-cell { width: 90px; }
           return c;
         },
         loot: () => {
-          const c = el6("div", "fut-sp-c fut-sp-r fut-sp-loot", fmt(r.lootRes));
+          const c = el7("div", "fut-sp-c fut-sp-r fut-sp-loot", fmt(r.lootRes));
           c.title = t("spy.lootHint", {
             pct: Math.round(e.loot * 100),
             m: fmt(e.res.metal * e.loot),
@@ -8764,11 +9159,11 @@ td.spark-cell { width: 90px; }
         def: () => value(e.defValue, t("msg.spy.def"))
       };
       const value = (v, label) => {
-        const c = el6("div", `fut-sp-c fut-sp-r ${v !== 0 ? "warm" : "zero"}`, v < 0 ? "?" : v > 0 ? fmt(v) : "0");
+        const c = el7("div", `fut-sp-c fut-sp-r ${v !== 0 ? "warm" : "zero"}`, v < 0 ? "?" : v > 0 ? fmt(v) : "0");
         c.title = `${label}: ${v < 0 ? t("spy.hidden") : exact(v)}`;
         return c;
       };
-      const acts = el6("div", "fut-sp-c fut-sp-acts");
+      const acts = el7("div", "fut-sp-c fut-sp-acts");
       const more = iconButton3("fut-sp-more", "more", t("spy.waves"), () => {
         if (open2) expanded.delete(e.key);
         else expanded.add(e.key);
@@ -8804,41 +9199,41 @@ td.spark-cell { width: 90px; }
         (panel2?.querySelector(near ? `[data-focus="del-${near.entry.key}"]` : '[data-focus="title"]') ?? panel2?.querySelector('[data-focus="title"]'))?.focus();
       }));
       acts.lastElementChild.setAttribute("data-focus", `del-${e.key}`);
-      const n = el6("div", "fut-sp-c fut-sp-n", String(index + 1));
+      const n = el7("div", "fut-sp-c fut-sp-n", String(index + 1));
       const cells = [n, ...view2.cols.map((c) => cellOf[c]()), acts];
       for (const c of cells) c.setAttribute("role", "cell");
       row.append(...cells);
       list.append(row);
       if (open2) {
-        const det = el6("div", "fut-sp-waves");
+        const det = el7("div", "fut-sp-waves");
         det.id = `fut-sp-w-${index}`;
         det.setAttribute("role", "row");
-        const cell = el6("div");
+        const cell = el7("div");
         cell.setAttribute("role", "cell");
         cell.setAttribute("aria-colspan", String(view2.cols.length + 2));
         const waves = raidWaves(e.res.metal + e.res.crystal + e.res.deuterium, e.loot, 6);
-        const wgrid = el6("div", "fut-sp-wgrid");
-        wgrid.append(el6("span", "k"), ...waves.map((_, i) => el6("span", "h", t("spy.wave", { n: i + 1 }))));
-        wgrid.append(el6("span", "k", t("spy.col.loot")), ...waves.map((w) => el6("b", "", fmt(w))));
+        const wgrid = el7("div", "fut-sp-wgrid");
+        wgrid.append(el7("span", "k"), ...waves.map((_, i) => el7("span", "h", t("spy.wave", { n: i + 1 }))));
+        wgrid.append(el7("span", "k", t("spy.col.loot")), ...waves.map((w) => el7("b", "", fmt(w))));
         for (const id of [203, 202]) {
-          const label = el6("span", "k");
+          const label = el7("span", "k");
           label.append(shipIcon(doc, id, shipName(id, ships, t), "fut-msg-icon"), shipName(id, ships, t));
           wgrid.append(label);
           for (const [i, w] of waves.entries()) {
             const n2 = Math.ceil(w / cap(id));
             if (!from || n2 === 0) {
-              wgrid.append(el6("span", "cnt", n2.toLocaleString(locale)));
+              wgrid.append(el7("span", "cnt", n2.toLocaleString(locale)));
               continue;
             }
-            const a = el6("a", "cnt", n2.toLocaleString(locale));
+            const a = el7("a", "cnt", n2.toLocaleString(locale));
             a.href = attackUrl(n2, id);
             a.title = t("spy.waveHint", { n: i + 1, count: n2.toLocaleString(locale), ship: shipName(id, ships, t), name: baseName(from) });
             wgrid.append(a);
           }
         }
-        const res = el6("div", "fut-sp-wres");
-        res.append(el6("span", "k", t("spy.onPlanet")), el6("span", "", `M ${fmt(e.res.metal)}`), el6("span", "", `C ${fmt(e.res.crystal)}`), el6("span", "", `D ${fmt(e.res.deuterium)}`));
-        if (from) res.append(el6("span", "from", t("spy.from", { name: baseName(from), coords: from.coords })));
+        const res = el7("div", "fut-sp-wres");
+        res.append(el7("span", "k", t("spy.onPlanet")), el7("span", "", `M ${fmt(e.res.metal)}`), el7("span", "", `C ${fmt(e.res.crystal)}`), el7("span", "", `D ${fmt(e.res.deuterium)}`));
+        if (from) res.append(el7("span", "from", t("spy.from", { name: baseName(from), coords: from.coords })));
         cell.append(wgrid, res);
         det.append(cell);
         list.append(det);
@@ -8846,11 +9241,11 @@ td.spark-cell { width: 90px; }
     });
     table.append(list);
     const foot = line("fut-sp-foot");
-    foot.append(el6("div", "fut-sp-c"));
-    for (const key of view2.cols) foot.append(el6("div", `fut-sp-c${RIGHT.includes(key) ? " fut-sp-r" : ""}`, key === "loot" ? fmt(rows.reduce((s, r) => s + r.lootRes, 0)) : key === "target" ? t("spy.total") : ""));
-    foot.append(el6("div", "fut-sp-c"));
+    foot.append(el7("div", "fut-sp-c"));
+    for (const key of view2.cols) foot.append(el7("div", `fut-sp-c${RIGHT.includes(key) ? " fut-sp-r" : ""}`, key === "loot" ? fmt(rows.reduce((s, r) => s + r.lootRes, 0)) : key === "target" ? t("spy.total") : ""));
+    foot.append(el7("div", "fut-sp-c"));
     table.append(foot);
-    panel.append(table, el6("p", "fut-sp-note", t("spy.hint")));
+    panel.append(table, el7("p", "fut-sp-note", t("spy.hint")));
     return panel;
   }
 
@@ -8878,29 +9273,29 @@ td.spark-cell { width: 90px; }
     const fmt = (n) => formatUnits(n, locale);
     const exact = (n) => Math.round(n).toLocaleString(locale);
     const ships = o.store.get(SHIPS_INFO_KEY, {});
-    const el6 = (tag, cls = "", text) => {
+    const el7 = (tag, cls = "", text) => {
       const n = doc.createElement(tag);
       if (cls) n.className = cls;
       if (text !== void 0) n.textContent = text;
       return n;
     };
-    const panel = el6("section", "fut-fresh");
+    const panel = el7("section", "fut-fresh");
     panel.id = FRESH_ID;
     panel.setAttribute("aria-live", "polite");
     panel.setAttribute("aria-label", t("fresh.title"));
     shown.set(panel, all2);
-    const timer2 = el6("div", "fut-fresh-timer");
-    const bar = el6("i");
+    const timer2 = el7("div", "fut-fresh-timer");
+    const bar = el7("i");
     bar.style.animationDuration = `${FRESH_MS}ms`;
     bar.addEventListener("animationend", () => panel.remove());
     timer2.append(bar);
-    const head = el6("div", "fut-fresh-head");
-    head.append(el6("b", "", t("fresh.title")), el6("span", "fut-fresh-count", t("recap.count", { n: (s.count + s.discoveries).toLocaleString(locale) })));
-    for (const i of [0, 1, 2]) if (s.sizes[i]) head.append(el6("span", `fut-rar-chip fut-rar-${i}`, `${s.sizes[i]} ${t(`msg.size.${i}`).toLowerCase()}`));
-    const total = el6("span", `fut-fresh-total${s.netMsu < 0 ? " fut-neg" : ""}`);
-    total.append(el6("b", "", fmt(s.netMsu)), el6("small", "", "MSU"));
+    const head = el7("div", "fut-fresh-head");
+    head.append(el7("b", "", t("fresh.title")), el7("span", "fut-fresh-count", t("recap.count", { n: (s.count + s.discoveries).toLocaleString(locale) })));
+    for (const i of [0, 1, 2]) if (s.sizes[i]) head.append(el7("span", `fut-rar-chip fut-rar-${i}`, `${s.sizes[i]} ${t(`msg.size.${i}`).toLowerCase()}`));
+    const total = el7("span", `fut-fresh-total${s.netMsu < 0 ? " fut-neg" : ""}`);
+    total.append(el7("b", "", fmt(s.netMsu)), el7("small", "", "MSU"));
     total.title = `${exact(s.netMsu)} MSU`;
-    const close = el6("button", "fut-fresh-close");
+    const close = el7("button", "fut-fresh-close");
     close.type = "button";
     close.title = t("fresh.close");
     close.setAttribute("aria-label", t("fresh.close"));
@@ -8908,25 +9303,25 @@ td.spark-cell { width: 90px; }
     close.addEventListener("click", () => panel.remove());
     head.append(total, close);
     panel.append(timer2, head);
-    const res = el6("div", "fut-fresh-res");
+    const res = el7("div", "fut-fresh-res");
     for (const [key, c] of [["metal", "m"], ["crystal", "c"], ["deuterium", "d"], ["darkMatter", "dm"]]) {
       const v = s.res[key];
-      const tile2 = el6("div", `fut-fresh-tile fut-r-${c}${v ? "" : " zero"}`);
+      const tile2 = el7("div", `fut-fresh-tile fut-r-${c}${v ? "" : " zero"}`);
       tile2.title = `${t(`msg.res.${key}`)}: ${exact(v)}`;
-      const name = el6("span", "fut-fresh-name", t(`msg.res.${key}`));
+      const name = el7("span", "fut-fresh-name", t(`msg.res.${key}`));
       name.insertAdjacentHTML("afterbegin", resIconSvg(key, 13));
-      tile2.append(name, el6("b", "", v ? fmt(v) : "0"));
+      tile2.append(name, el7("b", "", v ? fmt(v) : "0"));
       res.append(tile2);
     }
     panel.append(res);
     const found = Object.entries(s.shipsFound);
     const lost = Object.entries(s.lost);
     if (found.length || lost.length) {
-      const list = el6("div", "fut-fresh-ships");
+      const list = el7("div", "fut-fresh-ships");
       for (const [units, isLost] of [[found, false], [lost, true]]) {
         for (const [id, n] of [...units].sort((a, b) => Number(a[0]) - Number(b[0]))) {
           const name = shipName(Number(id), ships, t);
-          const tile2 = el6("span", `fut-fresh-ship${isLost ? " fut-neg" : ""}`, `${isLost ? "\u2212" : "+"}${n.toLocaleString(locale)}`);
+          const tile2 = el7("span", `fut-fresh-ship${isLost ? " fut-neg" : ""}`, `${isLost ? "−" : "+"}${n.toLocaleString(locale)}`);
           tile2.prepend(shipIcon(doc, Number(id), name, "fut-msg-icon"));
           tile2.title = name;
           list.append(tile2);
@@ -8946,13 +9341,13 @@ td.spark-cell { width: 90px; }
   var FOREIGN_CHECK_MS = 4e3;
   var FOREIGN_NAME = /ogame-?tracker|ogt[-_]|ogk[-_]|ogi[-_]|ogl[-_]|oginfinity|ogame-?infinity/i;
   function foreignTool(msg) {
-    for (const el6 of Array.from(msg.querySelectorAll("*"))) {
-      const ours = el6.closest('[class*="fut-"]');
+    for (const el7 of Array.from(msg.querySelectorAll("*"))) {
+      const ours = el7.closest('[class*="fut-"]');
       if (ours && ours !== msg && msg.contains(ours)) continue;
-      if (el6.shadowRoot) return true;
-      if (Array.from(el6.attributes).some((a) => a.name.startsWith("data-v-"))) return true;
-      const cls = typeof el6.className === "string" ? el6.className : el6.getAttribute("class") ?? "";
-      if (FOREIGN_NAME.test(cls) || FOREIGN_NAME.test(el6.id)) return true;
+      if (el7.shadowRoot) return true;
+      if (Array.from(el7.attributes).some((a) => a.name.startsWith("data-v-"))) return true;
+      const cls = typeof el7.className === "string" ? el7.className : el7.getAttribute("class") ?? "";
+      if (FOREIGN_NAME.test(cls) || FOREIGN_NAME.test(el7.id)) return true;
     }
     return false;
   }
@@ -8998,7 +9393,7 @@ td.spark-cell { width: 90px; }
           const v = (r[key] ?? 0) * sign;
           if (!v) continue;
           any = true;
-          const s = h2(doc, "span", `fut-r fut-r-${c}${v < 0 ? " fut-neg" : ""}`, `${v < 0 ? "\u2212" : prefix}${fmt(Math.abs(v))}`);
+          const s = h2(doc, "span", `fut-r fut-r-${c}${v < 0 ? " fut-neg" : ""}`, `${v < 0 ? "−" : prefix}${fmt(Math.abs(v))}`);
           s.insertAdjacentHTML("afterbegin", resIconSvg(key, 15));
           s.title = `${t(`msg.res.${key}`)}: ${exact(v)}`;
           s.setAttribute("aria-label", s.title);
@@ -9011,7 +9406,7 @@ td.spark-cell { width: 90px; }
         for (const [id, n] of Object.entries(units).sort((a, b) => Number(a[0]) - Number(b[0]))) {
           if (!n) continue;
           const name = shipName(Number(id), o.ships, t);
-          const s = h2(doc, "span", `fut-u${mode === "lost" ? " fut-neg" : ""}`, `${mode === "found" ? "+" : mode === "lost" ? "\u2212" : ""}${n.toLocaleString(locale)}`);
+          const s = h2(doc, "span", `fut-u${mode === "lost" ? " fut-neg" : ""}`, `${mode === "found" ? "+" : mode === "lost" ? "−" : ""}${n.toLocaleString(locale)}`);
           s.prepend(shipIcon(doc, Number(id), name, "fut-msg-icon"));
           s.title = name;
           body.append(s);
@@ -9033,11 +9428,11 @@ td.spark-cell { width: 90px; }
       value(msuValue, title = t("msg.msuHint")) {
         value.replaceChildren();
         if (!msuValue) {
-          value.append(h2(doc, "span", "fut-dash", "\u2014"));
+          value.append(h2(doc, "span", "fut-dash", "—"));
           return;
         }
-        value.append(h2(doc, "b", msuValue < 0 ? "fut-neg" : "", `${msuValue < 0 ? "\u2212" : ""}${fmt(Math.abs(msuValue))}`), h2(doc, "small", "", "MSU"));
-        value.title = `${exact(msuValue)} MSU \xB7 ${title}`;
+        value.append(h2(doc, "b", msuValue < 0 ? "fut-neg" : "", `${msuValue < 0 ? "−" : ""}${fmt(Math.abs(msuValue))}`), h2(doc, "small", "", "MSU"));
+        value.title = `${exact(msuValue)} MSU · ${title}`;
       },
       /** A small text button that opens an outside tool in a new tab (the player's click). */
       link(text, href, title) {
@@ -9071,9 +9466,9 @@ td.spark-cell { width: 90px; }
         const full = t(`msg.out.${m.result}`);
         const short = t(`msg.pill.${m.result}`);
         const name = short === `msg.pill.${m.result}` ? full : short;
-        const label = m.kind === "discovery" ? `${t("msg.discovery")} \xB7 ${name}` : name;
+        const label = m.kind === "discovery" ? `${t("msg.discovery")} · ${name}` : name;
         if (m.kind === "discovery" || !SELF_EVIDENT.has(m.result)) {
-          const p = line.pill(label, m.result, [m.kind === "discovery" ? t("msg.discovery") : "", full, sizeName].filter(Boolean).join(" \xB7 "));
+          const p = line.pill(label, m.result, [m.kind === "discovery" ? t("msg.discovery") : "", full, sizeName].filter(Boolean).join(" · "));
           const sayKey = `msg.say.${m.result}`;
           const say = m.item ?? (t(sayKey) === sayKey ? "" : t(sayKey));
           if (say) p.append(h2(doc, "span", "fut-say", say));
@@ -9121,7 +9516,7 @@ td.spark-cell { width: 90px; }
           };
           const route = h2(doc, "span", "fut-route");
           const arrow = icon(doc, "next", 12, "fut-arrow");
-          arrow.setAttribute("aria-label", "\u2192");
+          arrow.setAttribute("aria-label", "→");
           route.append(place2(m.from), arrow, place2(m.to));
           line.body.append(route);
         }
@@ -9197,8 +9592,8 @@ td.spark-cell { width: 90px; }
       quiet(msg);
       store.set(FOREIGN_KEY, now);
     }
-    const seen = store.get(FOREIGN_KEY, 0);
-    const silentNow = (msg) => style === "never" || style === "auto" && (seen > 0 && now - seen < FOREIGN_MS || foreignTool(msg));
+    const seen2 = store.get(FOREIGN_KEY, 0);
+    const silentNow = (msg) => style === "never" || style === "auto" && (seen2 > 0 && now - seen2 < FOREIGN_MS || foreignTool(msg));
     const sharedTab = !!doc.querySelector('[data-subtab-id="11"].active, [data-subtab-id="11"][aria-selected="true"]');
     const sharedAny = !!doc.querySelector(["11", "12", "13"].map((n) => `[data-subtab-id="${n}"].active, [data-subtab-id="${n}"][aria-selected="true"]`).join(", "));
     const expeditions = [];
@@ -9219,7 +9614,7 @@ td.spark-cell { width: 90px; }
       if (silent) msg.setAttribute("data-fut-quiet", "");
       const box = silent ? null : summaryFor(doc, parsed, { locale, t, ships, spy: o.spy, universe, sim });
       if (box) {
-        box.title = [box.dataset.size, t("msg.toggle")].filter(Boolean).join(" \xB7 ");
+        box.title = [box.dataset.size, t("msg.toggle")].filter(Boolean).join(" · ");
         box.tabIndex = 0;
         box.setAttribute("role", "button");
         const cell = () => msg.querySelector(":scope > .msgFilteredHeaderRow .msgFilteredHeaderCell");
@@ -9744,14 +10139,14 @@ td.spark-cell { width: 90px; }
     }
     return out;
   }
-  function planStatus(items, have, pending, now) {
+  function planStatus(items, have, pending2, now) {
     if (!have) return { state: "unknown", lack: null };
     const total = planTotal(items);
     const now0 = missing(total, have);
     if (!now0.metal && !now0.crystal && !now0.deuterium) return { state: "ready", lack: null };
-    const lack = missing(total, { metal: have.metal + pending.metal, crystal: have.crystal + pending.crystal, deuterium: have.deuterium + pending.deuterium });
+    const lack = missing(total, { metal: have.metal + pending2.metal, crystal: have.crystal + pending2.crystal, deuterium: have.deuterium + pending2.deuterium });
     if (lack.metal || lack.crystal || lack.deuterium) return { state: "missing", lack };
-    return { state: pending.arriveAt > now ? "arriving" : "arrived", lack: null };
+    return { state: pending2.arriveAt > now ? "arriving" : "arrived", lack: null };
   }
   function prunePending(list, plan, seenAtOf) {
     return list.filter((s) => (plan[String(s.target)]?.length ?? 0) > 0 && s.arriveAt > seenAtOf(s.target));
@@ -9760,7 +10155,7 @@ td.spark-cell { width: 90px; }
   function pruneByQueues(plan, queues) {
     let changed = false;
     const started = [];
-    for (const [body, items] of Object.entries(queues)) for (const q of items) if (q.level > 0 && q.name) started.push({ body, name: norm(q.name), level: q.level });
+    for (const [body, items] of Object.entries(queues)) for (const q2 of items) if (q2.level > 0 && q2.name) started.push({ body, name: norm(q2.name), level: q2.level });
     const next = {};
     for (const [key, list] of Object.entries(plan)) {
       const kept = list.filter((item) => {
@@ -9849,10 +10244,10 @@ td.spark-cell { width: 90px; }
   }
   function reservedFor(queued2, bodyId) {
     const out = { metal: 0, crystal: 0, deuterium: 0 };
-    for (const q of queued2[String(bodyId)] ?? []) {
-      out.metal += q.cost.metal;
-      out.crystal += q.cost.crystal;
-      out.deuterium += q.cost.deuterium;
+    for (const q2 of queued2[String(bodyId)] ?? []) {
+      out.metal += q2.cost.metal;
+      out.crystal += q2.cost.crystal;
+      out.deuterium += q2.cost.deuterium;
     }
     return out;
   }
@@ -9861,11 +10256,11 @@ td.spark-cell { width: 90px; }
   }
   function queuedLevel(queued2, bodyId, id) {
     const list = isResearch(id) ? Object.values(queued2).flat() : queued2[String(bodyId)] ?? [];
-    return list.reduce((top, q) => q.id === id ? Math.max(top, q.level) : top, 0);
+    return list.reduce((top, q2) => q2.id === id ? Math.max(top, q2.level) : top, 0);
   }
   function holdQueued(queued2, bodyId, item) {
     const key = String(bodyId);
-    const list = (queued2[key] ?? []).filter((q) => !(q.id === item.id && q.level === item.level));
+    const list = (queued2[key] ?? []).filter((q2) => !(q2.id === item.id && q2.level === item.level));
     return { ...queued2, [key]: [...list, item].sort((a, b) => a.queuedAt - b.queuedAt) };
   }
   function dropQueued(queued2, bodyId, index) {
@@ -9884,13 +10279,13 @@ td.spark-cell { width: 90px; }
       return lists.flat().filter((r) => r.kind === kind && r.end > at);
     };
     for (const [key, list] of Object.entries(queued2)) {
-      const kept = list.filter((q) => {
-        const built = o.built && (o.built.bodyId === Number(key) || isResearch(q.id)) ? o.built.levels[q.id] : void 0;
-        if (built !== void 0 && built >= q.level) return changed = true, false;
+      const kept = list.filter((q2) => {
+        const built = o.built && (o.built.bodyId === Number(key) || isResearch(q2.id)) ? o.built.levels[q2.id] : void 0;
+        if (built !== void 0 && built >= q2.level) return changed = true, false;
         const snap = o.queues;
-        if (!snap || snap.at <= q.queuedAt) return true;
-        const now = running(key, q.kind, snap.at);
-        if (!now.length || now.some((r) => norm(r.name) === norm(q.name) && r.level >= q.level)) return changed = true, false;
+        if (!snap || snap.at <= q2.queuedAt) return true;
+        const now = running(key, q2.kind, snap.at);
+        if (!now.length || now.some((r) => norm(r.name) === norm(q2.name) && r.level >= q2.level)) return changed = true, false;
         return true;
       });
       if (kept.length) next[key] = kept;
@@ -10181,8 +10576,8 @@ td.spark-cell { width: 90px; }
   };
   var BUILT_IN = { it: IT };
   function techName(id, locale, learned = {}, t) {
-    const seen = learned[String(id)];
-    if (seen) return seen;
+    const seen2 = learned[String(id)];
+    if (seen2) return seen2;
     const local = BUILT_IN[locale]?.[id];
     if (local) return local;
     if (t && id >= 202 && id <= 219) {
@@ -10459,11 +10854,11 @@ td.spark-cell { width: 90px; }
   function hookSend(fd, onSent) {
     const original = fd.submitFleet2;
     if (!original || original.futHooked) return;
-    const win = pageWindow();
+    const win2 = pageWindow();
     let leaving = false;
     const wrapped = function(force) {
       if (leaving) return void 0;
-      const $ = win.$;
+      const $ = win2.$;
       if (!$) return original.call(fd, force);
       const post = $.post;
       $.post = function(url, params, cb) {
@@ -10495,7 +10890,7 @@ td.spark-cell { width: 90px; }
   // src/modules/fleet/style.ts
   var FLEET_CSS = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
-.fut-fbar, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fchips, .fut-fclear, .fut-fall, .fut-fcap, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
+.fut-fbar, .fut-fhelp, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fchips, .fut-fclear, .fut-fall, .fut-fcap, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
 /* The fleet bar speaks the inbox's language: Verdana 11px, tabular numbers, one set of tokens. */
 .fut-fbar, .fut-fmenu {
   ${PAGE_TOKENS} --line: var(--line-strong); --line-soft: #1D2531;
@@ -10538,6 +10933,13 @@ ${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
 .fut-fact .name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; font: 600 condensed 12px/1 var(--display); white-space: nowrap; color: inherit; }
 /* Zone labels: what a group of buttons is for, printed once at its head. */
 .fut-fzone { color: var(--label); font: 600 condensed 13px var(--display); white-space: nowrap; }
+/* «?» beside a zone's name: what the zone does (modules/guide). Quiet until pointed at. */
+.fut-fzone { display: inline-flex; align-items: center; gap: 2px; }
+.fut-fhelp { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 4px;
+  background: none; color: var(--dim); cursor: pointer; }
+.fut-fhelp:hover { color: var(--hi); background: var(--tile-hi); }
+.fut-fhelp:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+@media (pointer: coarse) { .fut-fhelp { width: 30px; height: 30px; margin: -5px 0; } }
 .fut-fzonebox { display: inline-flex; flex-direction: column; gap: 4px; }
 .fut-ftiles { display: inline-flex; gap: 4px; }
 .fut-fgroup .fut-fzone { margin-right: 4px; }
@@ -10667,7 +11069,7 @@ ${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
 .fut-fresin.deuterium .sym { color: var(--d); }
 .fut-fclear { width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--mute); }
 .fut-fclear:hover { border-color: var(--line-hover); color: var(--hi); }
-/* \xABTutto\xBB: every resource here in the three fields, beside the eraser. */
+/* «Tutto»: every resource here in the three fields, beside the eraser. */
 .fut-fall { height: 26px; padding: 0 10px; border: 1px solid var(--line); border-radius: 5px; background: var(--tile); color: var(--txt); font: 600 12px Verdana, Arial, sans-serif; cursor: pointer; }
 .fut-fall:hover { border-color: var(--line-hover); color: var(--hi); }
 /* Ships reserve on a ship tile (page 1): how many stay here, bottom left over the picture. */
@@ -10733,7 +11135,7 @@ ${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
 .fut-fmenu .fut-fbtn.on { border-color: var(--warn); color: var(--warn); }
 .fut-fmenu .fut-fbtn:disabled { background: none; color: var(--dim); opacity: 0.5; cursor: default; border-color: transparent; }
 .fut-fmenu .fut-fbtn.moon svg { color: var(--mute); }
-/* Collection menu: the two sends to the favourite on top, then "once towards\u2026". */
+/* Collection menu: the two sends to the favourite on top, then "once towards…". */
 .fut-fcollect { min-width: 280px; }
 .fut-fmhead, .fut-fmsub { grid-column: 1 / -1; margin: 4px 4px 2px; color: var(--mute); }
 .fut-fmhead { color: var(--hi); font-weight: 700; }
@@ -10836,17 +11238,21 @@ input[type="checkbox"] { accent-color: var(--accent); }
   // src/core/viewport.ts
   var ZOOMED_OUT = 0.95;
   var PHONE_TEXT = 1.15;
-  function placeOnViewport(el6, vv, fit) {
+  function placeOnViewport(el7, vv, fit) {
     const s = vv.scale || 1;
     if (fit === "bottom") {
-      Object.assign(el6.style, { left: `${vv.offsetLeft}px`, top: `${vv.offsetTop + vv.height}px`, width: `${vv.width * s}px`, transform: `scale(${1 / s}) translateY(-100%)` });
+      Object.assign(el7.style, { left: `${vv.offsetLeft}px`, top: `${vv.offsetTop + vv.height}px`, width: `${vv.width * s}px`, transform: `scale(${1 / s}) translateY(-100%)` });
+      return;
+    }
+    if (fit === "top") {
+      Object.assign(el7.style, { left: `${vv.offsetLeft}px`, top: `${vv.offsetTop}px`, width: `${vv.width * s}px`, transform: `scale(${1 / s})` });
       return;
     }
     if (s >= ZOOMED_OUT) {
-      for (const p of ["left", "top", "width", "height", "transform", "transformOrigin", "inset"]) el6.style[p] = "";
+      for (const p of ["left", "top", "width", "height", "transform", "transformOrigin", "inset"]) el7.style[p] = "";
       return;
     }
-    Object.assign(el6.style, {
+    Object.assign(el7.style, {
       inset: "auto",
       left: `${vv.offsetLeft}px`,
       top: `${vv.offsetTop}px`,
@@ -10856,21 +11262,22 @@ input[type="checkbox"] { accent-color: var(--accent); }
       transform: `scale(${PHONE_TEXT / s})`
     });
   }
-  function followViewport(doc, el6, fit) {
+  function followViewport(doc, el7, fit) {
     const vv = doc.defaultView?.visualViewport;
     if (!vv) {
-      if (fit === "bottom") Object.assign(el6.style, { top: "auto", bottom: "0", width: "100%" });
+      if (fit === "bottom") Object.assign(el7.style, { top: "auto", bottom: "0", width: "100%" });
+      if (fit === "top") Object.assign(el7.style, { top: "0", bottom: "auto", width: "100%" });
       return;
     }
     const place2 = () => {
-      if (!el6.isConnected) {
+      if (!el7.isConnected) {
         vv.removeEventListener("resize", place2);
         vv.removeEventListener("scroll", place2);
         return;
       }
-      placeOnViewport(el6, vv, fit);
+      placeOnViewport(el7, vv, fit);
     };
-    placeOnViewport(el6, vv, fit);
+    placeOnViewport(el7, vv, fit);
     vv.addEventListener("resize", place2);
     vv.addEventListener("scroll", place2);
   }
@@ -10885,6 +11292,260 @@ input[type="checkbox"] { accent-color: var(--accent); }
       if (r.left < s.left) strip.scrollLeft -= (s.left - r.left) / k + 16;
       else if (r.right > s.right) strip.scrollLeft += (r.right - s.right) / k + 16;
     }
+  }
+
+  // src/core/tour.ts
+  var TOUR_ID = "fut-tour";
+  var Z = 1000010;
+  var PAD = 6;
+  var GAP = 14;
+  var CARD_CSS = `
+:host { all: initial; ${WINDOW_TOKENS} }
+* { box-sizing: border-box; }
+.card {
+  position: fixed; padding: 14px 16px 12px; border-radius: 6px; background: var(--raised);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  font: 13px/1.45 var(--body); color: var(--text-2); text-align: left;
+  -webkit-text-size-adjust: 100%; text-size-adjust: 100%; -moz-text-size-adjust: none;
+  animation: fut-card-in 180ms var(--ease-out);
+}
+/* Phone, page zoomed out: a strip along the screen edge, at the phone's own size (core/viewport). */
+.card.docked { max-width: none; border-radius: 0; transform-origin: 0 0; animation: none; }
+@keyframes fut-card-in { from { opacity: 0; transform: translateY(4px); } }
+h3 { margin: 0; font: 600 16px/1.25 var(--display); color: var(--text); }
+p { margin: 6px 0 0; }
+.acts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.b { height: 30px; padding: 0 14px; border: 0; border-radius: 4px; font: 600 13px var(--display); cursor: pointer; transition: transform 140ms var(--ease-out); }
+.ghost { background: none; box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--text-2); }
+.ghost:hover { box-shadow: inset 0 0 0 1px var(--line-hover); color: var(--text); }
+.quiet { margin-right: auto; padding: 0 4px; background: none; color: var(--muted); font-weight: 400; }
+.quiet:hover { color: var(--text); }
+.primary { background: var(--accent); color: var(--on-accent); }
+.primary:hover { background: var(--accent-hi); }
+.b:active { transform: scale(0.97); }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (pointer: coarse) { .b { height: 40px; padding: 0 16px; } }
+@media (prefers-reduced-motion: reduce) { .card { animation: none; } .b:active { transform: none; } }
+`;
+  var CSS4 = `${CARD_CSS}
+.veil { position: fixed; z-index: ${Z}; background: rgba(4, 6, 10, 0.72); }
+.shield { position: fixed; z-index: ${Z}; }
+/* The lit control: a pawn-yellow ring printed around it, nothing over it. */
+.ring { position: fixed; z-index: ${Z + 1}; border-radius: 6px; box-shadow: 0 0 0 2px var(--accent); pointer-events: none; }
+/* From one control to the next: moving on screen, so it eases in and out. */
+.veil, .shield, .ring { --move: 220ms cubic-bezier(0.65, 0, 0.35, 1); transition: left var(--move), top var(--move), width var(--move), height var(--move); }
+.card { z-index: ${Z + 2}; width: 340px; max-width: calc(100vw - 24px); }
+.card.docked.at-bottom { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+.arrow { position: absolute; width: 12px; height: 12px; background: var(--raised); transform: rotate(45deg); }
+.card[data-side="below"] .arrow { top: -6px; }
+.card[data-side="above"] .arrow { bottom: -6px; }
+.card[data-side="right"] .arrow { left: -6px; }
+.card[data-side="left"] .arrow { right: -6px; }
+.card.docked .arrow, .card[data-side="center"] .arrow { display: none; }
+.top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; min-height: 20px; }
+/* Progress as a track of cells, as on the board: done cells filled, the pawn on the current one. */
+.track { display: flex; gap: 2px; flex: 1; }
+.track i { flex: 1; max-width: 22px; height: 6px; background: var(--line-strong); }
+.track i.done { background: var(--faint); }
+.track i.on { background: var(--accent); }
+.count { font: 600 12px var(--display); color: var(--label); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.x { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; margin: -4px -6px -4px auto; padding: 0;
+  border: 0; border-radius: 4px; background: none; color: var(--muted); cursor: pointer; }
+.x:hover { color: var(--text); background: var(--band-2); }
+@media (pointer: coarse) { .x { width: 40px; height: 40px; } }
+@media (prefers-reduced-motion: reduce) { .veil, .shield, .ring { transition: none; } }
+`;
+  var el3 = (doc, tag, cls = "", text = "") => {
+    const n = doc.createElement(tag);
+    if (cls) n.className = cls;
+    if (text) n.textContent = text;
+    return n;
+  };
+  function shown2(node) {
+    if (!node || !node.isConnected || node.closest("[hidden]")) return false;
+    return typeof node.checkVisibility === "function" ? node.checkVisibility() : true;
+  }
+  var ending = null;
+  var tourOpen = (doc) => !!doc.getElementById(TOUR_ID);
+  function endTour() {
+    ending?.();
+  }
+  var liveSteps = (doc, steps) => steps.filter((s) => !s.at || shown2(s.at(doc)));
+  function startTour(doc, steps, labels2, onEnd) {
+    endTour();
+    const live = liveSteps(doc, steps);
+    if (!live.length) {
+      onEnd?.(false);
+      return;
+    }
+    const win2 = doc.defaultView;
+    const host = el3(doc, "div");
+    host.id = TOUR_ID;
+    const root = host.attachShadow({ mode: "open" });
+    const style = el3(doc, "style");
+    style.textContent = CSS4;
+    const [v0, v1, v2, v3] = [0, 1, 2, 3].map(() => el3(doc, "div", "veil"));
+    const veils = [v0, v1, v2, v3];
+    const shield = el3(doc, "div", "shield");
+    const ring2 = el3(doc, "div", "ring");
+    const card = el3(doc, "div", "card");
+    card.setAttribute("role", "dialog");
+    card.setAttribute("aria-modal", "true");
+    card.setAttribute("aria-labelledby", "fut-tour-title");
+    root.append(style, ...veils, shield, ring2, card);
+    doc.body.append(host);
+    let i = 0;
+    let target = null;
+    let frame = 0;
+    const place2 = () => {
+      frame = 0;
+      if (!host.isConnected) return;
+      const vw = doc.documentElement.clientWidth || win2?.innerWidth || 1024;
+      const vh = win2?.innerHeight || 768;
+      const vv = win2?.visualViewport;
+      const zoomed = !!vv && vv.scale < ZOOMED_OUT;
+      const r = target?.getBoundingClientRect();
+      const box = (v, l, t, w, h8) => Object.assign(v.style, { left: `${l}px`, top: `${t}px`, width: `${Math.max(0, w)}px`, height: `${Math.max(0, h8)}px` });
+      if (!r) {
+        box(v0, 0, 0, vw, vh);
+        for (const v of [v1, v2, v3]) box(v, 0, 0, 0, 0);
+        ring2.style.display = shield.style.display = "none";
+      } else {
+        const x = r.left - PAD;
+        const y = r.top - PAD;
+        const w = r.width + PAD * 2;
+        const h8 = r.height + PAD * 2;
+        box(v0, 0, 0, vw, y);
+        box(v1, 0, y + h8, vw, vh - y - h8);
+        box(v2, 0, y, x, h8);
+        box(v3, x + w, y, vw - x - w, h8);
+        ring2.style.display = shield.style.display = "";
+        box(ring2, x, y, w, h8);
+        box(shield, x, y, w, h8);
+      }
+      card.removeAttribute("style");
+      if (zoomed && vv) {
+        const low = !!r && r.top + r.height / 2 > vv.offsetTop + vv.height / 2;
+        card.className = `card docked ${low ? "at-top" : "at-bottom"}`;
+        card.dataset.side = "docked";
+        placeOnViewport(card, vv, low ? "top" : "bottom");
+        return;
+      }
+      card.className = "card";
+      const cw = Math.min(340, vw - 24);
+      card.style.width = `${cw}px`;
+      const ch = card.offsetHeight || 180;
+      const arrow = card.querySelector(".arrow");
+      const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), Math.max(lo, hi));
+      if (!r) {
+        card.dataset.side = "center";
+        Object.assign(card.style, { left: `${(vw - cw) / 2}px`, top: `${Math.max(12, (vh - ch) / 2)}px` });
+        return;
+      }
+      const room = { below: vh - (r.bottom + PAD), above: r.top - PAD, right: vw - (r.right + PAD), left: r.left - PAD };
+      const side = room.below >= ch + GAP ? "below" : room.above >= ch + GAP ? "above" : room.right >= cw + GAP ? "right" : room.left >= cw + GAP ? "left" : room.below >= room.above ? "below" : "above";
+      card.dataset.side = side;
+      let left;
+      let top;
+      if (side === "below" || side === "above") {
+        left = clamp(r.left + r.width / 2 - cw / 2, 12, vw - cw - 12);
+        top = clamp(side === "below" ? r.bottom + PAD + GAP : r.top - PAD - GAP - ch, 8, vh - ch - 8);
+        if (arrow) arrow.style.left = `${clamp(r.left + r.width / 2 - left - 6, 12, cw - 24)}px`;
+      } else {
+        top = clamp(r.top + r.height / 2 - ch / 2, 12, vh - ch - 12);
+        left = side === "right" ? r.right + PAD + GAP : r.left - PAD - GAP - cw;
+        if (arrow) arrow.style.top = `${clamp(r.top + r.height / 2 - top - 6, 12, ch - 24)}px`;
+      }
+      Object.assign(card.style, { left: `${left}px`, top: `${top}px` });
+    };
+    const replace = () => {
+      if (frame) return;
+      if (win2?.requestAnimationFrame) frame = win2.requestAnimationFrame(place2);
+      else place2();
+    };
+    const finish2 = (done) => {
+      ending = null;
+      host.remove();
+      win2?.removeEventListener("keydown", onKey, true);
+      win2?.removeEventListener("scroll", replace, true);
+      win2?.removeEventListener("resize", replace);
+      win2?.visualViewport?.removeEventListener("resize", replace);
+      win2?.visualViewport?.removeEventListener("scroll", replace);
+      onEnd?.(done);
+    };
+    ending = () => finish2(false);
+    const button3 = (cls, text, onClick) => {
+      const b = el3(doc, "button", cls, text);
+      b.type = "button";
+      b.addEventListener("click", onClick);
+      return b;
+    };
+    const show2 = (n) => {
+      i = n;
+      const step = live[i];
+      target = step.at?.(doc) ?? null;
+      if (target && !shown2(target)) target = null;
+      if (target) {
+        const r = target.getBoundingClientRect();
+        const vv = win2?.visualViewport;
+        const topEdge = vv ? vv.offsetTop : 0;
+        const bottomEdge = vv ? vv.offsetTop + vv.height : win2?.innerHeight ?? 768;
+        if (r.top < topEdge || r.bottom > bottomEdge) target.scrollIntoView?.({ block: "center", inline: "nearest" });
+      }
+      const last2 = i === live.length - 1;
+      const top = el3(doc, "div", "top");
+      if (live.length > 1) {
+        const track = el3(doc, "span", "track");
+        track.setAttribute("aria-hidden", "true");
+        live.forEach((_, k) => track.append(el3(doc, "i", k < i ? "done" : k === i ? "on" : "")));
+        top.append(track, el3(doc, "span", "count", labels2.count(i + 1, live.length)));
+      }
+      const x = button3("x", "", () => finish2(false));
+      x.setAttribute("aria-label", labels2.close);
+      x.title = labels2.close;
+      x.append(icon(doc, "close", 16));
+      top.append(x);
+      const title = el3(doc, "h3", "", step.title);
+      title.id = "fut-tour-title";
+      if (live.length === 1) top.prepend(title);
+      const acts = el3(doc, "div", "acts");
+      if (i > 0) acts.append(button3("b ghost", labels2.back, () => show2(i - 1)));
+      const next = button3("b primary", last2 ? labels2.done : labels2.next, () => last2 ? finish2(true) : show2(i + 1));
+      acts.append(next);
+      card.replaceChildren(el3(doc, "i", "arrow"), top, ...live.length === 1 ? [] : [title], ...step.text.split("\n").map((p) => el3(doc, "p", "", p)), acts);
+      place2();
+      replace();
+      next.focus({ preventScroll: true });
+    };
+    const onKey = (e) => {
+      if (e.key === "Escape") finish2(false);
+      else if (e.key === "ArrowRight") {
+        if (i < live.length - 1) show2(i + 1);
+      } else if (e.key === "ArrowLeft") {
+        if (i > 0) show2(i - 1);
+      } else return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    };
+    win2?.addEventListener("keydown", onKey, true);
+    win2?.addEventListener("scroll", replace, true);
+    win2?.addEventListener("resize", replace);
+    win2?.visualViewport?.addEventListener("resize", replace);
+    win2?.visualViewport?.addEventListener("scroll", replace);
+    show2(0);
+  }
+  function helpButton(doc, label, onClick, cls = "close help") {
+    const b = el3(doc, "button", cls);
+    b.type = "button";
+    b.title = label;
+    b.setAttribute("aria-label", label);
+    b.append(icon(doc, "help", 16));
+    b.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onClick();
+    });
+    return b;
   }
 
   // src/modules/shortcuts/index.ts
@@ -10948,7 +11609,7 @@ input[type="checkbox"] { accent-color: var(--accent); }
     while (a?.shadowRoot?.activeElement) a = a.shadowRoot.activeElement;
     return isField(a);
   }
-  var WINDOWS = ["fut-fleet-modal", "fut-dashboard", "fut-planner", "fut-journal", "fut-settings-window"];
+  var WINDOWS = ["fut-tour", "fut-dashboard", "fut-planner", "fut-journal", "fut-settings-window"];
   function registerActions(doc, store, t, list) {
     for (const [id, run] of Object.entries(list)) runs.set(id, run);
     current = { doc, store, t };
@@ -10984,7 +11645,7 @@ input[type="checkbox"] { accent-color: var(--accent); }
   }
   function keyLabel(key) {
     if (!key) return "";
-    return { arrowleft: "\u2190", arrowright: "\u2192", arrowup: "\u2191", arrowdown: "\u2193", enter: "\u21B5" }[key.toLowerCase()] ?? key.toUpperCase();
+    return { arrowleft: "←", arrowright: "→", arrowup: "↑", arrowdown: "↓", enter: "↵" }[key.toLowerCase()] ?? key.toUpperCase();
   }
   function glyph(doc, def, size = 18) {
     if ("fleet" in def.glyph) {
@@ -11200,7 +11861,7 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
   var pageState = /* @__PURE__ */ new WeakMap();
   var REPEATABLE = ["moon", "collect", "collectDeploy", "expedition", "fleetsave", "plan"];
   var SKIPPABLE = ["moon", "collect", "collectDeploy", "expedition"];
-  function el3(doc, tag, className = "", text) {
+  function el4(doc, tag, className = "", text) {
     const node = doc.createElement(tag);
     if (className) node.className = className;
     if (text !== void 0) node.textContent = text;
@@ -11232,7 +11893,7 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
     return settingsFrom(store.get(SETTINGS_KEY, {}));
   }
   function button(doc, text, onClick, cls = "", title = "") {
-    const b = el3(doc, "button", `fut-fbtn ${cls}`.trim(), text);
+    const b = el4(doc, "button", `fut-fbtn ${cls}`.trim(), text);
     b.type = "button";
     if (title) b.title = title;
     b.addEventListener("click", (e) => {
@@ -11248,9 +11909,9 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
     input.addEventListener("keypress", (e) => e.stopPropagation());
   }
   function numberField(doc, label, value, placeholder = "", locale) {
-    const wrap = el3(doc, "label", "fut-ffield");
-    wrap.append(el3(doc, "span", "", label));
-    const input = el3(doc, "input");
+    const wrap = el4(doc, "label", "fut-ffield");
+    wrap.append(el4(doc, "span", "", label));
+    const input = el4(doc, "input");
     input.type = "text";
     input.inputMode = "numeric";
     input.placeholder = placeholder;
@@ -11261,11 +11922,11 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
     return [wrap, input];
   }
   function selectField(doc, label, options, value) {
-    const wrap = el3(doc, "label", "fut-ffield");
-    wrap.append(el3(doc, "span", "", label));
-    const sel = el3(doc, "select");
+    const wrap = el4(doc, "label", "fut-ffield");
+    wrap.append(el4(doc, "span", "", label));
+    const sel = el4(doc, "select");
     for (const [v, text] of options) {
-      const opt = el3(doc, "option", "", text);
+      const opt = el4(doc, "option", "", text);
       opt.value = v;
       opt.selected = v === value;
       sel.append(opt);
@@ -11275,11 +11936,11 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
     return [wrap, sel];
   }
   function checkField(doc, label, checked) {
-    const wrap = el3(doc, "label", "fut-fcheck");
-    const input = el3(doc, "input");
+    const wrap = el4(doc, "label", "fut-fcheck");
+    const input = el4(doc, "input");
     input.type = "checkbox";
     input.checked = checked;
-    wrap.append(input, el3(doc, "span", "", label));
+    wrap.append(input, el4(doc, "span", "", label));
     return [wrap, input];
   }
   function bodyTarget(bodies, id) {
@@ -11303,10 +11964,10 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
   function bodyLabel(o, id) {
     const b = o.bodies.find((x) => x.planetId === id || x.moonId === id);
     if (!b) return String(id);
-    return `${b.name} [${b.coords}]${b.moonId === id ? ` \xB7 ${o.t("fleet.typeMoon")}` : ""}`;
+    return `${b.name} [${b.coords}]${b.moonId === id ? ` · ${o.t("fleet.typeMoon")}` : ""}`;
   }
   function shipFields(o, ships) {
-    const grid2 = el3(o.doc, "div", "fut-fgrid");
+    const grid2 = el4(o.doc, "div", "fut-fgrid");
     const inputs = [];
     const onPage = readShipSlots(o.doc);
     const info = o.store.get(SHIPS_INFO_KEY, {});
@@ -11317,7 +11978,7 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
       grid2.append(wrap);
       inputs.push([slot.id, input]);
     }
-    if (!inputs.length) grid2.append(el3(o.doc, "span", "fut-fnote", o.t("fleet.noShips")));
+    if (!inputs.length) grid2.append(el4(o.doc, "span", "fut-fnote", o.t("fleet.noShips")));
     return {
       el: grid2,
       read: () => {
@@ -11331,7 +11992,7 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
     };
   }
   function resourceFields(o, res) {
-    const grid2 = el3(o.doc, "div", "fut-fgrid");
+    const grid2 = el4(o.doc, "div", "fut-fgrid");
     const inputs = ["metal", "crystal", "deuterium"].map((k) => {
       const [wrap, input] = numberField(o.doc, o.t(`res.${k}`), res[k] || null, "0", o.locale);
       grid2.append(wrap);
@@ -11348,7 +12009,7 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
   }
   function shortName(o, id) {
     const b = o.bodies.find((x) => x.planetId === id || x.moonId === id);
-    return b ? `${b.name}${b.moonId === id ? " \u263E" : ""}` : String(id);
+    return b ? `${b.name}${b.moonId === id ? " ☾" : ""}` : String(id);
   }
   var SWITCH = { ships: "shipsOn", resources: "resourcesOn", gate: "gateOn" };
   function ruleBadge(o, section2) {
@@ -11356,7 +12017,7 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
     const profiles = loadProfiles(o.store);
     const settings = loadSettings(o.store);
     const key = SWITCH[section2];
-    const badge = el3(doc, "span", "fut-fbadge");
+    const badge = el4(doc, "span", "fut-fbadge");
     if (sectionEmpty(profileFor(profiles, o.bodyId), section2)) {
       badge.classList.add("empty");
       badge.textContent = t("fleet.rule.empty");
@@ -11368,29 +12029,29 @@ ${toneRules((k) => `#${TOUCH_ID} button[data-tone="${k}"]`)}
     const same = sameSection(profiles, o.bodyId, ids, section2);
     const names = same.map((id) => shortName(o, id));
     const where = same.length ? t("fleet.rule.alsoOn", { list: names.slice(0, 3).join(", ") + (names.length > 3 ? ` +${names.length - 3}` : "") }) : t("fleet.rule.onlyHere");
-    badge.textContent = `${on ? t("fleet.rule.on") : t("fleet.rule.off")} \xB7 ${where}`;
+    badge.textContent = `${on ? t("fleet.rule.on") : t("fleet.rule.off")} · ${where}`;
     badge.title = same.length ? `${t("fleet.rule.sameTitle")}
 ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     return badge;
   }
   function ruleBox(o, section2, title, hint, fields, onSwitch) {
     const { doc, t } = o;
-    const box = el3(doc, "details", "fut-freserve");
+    const box = el4(doc, "details", "fut-freserve");
     box.open = !sectionEmpty(profileFor(loadProfiles(o.store), o.bodyId), section2);
-    const head = el3(doc, "summary", "fut-frulehead");
-    const mark = el3(doc, "span", "fut-fruleico");
+    const head = el4(doc, "summary", "fut-frulehead");
+    const mark = el4(doc, "span", "fut-fruleico");
     mark.innerHTML = iconSvg(section2, 18);
-    head.append(iconEl(doc), mark, el3(doc, "h5", "", title), ruleBadge(o, section2));
+    head.append(iconEl(doc), mark, el4(doc, "h5", "", title), ruleBadge(o, section2));
     const key = SWITCH[section2];
     if (key) {
-      const wrap = el3(doc, "label", "fut-fswitch");
+      const wrap = el4(doc, "label", "fut-fswitch");
       wrap.title = t("fleet.rule.switchHint");
-      const input = el3(doc, "input");
+      const input = el4(doc, "input");
       input.type = "checkbox";
       input.setAttribute("role", "switch");
       input.setAttribute("aria-label", `${title}: ${t("fleet.rule.switch")}`);
       input.checked = loadSettings(o.store)[key];
-      wrap.append(input, el3(doc, "i", "sw-track"));
+      wrap.append(input, el4(doc, "i", "sw-track"));
       input.addEventListener("change", () => {
         o.store.set(SETTINGS_KEY, { ...loadSettings(o.store), [key]: input.checked });
         head.querySelector(".fut-fbadge")?.replaceWith(ruleBadge(o, section2));
@@ -11398,13 +12059,13 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       });
       head.append(wrap);
     }
-    const inner = el3(doc, "div", "fut-frulebody");
-    inner.append(el3(doc, "p", "fut-fnote", hint), ...fields);
+    const inner = el4(doc, "div", "fut-frulebody");
+    inner.append(el4(doc, "p", "fut-fnote", hint), ...fields);
     box.append(head, inner);
     return box;
   }
   function iconEl(doc) {
-    const span = el3(doc, "span", "fold");
+    const span = el4(doc, "span", "fold");
     span.innerHTML = iconSvg("caret", 14);
     return span;
   }
@@ -11415,7 +12076,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const { doc, t } = o;
     const profile = profileFor(loadProfiles(o.store), o.bodyId);
     const moon = isMoon(o.bodies, o.bodyId);
-    const panel = el3(doc, "div", "fut-feditor");
+    const panel = el4(doc, "div", "fut-feditor");
     const refresh = () => onSaved("");
     const ships = shipFields(o, profile.reserve.ships);
     panel.append(ruleBox(o, "ships", t("fleet.rule.ships"), t("fleet.rule.shipsHint"), [ships.el], refresh));
@@ -11423,7 +12084,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     panel.append(ruleBox(o, "resources", t("fleet.rule.resources"), t("fleet.rule.resourcesHint"), [res.el], refresh));
     const gate = moon ? shipFields(o, profile.gate) : null;
     if (gate) panel.append(ruleBox(o, "gate", t("fleet.rule.gate"), t("fleet.rule.gateHint"), [gate.el], refresh));
-    const saveGrid = el3(doc, "div", "fut-fgrid wide");
+    const saveGrid = el4(doc, "div", "fut-fgrid wide");
     const own = o.bodies.find((b) => b.planetId === o.bodyId || b.moonId === o.bodyId)?.coords.split(":").map(Number);
     const origin = own && own.length === 3 ? { galaxy: own[0], system: own[1] } : originCoords(doc);
     const [gWrap, gIn] = numberField(doc, t("fleet.galaxy"), profile.save?.galaxy ?? null, origin ? String(origin.galaxy) : "");
@@ -11448,9 +12109,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     panel.append(
       ruleBox(o, "fleetsave", t("fleet.fleetsave"), t("fleet.fleetsaveHint"), [
         saveGrid,
-        el3(doc, "h6", "", t("fleet.rule.saveShips")),
+        el4(doc, "h6", "", t("fleet.rule.saveShips")),
         saveShips.el,
-        el3(doc, "h6", "", t("fleet.rule.saveResources")),
+        el4(doc, "h6", "", t("fleet.rule.saveResources")),
         saveRes.el
       ], refresh)
     );
@@ -11488,7 +12149,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       onSaved("");
       statusOf(panel)?.replaceChildren(doc.createTextNode(t("fleet.saved")));
     });
-    const actions = el3(doc, "div", "fut-factions");
+    const actions = el4(doc, "div", "fut-factions");
     actions.append(
       button(doc, t("fleet.copyTo"), () => {
         copyBox.hidden = !copyBox.hidden;
@@ -11499,17 +12160,17 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   }
   function copyPanel(o, moon, onCopy) {
     const { doc, t } = o;
-    const box = el3(doc, "div", "fut-freserve fut-fcopy");
-    box.append(el3(doc, "h5", "", t("fleet.copyTitle")), el3(doc, "p", "fut-fnote", t("fleet.copyHint")));
-    const secRow = el3(doc, "div", "fut-fchecks");
+    const box = el4(doc, "div", "fut-freserve fut-fcopy");
+    box.append(el4(doc, "h5", "", t("fleet.copyTitle")), el4(doc, "p", "fut-fnote", t("fleet.copyHint")));
+    const secRow = el4(doc, "div", "fut-fchecks");
     const sections = RESERVE_SECTIONS.filter((s) => s !== "gate" || moon).map((s) => {
       const [wrap, input] = checkField(doc, t(s === "fleetsave" ? "fleet.fleetsave" : `fleet.rule.${s}`), true);
       secRow.append(wrap);
       return [s, input];
     });
-    box.append(el3(doc, "h6", "", t("fleet.copyWhat")), secRow);
-    const planetRow = el3(doc, "div", "fut-fchecks");
-    const moonRow = el3(doc, "div", "fut-fchecks");
+    box.append(el4(doc, "h6", "", t("fleet.copyWhat")), secRow);
+    const planetRow = el4(doc, "div", "fut-fchecks");
+    const moonRow = el4(doc, "div", "fut-fchecks");
     const targets = [];
     for (const b of o.bodies) {
       for (const [id, isMoonId] of [[b.planetId, false], [b.moonId, true]]) {
@@ -11519,21 +12180,21 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         targets.push([id, isMoonId, input]);
       }
     }
-    const bodyRow = el3(doc, "div", "fut-fcopywhere");
-    if (planetRow.childElementCount) bodyRow.append(el3(doc, "h6", "", o.t("dash.planets")), planetRow);
-    if (moonRow.childElementCount) bodyRow.append(el3(doc, "h6", "", o.t("dash.moons")), moonRow);
+    const bodyRow = el4(doc, "div", "fut-fcopywhere");
+    if (planetRow.childElementCount) bodyRow.append(el4(doc, "h6", "", o.t("dash.planets")), planetRow);
+    if (moonRow.childElementCount) bodyRow.append(el4(doc, "h6", "", o.t("dash.moons")), moonRow);
     const pick = (which) => {
       for (const [, isMoonId, input] of targets) input.checked = which === "moons" ? isMoonId : which === "planets" ? !isMoonId : false;
     };
-    const quick = el3(doc, "div", "fut-factions");
+    const quick = el4(doc, "div", "fut-factions");
     quick.append(
       button(doc, t("fleet.pickPlanets"), () => pick("planets")),
       button(doc, t("fleet.pickMoons"), () => pick("moons")),
       button(doc, t("fleet.pickNone"), () => pick("none"))
     );
-    box.append(el3(doc, "h6", "", t("fleet.copyWhere")), quick, bodyRow);
-    const status = el3(doc, "span", "fut-fnote");
-    const go = el3(doc, "div", "fut-factions");
+    box.append(el4(doc, "h6", "", t("fleet.copyWhere")), quick, bodyRow);
+    const status = el4(doc, "span", "fut-fnote");
+    const go = el4(doc, "div", "fut-factions");
     go.append(
       button(doc, t("fleet.copyGo"), () => {
         const chosen = sections.filter(([, i]) => i.checked).map(([s]) => s);
@@ -11560,25 +12221,25 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   }
   function bodyRulesPanel(r) {
     const { doc, t } = r;
-    const root = el3(doc, "div", "fut-frules-panel");
+    const root = el4(doc, "div", "fut-frules-panel");
     const opts = (id) => ({ doc, store: r.store, bodyId: id, bodies: r.bodies, t, locale: r.locale });
     const ids = r.bodies.flatMap((b) => [b.planetId, b.moonId]).filter((x) => x !== null);
-    const status = el3(doc, "span", "fut-fsaved");
+    const status = el4(doc, "span", "fut-fsaved");
     status.setAttribute("role", "status");
     const moonIds = ids.filter((id) => isMoon(r.bodies, id));
     let scope = r.bodyId && moonIds.includes(r.bodyId) ? "moon" : "planet";
     const showList = () => {
       const profiles = loadProfiles(r.store);
       if (!moonIds.length) scope = "planet";
-      const shown2 = ids.filter((id) => moonIds.includes(id) === (scope === "moon"));
-      const switcher = el3(doc, "span", "control fut-fscope");
+      const shown3 = ids.filter((id) => moonIds.includes(id) === (scope === "moon"));
+      const switcher = el4(doc, "span", "control fut-fscope");
       switcher.setAttribute("role", "group");
       for (const [key, label, count2] of [["planet", t("dash.planets"), ids.length - moonIds.length], ["moon", t("dash.moons"), moonIds.length]]) {
-        const b = el3(doc, "button", "seg");
+        const b = el4(doc, "button", "seg");
         b.type = "button";
         b.disabled = !count2;
         b.setAttribute("aria-pressed", String(scope === key));
-        b.append(icon(doc, key, 14), el3(doc, "span", "", label), el3(doc, "i", "", String(count2)));
+        b.append(icon(doc, key, 14), el4(doc, "span", "", label), el4(doc, "i", "", String(count2)));
         b.addEventListener("click", () => {
           if (scope === key) return;
           scope = key;
@@ -11587,24 +12248,24 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         switcher.append(b);
       }
       const sections = ["ships", "resources", "gate", "fleetsave"].filter((sec) => sec !== "gate" || scope === "moon");
-      const table = el3(doc, "div", `fut-fbodies ${scope === "moon" ? "moons" : "planets"}`);
+      const table = el4(doc, "div", `fut-fbodies ${scope === "moon" ? "moons" : "planets"}`);
       table.setAttribute("role", "list");
-      const head = el3(doc, "div", "fut-fbrow head");
+      const head = el4(doc, "div", "fut-fbrow head");
       head.setAttribute("aria-hidden", "true");
-      head.append(el3(doc, "span", "", ""), ...sections.map((sec) => el3(doc, "span", "", t(sec === "fleetsave" ? "fleet.fleetsave" : `fleet.rule.${sec}`))));
+      head.append(el4(doc, "span", "", ""), ...sections.map((sec) => el4(doc, "span", "", t(sec === "fleetsave" ? "fleet.fleetsave" : `fleet.rule.${sec}`))));
       table.append(head);
-      for (const id of shown2) {
+      for (const id of shown3) {
         const o = opts(id);
         const moon = isMoon(r.bodies, id);
         const p = profileFor(profiles, id);
-        const row = el3(doc, "button", "fut-fbrow");
+        const row = el4(doc, "button", "fut-fbrow");
         row.type = "button";
         row.setAttribute("role", "listitem");
-        const name = el3(doc, "span", "nm");
-        name.append(el3(doc, "b", "", shortLabel(o, id)), el3(doc, "small", "", r.bodies.find((b) => b.planetId === id || b.moonId === id)?.coords ?? ""));
+        const name = el4(doc, "span", "nm");
+        name.append(el4(doc, "b", "", shortLabel(o, id)), el4(doc, "small", "", r.bodies.find((b) => b.planetId === id || b.moonId === id)?.coords ?? ""));
         const cell = (section2, text) => {
           const empty = sectionEmpty(p, section2);
-          const c = el3(doc, "span", empty ? "unset" : "set", empty ? t("fleet.rule.unset") : text());
+          const c = el4(doc, "span", empty ? "unset" : "set", empty ? t("fleet.rule.unset") : text());
           c.dataset.l = t(section2 === "fleetsave" ? "fleet.fleetsave" : `fleet.rule.${section2}`);
           return c;
         };
@@ -11624,20 +12285,20 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         row.addEventListener("click", () => showBody(id));
         table.append(row);
       }
-      const top = el3(doc, "div", "fut-fbtop");
+      const top = el4(doc, "div", "fut-fbtop");
       top.append(switcher);
-      root.replaceChildren(el3(doc, "p", "fut-fnote", t("fleet.bodiesHint")), top, table);
+      root.replaceChildren(el4(doc, "p", "fut-fnote", t("fleet.bodiesHint")), top, table);
     };
     const showBody = (id) => {
       const o = opts(id);
-      const back = el3(doc, "button", "fut-fbtn fut-fback", `\u2190 ${t("fleet.bodiesAll")}`);
+      const back = el4(doc, "button", "fut-fbtn fut-fback", `← ${t("fleet.bodiesAll")}`);
       back.type = "button";
       back.addEventListener("click", () => {
         status.textContent = "";
         showList();
       });
-      const title = el3(doc, "h4", "", t(isMoon(r.bodies, id) ? "fleet.editTitleMoon" : "fleet.editTitlePlanet", { body: bodyLabel(o, id) }));
-      const top = el3(doc, "div", "fut-fbtop");
+      const title = el4(doc, "h4", "", t(isMoon(r.bodies, id) ? "fleet.editTitleMoon" : "fleet.editTitlePlanet", { body: bodyLabel(o, id) }));
+      const top = el4(doc, "div", "fut-fbtop");
       top.append(back, status);
       const saved = (msg) => {
         r.onChange?.();
@@ -11656,13 +12317,13 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     if (!id) return o.t("fleet.pickDest");
     const b = o.bodies.find((x) => x.planetId === id || x.moonId === id);
     if (!b) return o.t("fleet.pickDest");
-    return `${b.name}${b.moonId === id ? " \u263E" : ""}`;
+    return `${b.name}${b.moonId === id ? " ☾" : ""}`;
   }
   function readout(doc, text) {
-    const box = el3(doc, "span", "fut-fread");
-    const tip = el3(doc, "span", "tip");
+    const box = el4(doc, "span", "fut-fread");
+    const tip = el4(doc, "span", "tip");
     tip.setAttribute("aria-hidden", "true");
-    const info = el3(doc, "span", "fut-finfo", text);
+    const info = el4(doc, "span", "fut-finfo", text);
     info.setAttribute("role", "status");
     box.append(tip, info);
     const clear = () => tip.replaceChildren();
@@ -11674,7 +12335,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         info.classList.toggle("err", err);
       },
       peek(node, name, detail) {
-        const show2 = () => tip.replaceChildren(el3(doc, "b", "", name), doc.createTextNode(detail ? ` ${detail}` : ""));
+        const show2 = () => tip.replaceChildren(el4(doc, "b", "", name), doc.createTextNode(detail ? ` ${detail}` : ""));
         node.addEventListener("mouseenter", show2);
         node.addEventListener("focus", show2);
         node.addEventListener("mouseleave", clear);
@@ -11683,20 +12344,20 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     };
   }
   function tile(doc, icon2, label, onClick, cls = "", key = "", name = "") {
-    const b = el3(doc, "button", `fut-fact ${cls}`.trim());
+    const b = el4(doc, "button", `fut-fact ${cls}`.trim());
     b.type = "button";
     b.title = key ? `${label} [${keyLabel(key)}]` : label;
     b.setAttribute("aria-label", label);
-    const ico = el3(doc, "span", "ico");
+    const ico = el4(doc, "span", "ico");
     ico.innerHTML = iconSvg(icon2, 20);
     b.append(ico);
     if (name) {
-      const n = el3(doc, "span", "name", name);
+      const n = el4(doc, "span", "name", name);
       n.setAttribute("aria-hidden", "true");
       b.append(n);
     }
     if (key) {
-      const cap = el3(doc, "kbd", "", keyLabel(key));
+      const cap = el4(doc, "kbd", "", keyLabel(key));
       cap.setAttribute("aria-hidden", "true");
       b.append(cap);
     }
@@ -11707,15 +12368,15 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     return b;
   }
   function ruleSwitch(doc, icon2, label, on, onClick, value) {
-    const b = el3(doc, "button", "fut-fchip");
+    const b = el4(doc, "button", "fut-fchip");
     b.type = "button";
     b.setAttribute("role", "switch");
     b.setAttribute("aria-checked", String(on));
-    const ico = el3(doc, "span", "ico");
+    const ico = el4(doc, "span", "ico");
     ico.innerHTML = iconSvg(icon2, 14);
-    b.append(el3(doc, "i", "pip"), ico, el3(doc, "b", "", label));
+    b.append(el4(doc, "i", "pip"), ico, el4(doc, "b", "", label));
     if (value !== void 0) {
-      const v = el3(doc, "span", "val");
+      const v = el4(doc, "span", "val");
       v.append(value);
       b.append(v);
     }
@@ -11731,7 +12392,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     for (const slot of readShipSlots(doc)) {
       const tile2 = slot.input.closest("li");
       if (!tile2 || !slot.available || tile2.querySelector(".fut-finv")) continue;
-      const b = el3(doc, "button", "fut-finv");
+      const b = el4(doc, "button", "fut-finv");
       b.type = "button";
       b.title = t("fleet.invert");
       b.setAttribute("aria-label", `${t("fleet.invert")}: ${slot.name}`);
@@ -11774,7 +12435,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       tile2.querySelector(".fut-fkeep")?.remove();
       const n = keep[slot.id] ?? 0;
       if (n <= 0) continue;
-      const b = el3(doc, "span", "fut-fkeep", `\u2212${formatUnits(n, o.locale)}`);
+      const b = el4(doc, "span", "fut-fkeep", `−${formatUnits(n, o.locale)}`);
       b.title = t("fleet.keepShips", { n: n.toLocaleString(o.locale) });
       tile2.append(b);
     }
@@ -11786,7 +12447,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       if (!input) continue;
       input.parentElement?.querySelector(".fut-fkeepres")?.remove();
       if (keep[k] <= 0) continue;
-      const b = el3(doc, "span", "fut-fkeepres", t("fleet.keepRes", { n: formatUnits(keep[k], o.locale) }));
+      const b = el4(doc, "span", "fut-fkeepres", t("fleet.keepRes", { n: formatUnits(keep[k], o.locale) }));
       b.title = t("fleet.keepResHint", { n: keep[k].toLocaleString(o.locale) });
       input.after(b);
     }
@@ -11803,9 +12464,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const room = fd ? selectedCargo(doc, (id) => shipCapacity(fd, id)) : 0;
       out.replaceChildren();
       if (room > 0) {
-        const ico = el3(doc, "span", "ico");
+        const ico = el4(doc, "span", "ico");
         ico.innerHTML = iconSvg("cargo", 14);
-        out.append(ico, el3(doc, "span", "", t("fleet.cargoPicked", { n: formatUnits(room, o.locale) })));
+        out.append(ico, el4(doc, "span", "", t("fleet.cargoPicked", { n: formatUnits(room, o.locale) })));
       }
       out.title = room > 0 ? t("fleet.cargoPickedHint", { n: room.toLocaleString(o.locale) }) : "";
     };
@@ -11813,10 +12474,10 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const list = doc.querySelector("#fleet1 #technologies");
     if (!list || list.dataset.futCap) return;
     list.dataset.futCap = "1";
-    const later = () => (doc.defaultView ?? globalThis).setTimeout(draw, 0);
-    for (const type of ["input", "keyup", "change", "click"]) list.addEventListener(type, later);
+    const later2 = () => (doc.defaultView ?? globalThis).setTimeout(draw, 0);
+    for (const type of ["input", "keyup", "change", "click"]) list.addEventListener(type, later2);
     doc.addEventListener("click", (e) => {
-      if (e.target?.closest?.("#sendall, a.send_all, #resetall, a.reset_all")) later();
+      if (e.target?.closest?.("#sendall, a.send_all, #resetall, a.reset_all")) later2();
     });
   }
   function cappedByReserve(loaded, onPlanet2, keep, fuel) {
@@ -11892,13 +12553,13 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   function bodyGrid(o, menu, current3, onPick, allowHere = false) {
     const { doc } = o;
     const cell = (id, moon, b) => {
-      if (id === null) return el3(doc, "span");
+      if (id === null) return el4(doc, "span");
       const item = button(doc, moon ? "" : b.name, () => {
         menu.remove();
         onPick(id);
       }, `${moon ? "moon" : "planet"}${id === current3 ? " on" : ""}`);
       if (moon) item.innerHTML = iconSvg("moon", 14);
-      else item.append(el3(doc, "small", "", b.coords));
+      else item.append(el4(doc, "small", "", b.coords));
       item.setAttribute("aria-label", `${b.name}${moon ? ` (${o.t("fleet.typeMoon")})` : ""} [${b.coords}]`);
       if (moon) item.title = `${b.name} (${o.t("fleet.typeMoon")})`;
       if (id === current3) item.setAttribute("aria-current", "true");
@@ -11908,27 +12569,27 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     return o.bodies.flatMap((b) => [cell(b.planetId, false, b), cell(b.moonId, true, b)]);
   }
   function destinationMenu(o, anchor, current3, onPick) {
-    const menu = el3(o.doc, "div", "fut-fmenu");
+    const menu = el4(o.doc, "div", "fut-fmenu");
     menu.append(...bodyGrid(o, menu, current3, onPick));
     popup(o.doc, anchor, menu);
   }
   function collectMenu(o, anchor, settings, keys, run) {
     const { doc, t } = o;
-    const menu = el3(doc, "div", "fut-fmenu fut-fcollect");
+    const menu = el4(doc, "div", "fut-fmenu fut-fcollect");
     menu.setAttribute("role", "menu");
-    menu.append(el3(doc, "p", "fut-fmhead", t("fleet.btn.collect")));
+    menu.append(el4(doc, "p", "fut-fmhead", t("fleet.btn.collect")));
     const main2 = (mode2, ico, label, fav, key) => {
       const b = button(doc, "", () => {
         menu.remove();
         run(mode2, fav);
       }, "fut-fmain");
       b.setAttribute("role", "menuitem");
-      const i = el3(doc, "span", "ico");
+      const i = el4(doc, "span", "ico");
       i.innerHTML = iconSvg(ico, 18);
-      const text = el3(doc, "span", "txt");
-      text.append(el3(doc, "b", "", label), el3(doc, "span", "", fav ? `\u2192 ${shortLabel(o, fav)}` : t("fleet.collectNoFav")));
+      const text = el4(doc, "span", "txt");
+      text.append(el4(doc, "b", "", label), el4(doc, "span", "", fav ? `→ ${shortLabel(o, fav)}` : t("fleet.collectNoFav")));
       b.append(i, text);
-      if (key) b.append(el3(doc, "kbd", "", keyLabel(key)));
+      if (key) b.append(el4(doc, "kbd", "", keyLabel(key)));
       if (!fav) b.classList.add("dim");
       return b;
     };
@@ -11937,7 +12598,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       main2("collectDeploy", "deploy", t("fleet.collect.deploy"), settings.favDeploy, keys.deploy)
     );
     let mode = "collect";
-    const seg = el3(doc, "div", "fut-fseg");
+    const seg = el4(doc, "div", "fut-fseg");
     seg.setAttribute("role", "group");
     seg.setAttribute("aria-label", t("fleet.collectOnce"));
     const segBtn = (m, label) => {
@@ -11949,7 +12610,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       return b;
     };
     seg.append(segBtn("collect", t("fleet.collect.transport")), segBtn("collectDeploy", t("fleet.collect.deploy")));
-    menu.append(el3(doc, "p", "fut-fmsub", t("fleet.collectOnce")), seg);
+    menu.append(el4(doc, "p", "fut-fmsub", t("fleet.collectOnce")), seg);
     menu.append(...bodyGrid(o, menu, null, (id) => run(mode, id)));
     popup(doc, anchor, menu);
   }
@@ -11968,13 +12629,13 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       if ("sendTarget" in part) onTarget();
     };
     const origin = originCoords(doc);
-    const panel = el3(doc, "div", "fut-fsend");
+    const panel = el4(doc, "div", "fut-fsend");
     panel.setAttribute("role", "group");
     panel.setAttribute("aria-label", t("fleet.send.label"));
     const st = settings.sendTarget;
     let type = st?.type ?? 1;
     const coordIn = (label2, ph, v, cls) => {
-      const input = el3(doc, "input", `fut-fin ${cls}`);
+      const input = el4(doc, "input", `fut-fin ${cls}`);
       input.type = "text";
       input.inputMode = "numeric";
       input.placeholder = ph;
@@ -11987,7 +12648,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const gIn = coordIn(t("fleet.galaxy"), origin ? String(origin.galaxy) : "G", st?.galaxy, "g");
     const sIn = coordIn(t("fleet.system"), origin ? String(origin.system) : "S", st?.system, "s");
     const pIn = coordIn(t("fleet.position"), "P", st?.position, "p");
-    const typeSeg = el3(doc, "span", "fut-fseg");
+    const typeSeg = el4(doc, "span", "fut-fseg");
     typeSeg.setAttribute("role", "group");
     typeSeg.setAttribute("aria-label", t("fleet.type"));
     const showType = () => typeSeg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(Number(x.dataset.type) === type)));
@@ -12011,7 +12672,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       });
     }
     const typeBtn = (v, ico, label2) => {
-      const b = el3(doc, "button", "fut-ftype");
+      const b = el4(doc, "button", "fut-ftype");
       b.type = "button";
       b.dataset.type = String(v);
       b.title = label2;
@@ -12027,8 +12688,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     };
     typeSeg.append(typeBtn(1, "planet", t("fleet.typePlanet")), typeBtn(3, "moon", t("fleet.typeMoon")));
     showType();
-    const dest = el3(doc, "span", "fut-fdest");
-    const pick = el3(doc, "button", "fut-fpick");
+    const dest = el4(doc, "span", "fut-fdest");
+    const pick = el4(doc, "button", "fut-fpick");
     pick.type = "button";
     pick.setAttribute("aria-label", t("fleet.send.pick"));
     pick.setAttribute("aria-haspopup", "menu");
@@ -12045,18 +12706,18 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         store();
       });
     });
-    const sep = () => el3(doc, "span", "colon", ":");
+    const sep = () => el4(doc, "span", "colon", ":");
     dest.append(gIn, sep(), sIn, sep(), pIn, pick, typeSeg);
     for (const input of [gIn, sIn, pIn]) peek(input, t("fleet.send.dest"), t("fleet.send.destHint"));
-    const res = el3(doc, "span", "fut-fres");
+    const res = el4(doc, "span", "fut-fres");
     const inputs = ["metal", "crystal", "deuterium"].map((k) => {
-      const wrap = el3(doc, "span", `fut-fresin ${k}`);
-      const sym = el3(doc, "button", "sym");
+      const wrap = el4(doc, "span", `fut-fresin ${k}`);
+      const sym = el4(doc, "button", "sym");
       sym.type = "button";
       sym.innerHTML = iconSvg(k, 18);
       sym.setAttribute("aria-label", `${t(`res.${k}`)}: ${t("fleet.send.max")}`);
       peek(sym, t(`res.${k}`), t("fleet.send.maxHint"));
-      const input = el3(doc, "input", "fut-fin amount");
+      const input = el4(doc, "input", "fut-fin amount");
       input.type = "text";
       input.inputMode = "numeric";
       input.placeholder = "0";
@@ -12075,33 +12736,33 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       for (const [k, input] of inputs) out[k] = input.value.trim() ? parseAmount(input.value) : null;
       return out;
     };
-    const clear = el3(doc, "button", "fut-fclear");
+    const clear = el4(doc, "button", "fut-fclear");
     clear.type = "button";
     clear.innerHTML = iconSvg("erase", 15);
     clear.title = t("fleet.send.clearBtn");
     clear.setAttribute("aria-label", t("fleet.send.clearHint"));
     peek(clear, t("fleet.send.clearBtn"), t("fleet.send.clearHint"));
-    const all2 = el3(doc, "button", "fut-fall", t("fleet.send.allBtn"));
+    const all2 = el4(doc, "button", "fut-fall", t("fleet.send.allBtn"));
     all2.type = "button";
     all2.setAttribute("aria-label", t("fleet.send.allHint"));
     peek(all2, t("fleet.send.allBtn"), t("fleet.send.allHint"));
     res.append(all2, clear);
-    const cargoBox = el3(doc, "span", "fut-fcargo");
+    const cargoBox = el4(doc, "span", "fut-fcargo");
     const counts = /* @__PURE__ */ new Map();
     for (const id of SEND_CARGO) {
-      const b = el3(doc, "button", "fut-fcl");
+      const b = el4(doc, "button", "fut-fcl");
       b.type = "button";
       const short = t(id === 202 ? "fleet.send.small" : "fleet.send.large");
       const full = t(`ship.${id}`);
       b.setAttribute("aria-label", `${t("fleet.send.cargoWith")} ${full}`);
-      const n = el3(doc, "small", "n");
-      const pic = el3(doc, "img", "pic");
+      const n = el4(doc, "small", "n");
+      const pic = el4(doc, "img", "pic");
       pic.src = SHIP_ICONS[id] ?? "";
       pic.alt = "";
       pic.addEventListener("error", () => pic.remove());
-      b.append(pic, el3(doc, "b", "", short), n);
+      b.append(pic, el4(doc, "b", "", short), n);
       counts.set(id, n);
-      peek(b, `${short} \xB7 ${full}`, t("fleet.send.cargoHint"));
+      peek(b, `${short} · ${full}`, t("fleet.send.cargoHint"));
       b.addEventListener("click", (e) => {
         e.preventDefault();
         onCargo(id);
@@ -12119,7 +12780,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         const cap = shipCapacity(fd, id);
         const w = pickedLoad({ metal: fd.metalOnPlanet, crystal: fd.crystalOnPlanet, deuterium: fd.deuteriumOnPlanet }, readPick(), 0, Number.MAX_SAFE_INTEGER);
         const need = cap > 0 ? Math.ceil((w.metal + w.crystal + w.deuterium) / cap) : 0;
-        n.textContent = have ? `\xD7${Math.min(need, have).toLocaleString(o.locale)}` : "0";
+        n.textContent = have ? `×${Math.min(need, have).toLocaleString(o.locale)}` : "0";
         n.parentElement?.classList.toggle("short", need > have);
         n.parentElement?.classList.toggle("none", !have);
       }
@@ -12156,7 +12817,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     });
     recount();
     void whenDispatcherReady().then(recount);
-    const label = (text) => el3(doc, "span", "lbl", text);
+    const label = (text) => el4(doc, "span", "lbl", text);
     panel.append(label(t("fleet.send.dest")), dest, label(t("fleet.send.res")), res, cargoBox);
     return panel;
   }
@@ -12189,7 +12850,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   function renderFleetTools(o) {
     const { doc, t } = o;
     if (!doc.getElementById(STYLE_ID3)) {
-      const style = el3(doc, "style");
+      const style = el4(doc, "style");
       style.id = STYLE_ID3;
       style.textContent = FLEET_CSS;
       doc.head.append(style);
@@ -12292,7 +12953,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       report(r, "fleet.ok.cargo");
       const next = r.ok ? null : skipTarget();
       if (next === null) return;
-      say(`${t(r.reason ?? "fleet.err.noShips")} \xB7 ${t("fleet.skipOffer", { body: shortLabel(o, next) })}`, true);
+      say(`${t(r.reason ?? "fleet.err.noShips")} · ${t("fleet.skipOffer", { body: shortLabel(o, next) })}`, true);
       skipTile?.focus();
     };
     const run = {
@@ -12326,7 +12987,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           settings.expeditionSpread > 0 ? t("fleet.ok.expSystem", { coords: `${fd.currentPlanet.galaxy}:${r.system}:16`, n: settings.expeditionSpread }) : "",
           r.ok && r.slots ? t("fleet.ok.expSplit", { slots: r.slots }) : ""
         ].filter(Boolean);
-        if (r.ok && extra.length) say(`${t("fleet.ok.expedition", { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), target: r.target.toLocaleString(o.locale) })} \xB7 ${extra.join(" \xB7 ")}`);
+        if (r.ok && extra.length) say(`${t("fleet.ok.expedition", { ships: r.ships.toLocaleString(o.locale), cargo: r.cargo.toLocaleString(o.locale), target: r.target.toLocaleString(o.locale) })} · ${extra.join(" · ")}`);
         else report(r, "fleet.ok.expedition", { target: r.target.toLocaleString(o.locale) });
       }),
       fleetsave: () => withDispatcher((fd) => {
@@ -12399,7 +13060,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         const id = Number(li.dataset.technology);
         if (!CARGO_SHIPS.includes(id)) continue;
         const main2 = settings.mainShip === id;
-        const pick = el3(doc, "button", `fut-mainship${main2 ? " on" : ""}`);
+        const pick = el4(doc, "button", `fut-mainship${main2 ? " on" : ""}`);
         pick.type = "button";
         pick.innerHTML = iconSvg("cargo", 12);
         pick.title = main2 ? t("fleet.mainShipIs") : t("fleet.mainShipPick");
@@ -12417,10 +13078,10 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         });
         li.append(pick);
       }
-      const bar = el3(doc, "div", "fut-fbar");
+      const bar = el4(doc, "div", "fut-fbar");
       const keys = keymap(o.store);
       const k = (id) => keys.get(id) ?? "";
-      const tiles = el3(doc, "div", "fut-facts");
+      const tiles = el4(doc, "div", "fut-facts");
       tiles.setAttribute("role", "group");
       tiles.setAttribute("aria-label", t("fleet.actionsLabel"));
       const here = o.bodies.find((b) => b.planetId === o.bodyId);
@@ -12430,7 +13091,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         out.peek(b, where ? `${name} ${where}` : name, tip);
         return b;
       };
-      const to = (id) => `\u2192 ${shortLabel(o, id)}`;
+      const to = (id) => `→ ${shortLabel(o, id)}`;
       const last2 = o.store.get(LAST_FLEET_KEY, null);
       const collect = tile(doc, "collect", t("fleet.btn.collect"), () => collectMenu(
         o,
@@ -12441,20 +13102,26 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       ), "more", "", t("fleet.btn.collectShort"));
       collect.setAttribute("aria-haspopup", "menu");
       collect.dataset.mode = "collect";
-      collect.append(el3(doc, "i", "more-mark"));
+      collect.append(el4(doc, "i", "more-mark"));
       out.peek(collect, t("fleet.btn.collect"), t("fleet.tip.collect"));
-      const zone = (text) => {
-        const z = el3(doc, "span", "fut-fzone", text);
-        z.setAttribute("aria-hidden", "true");
+      const zone = (text, key) => {
+        const z = el4(doc, "span", "fut-fzone");
+        const name = el4(doc, "span", "", text);
+        name.setAttribute("aria-hidden", "true");
+        z.append(name);
+        if (key && o.onHelp) {
+          const help = o.onHelp;
+          z.append(helpButton(doc, `${t("tour.zoneHelp")}: ${text}`, () => help(key), "fut-fhelp"));
+        }
         return z;
       };
-      const zoneBox = (text, cls = "") => {
-        const box = el3(doc, "span", `fut-fzonebox ${cls}`.trim());
-        const row = el3(doc, "span", "fut-ftiles");
-        box.append(zone(text), row);
+      const zoneBox = (text, key, cls = "") => {
+        const box = el4(doc, "span", `fut-fzonebox ${cls}`.trim());
+        const row = el4(doc, "span", "fut-ftiles");
+        box.append(zone(text, key), row);
         return { box, row };
       };
-      const mission = zoneBox(t("fleet.zone.mission"));
+      const mission = zoneBox(t("fleet.zone.mission"), "mission");
       tiles.append(mission.box);
       mission.row.append(
         ...["transport", "deploy"].map((m) => {
@@ -12467,19 +13134,19 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           "fleetsave",
           "fleet.fleetsave",
           t("fleet.btn.fleetsave"),
-          profile.save ? `\u2192 ${profile.save.galaxy ?? "\xB7"}:${profile.save.system ?? "\xB7"}:${profile.save.position}` : "",
+          profile.save ? `→ ${profile.save.galaxy ?? "·"}:${profile.save.system ?? "·"}:${profile.save.position}` : "",
           profile.save ? t("fleet.tip.fleetsave") : t("fleet.err.noFleetsave"),
           () => profile.save ? run.fleetsave() : o.onOpenSettings?.("bodies"),
           !profile.save
         ),
         act2("last", "fleet.last", t("fleet.btn.last"), "", last2 ? t("fleet.tip.last") : t("fleet.err.noLast"), () => run.last(), !last2)
       );
-      const dest = zoneBox(t("fleet.zone.dest"), "fut-fsecond");
+      const dest = zoneBox(t("fleet.zone.dest"), "dest", "fut-fsecond");
       const secondary = dest.row;
       if (here?.moonId) secondary.append(act2("moon", "fleet.moon", t("fleet.btn.moon"), to(here.moonId), t("fleet.tip.moon"), () => run.moon()));
       secondary.append(collect);
       tiles.append(dest.box);
-      const skipSlot = el3(doc, "span", "fut-fsecond fut-fskip");
+      const skipSlot = el4(doc, "span", "fut-fsecond fut-fskip");
       drawSkip = () => {
         const next = skipTarget();
         skipTile = next === null ? null : act2("skip", "fleet.skip", t("fleet.btn.skip"), to(next), t("fleet.tip.skip"), skip);
@@ -12499,7 +13166,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         "fleet.last": () => run.last(),
         "fleet.skip": skip
       });
-      const rules = el3(doc, "div", "fut-frules");
+      const rules = el4(doc, "div", "fut-frules");
       rules.setAttribute("role", "group");
       rules.setAttribute("aria-label", t("fleet.rulesLabel"));
       const rulesOut = readout(doc, t("fleet.reservesHint"));
@@ -12516,42 +13183,42 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const sumOf = (r) => Object.values(r ?? {}).reduce((a, b) => a + b, 0);
       const shipsKept = sumOf(stored.reserve.ships);
       const res = stored.reserve.resources;
-      const resValue = el3(doc, "span", "toks");
+      const resValue = el4(doc, "span", "toks");
       for (const [cls, v] of [["m", res.metal], ["c", res.crystal], ["d", res.deuterium]]) {
         if (!v) continue;
-        const tk = el3(doc, "span", "");
+        const tk = el4(doc, "span", "");
         tk.append(resToken(doc, cls, 11), doc.createTextNode(fmtN(v)));
         resValue.append(tk);
       }
       const unset = t("fleet.rule.unset");
       const gateKept = sumOf(stored.gate);
-      const reserves = el3(doc, "span", "fut-fgroup");
+      const reserves = el4(doc, "span", "fut-fgroup");
       reserves.setAttribute("role", "group");
       reserves.setAttribute("aria-label", t("fleet.zone.reserves"));
-      const reserveChips = el3(doc, "span", "fut-fchips");
-      reserves.append(zone(t("fleet.zone.reserves")), reserveChips);
+      const reserveChips = el4(doc, "span", "fut-fchips");
+      reserves.append(zone(t("fleet.zone.reserves"), "reserves"), reserveChips);
       reserveChips.append(
         sw("ships", t("fleet.rule.ships"), t("fleet.rule.shipsHint"), "shipsOn", void 0, shipsKept ? fmtN(shipsKept) : unset),
         sw("resources", t("fleet.rule.resources"), t("fleet.rule.resourcesHint"), "resourcesOn", void 0, res.metal || res.crystal || res.deuterium ? resValue : unset),
         ...isMoon(o.bodies, o.bodyId) ? [sw("gate", t("fleet.rule.gate"), t("fleet.rule.gateHint"), "gateOn", void 0, gateKept ? fmtN(gateKept) : unset)] : [],
         sw("food", t("fleet.foodShort"), t("fleet.foodHint"), "ignoreFood", () => applyFood(o.store))
       );
-      const round = el3(doc, "span", "fut-fgroup");
+      const round = el4(doc, "span", "fut-fgroup");
       round.setAttribute("role", "group");
       round.setAttribute("aria-label", t("fleet.zone.round"));
-      const roundChips = el3(doc, "span", "fut-fchips");
-      round.append(zone(t("fleet.zone.round")), roundChips);
+      const roundChips = el4(doc, "span", "fut-fchips");
+      round.append(zone(t("fleet.zone.round"), "round"), roundChips);
       roundChips.append(sw("repeat", t("fleet.repeatShort"), t("fleet.repeatHint"), "repeat"));
       rules.append(reserves, round);
       roundChips.append(skipSwitch(o, rulesOut, redraw));
-      const edit = el3(doc, "span", "fut-fedit");
+      const edit = el4(doc, "span", "fut-fedit");
       const tool = (ico, label, hint, onClick, cls = "", short = "") => {
-        const b = el3(doc, "button", `fut-ftool ${cls}`.trim());
+        const b = el4(doc, "button", `fut-ftool ${cls}`.trim());
         b.type = "button";
         b.title = label;
         b.setAttribute("aria-label", label);
         b.innerHTML = iconSvg(ico, 18);
-        if (short) b.append(el3(doc, "span", "name", short));
+        if (short) b.append(el4(doc, "span", "name", short));
         b.addEventListener("click", (e) => {
           e.preventDefault();
           onClick();
@@ -12562,9 +13229,9 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       const rulesTool = tool("rules", t("fleet.editRules", { body: shortLabel(o, o.bodyId) }), t("fleet.editRulesHint"), () => o.onOpenSettings?.("bodies"), "fut-frules-open", t("fleet.rulesShort"));
       rulesOut.peek(rulesTool, t("fleet.editRules", { body: shortLabel(o, o.bodyId) }), t("fleet.editRulesHint"));
       if (o.onOpenSettings) edit.append(tool("settings", t("fleet.general"), t("fleet.generalHint"), () => o.onOpenSettings?.("fleet"), "", t("fleet.general")));
-      const top = el3(doc, "div", "fut-frow");
+      const top = el4(doc, "div", "fut-frow");
       top.append(tiles, edit);
-      const bottom = el3(doc, "div", "fut-frow");
+      const bottom = el4(doc, "div", "fut-frow");
       bottom.append(out.box);
       bar.append(top);
       if (settings.sendMode) {
@@ -12575,12 +13242,12 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       bar.append(bottom);
       anchor1.before(bar);
       markUsed(state.active?.mode ?? null);
-      const strip = el3(doc, "div", "fut-fbar fut-freserves");
-      const stripRow = el3(doc, "div", "fut-frow");
-      const cap = el3(doc, "span", "fut-fcap");
+      const strip = el4(doc, "div", "fut-fbar fut-freserves");
+      const stripRow = el4(doc, "div", "fut-frow");
+      const cap = el4(doc, "span", "fut-fcap");
       cap.setAttribute("role", "status");
       stripRow.append(rules, rulesTool);
-      const foot = el3(doc, "div", "fut-frow fut-ffoot");
+      const foot = el4(doc, "div", "fut-frow fut-ffoot");
       foot.append(rulesOut.box, cap);
       strip.append(stripRow, foot);
       const below = fleet1.querySelector("#allornone") ?? null;
@@ -12594,18 +13261,18 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const dispatch = doc.getElementById("fleetdispatchcomponent");
     if (!anchor1 && (fleet1 || dispatch) && !fleet2?.offsetParent) {
       const host = fleet1 ?? dispatch;
-      const strip = el3(doc, "div", "fut-fbar fut-freserves fut-fempty");
-      const row = el3(doc, "div", "fut-frow");
+      const strip = el4(doc, "div", "fut-fbar fut-freserves fut-fempty");
+      const row = el4(doc, "div", "fut-frow");
       const rulesOut = readout(doc, t("fleet.emptyHint"));
-      const round = el3(doc, "span", "fut-fgroup");
+      const round = el4(doc, "span", "fut-fgroup");
       round.setAttribute("role", "group");
       round.setAttribute("aria-label", t("fleet.zone.round"));
       round.append(skipSwitch(o, rulesOut, redraw));
       const next = skipTarget();
       if (next !== null) {
         const keys = keymap(o.store);
-        const b = tile(doc, "skip", `${t("fleet.btn.skip")} \u2192 ${shortLabel(o, next)}`, skip, "", keys.get("fleet.skip") ?? "", t("fleet.btn.skip"));
-        rulesOut.peek(b, `${t("fleet.btn.skip")} \u2192 ${shortLabel(o, next)}`, t("fleet.tip.skipEmpty"));
+        const b = tile(doc, "skip", `${t("fleet.btn.skip")} → ${shortLabel(o, next)}`, skip, "", keys.get("fleet.skip") ?? "", t("fleet.btn.skip"));
+        rulesOut.peek(b, `${t("fleet.btn.skip")} → ${shortLabel(o, next)}`, t("fleet.tip.skipEmpty"));
         round.append(b);
       }
       row.append(round);
@@ -12619,11 +13286,11 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       markResourceReserve(o, profile.reserve.resources);
     }
     if (fleet2 && anchor2) {
-      const bar = el3(doc, "div", "fut-fbar fut-faskbar");
+      const bar = el4(doc, "div", "fut-fbar fut-faskbar");
       bar.hidden = true;
       const out2 = readout(doc, "");
-      const row = el3(doc, "div", "fut-frow");
-      const ask = el3(doc, "span", "fut-fask");
+      const row = el4(doc, "div", "fut-frow");
+      const ask = el4(doc, "span", "fut-fask");
       ask.hidden = true;
       row.append(out2.box, ask);
       bar.append(row);
@@ -12640,15 +13307,15 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           box.hidden = true;
           return;
         }
-        const note = el3(doc, "div", "");
-        const noteYes = el3(doc, "button", "yes", t("fleet.speedAsk.yes"));
-        const noteNo = el3(doc, "button", "", t("fleet.speedAsk.no"));
+        const note = el4(doc, "div", "");
+        const noteYes = el4(doc, "button", "yes", t("fleet.speedAsk.yes"));
+        const noteNo = el4(doc, "button", "", t("fleet.speedAsk.no"));
         noteYes.type = noteNo.type = "button";
-        note.append(el3(doc, "span", "q", t("fleet.speedAsk.q", { pct })), noteYes, noteNo);
+        note.append(el4(doc, "span", "q", t("fleet.speedAsk.q", { pct })), noteYes, noteNo);
         noteYes.addEventListener("click", (e) => {
           e.preventDefault();
           state.active = { ...a, speed: pct };
-          note.replaceChildren(el3(doc, "span", "q", t("fleet.speedAsk.done", { pct })));
+          note.replaceChildren(el4(doc, "span", "q", t("fleet.speedAsk.done", { pct })));
           (doc.defaultView ?? globalThis).setTimeout(() => setTouchNote(doc, null), 3e3);
         });
         noteNo.addEventListener("click", (e) => {
@@ -12661,8 +13328,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
         }
         const host = box.closest(".fut-fbar");
         if (host) host.hidden = false;
-        const yes = el3(doc, "button", "fut-fask-b yes", t("fleet.speedAsk.yes"));
-        const no = el3(doc, "button", "fut-fask-b", t("fleet.speedAsk.no"));
+        const yes = el4(doc, "button", "fut-fask-b yes", t("fleet.speedAsk.yes"));
+        const no = el4(doc, "button", "fut-fask-b", t("fleet.speedAsk.no"));
         yes.type = no.type = "button";
         yes.addEventListener("click", (e) => {
           e.preventDefault();
@@ -12675,7 +13342,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
           e.preventDefault();
           box.hidden = true;
         });
-        box.replaceChildren(el3(doc, "span", "fut-fask-q", t("fleet.speedAsk.q", { pct })), yes, no);
+        box.replaceChildren(el4(doc, "span", "fut-fask-q", t("fleet.speedAsk.q", { pct })), yes, no);
         box.title = t("fleet.speedAsk.hint", { pct: current3 });
         box.hidden = false;
       };
@@ -12744,8 +13411,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     });
   }
   function holdContinue(doc, maxMs = 8e3) {
-    const win = doc.defaultView;
-    if (!win) return () => {
+    const win2 = doc.defaultView;
+    if (!win2) return () => {
     };
     const keys = (e) => {
       if (e.key !== "Enter") return;
@@ -12759,17 +13426,17 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       e.stopImmediatePropagation();
     };
     const types = ["keydown", "keypress", "keyup"];
-    types.forEach((type) => win.addEventListener(type, keys, true));
-    win.addEventListener("click", clicks, true);
+    types.forEach((type) => win2.addEventListener(type, keys, true));
+    win2.addEventListener("click", clicks, true);
     let done = false;
     const release = () => {
       if (done) return;
       done = true;
-      types.forEach((type) => win.removeEventListener(type, keys, true));
-      win.removeEventListener("click", clicks, true);
+      types.forEach((type) => win2.removeEventListener(type, keys, true));
+      win2.removeEventListener("click", clicks, true);
       delete doc.documentElement.dataset.futHold;
     };
-    win.setTimeout(release, maxMs);
+    win2.setTimeout(release, maxMs);
     return release;
   }
   function recordLeft(o, fd) {
@@ -12834,8 +13501,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
   // src/modules/settings/index.ts
   var SETTINGS_ID = "fut-settings-window";
   var TAB_KEY = "settings.tab";
-  var SECTIONS = ["menu", "mail", "galaxy", "fleet", "bodies", "keys", "data"];
-  var CSS4 = `
+  var SECTIONS = ["menu", "mail", "galaxy", "fleet", "bodies", "keys", "data", "guide"];
+  var CSS5 = `
 :host { --panel-w: 620px; }
 .body { display: flex; flex-direction: column; }
 /* Rows that follow each other read as one card, split by hairlines. */
@@ -12887,6 +13554,9 @@ input.field { width: 190px; }
 .mini { height: 28px; padding: 0 8px; border: 0; border-radius: 6px; background: none; color: var(--muted); font: 11px Arial, sans-serif; cursor: pointer; }
 .mini:hover { background: var(--line); color: var(--text); }
 .mini[hidden] { display: inline-block; visibility: hidden; }
+/* Guide tab: a first step already done reads as done, quietly. */
+.fut-done { align-items: center; gap: 6px; color: var(--ok); font: 600 12px var(--display); }
+.fut-step-done .name { color: var(--muted); }
 @container (max-width: 520px) { .row { grid-template-columns: 1fr; } .row .control { grid-column: 1; grid-row: auto; } }
 `;
   var keyHandler = null;
@@ -12901,16 +13571,16 @@ input.field { width: 190px; }
     const host = doc.createElement("div");
     host.id = SETTINGS_ID;
     const root = host.attachShadow({ mode: "open" });
-    const el6 = (tag, cls = "", text) => {
+    const el7 = (tag, cls = "", text) => {
       const n = doc.createElement(tag);
       if (cls) n.className = cls;
       if (text !== void 0) n.textContent = text;
       return n;
     };
-    const style = el6("style");
-    style.textContent = WINDOW_SHEET + CSS4 + (o.rules ? RULES_CSS : "");
-    const backdrop = el6("div", "backdrop");
-    const panel = el6("div", "panel");
+    const style = el7("style");
+    style.textContent = WINDOW_SHEET + CSS5 + (o.rules ? RULES_CSS : "");
+    const backdrop = el7("div", "backdrop");
+    const panel = el7("div", "panel");
     panel.setAttribute("role", "dialog");
     panel.setAttribute("aria-modal", "true");
     panel.setAttribute("aria-label", t("toolbar.settings"));
@@ -12921,17 +13591,17 @@ input.field { width: 190px; }
     root.append(style, backdrop);
     doc.body.append(host);
     followViewport(doc, backdrop, "cover");
-    const sections = SECTIONS.filter((s) => s !== "bodies" || o.rules);
+    const sections = SECTIONS.filter((s) => (s !== "bodies" || o.rules) && (s !== "guide" || o.guide));
     let section2 = o.section ?? store.get(TAB_KEY, "menu");
     if (!sections.includes(section2)) section2 = "menu";
     let rulesPanel = null;
     let menu = { ...o.menu.settings };
     let status = "";
     const choice = (options, current3, onPick, disabled = false) => {
-      const box = el6("span", "control");
+      const box = el7("span", "control");
       box.setAttribute("role", "group");
       for (const [v, label] of options) {
-        const b = el6("button", "seg", label);
+        const b = el7("button", "seg", label);
         b.type = "button";
         b.disabled = disabled;
         b.setAttribute("aria-pressed", String(v === current3));
@@ -12945,19 +13615,19 @@ input.field { width: 190px; }
       return box;
     };
     const row = (name, desc, control) => {
-      const r = el6("div", "row");
-      r.append(el6("span", "name", name), el6("span", "desc", desc), control);
+      const r = el7("div", "row");
+      r.append(el7("span", "name", name), el7("span", "desc", desc), control);
       control.querySelector(".switch")?.setAttribute("aria-label", name);
       return r;
     };
     const yesNo = (v, onPick) => {
-      const box = el6("span", "control");
-      const b = el6("button", "switch");
+      const box = el7("span", "control");
+      const b = el7("button", "switch");
       b.type = "button";
       b.setAttribute("role", "switch");
       b.setAttribute("aria-checked", String(v));
       b.title = t(v ? "settings.on" : "settings.off");
-      b.append(el6("i", "sw-track"));
+      b.append(el7("i", "sw-track"));
       b.addEventListener("click", () => {
         onPick(!v);
         draw();
@@ -12966,23 +13636,23 @@ input.field { width: 190px; }
       return box;
     };
     const group = (label, glyph2) => {
-      const g = el6("div", "group");
-      const gi = el6("span", "gi");
+      const g = el7("div", "group");
+      const gi = el7("span", "gi");
       gi.append(glyph2);
       g.append(gi, doc.createTextNode(label));
       return g;
     };
     const fleetGlyph = (name) => {
-      const span = el6("span");
+      const span = el7("span");
       span.style.display = "inline-flex";
       span.innerHTML = iconSvg(name, 16);
       return span;
     };
     const select = (options, current3, onPick) => {
-      const box = el6("span", "control");
-      const sel = el6("select", "field");
+      const box = el7("span", "control");
+      const sel = el7("select", "field");
       for (const [v, label] of options) {
-        const opt = el6("option", "", label);
+        const opt = el7("option", "", label);
         opt.value = v;
         opt.selected = v === current3;
         sel.append(opt);
@@ -13002,24 +13672,24 @@ input.field { width: 190px; }
       const cargo = CARGO_SHIPS.map((id) => [String(id), shipName2(id)]);
       const speeds = Array.from({ length: 10 }, (_, i) => [String((i + 1) * 10), `${(i + 1) * 10}%`]);
       const dest = (current3, onPick) => {
-        const box = el6("span", "control");
+        const box = el7("span", "control");
         box.append(bodyPicker(o.doc, { bodies: o.bodies ?? [], current: current3, moonWord: t("fleet.typeMoon"), none: t("fleet.none"), label: t("fleet.none"), onPick }));
         return box;
       };
-      const value = el6("span", "control");
-      const input = el6("input", "field");
+      const value = el7("span", "control");
+      const input = el7("input", "field");
       input.type = "text";
       input.value = f.expeditionValue;
       input.placeholder = t("fleet.auto");
       input.setAttribute("aria-label", t("fleet.expeditionValue"));
       input.addEventListener("change", () => set({ expeditionValue: input.value.trim() }));
       value.append(input);
-      const seen = store.get(EXPEDITION_MAX_KEY, null);
-      const calc = el6("small", "calc", seen ? t("fleet.expCalc", { value: formatUnits(seen.max, doc.documentElement.lang || "it") }) : t("fleet.expCalcUnknown"));
-      if (seen) calc.title = new Date(seen.at).toLocaleString(doc.documentElement.lang || void 0);
+      const seen2 = store.get(EXPEDITION_MAX_KEY, null);
+      const calc = el7("small", "calc", seen2 ? t("fleet.expCalc", { value: formatUnits(seen2.max, doc.documentElement.lang || "it") }) : t("fleet.expCalcUnknown"));
+      if (seen2) calc.title = new Date(seen2.at).toLocaleString(doc.documentElement.lang || void 0);
       value.append(calc);
-      const spread = el6("span", "control");
-      const spreadIn = el6("input", "field");
+      const spread = el7("span", "control");
+      const spreadIn = el7("input", "field");
       spreadIn.type = "text";
       spreadIn.inputMode = "numeric";
       spreadIn.value = f.expeditionSpread ? String(f.expeditionSpread) : "";
@@ -13029,9 +13699,9 @@ input.field { width: 190px; }
       spread.append(spreadIn);
       const split = yesNo(f.expeditionSplit, (v) => set({ expeditionSplit: v }));
       const lang = doc.documentElement.lang || "it";
-      const shares = seen?.cargo && seen.free ? Object.entries(seen.cargo).filter(([, n]) => n > 0).map(([id, n]) => t("fleet.expSplitCalc", { ship: shipName2(Number(id)), n: n.toLocaleString(lang), slots: seen.free, each: expeditionShare(n, seen.free).toLocaleString(lang) })) : [];
-      const splitCalc = el6("div", "calc wide");
-      if (shares.length) for (const line of shares) splitCalc.append(el6("div", "", line));
+      const shares = seen2?.cargo && seen2.free ? Object.entries(seen2.cargo).filter(([, n]) => n > 0).map(([id, n]) => t("fleet.expSplitCalc", { ship: shipName2(Number(id)), n: n.toLocaleString(lang), slots: seen2.free, each: expeditionShare(n, seen2.free).toLocaleString(lang) })) : [];
+      const splitCalc = el7("div", "calc wide");
+      if (shares.length) for (const line of shares) splitCalc.append(el7("div", "", line));
       else splitCalc.textContent = t("fleet.expSplitUnknown");
       return [
         group(t("fleet.transportTitle"), fleetGlyph("transport")),
@@ -13047,7 +13717,7 @@ input.field { width: 190px; }
           t("fleet.loadOrder"),
           t("settings.loadOrderHint"),
           select(
-            LOAD_ORDERS.map((order) => [order.join(","), order.map((k) => t(`res.short.${k}`)).join(" \u2192 ")]),
+            LOAD_ORDERS.map((order) => [order.join(","), order.map((k) => t(`res.short.${k}`)).join(" → ")]),
             validOrder(f.loadOrder).join(","),
             (v) => set({ loadOrder: v.split(",") })
           )
@@ -13078,22 +13748,22 @@ input.field { width: 190px; }
         }))
       ];
       let section3 = "";
-      let grid2 = el6("div", "keygrid");
+      let grid2 = el7("div", "keygrid");
       for (const a of ACTIONS) {
         if (a.group !== section3) {
           section3 = a.group;
-          grid2 = el6("div", "keygrid");
-          out.push(el6("div", "group", t(`settings.keys.${section3}`)), grid2);
+          grid2 = el7("div", "keygrid");
+          out.push(el7("div", "group", t(`settings.keys.${section3}`)), grid2);
         }
-        const r = el6("div", "keyrow");
-        const g = el6("span", "g");
+        const r = el7("div", "keyrow");
+        const g = el7("span", "g");
         g.append(glyph(doc, a, 16));
         const key = map.get(a.id) ?? null;
-        const cap = el6("button", `keycap${key ? "" : " none"}${listening === a.id ? " listening" : ""}`, listening === a.id ? t("settings.keyPress") : key ? keyLabel(key) : t("settings.keyNone"));
+        const cap = el7("button", `keycap${key ? "" : " none"}${listening === a.id ? " listening" : ""}`, listening === a.id ? t("settings.keyPress") : key ? keyLabel(key) : t("settings.keyNone"));
         cap.type = "button";
         cap.dataset.id = a.id;
         cap.setAttribute("aria-label", `${t(a.label)}: ${key ? keyLabel(key) : t("settings.keyNone")}. ${a.fixed ? t("settings.keyFixed") : t("settings.keyChange")}`);
-        const reset = el6("button", "mini", t("settings.keyReset"));
+        const reset = el7("button", "mini", t("settings.keyReset"));
         reset.type = "button";
         if (a.fixed) {
           cap.disabled = true;
@@ -13114,13 +13784,13 @@ input.field { width: 190px; }
             draw();
           });
         }
-        const name = el6("span", "name", t(a.label));
-        if (a.touchOnly) name.append(el6("span", "fixed", t("settings.keyGame")));
+        const name = el7("span", "name", t(a.label));
+        if (a.touchOnly) name.append(el7("span", "fixed", t("settings.keyGame")));
         r.append(g, name, reset, cap);
         grid2.append(r);
       }
-      const all2 = el6("span", "control");
-      const b = el6("button", "seg", t("settings.keysDefault"));
+      const all2 = el7("span", "control");
+      const b = el7("button", "seg", t("settings.keysDefault"));
       b.type = "button";
       b.addEventListener("click", () => {
         resetKeys(store);
@@ -13131,7 +13801,7 @@ input.field { width: 190px; }
       });
       all2.append(b);
       out.push(row(t("settings.keysDefault"), t("settings.keysHint"), all2));
-      const st = el6("div", "status", status);
+      const st = el7("div", "status", status);
       st.setAttribute("role", "status");
       out.push(st);
       return out;
@@ -13162,22 +13832,25 @@ input.field { width: 190px; }
       root.querySelector(`.keycap[data-id="${id}"]`)?.focus();
     };
     const draw = () => {
-      const head = el6("div", "head");
-      const titles = el6("div", "titles");
-      titles.append(el6("h2", "", t("toolbar.settings")), el6("span", "sub", t("settings.sub")));
-      const close = el6("button", "close");
+      const head = el7("div", "head");
+      const titles = el7("div", "titles");
+      titles.append(el7("h2", "", t("toolbar.settings")), el7("span", "sub", t("settings.sub")));
+      const close = el7("button", "close");
       close.type = "button";
       close.title = t("fleet.close");
       close.setAttribute("aria-label", t("fleet.close"));
       close.append(icon(doc, "close", 16));
       close.addEventListener("click", () => closeSettings(doc));
-      head.append(titles, close);
-      const tabs = el6("div", "tabs");
+      head.append(titles);
+      if (o.onHelp) head.append(helpButton(doc, t("tour.help"), o.onHelp));
+      head.append(close);
+      const tabs = el7("div", "tabs");
       tabs.setAttribute("role", "tablist");
       for (const s of sections) {
-        const b = el6("button", "tab", t(`settings.section.${s}`));
+        const b = el7("button", "tab", t(`settings.section.${s}`));
         b.type = "button";
         b.setAttribute("role", "tab");
+        b.dataset.section = s;
         b.setAttribute("aria-selected", String(s === section2));
         b.setAttribute("aria-pressed", String(s === section2));
         b.addEventListener("click", () => {
@@ -13189,7 +13862,7 @@ input.field { width: 190px; }
         });
         tabs.append(b);
       }
-      const body = el6("div", "body");
+      const body = el7("div", "body");
       body.setAttribute("role", "tabpanel");
       if (section2 === "menu") {
         const setMenu = (next) => {
@@ -13244,8 +13917,8 @@ input.field { width: 190px; }
         );
       } else if (section2 === "galaxy") {
         const current3 = store.get(BIG_DEBRIS_KEY, BIG_DEBRIS);
-        const box = el6("span", "control");
-        const input = el6("input", "field");
+        const box = el7("span", "control");
+        const input = el7("input", "field");
         input.type = "text";
         input.value = formatUnits(current3, doc.documentElement.lang || "it");
         input.setAttribute("aria-label", t("settings.bigDebris"));
@@ -13257,7 +13930,7 @@ input.field { width: 190px; }
           draw();
         });
         box.append(input);
-        const st = el6("div", "status", status);
+        const st = el7("div", "status", status);
         st.setAttribute("role", "status");
         body.append(row(t("settings.bigDebris"), t("settings.bigDebrisHint"), box), st);
       } else if (section2 === "fleet") {
@@ -13267,10 +13940,12 @@ input.field { width: 190px; }
         body.append(rulesPanel);
       } else if (section2 === "keys") {
         body.append(...keyRows());
+      } else if (section2 === "guide" && o.guide) {
+        body.append(...o.guide(draw));
       } else {
         if (o.backup) {
           const { onExport, onImport } = o.backup;
-          const picker = el6("input");
+          const picker = el7("input");
           picker.type = "file";
           picker.hidden = true;
           picker.title = t("settings.backupImportHint");
@@ -13286,19 +13961,19 @@ input.field { width: 190px; }
             }).finally(draw);
           });
           const action = (label, onClick) => {
-            const box = el6("span", "control");
-            const b = el6("button", "seg", label);
+            const box = el7("span", "control");
+            const b = el7("button", "seg", label);
             b.type = "button";
             b.addEventListener("click", onClick);
             box.append(b);
             return box;
           };
-          const two = el6("span", "control");
+          const two = el7("span", "control");
           for (const [label, fn] of [[t("settings.backupExport"), () => {
             status = t("settings.backupSaved", { n: onExport() });
             draw();
           }], [t("settings.backupImport"), () => picker.click()]]) {
-            const b = el6("button", "seg", label);
+            const b = el7("button", "seg", label);
             b.type = "button";
             b.addEventListener("click", fn);
             two.append(b);
@@ -13308,11 +13983,11 @@ input.field { width: 190px; }
             row(t("settings.oglight"), t("settings.backupImportHint"), action(t("settings.oglightImport"), () => picker.click())),
             picker
           );
-          const s = el6("div", "status", status);
+          const s = el7("div", "status", status);
           s.setAttribute("role", "status");
           body.append(s);
         }
-        if (o.notes?.length) body.append(el6("div", "notes", o.notes.join(" \xB7 ")));
+        if (o.notes?.length) body.append(el7("div", "notes", o.notes.join(" · ")));
       }
       panel.replaceChildren(head, tabs, body);
       revealActiveTabs(panel);
@@ -13323,6 +13998,291 @@ input.field { width: 190px; }
       if (e.key === "Escape") closeSettings(doc);
     };
     doc.addEventListener("keydown", keyHandler, true);
+  }
+
+  // src/modules/guide/index.ts
+  var GUIDES = ["board", "fleet", "settings", "dashboard", "planner", "journal", "galaxy", "messages", "tech"];
+  var SEEN_KEY = "tour.seen";
+  var OFFER_KEY = "tour.offer";
+  var GUIDE_PARAM = "futguide";
+  var INVITE_ID = "fut-tour-invite";
+  var q = (sel) => (doc) => doc.querySelector(sel);
+  var nth = (sel, n) => (doc) => doc.querySelectorAll(sel)[n];
+  var win = (host, sel, n = 0) => (doc) => doc.getElementById(host)?.shadowRoot?.querySelectorAll(sel)[n];
+  var S = "fut-settings-window";
+  var D = "fut-dashboard";
+  var P = "fut-planner";
+  var J = "fut-journal";
+  var POINTS = {
+    board: [
+      null,
+      nth(".fut-toolbar > button.fut-cell", 0),
+      nth(".fut-toolbar > button.fut-cell", 1),
+      (doc) => doc.querySelector("#planetList .fut-current") ?? doc.querySelector("#planetList .smallplanet"),
+      q(".fut-tool-sync"),
+      q(".fut-tool-settings"),
+      nth("#fut-dock section.card", 0),
+      nth("#fut-dock section.card", 1),
+      q("#fut-touchbar"),
+      null
+    ],
+    fleet: [
+      null,
+      q(".fut-fedit .fut-ftool"),
+      q(".fut-frules-open"),
+      (doc) => doc.querySelector(".fut-mainship.on") ?? doc.querySelector(".fut-mainship"),
+      nth(".fut-freserves .fut-fgroup", 0),
+      nth(".fut-freserves .fut-fgroup", 1),
+      q(".fut-facts > .fut-fzonebox:not(.fut-fsecond)"),
+      q(".fut-facts > .fut-fzonebox.fut-fsecond"),
+      q(".fut-fbar .fut-fread"),
+      q("#fut-touchbar .send"),
+      null
+    ],
+    settings: [
+      win(S, ".tabs"),
+      win(S, ".body .row"),
+      win(S, '.tab[data-section="bodies"]'),
+      win(S, '.tab[data-section="keys"]'),
+      win(S, '.tab[data-section="data"]'),
+      win(S, '.tab[data-section="guide"]')
+    ],
+    dashboard: [win(D, ".tabs"), win(D, '[data-tab="investments"]'), win(D, '[data-tab="history"]'), win(D, '[data-tab="mines"]')],
+    planner: [win(P, ".kpis"), win(P, ".seg"), win(P, ".bring-all"), win(P, ".empty")],
+    journal: [win(J, ".tabs"), win(J, ".tabs", 1), win(J, ".card.hero"), win(J, ".card-head")],
+    galaxy: [
+      q("#fut-galaxy-bar"),
+      // The flag shows on the row under the pointer: a set one, else the name cell where it appears.
+      (doc) => doc.querySelector(".fut-mk-flag.on") ?? doc.querySelector(".fut-mk-flag")?.closest(".cellPlayerName"),
+      q(".fut-g-name"),
+      q(".fut-g-rank"),
+      q(".fut-g-dval")
+    ],
+    messages: [q(".fut-msg"), q("#fut-spypanel")],
+    tech: [q(".fut-tp-plan"), q(".fut-tp-stepper"), q(".fut-tp")]
+  };
+  var ROOTS = {
+    board: ".fut-toolbar",
+    fleet: ".fut-facts",
+    settings: `#${S}`,
+    dashboard: `#${D}`,
+    planner: `#${P}`,
+    journal: `#${J}`,
+    galaxy: "#fut-galaxy-bar",
+    messages: ".fut-msg",
+    tech: ".fut-tp-plan"
+  };
+  var FLEET_ZONES = { mission: 6, dest: 7, reserves: 4, round: 5 };
+  function guideSteps(id, t) {
+    return POINTS[id].map((at, n) => {
+      const [title = "", text = ""] = t(`tour.${id}.${n}`).split("|");
+      return at ? { at, title, text } : { title, text };
+    });
+  }
+  var guideHere = (doc, id) => !!doc.querySelector(ROOTS[id]);
+  var labels = (t) => ({
+    next: t("tour.next"),
+    back: t("tour.back"),
+    done: t("tour.done"),
+    close: t("tour.close"),
+    count: (n, total) => t("tour.count", { n, total })
+  });
+  var seen = (d) => d.store.get(SEEN_KEY, {});
+  var markSeen = (d, id) => d.store.set(SEEN_KEY, { ...seen(d), [id]: Date.now() });
+  var pending = /* @__PURE__ */ new WeakMap();
+  var later = /* @__PURE__ */ new WeakMap();
+  function startGuide(d, id, only) {
+    closeInvite(d.doc);
+    const all2 = guideSteps(id, d.t);
+    const steps = only ? only.flatMap((n) => all2[n] ? [all2[n]] : []) : all2;
+    startTour(d.doc, steps, labels(d.t), () => {
+      if (only) return;
+      markSeen(d, id);
+      offerGuides(d, pending.get(d.doc) ?? []);
+    });
+  }
+  function closeInvite(doc) {
+    doc.getElementById(INVITE_ID)?.remove();
+  }
+  var INVITE_CSS = `${CARD_CSS}
+.card { right: 16px; bottom: 16px; z-index: 1000003; width: 320px; }
+.card.docked { right: auto; bottom: auto; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+.top { display: flex; align-items: center; gap: 8px; color: var(--label); }
+`;
+  function offerGuides(d, ids) {
+    const { doc, t } = d;
+    pending.set(doc, ids);
+    if (!d.store.get(OFFER_KEY, true)) return;
+    if (doc.getElementById(INVITE_ID) || tourOpen(doc)) return;
+    const done = seen(d);
+    const skip = later.get(doc) ?? /* @__PURE__ */ new Set();
+    const waiting = ids.filter((id2) => !done[id2] && !skip.has(id2));
+    const id = waiting.find((g) => guideHere(doc, g) && liveSteps(doc, guideSteps(g, t)).length > 1);
+    if (!id) {
+      if (waiting.length) watchFor(d);
+      return;
+    }
+    const host = doc.createElement("div");
+    host.id = INVITE_ID;
+    const root = host.attachShadow({ mode: "open" });
+    const style = doc.createElement("style");
+    style.textContent = INVITE_CSS;
+    const card = doc.createElement("div");
+    card.className = "card";
+    card.setAttribute("role", "dialog");
+    card.setAttribute("aria-labelledby", "fut-invite-title");
+    const top = doc.createElement("div");
+    top.className = "top";
+    const h8 = doc.createElement("h3");
+    h8.id = "fut-invite-title";
+    h8.textContent = t("tour.inviteTitle");
+    top.append(icon(doc, "help", 18), h8);
+    const p = doc.createElement("p");
+    p.textContent = t("tour.inviteText", { name: t(`tour.name.${id}`) });
+    const acts = doc.createElement("div");
+    acts.className = "acts";
+    const btn = (cls, text, onClick) => {
+      const b = doc.createElement("button");
+      b.type = "button";
+      b.className = cls;
+      b.textContent = text;
+      b.addEventListener("click", onClick);
+      acts.append(b);
+      return b;
+    };
+    btn("b quiet", t("tour.no"), () => {
+      markSeen(d, id);
+      closeInvite(doc);
+      offerGuides(d, ids);
+    });
+    btn("b ghost", t("tour.later"), () => {
+      later.set(doc, skip.add(id));
+      closeInvite(doc);
+      offerGuides(d, ids);
+    });
+    btn("b primary", t("tour.show"), () => startGuide(d, id));
+    card.append(top, p, acts);
+    root.append(style, card);
+    doc.body.append(host);
+    const vv = doc.defaultView?.visualViewport;
+    if (vv && vv.scale < ZOOMED_OUT) {
+      card.classList.add("docked");
+      followViewport(doc, card, "bottom");
+    }
+  }
+  var watching = /* @__PURE__ */ new WeakSet();
+  function watchFor(d) {
+    const { doc } = d;
+    if (watching.has(doc) || !doc.body) return;
+    watching.add(doc);
+    let queued2 = false;
+    const observer = new MutationObserver(() => {
+      if (queued2) return;
+      queued2 = true;
+      setTimeout(() => {
+        queued2 = false;
+        const left = (pending.get(doc) ?? []).filter((id) => !seen(d)[id] && !later.get(doc)?.has(id));
+        if (!left.length) {
+          observer.disconnect();
+          watching.delete(doc);
+          return;
+        }
+        if (left.some((id) => guideHere(doc, id))) offerGuides(d, pending.get(doc) ?? []);
+      }, 400);
+    });
+    observer.observe(doc.body, { childList: true, subtree: true });
+  }
+  function startWhenReady(d, id) {
+    if (guideHere(d.doc, id)) return startGuide(d, id);
+    const observer = new MutationObserver(() => {
+      if (!guideHere(d.doc, id)) return;
+      observer.disconnect();
+      startGuide(d, id);
+    });
+    observer.observe(d.doc.body, { childList: true, subtree: true });
+  }
+  function guideFromUrl(href) {
+    const id = new URL(href).searchParams.get(GUIDE_PARAM);
+    return GUIDES.includes(id) ? id : null;
+  }
+  var GUIDE_PAGES = { fleet: "fleetdispatch", galaxy: "galaxy", messages: "messages", tech: "supplies" };
+  function guideUrl(href, id) {
+    const component = GUIDE_PAGES[id];
+    if (!component) return null;
+    const u = new URL(href);
+    u.search = "";
+    u.searchParams.set("page", "ingame");
+    u.searchParams.set("component", component);
+    u.searchParams.set(GUIDE_PARAM, id);
+    return u.toString();
+  }
+  function guidePanel(o) {
+    const { doc, t } = o;
+    const el7 = (tag, cls = "", text = "") => {
+      const n = doc.createElement(tag);
+      if (cls) n.className = cls;
+      if (text) n.textContent = text;
+      return n;
+    };
+    const row = (name, desc, control) => {
+      const r = el7("div", "row");
+      r.append(el7("span", "name", name), el7("span", "desc", desc), control);
+      return r;
+    };
+    const action = (label, onClick) => {
+      const box = el7("span", "control");
+      const b2 = el7("button", "seg", label);
+      b2.type = "button";
+      b2.addEventListener("click", onClick);
+      box.append(b2);
+      return box;
+    };
+    const group = (label, glyph2) => {
+      const g = el7("div", "group");
+      const gi = el7("span", "gi");
+      gi.append(icon(doc, glyph2, 16));
+      g.append(gi, doc.createTextNode(label));
+      return g;
+    };
+    const out = [group(t("tour.firstSteps"), "flag")];
+    o.steps.forEach((s, n) => {
+      let control;
+      if (s.done) {
+        control = el7("span", "control fut-done");
+        control.append(icon(doc, "check", 16), el7("span", "", t("tour.stepDone")));
+      } else control = action(t("tour.show"), s.show);
+      const r = row(`${n + 1} · ${t(`tour.step.${s.key}`)}`, t(`tour.step.${s.key}Hint`), control);
+      if (s.done) r.classList.add("fut-step-done");
+      out.push(r);
+    });
+    out.push(group(t("tour.all"), "help"));
+    for (const id of GUIDES) out.push(row(t(`tour.name.${id}`), t(`tour.where.${id}`), action(t("tour.start"), () => o.onStart(id))));
+    const on = o.store.get(OFFER_KEY, true);
+    const sw = el7("span", "control");
+    const b = el7("button", "switch");
+    b.type = "button";
+    b.setAttribute("role", "switch");
+    b.setAttribute("aria-checked", String(on));
+    b.setAttribute("aria-label", t("tour.offer"));
+    b.append(el7("i", "sw-track"));
+    b.addEventListener("click", () => {
+      o.store.set(OFFER_KEY, !on);
+      o.redraw();
+    });
+    sw.append(b);
+    out.push(
+      group(t("tour.invites"), "bell"),
+      row(t("tour.offer"), t("tour.offerHint"), sw),
+      row(
+        t("tour.reset"),
+        t("tour.resetHint"),
+        action(t("tour.resetDo"), () => {
+          o.store.set(SEEN_KEY, {});
+          o.redraw();
+        })
+      )
+    );
+    return out;
   }
 
   // src/modules/planet-menu/style.ts
@@ -13337,7 +14297,7 @@ input.field { width: 190px; }
 #planetbarcomponent.fut-wide #cutty,
 #planetbarcomponent.fut-wide #myPlanets { width: ${MENU_WIDTH}px !important; }
 
-/* GRAY AREA: requires ToolDev approval before publishing \u2014 see AGENTS.md \xA71.7 / \xA73.
+/* GRAY AREA: requires ToolDev approval before publishing — see AGENTS.md §1.7 / §3.
    The wider menu would sit under the skyscraper banner, so the banner is shifted right
    by exactly the extra width, as tolerated OGLight does (margin-left on the banner
    component). The banner is never hidden, resized, faded or covered. */
@@ -13449,7 +14409,7 @@ ${L} .fut-fleet-m { display: inline-flex; align-items: center; gap: 2px; color: 
 ${L} .fut-line3 { display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; }
 ${L} .fut-line3 .fut-fleet { flex: none; margin-top: 0; }
 /* Fleets in flight from or to this row: the mission's glyph in its colour (expedition blue, transport and
-   deploy green, the rest silver), the way (\u2192 leaving, \u2190 coming back, \u2193 arriving here), how many when more
+   deploy green, the rest silver), the way (→ leaving, ← coming back, ↓ arriving here), how many when more
    than one; the moon's after a moon mark. Details in the tooltip. */
 ${L} .fut-flights { display: flex; align-items: center; gap: 4px; min-width: 0; margin-top: 1px; font: 600 11px/12px var(--display); white-space: nowrap; }
 ${L} .fut-fl { display: inline-flex; align-items: center; gap: 1px; color: var(--tone, var(--text-2)); }
@@ -13555,13 +14515,13 @@ ${L} .smallplanet a.alert {
   width: 12px !important; height: 12px !important; border-radius: 50%; box-shadow: 0 0 0 1px var(--bg);
 }
 
-/* Toolbar: replaces the colony counter. Two tiles side by side (production \u2192 Dashboard, plan \u2192 Piano),
+/* Toolbar: replaces the colony counter. Two tiles side by side (production → Dashboard, plan → Piano),
    name on top and number below; sync and settings stacked on the right. */
 #planetbarcomponent .fut-toolbar {
   box-sizing: border-box; display: grid !important; height: auto !important; padding: 0 !important; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto; margin: 0 0 3px;
   border: 0; border-radius: 6px; background: var(--band); overflow: hidden;
 }
-/* The board's band: two printed tiles (production \u2192 Dashboard, plan \u2192 Plan), figures in the board's face. */
+/* The board's band: two printed tiles (production → Dashboard, plan → Plan), figures in the board's face. */
 #planetbarcomponent .fut-toolbar .fut-cell {
   box-sizing: border-box !important; height: 40px !important; width: auto !important; box-shadow: none !important; border-radius: 0 !important; font: inherit;
   display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 3px; min-width: 0; padding: 0 6px 0 8px; margin: 0;
@@ -13679,14 +14639,14 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     sync: '<path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9" fill="none" stroke-width="2.2"/><path d="M19 3v5h-5M5 21v-5h5" fill="none" stroke-width="2.2"/>',
     settings: '<path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z" fill="none" stroke-width="2.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" fill="none" stroke-width="2.2"/>'
   };
-  function el4(doc, tag, className, text) {
+  function el5(doc, tag, className, text) {
     const node = doc.createElement(tag);
     node.className = className;
     if (text !== void 0) node.textContent = text;
     return node;
   }
   function iconButton2(doc, icon2, title, onClick) {
-    const button3 = el4(doc, "button", `fut-tool fut-tool-${icon2}`);
+    const button3 = el5(doc, "button", `fut-tool fut-tool-${icon2}`);
     button3.type = "button";
     button3.title = title;
     button3.setAttribute("aria-label", title);
@@ -13698,16 +14658,16 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     return button3;
   }
   function resourceColumn(doc, body, now, locale, withStorage, view2) {
-    const box = el4(doc, "span", "fut-res");
+    const box = el5(doc, "span", "fut-res");
     if (!body) {
-      for (const cls of ["fut-m", "fut-c", "fut-d"]) box.append(el4(doc, "span", `fut-cell ${cls} fut-missing`, "\u2014"));
+      for (const cls of ["fut-m", "fut-c", "fut-d"]) box.append(el5(doc, "span", `fut-cell ${cls} fut-missing`, "—"));
       return box;
     }
     const amount = estimateResources(body, now);
     const fill = withStorage ? storageFill(body, amount) : null;
     const cell = (key, cls) => {
       const full = fill !== null && fill[key] >= 0.9;
-      const node = el4(doc, "span", full ? `fut-cell ${cls} fut-full` : `fut-cell ${cls}`, formatUnits(amount[key], locale));
+      const node = el5(doc, "span", full ? `fut-cell ${cls} fut-full` : `fut-cell ${cls}`, formatUnits(amount[key], locale));
       if (fill !== null) {
         const pct = Math.round(fill[key] * 100);
         node.style.setProperty("--fut-fill", `${pct}%`);
@@ -13725,12 +14685,12 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     const p = planet ? fleetValue(planet) : 0;
     const m = moon ? fleetValue(moon) : 0;
     if (!p && !m) return null;
-    const line = el4(doc, "span", "fut-fleet");
+    const line = el5(doc, "span", "fut-fleet");
     line.title = t("planetMenu.fleetHint");
     if (p || m) line.append(icon(doc, "fleet", 12));
-    if (p) line.append(el4(doc, "span", "fut-fleet-p", formatUnits(p, locale)));
+    if (p) line.append(el5(doc, "span", "fut-fleet-p", formatUnits(p, locale)));
     if (m) {
-      const moonPart = el4(doc, "span", "fut-fleet-m");
+      const moonPart = el5(doc, "span", "fut-fleet-m");
       moonPart.innerHTML = '<svg viewBox="0 0 24 24" width="8" height="8" aria-hidden="true" fill="currentColor"><path d="M14.6 2.6A9.6 9.6 0 1 0 21.4 16 8 8 0 0 1 14.6 2.6z"/></svg>';
       moonPart.append(formatUnits(m, locale));
       line.append(moonPart);
@@ -13739,12 +14699,12 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
   }
   var MOON_MARK = '<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="currentColor"><path d="M14.6 2.6A9.6 9.6 0 1 0 21.4 16 8 8 0 0 1 14.6 2.6z"/></svg>';
   function fleetPeek(doc, value, o, cls, moon = false) {
-    const peek = el4(doc, "span", `fut-fleet-peek ${cls}`);
+    const peek = el5(doc, "span", `fut-fleet-peek ${cls}`);
     peek.setAttribute("aria-hidden", "true");
-    const v = el4(doc, "span", "fut-peek-v");
+    const v = el5(doc, "span", "fut-peek-v");
     v.append(icon(doc, "fleet", 12));
     if (moon) {
-      const mark = el4(doc, "span", "fut-peek-moonmark");
+      const mark = el5(doc, "span", "fut-peek-moonmark");
       mark.innerHTML = MOON_MARK;
       v.append(mark);
     }
@@ -13777,7 +14737,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     if (!id) return null;
     const at = visits?.[String(id)];
     const { text, cls } = at ? dataAge(at, now) : { text: "60", cls: "fut-age-old" };
-    const badge = el4(doc, "span", `fut-age ${cls}`, text);
+    const badge = el5(doc, "span", `fut-age ${cls}`, text);
     if (at) badge.dataset.at = String(at);
     badge.title = t("planetMenu.age");
     return badge;
@@ -13801,13 +14761,13 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
   }
   function queueDots(doc, items, building2, now, t, locale) {
     if (!items.length && !building2) return null;
-    const box = el4(doc, "span", "fut-queue");
+    const box = el5(doc, "span", "fut-queue");
     if (items.length) {
-      box.title = items.map((i) => `${t(`queue.${i.kind}`)}: ${queueLabel(i, locale)} \xB7 ${remaining(i.end, now)}`).join("\n");
-      for (const kind of new Set(items.map((i) => i.kind))) box.append(el4(doc, "span", `fut-q fut-q-${kind}`));
+      box.title = items.map((i) => `${t(`queue.${i.kind}`)}: ${queueLabel(i, locale)} · ${remaining(i.end, now)}`).join("\n");
+      for (const kind of new Set(items.map((i) => i.kind))) box.append(el5(doc, "span", `fut-q fut-q-${kind}`));
     } else {
       box.title = building2?.getAttribute("title") || t("planetMenu.building");
-      box.append(el4(doc, "span", "fut-q fut-q-unknown"));
+      box.append(el5(doc, "span", "fut-q fut-q-unknown"));
     }
     return box;
   }
@@ -13815,11 +14775,11 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
   var TIP_ID = "fut-plan-tip";
   function planBadge(doc, mark, o, where) {
     if (!mark) return null;
-    const b = el4(doc, "span", `fut-plan fut-plan-${mark.state}`);
+    const b = el5(doc, "span", `fut-plan fut-plan-${mark.state}`);
     b.textContent = String(mark.items.length);
     b.tabIndex = 0;
     b.setAttribute("role", "button");
-    b.setAttribute("aria-label", `${o.t("plan.title")}: ${where.name} [${where.coords}] \xB7 ${mark.items.join(", ")}`);
+    b.setAttribute("aria-label", `${o.t("plan.title")}: ${where.name} [${where.coords}] · ${mark.items.join(", ")}`);
     const show2 = () => showPlanTip(doc, b, mark, o, where);
     const hide = () => doc.getElementById(TIP_ID)?.remove();
     b.addEventListener("mouseenter", show2);
@@ -13841,30 +14801,30 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
   }
   function showPlanTip(doc, anchor, mark, o, where) {
     doc.getElementById(TIP_ID)?.remove();
-    const tip = el4(doc, "div", `fut-plan-tip fut-plan-${mark.state}`);
+    const tip = el5(doc, "div", `fut-plan-tip fut-plan-${mark.state}`);
     tip.id = TIP_ID;
     tip.setAttribute("role", "tooltip");
-    const head = el4(doc, "div", "fut-pt-head");
-    head.append(el4(doc, "b", "", where.name), el4(doc, "span", "", `[${where.coords}]${where.moon ? ` \xB7 ${o.t("planetMenu.moon")}` : ""}`));
-    const title = el4(doc, "div", "fut-pt-title");
+    const head = el5(doc, "div", "fut-pt-head");
+    head.append(el5(doc, "b", "", where.name), el5(doc, "span", "", `[${where.coords}]${where.moon ? ` · ${o.t("planetMenu.moon")}` : ""}`));
+    const title = el5(doc, "div", "fut-pt-title");
     title.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="currentColor">${PLAN_ICON}</svg>`;
     title.append(doc.createTextNode(o.t("plan.title")));
-    const list = el4(doc, "ul", "fut-pt-items");
-    for (const i of mark.items) list.append(el4(doc, "li", "", i));
+    const list = el5(doc, "ul", "fut-pt-items");
+    for (const i of mark.items) list.append(el5(doc, "li", "", i));
     const time = (ms) => new Date(ms).toLocaleTimeString(o.locale, { hour: "2-digit", minute: "2-digit" });
     const resRow = (r) => {
-      const row = el4(doc, "div", "fut-pt-res");
+      const row = el5(doc, "div", "fut-pt-res");
       for (const k of ["metal", "crystal", "deuterium"]) {
         if (!r[k]) continue;
-        const c = el4(doc, "span", `fut-pt-${k}`);
+        const c = el5(doc, "span", `fut-pt-${k}`);
         c.innerHTML = resIconSvg(k, 12);
         c.append(doc.createTextNode(formatUnits(r[k], o.locale)));
         row.append(c);
       }
       return row;
     };
-    const status = el4(doc, "div", "fut-pt-status");
-    const say = (text) => status.append(el4(doc, "div", "fut-pt-say", text));
+    const status = el5(doc, "div", "fut-pt-status");
+    const say = (text) => status.append(el5(doc, "div", "fut-pt-say", text));
     const sent = mark.pending.metal + mark.pending.crystal + mark.pending.deuterium > 0;
     const sentText = mark.pending.arriveAt > o.now ? o.t("plan.sentArriving", { time: time(mark.pending.arriveAt) }) : o.t("plan.sentArrived");
     if (mark.state === "ready") say(o.t("plan.readyHere"));
@@ -13874,7 +14834,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
       status.append(resRow(mark.lack ?? { metal: 0, crystal: 0, deuterium: 0 }));
     }
     if (mark.state !== "ready" && mark.state !== "unknown" && sent) {
-      const line = el4(doc, "div", "fut-pt-say fut-pt-sent", sentText);
+      const line = el5(doc, "div", "fut-pt-say fut-pt-sent", sentText);
       status.append(line, resRow(mark.pending));
     }
     tip.append(head, title, list, status);
@@ -13911,44 +14871,44 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
   }
   function toolbar(o, colonies) {
     const { doc, t } = o;
-    const bar = el4(doc, "div", "fut-toolbar");
+    const bar = el5(doc, "div", "fut-toolbar");
     if (colonies) bar.title = colonies;
     const fmt = (n) => formatUnits(n, o.locale);
     const msu4 = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
     const cell = (glyph2, label, value, unit, cls, title, onClick) => {
-      const b = el4(doc, "button", "fut-cell");
+      const b = el5(doc, "button", "fut-cell");
       b.type = "button";
       b.title = title;
-      const top = el4(doc, "span", "fut-cell-t");
-      const ico = el4(doc, "span", "fut-cell-i");
+      const top = el5(doc, "span", "fut-cell-t");
+      const ico = el5(doc, "span", "fut-cell-i");
       ico.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="currentColor" stroke="currentColor">${ICONS2[glyph2]}</svg>`;
-      top.append(ico, el4(doc, "span", "fut-cell-k", label));
-      const v = el4(doc, "span", `fut-cell-v ${cls}`.trim());
+      top.append(ico, el5(doc, "span", "fut-cell-k", label));
+      const v = el5(doc, "span", `fut-cell-v ${cls}`.trim());
       v.append(value);
-      if (unit) v.append(" ", el4(doc, "small", "", unit));
+      if (unit) v.append(" ", el5(doc, "small", "", unit));
       b.append(top, v);
       if (onClick) b.addEventListener("click", onClick);
       else b.disabled = true;
       bar.append(b);
     };
     const perDay = o.snapshot ? msu4(totals(o.snapshot, o.now).perHour) * 24 : null;
-    cell("dashboard", t("bar.prod"), perDay === null ? "\u2014" : `+${fmt(perDay)}`, perDay === null ? "" : t("bar.msuDay"), "", `${t("dash.title")}${perDay === null ? "" : ` \xB7 ${t("bar.dashHint")}`}`, o.onOpenDashboard);
+    cell("dashboard", t("bar.prod"), perDay === null ? "—" : `+${fmt(perDay)}`, perDay === null ? "" : t("bar.msuDay"), "", `${t("dash.title")}${perDay === null ? "" : ` · ${t("bar.dashHint")}`}`, o.onOpenDashboard);
     const count2 = o.planCount ?? 0;
     const gap = o.planGap;
     const known = count2 > 0 && gap !== null && gap !== void 0;
-    const planValue = !count2 ? "\u2014" : !known ? "?" : gap > 0 ? `\u2212${fmt(gap)}` : t("bar.ready");
+    const planValue = !count2 ? "—" : !known ? "?" : gap > 0 ? `−${fmt(gap)}` : t("bar.ready");
     cell(
       "planner",
       count2 ? t("bar.plan", { n: count2 > 99 ? "99+" : count2 }) : t("bar.planEmpty"),
       planValue,
       "",
       !known ? "" : gap > 0 ? "fut-warn" : "fut-ok",
-      `${t("plan.title")}${known && gap > 0 ? ` \xB7 ${t("bar.missing")} ${fmt(gap)}` : ""}${count2 && gap ? ` \xB7 ${t("bar.planHint")}` : ""}`,
+      `${t("plan.title")}${known && gap > 0 ? ` · ${t("bar.missing")} ${fmt(gap)}` : ""}${count2 && gap ? ` · ${t("bar.planHint")}` : ""}`,
       () => o.onOpenPlanner?.()
     );
-    const side = el4(doc, "div", "fut-side");
+    const side = el5(doc, "div", "fut-side");
     const lastSync = o.snapshot ? t("toolbar.lastSync", { time: formatTime(o.snapshot.fetchedAt, o.locale) }) : "";
-    const sync = iconButton2(doc, "sync", [t("sync.button"), lastSync].filter(Boolean).join(" \xB7 "), () => {
+    const sync = iconButton2(doc, "sync", [t("sync.button"), lastSync].filter(Boolean).join(" · "), () => {
       if (sync.classList.contains("fut-busy")) return;
       sync.classList.add("fut-busy");
       sync.classList.remove("fut-failed");
@@ -13998,8 +14958,8 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
   }
   function showInfoTip(doc, anchor, title, lines) {
     doc.getElementById(TIP_ID)?.remove();
-    const note = el4(doc, "div", "fut-info-note");
-    const shut = el4(doc, "button", "");
+    const note = el5(doc, "div", "fut-info-note");
+    const shut = el5(doc, "button", "");
     shut.append(icon(doc, "close", 16));
     shut.type = "button";
     shut.setAttribute("aria-label", title);
@@ -14007,18 +14967,18 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
       e.preventDefault();
       setTouchNote(doc, null);
     });
-    const text = el4(doc, "span", "q");
-    text.append(el4(doc, "b", "", title));
-    for (const line of lines) text.append(el4(doc, "span", "l", line));
+    const text = el5(doc, "span", "q");
+    text.append(el5(doc, "b", "", title));
+    for (const line of lines) text.append(el5(doc, "span", "l", line));
     note.append(text, shut);
     if (setTouchNote(doc, note)) return;
-    const tip = el4(doc, "div", "fut-plan-tip fut-info-tip");
+    const tip = el5(doc, "div", "fut-plan-tip fut-info-tip");
     tip.id = TIP_ID;
     tip.setAttribute("role", "tooltip");
-    const head = el4(doc, "div", "fut-pt-head");
-    head.append(el4(doc, "b", "", title));
-    const list = el4(doc, "ul", "fut-pt-items");
-    for (const line of lines) list.append(el4(doc, "li", "", line));
+    const head = el5(doc, "div", "fut-pt-head");
+    head.append(el5(doc, "b", "", title));
+    const list = el5(doc, "ul", "fut-pt-items");
+    for (const line of lines) list.append(el5(doc, "li", "", line));
     tip.append(head, list);
     doc.body.append(tip);
     const box = anchor.getBoundingClientRect();
@@ -14049,7 +15009,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     if (!ev || ev.attack === null && ev.spy === null) return;
     const { doc, t } = o;
     link.classList.add(ev.attack !== null ? "fut-attack" : "fut-spy");
-    const badge = el4(doc, "span", "fut-threat");
+    const badge = el5(doc, "span", "fut-threat");
     const lines = [];
     if (ev.attack !== null) {
       badge.append(icon(doc, "sword", 12));
@@ -14068,27 +15028,27 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
   function flightChips(doc, planet, moon, o) {
     const groups = [planet?.own ?? [], moon?.own ?? []];
     if (!groups[0].length && !groups[1].length) return null;
-    const line = el4(doc, "span", "fut-flights");
+    const line = el5(doc, "span", "fut-flights");
     const lines = [];
     const order = { out: 0, in: 1, back: 2 };
     groups.forEach((own, i) => {
       if (!own.length) return;
       if (i === 1) {
-        const mark = el4(doc, "span", "fut-fl-moon");
+        const mark = el5(doc, "span", "fut-fl-moon");
         mark.innerHTML = MOON_MARK;
         line.append(mark);
         lines.push(o.t("flights.moon"));
       }
       for (const f of [...own].sort((a, b) => order[a.way] - order[b.way] || a.first - b.first)) {
         const look = MISSION_LOOK[f.mission] ?? { icon: "ships" };
-        const chip2 = el4(doc, "span", "fut-fl");
+        const chip2 = el5(doc, "span", "fut-fl");
         chip2.dataset.way = f.way;
         if (look.tone) chip2.style.setProperty("--tone", MISSION_TONES[look.tone]);
         chip2.innerHTML = iconSvg(look.icon, 11);
-        const way = el4(doc, "span", "w");
+        const way = el5(doc, "span", "w");
         way.append(icon(doc, WAY_MARK[f.way].icon, 10));
         chip2.append(way);
-        if (f.count > 1) chip2.append(el4(doc, "span", "n", String(f.count)));
+        if (f.count > 1) chip2.append(el5(doc, "span", "n", String(f.count)));
         const text = o.t(`flights.${f.way}`, { mission: o.t(`mission.${f.mission}`), n: f.count, time: clock(f.first, o.locale) });
         chip2.title = text;
         lines.push(`${i === 1 ? "  " : ""}${text}`);
@@ -14098,7 +15058,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     line.title = lines.join("\n");
     line.setAttribute("aria-label", lines.join(". "));
     line.setAttribute("role", "button");
-    detailsOnTap(doc, line, () => [line.closest("a")?.querySelector(".planet-name")?.textContent?.trim(), o.t("flights.title")].filter(Boolean).join(" \xB7 "), () => lines);
+    detailsOnTap(doc, line, () => [line.closest("a")?.querySelector(".planet-name")?.textContent?.trim(), o.t("flights.title")].filter(Boolean).join(" · "), () => lines);
     return line;
   }
   function renderPlanetMenu(o) {
@@ -14106,7 +15066,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     const list = doc.getElementById("planetList");
     if (!list) return;
     if (!doc.getElementById(STYLE_ID4)) {
-      const style = el4(doc, "style", "");
+      const style = el5(doc, "style", "");
       style.id = STYLE_ID4;
       style.textContent = PLANET_MENU_CSS;
       doc.head.append(style);
@@ -14132,10 +15092,10 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
       if (entry.current) entry.element.classList.add("fut-current");
       const link = entry.planetLink;
       if (link) {
-        const wrap = el4(doc, "span", "fut-name");
+        const wrap = el5(doc, "span", "fut-name");
         link.querySelectorAll(".planet-name, .planet-koords").forEach((n) => wrap.append(n));
         const planetBody = entry.planetId ? byId.get(entry.planetId) : void 0;
-        const third = el4(doc, "span", "fut-line3");
+        const third = el5(doc, "span", "fut-line3");
         if (view2.fleet) {
           const line = fleetLine(doc, planetBody, entry.moonId ? byId.get(entry.moonId) : void 0, o.locale, o.t);
           if (line) third.append(line);
@@ -14175,22 +15135,22 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
         const mq = queueDots(doc, entry.moonId ? activeItems(o.queues?.bodies[String(entry.moonId)], o.now) : [], entry.construction.moon, o.now, o.t, o.locale);
         if (mq) moon.append(mq);
       } else {
-        gap = el4(doc, "span", "fut-nomoon");
+        gap = el5(doc, "span", "fut-nomoon");
         link?.after(gap);
       }
       {
-        const col = el4(doc, "span", "fut-plancol");
+        const col = el5(doc, "span", "fut-plancol");
         const pb = planBadge(doc, entry.planetId ? o.planMarks?.[String(entry.planetId)] : void 0, o, { id: entry.planetId, name: entry.name, coords: entry.coords, moon: false });
         const moonName = entry.moonLink?.querySelector("img")?.getAttribute("alt") || entry.name;
         const mb = planBadge(doc, entry.moonId ? o.planMarks?.[String(entry.moonId)] : void 0, o, { id: entry.moonId, name: moonName, coords: entry.coords, moon: true });
         if (pb) pb.classList.add("fut-plan-p");
         if (mb) mb.classList.add("fut-plan-m");
         const empty = () => {
-          const slot = el4(doc, "span", "fut-plan-empty");
+          const slot = el5(doc, "span", "fut-plan-empty");
           slot.setAttribute("aria-hidden", "true");
           return slot;
         };
-        col.append(pb ?? (entry.planetId ? empty() : el4(doc, "span", "")), mb ?? (moon ? empty() : el4(doc, "span", "")));
+        col.append(pb ?? (entry.planetId ? empty() : el5(doc, "span", "")), mb ?? (moon ? empty() : el5(doc, "span", "")));
         const after = moon ?? gap;
         if (after) after.after(col);
         else entry.element.append(col);
@@ -14206,24 +15166,24 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
       const fly = o.flying ?? { metal: 0, crystal: 0, deuterium: 0 };
       const stock2 = { metal: base2.stock.metal + fly.metal, crystal: base2.stock.crystal + fly.crystal, deuterium: base2.stock.deuterium + fly.deuterium };
       const msu4 = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
-      const box = el4(doc, "div", "fut-totals");
+      const box = el5(doc, "div", "fut-totals");
       box.setAttribute("role", "table");
       const row = (cls, cells, glyph2) => {
-        const r = el4(doc, "div", `fut-trow ${cls}`.trim());
+        const r = el5(doc, "div", `fut-trow ${cls}`.trim());
         r.setAttribute("role", "row");
         cells.forEach((text, i) => {
-          const c = el4(doc, "span", i ? "fut-tnum" : "fut-tname");
+          const c = el5(doc, "span", i ? "fut-tnum" : "fut-tname");
           c.setAttribute("role", "cell");
           if (i && text) {
             c.title = o.t(i === 1 ? "totals.stock" : "totals.day");
             c.setAttribute("aria-label", `${c.title}: ${text}`);
           }
           if (!i && glyph2) {
-            const ico = el4(doc, "span", "fut-tico");
+            const ico = el5(doc, "span", "fut-tico");
             ico.innerHTML = iconSvg(glyph2, 13);
             c.append(ico);
           }
-          c.append(el4(doc, "span", "fut-tlabel", text));
+          c.append(el5(doc, "span", "fut-tlabel", text));
           r.append(c);
         });
         box.append(r);
@@ -14268,10 +15228,10 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     if (!SPECIES.includes(s)) return [];
     return lfBuildings(s).map((id) => ({ id, level: lvl(body, id), guessed: false }));
   }
-  function activeLfResearch(body, seen) {
+  function activeLfResearch(body, seen2) {
     const out = [];
     for (let slot = 1; slot <= 18; slot++) {
-      const known = seen?.find((id) => slotOf(id) === slot);
+      const known = seen2?.find((id) => slotOf(id) === slot);
       if (known) {
         out.push({ id: known, level: lvl(body, known), guessed: false });
         continue;
@@ -14421,8 +15381,8 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
   var INVEST_KINDS = ["metal", "crystal", "deuterium", "lfBuilding", "lfResearch", "plasma", "astro"];
   function open(locked, planetId, id, level2) {
     if (level2 > 0) return true;
-    const seen = locked[String(planetId)]?.[techKind(id) === "lfBuilding" ? "b" : "r"];
-    return seen !== void 0 && !seen.includes(id);
+    const seen2 = locked[String(planetId)]?.[techKind(id) === "lfBuilding" ? "b" : "r"];
+    return seen2 !== void 0 && !seen2.includes(id);
   }
   function amortizationPlan({ snapshot, planets, speed, rates = DEFAULT_RATES, steps = 20, lfSlots = {}, lfLevels = {}, lfLocked = {}, exclude = [] }) {
     if (!snapshot) return [];
@@ -14598,11 +15558,11 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     return out;
   }
   function rememberTechIcons(doc, store) {
-    const seen = readTechIcons(doc);
-    if (!Object.keys(seen).length) return;
+    const seen2 = readTechIcons(doc);
+    if (!Object.keys(seen2).length) return;
     const known = store.get(TECH_ICONS_KEY, {});
-    if (Object.entries(seen).every(([id, i]) => JSON.stringify(known[id]) === JSON.stringify(i))) return;
-    store.set(TECH_ICONS_KEY, { ...known, ...seen });
+    if (Object.entries(seen2).every(([id, i]) => JSON.stringify(known[id]) === JSON.stringify(i))) return;
+    store.set(TECH_ICONS_KEY, { ...known, ...seen2 });
   }
   var TILE_CLASS = {
     1: "metalMine",
@@ -14680,10 +15640,10 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     for (const id of ids) {
       const cls = TILE_CLASS[id] ? `icon sprite sprite_medium medium ${TILE_CLASS[id]}` : LF_IDS.includes(id) ? `queuePic lifeformqueue lifeformTech${id}` : "";
       if (!cls) continue;
-      const el6 = doc.createElement("div");
-      el6.className = cls;
-      box.append(el6);
-      const cs = view2.getComputedStyle(el6);
+      const el7 = doc.createElement("div");
+      el7.className = cls;
+      box.append(el7);
+      const cs = view2.getComputedStyle(el7);
       const url = /url\("?([^")]+)"?\)/.exec(cs.backgroundImage)?.[1];
       const w = parseFloat(cs.width);
       const pos = cs.backgroundPosition;
@@ -15056,14 +16016,16 @@ table.queues td.acts { width: 1%; text-align: right; }
     titles.append(h3("h2", "", t("dash.title")));
     const universe = doc.querySelector('meta[name="ogame-universe-name"]')?.getAttribute("content") ?? "";
     const player = doc.querySelector('meta[name="ogame-player-name"]')?.getAttribute("content") ?? "";
-    const sub = [player, universe, o.snapshot ? t("toolbar.lastSync", { time: new Date(o.snapshot.fetchedAt).toLocaleString(locale) }) : t("dash.noData")].filter(Boolean).join(" \xB7 ");
+    const sub = [player, universe, o.snapshot ? t("toolbar.lastSync", { time: new Date(o.snapshot.fetchedAt).toLocaleString(locale) }) : t("dash.noData")].filter(Boolean).join(" · ");
     titles.append(h3("span", "sub", sub));
     const x = h3("button", "close");
     x.append(icon(doc, "close", 16));
     x.type = "button";
     x.setAttribute("aria-label", t("dash.close"));
     x.addEventListener("click", close);
-    header.append(titles, x);
+    header.append(titles);
+    if (o.onHelp) header.append(helpButton(doc, t("tour.help"), o.onHelp));
+    header.append(x);
     panel.append(header);
     const tabs = h3("nav", "tabs");
     tabs.setAttribute("role", "tablist");
@@ -15135,7 +16097,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     return cell;
   }
   function levelCell(v, max, fmt) {
-    const cell = h3("td", `num mono${v === 0 ? " zero" : v === max && max > 0 ? " top" : ""}`, v === 0 ? "\xB7" : fmt ? fmt(v) : String(v));
+    const cell = h3("td", `num mono${v === 0 ? " zero" : v === max && max > 0 ? " top" : ""}`, v === 0 ? "·" : fmt ? fmt(v) : String(v));
     return cell;
   }
   function bodyMatrix(ctx, bodies, ids, opts = {}) {
@@ -15174,7 +16136,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       for (const id of ids) {
         const values = bodies.map((b) => level(b, id));
         const total = values.reduce((a, v) => a + v, 0);
-        fr.append(h3("td", "num mono", opts.foot === "sum" ? total ? count(total) : "\xB7" : (total / values.length).toLocaleString(ctx.o.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })));
+        fr.append(h3("td", "num mono", opts.foot === "sum" ? total ? count(total) : "·" : (total / values.length).toLocaleString(ctx.o.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })));
       }
       for (let i = 0; i < (opts.extra ?? []).length; i++) fr.append(h3("td"));
       const tfoot = h3("tfoot");
@@ -15199,8 +16161,8 @@ table.queues td.acts { width: 1%; text-align: right; }
       facts.append(f);
     };
     if (o.score) fact(o.score.points.toLocaleString(o.locale), t("dash.factPoints"));
-    if (o.score?.rank != null) fact(`${o.score.rank}\xB0`, t("dash.factRank", { of: o.score.of ?? "?" }));
-    fact(fmt(msu2(sum.stock)), t("dash.factStock"), `${fmt(sum.stock.metal)} \xB7 ${fmt(sum.stock.crystal)} \xB7 ${fmt(sum.stock.deuterium)}`);
+    if (o.score?.rank != null) fact(`${o.score.rank}°`, t("dash.factRank", { of: o.score.of ?? "?" }));
+    fact(fmt(msu2(sum.stock)), t("dash.factStock"), `${fmt(sum.stock.metal)} · ${fmt(sum.stock.crystal)} · ${fmt(sum.stock.deuterium)}`);
     const fleet = fleetValueOf(ctx.bodies);
     let def = { value: 0, count: 0 };
     for (const b of ctx.bodies) {
@@ -15225,7 +16187,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       name.append(resToken(document, cls, 14), document.createTextNode(label));
       const value = h3("span", "prod-val", `+${fmt(perHour * 24)}`);
       value.append(h3("small", "", `/${t("dash.dayShort")}`));
-      if (gainHour > 0) value.append(h3("small", "next", `\u2192 +${fmt(gainHour * 24)}`));
+      if (gainHour > 0) value.append(h3("small", "next", `→ +${fmt(gainHour * 24)}`));
       top.append(name, value);
       const track = h3("div", "track");
       track.setAttribute("role", "img");
@@ -15244,13 +16206,13 @@ table.queues td.acts { width: 1%; text-align: right; }
     scale.append(h3("span", "", "0"), h3("span", "", fmt(scaleTop / 2)), h3("span", "", fmt(scaleTop)));
     prod.append(scale);
     const total = h3("p", "prod-total");
-    total.append(h3("b", "", `+${fmt(msu2(sum.perHour) * 24)}`), document.createTextNode(` ${t("dash.factProdDay")} \xB7 ${t("dash.prodHourNote", { value: fmt(msu2(sum.perHour)) })}`));
+    total.append(h3("b", "", `+${fmt(msu2(sum.perHour) * 24)}`), document.createTextNode(` ${t("dash.factProdDay")} · ${t("dash.prodHourNote", { value: fmt(msu2(sum.perHour)) })}`));
     prod.append(total);
     const bySpecies = /* @__PURE__ */ new Map();
     for (const b of ctx.bodies) if (b.type === "planet" && b.species) bySpecies.set(b.species, (bySpecies.get(b.species) ?? 0) + 1);
     if (bySpecies.size) {
       const lf = h3("p", "hint");
-      lf.textContent = SPECIES.filter((s) => bySpecies.has(s)).map((s) => `${t(`lf.${s}`)} ${bySpecies.get(s)}`).join(" \xB7 ");
+      lf.textContent = SPECIES.filter((s) => bySpecies.has(s)).map((s) => `${t(`lf.${s}`)} ${bySpecies.get(s)}`).join(" · ");
       prod.append(h3("h4", "", t("dash.tab.lifeforms")), lf);
     }
     const movesCard = buildOrderCard(ctx);
@@ -15273,7 +16235,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     for (const b of ctx.bodies) for (const item of activeItems(o.queues?.bodies[String(b.id)], o.now)) inQueue.push({ body: b, item });
     if (inQueue.length) {
       inQueue.sort((a, b) => a.item.end - b.item.end);
-      const span = Math.max(12, Math.ceil(Math.max(...inQueue.map((q) => (q.item.end - o.now) / 36e5)) / 12) * 12);
+      const span = Math.max(12, Math.ceil(Math.max(...inQueue.map((q2) => (q2.item.end - o.now) / 36e5)) / 12) * 12);
       const qs = section(parent, t("dash.queuesTitle"), o.bell ? t("dash.queuesHint") : void 0);
       const wrap = h3("div", "table-wrap");
       const table = h3("table", "queues");
@@ -15332,7 +16294,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const box = h3("figure", "chart");
     box.append(h3("figcaption", "", label));
     if (pts.length < 2) {
-      box.append(h3("p", "hint", "\u2014"));
+      box.append(h3("p", "hint", "—"));
       return box;
     }
     const t0 = pts[0].at, t1 = pts.at(-1).at;
@@ -15344,7 +16306,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     }
     const x = (at) => L2 + (at - t0) / Math.max(1, t1 - t0) * (W - L2 - R);
     const y = (v) => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
-    const chart = svg(doc, "svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `${label}: ${fmt(vs[0])} \u2192 ${fmt(vs.at(-1))}` });
+    const chart = svg(doc, "svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `${label}: ${fmt(vs[0])} → ${fmt(vs.at(-1))}` });
     for (const v of [lo, hi]) {
       chart.append(svg(doc, "line", { x1: L2, x2: W - R, y1: y(v), y2: y(v), class: "grid" }));
       const tx = svg(doc, "text", { x: L2 - 6, y: y(v) + 4, "text-anchor": "end", class: "axis" });
@@ -15374,7 +16336,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       dot.setAttribute("cx", String(x(d.at)));
       dot.setAttribute("cy", String(y(value(d))));
       tip.hidden = false;
-      tip.textContent = `${date(d.at)} \xB7 ${fmt(value(d))}`;
+      tip.textContent = `${date(d.at)} · ${fmt(value(d))}`;
       tip.style.left = `${x(d.at) / W * 100}%`;
     });
     hit.addEventListener("mouseleave", () => {
@@ -15394,15 +16356,15 @@ table.queues td.acts { width: 1%; text-align: right; }
       parent.append(h3("p", "empty", t("dash.historyEmpty")));
       return;
     }
-    const signed = (v, f) => v > 0 ? `+${f(v)}` : v < 0 ? `\u2212${f(-v)}` : "0";
+    const signed = (v, f) => v > 0 ? `+${f(v)}` : v < 0 ? `−${f(-v)}` : "0";
     const kpis = h3("div", "kpis");
     for (const span of [1, 7, 30]) {
       const c = changeOver(days2, span);
       const box = h3("div", "kpi");
       box.append(h3("span", "label", t("dash.historySpan", { n: span })));
-      box.append(h3("span", `value ${c && c.points < 0 ? "neg" : ""}`, c ? signed(c.points, (n) => n.toLocaleString(locale)) : "\u2014"));
+      box.append(h3("span", `value ${c && c.points < 0 ? "neg" : ""}`, c ? signed(c.points, (n) => n.toLocaleString(locale)) : "—"));
       const rank = c?.rank ? t(c.rank > 0 ? "dash.historyUp" : "dash.historyDown", { n: Math.abs(c.rank) }) : "";
-      box.append(h3("span", "note", c ? [t("dash.historyPerDay", { v: fmt(c.perDay) }), rank, c.days !== span ? t("dash.historyReal", { n: c.days }) : ""].filter(Boolean).join(" \xB7 ") : t("dash.historyFew")));
+      box.append(h3("span", "note", c ? [t("dash.historyPerDay", { v: fmt(c.perDay) }), rank, c.days !== span ? t("dash.historyReal", { n: c.days }) : ""].filter(Boolean).join(" · ") : t("dash.historyFew")));
       kpis.append(box);
     }
     parent.append(kpis);
@@ -15430,9 +16392,9 @@ table.queues td.acts { width: 1%; text-align: right; }
         h3("td", "", new Date(d.at).toLocaleDateString(locale)),
         h3("td", "mono", d.points.toLocaleString(locale)),
         h3("td", `mono ${delta < 0 ? "neg" : delta > 0 ? "pos" : ""}`, prev ? signed(delta, (n) => n.toLocaleString(locale)) : ""),
-        h3("td", "mono", d.rank === null ? "\u2014" : `${d.rank.toLocaleString(locale)}${rankMove ? ` (${rankMove > 0 ? "\u2191" : "\u2193"}${Math.abs(rankMove)})` : ""}`),
-        h3("td", "mono", d.prodDay ? `+${fmt(d.prodDay)}` : "\u2014"),
-        h3("td", "mono", d.fleet ? fmt(d.fleet) : "\u2014")
+        h3("td", "mono", d.rank === null ? "—" : `${d.rank.toLocaleString(locale)}${rankMove ? ` (${rankMove > 0 ? "↑" : "↓"}${Math.abs(rankMove)})` : ""}`),
+        h3("td", "mono", d.prodDay ? `+${fmt(d.prodDay)}` : "—"),
+        h3("td", "mono", d.fleet ? fmt(d.fleet) : "—")
       );
       tbody.append(tr);
     });
@@ -15505,7 +16467,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (!s.planetId) return false;
     if ((o.seenLevels?.[String(s.planetId)]?.[String(s.id)] ?? 0) >= s.to) return true;
     const name = ctx.name(s.id);
-    return activeItems(o.queues?.bodies[String(s.planetId)], o.now).some((q) => q.name === name && q.level >= s.to);
+    return activeItems(o.queues?.bodies[String(s.planetId)], o.now).some((q2) => q2.name === name && q2.level >= s.to);
   }
   function stepPage(s) {
     const component = s.kind === "mine" ? "supplies" : s.kind === "lfBuilding" ? "lfbuildings" : s.kind === "lfResearch" ? "lfresearch" : "research";
@@ -15526,9 +16488,9 @@ table.queues td.acts { width: 1%; text-align: right; }
     const text = h3("div", "move-text");
     const what = m.kind === "mine" ? t(`mine.${m.mine}`) : ctx.name(m.id);
     const to = g.steps[g.steps.length - 1].to;
-    text.append(h3("strong", "", `${what} ${m.from} \u2192 ${to}${m.kind === "astro" ? ` \xB7 ${t("dash.newColony")}` : ""}`));
+    text.append(h3("strong", "", `${what} ${m.from} → ${to}${m.kind === "astro" ? ` · ${t("dash.newColony")}` : ""}`));
     const total = g.steps.reduce((sum, s) => ({ metal: sum.metal + s.cost.metal, crystal: sum.crystal + s.cost.crystal, deuterium: sum.deuterium + s.cost.deuterium }), { metal: 0, crystal: 0, deuterium: 0 });
-    const cost = [`${ctx.fmt(total.metal)} M`, `${ctx.fmt(total.crystal)} C`, ...total.deuterium ? [`${ctx.fmt(total.deuterium)} D`] : []].join(" \xB7 ");
+    const cost = [`${ctx.fmt(total.metal)} M`, `${ctx.fmt(total.crystal)} C`, ...total.deuterium ? [`${ctx.fmt(total.deuterium)} D`] : []].join(" · ");
     const tokens = h3("span", "cost");
     tokens.setAttribute("aria-label", cost);
     for (const [k, v] of [["m", total.metal], ["c", total.crystal], ["d", total.deuterium]]) {
@@ -15541,26 +16503,26 @@ table.queues td.acts { width: 1%; text-align: right; }
       const chips = h3("div", "pls");
       const perPlanet = [...new Map(g.steps.map((s) => [s.planetId, s])).values()];
       let done = 0;
-      const shown2 = numbered ? perPlanet : perPlanet.slice(0, 5);
+      const shown3 = numbered ? perPlanet : perPlanet.slice(0, 5);
       for (const s of perPlanet) {
-        if (!shown2.includes(s)) {
+        if (!shown3.includes(s)) {
           if (stepDone(ctx, s)) done++;
           continue;
         }
         const a = h3("a", "pl", s.name || `[${s.coords}]`);
         a.setAttribute("href", stepPage(s));
         const guessed = g.steps.some((x) => x.planetId === s.planetId && x.guessed);
-        a.title = `${s.name} [${s.coords}] \xB7 ${daysText(ctx, s.days)}${guessed ? ` \xB7 ${t("dash.lfGuessedHint")}` : ""}`;
+        a.title = `${s.name} [${s.coords}] · ${daysText(ctx, s.days)}${guessed ? ` · ${t("dash.lfGuessedHint")}` : ""}`;
         if (guessed) a.classList.add("guess");
         if (stepDone(ctx, s)) {
           a.classList.add("done");
-          a.setAttribute("aria-label", `${a.title} \xB7 ${t("dash.stepDone")}`);
+          a.setAttribute("aria-label", `${a.title} · ${t("dash.stepDone")}`);
           done++;
         }
         chips.append(a);
       }
-      if (shown2.length < perPlanet.length) {
-        const more = h3("button", "pl more", `+${perPlanet.length - shown2.length}`);
+      if (shown3.length < perPlanet.length) {
+        const more = h3("button", "pl more", `+${perPlanet.length - shown3.length}`);
         more.type = "button";
         more.title = t("dash.movesOpen");
         more.addEventListener("click", () => {
@@ -15571,9 +16533,9 @@ table.queues td.acts { width: 1%; text-align: right; }
       }
       if (done === perPlanet.length) line.classList.add("done");
       const sub = h3("span", "meta");
-      if (perPlanet.length > shown2.length) sub.append(document.createTextNode(`${t("dash.planetsCount", { count: perPlanet.length })} `));
+      if (perPlanet.length > shown3.length) sub.append(document.createTextNode(`${t("dash.planetsCount", { count: perPlanet.length })} `));
       sub.append(tokens);
-      if (done) sub.append(h3("em", "ok", ` \xB7 ${t("dash.doneCount", { done, count: perPlanet.length })}`));
+      if (done) sub.append(h3("em", "ok", ` · ${t("dash.doneCount", { done, count: perPlanet.length })}`));
       text.append(chips, sub);
     } else {
       const sub = h3("span", "meta", `${t("dash.account")} `);
@@ -15583,7 +16545,7 @@ table.queues td.acts { width: 1%; text-align: right; }
     const days2 = g.steps.map((s) => s.days);
     const lo = Math.min(...days2), hi = Math.max(...days2);
     const roi = h3("span", "roi");
-    const span = hi - lo >= 0.05 ? `${daysText(ctx, lo)}\u2013${daysText(ctx, hi)}`.replace(` ${t("dash.daysShort")}\u2013`, "\u2013") : daysText(ctx, lo);
+    const span = hi - lo >= 0.05 ? `${daysText(ctx, lo)}–${daysText(ctx, hi)}`.replace(` ${t("dash.daysShort")}–`, "–") : daysText(ctx, lo);
     const unit = ` ${t("dash.daysShort")}`;
     roi.append(document.createTextNode(span.endsWith(unit) ? span.slice(0, -unit.length) : span), h3("small", "", t("dash.daysShort")));
     line.append(text, roi);
@@ -15725,7 +16687,7 @@ table.queues td.acts { width: 1%; text-align: right; }
         const a = h3("a", "col-name", p.name);
         a.href = `${doc.location?.origin ?? ""}/game/index.php?page=ingame&component=lfresearch&cp=${p.id}`;
         th.append(a);
-        th.title = `${p.name} [${p.coords}]${p.species ? ` \xB7 ${t(`lf.${p.species}`)}` : ""}`;
+        th.title = `${p.name} [${p.coords}]${p.species ? ` · ${t(`lf.${p.species}`)}` : ""}`;
         hr.append(th);
       }
       const thead = h3("thead");
@@ -15807,7 +16769,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       b.type = "button";
       b.dataset.scope = type;
       b.setAttribute("aria-pressed", String(unitScope === type));
-      b.append(icon(ctx.o.doc, type, 14, "seg-ico"), h3("span", "", t(type === "planet" ? "dash.planets" : "dash.moons")), h3("i", "mono", list.length ? ctx.fmt(value(list)) : "\u2014"));
+      b.append(icon(ctx.o.doc, type, 14, "seg-ico"), h3("span", "", t(type === "planet" ? "dash.planets" : "dash.moons")), h3("i", "mono", list.length ? ctx.fmt(value(list)) : "—"));
       b.addEventListener("click", () => {
         unitScope = type;
         ctx.redraw();
@@ -15817,12 +16779,12 @@ table.queues td.acts { width: 1%; text-align: right; }
     head.append(seg);
     s.append(head);
     const bodies = of(unitScope);
-    const shown2 = ids.filter((id) => bodies.some((b) => level(b, id) > 0));
-    if (!shown2.length) {
+    const shown3 = ids.filter((id) => bodies.some((b) => level(b, id) > 0));
+    if (!shown3.length) {
       s.append(h3("p", "hint", t("dash.unitsNone")));
       return;
     }
-    s.append(bodyMatrix(ctx, bodies, shown2, { units: true, foot: "sum", extra: [{ label: t("dash.valueMsu"), value: (b) => ctx.fmt(unitsValue2(b, shown2).value) }] }));
+    s.append(bodyMatrix(ctx, bodies, shown3, { units: true, foot: "sum", extra: [{ label: t("dash.valueMsu"), value: (b) => ctx.fmt(unitsValue2(b, shown3).value) }] }));
   }
   function bodyPicker2(ctx, ids, current3, onPick) {
     const { doc, t } = ctx.o;
@@ -15903,7 +16865,7 @@ table.queues td.acts { width: 1%; text-align: right; }
         const nameCell = h3("td", "unit");
         const label = h3("button", "unit-label");
         label.type = "button";
-        label.title = `${ctx.name(id)} \xB7 ${t("dash.scrapPick")}`;
+        label.title = `${ctx.name(id)} · ${t("dash.scrapPick")}`;
         const p = ctx.pic(id, 22);
         if (p) label.append(p);
         label.append(h3("span", "", ctx.name(id)));
@@ -15951,9 +16913,9 @@ table.queues td.acts { width: 1%; text-align: right; }
         picks.get(id).setAttribute("aria-pressed", String(n === level(body, id)));
         const r = scrapReturn({ [id]: n }, scrapRate);
         const [m, c, d] = outs.get(id);
-        m.textContent = n ? ctx.fmt(r.metal) : "\xB7";
-        c.textContent = n ? ctx.fmt(r.crystal) : "\xB7";
-        d.textContent = n ? ctx.fmt(r.deuterium) : "\xB7";
+        m.textContent = n ? ctx.fmt(r.metal) : "·";
+        c.textContent = n ? ctx.fmt(r.crystal) : "·";
+        d.textContent = n ? ctx.fmt(r.deuterium) : "·";
       }
       const total = scrapReturn(amounts, scrapRate);
       totalCells[0].textContent = ctx.fmt(total.metal);
@@ -15988,21 +16950,21 @@ table.queues td.acts { width: 1%; text-align: right; }
     return Number.isFinite(n) && String(value).trim() !== "" ? n : null;
   };
   function readTechList(doc) {
-    return Array.from(doc.querySelectorAll("#technologies .technology[data-technology]")).flatMap((el6) => {
-      const id = Number(el6.getAttribute("data-technology"));
-      const built = num4(el6.querySelector(".level")?.getAttribute("data-value"));
+    return Array.from(doc.querySelectorAll("#technologies .technology[data-technology]")).flatMap((el7) => {
+      const id = Number(el7.getAttribute("data-technology"));
+      const built = num4(el7.querySelector(".level")?.getAttribute("data-value"));
       if (!id || built === null) return [];
-      const target = num4(el6.querySelector(".targetlevel")?.getAttribute("data-value"));
-      return [{ id, name: el6.getAttribute("aria-label") ?? el6.getAttribute("title") ?? String(id), built, level: Math.max(built, target ?? 0) }];
+      const target = num4(el7.querySelector(".targetlevel")?.getAttribute("data-value"));
+      return [{ id, name: el7.getAttribute("aria-label") ?? el7.getAttribute("title") ?? String(id), built, level: Math.max(built, target ?? 0) }];
     });
   }
   function levelsOf(list) {
     return Object.fromEntries(list.map((e) => [e.id, e.level]));
   }
   function costValue(root, cls) {
-    const el6 = root.querySelector(`.costs .${cls}`);
-    if (!el6) return void 0;
-    const v = num4(el6.getAttribute("data-value")) ?? num4(el6.getAttribute("data-tooltip-title") ?? el6.getAttribute("title")) ?? num4(el6.textContent);
+    const el7 = root.querySelector(`.costs .${cls}`);
+    if (!el7) return void 0;
+    const v = num4(el7.getAttribute("data-value")) ?? num4(el7.getAttribute("data-tooltip-title") ?? el7.getAttribute("title")) ?? num4(el7.textContent);
     return v ?? void 0;
   }
   function readEnergyProduction(root) {
@@ -16020,15 +16982,15 @@ table.queues td.acts { width: 1%; text-align: right; }
     if (!root) return null;
     const id = Number(root.getAttribute("data-technology-id") ?? root.querySelector("[data-technology-id]")?.getAttribute("data-technology-id"));
     if (!id) return null;
-    const shown2 = {};
+    const shown3 = {};
     const metal = costValue(root, "metal");
     const crystal = costValue(root, "crystal");
     const deuterium = costValue(root, "deuterium");
     const energy = costValue(root, "energy");
-    if (metal !== void 0) shown2.metal = metal;
-    if (crystal !== void 0) shown2.crystal = crystal;
-    if (deuterium !== void 0) shown2.deuterium = deuterium;
-    if (energy !== void 0) shown2.energy = energy;
+    if (metal !== void 0) shown3.metal = metal;
+    if (crystal !== void 0) shown3.crystal = crystal;
+    if (deuterium !== void 0) shown3.deuterium = deuterium;
+    if (energy !== void 0) shown3.energy = energy;
     const popEl = root.querySelector(".costs .population");
     const pop = costValue(root, "population");
     const population = popEl && pop !== void 0 ? { value: pop, enough: !popEl.classList.contains("insufficient") } : null;
@@ -16039,7 +17001,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       id,
       name: root.querySelector("h3")?.textContent?.trim() ?? String(id),
       panelLevel: num4(root.querySelector(".information .level")?.getAttribute("data-value")),
-      shown: shown2,
+      shown: shown3,
       population,
       durationMs,
       amountInput: root.querySelector("#build_amount"),
@@ -16127,7 +17089,7 @@ table.queues td.acts { width: 1%; text-align: right; }
           applyJumpgateReserve(doc, store, bodyId, t);
         });
         note.replaceChildren(field);
-      } else note.textContent = keep ? `\u2212${keep.toLocaleString()}` : "";
+      } else note.textContent = keep ? `−${keep.toLocaleString()}` : "";
       all2[id] = amount;
     });
     gate.querySelector("#sendall")?.setAttribute("onclick", `setMaxIntInput("#jumpgateForm", ${JSON.stringify(all2)})`);
@@ -16169,8 +17131,8 @@ table.queues td.acts { width: 1%; text-align: right; }
     bar.replaceChildren(label, toggle, edit);
   }
   function watchJumpgate(doc, store, bodyId, t) {
-    const win = pageWindow();
-    const original = win.initJumpgate;
+    const win2 = pageWindow();
+    const original = win2.initJumpgate;
     if (typeof original !== "function" || original.futHooked) return;
     const wrapped = function(...args) {
       const result = original.apply(this, args);
@@ -16181,7 +17143,7 @@ table.queues td.acts { width: 1%; text-align: right; }
       return result;
     };
     wrapped.futHooked = true;
-    win.initJumpgate = wrapped;
+    win2.initJumpgate = wrapped;
   }
 
   // src/engines/energy.ts
@@ -16288,7 +17250,7 @@ table.queues td.acts { width: 1%; text-align: right; }
 .fut-tp-sat:hover { border-color: var(--energy); }
 .fut-tp-lab { border-color: var(--accent-line); color: var(--text, var(--text-2)); }
 .fut-tp-sat-link { display: inline-flex; max-width: 100%; text-decoration: none; }
-/* Tools over the picture: one stepper (\u2212 / the jump printed large / +) and the plan button with its word,
+/* Tools over the picture: one stepper (− / the jump printed large / +) and the plan button with its word,
    as the board's rung track. Filled pawn yellow to add; outlined with a tick once it is in the plan. */
 .fut-tp-tools { position: absolute; top: 4px; left: 4px; right: 4px; display: flex; gap: 4px; z-index: 2; }
 #technologydetails .fut-tp-btn { height: 26px; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 0 6px; margin: 0;
@@ -16402,14 +17364,14 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     ["deuterium", "d"],
     ["energy", "e"]
   ];
-  function el5(doc, tag, cls = "", text) {
+  function el6(doc, tag, cls = "", text) {
     const node = doc.createElement(tag);
     if (cls) node.className = cls;
     if (text !== void 0) node.textContent = text;
     return node;
   }
   function okCell(doc, have, cls) {
-    const c = el5(doc, "span", cls, have ? "" : "\u2014");
+    const c = el6(doc, "span", cls, have ? "" : "—");
     if (have) c.append(icon(doc, "check", 12));
     return c;
   }
@@ -16442,7 +17404,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   }
   var msu3 = (c) => c.metal + c.crystal * 1.5 + c.deuterium * 3;
   function button2(doc, cls, html, title, onClick) {
-    const b = el5(doc, "button", cls);
+    const b = el6(doc, "button", cls);
     b.type = "button";
     b.innerHTML = html;
     b.title = title;
@@ -16473,30 +17435,30 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   };
   function grid(o, view2, have) {
     const { doc, t, locale } = o;
-    const g = el5(doc, "div", "fut-tp-grid");
+    const g = el6(doc, "div", "fut-tp-grid");
     g.style.gridTemplateColumns = `minmax(0, auto) repeat(${view2.cols.length}, minmax(0, 1fr))`;
     const band = (col) => col.short ? msu3(col.cost) > 0 ? " fut-tp-miss" : " fut-tp-miss fut-tp-none" : "";
-    g.append(el5(doc, "span", "fut-tp-h"));
-    view2.heads.forEach((h8, i) => g.append(el5(doc, "span", `fut-tp-h${band(view2.cols[i])}`, h8)));
+    g.append(el6(doc, "span", "fut-tp-h"));
+    view2.heads.forEach((h8, i) => g.append(el6(doc, "span", `fut-tp-h${band(view2.cols[i])}`, h8)));
     const rows = RES.filter(([key]) => view2.cols.some((c) => !c.short && c.cost[key] > 0));
     const cell = (value, cls) => {
-      const c = el5(doc, "span", `fut-tp-v ${cls}`, value ? formatUnits(value, locale) : "\u2014");
+      const c = el6(doc, "span", `fut-tp-v ${cls}`, value ? formatUnits(value, locale) : "—");
       c.title = Math.round(value).toLocaleString(locale);
       return c;
     };
     for (const [key, cls] of rows) {
-      const k = el5(doc, "span", `fut-tp-k fut-${cls}`);
+      const k = el6(doc, "span", `fut-tp-k fut-${cls}`);
       k.innerHTML = ROW_ICON[key];
-      k.append(el5(doc, "span", "", t(`tech.res.${key}`)));
+      k.append(el6(doc, "span", "", t(`tech.res.${key}`)));
       g.append(k);
       for (const col of view2.cols) {
         if (!col.short) g.append(cell(col.cost[key], col.cls ?? ""));
-        else if (key === "energy") g.append(el5(doc, "span", `fut-tp-v${band(col)}`));
+        else if (key === "energy") g.append(el6(doc, "span", `fut-tp-v${band(col)}`));
         else if (col.cost[key] > 0) g.append(cell(-col.cost[key], `fut-tp-short${band(col)}`));
         else g.append(okCell(doc, have, `fut-tp-v fut-tp-ok${band(col)}`));
       }
     }
-    g.append(el5(doc, "span", "fut-tp-k fut-tp-msu fut-tp-total", "MSU"));
+    g.append(el6(doc, "span", "fut-tp-k fut-tp-msu fut-tp-total", "MSU"));
     for (const col of view2.cols) {
       const v = msu3(col.cost);
       if (col.short) g.append(v > 0 ? cell(-v, `fut-tp-short fut-tp-msu fut-tp-total${band(col)}`) : okCell(doc, have, `fut-tp-v fut-tp-ok fut-tp-msu fut-tp-total${band(col)}`));
@@ -16505,9 +17467,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     return g;
   }
   function chip(doc, icon2, text, title, cls = "") {
-    const c = el5(doc, "span", `fut-tp-chip ${cls}`.trim());
+    const c = el6(doc, "span", `fut-tp-chip ${cls}`.trim());
     c.innerHTML = icon2;
-    c.append(el5(doc, "span", "", text));
+    c.append(el6(doc, "span", "", text));
     c.title = title;
     return c;
   }
@@ -16526,8 +17488,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       const label = li.querySelector("strong")?.textContent?.replace(/\s+/g, " ").trim() ?? "";
       const why = value?.getAttribute("data-tooltip-title") ?? value?.getAttribute("title") ?? "";
       const cls = Array.from(li.classList).find((c) => icons[c]) ?? "";
-      const shown2 = cls.includes("energy") ? `-${text}` : value ? text : text.replace(label, "").trim();
-      out.push(chip(doc, icons[cls] ?? "", shown2, [label, why].filter(Boolean).join(" "), cls.includes("energy") ? "fut-tp-energy" : cls ? "fut-tp-start" : ""));
+      const shown3 = cls.includes("energy") ? `-${text}` : value ? text : text.replace(label, "").trim();
+      out.push(chip(doc, icons[cls] ?? "", shown3, [label, why].filter(Boolean).join(" "), cls.includes("energy") ? "fut-tp-energy" : cls ? "fut-tp-start" : ""));
     }
     return out;
   }
@@ -16562,10 +17524,10 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     const need = LAB_NEEDED[id] ?? 1;
     const net = researchNetwork(labs.here, labs.others, labs.irn, need);
     const title = [
-      o.t("tech.labNet", { total: net.total, here: labs.here, linked: net.linked.length ? net.linked.join(" + ") : "\u2014", irn: labs.irn }),
+      o.t("tech.labNet", { total: net.total, here: labs.here, linked: net.linked.length ? net.linked.join(" + ") : "—", irn: labs.irn }),
       o.t("tech.labNeed", { need }),
       ...net.hereOk ? [] : [o.t("tech.labHereShort", { need })]
-    ].join(" \xB7 ");
+    ].join(" · ");
     return chip(o.doc, ICON.lab, o.t("tech.labShort", { total: net.total, n: net.linked.length + 1 }), title, net.hereOk ? "fut-tp-lab" : "fut-tp-lab fut-tp-lack");
   }
   function satelliteChip(o, need, amountInput) {
@@ -16581,13 +17543,13 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       t(need > 0 ? "tech.satNeed" : "tech.satDeficit", { n: groupInt(sat.count, locale), energy: groupInt(Math.round(sat.energy), locale) }),
       t("tech.satBalance", { energy: groupInt(Math.round(balance2), locale) }),
       t(per.exact ? "tech.satPer" : "tech.satPerGuess", { energy: perText })
-    ].join(" \xB7 ");
-    const c = chip(doc, ICON.sat, `${per.exact ? "" : "\u2248"}${groupInt(sat.count, locale)} ${t("tech.satShort")} \xB7 ${groupInt(Math.round(sat.energy), locale)}`, `${title} \xB7 ${t(amountInput ? "tech.satFill" : "tech.satGo")}`, "fut-tp-sat");
+    ].join(" · ");
+    const c = chip(doc, ICON.sat, `${per.exact ? "" : "≈"}${groupInt(sat.count, locale)} ${t("tech.satShort")} · ${groupInt(Math.round(sat.energy), locale)}`, `${title} · ${t(amountInput ? "tech.satFill" : "tech.satGo")}`, "fut-tp-sat");
     if (amountInput) {
       c.addEventListener("click", () => fillAmount(amountInput, sat.count));
       return c;
     }
-    const a = el5(doc, "a", "fut-tp-sat-link");
+    const a = el6(doc, "a", "fut-tp-sat-link");
     a.href = `index.php?page=ingame&component=supplies&openTech=${SATELLITE}&${SAT_PARAM}=${sat.count}`;
     a.append(c);
     a.addEventListener("click", (e) => {
@@ -16606,8 +17568,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     details.root.querySelectorAll(".fut-tp, .fut-tp-tools").forEach((n) => n.remove());
     const list = readTechList(doc);
     const entry = list.find((e) => e.id === details.id);
-    const box = el5(doc, "div", "fut-tp");
-    const tools = el5(doc, "div", "fut-tp-tools");
+    const box = el6(doc, "div", "fut-tp");
+    const tools = el6(doc, "div", "fut-tp-tools");
     const levelLabel = details.root.querySelector(".information .level");
     const levelText = levelLabel?.textContent ?? "";
     const chips = gameChips(doc, details);
@@ -16636,15 +17598,15 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           to = start.level;
           draw();
         });
-        range.append(el5(doc, "b", "", String(start.level - 1)), el5(doc, "span", "fut-tp-arrow", "\u2192"), el5(doc, "b", "fut-tp-to", String(to)));
+        range.append(el6(doc, "b", "", String(start.level - 1)), el6(doc, "span", "fut-tp-arrow", "→"), el6(doc, "b", "fut-tp-to", String(to)));
         range.disabled = to <= start.level;
-        range.setAttribute("aria-label", `${start.level - 1} \u2192 ${to}${to > start.level ? ` \xB7 ${t("tech.reset")}` : ""}`);
+        range.setAttribute("aria-label", `${start.level - 1} → ${to}${to > start.level ? ` · ${t("tech.reset")}` : ""}`);
         const next = button2(doc, "fut-tp-btn fut-tp-step", ICON.plus, t("tech.next"), () => {
           to += 1;
           draw();
         });
         next.setAttribute("aria-label", t("tech.next"));
-        const stepper = el5(doc, "span", "fut-tp-stepper");
+        const stepper = el6(doc, "span", "fut-tp-stepper");
         stepper.append(prev, range, next);
         const add = button2(doc, planned ? "fut-tp-btn fut-tp-plan on" : "fut-tp-btn fut-tp-plan", planned ? ICON.check : ICON.plus, "", () => {
           let current3 = loadPlan(o.store);
@@ -16665,23 +17627,23 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           o.onPlanChange?.();
           draw();
         });
-        add.append(el5(doc, "span", "", t("tech.planBtn")));
-        add.title = planned ? `${t("tech.inPlan")} \xB7 ${t("tech.removeHint")}` : to > start.level ? t("tech.addRange", { from: start.level, to }) : t("tech.addOne", { level: to });
+        add.append(el6(doc, "span", "", t("tech.planBtn")));
+        add.title = planned ? `${t("tech.inPlan")} · ${t("tech.removeHint")}` : to > start.level ? t("tech.addRange", { from: start.level, to }) : t("tech.addOne", { level: to });
         add.setAttribute("aria-label", add.title);
         add.setAttribute("aria-pressed", String(planned));
         tools.replaceChildren(stepper, add);
-        if (levelLabel) levelLabel.textContent = `${start.level - 1} \u2192 ${to}`;
+        if (levelLabel) levelLabel.textContent = `${start.level - 1} → ${to}`;
         const view2 = {
           heads: [t("tech.colLevel", { level: to }), t("tech.rangeShort", { from: start.level - 1, to }), t("tech.colMissing")],
           cols: [{ cost: one }, { cost: total, cls: "fut-tp-sum" }, { cost: gap, short: true }]
         };
-        const row = el5(doc, "div", "fut-tp-chips");
+        const row = el6(doc, "div", "fut-tp-chips");
         if (details.durationMs) {
           row.append(
             chip(
               doc,
               ICON.time,
-              to > start.level ? `${formatDuration(ms(to))} \xB7 \u03A3 ${formatDuration(sumMs)}` : formatDuration(ms(to)),
+              to > start.level ? `${formatDuration(ms(to))} · Σ ${formatDuration(sumMs)}` : formatDuration(ms(to)),
               to > start.level ? t("tech.timeHint", { level: to, from: start.level, to }) : t("tech.time")
             )
           );
@@ -16689,7 +17651,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         if (details.population) {
           const p = details.population;
           const text = `${to > start.level ? `${t("plan.level", { level: start.level })}: ` : ""}${formatUnits(p.value, locale)}`;
-          row.append(chip(doc, ICON.pop, text, `${t("tech.population", { level: start.level })}: ${p.value.toLocaleString(locale)}${p.enough ? "" : ` \xB7 ${t("tech.populationShort")}`}`, p.enough ? "fut-tp-pop" : "fut-tp-pop fut-tp-lack"));
+          row.append(chip(doc, ICON.pop, text, `${t("tech.population", { level: start.level })}: ${p.value.toLocaleString(locale)}${p.enough ? "" : ` · ${t("tech.populationShort")}`}`, p.enough ? "fut-tp-pop" : "fut-tp-pop fut-tp-lack"));
         }
         row.append(...chips);
         if (details.energyNeed !== null) {
@@ -16712,7 +17674,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     } else {
       const unit = matchShownLevel(details.id, [1], details.shown);
       const discount2 = unit?.discount ?? 0;
-      const amount = el5(doc, "input", "fut-tp-amount");
+      const amount = el6(doc, "input", "fut-tp-amount");
       amount.type = "text";
       amount.inputMode = "numeric";
       amount.value = "";
@@ -16735,17 +17697,17 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           added = true;
           draw();
         });
-        add.append(el5(doc, "span", "", t("tech.planBtn")));
+        add.append(el6(doc, "span", "", t("tech.planBtn")));
         if (added) add.title = t("tech.added");
         add.setAttribute("aria-label", add.title);
         if (details.amountInput) tools.replaceChildren(add);
         else tools.replaceChildren(amount, add);
         const view2 = {
-          heads: [t("tech.colOne"), `\xD7${n < 1e4 ? n.toLocaleString(locale) : formatUnits(n, locale)}`, t("tech.colMissing")],
+          heads: [t("tech.colOne"), `×${n < 1e4 ? n.toLocaleString(locale) : formatUnits(n, locale)}`, t("tech.colMissing")],
           cols: [{ cost: one }, { cost: total, cls: "fut-tp-sum" }, { cost: gap, short: true }]
         };
-        const row = el5(doc, "div", "fut-tp-chips");
-        if (details.durationMs) row.append(chip(doc, ICON.time, `${formatDuration(details.durationMs)} \xB7 \u03A3 ${formatDuration(details.durationMs * n)}`, t("tech.time")));
+        const row = el6(doc, "div", "fut-tp-chips");
+        if (details.durationMs) row.append(chip(doc, ICON.time, `${formatDuration(details.durationMs)} · Σ ${formatDuration(details.durationMs * n)}`, t("tech.time")));
         row.append(...chips);
         if (details.id === SATELLITE) {
           const sat = satelliteChip(o, 0, details.amountInput);
@@ -16810,7 +17772,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   }
   function injectStyle(doc) {
     if (doc.getElementById("fut-tp-style")) return;
-    const style = el5(doc, "style");
+    const style = el6(doc, "style");
     style.id = "fut-tp-style";
     style.textContent = TECH_CSS;
     doc.head.append(style);
@@ -16820,7 +17782,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     const snap = store.get(QUEUES_KEY, null);
     if (!snap) return false;
     const lists = kind === "research" ? Object.values(snap.bodies) : [snap.bodies[String(bodyId)] ?? []];
-    return lists.flat().some((q) => q.kind === kind && q.end > now);
+    return lists.flat().some((q2) => q2.kind === kind && q2.end > now);
   }
   function watchTechPages(o) {
     const { doc } = o;
@@ -16938,26 +17900,26 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       view = "body";
       opened.add(o.focus);
     }
-    const labels = /* @__PURE__ */ new Map();
+    const labels2 = /* @__PURE__ */ new Map();
     for (const e of o.entries) {
-      if (e.planetId) labels.set(e.planetId, `${e.name} [${e.coords}]`);
-      if (e.moonId) labels.set(e.moonId, `${t("plan.moonOf", { name: e.name })} [${e.coords}]`);
+      if (e.planetId) labels2.set(e.planetId, `${e.name} [${e.coords}]`);
+      if (e.moonId) labels2.set(e.moonId, `${t("plan.moonOf", { name: e.name })} [${e.coords}]`);
     }
-    const labelOf = (id) => labels.get(id) ?? `#${id}`;
-    const order = new Map([...labels.keys()].map((id, i) => [id, i]));
+    const labelOf = (id) => labels2.get(id) ?? `#${id}`;
+    const order = new Map([...labels2.keys()].map((id, i) => [id, i]));
     const byList = (a, b) => (order.get(a.bodyId) ?? 1e9) - (order.get(b.bodyId) ?? 1e9);
     const refs = o.entries.map((e) => ({ planetId: e.planetId, moonId: e.moonId }));
     const triple = (cost, short) => {
       const out = [];
       for (const [key, c] of RES2) {
         const lack = short ? short[key] : 0;
-        const v = h4("span", `num ${c}${lack > 0 ? " short" : ""}`, cost[key] ? fmt(cost[key]) : "\u2014");
-        v.title = `${t(`tech.res.${key}`)}: ${Math.round(cost[key]).toLocaleString(locale)}${lack > 0 ? ` \xB7 ${t("plan.lacksHere", { n: fmt(lack) })}` : ""}`;
+        const v = h4("span", `num ${c}${lack > 0 ? " short" : ""}`, cost[key] ? fmt(cost[key]) : "—");
+        v.title = `${t(`tech.res.${key}`)}: ${Math.round(cost[key]).toLocaleString(locale)}${lack > 0 ? ` · ${t("plan.lacksHere", { n: fmt(lack) })}` : ""}`;
         out.push(v);
       }
       return out;
     };
-    const what = (r) => r.amount !== void 0 ? `\xD7${r.amount.toLocaleString(locale)}` : r.from === r.to ? t("plan.level", { level: r.from ?? 0 }) : t("plan.levels", { from: r.from ?? 0, to: r.to ?? 0 });
+    const what = (r) => r.amount !== void 0 ? `×${r.amount.toLocaleString(locale)}` : r.from === r.to ? t("plan.level", { level: r.from ?? 0 }) : t("plan.levels", { from: r.from ?? 0, to: r.to ?? 0 });
     const draw = () => {
       const plan = o.store.get(PLAN_KEY, {});
       const allSent = o.store.get(SENT_KEY, []);
@@ -17010,6 +17972,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       close.append(icon(doc, "close", 16));
       close.title = t("fleet.close");
       close.addEventListener("click", () => closePlanner(doc));
+      if (o.onHelp) head.append(helpButton(doc, t("tour.help"), o.onHelp));
       head.append(close);
       if (!groups.length) {
         panel.replaceChildren(head, h4("p", "empty", t("plan.empty")));
@@ -17036,7 +17999,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         kpi(t("plan.account"), account, "", account ? t("plan.accountNote") : t("plan.accountUnknown")),
         covered ? kpi(t("plan.accountCovered"), null, "ok") : kpi(t("plan.accountMissing"), missing2, "warn")
       );
-      if (covered) kpis.lastElementChild.querySelector(".kpi-line").replaceChildren(h4("span", "num okv", "\u2713"));
+      if (covered) kpis.lastElementChild.querySelector(".kpi-line").replaceChildren(h4("span", "num okv", "✓"));
       const seg = h4("div", "seg");
       seg.setAttribute("role", "group");
       for (const v of ["body", "tech"]) {
@@ -17068,7 +18031,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           const here = ids.filter((id) => sec.states.includes(states.get(id)));
           if (!here.length) continue;
           const bar = h4("div", `sec sec-${sec.key}`);
-          bar.append(h4("span", "sec-name", `${t(`plan.sec.${sec.key}`)} \xB7 ${here.length}`), h4("span", "sec-col", t(sec.numbers === "gap" ? "plan.colMissing" : "plan.colCost")));
+          bar.append(h4("span", "sec-name", `${t(`plan.sec.${sec.key}`)} · ${here.length}`), h4("span", "sec-col", t(sec.numbers === "gap" ? "plan.colMissing" : "plan.colCost")));
           list.append(bar);
           for (const id of here) list.append(bodyTile(id, plan, haveOf, pendingOf, save, sec.numbers, queued2));
         }
@@ -17092,7 +18055,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     const sentMark = (p) => {
       const mark = h4("span", "sent");
       mark.append(icon(doc, "fleet", 12));
-      mark.title = `${p.arriveAt > o.now ? t("plan.sentArriving", { time: timeOf(p.arriveAt) }) : t("plan.sentArrived")}: ${fmt(p.metal)} \xB7 ${fmt(p.crystal)} \xB7 ${fmt(p.deuterium)}`;
+      mark.title = `${p.arriveAt > o.now ? t("plan.sentArriving", { time: timeOf(p.arriveAt) }) : t("plan.sentArrived")}: ${fmt(p.metal)} · ${fmt(p.crystal)} · ${fmt(p.deuterium)}`;
       return mark;
     };
     const bodyTile = (bodyId, plan, haveOf, pendingOf, save, numbers, queued2) => {
@@ -17122,7 +18085,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         draw();
       };
       const isOn = (r) => r.indexes.every((i) => chosen.has(i));
-      const brief = (r) => r.amount !== void 0 ? `\xD7${fmt(r.amount)}` : r.from === r.to ? String(r.from ?? 0) : `${r.from ?? 0}\u2013${r.to ?? 0}`;
+      const brief = (r) => r.amount !== void 0 ? `×${fmt(r.amount)}` : r.from === r.to ? String(r.from ?? 0) : `${r.from ?? 0}–${r.to ?? 0}`;
       const tile2 = h4("div", `group body${bodyId === o.focus ? " focus" : ""}`);
       tile2.dataset.body = String(bodyId);
       tile2.tabIndex = -1;
@@ -17138,13 +18101,13 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         const chip2 = h4("button", "pchip");
         chip2.type = "button";
         chip2.setAttribute("aria-pressed", String(on));
-        chip2.title = `${r.name} \xB7 ${what(r)} \xB7 ${fmt(r.cost.metal)} / ${fmt(r.cost.crystal)} / ${fmt(r.cost.deuterium)} \u2014 ${t("plan.pickHint")}`;
+        chip2.title = `${r.name} · ${what(r)} · ${fmt(r.cost.metal)} / ${fmt(r.cost.crystal)} / ${fmt(r.cost.deuterium)} — ${t("plan.pickHint")}`;
         chip2.setAttribute("aria-label", `${r.name} ${what(r)}`);
         chip2.append(techIconEl(doc, icons[String(r.id)], 20), h4("span", "", brief(r)));
         chip2.addEventListener("click", () => toggle(r, on));
         chips.append(chip2);
       }
-      for (const q of waiting) chips.append(queuedChip(q));
+      for (const q2 of waiting) chips.append(queuedChip(q2));
       const many = rows.length + waiting.length > 1;
       const open2 = many && opened.has(bodyId);
       if (many) {
@@ -17173,7 +18136,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         const bring = h4("button", "bring-all");
         bring.type = "button";
         bring.append(icon(doc, "swap", 13), h4("span", "", chosen.size ? t("plan.bringSome", { n: chosen.size }) : onWay ? t("plan.complete") : t("plan.bringAll")));
-        bring.title = `${fmt(gap.metal)} \xB7 ${fmt(gap.crystal)} \xB7 ${fmt(gap.deuterium)} \u2014 ${t("plan.bringHint")}`;
+        bring.title = `${fmt(gap.metal)} · ${fmt(gap.crystal)} · ${fmt(gap.deuterium)} — ${t("plan.bringHint")}`;
         bring.addEventListener("click", () => bringTo(bodyId, gap));
         acts.append(bring);
       } else if (gap) {
@@ -17218,18 +18181,18 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           row.append(a);
           list.append(row);
         }
-        waiting.forEach((q, index) => {
+        waiting.forEach((q2, index) => {
           const row = h4("div", "grow queued");
           const label2 = h4("span", "gbody");
-          label2.append(techIconEl(doc, icons[String(q.id)], 20), h4("span", "", q.name), h4("span", "lv", what({ from: q.level, to: q.level })), h4("span", "qtag", t("plan.queued")));
+          label2.append(techIconEl(doc, icons[String(q2.id)], 20), h4("span", "", q2.name), h4("span", "lv", what({ from: q2.level, to: q2.level })), h4("span", "qtag", t("plan.queued")));
           label2.title = t("plan.queuedHint");
-          row.append(label2, h4("span"), ...triple(q.cost));
+          row.append(label2, h4("span"), ...triple(q2.cost));
           const a = h4("div", "acts");
           const x = h4("button", "x");
           x.type = "button";
           x.append(icon(doc, "close", 13));
           x.title = t("plan.unhold");
-          x.setAttribute("aria-label", `${t("plan.unhold")}: ${q.name}`);
+          x.setAttribute("aria-label", `${t("plan.unhold")}: ${q2.name}`);
           x.addEventListener("click", () => {
             o.store.set(QUEUED_KEY, dropQueued(o.store.get(QUEUED_KEY, {}), bodyId, index));
             o.onChange?.();
@@ -17243,10 +18206,10 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       }
       return tile2;
     };
-    const queuedChip = (q) => {
+    const queuedChip = (q2) => {
       const chip2 = h4("span", "pchip qchip");
-      chip2.title = `${q.name} \xB7 ${t("plan.level", { level: q.level })} \xB7 ${t("plan.queued")} \u2014 ${t("plan.queuedHint")} (${fmt(q.cost.metal)} / ${fmt(q.cost.crystal)} / ${fmt(q.cost.deuterium)})`;
-      chip2.append(techIconEl(doc, icons[String(q.id)], 20), h4("span", "", String(q.level)));
+      chip2.title = `${q2.name} · ${t("plan.level", { level: q2.level })} · ${t("plan.queued")} — ${t("plan.queuedHint")} (${fmt(q2.cost.metal)} / ${fmt(q2.cost.crystal)} / ${fmt(q2.cost.deuterium)})`;
+      chip2.append(techIconEl(doc, icons[String(q2.id)], 20), h4("span", "", String(q2.level)));
       return chip2;
     };
     const groupTile = (g, plan, haveOf, pendingOf, save) => {
@@ -17256,7 +18219,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       const top = h4("div", "ghead");
       const name = h4("div", "gname");
       const titleLine = h4("span", "gtitle", g.name);
-      const meta = h4("span", "gmeta", one ? `${labelOf(one.bodyId)} \xB7 ${what(one)}` : t("plan.onBodies", { n: g.rows.length }) + " \xB7 " + levelsSummary(g.rows));
+      const meta = h4("span", "gmeta", one ? `${labelOf(one.bodyId)} · ${what(one)}` : t("plan.onBodies", { n: g.rows.length }) + " · " + levelsSummary(g.rows));
       name.append(titleLine, meta);
       top.append(techIconEl(doc, icons[String(g.id)], 28), name, ...triple(g.cost, one?.short));
       const acts = h4("div", "acts");
@@ -17266,7 +18229,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         caret.type = "button";
         caret.setAttribute("aria-expanded", String(open2));
         caret.title = t(open2 ? "plan.collapse" : "plan.expand");
-        caret.textContent = open2 ? "\u25B4" : "\u25BE";
+        caret.textContent = open2 ? "▴" : "▾";
         const flip = () => {
           if (toggled.has(g.id)) toggled.delete(g.id);
           else toggled.add(g.id);
@@ -17306,7 +18269,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     };
     const levelsSummary = (rows) => {
       const levels = rows.flatMap((r) => r.from !== void 0 ? [r.from, r.to ?? r.from] : []);
-      if (!levels.length) return `\xD7${rows.reduce((n, r) => n + (r.amount ?? 0), 0).toLocaleString(locale)}`;
+      if (!levels.length) return `×${rows.reduce((n, r) => n + (r.amount ?? 0), 0).toLocaleString(locale)}`;
       const lo = Math.min(...levels);
       const hi = Math.max(...levels);
       return lo === hi ? t("plan.level", { level: lo }) : t("plan.levels", { from: lo, to: hi });
@@ -17323,7 +18286,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         const bring = h4("button", "ib bring");
         bring.type = "button";
         bring.append(icon(doc, "swap", 13));
-        bring.title = `${p.metal + p.crystal + p.deuterium > 0 ? t("plan.complete") : t("plan.bring")} \xB7 ${labelOf(r.bodyId)} \xB7 ${t("plan.bringHint")}`;
+        bring.title = `${p.metal + p.crystal + p.deuterium > 0 ? t("plan.complete") : t("plan.bring")} · ${labelOf(r.bodyId)} · ${t("plan.bringHint")}`;
         bring.setAttribute("aria-label", bring.title);
         bring.addEventListener("click", () => bringTo(r.bodyId, gap));
         out.push(bring);
@@ -17402,7 +18365,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   }
   function orionData(doc, store, locale, now) {
     const archive = loadOrion(store);
-    const home = new Set(Array.from(doc.querySelectorAll("#planetList .planet-koords")).map((el6) => /\d+:\d+:\d+/.exec(el6.textContent ?? "")?.[0] ?? ""));
+    const home = new Set(Array.from(doc.querySelectorAll("#planetList .planet-koords")).map((el7) => /\d+:\d+:\d+/.exec(el7.textContent ?? "")?.[0] ?? ""));
     return { archive, events: orionEvents(archive, home, now), shipOf: matcher(store, locale) };
   }
   function orionCount(store, period, now) {
@@ -17416,7 +18379,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   function orionView(c) {
     const { t, locale, now, period, state } = c;
     const fmt = (n) => formatUnits(n, locale);
-    const sign = (n) => `${n < 0 ? "\u2212" : ""}${fmt(Math.abs(n))}`;
+    const sign = (n) => `${n < 0 ? "−" : ""}${fmt(Math.abs(n))}`;
     const { archive, events, shipOf } = orionData(c.doc, c.store, locale, now);
     const out = [];
     if (!Object.keys(archive.entries).length && !archive.fuel.length) return [h5("p", "empty", t("orion.empty"))];
@@ -17446,34 +18409,34 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     const hero = h5("div", "card hero");
     const top = h5("div", "hero-top");
     const main2 = h5("div", "hero-net");
-    main2.append(h5("span", "hero-k", `${t("orion.balance")} \xB7 ${fi >= 0 ? label(from, false) : t(`exp.period.${period}`)}`));
+    main2.append(h5("span", "hero-k", `${t("orion.balance")} · ${fi >= 0 ? label(from, false) : t(`exp.period.${period}`)}`));
     const big = h5("b", `hero-v${net < 0 ? " neg" : ""}`, sign(net));
     big.append(h5("small", "", "MSU"));
     main2.title = t("orion.balanceHint");
     main2.append(big);
     const part = (k, value, note, neg = false) => {
       const p = h5("div", "hero-part");
-      const v = h5("b", `hero-pv${neg && value ? " neg" : ""}`, `${neg && value ? "\u2212" : ""}${fmt(value)}`);
+      const v = h5("b", `hero-pv${neg && value ? " neg" : ""}`, `${neg && value ? "−" : ""}${fmt(value)}`);
       v.append(h5("small", "", "MSU"));
       p.append(h5("span", "hero-k", k), v, h5("span", "hero-note", note));
       return p;
     };
     top.append(
       main2,
-      part(t("orion.rewardsK"), tot.gain, `M ${fmt(tot.res.metal)} \xB7 C ${fmt(tot.res.crystal)} \xB7 D ${fmt(tot.res.deuterium)}`),
+      part(t("orion.rewardsK"), tot.gain, `M ${fmt(tot.res.metal)} · C ${fmt(tot.res.crystal)} · D ${fmt(tot.res.deuterium)}`),
       part(t("orion.shipsGot"), tot.gotMsu, `${fmt(tot.gotN)} ${t("orion.shipsN")}`),
-      part(t("orion.costs"), tot.lostMsu + tot.fuelMsu, `${t("orion.lost")} ${fmt(tot.lostMsu)} (${fmt(tot.lostN)}, ${tot.battles} ${t("orion.battlesN")}) \xB7 ${t("orion.fuel")} ${fmt(tot.fuel)} D`, true)
+      part(t("orion.costs"), tot.lostMsu + tot.fuelMsu, `${t("orion.lost")} ${fmt(tot.lostMsu)} (${fmt(tot.lostN)}, ${tot.battles} ${t("orion.battlesN")}) · ${t("orion.fuel")} ${fmt(tot.fuel)} D`, true)
     );
     const strip = h5("p", "hero-sub");
     strip.append(
       h5("b", "", String(tot.collections)),
-      ` ${t("orion.collectionsN")} \xB7 `,
+      ` ${t("orion.collectionsN")} · `,
       h5("b", "", String(tot.waves)),
-      ` ${t("orion.wavesN")} \xB7 ${t("orion.lithiumNet")} `,
+      ` ${t("orion.wavesN")} · ${t("orion.lithiumNet")} `,
       h5("b", "", fmt(tot.paid - tot.back)),
-      ` (${t("orion.paid")} ${fmt(tot.paid)} \xB7 ${t("orion.back")} ${fmt(tot.back)})`
+      ` (${t("orion.paid")} ${fmt(tot.paid)} · ${t("orion.back")} ${fmt(tot.back)})`
     );
-    if (tot.rolled) strip.append(` \xB7 ${t("orion.lowRolls")} `, h5("b", "", `${tot.lowRolls}/${tot.rolled}`));
+    if (tot.rolled) strip.append(` · ${t("orion.lowRolls")} `, h5("b", "", `${tot.lowRolls}/${tot.rolled}`));
     hero.append(top, strip);
     out.push(hero);
     const cols = starts.map((s, i) => {
@@ -17552,17 +18515,17 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       out.push(two);
     }
     const all2 = Object.values(archive.entries);
-    const q = state.q.toLowerCase();
+    const q2 = state.q.toLowerCase();
     const rows = all2.filter((e) => {
       const at = e.spawnedAt || e.firstSeen || 0;
       return at >= from && at < to;
-    }).map((e) => ({ ...e, date: e.spawnedAt || e.firstSeen || 0, x: orionTotals(inRange(events, from, to).filter((ev) => ev.entry === e.id), shipOf) })).filter((r) => (!q || `${r.name} ${r.coords}`.toLowerCase().includes(q)) && (!state.mode || r.mode === state.mode) && (!state.kind || r.kind === state.kind) && (!state.stars || String(r.stars) === state.stars) && (!state.status || r.status === state.status));
+    }).map((e) => ({ ...e, date: e.spawnedAt || e.firstSeen || 0, x: orionTotals(inRange(events, from, to).filter((ev) => ev.entry === e.id), shipOf) })).filter((r) => (!q2 || `${r.name} ${r.coords}`.toLowerCase().includes(q2)) && (!state.mode || r.mode === state.mode) && (!state.kind || r.kind === state.kind) && (!state.stars || String(r.stars) === state.stars) && (!state.status || r.status === state.status));
     const COLS2 = [
       { k: "date", label: t("orion.col.spawned"), num: true, v: (r) => r.date, show: (r) => r.date ? new Date(r.date).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "" },
       { k: "name", label: t("orion.col.name"), v: (r) => r.name, show: (r) => r.name },
       { k: "coords", label: t("orion.col.coords"), v: (r) => r.coords, show: (r) => r.coords },
       { k: "level", label: t("orion.col.level"), num: true, v: (r) => r.level, show: (r) => r.level ? String(r.level) : "" },
-      { k: "stars", label: t("orion.col.stars"), num: true, v: (r) => r.stars, show: (r) => "\u2605".repeat(r.stars) },
+      { k: "stars", label: t("orion.col.stars"), num: true, v: (r) => r.stars, show: (r) => "★".repeat(r.stars) },
       { k: "mode", label: t("orion.col.mode"), v: (r) => r.mode, show: (r) => {
         const s = h5("span", `otag ${r.mode.toLowerCase()}`, r.mode);
         return r.mode ? s : "";
@@ -17590,7 +18553,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       return state.desc ? -d : d;
     });
     const tcard = h5("div", "card");
-    tcard.append(h5("h3", "", `${t("orion.anomalies")} \xB7 ${rows.length}`));
+    tcard.append(h5("h3", "", `${t("orion.anomalies")} · ${rows.length}`));
     const filters = h5("div", "ofilters");
     const search = h5("input");
     search.type = "search";
@@ -17629,7 +18592,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       const table = h5("table", "otable");
       const hr = h5("tr");
       for (const col of COLS2) {
-        const th = h5("th", col.num ? "num" : "", `${col.label}${state.sort === col.k ? state.desc ? " \u25BE" : " \u25B4" : ""}`);
+        const th = h5("th", col.num ? "num" : "", `${col.label}${state.sort === col.k ? state.desc ? " ▾" : " ▴" : ""}`);
         th.addEventListener("click", () => {
           state.desc = state.sort === col.k ? !state.desc : !!col.num;
           state.sort = col.k;
@@ -17646,7 +18609,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           td2.append(col.show(r));
           tr.append(td2);
         }
-        const del = h5("button", `odel${state.armed === r.id ? " armed" : ""}`, state.armed === r.id ? t("orion.delConfirm") : "\xD7");
+        const del = h5("button", `odel${state.armed === r.id ? " armed" : ""}`, state.armed === r.id ? t("orion.delConfirm") : "×");
         del.type = "button";
         del.title = t("orion.del");
         del.addEventListener("click", () => {
@@ -17738,7 +18701,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         const name = shipName(Number(id), ships, t);
         const tile2 = h6("div", "ship");
         const info = h6("div", "ship-info");
-        info.append(h6("b", lost ? "neg" : "pos", `${lost ? "\u2212" : "+"}${n.toLocaleString(locale)}`), h6("span", "ship-name", name));
+        info.append(h6("b", lost ? "neg" : "pos", `${lost ? "−" : "+"}${n.toLocaleString(locale)}`), h6("span", "ship-name", name));
         tile2.append(shipIcon(doc, Number(id), name, "ship-img"), info);
         list.append(tile2);
       }
@@ -17746,19 +18709,19 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     };
     const expeditionView = (entries, s) => {
       const out = [];
-      const sign = (n) => `${n < 0 ? "\u2212" : ""}${fmt(Math.abs(n))}`;
+      const sign = (n) => `${n < 0 ? "−" : ""}${fmt(Math.abs(n))}`;
       const hero = h6("div", "card hero");
       const top = h6("div", "hero-top");
       const net = h6("div", "hero-net");
-      net.append(h6("span", "hero-k", `${t("exp.net")} \xB7 ${t(`exp.period.${period}`)}`));
+      net.append(h6("span", "hero-k", `${t("exp.net")} · ${t(`exp.period.${period}`)}`));
       const big = h6("b", `hero-v${s.netMsu < 0 ? " neg" : ""}`, sign(s.netMsu));
       big.append(h6("small", "", "MSU"));
       net.append(big);
       const sub = h6("p", "hero-sub");
       sub.append(
         h6("b", "", s.count.toLocaleString(locale)),
-        ` ${t("exp.heroCount")} \xB7 `,
-        h6("b", "", s.count ? fmt(s.netMsu / s.count) : "\u2014"),
+        ` ${t("exp.heroCount")} · `,
+        h6("b", "", s.count ? fmt(s.netMsu / s.count) : "—"),
         ` ${t("exp.heroAvg")}`
       );
       net.append(sub);
@@ -17774,7 +18737,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       const fleetMsu = msu(s.shipsValue) - msu(s.lostValue);
       const lostNote = h6("span", "hero-note");
       lostNote.append(`${t("exp.heroFound")} `, h6("b", "", fmt(msu(s.shipsValue))));
-      if (msu(s.lostValue)) lostNote.append(` \xB7 ${t("exp.heroLostShort")} `, h6("b", "neg", `\u2212${fmt(msu(s.lostValue))}`));
+      if (msu(s.lostValue)) lostNote.append(` · ${t("exp.heroLostShort")} `, h6("b", "neg", `−${fmt(msu(s.lostValue))}`));
       const debrisNote = s.debris ? h6("span", "hero-note") : void 0;
       debrisNote?.append(`${t("exp.heroDebris")} `, h6("b", "", fmt(s.debris)));
       top.append(net, part(t("exp.heroRes"), resMsu, debrisNote), part(t("exp.heroFleet"), fleetMsu, lostNote));
@@ -17837,7 +18800,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         const tot = m.metal + m.crystal + m.deuterium + m.ships;
         const col = h6("button", `col${focus === b.start ? " on" : ""}${b.stats.count ? "" : " empty"}`);
         col.type = "button";
-        col.title = `${label(b, false)} \xB7 ${b.stats.count.toLocaleString(locale)} ${t("exp.heroCount")} \xB7 ${sign(b.stats.netMsu)} MSU`;
+        col.title = `${label(b, false)} · ${b.stats.count.toLocaleString(locale)} ${t("exp.heroCount")} · ${sign(b.stats.netMsu)} MSU`;
         col.setAttribute("aria-pressed", String(focus === b.start));
         if (buckets.length <= 14) col.append(h6("span", "tot", b.stats.count ? sign(b.stats.netMsu) : ""));
         const stack = h6("span", "stack");
@@ -17862,7 +18825,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       out.push(chartCard);
       const picked2 = focus !== null ? buckets.find((b) => b.start === focus) : null;
       const fs = picked2 ? picked2.stats : s;
-      const suffix = picked2 ? ` \xB7 ${label(picked2, false)}` : "";
+      const suffix = picked2 ? ` · ${label(picked2, false)}` : "";
       const two = h6("div", "two");
       const outs = h6("div", "card");
       outs.append(h6("h3", "", `${t("exp.outcomes")}${suffix}`));
@@ -17972,7 +18935,9 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       close.append(icon(doc, "close", 16));
       close.title = t("fleet.close");
       close.addEventListener("click", () => closeJournal(doc));
-      head.append(titles, close);
+      head.append(titles);
+      if (o.onHelp) head.append(helpButton(doc, t("tour.help"), o.onHelp));
+      head.append(close);
       const tabs = h6("div", "tabs");
       for (const p of PERIODS) {
         const b = h6("button", "tab", t(`exp.period.${p}`));
@@ -17990,7 +18955,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       for (const k of ["expedition", "discovery", ...hasRaids ? ["raid"] : [], ...hasAnomalies ? ["orion"] : []]) {
         const n = periodStats(inPeriod.filter((e) => e.kind === k));
         const count2 = k === "orion" ? orionCount(store, period, o.now) : k === "raid" ? raidStats(inPeriod).count : k === "discovery" ? n.discoveries : n.count;
-        const b = h6("button", "tab", `${t(`exp.kind.${k}`)} \xB7 ${count2.toLocaleString(locale)}`);
+        const b = h6("button", "tab", `${t(`exp.kind.${k}`)} · ${count2.toLocaleString(locale)}`);
         b.setAttribute("aria-pressed", String(k === kind));
         b.addEventListener("click", () => {
           kind = k;
@@ -18025,7 +18990,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           kpi(t("exp.kind.discovery"), s.discoveries.toLocaleString(locale));
           kpi(t("exp.artefacts"), s.artefacts.toLocaleString(locale), "pos");
           kpi(t("exp.lfXp"), s.lfXp.toLocaleString(locale));
-          kpi(t("exp.artefactsAvg"), s.discoveries ? (s.artefacts / s.discoveries).toLocaleString(locale, { maximumFractionDigits: 2 }) : "\u2014");
+          kpi(t("exp.artefactsAvg"), s.discoveries ? (s.artefacts / s.discoveries).toLocaleString(locale, { maximumFractionDigits: 2 }) : "—");
         }
         if (kind !== "raid") parts.push(kpis);
         const outs = h6("div", "card");
@@ -18069,7 +19034,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           };
           cell(t("exp.raidCount"), r.count.toLocaleString(locale));
           cell(t("exp.raidLoot"), `${fmt(msu(r.res))} MSU`, "", triple(r.res));
-          cell(t("exp.raidLost"), msu(r.lostValue) ? `\u2212${fmt(msu(r.lostValue))} MSU` : "\u2014", msu(r.lostValue) ? "neg" : "");
+          cell(t("exp.raidLost"), msu(r.lostValue) ? `−${fmt(msu(r.lostValue))} MSU` : "—", msu(r.lostValue) ? "neg" : "");
           cell(t("exp.raidNet"), `${fmt(r.netMsu)} MSU`, r.netMsu < 0 ? "neg" : "pos");
           card.append(strip);
           parts.push(card);
@@ -18081,8 +19046,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           const scroll = h6("div", "scroll");
           const table = h6("table");
           const hr = h6("tr");
-          const labels = isDisc ? [t("exp.day"), t("exp.countShort"), t("exp.artefacts"), t("exp.lfXp")] : [t("exp.day"), t("exp.countShort"), t("msg.res.metal"), t("msg.res.crystal"), t("msg.res.deuterium"), t("exp.dmShort"), t("exp.shipsShort"), "MSU"];
-          for (const label of labels) hr.append(h6("th", "", label));
+          const labels2 = isDisc ? [t("exp.day"), t("exp.countShort"), t("exp.artefacts"), t("exp.lfXp")] : [t("exp.day"), t("exp.countShort"), t("msg.res.metal"), t("msg.res.crystal"), t("msg.res.deuterium"), t("exp.dmShort"), t("exp.shipsShort"), "MSU"];
+          for (const label of labels2) hr.append(h6("th", "", label));
           table.append(hr);
           for (const { day, stats } of days2) {
             const tr = h6("tr");
@@ -18250,7 +19215,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   // src/modules/highscore/index.ts
   var ptreSeen = /* @__PURE__ */ new WeakMap();
   var isHighscorePage = (doc) => new URL(doc.location?.href ?? "http://x/").searchParams.get("component") === "highscore";
-  var CSS5 = `
+  var CSS6 = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
 #ranks, #fut-hs-top { ${WINDOW_TOKENS} }
 #ranks { --fut-up: var(--ok); --fut-down: #E57B70; --fut-mute: var(--muted); --fut-line: var(--faint); --fut-btn: var(--surface); --fut-txt: var(--text-2); --fut-hi: #FFFFFF; --fut-link: var(--link); }
@@ -18304,7 +19269,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     if (head && snap) {
       const age = doc.createElement("span");
       age.className = "fut-hs-age";
-      age.textContent = `(\u0394 ${Math.max(0, Math.floor((now - snap.at) / 36e5))}h)`;
+      age.textContent = `(Δ ${Math.max(0, Math.floor((now - snap.at) / 36e5))}h)`;
       age.title = t("hs.ptreAge", { time: since });
       head.append(age);
     }
@@ -18317,7 +19282,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         const made = r.score - base2;
         const g = doc.createElement("span");
         g.className = `fut-hs-gap ${made > 0 ? "up" : "down"}`;
-        g.textContent = made > 0 ? `+${fmt(made)}` : `\u2212${fmt(-made)}`;
+        g.textContent = made > 0 ? `+${fmt(made)}` : `−${fmt(-made)}`;
         g.title = t("hs.sincePtre", { n: made.toLocaleString(locale), time: since });
         scoreCell.append(g);
       }
@@ -18333,7 +19298,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     if (!o.doc.getElementById("fut-hs-style")) {
       const style = o.doc.createElement("style");
       style.id = "fut-hs-style";
-      style.textContent = CSS5;
+      style.textContent = CSS6;
       o.doc.head.append(style);
     }
     decorateHighscore(o);
@@ -18529,15 +19494,15 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     }
     return null;
   }
-  function lithiumPerHour(doc, win) {
-    const value = Number(win?.lithiumProduction);
+  function lithiumPerHour(doc, win2) {
+    const value = Number(win2?.lithiumProduction);
     if (value > 0) return value;
     return Number(scriptValue(doc, /lithiumProduction\s*=\s*([\d.]+)/, /lithiumPerHour\s*:\s*([\d.]+)/)) || 0;
   }
   function lithiumNow(doc) {
-    const el6 = doc.querySelector("#lithiumAmount, .orionLithiumAmount");
-    if (!el6) return null;
-    return parseNumber(el6.textContent) || Math.floor(Number(el6.getAttribute("data-value")) || 0);
+    const el7 = doc.querySelector("#lithiumAmount, .orionLithiumAmount");
+    if (!el7) return null;
+    return parseNumber(el7.textContent) || Math.floor(Number(el7.getAttribute("data-value")) || 0);
   }
   function depletionHours(doc) {
     const v = scriptValue(doc, /lithiumDepletionSeconds\s*=\s*(\d+)/, /depletionSeconds\s*:\s*(\d+)/);
@@ -18548,8 +19513,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     return v > 0 ? v : Infinity;
   }
   function scanCost(doc) {
-    const el6 = doc.querySelector("#scanCostValue");
-    return el6 ? parseNumber(el6.getAttribute("data-tooltip-title")) || parseNumber(el6.textContent) : 0;
+    const el7 = doc.querySelector("#scanCostValue");
+    return el7 ? parseNumber(el7.getAttribute("data-tooltip-title")) || parseNumber(el7.textContent) : 0;
   }
   var isLithium = (line) => !!line.querySelector("lithium-icon") || /^\s*lit(h)?i/i.test(line.querySelector(".rewardName")?.textContent ?? "");
   function readRewards(box, selector) {
@@ -18569,15 +19534,15 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     }
     return r;
   }
-  function isCombat(type, win) {
-    const words = [win?.scannerLoca?.LOCA_ALL_COMBAT, "Battaglia", "Combat", "Kampf", "Combate", "Walka"].filter(Boolean).map((w) => w.toLowerCase());
+  function isCombat(type, win2) {
+    const words = [win2?.scannerLoca?.LOCA_ALL_COMBAT, "Battaglia", "Combat", "Kampf", "Combate", "Walka"].filter(Boolean).map((w) => w.toLowerCase());
     const t = clean(type).toLowerCase();
     return !!t && words.some((w) => t.split(/\s*\/\s*/).includes(w));
   }
   function modeOf(card) {
-    for (const el6 of Array.from(card.querySelectorAll("span, div"))) {
-      const t = clean(el6.textContent);
-      if ((t === "PvP" || t === "PvE") && !el6.children.length) return t;
+    for (const el7 of Array.from(card.querySelectorAll("span, div"))) {
+      const t = clean(el7.textContent);
+      if ((t === "PvP" || t === "PvE") && !el7.children.length) return t;
     }
     return "";
   }
@@ -18601,8 +19566,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   }
   var MISSION_CARD = ".anomalyMission";
   function readMissionCard(card) {
-    const labels = card.querySelectorAll(".missionRouteLabels .routeLabelCell");
-    const coords = coordsText(labels[labels.length === 1 ? 0 : 1]?.querySelector(".nodeCoords")?.textContent) || coordsText(card.querySelector(".missionDetailsTable .cell:nth-child(3) span:last-child")?.textContent);
+    const labels2 = card.querySelectorAll(".missionRouteLabels .routeLabelCell");
+    const coords = coordsText(labels2[labels2.length === 1 ? 0 : 1]?.querySelector(".nodeCoords")?.textContent) || coordsText(card.querySelector(".missionDetailsTable .cell:nth-child(3) span:last-child")?.textContent);
     const [incoming, total] = (/(\d+)\s*\/\s*(\d+)/.exec(clean(card.querySelector(".nodeWave")?.textContent)) ?? []).slice(1).map(Number);
     const tags = Array.from(card.querySelectorAll(".missionDetailsSubtitle .titleTypeIcon")).map((x) => clean(x.textContent));
     return {
@@ -18638,7 +19603,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       cost
     };
   }
-  var isDisabled = (el6) => !!(el6.disabled || el6.classList.contains("disabled") || el6.getAttribute("aria-disabled") === "true");
+  var isDisabled = (el7) => !!(el7.disabled || el7.classList.contains("disabled") || el7.getAttribute("aria-disabled") === "true");
   var WAVE_SIM = ".waveSimButton";
   var WAVE_API = ".waveApiButton";
   function readWaveFleet(apiButton) {
@@ -18659,7 +19624,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
 
   // src/modules/orion/index.ts
   var STYLE_ID5 = "fut-orion-style";
-  var CSS6 = `
+  var CSS7 = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
 .fut-or, .fut-or-box, .fut-or-tiles, .fut-or-t, .fut-or-m, .fut-or-c, .fut-or-d, .fut-or-li, .fut-or-val, .fut-or-x, .fut-or-cap, .fut-or-sim, .fut-or-best, .fut-or-line, .fut-or-dot, .fut-or-sw, .fut-or-head, .fut-or-kpis, .fut-or-kpi, .fut-or-rows, .fut-or-row, .fut-or-empty, .fut-or-warn { ${WINDOW_TOKENS_NO_LINES} }
 .fut-or, .fut-or-box {
@@ -18735,10 +19700,10 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     if (minutes >= 24 * 60) return `${Math.floor(minutes / 1440)}d ${Math.floor(minutes % 1440 / 60)}h`;
     return `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}m`;
   };
-  var isShown = (el6) => el6.isConnected && el6.getClientRects().length > 0;
+  var isShown = (el7) => el7.isConnected && el7.getClientRects().length > 0;
   function watchOrion(o) {
     const { doc, store, t, locale } = o;
-    const win = pageWindow();
+    const win2 = pageWindow();
     const fmt = (n) => formatUnits(n, locale);
     const rich = (key, vars) => {
       const span = h7(doc, "span");
@@ -18763,7 +19728,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     if (!doc.getElementById(STYLE_ID5)) {
       const style = h7(doc, "style");
       style.id = STYLE_ID5;
-      style.textContent = CSS6;
+      style.textContent = CSS7;
       doc.head.append(style);
     }
     const loadLedger = () => store.get(LEDGER_KEY, {});
@@ -18776,7 +19741,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
     };
     const lithium = () => {
       const now = lithiumNow(doc);
-      return now === null ? null : { now, perHour: lithiumPerHour(doc, win), stopsIn: depletionHours(doc), cap: storageCap(doc) };
+      return now === null ? null : { now, perHour: lithiumPerHour(doc, win2), stopsIn: depletionHours(doc), cap: storageCap(doc) };
     };
     const CSS_ESCAPE = (s) => s.replace(/["\\]/g, "");
     let lastPrint = "";
@@ -18785,18 +19750,18 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       if (!tab2) return;
       tab2.setAttribute("data-fut-or-synced", "1");
       const read = Array.from(doc.querySelectorAll(MISSION_CARD)).map((c) => readMissionCard(c));
-      const pending = store.get(PENDING_KEY, {});
+      const pending2 = store.get(PENDING_KEY, {});
       const print = read.map((m) => `${m.id}:${m.cost}:${cardValue(m.rewards)}:${m.incoming}/${m.total}`).join("#");
-      if (print === lastPrint && !Object.keys(pending).length) return;
+      if (print === lastPrint && !Object.keys(pending2).length) return;
       lastPrint = print;
       const now = Date.now();
       const ledger = syncLedger(loadLedger(), read.map((m) => ({ ...m, lithium: m.rewards.lithium })), now);
       store.set(LEDGER_KEY, ledger);
       const ignored = loadIgnored();
       if (Object.keys(ignored).some((c) => !ledger[c])) store.set(IGNORED_KEY, Object.fromEntries(Object.keys(ignored).filter((c) => ledger[c]).map((c) => [c, true])));
-      let archive = syncArchive(loadArch(), read.filter((m) => m.id).map((m) => ({ id: m.id, name: m.name, coords: m.coords, level: m.level, stars: m.stars, mode: m.mode, kind: m.kind, spawnedAt: m.spawnedAt, wave: m.incoming, waves: m.total, possibleMsu: msu(m.possible), combat: isCombat(m.kind, win) })), now);
+      let archive = syncArchive(loadArch(), read.filter((m) => m.id).map((m) => ({ id: m.id, name: m.name, coords: m.coords, level: m.level, stars: m.stars, mode: m.mode, kind: m.kind, spawnedAt: m.spawnedAt, wave: m.incoming, waves: m.total, possibleMsu: msu(m.possible), combat: isCombat(m.kind, win2) })), now);
       const states = new Map(read.filter((m) => m.id).map((m) => [m.id, { cost: m.cost, value: cardValue(m.rewards), rewards: m.rewards }]));
-      const s = settle(pending, archive, states, (id) => !!doc.querySelector(`${COLLECT_DIALOG}[data-space-object-id="${CSS_ESCAPE(id)}"]`), now);
+      const s = settle(pending2, archive, states, (id) => !!doc.querySelector(`${COLLECT_DIALOG}[data-space-object-id="${CSS_ESCAPE(id)}"]`), now);
       archive = s.archive;
       if (s.changed) store.set(PENDING_KEY, s.pending);
       store.set(ARCHIVE_KEY, archive);
@@ -18842,8 +19807,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         if (confirm && dialog && !isDisabled(confirm)) {
           const d = readCollectDialog(dialog);
           if (!d.id) return;
-          const el6 = cardOf(d.id);
-          const m2 = el6 ? readMissionCard(el6) : null;
+          const el7 = cardOf(d.id);
+          const m2 = el7 ? readMissionCard(el7) : null;
           addPending(d.id, { at: Date.now(), via: "dialog", cost: d.cost, rewards: d.rewards, before: m2?.rewards ?? null, cardCost: m2?.cost ?? 0, cardValue: m2 ? cardValue(m2.rewards) : 0, wave: d.waves.length ? Math.max(...d.waves) : m2?.incoming ?? 0, waves: d.waves.length });
           return;
         }
@@ -18902,7 +19867,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
       return out;
     };
     const endsIn = (r) => r.endAt <= Date.now() ? t("orion.over") : t("orion.endsIn", { h: hoursText((r.endAt - Date.now()) / 36e5) });
-    const recordText = (r) => `${r.name} [${r.coords}] ${fmt(r.cost)}${r.partial ? ` (${t("orion.soFar")})` : ""}${r.lithium ? ` \u2212${fmt(r.lithium)} ${t("orion.back")}` : ""}, ${endsIn(r)}`;
+    const recordText = (r) => `${r.name} [${r.coords}] ${fmt(r.cost)}${r.partial ? ` (${t("orion.soFar")})` : ""}${r.lithium ? ` −${fmt(r.lithium)} ${t("orion.back")}` : ""}, ${endsIn(r)}`;
     const fingerprint = (card, rewards) => `${card.querySelector(".collectRewards .btnSub")?.textContent ?? ""}|${card.querySelector(".scannerResultRow:not(.header)")?.textContent ?? ""}|${card.querySelector(".nodeWave")?.textContent ?? ""}|${Array.from(card.querySelectorAll(rewards)).map((l) => l.textContent).join("|")}`.replace(/\s+/g, " ");
     const KINDS = [
       { card: SCAN_CARD, rewards: ".scannerResultRewardsList .rewardLine", after: ".scannerResultTable", scanner: true },
@@ -18932,7 +19897,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         const est = whole.rewards.other.length ? budgetOf(mults[multKey(s?.name ?? m?.name ?? "", s?.mode ?? m?.mode ?? "")], whole.cost, waves, whole.rewards) : null;
         const extraMsu = est ? est.extra * SHIP_RATE : 0;
         const p = profit(whole.cost, { ...whole.rewards, metal: whole.rewards.metal + extraMsu }, perHour);
-        const combat = isCombat(s ? s.type : m?.kind ?? "", win);
+        const combat = isCombat(s ? s.type : m?.kind ?? "", win2);
         const box = h7(doc, "div", "fut-or");
         const tiles = h7(doc, "div", "fut-or-tiles");
         const val = h7(doc, "div", "fut-or-val");
@@ -18941,21 +19906,21 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           tiles.append(h7(doc, "span", "fut-or-cap", t("orion.expected")));
           tiles.append(...rewardTiles(m.possible));
           if (est) {
-            const x = tile2("fut-or-x", null, `\u2248${fmt(extraMsu)}`, t("orion.extraValue"));
+            const x = tile2("fut-or-x", null, `≈${fmt(extraMsu)}`, t("orion.extraValue"));
             x.title = t("orion.extraHint", { budget: fmt(est.budget), extra: fmt(est.extra), rate: SHIP_RATE * 100 });
             tiles.append(x);
           }
-          if (m.totalCost) tiles.append(tile2("fut-or-li neg", lithiumIcon(), `\u2212${fmt(m.totalCost)}`, t("orion.redeemCost")));
+          if (m.totalCost) tiles.append(tile2("fut-or-li neg", lithiumIcon(), `−${fmt(m.totalCost)}`, t("orion.redeemCost")));
         } else {
           tiles.append(...rewardTiles(data.rewards));
           if (est && !m) {
-            const x = tile2("fut-or-x", null, `\u2248${fmt(extraMsu)}`, t("orion.extraValue"));
+            const x = tile2("fut-or-x", null, `≈${fmt(extraMsu)}`, t("orion.extraValue"));
             x.title = t("orion.extraHint", { budget: fmt(est.budget), extra: fmt(est.extra), rate: SHIP_RATE * 100 });
             tiles.append(x);
           }
-          if (data.cost) tiles.append(tile2("fut-or-li neg", lithiumIcon(), `\u2212${fmt(data.cost)}`, kind.scanner ? t("orion.redeemCost") : t("orion.collectCost")));
+          if (data.cost) tiles.append(tile2("fut-or-li neg", lithiumIcon(), `−${fmt(data.cost)}`, kind.scanner ? t("orion.redeemCost") : t("orion.collectCost")));
         }
-        if (!whole.cost) val.append(h7(doc, "b", "", m && !msu(whole.rewards) ? "\u2014" : fmt(p.msu)), h7(doc, "small", "", m && !msu(whole.rewards) ? t("orion.waitingShort") : t("orion.msuNoCost")));
+        if (!whole.cost) val.append(h7(doc, "b", "", m && !msu(whole.rewards) ? "—" : fmt(p.msu)), h7(doc, "small", "", m && !msu(whole.rewards) ? t("orion.waitingShort") : t("orion.msuNoCost")));
         else if (p.free) {
           val.classList.add("free");
           val.append(h7(doc, "b", "", t("orion.freeWord")), h7(doc, "small", "", t("orion.freeHint")));
@@ -18970,7 +19935,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           low.title = t("orion.lowRollHint");
           val.append(low);
         }
-        val.title = `${t("orion.rewards", { v: fmt(p.msu) })}${extraMsu ? ` (${t("orion.withExtra", { v: fmt(extraMsu) })})` : ""}${whole.rewards.lithium ? ` \xB7 ${t("orion.paidBack", { paid: fmt(whole.cost), back: fmt(whole.rewards.lithium) })}` : ""}`;
+        val.title = `${t("orion.rewards", { v: fmt(p.msu) })}${extraMsu ? ` (${t("orion.withExtra", { v: fmt(extraMsu) })})` : ""}${whole.rewards.lithium ? ` · ${t("orion.paidBack", { paid: fmt(whole.cost), back: fmt(whole.rewards.lithium) })}` : ""}`;
         box.append(tiles, val);
         const plan = s && l ? launchPlan({ cost: s.cost, lithium: s.rewards.lithium, msu: p.msu }, s.hours, s.waves, l, records, s.coords, Date.now()) : null;
         if (plan && s) {
@@ -18995,7 +19960,7 @@ ${t("orion.planOwnBack", { v: fmt(s.rewards.lithium) })}` : ""}`;
             const parts = ["metal", "crystal", "deuterium"].filter((k) => m.rewards[k]).map((k) => `${t(`msg.res.${k}`)} ${fmt(m.rewards[k])}`);
             if (m.rewards.lithium) parts.push(`${t("orion.lithiumBack")} ${fmt(m.rewards.lithium)}`);
             if (m.rewards.other.length) parts.push(m.rewards.other.join(", "));
-            now.append(h7(doc, "b", "", parts.join(" \xB7 ") || "\u2014"));
+            now.append(h7(doc, "b", "", parts.join(" · ") || "—"));
             if (m.cost) now.append(h7(doc, "span", "fut-or-dim", t("orion.nowCost", { v: fmt(m.cost) })));
           }
           box.append(now);
@@ -19016,7 +19981,7 @@ ${waves2.map((w) => `${t("orion.waveN", { n: w.n })}: ${fmt(w.cap)}`).join("\n")
         if (m?.coords) {
           const line = h7(doc, "div", "fut-or-line");
           line.append(countSwitch(m.coords, true));
-          if (known && known.cost) line.append(h7(doc, "span", "fut-or-dim", `${t("orion.totalCost", { v: fmt(known.cost) })}${known.partial ? ` (${t("orion.soFar")})` : ""}${known.msu ? ` \xB7 \u2248${fmt(known.msu)} MSU` : ""} \xB7 ${endsIn(known)}`));
+          if (known && known.cost) line.append(h7(doc, "span", "fut-or-dim", `${t("orion.totalCost", { v: fmt(known.cost) })}${known.partial ? ` (${t("orion.soFar")})` : ""}${known.msu ? ` · ≈${fmt(known.msu)} MSU` : ""} · ${endsIn(known)}`));
           box.append(line);
         }
         const anchor = card.querySelector(kind.after);
@@ -19026,9 +19991,9 @@ ${waves2.map((w) => `${t("orion.waveN", { n: w.n })}: ${fmt(w.cap)}`).join("\n")
       }
       scored.sort((a, b) => b.index - a.index);
       for (const { card } of scored) card.parentElement?.append(card);
-      const shown2 = scored.filter((x) => isShown(x.card));
-      if (shown2.length > 1 && shown2[0].index >= 0) shown2[0].card.querySelector(".fut-or")?.classList.add("fut-or-best");
-      return shown2.map((x) => x.card);
+      const shown3 = scored.filter((x) => isShown(x.card));
+      if (shown3.length > 1 && shown3[0].index >= 0) shown3[0].card.querySelector(".fut-or")?.classList.add("fut-or-best");
+      return shown3.map((x) => x.card);
     };
     let lastScanCost = null;
     const renderBox = (l, records) => {
@@ -19042,7 +20007,7 @@ ${waves2.map((w) => `${t("orion.waveN", { n: w.n })}: ${fmt(w.cap)}`).join("\n")
       const box = h7(doc, "div", "fut-or-box");
       const head = h7(doc, "div", "fut-or-head");
       head.append(h7(doc, "b", "", t("orion.boxTitle")));
-      if (l.perHour > 0) head.append(h7(doc, "span", "", `${t("orion.prod", { v: fmt(l.perHour) })}${Number.isFinite(l.stopsIn) ? ` \xB7 ${t("orion.stopsIn", { h: hoursText(l.stopsIn) })}` : ""}${Number.isFinite(l.cap) && l.now < l.cap ? ` \xB7 ${t("orion.fullIn", { h: hoursText((l.cap - l.now) / l.perHour) })}` : ""}`));
+      if (l.perHour > 0) head.append(h7(doc, "span", "", `${t("orion.prod", { v: fmt(l.perHour) })}${Number.isFinite(l.stopsIn) ? ` · ${t("orion.stopsIn", { h: hoursText(l.stopsIn) })}` : ""}${Number.isFinite(l.cap) && l.now < l.cap ? ` · ${t("orion.fullIn", { h: hoursText((l.cap - l.now) / l.perHour) })}` : ""}`));
       else head.append(h7(doc, "span", "warn", Number.isFinite(l.cap) && l.now >= l.cap ? t("orion.prodFull") : t("orion.prodStopped")));
       box.append(head);
       const kpis = h7(doc, "div", "fut-or-kpis");
@@ -19069,7 +20034,7 @@ ${waves2.map((w) => `${t("orion.waveN", { n: w.n })}: ${fmt(w.cap)}`).join("\n")
           const n = h7(doc, "span", "n", r.name);
           n.append(h7(doc, "small", "", `[${r.coords}]`));
           const v = h7(doc, "span", `v${r.partial ? " partial" : ""}`, fmt(r.cost));
-          v.title = r.partial ? t("orion.partial") : `${t("orion.totalCost", { v: fmt(r.cost) })}${r.lithium ? ` \xB7 ${fmt(r.lithium)} ${t("orion.back")}` : ""}`;
+          v.title = r.partial ? t("orion.partial") : `${t("orion.totalCost", { v: fmt(r.cost) })}${r.lithium ? ` · ${fmt(r.lithium)} ${t("orion.back")}` : ""}`;
           row.append(n, v, h7(doc, "span", "e", endsIn(r)), countSwitch(r.coords, false));
           rows.append(row);
         }
@@ -19121,13 +20086,13 @@ ${waves2.map((w) => `${t("orion.waveN", { n: w.n })}: ${fmt(w.cap)}`).join("\n")
       if ((doc.querySelector("#scannerResultHolder") || doc.querySelector(".orionTabContentWrapper.anomalyMissions")) && !doc.querySelector(".fut-or-box") && lithiumNow(doc) !== null) return true;
       if (doc.querySelector("#scannerResultHolder") && scanCost(doc) !== lastScanCost) return true;
       if (Object.keys(store.get(PENDING_KEY, {})).length || discovered.size) return true;
-      const shown2 = [];
+      const shown3 = [];
       for (const k of KINDS)
         for (const card of Array.from(doc.querySelectorAll(k.card))) {
           if (card.getAttribute("data-fut-or") !== fingerprint(card, k.rewards)) return true;
-          if (isShown(card)) shown2.push(card);
+          if (isShown(card)) shown3.push(card);
         }
-      return shown2.length !== rendered.length || shown2.some((c) => !rendered.includes(c));
+      return shown3.length !== rendered.length || shown3.some((c) => !rendered.includes(c));
     };
     let scheduled = false;
     const watch = () => observer.observe(doc.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "class", "hidden"] });
@@ -19193,6 +20158,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
     for (const type of [0, 1, 2, 3, 8]) if (store.get(`hs.daily.${type}`, null) !== null) store.set(`hs.daily.${type}`, null);
     const locale = detectLocale(document);
     const t = translator(locale);
+    const guide = { doc: document, store: new Store(gm, "future"), t };
     let snapshot = store.get(SNAPSHOT_KEY, null);
     const saver = new IdleSaver(() => {
       if (!snapshot) return;
@@ -19250,14 +20216,14 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
     const seenSlots = readLfSlots(document, techList);
     if (seenSlots && bodyId && rememberLfSlots(lfSlots, bodyId, seenSlots)) store.set(LF_SLOTS_KEY, lfSlots);
     if (bodyId && techList.length) {
-      const seen = store.get(SEEN_LEVELS_KEY, {});
-      const mine = { ...seen[String(bodyId)] };
+      const seen2 = store.get(SEEN_LEVELS_KEY, {});
+      const mine = { ...seen2[String(bodyId)] };
       let changed = false;
       for (const e of techList) if (mine[String(e.id)] !== e.level) {
         mine[String(e.id)] = e.level;
         changed = true;
       }
-      if (changed) store.set(SEEN_LEVELS_KEY, { ...seen, [String(bodyId)]: mine });
+      if (changed) store.set(SEEN_LEVELS_KEY, { ...seen2, [String(bodyId)]: mine });
     }
     const seenLocked = readLfLocked(document);
     if (seenLocked && bodyId) {
@@ -19293,16 +20259,16 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
         const body = snapshot?.bodies.find((b) => b.id === id);
         const stock2 = here === id && onScreen ? onScreen : body ? estimateResources(body, now) : null;
         const have = stock2 ? lessReserved(stock2, reservedFor(queued2, id)) : null;
-        const pending = pendingFor(sent, id, here === id ? now : body?.resourcesAt ?? 0);
-        const { state, lack } = planStatus(items2, have, pending, now);
+        const pending2 = pendingFor(sent, id, here === id ? now : body?.resourcesAt ?? 0);
+        const { state, lack } = planStatus(items2, have, pending2, now);
         const lines = [];
         for (const i of items2) {
           const last2 = lines[lines.length - 1];
           if (last2 && last2.name === i.name && i.level !== void 0 && last2.to !== void 0 && i.level === last2.to + 1) last2.to = i.level;
           else lines.push({ name: i.name, from: i.level, to: i.level, amount: i.amount });
         }
-        const label = (l) => l.amount !== void 0 ? `${l.name} \xD7${l.amount.toLocaleString(locale)}` : `${l.name} ${l.from === l.to ? t("plan.level", { level: l.from ?? 0 }) : t("plan.levels", { from: l.from ?? 0, to: l.to ?? 0 })}`;
-        out[key] = { state, lack, pending, items: lines.map(label) };
+        const label = (l) => l.amount !== void 0 ? `${l.name} ×${l.amount.toLocaleString(locale)}` : `${l.name} ${l.from === l.to ? t("plan.level", { level: l.from ?? 0 }) : t("plan.levels", { from: l.from ?? 0, to: l.to ?? 0 })}`;
+        out[key] = { state, lack, pending: pending2, items: lines.map(label) };
       }
       return out;
     };
@@ -19330,52 +20296,131 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
     let refreshInbox = null;
     let refreshFleet = null;
     let menuCtx = { colonies: "" };
-    const openFutureSettings = (section2) => openSettings({
-      doc: document,
-      store,
-      t,
-      menu: {
-        settings,
-        onChange: (next) => {
-          settings = next;
-          store.set("planetMenu.totals", next.showTotals);
-          store.set("planetMenu.fleet", next.showFleet === true);
-          store.set("planetMenu.totalView", next.totalView ?? "msu");
-          store.set("planetMenu.gameTips", next.gameTips !== false);
-          draw();
-        }
-      },
-      backup: {
-        onExport: () => downloadBackup(document, gm, Date.now()),
-        onImport: (text) => {
-          let json2 = null;
-          try {
-            json2 = JSON.parse(text);
-          } catch {
+    const openFutureSettings = (section2) => {
+      openSettings({
+        doc: document,
+        store,
+        t,
+        menu: {
+          settings,
+          onChange: (next) => {
+            settings = next;
+            store.set("planetMenu.totals", next.showTotals);
+            store.set("planetMenu.fleet", next.showFleet === true);
+            store.set("planetMenu.totalView", next.totalView ?? "msu");
+            store.set("planetMenu.gameTips", next.gameTips !== false);
+            draw();
           }
-          if (!isOglightDb(json2)) return importBackup(gm, text);
-          const out = convertOglight(json2, loadMarks(store.get(MARKS_KEY, null)), store.get(POSITIONS_KEY, {}), Date.now());
-          store.set(MARKS_KEY, out.marks);
-          store.set(POSITIONS_KEY, out.positions);
-          const days2 = convertOglightStats(json2.stats ?? {}, store.get(JOURNAL_KEY, {}));
-          store.set(JOURNAL_KEY, days2.journal);
-          return t("settings.oglightDone", { players: out.players, seen: out.seen, exp: days2.expeditions.toLocaleString(locale), raids: days2.raids.toLocaleString(locale), days: days2.days });
-        }
-      },
-      notes: [menuCtx.colonies, snapshot ? t("toolbar.lastSync", { time: new Date(snapshot.fetchedAt).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) }) : ""].filter(Boolean),
-      onMailChange: () => refreshInbox?.(),
-      bodies: readPlanetList(document).flatMap((b) => [
-        ...b.planetId ? [{ id: b.planetId, name: b.name, coords: b.coords, moon: false }] : [],
-        ...b.moonId ? [{ id: b.moonId, name: b.name, coords: b.coords, moon: true }] : []
-      ]),
-      onFleetChange: () => {
-        refreshFleet?.();
-        mountTouchBar(document, store, t);
-      },
-      section: section2,
-      rules: { bodies: readPlanetList(document).map(({ planetId, moonId, name, coords }) => ({ planetId, moonId, name, coords })), bodyId: currentId, locale }
-    });
+        },
+        backup: {
+          onExport: () => downloadBackup(document, gm, Date.now()),
+          onImport: (text) => {
+            let json2 = null;
+            try {
+              json2 = JSON.parse(text);
+            } catch {
+            }
+            if (!isOglightDb(json2)) return importBackup(gm, text);
+            const out = convertOglight(json2, loadMarks(store.get(MARKS_KEY, null)), store.get(POSITIONS_KEY, {}), Date.now());
+            store.set(MARKS_KEY, out.marks);
+            store.set(POSITIONS_KEY, out.positions);
+            const days2 = convertOglightStats(json2.stats ?? {}, store.get(JOURNAL_KEY, {}));
+            store.set(JOURNAL_KEY, days2.journal);
+            return t("settings.oglightDone", { players: out.players, seen: out.seen, exp: days2.expeditions.toLocaleString(locale), raids: days2.raids.toLocaleString(locale), days: days2.days });
+          }
+        },
+        notes: [menuCtx.colonies, snapshot ? t("toolbar.lastSync", { time: new Date(snapshot.fetchedAt).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) }) : ""].filter(Boolean),
+        onMailChange: () => refreshInbox?.(),
+        bodies: readPlanetList(document).flatMap((b) => [
+          ...b.planetId ? [{ id: b.planetId, name: b.name, coords: b.coords, moon: false }] : [],
+          ...b.moonId ? [{ id: b.moonId, name: b.name, coords: b.coords, moon: true }] : []
+        ]),
+        onFleetChange: () => {
+          refreshFleet?.();
+          mountTouchBar(document, store, t);
+        },
+        section: section2,
+        rules: { bodies: readPlanetList(document).map(({ planetId, moonId, name, coords }) => ({ planetId, moonId, name, coords })), bodyId: currentId, locale },
+        onHelp: () => startGuide(guide, "settings"),
+        guide: (redraw) => guidePanel({ doc: document, t, store: guide.store, steps: firstSteps(), onStart: runGuide, redraw })
+      });
+      offerGuides(guide, ["settings"]);
+    };
     const ownPlaces = () => new Set(readPlanetList(document).flatMap((e) => [...e.planetId ? [`${e.coords}|p`] : [], ...e.moonId ? [`${e.coords}|m`] : []]));
+    const openDash = () => {
+      openDashboard({
+        doc: document,
+        snapshot,
+        entries: readPlanetList(document),
+        score: store.get(SCORE_KEY, null),
+        history: store.get(HISTORY_KEY, []),
+        bell: (r) => bellButton(document, store, t, r),
+        queues,
+        names: techNames,
+        lfSlots,
+        lfLevels: store.get(LF_LEVELS_KEY, null),
+        lfLocked: store.get(LF_LOCKED_KEY, {}),
+        seenLevels: store.get(SEEN_LEVELS_KEY, {}),
+        icons: techIcons(document, store),
+        store,
+        now: Date.now(),
+        locale,
+        t,
+        onHelp: () => startGuide(guide, "dashboard")
+      });
+      offerGuides(guide, ["dashboard"]);
+    };
+    const openPlan = (focus) => {
+      const id = currentBodyId(document);
+      const resources = readCurrentResources(document);
+      openPlanner({
+        doc: document,
+        store,
+        entries: readPlanetList(document),
+        snapshot,
+        current: id && resources ? { id, resources } : null,
+        now: Date.now(),
+        locale,
+        t,
+        onChange: () => draw(),
+        focus,
+        href: location.href,
+        navigate: (url) => location.assign(url),
+        onHelp: () => startGuide(guide, "planner")
+      });
+      offerGuides(guide, ["planner"]);
+    };
+    const openJour = () => {
+      openJournal({ doc: document, store, now: Date.now(), locale, t, onHelp: () => startGuide(guide, "journal") });
+      offerGuides(guide, ["journal"]);
+    };
+    const firstSteps = () => {
+      const onFleet = isFleetDispatch(document);
+      const goTo = (id) => {
+        const url = guideUrl(location.href, id);
+        if (url) location.assign(url);
+      };
+      return [
+        { key: "sync", done: !!snapshot, show: () => (closeSettings(document), startGuide(guide, "board", [4])) },
+        { key: "fleetsave", done: Object.values(loadProfiles(store)).some((p) => p?.save), show: () => openFutureSettings("bodies") },
+        {
+          key: "mainShip",
+          done: store.get(SETTINGS_KEY, {}).mainShip !== void 0,
+          show: () => onFleet ? (closeSettings(document), startGuide(guide, "fleet", [3])) : goTo("fleet")
+        },
+        { key: "plan", done: planCount(store.get(PLAN_KEY, {})) > 0, show: () => goTo("tech") },
+        { key: "journal", done: Object.keys(store.get(JOURNAL_KEY, {})).length > 0, show: () => goTo("messages") }
+      ];
+    };
+    const runGuide = (id) => {
+      if (id !== "settings") closeSettings(document);
+      const windows = { dashboard: openDash, planner: () => openPlan(), journal: openJour };
+      windows[id]?.();
+      if (id === "settings" || windows[id] || guideHere(document, id)) return startGuide(guide, id);
+      const url = guideUrl(location.href, id);
+      if (url) location.assign(url);
+      else startGuide(guide, id);
+    };
     let drawDock = null;
     const draw = () => {
       drawDock?.();
@@ -19395,46 +20440,11 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
           menuCtx = ctx;
           openFutureSettings();
         },
-        onOpenDashboard: () => openDashboard({
-          doc: document,
-          snapshot,
-          entries: readPlanetList(document),
-          score: store.get(SCORE_KEY, null),
-          history: store.get(HISTORY_KEY, []),
-          bell: (r) => bellButton(document, store, t, r),
-          queues,
-          names: techNames,
-          lfSlots,
-          lfLevels: store.get(LF_LEVELS_KEY, null),
-          lfLocked: store.get(LF_LOCKED_KEY, {}),
-          seenLevels: store.get(SEEN_LEVELS_KEY, {}),
-          icons: techIcons(document, store),
-          store,
-          now: Date.now(),
-          locale,
-          t
-        }),
+        onOpenDashboard: () => openDash(),
         planCount: planCount(store.get(PLAN_KEY, {})),
         planGap: planGap(),
         planMarks: planMarks(),
-        onOpenPlanner: (focus) => {
-          const id = currentBodyId(document);
-          const resources = readCurrentResources(document);
-          openPlanner({
-            doc: document,
-            store,
-            entries: readPlanetList(document),
-            snapshot,
-            current: id && resources ? { id, resources } : null,
-            now: Date.now(),
-            locale,
-            t,
-            onChange: () => draw(),
-            focus,
-            href: location.href,
-            navigate: (url) => location.assign(url)
-          });
-        },
+        onOpenPlanner: (focus) => openPlan(focus),
         // COMPLIANCE: runs only from the Sync button's click (reason 'user-sync', no cp).
         onSync: async () => {
           try {
@@ -19506,7 +20516,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
         locale,
         journal: { today: stats("today"), yesterday: stats("yesterday") },
         marks: loadMarks(store.get(MARKS_KEY, null)),
-        onOpenJournal: () => openJournal({ doc: document, store, now: Date.now(), locale, t }),
+        onOpenJournal: () => openJour(),
         onOpenTargets: (view2) => view2 ? openSide(side, view2) : toggleSide(side)
       });
     };
@@ -19590,7 +20600,16 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
       });
     if (isFleetDispatch(document) && currentId) {
       const bodies = readPlanetList(document).map(({ planetId, moonId, name, coords }) => ({ planetId, moonId, name, coords }));
-      const fleet = { doc: document, store, bodyId: currentId, bodies, t, locale, onOpenSettings: (s) => openFutureSettings(s ?? "fleet") };
+      const fleet = {
+        doc: document,
+        store,
+        bodyId: currentId,
+        bodies,
+        t,
+        locale,
+        onOpenSettings: (s) => openFutureSettings(s ?? "fleet"),
+        onHelp: (zone) => startGuide(guide, "fleet", [FLEET_ZONES[zone]])
+      };
       renderFleetTools(fleet);
       refreshFleet = () => renderFleetTools(fleet);
     }
@@ -19600,6 +20619,13 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
       const arrow = (key) => () => document.querySelector(`#galaxycomponent .galaxy_icons[onclick*="'${key}'"]`)?.click();
       registerActions(document, store, t, { "galaxy.left": arrow("ArrowLeft"), "galaxy.right": arrow("ArrowRight"), "galaxy.down": arrow("ArrowDown"), "galaxy.up": arrow("ArrowUp") });
     }
+    const asked = guideFromUrl(location.href);
+    if (asked) {
+      const clean2 = new URL(location.href);
+      clean2.searchParams.delete(GUIDE_PARAM);
+      history.replaceState(history.state, "", clean2.toString());
+      startWhenReady(guide, asked);
+    } else offerGuides(guide, ["board", "fleet", "galaxy", "messages", "tech"]);
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => void bootstrap(), { once: true });

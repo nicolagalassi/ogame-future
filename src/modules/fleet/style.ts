@@ -3,7 +3,7 @@ import { PAGE_TOKENS, toneRules, WINDOW_TOKENS_NO_LINES } from '../../core/sheet
 /** Styles for the action bars on the game's fleet page (scoped by fut- class names). */
 export const FLEET_CSS = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
-.fut-fbar, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fchips, .fut-fclear, .fut-fall, .fut-fcap, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
+.fut-fbar, .fut-fhelp, .fut-fmenu, .fut-frow, .fut-facts, .fut-fact, .fut-fsecond, .fut-fskip, #fleet1, .fut-mainship, .fut-finv, .fut-fedit, .fut-ftool, .fut-frules, .fut-fsw, .fut-fread, .fut-fask, .fut-fask-q, .fut-fask-b, .fut-finfo, .fut-fsend, .fut-fdest, .fut-fres, .fut-fin, .fut-fpick, .fut-fseg, .fut-fresin, .fut-fchips, .fut-fclear, .fut-fall, .fut-fcap, .fut-fcargo, .fut-fcl, .fut-fcaret, .fut-fcollect, .fut-fmhead, .fut-fmsub, .fut-fmain { ${WINDOW_TOKENS_NO_LINES} }
 /* The fleet bar speaks the inbox's language: Verdana 11px, tabular numbers, one set of tokens. */
 .fut-fbar, .fut-fmenu {
   ${PAGE_TOKENS} --line: var(--line-strong); --line-soft: #1D2531;
@@ -46,6 +46,13 @@ ${toneRules((k) => `.fut-fact[data-mode="${k}"]`)}
 .fut-fact .name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; font: 600 condensed 12px/1 var(--display); white-space: nowrap; color: inherit; }
 /* Zone labels: what a group of buttons is for, printed once at its head. */
 .fut-fzone { color: var(--label); font: 600 condensed 13px var(--display); white-space: nowrap; }
+/* «?» beside a zone's name: what the zone does (modules/guide). Quiet until pointed at. */
+.fut-fzone { display: inline-flex; align-items: center; gap: 2px; }
+.fut-fhelp { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 4px;
+  background: none; color: var(--dim); cursor: pointer; }
+.fut-fhelp:hover { color: var(--hi); background: var(--tile-hi); }
+.fut-fhelp:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+@media (pointer: coarse) { .fut-fhelp { width: 30px; height: 30px; margin: -5px 0; } }
 .fut-fzonebox { display: inline-flex; flex-direction: column; gap: 4px; }
 .fut-ftiles { display: inline-flex; gap: 4px; }
 .fut-fgroup .fut-fzone { margin-right: 4px; }
