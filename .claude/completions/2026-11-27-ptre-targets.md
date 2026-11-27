@@ -9,3 +9,4 @@
   e «Gestisci su PTRE»; messaggio con quanti bersagli ha il team e quanti nuovi.
 - Consenso aggiornato: elenca rapporto, info giocatore, bersagli.
 - Test in tests/marks.test.ts «PTRE targets». Screenshot scratchpad/ptre3/list.png. Non provato contro PTRE.
+- 0.3.183: dopo «Sincronizza con PTRE» il messaggio aggiunge le parole di PTRE (Nicola: «0 bersagli» dopo una sincronizzazione con Pain marcato PTRE).

@@ -113,7 +113,7 @@ describe('PTRE targets', () => {
     openSide({ doc: document, store, guard, t, locale: 'it', ptre }, { flagTab: 'ptre', player: null });
     const root = () => document.getElementById(SIDE_ID)!.shadowRoot!;
     root().querySelector<HTMLButtonElement>('.psync button')!.click();
-    await vi.waitFor(() => expect(root().querySelector('.psync .msg')?.textContent).toBe('Il team ha 2 bersagli su PTRE; 1 nuovi qui.'));
+    await vi.waitFor(() => expect(root().querySelector('.psync .msg')?.textContent).toBe('Il team ha 2 bersagli su PTRE; 1 nuovi qui. PTRE: ok'));
     const call = fetchImpl.mock.calls.find(([u]) => u.includes('api_sync_target_list.php'))!;
     expect(call[1]).toMatchObject({ method: 'POST', body: '[{"id":5,"pseudo":"Bob"}]' });
     expect(loadMarks(store.get(MARKS_KEY, null)).players['7']?.flag).toBe('ptre');

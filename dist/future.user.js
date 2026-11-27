@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.182
+// @version      0.3.183
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -8259,7 +8259,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
         if (r.ok) {
           const { marks, added } = mergePtreTargets(readMarks2(store), r.targets, Date.now());
           store.set(MARKS_KEY, marks);
-          ptreSync = { busy: false, ok: true, text: t("ptre.synced", { n: r.targets.length, added }) };
+          ptreSync = { busy: false, ok: true, text: [t("ptre.synced", { n: r.targets.length, added }), r.message && `PTRE: ${r.message}`].filter(Boolean).join(" ") };
         } else {
           const why = r.message === "no-key" ? t("ptre.noKey") : r.message === "server" ? t("ptre.noServer") : r.message || "?";
           ptreSync = { busy: false, ok: false, text: t("ptre.failed", { message: why }) };
