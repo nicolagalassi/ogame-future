@@ -16,4 +16,6 @@ OGLight 5.4.3 è tollerato. Queste regole emergono dal suo codice e valgono anch
 
 10. **PTRE con la team key** (chiesto da Nicola il 2026-11-27): solo le funzioni che OGLight ha nella tabella di compatibilità di PTRE, nessun invio senza key, chiamate con la key solo da click (fase 2, invii durante la navigazione, dietro un interruttore spento di default). Dettagli e fasi in [PTRE.md](PTRE.md).
 
+11. **Scheda giocatore al posto del tooltip del gioco sul nome in galassia** (chiesto da Nicola il 2026-11-27; OGLight sostituisce il contenuto dello stesso tooltip con il suo specchietto): Future toglie la classe `tooltipRel` dal nome e spegne il tooltip già agganciato (`_tippy.disable()`); le azioni del tooltip del gioco (scrivi, amicizia…) vengono copiate nella scheda di Future, cliccabili, così nessuna funzione del gioco sparisce. `src/modules/player-card`, `quietGameTooltip` in `src/modules/galaxy`.
+
 Da verificare con un ToolDev prima di copiarle: "Repeat x" sulla coda e la pulizia automatica dei report.

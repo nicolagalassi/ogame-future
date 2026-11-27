@@ -53,10 +53,19 @@ const CSS = `
 #${CARD_ID} tr.sub td:first-child { padding-left: 18px; }
 #${CARD_ID} p { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
 #${CARD_ID} .err { color: var(--bad); }
+/* The game's own actions on the player (from its tooltip, which the card replaces in the galaxy): clickable. */
+#${CARD_ID}.live { pointer-events: auto; }
+#${CARD_ID} .acts { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 8px 0 0; padding: 6px 0 0; border-top: 1px solid var(--line-soft); list-style: none; }
+#${CARD_ID} .acts li { margin: 0; padding: 0; }
+#${CARD_ID} .acts a { color: var(--accent); text-decoration: none; font-size: 12px; }
+#${CARD_ID} .acts a:hover, #${CARD_ID} .acts a:focus-visible { color: var(--text); text-decoration: underline; }
 `;
 
 let cardFor = 0;
 let pending: ReturnType<typeof setTimeout> | undefined;
+/** A card with actions stays open while the pointer crosses from the name to it. */
+const GRACE_MS = 200;
+let closing: ReturnType<typeof setTimeout> | undefined;
 
 function el<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, cls = '', text = ''): HTMLElementTagNameMap[K] {
   const n = doc.createElement(tag);
@@ -67,6 +76,7 @@ function el<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, cls = 
 
 export function closePlayerCard(doc: Document): void {
   clearTimeout(pending);
+  clearTimeout(closing);
   cardFor = 0;
   doc.getElementById(CARD_ID)?.remove();
 }
@@ -75,19 +85,30 @@ export function closePlayerCard(doc: Document): void {
  * Shows the card while the pointer (or the keyboard focus) is on `anchor`. Once per element: calling it
  * again on the same element does nothing.
  */
-export function attachPlayerCard(o: PlayerCardOptions, anchor: HTMLElement, id: number, name: string): void {
+export function attachPlayerCard(o: PlayerCardOptions, anchor: HTMLElement, id: number, name: string, actions?: () => Node[]): void {
   if (anchor.dataset.futCard) return;
   anchor.dataset.futCard = String(id);
   anchor.addEventListener('mouseenter', () => {
     clearTimeout(pending);
-    pending = setTimeout(() => void openPlayerCard(o, anchor, id, name), INTENT_MS);
+    clearTimeout(closing);
+    if (cardFor === id && o.doc.getElementById(CARD_ID)) return;
+    pending = setTimeout(() => void openPlayerCard(o, anchor, id, name, actions), INTENT_MS);
   });
-  anchor.addEventListener('focus', () => void openPlayerCard(o, anchor, id, name));
-  anchor.addEventListener('mouseleave', () => closePlayerCard(o.doc));
-  anchor.addEventListener('blur', () => closePlayerCard(o.doc));
+  anchor.addEventListener('focus', () => void openPlayerCard(o, anchor, id, name, actions));
+  // With actions the pointer may be on its way to the card: a short grace before closing.
+  anchor.addEventListener('mouseleave', () => {
+    clearTimeout(pending);
+    if (!actions) return closePlayerCard(o.doc);
+    clearTimeout(closing);
+    closing = setTimeout(() => closePlayerCard(o.doc), GRACE_MS);
+  });
+  anchor.addEventListener('blur', (e) => {
+    // Tabbing into the card's own links keeps it open.
+    if (!(e.relatedTarget instanceof Node && o.doc.getElementById(CARD_ID)?.contains(e.relatedTarget))) closePlayerCard(o.doc);
+  });
 }
 
-export async function openPlayerCard(o: PlayerCardOptions, anchor: Element, id: number, name: string): Promise<void> {
+export async function openPlayerCard(o: PlayerCardOptions, anchor: Element, id: number, name: string, actions?: () => Node[]): Promise<void> {
   const { doc, t, locale } = o;
   if (!doc.getElementById('fut-player-card-css')) {
     const style = el(doc, 'style');
@@ -105,6 +126,23 @@ export async function openPlayerCard(o: PlayerCardOptions, anchor: Element, id: 
   card.append(head);
   const note = el(doc, 'p', '', t('galaxy.loading'));
   card.append(note);
+  // The game's own actions on this player (write, buddy request…), when the caller hands them over.
+  const acts = actions?.() ?? [];
+  if (acts.length) {
+    const list = el(doc, 'ul', 'acts');
+    list.append(...acts);
+    card.append(list);
+    card.classList.add('live');
+    card.addEventListener('mouseenter', () => clearTimeout(closing));
+    card.addEventListener('mouseleave', () => closePlayerCard(doc));
+    card.addEventListener('focusout', (e) => {
+      if (!(e.relatedTarget instanceof Node && (card.contains(e.relatedTarget) || e.relatedTarget === anchor))) closePlayerCard(doc);
+    });
+    // A click on one of them is the game's: the card goes, the game does the rest.
+    card.addEventListener('click', (e) => {
+      if ((e.target as Element).closest('a')) closePlayerCard(doc);
+    });
+  }
   doc.body.append(card);
   // Beside the name, inside the window: right of it when there is room, else left; level with it when possible.
   const place = () => {
