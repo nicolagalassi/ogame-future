@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.177
+// @version      0.3.178
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -17822,8 +17822,12 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
   function startLevel(details, listLevel, built) {
     const candidates = [details.panelLevel ?? 0, (details.panelLevel ?? 0) + 1, (listLevel ?? 0) + 1, (built ?? 0) + 1];
     const match = matchShownLevel(details.id, candidates, details.shown);
-    if (match) return match;
-    return { level: (listLevel ?? details.panelLevel ?? 0) + 1, discount: 0 };
+    if (!match) {
+      const level2 = (listLevel ?? details.panelLevel ?? 0) + 1;
+      return { level: level2, discount: 0, shown: level2 };
+    }
+    const running = listLevel !== void 0 && built !== void 0 && listLevel > built;
+    return { level: running ? Math.max(match.level, listLevel + 1) : match.level, discount: match.discount, shown: match.level };
   }
   var msu3 = (c) => c.metal + c.crystal * 1.5 + c.deuterium * 3;
   function button2(doc, cls, html, title, onClick) {
@@ -18008,7 +18012,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
         const plan = loadPlan(o.store);
         let planned = true;
         for (let l = start.level; l <= to; l++) planned && (planned = inPlan(plan, o.bodyId, details.id, l));
-        const ms = (l) => details.durationMs ? scaleDuration(details.id, start.level, details.durationMs, l) : 0;
+        const ms = (l) => details.durationMs ? scaleDuration(details.id, start.shown, details.durationMs, l) : 0;
         let sumMs = 0;
         for (let l = start.level; l <= to; l++) sumMs += ms(l);
         const prev = button2(doc, "fut-tp-btn fut-tp-step", ICON.minus, t("tech.prev"), () => {
