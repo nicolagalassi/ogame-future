@@ -60,6 +60,16 @@ export async function ptreRanks(deps: { guard: NetworkGuard; store: Store; host:
 /* ---------- The team's PTRE: everything below needs the player's team key ---------- */
 
 /**
+ * Country and universe as OGLight sends them to PTRE: the universe's language (meta "ogame-language")
+ * and every digit of the host ("s269-it…" → 269), so test and special servers name the same universe.
+ */
+export function ptreUniverse(host: string, lang: string): { country: string; univers: string } | null {
+  const univers = host.split('.')[0]!.replace(/\D/g, '');
+  const country = lang.trim().toLowerCase() || ptreServer(host)?.country || '';
+  return univers && /^[a-z]{2,}$/.test(country) ? { country, univers } : null;
+}
+
+/**
  * The player's PTRE team key, per universe and player (a team lives on one universe). It works as a
  * password for the team's data: never in a backup file (core/backup), never in the network log (guard).
  */
@@ -81,6 +91,8 @@ export interface PtreDeps {
   store: Store;
   /** The game's host, e.g. "s269-it.ogame.gameforge.com". */
   host: string;
+  /** The universe's language (meta "ogame-language"), PTRE's "country". */
+  lang: string;
   /** Future's version, sent as OGLight sends its own. */
   version: string;
   now?: () => number;
@@ -106,7 +118,7 @@ export interface PtreError {
  */
 export async function ptreCall(deps: PtreDeps, script: string, params: Record<string, string>, init: RequestInit = {}): Promise<PtreAnswer & { data: Record<string, unknown> | null }> {
   const key = teamKeyOf(deps.store);
-  const server = ptreServer(deps.host);
+  const server = ptreUniverse(deps.host, deps.lang);
   if (!key || !server) return { ok: false, message: key ? 'server' : 'no-key', data: null };
   const query = new URLSearchParams({ ...params, tool: 'future', team_key: key, country: server.country, univers: server.univers, version: deps.version });
   let data: Record<string, unknown> | null = null;

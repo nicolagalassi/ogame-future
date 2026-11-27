@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.179
+// @version      0.3.180
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -2733,7 +2733,9 @@
     "ptre.save": "Salva su PTRE",
     "ptre.saving": "Invio a PTRE…",
     "ptre.saved": "Salvato su PTRE",
-    "ptre.saveFailed": "PTRE non l'ha salvato: {message}. Clic per riprovare."
+    "ptre.saveFailed": "PTRE non l'ha salvato: {message}. Clic per riprovare.",
+    "ptre.noKey": "Team key mancante",
+    "ptre.noServer": "universo non riconosciuto"
   };
 
   // src/i18n/en.json
@@ -3856,7 +3858,9 @@
     "ptre.save": "Save to PTRE",
     "ptre.saving": "Sending to PTRE…",
     "ptre.saved": "Saved to PTRE",
-    "ptre.saveFailed": "PTRE did not save it: {message}. Click to try again."
+    "ptre.saveFailed": "PTRE did not save it: {message}. Click to try again.",
+    "ptre.noKey": "team key missing",
+    "ptre.noServer": "universe not recognised"
   };
 
   // src/i18n/fr.json
@@ -4979,7 +4983,9 @@
     "ptre.save": "Enregistrer sur PTRE",
     "ptre.saving": "Envoi à PTRE…",
     "ptre.saved": "Enregistré sur PTRE",
-    "ptre.saveFailed": "PTRE ne l'a pas enregistré : {message}. Clic pour réessayer."
+    "ptre.saveFailed": "PTRE ne l'a pas enregistré : {message}. Clic pour réessayer.",
+    "ptre.noKey": "team key manquante",
+    "ptre.noServer": "univers non reconnu"
   };
 
   // src/i18n/de.json
@@ -6102,7 +6108,9 @@
     "ptre.save": "In PTRE speichern",
     "ptre.saving": "Wird an PTRE gesendet…",
     "ptre.saved": "In PTRE gespeichert",
-    "ptre.saveFailed": "PTRE hat ihn nicht gespeichert: {message}. Klick für einen neuen Versuch."
+    "ptre.saveFailed": "PTRE hat ihn nicht gespeichert: {message}. Klick für einen neuen Versuch.",
+    "ptre.noKey": "Team Key fehlt",
+    "ptre.noServer": "Universum nicht erkannt"
   };
 
   // src/core/i18n.ts
@@ -6480,6 +6488,11 @@
     deps.store.set(PTRE_KEY, fresh);
     return fresh;
   }
+  function ptreUniverse(host, lang) {
+    const univers = host.split(".")[0].replace(/\D/g, "");
+    const country = lang.trim().toLowerCase() || ptreServer(host)?.country || "";
+    return univers && /^[a-z]{2,}$/.test(country) ? { country, univers } : null;
+  }
   var TEAM_KEY = "ptre.teamKey";
   var ERRORS_KEY = "ptre.errors";
   var ERRORS_MAX = 10;
@@ -6490,7 +6503,7 @@
   var teamKeyOf = (store) => normalTeamKey(store.get(TEAM_KEY, ""));
   async function ptreCall(deps, script, params, init = {}) {
     const key = teamKeyOf(deps.store);
-    const server = ptreServer(deps.host);
+    const server = ptreUniverse(deps.host, deps.lang);
     if (!key || !server) return { ok: false, message: key ? "server" : "no-key", data: null };
     const query = new URLSearchParams({ ...params, tool: "future", team_key: key, country: server.country, univers: server.univers, version: deps.version });
     let data = null;
@@ -9709,7 +9722,7 @@ td.spark-cell { width: 90px; }
     const view2 = { ...DEFAULT_VIEW, ...o.store.get(VIEW_KEY2, {}) };
     if (!COLS.includes(view2.sort)) view2.sort = "loot";
     view2.cols = columnOrder(view2.cols);
-    const prefs = [o.store.get(SPY_SHARED_KEY, true), o.store.get(SIM_KEY, "osims"), [...expanded], !!o.spy.ptre, [...ptreState], Object.keys(o.store.get(PTRE_SENT_KEY, {})).length];
+    const prefs = [o.store.get(SPY_SHARED_KEY, true), o.store.get(SIM_KEY, "osims"), [...expanded], !!(o.spy.ptre && teamKeyOf(o.store)), [...ptreState], Object.keys(o.store.get(PTRE_SENT_KEY, {})).length];
     const sig = JSON.stringify([Object.values(board).map((e) => e.id), view2, prefs, Math.floor((o.now?.() ?? Date.now()) / 6e4)]);
     if (old && old.dataset.sig === sig && old.nextElementSibling === anchor) return;
     const focus = doc.activeElement?.closest(`#${SPY_PANEL_ID}`) ? doc.activeElement.dataset.focus : void 0;
@@ -9932,7 +9945,7 @@ td.spark-cell { width: 90px; }
           doc.defaultView?.open(simLink(tool, key, spy.lang, prefill), "_blank", "noopener");
         }));
       }
-      if (e.apiKey && spy.ptre) {
+      if (e.apiKey && spy.ptre && teamKeyOf(store)) {
         const key = e.apiKey;
         const save = spy.ptre;
         const sent = store.get(PTRE_SENT_KEY, {})[key];
@@ -9947,7 +9960,7 @@ td.spark-cell { width: 90px; }
               ptreState.delete(key);
               const all3 = { ...store.get(PTRE_SENT_KEY, {}), [key]: Date.now() };
               store.set(PTRE_SENT_KEY, Object.fromEntries(Object.entries(all3).sort((a, b2) => a[1] - b2[1]).slice(-PTRE_SENT_MAX)));
-            } else ptreState.set(key, { busy: false, error: r2.message || "?" });
+            } else ptreState.set(key, { busy: false, error: r2.message === "no-key" ? t("ptre.noKey") : r2.message === "server" ? t("ptre.noServer") : r2.message || "?" });
             mountSpyPanel(o);
           });
         });
@@ -20951,7 +20964,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
     const guard = new NetworkGuard((input, init) => fetch(input, init), window.location.origin);
     const gm = new GMStore();
     const store = new Store(gm, namespace);
-    const ptreDeps = { guard, store, host: location.host, version: typeof GM_info === "undefined" ? "" : GM_info?.script.version ?? "" };
+    const ptreDeps = { guard, store, host: location.host, lang: document.querySelector('meta[name="ogame-language"]')?.getAttribute("content") ?? "", version: typeof GM_info === "undefined" ? "" : GM_info?.script.version ?? "" };
     const moved = migrateOld(loadMarks(store.get(MARKS_KEY, null)), {
       targets: store.get(TARGETS_KEY, []),
       rivals: store.get("rivals.list", [])
@@ -21421,8 +21434,8 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
           lang: pageMeta("ogame-ui-language") || pageMeta("ogame-language"),
           allianceClass: Number(pageMeta("ogame-allianceclass-id")) || 0,
           lf: store.get(LF_BONUS_KEY, null),
-          // Only with the player's team key: no key, no PTRE button, nothing sent.
-          ptre: teamKeyOf(store) ? (apiKey) => ptreSaveSpyReport(ptreDeps, apiKey) : void 0
+          // The table shows the button only while a team key is saved (read on every draw): no key, nothing sent.
+          ptre: (apiKey) => ptreSaveSpyReport(ptreDeps, apiKey)
         }
       });
     if (isFleetDispatch(document) && currentId) {

@@ -1117,5 +1117,7 @@
   "ptre.save": "Enregistrer sur PTRE",
   "ptre.saving": "Envoi à PTRE…",
   "ptre.saved": "Enregistré sur PTRE",
-  "ptre.saveFailed": "PTRE ne l'a pas enregistré : {message}. Clic pour réessayer."
+  "ptre.saveFailed": "PTRE ne l'a pas enregistré : {message}. Clic pour réessayer.",
+  "ptre.noKey": "team key manquante",
+  "ptre.noServer": "univers non reconnu"
 }

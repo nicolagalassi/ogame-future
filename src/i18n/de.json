@@ -1117,5 +1117,7 @@
   "ptre.save": "In PTRE speichern",
   "ptre.saving": "Wird an PTRE gesendet…",
   "ptre.saved": "In PTRE gespeichert",
-  "ptre.saveFailed": "PTRE hat ihn nicht gespeichert: {message}. Klick für einen neuen Versuch."
+  "ptre.saveFailed": "PTRE hat ihn nicht gespeichert: {message}. Klick für einen neuen Versuch.",
+  "ptre.noKey": "Team Key fehlt",
+  "ptre.noServer": "Universum nicht erkannt"
 }
