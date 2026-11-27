@@ -1119,5 +1119,21 @@
   "ptre.saved": "Saved to PTRE",
   "ptre.saveFailed": "PTRE did not save it: {message}. Click to try again.",
   "ptre.noKey": "team key missing",
-  "ptre.noServer": "universe not recognised"
+  "ptre.noServer": "universe not recognised",
+  "ptre.playerHint": "The player's activity and the team's best report, from PTRE",
+  "ptre.frame.last24h": "24h",
+  "ptre.frame.2days": "2 d",
+  "ptre.frame.3days": "3 d",
+  "ptre.frame.week": "Week",
+  "ptre.frame.2weeks": "2 wk",
+  "ptre.frame.month": "Month",
+  "ptre.activity": "Activity by hour (PTRE)",
+  "ptre.slot": "{label}: {n} activities, {pct}% checked",
+  "ptre.noActivity": "PTRE has no activity for this period.",
+  "ptre.best": "The team's best report · {date}",
+  "ptre.bestFleet": "Fleet {points} points",
+  "ptre.noBest": "No team report on this player.",
+  "ptre.report": "Report on PTRE",
+  "ptre.profile": "Profile on PTRE",
+  "ptre.failed": "PTRE: {message}"
 }

@@ -179,3 +179,47 @@ describe('player sheet scores', () => {
     closeSide(document, store);
   });
 });
+
+describe('PTRE on the player sheet', () => {
+  it('asks PTRE only on a click, shows activity and the best report, a new frame asks again', async () => {
+    resetSideCache();
+    const store = new Store(new MemoryStore(), 'ptre');
+    store.set('ptre.teamKey', 'TM-AAAA-BBBB-CCCC-DDDD');
+    const xml = '<?xml version="1.0"?><playerData id="8" name="Zed" timestamp="1"><positions></positions><planets></planets></playerData>';
+    const answer = {
+      code: 1, message: 'ok',
+      activity_array: { succes: 1, max_acti_per_slot: 4, activity_array: JSON.stringify([['00h', 0], ['01h', 4], ['02h', 'x']]), check_array: JSON.stringify([['00h', 100], ['01h', 50], ['02h', 0]]) },
+      top_sr_timestamp: 1_790_000_000, top_sr_fleet_points: 12_300_000, top_sr_link: 'https://ptre.chez.gg/?iid=1', fleet_json: [{ ship_type: 202, count: 1500 }],
+    };
+    const fetchImpl = vi.fn(async (url: string) => new Response(url.includes('ptre.chez.gg') ? JSON.stringify(answer) : xml));
+    const guard = new NetworkGuard(fetchImpl, 'http://localhost:3000');
+    document.body.innerHTML = '';
+    const ptre = { guard, store, host: 's269-it.ogame.gameforge.com', lang: 'it', version: '1' };
+    openSide({ doc: document, store, guard, t, locale: 'it', ptre }, { player: 8 });
+    const root = () => document.getElementById(SIDE_ID)!.shadowRoot!;
+    const button = () => [...root().querySelectorAll<HTMLButtonElement>('.actions button')].find((b) => b.textContent === 'PTRE')!;
+    await vi.waitFor(() => expect(button()).toBeDefined());
+    const ptreCalls = () => fetchImpl.mock.calls.filter(([u]) => u.includes('ptre.chez.gg')).map(([u]) => new URL(u));
+    expect(ptreCalls()).toHaveLength(0);
+    button().click();
+    await vi.waitFor(() => expect(root().querySelectorAll('.ptre .bar')).toHaveLength(2));
+    expect(Object.fromEntries(ptreCalls()[0]!.searchParams)).toMatchObject({ player_id: '8', pseudo: 'Zed', input_frame: 'week', tool: 'future' });
+    const bars = [...root().querySelectorAll<HTMLElement>('.ptre .bar')];
+    expect(bars.map((b) => b.className)).toEqual(['bar', 'bar hot']);
+    expect(bars[1]!.title).toBe('01h: 4 attività, controllato al 50%');
+    expect(root().querySelector('.ptre .best b')!.textContent).toBe('Flotta 12,3M punti');
+    expect(root().querySelector('.ptre .ships')!.textContent).toContain('1,5k');
+    expect([...root().querySelectorAll<HTMLAnchorElement>('.ptre .links a')].map((a) => a.href)).toEqual(['https://ptre.chez.gg/?iid=1', 'https://ptre.chez.gg/?country=it&univers=269&player_id=8']);
+    // A redraw does not ask again; another frame does.
+    openSide({ doc: document, store, guard, t, locale: 'it', ptre }, { player: 8 });
+    expect(ptreCalls()).toHaveLength(1);
+    [...root().querySelectorAll<HTMLButtonElement>('.ptre .chip')].find((c) => c.textContent === '24h')!.click();
+    await vi.waitFor(() => expect(ptreCalls()).toHaveLength(2));
+    expect(ptreCalls()[1]!.searchParams.get('input_frame')).toBe('last24h');
+    // Without a team key there is no PTRE button.
+    store.delete('ptre.teamKey');
+    openSide({ doc: document, store, guard, t, locale: 'it', ptre }, { player: 8 });
+    expect(button()).toBeUndefined();
+    closeSide(document, store);
+  });
+});

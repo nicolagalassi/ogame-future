@@ -143,3 +143,56 @@ export async function ptreSaveSpyReport(deps: PtreDeps, apiKey: string): Promise
   const { ok, message } = await ptreCall(deps, 'oglight_import.php', { sr_id: apiKey }, { method: 'POST' });
   return { ok, message };
 }
+
+/** PTRE's time frames for a player's activity, as OGLight offers them. */
+export const PTRE_FRAMES = ['last24h', '2days', '3days', 'week', '2weeks', 'month'] as const;
+export type PtreFrame = (typeof PTRE_FRAMES)[number];
+
+export interface PtrePlayer {
+  /** One slot of the day: its label, the activities seen in it, how well it was checked (0–100). */
+  slots: { label: string; activity: number; checked: number }[];
+  /** Most activities seen in one slot (PTRE's scale for the dots). */
+  max: number;
+  /** The team's best spy report on the player: when, its fleet points, the ships, PTRE's page for it. */
+  best: { at: number; fleetPoints: number; link: string; ships: Record<string, number> } | null;
+}
+
+const json = <V>(v: unknown, fallback: V): V => {
+  if (typeof v !== 'string') return (v ?? fallback) as V;
+  try { return JSON.parse(v) as V; } catch { return fallback; }
+};
+
+/** PTRE's answer for one player (oglight_get_player_infos.php), read the way OGLight reads it. */
+export function parsePtrePlayer(data: Record<string, unknown> | null): PtrePlayer | null {
+  if (!data || String(data.code) !== '1') return null;
+  const a = (data.activity_array ?? {}) as { succes?: unknown; activity_array?: unknown; check_array?: unknown; max_acti_per_slot?: unknown };
+  const lines = String(a.succes) === '1' ? json<unknown[][]>(a.activity_array, []) : [];
+  const checks = String(a.succes) === '1' ? json<unknown[][]>(a.check_array, []) : [];
+  const slots = (Array.isArray(lines) ? lines : []).flatMap((line, i) => {
+    const activity = Number(Array.isArray(line) ? line[1] : NaN);
+    if (!Array.isArray(line) || !Number.isFinite(activity)) return [];
+    const check = Number(Array.isArray(checks[i]) ? checks[i]![1] : 0);
+    return [{ label: String(line[0] ?? ''), activity, checked: Number.isFinite(check) ? Math.max(0, Math.min(100, check)) : 0 }];
+  });
+  const at = Number(data.top_sr_timestamp) * 1000;
+  const ships: Record<string, number> = {};
+  for (const s of json<{ ship_type?: unknown; count?: unknown }[]>(data.fleet_json, [])) {
+    const n = Number(s?.count);
+    if (/^\d+$/.test(String(s?.ship_type ?? '')) && n > 0) ships[String(s.ship_type)] = n;
+  }
+  const link = String(data.top_sr_link ?? '');
+  const best = at > 0 ? { at, fleetPoints: Number(data.top_sr_fleet_points) || 0, link: /^https:\/\/ptre\.chez\.gg\//.test(link) ? link : '', ships } : null;
+  return { slots, max: Number(a.max_acti_per_slot) || 0, best };
+}
+
+/** One player's activity and best report in the team's PTRE, for the frame the player picked. */
+export async function ptrePlayerInfo(deps: PtreDeps, player: { id: number; name: string }, frame: PtreFrame): Promise<{ info: PtrePlayer | null; message: string }> {
+  const r = await ptreCall(deps, 'oglight_get_player_infos.php', { player_id: String(player.id), pseudo: player.name, input_frame: frame });
+  return { info: r.ok ? parsePtrePlayer(r.data) : null, message: r.message };
+}
+
+/** The player's page on PTRE (a plain link, opened by the player). */
+export function ptreProfileUrl(host: string, lang: string, playerId: number): string | null {
+  const u = ptreUniverse(host, lang);
+  return u ? `https://ptre.chez.gg/?country=${u.country}&univers=${u.univers}&player_id=${playerId}` : null;
+}

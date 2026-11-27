@@ -491,7 +491,7 @@ async function bootstrap(): Promise<void> {
   }
 
   // Targets side bar: stays open across pages as the player left it; M = next position of its list.
-  const side = { doc: document, store, guard, t, locale };
+  const side = { doc: document, store, guard, t, locale, ptre: ptreDeps };
   // Dock under the game's menu: journal and targets at a glance; redrawn with the planet menu.
   drawDock = () => {
     const journal = store.get<Journal>(JOURNAL_KEY, {});

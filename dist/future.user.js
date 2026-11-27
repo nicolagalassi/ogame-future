@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.180
+// @version      0.3.181
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -345,7 +345,8 @@
   var PTRE_RANKS = `${PTRE_BASE}api_get_ranks.php`;
   var PTRE_SCRIPTS = {
     "api_get_ranks.php": "every player's points at PTRE's last reading (highscore page)",
-    "oglight_import.php": "one spy report the player chose to save to the team (its API id only)"
+    "oglight_import.php": "one spy report the player chose to save to the team (its API id only)",
+    "oglight_get_player_infos.php": "one player's activity and best spy report in the team's data, when the player asks for them"
   };
   function redactUrl(url) {
     return url.replace(/([?&]team_?key=)[^&#]*/gi, "$1***");
@@ -2735,7 +2736,23 @@
     "ptre.saved": "Salvato su PTRE",
     "ptre.saveFailed": "PTRE non l'ha salvato: {message}. Clic per riprovare.",
     "ptre.noKey": "Team key mancante",
-    "ptre.noServer": "universo non riconosciuto"
+    "ptre.noServer": "universo non riconosciuto",
+    "ptre.playerHint": "Attività del giocatore e miglior rapporto del team, da PTRE",
+    "ptre.frame.last24h": "24h",
+    "ptre.frame.2days": "2 g",
+    "ptre.frame.3days": "3 g",
+    "ptre.frame.week": "Sett.",
+    "ptre.frame.2weeks": "2 sett.",
+    "ptre.frame.month": "Mese",
+    "ptre.activity": "Attività per ora (PTRE)",
+    "ptre.slot": "{label}: {n} attività, controllato al {pct}%",
+    "ptre.noActivity": "PTRE non ha attività per questo periodo.",
+    "ptre.best": "Miglior rapporto del team · {date}",
+    "ptre.bestFleet": "Flotta {points} punti",
+    "ptre.noBest": "Nessun rapporto del team su questo giocatore.",
+    "ptre.report": "Rapporto su PTRE",
+    "ptre.profile": "Profilo su PTRE",
+    "ptre.failed": "PTRE: {message}"
   };
 
   // src/i18n/en.json
@@ -3860,7 +3877,23 @@
     "ptre.saved": "Saved to PTRE",
     "ptre.saveFailed": "PTRE did not save it: {message}. Click to try again.",
     "ptre.noKey": "team key missing",
-    "ptre.noServer": "universe not recognised"
+    "ptre.noServer": "universe not recognised",
+    "ptre.playerHint": "The player's activity and the team's best report, from PTRE",
+    "ptre.frame.last24h": "24h",
+    "ptre.frame.2days": "2 d",
+    "ptre.frame.3days": "3 d",
+    "ptre.frame.week": "Week",
+    "ptre.frame.2weeks": "2 wk",
+    "ptre.frame.month": "Month",
+    "ptre.activity": "Activity by hour (PTRE)",
+    "ptre.slot": "{label}: {n} activities, {pct}% checked",
+    "ptre.noActivity": "PTRE has no activity for this period.",
+    "ptre.best": "The team's best report · {date}",
+    "ptre.bestFleet": "Fleet {points} points",
+    "ptre.noBest": "No team report on this player.",
+    "ptre.report": "Report on PTRE",
+    "ptre.profile": "Profile on PTRE",
+    "ptre.failed": "PTRE: {message}"
   };
 
   // src/i18n/fr.json
@@ -4985,7 +5018,23 @@
     "ptre.saved": "Enregistré sur PTRE",
     "ptre.saveFailed": "PTRE ne l'a pas enregistré : {message}. Clic pour réessayer.",
     "ptre.noKey": "team key manquante",
-    "ptre.noServer": "univers non reconnu"
+    "ptre.noServer": "univers non reconnu",
+    "ptre.playerHint": "Activité du joueur et meilleur rapport de l'équipe, depuis PTRE",
+    "ptre.frame.last24h": "24h",
+    "ptre.frame.2days": "2 j",
+    "ptre.frame.3days": "3 j",
+    "ptre.frame.week": "Sem.",
+    "ptre.frame.2weeks": "2 sem.",
+    "ptre.frame.month": "Mois",
+    "ptre.activity": "Activité par heure (PTRE)",
+    "ptre.slot": "{label} : {n} activités, vérifié à {pct}%",
+    "ptre.noActivity": "PTRE n'a pas d'activité pour cette période.",
+    "ptre.best": "Meilleur rapport de l'équipe · {date}",
+    "ptre.bestFleet": "Flotte {points} points",
+    "ptre.noBest": "Aucun rapport de l'équipe sur ce joueur.",
+    "ptre.report": "Rapport sur PTRE",
+    "ptre.profile": "Profil sur PTRE",
+    "ptre.failed": "PTRE : {message}"
   };
 
   // src/i18n/de.json
@@ -6110,7 +6159,23 @@
     "ptre.saved": "In PTRE gespeichert",
     "ptre.saveFailed": "PTRE hat ihn nicht gespeichert: {message}. Klick für einen neuen Versuch.",
     "ptre.noKey": "Team Key fehlt",
-    "ptre.noServer": "Universum nicht erkannt"
+    "ptre.noServer": "Universum nicht erkannt",
+    "ptre.playerHint": "Aktivität des Spielers und bester Bericht des Teams, von PTRE",
+    "ptre.frame.last24h": "24h",
+    "ptre.frame.2days": "2 T",
+    "ptre.frame.3days": "3 T",
+    "ptre.frame.week": "Woche",
+    "ptre.frame.2weeks": "2 Wo.",
+    "ptre.frame.month": "Monat",
+    "ptre.activity": "Aktivität pro Stunde (PTRE)",
+    "ptre.slot": "{label}: {n} Aktivitäten, zu {pct}% geprüft",
+    "ptre.noActivity": "PTRE hat keine Aktivität für diesen Zeitraum.",
+    "ptre.best": "Bester Bericht des Teams · {date}",
+    "ptre.bestFleet": "Flotte {points} Punkte",
+    "ptre.noBest": "Kein Bericht des Teams über diesen Spieler.",
+    "ptre.report": "Bericht auf PTRE",
+    "ptre.profile": "Profil auf PTRE",
+    "ptre.failed": "PTRE: {message}"
   };
 
   // src/core/i18n.ts
@@ -6158,8 +6223,8 @@
       }
     };
   }
-  function parseAccountInfo(json2, fetchedAt) {
-    const data = json2 ?? {};
+  function parseAccountInfo(json3, fetchedAt) {
+    const data = json3 ?? {};
     const list = (v) => Array.isArray(v) ? v : v && typeof v === "object" ? Object.values(v) : [];
     return {
       fetchedAt,
@@ -6177,13 +6242,13 @@
     deps.session.setItem(sessionKey(deps.store), "1");
     const response = await deps.guard.request(ACCOUNT_INFO_PATH, reason);
     const text = await response.text();
-    let json2;
+    let json3;
     try {
-      json2 = JSON.parse(text);
+      json3 = JSON.parse(text);
     } catch {
       throw new Error(`accountInfo: not JSON (${text.slice(0, 40).trim()})`);
     }
-    const snapshot = parseAccountInfo(json2, now());
+    const snapshot = parseAccountInfo(json3, now());
     if (!snapshot.bodies.some((b) => b.type === "planet")) throw new Error("accountInfo: no planets in the answer");
     deps.store.set(SNAPSHOT_KEY, snapshot);
     return snapshot;
@@ -6459,8 +6524,8 @@
   // src/data/ptre.ts
   var PTRE_KEY = "ptre.ranks";
   var TTL = 6 * 36e5;
-  function parsePtreRanks(json2, readAt) {
-    const d = json2 ?? {};
+  function parsePtreRanks(json3, readAt) {
+    const d = json3 ?? {};
     if (Number(d.code) !== 1 || !Array.isArray(d.ranks_array) || !d.ranks_array.length) return null;
     const scores = {};
     for (const r of d.ranks_array) {
@@ -6525,6 +6590,44 @@
   async function ptreSaveSpyReport(deps, apiKey) {
     const { ok, message } = await ptreCall(deps, "oglight_import.php", { sr_id: apiKey }, { method: "POST" });
     return { ok, message };
+  }
+  var PTRE_FRAMES = ["last24h", "2days", "3days", "week", "2weeks", "month"];
+  var json = (v, fallback) => {
+    if (typeof v !== "string") return v ?? fallback;
+    try {
+      return JSON.parse(v);
+    } catch {
+      return fallback;
+    }
+  };
+  function parsePtrePlayer(data) {
+    if (!data || String(data.code) !== "1") return null;
+    const a = data.activity_array ?? {};
+    const lines = String(a.succes) === "1" ? json(a.activity_array, []) : [];
+    const checks = String(a.succes) === "1" ? json(a.check_array, []) : [];
+    const slots = (Array.isArray(lines) ? lines : []).flatMap((line, i) => {
+      const activity = Number(Array.isArray(line) ? line[1] : NaN);
+      if (!Array.isArray(line) || !Number.isFinite(activity)) return [];
+      const check = Number(Array.isArray(checks[i]) ? checks[i][1] : 0);
+      return [{ label: String(line[0] ?? ""), activity, checked: Number.isFinite(check) ? Math.max(0, Math.min(100, check)) : 0 }];
+    });
+    const at = Number(data.top_sr_timestamp) * 1e3;
+    const ships = {};
+    for (const s of json(data.fleet_json, [])) {
+      const n = Number(s?.count);
+      if (/^\d+$/.test(String(s?.ship_type ?? "")) && n > 0) ships[String(s.ship_type)] = n;
+    }
+    const link = String(data.top_sr_link ?? "");
+    const best = at > 0 ? { at, fleetPoints: Number(data.top_sr_fleet_points) || 0, link: /^https:\/\/ptre\.chez\.gg\//.test(link) ? link : "", ships } : null;
+    return { slots, max: Number(a.max_acti_per_slot) || 0, best };
+  }
+  async function ptrePlayerInfo(deps, player, frame) {
+    const r = await ptreCall(deps, "oglight_get_player_infos.php", { player_id: String(player.id), pseudo: player.name, input_frame: frame });
+    return { info: r.ok ? parsePtrePlayer(r.data) : null, message: r.message };
+  }
+  function ptreProfileUrl(host, lang, playerId) {
+    const u = ptreUniverse(host, lang);
+    return u ? `https://ptre.chez.gg/?country=${u.country}&univers=${u.univers}&player_id=${playerId}` : null;
   }
 
   // src/data/server-data.ts
@@ -7405,6 +7508,49 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     return fresh;
   }
 
+  // src/data/ship-icons.ts
+  var SHIP_ICONS = {
+    202: "https://gf2.geo.gfsrv.net/cdnd9/60555c3c87b9eb3b5ddf76780b5712.jpg",
+    203: "https://gf1.geo.gfsrv.net/cdn34/fdbcc505474e3e108d10a3ed4a19f4.jpg",
+    204: "https://gf2.geo.gfsrv.net/cdnd2/9ed5c1b6aea28fa51f84cdb8cb1e7e.jpg",
+    205: "https://gf1.geo.gfsrv.net/cdnf1/8266a2cbae5ad630c5fedbdf270f3e.jpg",
+    206: "https://gf2.geo.gfsrv.net/cdn45/b7ee4f9d556a0f39dae8d2133e05b7.jpg",
+    207: "https://gf1.geo.gfsrv.net/cdn32/3f4a081f4d15662bed33473db53d5b.jpg",
+    208: "https://gf1.geo.gfsrv.net/cdn6f/41a21e4253d2231f8937ddef1ba43e.jpg",
+    209: "https://gf1.geo.gfsrv.net/cdn07/6246eb3d7fa67414f6b818fa79dd9b.jpg",
+    210: "https://gf3.geo.gfsrv.net/cdnb5/347821e80cafc52aec04f27c3a2a4d.jpg",
+    211: "https://gf1.geo.gfsrv.net/cdnca/4d55a520aed09d0c43e7b962f33e27.jpg",
+    213: "https://gf3.geo.gfsrv.net/cdn2a/c2b9fedc9c93ef22f2739c49fbac52.jpg",
+    214: "https://gf3.geo.gfsrv.net/cdn84/155e9e24fc1d34ed4660de8d428f45.jpg",
+    215: "https://gf3.geo.gfsrv.net/cdn5a/24f511ec14a71e2d83fd750aa0dee2.jpg",
+    217: "https://gf3.geo.gfsrv.net/cdn26/28e8d79a5b489dc795cc47f3adf165.jpg",
+    218: "https://gf1.geo.gfsrv.net/cdn39/12d016c8bb0d71e053b901560c17cc.jpg",
+    219: "https://gf3.geo.gfsrv.net/cdne2/b8d8d18f2baf674acedb7504c7cc83.jpg"
+  };
+  function shipIcon(doc, id, name, cls) {
+    const url = SHIP_ICONS[id];
+    if (!url) {
+      const span = doc.createElement("span");
+      span.className = `${cls} ${cls}-none`;
+      span.textContent = name.slice(0, 3);
+      return span;
+    }
+    const img = doc.createElement("img");
+    img.className = cls;
+    img.src = url;
+    img.alt = name;
+    img.title = name;
+    img.loading = "lazy";
+    return img;
+  }
+  function shipName(id, ships, t) {
+    const name = ships[String(id)]?.name;
+    if (name) return name;
+    const key = `ship.${id}`;
+    const fallback = t(key);
+    return fallback === key ? `#${id}` : fallback;
+  }
+
   // src/modules/marks/side.ts
   var SIDE_ID = "fut-side";
   var SIDE_W = 390;
@@ -7413,6 +7559,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   var BIG_DEBRIS = 1e6;
   var HOUR2 = 36e5;
   var last = null;
+  var ptreOpen = null;
+  var ptreFrame = "week";
+  var ptreAnswers = /* @__PURE__ */ new Map();
   var sheetData = /* @__PURE__ */ new Map();
   var uni = null;
   var ranksLoading = false;
@@ -7469,6 +7618,28 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .actions { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; flex: none; }
 .actions a { display: flex; align-items: center; justify-content: center; gap: 6px; height: 30px; padding: 0 4px; border-radius: 4px; background: var(--surface); color: var(--text-2); text-decoration: none; white-space: nowrap; overflow: hidden; }
 .actions a:hover { background: var(--hover); color: var(--text); }
+.actions button { all: unset; display: flex; align-items: center; justify-content: center; gap: 6px; height: 30px; padding: 0 4px; border-radius: 4px; background: var(--surface); color: var(--text-2); white-space: nowrap; overflow: hidden; cursor: pointer; }
+.actions button:hover { background: var(--hover); color: var(--text); }
+.actions a, .actions button { transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.actions a:active, .actions button:active { transform: scale(0.97); }
+.actions button[aria-expanded="true"] { background: var(--hover); color: var(--text); box-shadow: inset 0 2px 0 var(--accent); }
+/* PTRE: the player's activity through the day and the team's best report on them. */
+.ptre { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; padding: 8px; border-radius: 4px; background: var(--surface); }
+.ptre .chips .chip { min-width: 0; font-size: 11px; background: var(--raised); }
+.ptre .chips .chip:hover { background: var(--hover); }
+.ptre .lbl { color: var(--label); font-size: 11px; }
+.ptre .bars { display: flex; align-items: flex-end; gap: 2px; height: 44px; padding-top: 2px; }
+.ptre .bar { flex: 1 1 0; min-width: 0; height: max(3px, calc(var(--h) * 100%)); border-radius: 2px 2px 0 0; background: var(--fresh); }
+.ptre .bar.mid { background: var(--warm); } .ptre .bar.hot { background: var(--old); }
+.ptre .bar.none { background: var(--line-strong); }
+.ptre .axis { display: flex; justify-content: space-between; color: var(--quiet); font: condensed 11px var(--display); }
+.ptre .best { display: flex; flex-direction: column; gap: 4px; padding-top: 6px; border-top: 1px solid var(--line-soft); }
+.ptre .best b { color: var(--text); font: 600 condensed 14px var(--display); }
+.ptre .ships { display: flex; flex-wrap: wrap; gap: 2px 10px; color: var(--text-2); }
+.ptre .ships span b { font-size: 13px; }
+.ptre .links { display: flex; gap: 10px; }
+.ptre .links a { color: var(--accent); text-decoration: none; } .ptre .links a:hover { color: var(--accent-hi); }
+.ptre .msg { color: var(--label); line-height: 1.4; } .ptre .msg.err { color: var(--old); }
 /* The player's note. */
 .note { display: flex; align-items: flex-start; gap: 6px; padding: 6px 8px; border-radius: 4px; background: var(--surface); flex: none; }
 .note svg { flex: none; margin-top: 3px; color: var(--warn); }
@@ -7851,6 +8022,20 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     link("user", t("marks.profile"), `/game/index.php?page=ingame&component=playerprofile&profileId=${id}`);
     link("chart", t("marks.rank"), highscoreHref(id, rank));
     link("eye", "ostats", ostatsUrl(doc.location?.host ?? "", id), true);
+    const ptre = o.ptre && teamKeyOf(store) ? o.ptre : null;
+    if (ptre) {
+      const b = h(doc, "button");
+      b.type = "button";
+      b.title = t("ptre.playerHint");
+      b.setAttribute("aria-expanded", String(ptreOpen === id));
+      b.append(icon(doc, "chart", 13), h(doc, "span", "", "PTRE"));
+      b.addEventListener("click", () => {
+        ptreOpen = ptreOpen === id ? null : id;
+        if (ptreOpen === id) askPtre(ptre, id, name);
+        refreshSide();
+      });
+      actions.append(b);
+    }
     side.append(actions);
     const flagged = marks.players[String(id)];
     const noteBox = h(doc, "label", `note${flagged ? "" : " off"}`);
@@ -7867,6 +8052,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
       noteBox.append(area);
     } else noteBox.append(h(doc, "span", "", t("marks.noteNeedsFlag")));
     side.append(noteBox);
+    if (ptre && ptreOpen === id) scroll.append(ptrePanel(o, ptre, id, name));
     if (!data) {
       scroll.append(h(doc, "p", "empty err", t("galaxy.apiError")));
       return;
@@ -7912,6 +8098,93 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     });
     scroll.append(wrap);
     scroll.append(h(doc, "p", "foot", t("marks.planets", { n: lines.length, moons: lines.filter((l) => l.moon).length }) + " · " + t("galaxy.apiAge", { time: new Date(data.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) })));
+  }
+  function askPtre(ptre, id, name) {
+    const key = `${id}|${ptreFrame}`;
+    if (ptreAnswers.has(key)) return;
+    ptreAnswers.set(key, "loading");
+    void ptrePlayerInfo(ptre, { id, name }, ptreFrame).catch(() => ({ info: null, message: "" })).then((r) => {
+      ptreAnswers.set(key, r);
+      refreshSide();
+    });
+  }
+  function ptrePanel(o, ptre, id, name) {
+    const { doc, t, locale, store } = o;
+    const box = h(doc, "div", "ptre");
+    const frames = h(doc, "div", "chips");
+    for (const f of PTRE_FRAMES) {
+      const c = h(doc, "button", "chip", t(`ptre.frame.${f}`));
+      c.type = "button";
+      c.setAttribute("aria-pressed", String(f === ptreFrame));
+      c.addEventListener("click", () => {
+        ptreFrame = f;
+        askPtre(ptre, id, name);
+        refreshSide();
+      });
+      frames.append(c);
+    }
+    box.append(frames);
+    const answer = ptreAnswers.get(`${id}|${ptreFrame}`);
+    if (!answer || answer === "loading") {
+      box.append(h(doc, "p", "msg", t("galaxy.loading")));
+      return box;
+    }
+    const profile = ptreProfileUrl(ptre.host, ptre.lang, id);
+    const links = h(doc, "div", "links");
+    const link = (text, href) => {
+      const a = h(doc, "a", "", text);
+      a.href = href;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      links.append(a);
+    };
+    const { info } = answer;
+    if (!info) {
+      box.append(h(doc, "p", "msg err", t("ptre.failed", { message: answer.message === "no-key" ? t("ptre.noKey") : answer.message === "server" ? t("ptre.noServer") : answer.message || "?" })));
+      if (profile) link(t("ptre.profile"), profile);
+      box.append(links);
+      return box;
+    }
+    box.append(h(doc, "span", "lbl", t("ptre.activity")));
+    if (info.slots.length) {
+      const bars = h(doc, "div", "bars");
+      bars.setAttribute("role", "img");
+      const busiest = info.max || Math.max(1, ...info.slots.map((s) => s.activity));
+      const words = [];
+      for (const s of info.slots) {
+        const ratio = Math.min(1, s.activity / busiest);
+        const bar = h(doc, "span", `bar${!s.checked ? " none" : s.activity === 0 ? "" : ratio < 0.34 ? " mid" : " hot"}`);
+        bar.style.setProperty("--h", String(s.activity ? Math.max(0.12, ratio) : 0.06));
+        bar.style.opacity = String(0.3 + 0.7 * s.checked / 100);
+        const tip = t("ptre.slot", { label: s.label, n: s.activity, pct: Math.round(s.checked) });
+        bar.title = tip;
+        words.push(tip);
+        bars.append(bar);
+      }
+      bars.setAttribute("aria-label", words.join("; "));
+      const axis = h(doc, "div", "axis");
+      const at = (i) => info.slots[Math.min(info.slots.length - 1, i)]?.label ?? "";
+      axis.append(h(doc, "span", "", at(0)), h(doc, "span", "", at(Math.floor(info.slots.length / 2))), h(doc, "span", "", at(info.slots.length - 1)));
+      box.append(bars, axis);
+    } else box.append(h(doc, "p", "msg", t("ptre.noActivity")));
+    const best = h(doc, "div", "best");
+    if (info.best) {
+      const date = new Date(info.best.at).toLocaleDateString(locale, { day: "2-digit", month: "2-digit", year: "2-digit" });
+      best.append(h(doc, "span", "lbl", t("ptre.best", { date })), h(doc, "b", "", t("ptre.bestFleet", { points: formatUnits(info.best.fleetPoints, locale) })));
+      const ships = h(doc, "div", "ships");
+      const known = store.get(SHIPS_INFO_KEY, {});
+      for (const [ship, n] of Object.entries(info.best.ships).sort((a, b) => Number(a[0]) - Number(b[0]))) {
+        const s = h(doc, "span", "", `${shipName(Number(ship), known, t)} `);
+        s.append(h(doc, "b", "mono", formatUnits(n, locale)));
+        ships.append(s);
+      }
+      if (ships.childElementCount) best.append(ships);
+      if (info.best.link) link(t("ptre.report"), info.best.link);
+    } else best.append(h(doc, "p", "msg", t("ptre.noBest")));
+    box.append(best);
+    if (profile) link(t("ptre.profile"), profile);
+    if (links.childElementCount) box.append(links);
+    return box;
   }
 
   // src/modules/galaxy/index.ts
@@ -8305,9 +8578,9 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   var IMPORT_EXPORT_KEY = "importexport";
   var isFalse = (v) => v === false || v === "false" || v === 0 || v === "0";
   var isTrue = (v) => v === true || v === "true" || v === 1 || v === "1";
-  function parseImportExport(json2) {
-    if (!json2 || typeof json2 !== "object") return null;
-    const { hasBought, gotItem } = json2;
+  function parseImportExport(json3) {
+    if (!json3 || typeof json3 !== "object") return null;
+    const { hasBought, gotItem } = json3;
     if (hasBought === void 0 && gotItem === void 0) return null;
     if (isFalse(hasBought) || isFalse(gotItem)) return true;
     if (isTrue(hasBought) && (gotItem === void 0 || isTrue(gotItem))) return false;
@@ -8316,13 +8589,13 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   var sessionKey2 = (store) => `${store.namespace}:importexport.read`;
   async function fetchImportExport(deps, reason) {
     const response = await deps.guard.request(IMPORT_EXPORT_PATH, reason);
-    let json2 = null;
+    let json3 = null;
     try {
-      json2 = JSON.parse(await response.text());
+      json3 = JSON.parse(await response.text());
     } catch {
-      json2 = null;
+      json3 = null;
     }
-    const available = parseImportExport(json2);
+    const available = parseImportExport(json3);
     if (available === null) return deps.store.get(IMPORT_EXPORT_KEY, null);
     const state = { available, at: (deps.now ?? Date.now)() };
     deps.store.set(IMPORT_EXPORT_KEY, state);
@@ -8672,8 +8945,8 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     "1b709fc34003e171528ec345430cbb2e3aa090e5": 0.35,
     b0f6477d68c9683170cb8d32be2df1177669c5a0: 0.4
   };
-  function parseSpeciesBonuses(json2, at) {
-    const data = (json2 ?? {}).data;
+  function parseSpeciesBonuses(json3, at) {
+    const data = (json3 ?? {}).data;
     if (!data?.expedition || typeof data.expedition !== "object") return null;
     const num5 = (v) => Number.isFinite(Number(v)) ? Number(v) : 0;
     const value = num5(data.expedition.ResultBooster?.totalBonus?.ResultBooster);
@@ -8691,13 +8964,13 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   async function fetchLfBonuses(deps, reason, now = Date.now()) {
     const response = await deps.guard.request(SPECIES_BONUSES_PATH, reason);
     const text = await response.text();
-    let json2;
+    let json3;
     try {
-      json2 = JSON.parse(text);
+      json3 = JSON.parse(text);
     } catch {
       throw new Error(`speciesBonuses: not JSON (${text.slice(0, 40).trim()})`);
     }
-    const bonuses = parseSpeciesBonuses(json2, now);
+    const bonuses = parseSpeciesBonuses(json3, now);
     if (!bonuses) throw new Error("speciesBonuses: no expedition data in the answer");
     deps.store.set(LF_BONUS_KEY, bonuses);
     return bonuses;
@@ -8912,7 +9185,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   }
 
   // src/data/messages.ts
-  var json = (value, fallback) => {
+  var json2 = (value, fallback) => {
     if (!value || value === "-") return fallback;
     try {
       return JSON.parse(value) ?? fallback;
@@ -8948,7 +9221,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   }
   function outcome(type, d, artefacts, lfXp) {
     if (type === 61) return artefacts > 0 ? "artefact" : lfXp > 0 ? "lifeform" : "nothing";
-    const nav = json(d.rawNavigation, {});
+    const nav = json2(d.rawNavigation, {});
     switch (d.rawExpeditionresult) {
       case "ressources":
       case "resources":
@@ -8987,7 +9260,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
       const artefacts = int2(d.rawArtifactsfound);
       const lfXp = int2(d.rawLifeformgainedexperience);
       const result = outcome(type, d, artefacts, lfXp);
-      const items = json(d.rawItemsgained, null);
+      const items = json2(d.rawItemsgained, null);
       const first = Array.isArray(items) ? items[0] : items && typeof items === "object" ? Object.values(items)[0] : null;
       const sizeRaw = d.rawSize ?? d.rawArtifactssize ?? "";
       const sized = !["nothing", "trader", "blackhole", "lifeform", "unknown"].includes(result);
@@ -9000,9 +9273,9 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
         depletion: int2(d.rawDepletion),
         // An expedition has one outcome: a ship find brings ships only. Its report can also carry the
         // ships' value as resources, which counted them twice (OGLight with ship value at 0% showed it).
-        res: result === "ship" ? readRes({}) : readRes(json(d.rawResourcesgained, {})),
-        ships: readUnits(json(d.rawTechnologiesgained, {})),
-        lost: readUnits(json(d.rawShipslost, {})),
+        res: result === "ship" ? readRes({}) : readRes(json2(d.rawResourcesgained, {})),
+        ships: readUnits(json2(d.rawTechnologiesgained, {})),
+        lost: readUnits(json2(d.rawShipslost, {})),
         item: first && typeof first === "object" ? String(first.name ?? "") || null : null,
         lfXp,
         lifeform: int2(d.rawLifeform),
@@ -9027,7 +9300,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
         moon: int2(d.rawTargetplanettype) === 3,
         playerId: int2(d.rawTargetplayerid),
         playerName: d.rawPlayername ?? "",
-        statuses: json(d.rawPlayerstatus, []).filter((x) => typeof x === "string"),
+        statuses: json2(d.rawPlayerstatus, []).filter((x) => typeof x === "string"),
         counter,
         sourceName: d.rawSourceplayername ?? "",
         sourceCoords: d.rawSourceplanetcoordinates ?? "",
@@ -9050,7 +9323,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
         attacker: true,
         winner: "lost",
         loot: { metal: 0, crystal: 0, deuterium: 0 },
-        lost: readUnits(json(d.rawShipslost, {})),
+        lost: readUnits(json2(d.rawShipslost, {})),
         debris: { metal: 0, crystal: 0, deuterium: 0 },
         apiKey: d.rawHashcode ?? ""
       });
@@ -9059,9 +9332,9 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
       if (!coords) return null;
       return { name: d[`raw${side === "source" ? "Source" : "Target"}planetname`] ?? "", coords, moon: int2(d[`raw${side === "source" ? "Source" : "Target"}planettype`]) === 3 };
     };
-    const recycled = readRes(json(d.rawRecycledresources, {}));
+    const recycled = readRes(json2(d.rawRecycledresources, {}));
     if (type === 32 || recycled.metal + recycled.crystal + recycled.deuterium > 0) {
-      const field = readRes(json(d.rawDebrisresources, {}));
+      const field = readRes(json2(d.rawDebrisresources, {}));
       return {
         kind: "recycle",
         id,
@@ -9073,7 +9346,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
         left: { metal: Math.max(0, field.metal - recycled.metal), crystal: Math.max(0, field.crystal - recycled.crystal), deuterium: Math.max(0, field.deuterium - recycled.deuterium) }
       };
     }
-    const cargo = readRes(json(d.rawCargo, {}));
+    const cargo = readRes(json2(d.rawCargo, {}));
     if (type === 33 || type === 34 || cargo.metal + cargo.crystal + cargo.deuterium + cargo.food > 0) {
       let from = place2("source");
       if (!from) {
@@ -9100,10 +9373,10 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     return c.attacker && !took && lost.length > 0 && lost.every((u) => Number(u) === PROBE2) ? null : c;
   }
   function readCombat(id, at, d, own) {
-    const fleets = json(d.rawFleets, []);
-    const rounds = json(d.rawCombatrounds, []);
-    const result = json(d.rawResult, {});
-    const defender = json(d.rawDefenderspaceobject, {});
+    const fleets = json2(d.rawFleets, []);
+    const rounds = json2(d.rawCombatrounds, []);
+    const result = json2(d.rawResult, {});
+    const defender = json2(d.rawDefenderspaceobject, {});
     const mine = (Array.isArray(fleets) ? fleets : []).filter((f) => f.player?.id === own);
     const ownIds = new Set(mine.map((f) => f.fleetId));
     const sides = new Set(mine.map((f) => f.side));
@@ -9134,49 +9407,6 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
   function isMessagesPage(doc) {
     const q2 = new URLSearchParams(doc.location?.search ?? "");
     return q2.get("page") === "messages" || q2.get("component") === "messages" || !!doc.querySelector("#messagecontainercomponent, #messagescomponent");
-  }
-
-  // src/data/ship-icons.ts
-  var SHIP_ICONS = {
-    202: "https://gf2.geo.gfsrv.net/cdnd9/60555c3c87b9eb3b5ddf76780b5712.jpg",
-    203: "https://gf1.geo.gfsrv.net/cdn34/fdbcc505474e3e108d10a3ed4a19f4.jpg",
-    204: "https://gf2.geo.gfsrv.net/cdnd2/9ed5c1b6aea28fa51f84cdb8cb1e7e.jpg",
-    205: "https://gf1.geo.gfsrv.net/cdnf1/8266a2cbae5ad630c5fedbdf270f3e.jpg",
-    206: "https://gf2.geo.gfsrv.net/cdn45/b7ee4f9d556a0f39dae8d2133e05b7.jpg",
-    207: "https://gf1.geo.gfsrv.net/cdn32/3f4a081f4d15662bed33473db53d5b.jpg",
-    208: "https://gf1.geo.gfsrv.net/cdn6f/41a21e4253d2231f8937ddef1ba43e.jpg",
-    209: "https://gf1.geo.gfsrv.net/cdn07/6246eb3d7fa67414f6b818fa79dd9b.jpg",
-    210: "https://gf3.geo.gfsrv.net/cdnb5/347821e80cafc52aec04f27c3a2a4d.jpg",
-    211: "https://gf1.geo.gfsrv.net/cdnca/4d55a520aed09d0c43e7b962f33e27.jpg",
-    213: "https://gf3.geo.gfsrv.net/cdn2a/c2b9fedc9c93ef22f2739c49fbac52.jpg",
-    214: "https://gf3.geo.gfsrv.net/cdn84/155e9e24fc1d34ed4660de8d428f45.jpg",
-    215: "https://gf3.geo.gfsrv.net/cdn5a/24f511ec14a71e2d83fd750aa0dee2.jpg",
-    217: "https://gf3.geo.gfsrv.net/cdn26/28e8d79a5b489dc795cc47f3adf165.jpg",
-    218: "https://gf1.geo.gfsrv.net/cdn39/12d016c8bb0d71e053b901560c17cc.jpg",
-    219: "https://gf3.geo.gfsrv.net/cdne2/b8d8d18f2baf674acedb7504c7cc83.jpg"
-  };
-  function shipIcon(doc, id, name, cls) {
-    const url = SHIP_ICONS[id];
-    if (!url) {
-      const span = doc.createElement("span");
-      span.className = `${cls} ${cls}-none`;
-      span.textContent = name.slice(0, 3);
-      return span;
-    }
-    const img = doc.createElement("img");
-    img.className = cls;
-    img.src = url;
-    img.alt = name;
-    img.title = name;
-    img.loading = "lazy";
-    return img;
-  }
-  function shipName(id, ships, t) {
-    const name = ships[String(id)]?.name;
-    if (name) return name;
-    const key = `ship.${id}`;
-    const fallback = t(key);
-    return fallback === key ? `#${id}` : fallback;
   }
 
   // src/engines/raids.ts
@@ -9499,6 +9729,8 @@ ${outcomeCss}
 #fut-spypanel .fut-sp-attack:hover { color: var(--hi); border-color: var(--attack-line); background: rgba(192, 83, 63, 0.3); }
 #fut-spypanel .fut-sp-sim { color: var(--sim); }
 #fut-spypanel .fut-sp-ptre { color: var(--sim); }
+#fut-spypanel .fut-sp-ptre { transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+#fut-spypanel .fut-sp-ptre:active { transform: scale(0.97); }
 #fut-spypanel .fut-sp-ptre.ok { color: var(--ok); }
 #fut-spypanel .fut-sp-ptre.bad { color: var(--neg); border-color: rgba(240, 122, 110, 0.5); }
 #fut-spypanel .fut-sp-ptre[aria-busy="true"] { opacity: 0.5; cursor: progress; }
@@ -19977,8 +20209,8 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           const d = orionData(doc, store, locale, o.now);
           save("orion-anomalies-per-day.csv", orionCsv(d.events, d.shipOf), "text/csv");
         });
-        const json2 = h6("button", "act", t("orion.json"));
-        json2.addEventListener("click", () => save("orion-anomalies.json", JSON.stringify(loadOrion(store), null, 1), "application/json"));
+        const json3 = h6("button", "act", t("orion.json"));
+        json3.addEventListener("click", () => save("orion-anomalies.json", JSON.stringify(loadOrion(store), null, 1), "application/json"));
         const wipe = h6("button", confirmClear ? "act danger" : "act ghost", confirmClear ? t("exp.clearConfirm") : t("orion.clear"));
         wipe.addEventListener("click", () => {
           if (!confirmClear) {
@@ -19990,7 +20222,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           clearOrion(store);
           draw();
         });
-        acts.append(csv, json2, wipe);
+        acts.append(csv, json3, wipe);
       } else if (Object.keys(journal).length) acts.append(exp, clear);
       foot.append(opt, acts);
       parts.push(foot);
@@ -21136,16 +21368,16 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
         backup: {
           onExport: () => downloadBackup(document, gm, Date.now()),
           onImport: (text) => {
-            let json2 = null;
+            let json3 = null;
             try {
-              json2 = JSON.parse(text);
+              json3 = JSON.parse(text);
             } catch {
             }
-            if (!isOglightDb(json2)) return importBackup(gm, text);
-            const out = convertOglight(json2, loadMarks(store.get(MARKS_KEY, null)), store.get(POSITIONS_KEY, {}), Date.now());
+            if (!isOglightDb(json3)) return importBackup(gm, text);
+            const out = convertOglight(json3, loadMarks(store.get(MARKS_KEY, null)), store.get(POSITIONS_KEY, {}), Date.now());
             store.set(MARKS_KEY, out.marks);
             store.set(POSITIONS_KEY, out.positions);
-            const days2 = convertOglightStats(json2.stats ?? {}, store.get(JOURNAL_KEY, {}));
+            const days2 = convertOglightStats(json3.stats ?? {}, store.get(JOURNAL_KEY, {}));
             store.set(JOURNAL_KEY, days2.journal);
             return t("settings.oglightDone", { players: out.players, seen: out.seen, exp: days2.expeditions.toLocaleString(locale), raids: days2.raids.toLocaleString(locale), days: days2.days });
           }
@@ -21341,7 +21573,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
         }
       });
     }
-    const side = { doc: document, store, guard, t, locale };
+    const side = { doc: document, store, guard, t, locale, ptre: ptreDeps };
     drawDock = () => {
       const journal = store.get(JOURNAL_KEY, {});
       const stats = (period) => {

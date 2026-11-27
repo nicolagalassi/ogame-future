@@ -1119,5 +1119,21 @@
   "ptre.saved": "Enregistré sur PTRE",
   "ptre.saveFailed": "PTRE ne l'a pas enregistré : {message}. Clic pour réessayer.",
   "ptre.noKey": "team key manquante",
-  "ptre.noServer": "univers non reconnu"
+  "ptre.noServer": "univers non reconnu",
+  "ptre.playerHint": "Activité du joueur et meilleur rapport de l'équipe, depuis PTRE",
+  "ptre.frame.last24h": "24h",
+  "ptre.frame.2days": "2 j",
+  "ptre.frame.3days": "3 j",
+  "ptre.frame.week": "Sem.",
+  "ptre.frame.2weeks": "2 sem.",
+  "ptre.frame.month": "Mois",
+  "ptre.activity": "Activité par heure (PTRE)",
+  "ptre.slot": "{label} : {n} activités, vérifié à {pct}%",
+  "ptre.noActivity": "PTRE n'a pas d'activité pour cette période.",
+  "ptre.best": "Meilleur rapport de l'équipe · {date}",
+  "ptre.bestFleet": "Flotte {points} points",
+  "ptre.noBest": "Aucun rapport de l'équipe sur ce joueur.",
+  "ptre.report": "Rapport sur PTRE",
+  "ptre.profile": "Profil sur PTRE",
+  "ptre.failed": "PTRE : {message}"
 }

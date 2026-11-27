@@ -23,12 +23,12 @@ pianeti e lune, bersagli condivisi. Nicola (2026-11-27) vuole la sincronizzazion
 | Fase | Cosa | Script PTRE | Stato |
 |---|---|---|---|
 | 0 | guard, client, team key + consenso, errori di PTRE | — | 0.3.179 |
-| 1a | «Salva su PTRE» su un rapporto della tabella spiate (click) | `oglight_import.php` (`sr_id`) | 0.3.179 |
-| 1b | info giocatore: grafico attività e miglior rapporto (click sulla scheda) | `oglight_get_player_infos.php` | da fare |
+| 1a | «Salva su PTRE» su un rapporto della tabella spiate (click) | `oglight_import.php` (`sr_id`) | 0.3.179, provato da Nicola sul suo universo (PTRE accetta `tool=future`) |
+| 1b | info giocatore: grafico attività e miglior rapporto (click sulla scheda) | `oglight_get_player_infos.php` | 0.3.181 |
 | 1c | bandierina «PTRE» e sincronizzazione bersagli del team (click) | `api_sync_target_list.php` | da fare |
 | 2 | dietro un interruttore a parte, spento di default: attività vista in galassia, pianeti e lune nuovi o cambiati, controspionaggi letti in posta, pianeti del giocatore da PTRE (al massimo ogni ora per giocatore) | `oglight_import_player_activity.php`, `api_galaxy_import_infos.php`, `api_galaxy_get_infos.php` | dopo la prova di 1a |
 
-La fase 2 parte solo dopo che Nicola ha provato 1a con la sua key (prova che PTRE accetta `tool=future`).
+La prova di 1a è passata il 2026-11-27 sul suo universo (sul server di test PTS i team non sembrano attivi).
 In fase 2 un invio per sistema disegnato dal gioco, mai per ridisegno di Future o per giro dell'observer (§1.3).
 
 ## Formati (dal sorgente di OGLight 5.4.2 nel repo, classe `PTRE`)
