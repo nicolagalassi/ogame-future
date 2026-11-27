@@ -251,10 +251,10 @@ export function readMessage(msg: Element, ownPlayerId: number): ParsedMessage | 
     };
   }
 
-  if (d.rawResult !== undefined && d.rawFleets !== undefined) return readCombat(id, at, d, ownPlayerId);
-  // One-round combat (probes shot down): only the losses are given.
+  if (d.rawResult !== undefined && d.rawFleets !== undefined) return spyingOnly(readCombat(id, at, d, ownPlayerId));
+  // One-round combat (the attacking fleet destroyed at once): only the losses are given.
   if (type === 48)
-    return {
+    return spyingOnly({
       kind: 'combat',
       id,
       at,
@@ -265,7 +265,7 @@ export function readMessage(msg: Element, ownPlayerId: number): ParsedMessage | 
       lost: readUnits(json(d.rawShipslost, {})),
       debris: { metal: 0, crystal: 0, deuterium: 0 },
       apiKey: d.rawHashcode ?? '',
-    };
+    });
 
   const place = (side: 'source' | 'target'): Place | null => {
     const coords = d[`raw${side === 'source' ? 'Source' : 'Target'}planetcoordinates`];
@@ -321,6 +321,18 @@ interface CombatResult {
   loot?: { resources?: { resource?: string; amount?: number }[] };
   debris?: { resources?: { resource?: string; remaining?: number; total?: number }[] };
   repairedTechnologies?: { technologyId?: number; amount?: number }[];
+}
+
+/** Espionage probe. */
+const PROBE = 210;
+/**
+ * Counter-espionage: own probes shot down while spying, nothing taken. Not an attack (Nicola): no summary on
+ * the report, nothing in the journal.
+ */
+function spyingOnly(c: CombatMessage): CombatMessage | null {
+  const lost = Object.keys(c.lost);
+  const took = c.loot.metal + c.loot.crystal + c.loot.deuterium > 0;
+  return c.attacker && !took && lost.length > 0 && lost.every((u) => Number(u) === PROBE) ? null : c;
 }
 
 function readCombat(id: string, at: number, d: DOMStringMap, own: number): CombatMessage {

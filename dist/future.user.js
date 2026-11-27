@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.171
+// @version      0.3.172
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -8376,9 +8376,9 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
         apiKey: d.rawHashcode ?? ""
       };
     }
-    if (d.rawResult !== void 0 && d.rawFleets !== void 0) return readCombat(id, at, d, ownPlayerId2);
+    if (d.rawResult !== void 0 && d.rawFleets !== void 0) return spyingOnly(readCombat(id, at, d, ownPlayerId2));
     if (type === 48)
-      return {
+      return spyingOnly({
         kind: "combat",
         id,
         at,
@@ -8389,7 +8389,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
         lost: readUnits(json(d.rawShipslost, {})),
         debris: { metal: 0, crystal: 0, deuterium: 0 },
         apiKey: d.rawHashcode ?? ""
-      };
+      });
     const place2 = (side) => {
       const coords = d[`raw${side === "source" ? "Source" : "Target"}planetcoordinates`];
       if (!coords) return null;
@@ -8428,6 +8428,12 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
       };
     }
     return null;
+  }
+  var PROBE2 = 210;
+  function spyingOnly(c) {
+    const lost = Object.keys(c.lost);
+    const took = c.loot.metal + c.loot.crystal + c.loot.deuterium > 0;
+    return c.attacker && !took && lost.length > 0 && lost.every((u) => Number(u) === PROBE2) ? null : c;
   }
   function readCombat(id, at, d, own) {
     const fleets = json(d.rawFleets, []);
