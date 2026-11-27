@@ -98,4 +98,20 @@ describe('expedition share calculator', () => {
     expect(lines[0]).toContain('4643 ÷ 6 slot = 773');
     expect(row.querySelector('.control .calc')).toBeNull();
   });
+
+  it('brings another universe over: where from, then which one, then a message', () => {
+    const src = { ns: 'future:s150-it.ogame.gameforge.com:100200', universe: 's150-it', player: '100200', journal: 412, days: 30 };
+    const list = vi.fn((text?: string) => (text === undefined ? [src] : null));
+    const apply = vi.fn(() => 'Portati');
+    const w = open(new Store(new MemoryStore(), 'x'), { backup: { onExport: () => 0, onImport: () => 0 }, carry: { list, apply } });
+    w.tab('Dati').click();
+    w.seg('Da questo browser', 'Da un altro universo').click();
+    const row = Array.from(w.root.querySelectorAll('.row')).find((r) => r.querySelector('.name')!.textContent === 's150-it · giocatore 100200')!;
+    expect(row.querySelector('.desc')!.textContent).toMatch(/^412 spedizioni e raid, 30 giorni di storico/);
+    w.seg('Porta qui', 's150-it · giocatore 100200').click();
+    expect(apply).toHaveBeenCalledWith(src.ns);
+    expect(w.root.querySelector('.status')!.textContent).toBe('Portati');
+    expect(w.root.textContent).not.toContain('s150-it · giocatore');
+  });
 });
+

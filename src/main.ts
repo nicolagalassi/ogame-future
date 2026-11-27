@@ -5,7 +5,8 @@
 import { IRN, LAB } from './engines/tech';
 import { NetworkGuard } from './core/guard';
 import { GMStore, Store, serverNamespace } from './core/storage';
-import { downloadBackup, importBackup } from './core/backup';
+import { backupData, downloadBackup, exportBackup, importBackup } from './core/backup';
+import { carryOver, carrySources } from './engines/carry-over';
 import { IdleSaver } from './core/idle-saver';
 import { detectLocale, translator } from './core/i18n';
 import { SNAPSHOT_KEY, hydrateAccountOncePerSession, syncAccountOnUserClick, type AccountSnapshot } from './data/account-info';
@@ -257,6 +258,7 @@ async function bootstrap(): Promise<void> {
   let refreshFleet: (() => void) | null = null;
   // Planet menu facts the settings show (whether the side view fits, colonies); updated by the menu.
   let menuCtx = { colonies: '' };
+  let carryData: Record<string, unknown> = {};
   const openFutureSettings = (section?: Section) => {
     openSettings({
       doc: document,
@@ -286,6 +288,20 @@ async function bootstrap(): Promise<void> {
           const days = convertOglightStats(json.stats ?? {}, store.get<Journal>(JOURNAL_KEY, {}));
           store.set(JOURNAL_KEY, days.journal);
           return t('settings.oglightDone', { players: out.players, seen: out.seen, exp: days.expeditions.toLocaleString(locale), raids: days.raids.toLocaleString(locale), days: days.days });
+        },
+      },
+      carry: {
+        list: (text) => {
+          // This browser's other universes, or those in a backup file.
+          const data = text === undefined ? exportBackup(gm, Date.now()).data : backupData(text);
+          if (!data) return null;
+          carryData = data;
+          return carrySources(data, namespace);
+        },
+        apply: (ns) => {
+          const r = carryOver(carryData, ns, (key) => store.get<unknown>(key, undefined), Date.now());
+          for (const [key, value] of Object.entries(r.writes)) store.set(key, value);
+          return t('settings.carryDone', { settings: r.settings, exp: r.journal.toLocaleString(locale), days: r.days, orion: r.orion });
         },
       },
       notes: [menuCtx.colonies, snapshot ? t('toolbar.lastSync', { time: new Date(snapshot.fetchedAt).toLocaleString(locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) }) : ''].filter(Boolean),

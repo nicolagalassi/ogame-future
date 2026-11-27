@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.173
+// @version      0.3.174
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -450,6 +450,17 @@
     for (const key of kv.keys().filter((k) => k.startsWith(PREFIX)).sort()) data[key] = kv.get(key, null);
     return { app: "future", version: VERSION, at: now, data };
   }
+  function dataOf(file) {
+    if (!file || file.app !== "future" || file.version !== VERSION || !file.data || typeof file.data !== "object" || Array.isArray(file.data)) return null;
+    return Object.fromEntries(Object.entries(file.data).filter(([k]) => k.startsWith(PREFIX)));
+  }
+  function backupData(text) {
+    try {
+      return dataOf(JSON.parse(text));
+    } catch {
+      return null;
+    }
+  }
   function importBackup(kv, text) {
     let file;
     try {
@@ -457,8 +468,9 @@
     } catch {
       throw new Error("backup: not JSON");
     }
-    if (!file || file.app !== "future" || file.version !== VERSION || !file.data || typeof file.data !== "object" || Array.isArray(file.data)) throw new Error("backup: not a Future backup");
-    const entries = Object.entries(file.data).filter(([k]) => k.startsWith(PREFIX));
+    const data = dataOf(file);
+    if (!data) throw new Error("backup: not a Future backup");
+    const entries = Object.entries(data);
     for (const [key, value] of entries) kv.set(key, value);
     return entries.length;
   }
@@ -474,6 +486,1070 @@
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 0);
     return Object.keys(file.data).length;
+  }
+
+  // src/engines/expeditions.ts
+  var JOURNAL_KEY = "exp.journal";
+  var DAY = 864e5;
+  var KEEP_MS = 550 * DAY;
+  var MAX_ENTRIES = 25e3;
+  var ZERO = () => ({ metal: 0, crystal: 0, deuterium: 0, darkMatter: 0 });
+  function record(journal, messages) {
+    let added = 0;
+    let next = journal;
+    const seen2 = new Set(Object.values(journal).map(signature).filter(Boolean));
+    for (const { id, ...entry } of messages) {
+      if (next[id]) continue;
+      const sig = signature(entry);
+      if (sig && seen2.has(sig)) continue;
+      if (sig) seen2.add(sig);
+      if (next === journal) next = { ...journal };
+      next[id] = entry;
+      added++;
+    }
+    return { journal: next, added };
+  }
+  function signature(e) {
+    if (e.summary || e.combat || e.debris || e.kind !== "expedition") return "";
+    const units = (u) => Object.entries(u).sort(([a], [b]) => Number(a) - Number(b)).map(([k, v]) => `${k}:${v}`).join(",");
+    return [e.at, e.coords ?? "", e.result, e.size, e.res.metal, e.res.crystal, e.res.deuterium, e.res.darkMatter, units(e.ships), units(e.lost), e.item ?? ""].join("|");
+  }
+  function dedupe(journal) {
+    const seen2 = /* @__PURE__ */ new Set();
+    let removed = 0;
+    const next = {};
+    for (const [id, e] of Object.entries(journal).sort(([a], [b]) => a.localeCompare(b, void 0, { numeric: true }))) {
+      const sig = signature(e);
+      if (sig && seen2.has(sig)) {
+        removed++;
+        continue;
+      }
+      if (sig) seen2.add(sig);
+      next[id] = e;
+    }
+    return { journal: removed ? next : journal, removed };
+  }
+  function recordDebris(journal, id, at, res, coords) {
+    if (journal[id] || res.metal + res.crystal + res.deuterium <= 0) return { journal, added: 0 };
+    const entry = {
+      kind: "expedition",
+      at,
+      result: "unknown",
+      size: -1,
+      depletion: 0,
+      res: { metal: res.metal, crystal: res.crystal, deuterium: res.deuterium, darkMatter: 0, food: 0 },
+      ships: {},
+      lost: {},
+      item: null,
+      lfXp: 0,
+      lifeform: 0,
+      artefacts: 0,
+      coords,
+      debris: true
+    };
+    return { journal: { ...journal, [id]: entry }, added: 1 };
+  }
+  function recordCombat(journal, id, at, lost, coords) {
+    if (journal[id] || !Object.keys(lost).length) return { journal, added: 0 };
+    const entry = {
+      kind: "expedition",
+      at,
+      result: "unknown",
+      size: -1,
+      depletion: 0,
+      res: { metal: 0, crystal: 0, deuterium: 0, darkMatter: 0, food: 0 },
+      ships: {},
+      lost,
+      item: null,
+      lfXp: 0,
+      lifeform: 0,
+      artefacts: 0,
+      coords,
+      combat: true
+    };
+    return { journal: { ...journal, [id]: entry }, added: 1 };
+  }
+  var PROBE = 210;
+  function recordRaid(journal, id, at, loot, lost, coords) {
+    const res = { metal: Math.max(0, loot.metal), crystal: Math.max(0, loot.crystal), deuterium: Math.max(0, loot.deuterium) };
+    const onlyProbes = Object.keys(lost).every((u) => Number(u) === PROBE) && res.metal + res.crystal + res.deuterium === 0;
+    if (journal[id] || onlyProbes) return { journal, added: 0 };
+    return { journal: { ...journal, [id]: raidEntry(at, res, lost, coords) }, added: 1 };
+  }
+  function recordHarvest(journal, id, at, res, coords) {
+    if (journal[id] || res.metal + res.crystal + res.deuterium <= 0) return { journal, added: 0 };
+    return { journal: { ...journal, [id]: { ...raidEntry(at, res, {}, coords), debris: true } }, added: 1 };
+  }
+  var raidEntry = (at, res, lost, coords) => ({
+    kind: "raid",
+    at,
+    result: "unknown",
+    size: -1,
+    depletion: 0,
+    res: { metal: res.metal, crystal: res.crystal, deuterium: res.deuterium, darkMatter: 0, food: 0 },
+    ships: {},
+    lost,
+    item: null,
+    lfXp: 0,
+    lifeform: 0,
+    artefacts: 0,
+    coords
+  });
+  function trim(journal, now) {
+    const entries = Object.entries(journal).filter(([, e]) => e.at > now - KEEP_MS);
+    if (entries.length > MAX_ENTRIES) entries.sort((a, b) => b[1].at - a[1].at).splice(MAX_ENTRIES);
+    return entries.length === Object.keys(journal).length ? journal : Object.fromEntries(entries);
+  }
+  function unitsValue(units) {
+    const out = ZERO();
+    for (const [id, n] of Object.entries(units)) {
+      const c = rawCost(Number(id), 1);
+      out.metal += c.metal * n;
+      out.crystal += c.crystal * n;
+      out.deuterium += c.deuterium * n;
+    }
+    return out;
+  }
+  var msu = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
+  function periodStats(entries) {
+    const s = {
+      count: 0,
+      discoveries: 0,
+      outcomes: {},
+      res: ZERO(),
+      shipsFound: {},
+      shipsValue: ZERO(),
+      lost: {},
+      lostValue: ZERO(),
+      lfXp: 0,
+      artefacts: 0,
+      items: [],
+      sizes: [0, 0, 0],
+      debris: 0,
+      netMsu: 0
+    };
+    for (const e of entries) {
+      if (e.kind === "raid") continue;
+      const n = e.summary ? e.summary.count : 1;
+      if (e.kind === "discovery") s.discoveries += n;
+      else if (!e.combat && !e.debris) s.count += n;
+      if (e.summary) for (const [k, v] of Object.entries(e.summary.outcomes)) s.outcomes[k] = (s.outcomes[k] ?? 0) + (v ?? 0);
+      else if (!e.combat && !e.debris) s.outcomes[e.result] = (s.outcomes[e.result] ?? 0) + 1;
+      const res = !e.summary && e.result === "ship" ? { metal: 0, crystal: 0, deuterium: 0 } : e.res;
+      s.res.metal += res.metal;
+      s.res.crystal += res.crystal;
+      s.res.deuterium += res.deuterium;
+      s.res.darkMatter += e.res.darkMatter;
+      if (e.debris) s.debris += msu(e.res);
+      for (const [id, n2] of Object.entries(e.ships)) s.shipsFound[Number(id)] = (s.shipsFound[Number(id)] ?? 0) + n2;
+      for (const [id, n2] of Object.entries(e.lost)) s.lost[Number(id)] = (s.lost[Number(id)] ?? 0) + n2;
+      s.lfXp += e.lfXp;
+      s.artefacts += e.artefacts;
+      if (e.item) s.items.push(e.item);
+      if (e.size >= 0 && e.size <= 2) s.sizes[e.size]++;
+    }
+    s.shipsValue = unitsValue(s.shipsFound);
+    s.lostValue = unitsValue(s.lost);
+    s.netMsu = msu(s.res) + msu(s.shipsValue) - msu(s.lostValue);
+    return s;
+  }
+  function dayStart(at) {
+    const d = new Date(at);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
+  }
+  function periodRange(period, now) {
+    const today = dayStart(now);
+    switch (period) {
+      case "today":
+        return [today, Infinity];
+      case "yesterday":
+        return [dayStart(today - 1), today];
+      case "week":
+        return [dayStart(today - 6 * DAY), Infinity];
+      case "month":
+        return [dayStart(today - 29 * DAY), Infinity];
+      default:
+        return [0, Infinity];
+    }
+  }
+  function entriesIn(journal, [from, to]) {
+    return Object.values(journal).filter((e) => e.at >= from && e.at < to).sort((a, b) => b.at - a.at);
+  }
+  function byDay(entries, limit = 14) {
+    const days2 = /* @__PURE__ */ new Map();
+    for (const e of entries) {
+      if (e.kind === "raid") continue;
+      const key = dayStart(e.at);
+      const list = days2.get(key) ?? [];
+      list.push(e);
+      days2.set(key, list);
+    }
+    return [...days2.entries()].sort((a, b) => b[0] - a[0]).slice(0, limit).map(([day, list]) => ({ day, stats: periodStats(list) }));
+  }
+  function hourSeries(entries, day) {
+    const lists = Array.from({ length: 24 }, () => []);
+    for (const e of entries) {
+      if (e.kind === "raid" || dayStart(e.at) !== day) continue;
+      lists[new Date(e.at).getHours()].push(e);
+    }
+    return lists.map((list, h8) => ({ start: new Date(day).setHours(h8, 0, 0, 0), stats: periodStats(list) }));
+  }
+  function daySeries(entries, last2, n) {
+    const starts = [];
+    let d = dayStart(last2);
+    for (let i = 0; i < n; i++) {
+      starts.unshift(d);
+      d = dayStart(d - 1);
+    }
+    const lists = new Map(starts.map((s) => [s, []]));
+    for (const e of entries) if (e.kind !== "raid") lists.get(dayStart(e.at))?.push(e);
+    return starts.map((start) => ({ start, stats: periodStats(lists.get(start)) }));
+  }
+  function raidHours(entries, day) {
+    const lists = Array.from({ length: 24 }, () => []);
+    for (const e of entries) if (e.kind === "raid" && dayStart(e.at) === day) lists[new Date(e.at).getHours()].push(e);
+    return lists.map((list, h8) => ({ start: new Date(day).setHours(h8, 0, 0, 0), stats: raidStats(list) }));
+  }
+  function raidDays(entries, last2, n) {
+    const starts = [];
+    for (let i = 0, d = dayStart(last2); i < n; i++, d = dayStart(d - 1)) starts.unshift(d);
+    const lists = new Map(starts.map((s) => [s, []]));
+    for (const e of entries) if (e.kind === "raid") lists.get(dayStart(e.at))?.push(e);
+    return starts.map((start) => ({ start, stats: raidStats(lists.get(start)) }));
+  }
+  function raidTargets(entries) {
+    const by = /* @__PURE__ */ new Map();
+    for (const e of entries) {
+      if (e.kind !== "raid" || e.debris || e.summary || !e.coords) continue;
+      const t = by.get(e.coords) ?? { coords: e.coords, count: 0, msu: 0 };
+      t.count++;
+      t.msu += msu(e.res);
+      by.set(e.coords, t);
+    }
+    return [...by.values()].sort((a, b) => b.msu - a.msu || b.count - a.count);
+  }
+  function netRes(s) {
+    const of = (k) => s.res[k] + s.shipsValue[k] - s.lostValue[k];
+    return { metal: of("metal"), crystal: of("crystal"), deuterium: of("deuterium") };
+  }
+  function valueMix(s) {
+    return { metal: s.res.metal, crystal: s.res.crystal * 1.5, deuterium: s.res.deuterium * 3, ships: msu(s.shipsValue) };
+  }
+  function raidStats(entries) {
+    const s = { count: 0, res: ZERO(), debris: ZERO(), lost: {}, lostValue: ZERO(), netMsu: 0 };
+    for (const e of entries) {
+      if (e.kind !== "raid") continue;
+      if (!e.debris) s.count += e.summary?.count ?? 1;
+      for (const r of e.debris ? [s.res, s.debris] : [s.res]) {
+        r.metal += e.res.metal;
+        r.crystal += e.res.crystal;
+        r.deuterium += e.res.deuterium;
+      }
+      for (const [id, n] of Object.entries(e.lost)) s.lost[Number(id)] = (s.lost[Number(id)] ?? 0) + n;
+    }
+    s.lostValue = unitsValue(s.lost);
+    s.netMsu = msu(s.res) - msu(s.lostValue);
+    return s;
+  }
+
+  // src/engines/fleet.ts
+  var EMPTY_RESERVE = { ships: {}, resources: { metal: 0, crystal: 0, deuterium: 0 } };
+  var PROFILES_KEY = "fleet.profiles";
+  function profileFor(profiles, bodyId) {
+    const p = profiles[String(bodyId)] ?? { reserve: structuredClone(EMPTY_RESERVE), save: null };
+    return { ...p, gate: p.gate ?? { ...p.reserve.ships }, saveReserve: p.saveReserve ?? structuredClone(EMPTY_RESERVE) };
+  }
+  function activeProfile(p, s) {
+    return {
+      ...p,
+      reserve: { ships: s.shipsOn ? p.reserve.ships : {}, resources: s.resourcesOn ? p.reserve.resources : { ...EMPTY_RESERVE.resources } },
+      gate: s.gateOn ? p.gate : {}
+    };
+  }
+  var RESERVE_SECTIONS = ["ships", "resources", "gate", "fleetsave"];
+  var positive = (ships) => Object.fromEntries(Object.entries(ships).filter(([, n]) => n > 0));
+  function sectionValue(p, section2) {
+    switch (section2) {
+      case "ships":
+        return positive(p.reserve.ships);
+      case "resources":
+        return p.reserve.resources;
+      case "gate":
+        return positive(p.gate);
+      case "fleetsave":
+        return { save: p.save, ships: positive(p.saveReserve.ships), resources: p.saveReserve.resources };
+    }
+  }
+  function canonical(v) {
+    if (v === null || typeof v !== "object") return JSON.stringify(v ?? null);
+    return `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${canonical(v[k])}`).join(",")}}`;
+  }
+  function sectionEmpty(p, section2) {
+    const v = sectionValue(p, section2);
+    if (section2 === "resources") return !Object.values(v).some(Boolean);
+    if (section2 === "fleetsave") return v.save === null && canonical({ ships: v.ships, resources: v.resources }) === canonical({ ships: {}, resources: EMPTY_RESERVE.resources });
+    return Object.keys(v).length === 0;
+  }
+  function sameSection(profiles, fromId, ids, section2) {
+    const mine = canonical(sectionValue(profileFor(profiles, fromId), section2));
+    return ids.filter((id) => id !== fromId && canonical(sectionValue(profileFor(profiles, id), section2)) === mine);
+  }
+  function copySections(profiles, fromId, ids, sections) {
+    const src = structuredClone(profileFor(profiles, fromId));
+    const out = { ...profiles };
+    for (const id of ids) {
+      if (id === fromId) continue;
+      const p = structuredClone(profileFor(profiles, id));
+      if (sections.includes("ships")) p.reserve.ships = { ...src.reserve.ships };
+      if (sections.includes("resources")) p.reserve.resources = { ...src.reserve.resources };
+      if (sections.includes("gate")) p.gate = { ...src.gate };
+      if (sections.includes("fleetsave")) {
+        p.save = structuredClone(src.save);
+        p.saveReserve = structuredClone(src.saveReserve);
+      }
+      out[String(id)] = p;
+    }
+    return out;
+  }
+  function shipsAfterReserve(available, reserve) {
+    const out = {};
+    for (const [id, count2] of Object.entries(available)) {
+      const n = Math.max(0, count2 - (reserve.ships[id] ?? 0));
+      if (n > 0) out[id] = n;
+    }
+    return out;
+  }
+  function resourcesAfterReserve(available, reserve, fuel) {
+    return {
+      metal: Math.max(0, Math.floor(available.metal - reserve.resources.metal)),
+      crystal: Math.max(0, Math.floor(available.crystal - reserve.resources.crystal)),
+      deuterium: Math.max(0, Math.floor(available.deuterium - fuel - reserve.resources.deuterium))
+    };
+  }
+  function resolveTarget(save, origin) {
+    return {
+      galaxy: save.galaxy ?? origin.galaxy,
+      system: save.system ?? origin.system,
+      position: save.position,
+      type: save.type
+    };
+  }
+  function parseAmount(text) {
+    const raw = text.trim().toLowerCase().replace(/\s/g, "");
+    const m = raw.match(/^([\d.,]+)([kmg])?$/);
+    if (!m) return 0;
+    const unit = m[2] === "k" ? 1e3 : m[2] === "m" ? 1e6 : m[2] === "g" ? 1e9 : 1;
+    let num5 = m[1];
+    num5 = unit === 1 ? num5.replace(/[.,]/g, "") : num5.replace(",", ".");
+    const value = Number(num5) * unit;
+    return Number.isFinite(value) ? Math.floor(value) : 0;
+  }
+  var SETTINGS_KEY = "fleet.settings";
+  var DEFAULT_SETTINGS = {
+    mainShip: 203,
+    secondShip: 202,
+    transportSpeed: 100,
+    favTransport: null,
+    favDeploy: null,
+    expeditionShip: 0,
+    expeditionValue: "",
+    expeditionExtras: true,
+    expeditionBig: 0,
+    repeat: false,
+    expeditionStay: false,
+    expeditionSpread: 0,
+    expeditionSplit: false,
+    shipsOn: true,
+    resourcesOn: true,
+    gateOn: true,
+    ignoreFood: false,
+    // Off (Nicola, 2026-11-26): the ships reserve holds in every mission but the expedition and the fleetsave.
+    collectIgnoreShips: false,
+    collectDeployRes: true,
+    loadOrder: ["deuterium", "crystal", "metal"],
+    sendMode: null,
+    sendTarget: null,
+    sendPick: { metal: null, crystal: null, deuterium: null },
+    skipBodies: []
+  };
+  function settingsFrom(stored) {
+    const { reserveOn, ...rest } = stored;
+    const legacy = reserveOn === void 0 ? {} : { shipsOn: reserveOn, resourcesOn: reserveOn };
+    const big = rest.expeditionBig === void 0 && rest.expeditionExtras === false ? { expeditionBig: -1 } : {};
+    return { ...DEFAULT_SETTINGS, ...legacy, ...big, ...rest };
+  }
+  function pickedLoad(onPlanet2, pick, fuel, capacity) {
+    const want = (k, have) => Math.max(0, Math.floor(Math.min(have, pick[k] ?? 0)));
+    let room = Math.max(0, Math.floor(capacity));
+    const deuterium = Math.min(want("deuterium", onPlanet2.deuterium - fuel), room);
+    room -= deuterium;
+    const crystal = Math.min(want("crystal", onPlanet2.crystal), room);
+    room -= crystal;
+    const metal = Math.min(want("metal", onPlanet2.metal), room);
+    return { metal, crystal, deuterium };
+  }
+  function cargoCount(amount, othersCapacity, capacity, available, already = 0) {
+    if (capacity <= 0) return Math.min(available, already);
+    const need = Math.ceil(Math.max(0, amount - othersCapacity) / capacity);
+    return Math.min(available, Math.max(need, already));
+  }
+  function resolveSend(t, origin) {
+    return { galaxy: t.galaxy ?? origin.galaxy, system: t.system ?? origin.system, position: t.position, type: t.type };
+  }
+  function parseCoords(text) {
+    const parts = text.trim().split(/[^\d]+/).filter(Boolean).map(Number);
+    return parts.length === 3 && parts.every((n) => n > 0) ? parts : null;
+  }
+  var DELIVERY_KEY = "plan.delivery";
+  function deliveryLoad(onPlanet2, reserve, fuel, capacity, need) {
+    const free = resourcesAfterReserve(onPlanet2, reserve, fuel);
+    let room = Math.max(0, Math.floor(capacity));
+    const take = (a, b) => Math.max(0, Math.floor(Math.min(a, b, room)));
+    const deuterium = take(free.deuterium, Math.ceil(need.deuterium));
+    room -= deuterium;
+    const crystal = take(free.crystal, Math.ceil(need.crystal));
+    room -= crystal;
+    const metal = take(free.metal, Math.ceil(need.metal));
+    return { metal, crystal, deuterium };
+  }
+  var CARGO_SHIPS = [203, 202, 219, 209, 210];
+  function cargoShipsFor(amount, stock2, main2, second) {
+    const out = {};
+    let left = Math.max(0, amount);
+    for (const id of [main2, second]) {
+      if (!id || left <= 0) continue;
+      const s = stock2.find((x) => x.id === id);
+      if (!s || s.available <= 0 || s.capacity <= 0) continue;
+      const n = Math.min(s.available, Math.ceil(left / s.capacity));
+      if (n > 0) {
+        out[id] = (out[id] ?? 0) + n;
+        left -= n * s.capacity;
+      }
+    }
+    return out;
+  }
+  function cargoLoad(onPlanet2, reserve, fuel, capacity, order = GAME_ORDER) {
+    const free = resourcesAfterReserve(onPlanet2, reserve, fuel);
+    let room = Math.max(0, Math.floor(capacity));
+    const out = { metal: 0, crystal: 0, deuterium: 0 };
+    for (const k of validOrder(order)) {
+      out[k] = Math.max(0, Math.floor(Math.min(free[k], room)));
+      room -= out[k];
+    }
+    return out;
+  }
+  var GAME_ORDER = ["deuterium", "crystal", "metal"];
+  var LOAD_ORDERS = [
+    ["deuterium", "crystal", "metal"],
+    ["deuterium", "metal", "crystal"],
+    ["crystal", "deuterium", "metal"],
+    ["crystal", "metal", "deuterium"],
+    ["metal", "crystal", "deuterium"],
+    ["metal", "deuterium", "crystal"]
+  ];
+  function validOrder(order) {
+    const ok = Array.isArray(order) && order.length === 3 && ["metal", "crystal", "deuterium"].every((k) => order.includes(k));
+    return ok ? order : GAME_ORDER;
+  }
+  var EXPEDITION_TABLE = [
+    { topScore: 1e4, base: 10, max: 4e4 },
+    { topScore: 1e5, base: 125, max: 5e5 },
+    { topScore: 1e6, base: 300, max: 12e5 },
+    { topScore: 5e6, base: 450, max: 18e5 },
+    { topScore: 25e6, base: 600, max: 24e5 },
+    { topScore: 5e7, base: 750, max: 3e6 },
+    { topScore: 75e6, base: 900, max: 36e5 },
+    { topScore: 1e8, base: 1050, max: 42e5 },
+    { topScore: Infinity, base: 1250, max: 5e6 }
+  ];
+  function expeditionMax(o) {
+    const row = EXPEDITION_TABLE.find((r) => r.topScore >= (o.topScore ?? Infinity));
+    const factor = (o.characterClass === 3 ? 3 : 2) * o.economySpeed;
+    const bonus = (1 + o.classBooster) * (1 + (o.lfBooster ?? 0)) * (1 + (o.itemBoost ?? 0));
+    return { base: row.base, max: Math.round(row.max * factor * bonus) };
+  }
+  var EXPEDITION_MAX_KEY = "fleet.expeditionMax";
+  function expeditionTarget(calculated, value) {
+    const v = value.trim();
+    if (!v) return calculated;
+    if (v.endsWith("%")) return Math.round(calculated * (parseAmount(v.slice(0, -1)) || 0) / 100);
+    return parseAmount(v) || calculated;
+  }
+  var EXPEDITION_FACTOR = { 202: 1, 203: 3, 219: 5.75 };
+  var EXPEDITION_FILLERS = [218, 213, 211, 215, 207, 206, 205, 204];
+  function expeditionSystem(system, spread, u, rand = Math.random) {
+    const n = Math.max(0, Math.floor(spread || 0));
+    const size = Math.max(1, u.systems);
+    if (!n) return system;
+    const s = system + Math.min(2 * n, Math.floor(rand() * (2 * n + 1))) - n;
+    if (u.donut) return ((s - 1) % size + size) % size + 1;
+    return Math.min(size, Math.max(1, s));
+  }
+  function freeExpeditionSlots(used, max) {
+    return Math.max(1, (max || 0) - (used || 0));
+  }
+  function expeditionShare(available, slots) {
+    if (available <= 0) return 0;
+    return Math.max(1, Math.floor(available / Math.max(1, slots)));
+  }
+  function expeditionFleet(stock2, o) {
+    const avail = (id) => {
+      const n = stock2.find((s) => s.id === id)?.available ?? 0;
+      return o.slots && [219, 203, 202].includes(id) ? expeditionShare(n, o.slots) : n;
+    };
+    const has = (id) => (stock2.find((s) => s.id === id)?.available ?? 0) > 0;
+    const need = (id) => {
+      const s = stock2.find((x) => x.id === id);
+      if (!s || s.capacity <= 0) return Infinity;
+      return Math.max(Math.ceil(o.base / (EXPEDITION_FACTOR[id] ?? 1)), Math.ceil(o.target / s.capacity));
+    };
+    let ship = o.ship;
+    if (!ship) {
+      const options = [219, 203, 202].filter(has);
+      ship = options.find((id) => avail(id) >= need(id)) ?? options.sort((a, b) => {
+        const cap = (id) => avail(id) * stock2.find((x) => x.id === id).capacity;
+        return cap(b) - cap(a);
+      })[0] ?? 0;
+    }
+    const out = {};
+    if (ship && has(ship)) out[ship] = Math.min(avail(ship), need(ship));
+    const big = o.big ?? (o.extras ? 0 : -1);
+    if (big !== -1) {
+      const filler = big > 0 && big !== ship && has(big) ? big : EXPEDITION_FILLERS.find((id) => id !== ship && has(id));
+      if (filler) out[filler] = 1;
+    }
+    if (o.extras) {
+      if (ship !== 210 && has(210)) out[210] = 1;
+      if (ship !== 219 && has(219)) out[219] = 1;
+    }
+    return out;
+  }
+  function nextBody(list, current3, opts = {}) {
+    const isMoon2 = list.some((b) => b.moonId === current3);
+    const ids = list.filter((b) => isMoon2 || opts.onlyWithMoon ? b.moonId !== null : b.planetId !== null).map((b) => isMoon2 ? b.moonId : b.planetId);
+    const i = ids.indexOf(current3);
+    if (i < 0) return null;
+    for (let k = 1; k < ids.length; k++) {
+      const step = opts.backwards ? -k : k;
+      const id = ids[((i + step) % ids.length + ids.length) % ids.length];
+      if (id !== opts.skip && !opts.skipIds?.includes(id)) return id;
+    }
+    return null;
+  }
+  var LAST_FLEET_KEY = "fleet.last";
+
+  // src/engines/history.ts
+  var HISTORY_KEY = "account.history";
+  var HISTORY_MAX = 730;
+  var dayKey = (at) => {
+    const d = new Date(at);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  };
+  function recordDay(history2, entry) {
+    const day = dayKey(entry.at);
+    const prev = history2.find((d) => d.day === day);
+    const next = { ...entry, day, prodDay: entry.prodDay || prev?.prodDay || 0, fleet: entry.fleet || prev?.fleet || 0 };
+    const out = history2.filter((d) => d.day !== day).concat(next).sort((a, b) => a.day < b.day ? -1 : a.day > b.day ? 1 : 0);
+    return out.slice(-HISTORY_MAX);
+  }
+  function changeOver(history2, days2) {
+    const last2 = history2.at(-1);
+    if (!last2 || history2.length < 2) return null;
+    const limit = last2.at - days2 * 864e5;
+    const base2 = [...history2].reverse().find((d) => d.at <= limit + 36e5) ?? history2[0];
+    if (base2 === last2) return null;
+    const span = Math.max(1, Math.round((last2.at - base2.at) / 864e5));
+    return {
+      days: span,
+      points: last2.points - base2.points,
+      rank: last2.rank !== null && base2.rank !== null ? base2.rank - last2.rank : null,
+      perDay: (last2.points - base2.points) / span
+    };
+  }
+
+  // src/engines/orion.ts
+  var LEDGER_KEY = "orion.ledger";
+  var IGNORED_KEY = "orion.ignored";
+  var ARCHIVE_KEY = "orion.archive";
+  var PENDING_KEY = "orion.pending";
+  var IMPORTED_KEY = "orion.imported";
+  var HOUR = 36e5;
+  function profit(cost, rewards, perHour) {
+    const value = msu(rewards);
+    const net = cost - rewards.lithium;
+    if (!cost) return { index: -1, net: 0, free: false, hours: 0, msu: value };
+    if (net <= 0) return { index: 1e18 + value, net, free: true, hours: 0, msu: value };
+    return { index: perHour > 0 ? value * perHour / net : value * 1e6 / net, net, free: false, hours: perHour > 0 ? net / perHour : 0, msu: value };
+  }
+  var SCANNER_TTL = 24 * HOUR;
+  function pruneLedger(ledger, now) {
+    const out = {};
+    let changed = false;
+    for (const [k, r] of Object.entries(ledger)) {
+      if (r.source === "scanner" && now - r.at > SCANNER_TTL) changed = true;
+      else out[k] = r;
+    }
+    return { ledger: changed ? out : ledger, changed };
+  }
+  var counted = (ledger, ignored) => Object.values(ledger).filter((r) => !ignored[r.coords]);
+  function projectMission(now, wave, seconds, known, at) {
+    const done = wave.total ? Math.max(0, wave.incoming - 1) : 0;
+    const scale = wave.total && done ? wave.total / done : 0;
+    const cost = Math.max(scale ? Math.round(now.cost * scale) : now.cost, known?.cost ?? 0);
+    const lithium = Math.max(scale ? Math.round(now.lithium * scale) : now.lithium, known?.lithium ?? 0);
+    return {
+      cost,
+      lithium,
+      partial: !scale && !((known?.cost ?? 0) > now.cost) && !!wave.total && done < wave.total,
+      endAt: seconds ? at + seconds * 1e3 : known?.endAt ?? at
+    };
+  }
+  function syncLedger(ledger, missions, now) {
+    const out = {};
+    for (const [k, r] of Object.entries(ledger)) if (r.source !== "mission") out[k] = r;
+    for (const m of missions) {
+      if (!m.coords) continue;
+      const known = ledger[m.coords];
+      const p = projectMission(m, { incoming: m.incoming, total: m.total }, m.seconds, known, now);
+      const total = m.totalCost ?? 0;
+      const value = m.possible ? msu(m.possible) : 0;
+      out[m.coords] = {
+        coords: m.coords,
+        name: m.name || m.coords,
+        ...p,
+        cost: Math.max(p.cost, total),
+        lithium: Math.max(p.lithium, m.possible?.lithium ?? 0),
+        partial: p.partial && !total,
+        source: "mission",
+        at: now,
+        ...value || known?.msu ? { msu: value || known.msu } : {}
+      };
+    }
+    return out;
+  }
+  function dueList(records, now) {
+    return records.map((r) => ({ h: Math.max(0, (r.endAt - now) / HOUR), net: (r.cost || 0) - (r.lithium || 0), record: r })).sort((a, b) => a.h - b.h);
+  }
+  function poolAt(l, due, h8) {
+    let pool = l.now;
+    let t = 0;
+    const run = (to) => {
+      const hours = Math.max(0, Math.min(to, l.stopsIn) - Math.min(t, l.stopsIn));
+      if (hours > 0 && l.perHour > 0 && pool < l.cap) pool = Math.min(l.cap, pool + l.perHour * hours);
+      t = Math.max(t, to);
+    };
+    for (const d of due) {
+      if (d.h > h8) break;
+      run(d.h);
+      pool -= d.net;
+    }
+    run(h8);
+    return pool;
+  }
+  function launchPlan(card, hours, waves, l, records, ownCoords, now) {
+    if (!(hours > 0) || !(waves > 0) || !card.cost) return null;
+    const due = dueList(records.filter((r) => r.coords !== ownCoords), now);
+    const freeAt = (h8) => Math.min(poolAt(l, due, h8), ...due.filter((d) => d.h > h8).map((d) => poolAt(l, due, d.h) + card.lithium));
+    const free = freeAt(hours);
+    const covered = Math.max(0, Math.min(waves, Math.floor(free / (card.cost / waves))));
+    let wait = 0;
+    if (free < card.cost) {
+      const totalNet = due.reduce((s, d) => s + d.net, 0);
+      const last2 = due.length ? due[due.length - 1].h : 0;
+      const producing = l.perHour > 0 && l.stopsIn > 0;
+      const fill = producing && Number.isFinite(l.cap) ? last2 + l.cap / l.perHour : 0;
+      const need = !producing ? 0 : Number.isFinite(l.stopsIn) ? l.stopsIn : (card.cost + totalNet - l.now) / l.perHour;
+      const top = Math.max(hours, last2, fill, need) + 1;
+      if (freeAt(top) < card.cost) wait = null;
+      else {
+        let lo = hours;
+        let hi = top;
+        for (let i = 0; i < 40; i++) {
+          const mid = (lo + hi) / 2;
+          if (freeAt(mid) >= card.cost) hi = mid;
+          else lo = mid;
+        }
+        wait = hi - hours;
+      }
+    }
+    return { free, covered, waves, due: due.map((d) => d.record), reserved: Math.max(0, poolAt(l, [], hours) - free), msu: card.msu * covered / waves, wait };
+  }
+  function scansPossible(l, records, scanCost2, now) {
+    if (!scanCost2) return null;
+    const free = freeLithium(l, records, now);
+    return { cost: scanCost2, free, count: Math.max(0, Math.floor(free / scanCost2)) };
+  }
+  function freeLithium(l, records, now) {
+    const due = dueList(records, now);
+    return Math.min(poolAt(l, due, 0), ...due.map((d) => poolAt(l, due, d.h)));
+  }
+  var emptyArchive = () => ({ entries: {}, fuel: [], battles: {} });
+  function loadArchive(raw) {
+    return { entries: raw?.entries ?? {}, fuel: raw?.fuel ?? [], battles: raw?.battles ?? {} };
+  }
+  function syncArchive(archive, seen2, now) {
+    const entries = { ...archive.entries };
+    const listed = /* @__PURE__ */ new Set();
+    for (const s of seen2) {
+      if (!s.id) continue;
+      listed.add(s.id);
+      const old = entries[s.id] ?? { id: s.id, name: "", coords: "", level: 0, stars: 0, mode: "", kind: "", spawnedAt: 0, wave: 0, waves: 0, firstSeen: now, lastSeen: now, status: "running", endedAt: 0, collections: [] };
+      const known = Object.fromEntries(Object.entries(s).filter(([, v]) => v !== "" && v !== 0));
+      entries[s.id] = { ...old, ...known, ...s.coords ? { located: true } : {}, wave: Math.max(old.wave, s.wave), lastSeen: now, status: "running", endedAt: 0 };
+    }
+    for (const e of Object.values(entries)) {
+      if (e.status === "running" && !listed.has(e.id)) entries[e.id] = { ...e, status: e.collections.length ? "collected" : "expired", endedAt: now };
+      else if (e.status === "expired" && e.collections.length) entries[e.id] = { ...e, status: "collected" };
+    }
+    return { ...archive, entries };
+  }
+  function splitCount(text) {
+    const m = /^(.*?)\s*(\d[\d.,' ]*)$/.exec(text.replace(/\s+/g, " ").trim());
+    return m && m[1] ? [m[1], Number(m[2].replace(/\D/g, "")) || 0] : null;
+  }
+  function collectedOnly(r, before, after) {
+    if (!before) return r;
+    const out = { ...r, other: [] };
+    for (const k of ["metal", "crystal", "deuterium", "lithium"]) out[k] = Math.min(r[k] || 0, Math.max(0, (before[k] || 0) - (after ? after[k] || 0 : 0)));
+    const counts = (list) => list.reduce((acc, text) => {
+      const x = splitCount(text);
+      if (x) acc[x[0]] = (acc[x[0]] ?? 0) + x[1];
+      return acc;
+    }, {});
+    const had = counts(before.other);
+    const still = after ? counts(after.other) : {};
+    for (const text of r.other) {
+      const x = splitCount(text);
+      if (!x || !(x[0] in had)) {
+        out.other.push(text);
+        continue;
+      }
+      const n = Math.min(x[1], Math.max(0, had[x[0]] - (still[x[0]] ?? 0)));
+      if (n) out.other.push(n === x[1] ? text : `${x[0]} ${n}`);
+    }
+    return out;
+  }
+  var PENDING_TTL = 6e4;
+  var GONE_SETTLE = 3e3;
+  var cardValue = (r) => msu(r) + r.lithium;
+  function settle(pending2, archive, cards, dialogFor, now) {
+    const out = {};
+    const entries = { ...archive.entries };
+    let changed = false;
+    for (const [id, p] of Object.entries(pending2)) {
+      if (p.via === "card" && dialogFor(id)) {
+        changed = true;
+        continue;
+      }
+      const card = cards.get(id);
+      if (card) {
+        const q2 = p.goneSince ? (({ goneSince: _g, ...rest }) => rest)(p) : p;
+        if (p.goneSince) changed = true;
+        const paid = q2.cardCost ? card.cost < q2.cardCost : card.value < q2.cardValue;
+        if (!paid) {
+          if (now - q2.at > PENDING_TTL) changed = true;
+          else out[id] = q2;
+          continue;
+        }
+      } else {
+        if (!p.goneSince) {
+          out[id] = { ...p, goneSince: now };
+          changed = true;
+          continue;
+        }
+        if (now - p.goneSince < GONE_SETTLE) {
+          out[id] = p;
+          continue;
+        }
+      }
+      const entry = entries[id];
+      if (entry) {
+        const r = collectedOnly(p.rewards, p.before, card ? card.rewards : null);
+        const roll = entry.combat ? rollOf(msu(r), entry.possibleMsu ?? 0, p.waves, entry.waves) : void 0;
+        entries[id] = { ...entry, collections: [...entry.collections, { at: p.at, wave: p.wave, waves: p.waves, cost: p.cost, lithium: r.lithium, metal: r.metal, crystal: r.crystal, deuterium: r.deuterium, other: r.other, ...roll ? { roll } : {} }] };
+      }
+      changed = true;
+    }
+    return { pending: out, archive: { ...archive, entries }, changed };
+  }
+  var ANOMALY_MISSION = 14;
+  var DEEP_SPACE = 4;
+  var MARGIN = 12 * HOUR;
+  function matchEntry(entries, coords, at, now) {
+    const fits = entries.filter((e) => e.coords === coords && at >= (e.spawnedAt || e.firstSeen || 0) - MARGIN && at <= (e.endedAt || now) + MARGIN);
+    const start = (e) => e.spawnedAt || e.firstSeen;
+    return fits.sort((a, b) => Math.abs(at - start(a)) - Math.abs(at - start(b)))[0] ?? null;
+  }
+  function noteFuel(archive, f) {
+    if (!(f.deut > 0)) return null;
+    const known = new Set(Object.values(archive.entries).filter((e) => e.located).map((e) => e.coords));
+    if (!(f.type === DEEP_SPACE || f.mission === ANOMALY_MISSION || known.has(f.coords))) return null;
+    return { ...archive, fuel: [...archive.fuel, { at: f.at, coords: f.coords, deut: f.deut, mission: f.mission }] };
+  }
+  function noteBattle(archive, b, now) {
+    if (!b.id || archive.battles[b.id]) return null;
+    if (b.targetType && b.targetType !== "anomaly") return null;
+    const byId = b.targetId ? archive.entries[b.targetId] : void 0;
+    const entry = byId ?? matchEntry(Object.values(archive.entries).filter((e) => e.located), b.coords, b.at, now);
+    if (!entry) return null;
+    const entries = !entry.located && b.coords ? { ...archive.entries, [entry.id]: { ...entry, coords: b.coords, located: true } } : archive.entries;
+    const lost = Object.fromEntries(Object.entries(b.lost).map(([k, n]) => [k, n]));
+    return { ...archive, entries, battles: { ...archive.battles, [b.id]: { at: b.at, coords: b.coords, entry: entry.id, lost, won: b.won, draw: b.draw } } };
+  }
+  function orionEvents(archive, home, now) {
+    const entries = Object.values(archive.entries);
+    const located = entries.filter((e) => e.located);
+    const out = [];
+    for (const e of entries) for (const c of e.collections) out.push({ kind: "collect", at: c.at, entry: e.id, c });
+    for (const f of archive.fuel) {
+      if (f.mission !== ANOMALY_MISSION && home.has(f.coords)) continue;
+      out.push({ kind: "fuel", at: f.at, entry: matchEntry(located, f.coords, f.at, now)?.id ?? "", deut: f.deut });
+    }
+    for (const b of Object.values(archive.battles)) out.push({ kind: "battle", at: b.at, entry: b.entry, lost: b.lost });
+    return out;
+  }
+  var noTotals = () => ({ rolled: 0, lowRolls: 0, collections: 0, waves: 0, paid: 0, back: 0, res: { metal: 0, crystal: 0, deuterium: 0 }, gain: 0, other: [], got: {}, gotN: 0, gotMsu: 0, fuel: 0, fuelMsu: 0, battles: 0, lost: {}, lostN: 0, lostMsu: 0 });
+  var unitsMsu = (units) => msu(unitsValue(Object.fromEntries(Object.entries(units).map(([k, n]) => [Number(k), n]))));
+  function orionTotals(events, shipOf) {
+    const t = noTotals();
+    for (const ev of events) {
+      if (ev.kind === "collect") {
+        const c = ev.c;
+        t.collections++;
+        t.waves += c.waves || 0;
+        t.paid += c.cost || 0;
+        t.back += c.lithium || 0;
+        t.res.metal += c.metal || 0;
+        t.res.crystal += c.crystal || 0;
+        t.res.deuterium += c.deuterium || 0;
+        t.gain += msu(c);
+        if (c.roll) {
+          t.rolled++;
+          if (c.roll === "low") t.lowRolls++;
+        }
+        for (const text of c.other ?? []) {
+          const ship = shipOf(text);
+          if (!ship) {
+            t.other.push(text);
+            continue;
+          }
+          t.got[ship.id] = (t.got[ship.id] ?? 0) + ship.n;
+          t.gotN += ship.n;
+          t.gotMsu += unitsMsu({ [ship.id]: ship.n });
+        }
+      } else if (ev.kind === "fuel") {
+        t.fuel += ev.deut || 0;
+        t.fuelMsu += msu({ metal: 0, crystal: 0, deuterium: ev.deut || 0 });
+      } else {
+        t.battles++;
+        for (const [id, n] of Object.entries(ev.lost)) {
+          t.lost[id] = (t.lost[id] ?? 0) + n;
+          t.lostN += n;
+        }
+        t.lostMsu += unitsMsu(ev.lost);
+      }
+    }
+    return t;
+  }
+  var balance = (t) => t.gain + t.gotMsu - t.lostMsu - t.fuelMsu;
+  function shipMatcher(names) {
+    const list = names.filter(([, n]) => n).sort((a, b) => b[1].length - a[1].length);
+    return (text) => {
+      const tx = text.replace(/\s+/g, " ").trim().toLowerCase();
+      const hit = list.find(([, name]) => tx.startsWith(name.toLowerCase()) && !/[a-zà-ÿ]/i.test(tx.charAt(name.length)));
+      if (!hit) return null;
+      const n = Number(tx.slice(hit[1].length).replace(/\D/g, "")) || 0;
+      return n ? { id: hit[0], n } : null;
+    };
+  }
+  function otherSummary(list, locale) {
+    const sums = /* @__PURE__ */ new Map();
+    for (const text of list) {
+      const x = splitCount(text);
+      const key = x ? x[0] : text.replace(/\s+/g, " ").trim();
+      const cur = sums.get(key) ?? { n: 0, times: 0, counted: !!x };
+      if (x) cur.n += x[1];
+      cur.times++;
+      sums.set(key, cur);
+    }
+    return [...sums].map(([name, v]) => v.counted ? `${name} ${v.n.toLocaleString(locale)}` : name + (v.times > 1 ? ` ×${v.times}` : "")).join(", ");
+  }
+  function importLegacy(cur, old) {
+    const a = old.archive ?? {};
+    const entries = { ...cur.archive.entries };
+    for (const [id, e] of Object.entries(a.entries ?? {})) {
+      if (entries[id] || !e) continue;
+      entries[id] = {
+        id,
+        name: e.name ?? "",
+        coords: e.coords ?? "",
+        level: e.level ?? 0,
+        stars: e.stars ?? 0,
+        mode: e.mode ?? "",
+        kind: e.kind ?? "",
+        spawnedAt: e.spawnedAt ?? 0,
+        wave: e.wave ?? 0,
+        waves: e.waves ?? 0,
+        ...e.located ? { located: true } : {},
+        firstSeen: e.firstSeen ?? 0,
+        lastSeen: e.lastSeen ?? 0,
+        status: e.status === "collected" || e.status === "expired" ? e.status : "running",
+        endedAt: e.endedAt ?? 0,
+        collections: (e.collections ?? []).map((c) => ({ at: c.at ?? 0, wave: c.wave ?? 0, waves: c.waves ?? 0, cost: c.cost ?? 0, lithium: c.lithium ?? 0, metal: c.metal ?? 0, crystal: c.crystal ?? 0, deuterium: c.deuterium ?? 0, other: c.other ?? [] }))
+      };
+    }
+    const seenFuel = new Set(cur.archive.fuel.map((f) => `${f.at}|${f.coords}`));
+    const fuel = [...cur.archive.fuel];
+    for (const f of a.fuel ?? []) {
+      if (!f.at || !f.coords || seenFuel.has(`${f.at}|${f.coords}`)) continue;
+      fuel.push({ at: f.at, coords: f.coords, deut: f.deut ?? 0, mission: f.mission ?? 0 });
+    }
+    const battles = { ...cur.archive.battles };
+    for (const [id, b] of Object.entries(a.battles ?? {})) {
+      if (battles[id] || !b?.v) continue;
+      battles[id] = { at: b.at ?? 0, coords: b.coords ?? "", entry: b.entry ?? "", lost: b.lost ?? {}, won: !!b.won, draw: !!b.draw };
+    }
+    const ledger = { ...cur.ledger };
+    for (const [k, r] of Object.entries(old.ledger ?? {})) if (!ledger[k] && r?.coords) ledger[k] = r;
+    const ignored = { ...cur.ignored };
+    for (const k of Object.keys(old.ignored ?? {})) ignored[k] = true;
+    return { archive: { entries, fuel, battles }, ledger, ignored };
+  }
+  var MULT_KEY = "orion.mult";
+  var waveBonus = (waves) => 1 + (Math.max(1, waves) - 1) / 51;
+  var multKey = (name, mode) => `${name.trim()}|${mode.trim().toLowerCase()}`;
+  function learnMult(mults, name, mode, cost, waves, r) {
+    const value = msu(r);
+    if (!name || !cost || !waves || !value || r.other.length) return false;
+    const k = value / (cost * waveBonus(waves));
+    const key = multKey(name, mode);
+    if (mults[key] !== void 0 && Math.abs(mults[key] - k) / k < 1e-6) return false;
+    mults[key] = k;
+    return true;
+  }
+  var SHIP_RATE = 0.75;
+  function budgetOf(k, cost, waves, r) {
+    if (!k || !cost || !waves) return null;
+    const budget = k * cost * waveBonus(waves);
+    return { budget, extra: Math.max(0, budget - msu(r)) };
+  }
+  var LOW_ROLL = 0.375;
+  function rollOf(collectedMsu, possibleMsu, waves, totalWaves) {
+    if (!possibleMsu || !waves || !totalWaves || !collectedMsu) return void 0;
+    const ratio = collectedMsu / (possibleMsu * waves / totalWaves);
+    return ratio < 0.6 ? "low" : ratio > 0.8 ? "high" : void 0;
+  }
+  var iasProduction = (level2, economy) => level2 > 0 ? Math.floor(15.36 * level2 * 1.1 ** level2 * economy) : 0;
+  var BASE_CARGO = { 202: 5e3, 203: 25e3, 204: 50, 205: 100, 206: 800, 207: 1500, 208: 7500, 209: 2e4, 210: 5, 211: 500, 213: 2e3, 214: 1e6, 215: 750, 217: 0, 218: 1e4, 219: 1e4 };
+  function fleetCapacity(ships) {
+    let total = 0;
+    for (const [id, x] of Object.entries(ships ?? {})) total += (x.amount ?? 0) * (BASE_CARGO[Number(id)] ?? 0) * (1 + (x.cargo ?? 0));
+    return Math.ceil(total);
+  }
+  var shipsFor = (capacity, perShip) => perShip > 0 ? Math.ceil(capacity / perShip) : 0;
+
+  // src/engines/carry-over.ts
+  var KEY = /^(future:[^:]+:\d+):(.+)$/;
+  var CARRY_COPY = [
+    "planetMenu.totals",
+    "planetMenu.fleet",
+    "planetMenu.totalView",
+    "planetMenu.gameTips",
+    "keys.map",
+    "keys.touch",
+    "msg.expStyle",
+    "msg.fold",
+    "spy.view",
+    "marks.view",
+    "exp.kind",
+    "exp.period",
+    "settings.tab",
+    "sim.tool",
+    "remind.desktop",
+    "dash.rates",
+    "dash.investExclude"
+  ];
+  var split = (key) => {
+    const m = KEY.exec(key);
+    return m ? [m[1], m[2]] : null;
+  };
+  var universeOf = (ns) => ns.split(":")[1].replace(/\.ogame\.gameforge\.com$/, "");
+  function carrySources(data, current3) {
+    const found = /* @__PURE__ */ new Map();
+    for (const [key, value] of Object.entries(data)) {
+      const parts = split(key);
+      if (!parts || parts[0] === current3) continue;
+      const [ns, sub] = parts;
+      const s = found.get(ns) ?? { ns, universe: universeOf(ns), player: ns.split(":")[2], journal: 0, days: 0 };
+      if (sub === JOURNAL_KEY && value && typeof value === "object") s.journal = Object.keys(value).length;
+      if (sub === HISTORY_KEY && Array.isArray(value)) s.days = value.length;
+      found.set(ns, s);
+    }
+    const brings = (s) => s.journal || s.days || [...CARRY_COPY, SETTINGS_KEY, ARCHIVE_KEY].some((k) => `${s.ns}:${k}` in data);
+    return [...found.values()].filter(brings);
+  }
+  function carryOver(data, from, here, now) {
+    var _a;
+    const src = (key) => data[`${from}:${key}`];
+    const tag = `@${universeOf(from)}`;
+    const tagged = (id) => !id || id.endsWith(tag) ? id : `${id}${tag}`;
+    const writes = {};
+    let settings = 0;
+    for (const key of CARRY_COPY) {
+      if (src(key) === void 0) continue;
+      writes[key] = src(key);
+      settings++;
+    }
+    const fleet = src(SETTINGS_KEY);
+    if (fleet && typeof fleet === "object") {
+      writes[SETTINGS_KEY] = { ...fleet, favTransport: null, favDeploy: null, sendTarget: null, skipBodies: [] };
+      settings++;
+    }
+    let journal = 0;
+    const oldJournal = src(JOURNAL_KEY);
+    if (oldJournal && typeof oldJournal === "object") {
+      const mine = here(JOURNAL_KEY) ?? {};
+      const next = { ...mine };
+      for (const [id, e] of Object.entries(oldJournal)) {
+        const key = tagged(id);
+        if (key in mine) continue;
+        next[key] = { ...e, coords: null };
+        journal++;
+      }
+      if (journal) writes[JOURNAL_KEY] = trim(next, now);
+    }
+    let days2 = 0;
+    const oldHistory = src(HISTORY_KEY);
+    if (Array.isArray(oldHistory)) {
+      const mine = here(HISTORY_KEY) ?? [];
+      const have = new Set(mine.map((d) => d.day));
+      const added = oldHistory.filter((d) => d?.day && !have.has(d.day));
+      days2 = added.length;
+      if (days2) writes[HISTORY_KEY] = [...mine, ...added].sort((a, b) => a.day < b.day ? -1 : a.day > b.day ? 1 : 0).slice(-HISTORY_MAX);
+    }
+    const mults = src(MULT_KEY);
+    if (mults && typeof mults === "object") writes[MULT_KEY] = { ...mults, ...here(MULT_KEY) ?? {} };
+    let orion = 0;
+    const oldArchive = src(ARCHIVE_KEY);
+    if (oldArchive && typeof oldArchive === "object") {
+      const a = loadArchive(oldArchive);
+      const mine = loadArchive(here(ARCHIVE_KEY));
+      const entries = { ...mine.entries };
+      for (const e of Object.values(a.entries)) {
+        const id = tagged(e.id);
+        if (entries[id]) continue;
+        const ended = e.status === "running" ? { status: e.collections.length ? "collected" : "expired", endedAt: e.lastSeen || now } : {};
+        entries[id] = { ...e, ...ended, id, coords: "", located: false };
+        orion++;
+      }
+      const battles = { ...mine.battles };
+      for (const [id, b] of Object.entries(a.battles)) battles[_a = tagged(id)] ?? (battles[_a] = { ...b, entry: tagged(b.entry), coords: "" });
+      const fuelSeen = new Set(mine.fuel.filter((f) => !f.coords).map((f) => `${f.at}|${f.deut}`));
+      const fuel = [...mine.fuel, ...a.fuel.filter((f) => !fuelSeen.has(`${f.at}|${f.deut}`)).map((f) => ({ ...f, coords: "" }))];
+      if (orion || fuel.length > mine.fuel.length || Object.keys(battles).length > Object.keys(mine.battles).length) writes[ARCHIVE_KEY] = { ...mine, entries, battles, fuel };
+    }
+    return { writes, settings, journal, days: days2, orion };
   }
 
   // src/core/idle-saver.ts
@@ -1059,6 +2135,16 @@
     "settings.oglightImport": "Importa export",
     "settings.oglightDone": "Da OGLight: {players} giocatori, {seen} posizioni, {exp} spedizioni e {raids} raid su {days} giorni. Ricarica la pagina.",
     "settings.backupImportHint": "Un backup di Future o il file «Export data» di OGLight (dello stesso universo)",
+    "settings.carry": "Da un altro universo",
+    "settings.carryHint": "Per le fusioni: porta qui impostazioni, diario di spedizioni e raid, storico e Orion. Le impostazioni sostituiscono quelle di qui, le statistiche si sommano. Coordinate, bersagli, piani e regole dei pianeti restano là.",
+    "settings.carryLocal": "Da questo browser",
+    "settings.carryFile": "Da un backup",
+    "settings.carryNone": "In questo browser non c'è un altro universo: scegli un backup.",
+    "settings.carryNoneFile": "Nel backup non c'è un altro universo.",
+    "settings.carrySource": "{universe} · giocatore {player}",
+    "settings.carrySourceHint": "{n} spedizioni e raid, {days} giorni di storico",
+    "settings.carryDo": "Porta qui",
+    "settings.carryDone": "Portati: {settings} impostazioni, {exp} spedizioni e raid, {days} giorni di storico, {orion} anomalie. Ricarica la pagina.",
     "exp.raidLoot": "Bottino e detriti",
     "exp.raidLost": "Navi perse",
     "exp.raidNet": "Netto raid",
@@ -2146,6 +3232,16 @@
     "settings.oglightImport": "Import export",
     "settings.oglightDone": "From OGLight: {players} players, {seen} positions, {exp} expeditions and {raids} raids over {days} days. Reload the page.",
     "settings.backupImportHint": "A Future backup or OGLight's “Export data” file (same universe)",
+    "settings.carry": "From another universe",
+    "settings.carryHint": "For server merges: brings over settings, the expedition and raid journal, history and Orion. Settings replace the ones here, statistics add up. Coordinates, targets, plans and body rules stay behind.",
+    "settings.carryLocal": "From this browser",
+    "settings.carryFile": "From a backup",
+    "settings.carryNone": "No other universe in this browser: pick a backup.",
+    "settings.carryNoneFile": "The backup holds no other universe.",
+    "settings.carrySource": "{universe} · player {player}",
+    "settings.carrySourceHint": "{n} expeditions and raids, {days} days of history",
+    "settings.carryDo": "Bring here",
+    "settings.carryDone": "Brought over: {settings} settings, {exp} expeditions and raids, {days} days of history, {orion} anomalies. Reload the page.",
     "exp.raidLoot": "Loot and debris",
     "exp.raidLost": "Ships lost",
     "exp.raidNet": "Raid net",
@@ -3233,6 +4329,16 @@
     "settings.oglightImport": "Importer l'export",
     "settings.oglightDone": "Depuis OGLight : {players} joueurs, {seen} positions, {exp} expéditions et {raids} raids sur {days} jours. Rechargez la page.",
     "settings.backupImportHint": "Une sauvegarde Future ou le fichier « Export data » d'OGLight (même univers)",
+    "settings.carry": "Depuis un autre univers",
+    "settings.carryHint": "Pour les fusions : reprend les réglages, le journal des expéditions et raids, l'historique et Orion. Les réglages remplacent ceux d'ici, les statistiques s'additionnent. Coordonnées, cibles, plans et règles des planètes restent là-bas.",
+    "settings.carryLocal": "Depuis ce navigateur",
+    "settings.carryFile": "Depuis une sauvegarde",
+    "settings.carryNone": "Aucun autre univers dans ce navigateur : choisis une sauvegarde.",
+    "settings.carryNoneFile": "La sauvegarde ne contient aucun autre univers.",
+    "settings.carrySource": "{universe} · joueur {player}",
+    "settings.carrySourceHint": "{n} expéditions et raids, {days} jours d'historique",
+    "settings.carryDo": "Amener ici",
+    "settings.carryDone": "Repris : {settings} réglages, {exp} expéditions et raids, {days} jours d'historique, {orion} anomalies. Recharge la page.",
     "exp.raidLoot": "Butin et débris",
     "exp.raidLost": "Vaisseaux perdus",
     "exp.raidNet": "Net raids",
@@ -4320,6 +5426,16 @@
     "settings.oglightImport": "Export importieren",
     "settings.oglightDone": "Aus OGLight: {players} Spieler, {seen} Positionen, {exp} Expeditionen und {raids} Raids an {days} Tagen. Seite neu laden.",
     "settings.backupImportHint": "Ein Future-Backup oder die „Export data“-Datei von OGLight (gleiches Universum)",
+    "settings.carry": "Aus einem anderen Universum",
+    "settings.carryHint": "Für Fusionen: übernimmt Einstellungen, Tagebuch der Expeditionen und Raids, Verlauf und Orion. Einstellungen ersetzen die hiesigen, Statistiken werden addiert. Koordinaten, Ziele, Pläne und Regeln der Planeten bleiben dort.",
+    "settings.carryLocal": "Aus diesem Browser",
+    "settings.carryFile": "Aus einem Backup",
+    "settings.carryNone": "Kein anderes Universum in diesem Browser: wähle ein Backup.",
+    "settings.carryNoneFile": "Im Backup ist kein anderes Universum.",
+    "settings.carrySource": "{universe} · Spieler {player}",
+    "settings.carrySourceHint": "{n} Expeditionen und Raids, {days} Tage Verlauf",
+    "settings.carryDo": "Hierher holen",
+    "settings.carryDone": "Übernommen: {settings} Einstellungen, {exp} Expeditionen und Raids, {days} Tage Verlauf, {orion} Anomalien. Lade die Seite neu.",
     "exp.raidLoot": "Beute und Trümmer",
     "exp.raidLost": "Verlorene Schiffe",
     "exp.raidNet": "Raids netto",
@@ -4872,7 +5988,7 @@
   // src/data/account-info.ts
   var ACCOUNT_INFO_PATH = "/game/index.php?page=componentOnly&component=externaldataexport&action=accountInfo&asJson=1";
   var num = (v) => typeof v === "number" && Number.isFinite(v) ? v : Number(v) || 0;
-  var record = (v) => {
+  var record2 = (v) => {
     if (!v || typeof v !== "object") return {};
     return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, num(x)]));
   };
@@ -4891,11 +6007,11 @@
       resourcesAt: fetchedAt,
       species: num(raw.selectedSpeciesId) % 10,
       levels: {
-        ...record(raw.buildings),
-        ...record(raw.ships),
-        ...record(raw.defenses),
-        ...record(raw.speciesBuildings),
-        ...record(raw.speciesResearches)
+        ...record2(raw.buildings),
+        ...record2(raw.ships),
+        ...record2(raw.defenses),
+        ...record2(raw.speciesBuildings),
+        ...record2(raw.speciesResearches)
       }
     };
   }
@@ -4908,7 +6024,7 @@
         ...list(data.planets).map((b) => toBody(b, "planet", fetchedAt)),
         ...list(data.moons).map((b) => toBody(b, "moon", fetchedAt))
       ],
-      researches: record(data.researches)
+      researches: record2(data.researches)
     };
   }
   var SNAPSHOT_KEY = "account.snapshot";
@@ -5078,7 +6194,7 @@
 
   // src/data/flights.ts
   var FLIGHTS_KEY = "fleet.inFlight";
-  var ZERO = { metal: 0, crystal: 0, deuterium: 0 };
+  var ZERO2 = { metal: 0, crystal: 0, deuterium: 0 };
   var num2 = (text) => Number((text ?? "").replace(/\D/g, "")) || 0;
   function parseFleetTooltip(html, doc) {
     const box = doc.createElement("template");
@@ -5099,7 +6215,7 @@
     const shipPart = filled[0] ?? [];
     return {
       ships: shipPart.map((s) => `${s.label}${s.value}`).join(","),
-      cargo: cargoPart.length >= 3 ? { metal: cargoPart[0].value, crystal: cargoPart[1].value, deuterium: cargoPart[2].value } : { ...ZERO }
+      cargo: cargoPart.length >= 3 ? { metal: cargoPart[0].value, crystal: cargoPart[1].value, deuterium: cargoPart[2].value } : { ...ZERO2 }
     };
   }
   function readEventFlights(doc, offset) {
@@ -5117,7 +6233,7 @@
       const { ships, cargo } = parseFleetTooltip(html, doc);
       const coords = [row.querySelector("td.coordsOrigin")?.textContent, row.querySelector("td.destCoords")?.textContent].map((c) => (c ?? "").replace(/\s+/g, ""));
       const key = `${mission}|${coords.sort().join(">")}|${ships}`;
-      const g = groups.get(key) ?? { mission, cargo: { ...ZERO }, outbound: 0, latest: 0 };
+      const g = groups.get(key) ?? { mission, cargo: { ...ZERO2 }, outbound: 0, latest: 0 };
       g.cargo = { metal: Math.max(g.cargo.metal, cargo.metal), crystal: Math.max(g.cargo.crystal, cargo.crystal), deuterium: Math.max(g.cargo.deuterium, cargo.deuterium) };
       if (!back) g.outbound = Math.max(g.outbound, arrival);
       g.latest = Math.max(g.latest, arrival);
@@ -5131,7 +6247,7 @@
     }));
   }
   function flyingTotal(flights, now) {
-    const out = { ...ZERO };
+    const out = { ...ZERO2 };
     for (const f of flights?.list ?? []) {
       if (f.until <= now) continue;
       out.metal += f.cargo.metal;
@@ -5187,35 +6303,6 @@
       onScore(score);
     });
     observer.observe(field, { childList: true, characterData: true, subtree: true });
-  }
-
-  // src/engines/history.ts
-  var HISTORY_KEY = "account.history";
-  var HISTORY_MAX = 730;
-  var dayKey = (at) => {
-    const d = new Date(at);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  };
-  function recordDay(history2, entry) {
-    const day = dayKey(entry.at);
-    const prev = history2.find((d) => d.day === day);
-    const next = { ...entry, day, prodDay: entry.prodDay || prev?.prodDay || 0, fleet: entry.fleet || prev?.fleet || 0 };
-    const out = history2.filter((d) => d.day !== day).concat(next).sort((a, b) => a.day < b.day ? -1 : a.day > b.day ? 1 : 0);
-    return out.slice(-HISTORY_MAX);
-  }
-  function changeOver(history2, days2) {
-    const last2 = history2.at(-1);
-    if (!last2 || history2.length < 2) return null;
-    const limit = last2.at - days2 * 864e5;
-    const base2 = [...history2].reverse().find((d) => d.at <= limit + 36e5) ?? history2[0];
-    if (base2 === last2) return null;
-    const span = Math.max(1, Math.round((last2.at - base2.at) / 864e5));
-    return {
-      days: span,
-      points: last2.points - base2.points,
-      rank: last2.rank !== null && base2.rank !== null ? base2.rank - last2.rank : null,
-      perDay: (last2.points - base2.points) / span
-    };
   }
 
   // src/data/server-data.ts
@@ -6101,7 +7188,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   var VIEW_KEY = "marks.view";
   var BIG_DEBRIS_KEY = "galaxy.bigDebris";
   var BIG_DEBRIS = 1e6;
-  var HOUR = 36e5;
+  var HOUR2 = 36e5;
   var last = null;
   var sheetData = /* @__PURE__ */ new Map();
   var uni = null;
@@ -6450,7 +7537,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     a.href = fleetHref(coords, type);
     a.title = t(type === 1 ? "marks.fleetPlanet" : "marks.fleetMoon", { coords });
     a.append(icon(doc, type === 1 ? "planet" : "moon", 12));
-    if (!seen2 || now - seen2.at > HOUR) {
+    if (!seen2 || now - seen2.at > HOUR2) {
       a.classList.add("unknown");
       a.append(doc.createTextNode("?"));
     } else {
@@ -6463,7 +7550,7 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     if (!seen2) return h(doc, "span", "age none", "—");
     const ms = now - seen2.at;
     const { n, unit } = ageParts(ms);
-    const el7 = h(doc, "span", `age ${ms < HOUR ? "fresh" : ms < 3 * 864e5 ? "warm" : "old"}`, t("marks.ago", { n, u: t(`marks.unit.${unit}`) }));
+    const el7 = h(doc, "span", `age ${ms < HOUR2 ? "fresh" : ms < 3 * 864e5 ? "warm" : "old"}`, t("marks.ago", { n, u: t(`marks.unit.${unit}`) }));
     el7.title = new Date(seen2.at).toLocaleString(locale);
     return el7;
   }
@@ -6518,9 +7605,9 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
       score(ico, color, t(`galaxy.score.${key}`), v ? formatUnits(v.points, locale) : "—", v ? `#${v.rank.toLocaleString(locale)}` : "");
     }
     score("fleet", "#C9D4E2", t("marks.ships"), data?.ships ? data.ships.toLocaleString(locale) : "—", "");
-    const split = data ? splitMilitary(data.scores) : null;
-    if (split) {
-      for (const [key, ico, value] of [["fleet", "fleet", split.fleet], ["defence", "shield", split.defence]]) {
+    const split2 = data ? splitMilitary(data.scores) : null;
+    if (split2) {
+      for (const [key, ico, value] of [["fleet", "fleet", split2.fleet], ["defence", "shield", split2.defence]]) {
         score(ico, "#FF7A7A", t(`galaxy.score.${key}`), formatUnits(value, locale), t("marks.estimate"), "half").title = t("galaxy.splitHint");
       }
     }
@@ -6804,9 +7891,9 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
       tr.append(el(doc, "td", "", t(`galaxy.score.${key}`)), el(doc, "td", "", formatUnits(v.points, locale)), el(doc, "td", "r", `#${v.rank.toLocaleString(locale)}`));
       table.append(tr);
       if (key === "military") {
-        const split = splitMilitary(data.scores);
-        if (split) {
-          for (const [part, points] of [["fleet", split.fleet], ["defence", split.defence]]) {
+        const split2 = splitMilitary(data.scores);
+        if (split2) {
+          for (const [part, points] of [["fleet", split2.fleet], ["defence", split2.defence]]) {
             const sub = el(doc, "tr", "sub");
             sub.title = t("galaxy.splitHint");
             sub.append(el(doc, "td", "", t(`galaxy.score.${part}`)), el(doc, "td", "", formatUnits(points, locale)), el(doc, "td", "r"));
@@ -7041,271 +8128,6 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
       doc.head.append(style);
     }
     doc.body.classList.toggle(MERCHANT_CLASS, state?.available === true);
-  }
-
-  // src/engines/expeditions.ts
-  var JOURNAL_KEY = "exp.journal";
-  var DAY = 864e5;
-  var KEEP_MS = 550 * DAY;
-  var MAX_ENTRIES = 25e3;
-  var ZERO2 = () => ({ metal: 0, crystal: 0, deuterium: 0, darkMatter: 0 });
-  function record2(journal, messages) {
-    let added = 0;
-    let next = journal;
-    const seen2 = new Set(Object.values(journal).map(signature).filter(Boolean));
-    for (const { id, ...entry } of messages) {
-      if (next[id]) continue;
-      const sig = signature(entry);
-      if (sig && seen2.has(sig)) continue;
-      if (sig) seen2.add(sig);
-      if (next === journal) next = { ...journal };
-      next[id] = entry;
-      added++;
-    }
-    return { journal: next, added };
-  }
-  function signature(e) {
-    if (e.summary || e.combat || e.debris || e.kind !== "expedition") return "";
-    const units = (u) => Object.entries(u).sort(([a], [b]) => Number(a) - Number(b)).map(([k, v]) => `${k}:${v}`).join(",");
-    return [e.at, e.coords ?? "", e.result, e.size, e.res.metal, e.res.crystal, e.res.deuterium, e.res.darkMatter, units(e.ships), units(e.lost), e.item ?? ""].join("|");
-  }
-  function dedupe(journal) {
-    const seen2 = /* @__PURE__ */ new Set();
-    let removed = 0;
-    const next = {};
-    for (const [id, e] of Object.entries(journal).sort(([a], [b]) => a.localeCompare(b, void 0, { numeric: true }))) {
-      const sig = signature(e);
-      if (sig && seen2.has(sig)) {
-        removed++;
-        continue;
-      }
-      if (sig) seen2.add(sig);
-      next[id] = e;
-    }
-    return { journal: removed ? next : journal, removed };
-  }
-  function recordDebris(journal, id, at, res, coords) {
-    if (journal[id] || res.metal + res.crystal + res.deuterium <= 0) return { journal, added: 0 };
-    const entry = {
-      kind: "expedition",
-      at,
-      result: "unknown",
-      size: -1,
-      depletion: 0,
-      res: { metal: res.metal, crystal: res.crystal, deuterium: res.deuterium, darkMatter: 0, food: 0 },
-      ships: {},
-      lost: {},
-      item: null,
-      lfXp: 0,
-      lifeform: 0,
-      artefacts: 0,
-      coords,
-      debris: true
-    };
-    return { journal: { ...journal, [id]: entry }, added: 1 };
-  }
-  function recordCombat(journal, id, at, lost, coords) {
-    if (journal[id] || !Object.keys(lost).length) return { journal, added: 0 };
-    const entry = {
-      kind: "expedition",
-      at,
-      result: "unknown",
-      size: -1,
-      depletion: 0,
-      res: { metal: 0, crystal: 0, deuterium: 0, darkMatter: 0, food: 0 },
-      ships: {},
-      lost,
-      item: null,
-      lfXp: 0,
-      lifeform: 0,
-      artefacts: 0,
-      coords,
-      combat: true
-    };
-    return { journal: { ...journal, [id]: entry }, added: 1 };
-  }
-  var PROBE = 210;
-  function recordRaid(journal, id, at, loot, lost, coords) {
-    const res = { metal: Math.max(0, loot.metal), crystal: Math.max(0, loot.crystal), deuterium: Math.max(0, loot.deuterium) };
-    const onlyProbes = Object.keys(lost).every((u) => Number(u) === PROBE) && res.metal + res.crystal + res.deuterium === 0;
-    if (journal[id] || onlyProbes) return { journal, added: 0 };
-    return { journal: { ...journal, [id]: raidEntry(at, res, lost, coords) }, added: 1 };
-  }
-  function recordHarvest(journal, id, at, res, coords) {
-    if (journal[id] || res.metal + res.crystal + res.deuterium <= 0) return { journal, added: 0 };
-    return { journal: { ...journal, [id]: { ...raidEntry(at, res, {}, coords), debris: true } }, added: 1 };
-  }
-  var raidEntry = (at, res, lost, coords) => ({
-    kind: "raid",
-    at,
-    result: "unknown",
-    size: -1,
-    depletion: 0,
-    res: { metal: res.metal, crystal: res.crystal, deuterium: res.deuterium, darkMatter: 0, food: 0 },
-    ships: {},
-    lost,
-    item: null,
-    lfXp: 0,
-    lifeform: 0,
-    artefacts: 0,
-    coords
-  });
-  function trim(journal, now) {
-    const entries = Object.entries(journal).filter(([, e]) => e.at > now - KEEP_MS);
-    if (entries.length > MAX_ENTRIES) entries.sort((a, b) => b[1].at - a[1].at).splice(MAX_ENTRIES);
-    return entries.length === Object.keys(journal).length ? journal : Object.fromEntries(entries);
-  }
-  function unitsValue(units) {
-    const out = ZERO2();
-    for (const [id, n] of Object.entries(units)) {
-      const c = rawCost(Number(id), 1);
-      out.metal += c.metal * n;
-      out.crystal += c.crystal * n;
-      out.deuterium += c.deuterium * n;
-    }
-    return out;
-  }
-  var msu = (r) => r.metal + r.crystal * 1.5 + r.deuterium * 3;
-  function periodStats(entries) {
-    const s = {
-      count: 0,
-      discoveries: 0,
-      outcomes: {},
-      res: ZERO2(),
-      shipsFound: {},
-      shipsValue: ZERO2(),
-      lost: {},
-      lostValue: ZERO2(),
-      lfXp: 0,
-      artefacts: 0,
-      items: [],
-      sizes: [0, 0, 0],
-      debris: 0,
-      netMsu: 0
-    };
-    for (const e of entries) {
-      if (e.kind === "raid") continue;
-      const n = e.summary ? e.summary.count : 1;
-      if (e.kind === "discovery") s.discoveries += n;
-      else if (!e.combat && !e.debris) s.count += n;
-      if (e.summary) for (const [k, v] of Object.entries(e.summary.outcomes)) s.outcomes[k] = (s.outcomes[k] ?? 0) + (v ?? 0);
-      else if (!e.combat && !e.debris) s.outcomes[e.result] = (s.outcomes[e.result] ?? 0) + 1;
-      const res = !e.summary && e.result === "ship" ? { metal: 0, crystal: 0, deuterium: 0 } : e.res;
-      s.res.metal += res.metal;
-      s.res.crystal += res.crystal;
-      s.res.deuterium += res.deuterium;
-      s.res.darkMatter += e.res.darkMatter;
-      if (e.debris) s.debris += msu(e.res);
-      for (const [id, n2] of Object.entries(e.ships)) s.shipsFound[Number(id)] = (s.shipsFound[Number(id)] ?? 0) + n2;
-      for (const [id, n2] of Object.entries(e.lost)) s.lost[Number(id)] = (s.lost[Number(id)] ?? 0) + n2;
-      s.lfXp += e.lfXp;
-      s.artefacts += e.artefacts;
-      if (e.item) s.items.push(e.item);
-      if (e.size >= 0 && e.size <= 2) s.sizes[e.size]++;
-    }
-    s.shipsValue = unitsValue(s.shipsFound);
-    s.lostValue = unitsValue(s.lost);
-    s.netMsu = msu(s.res) + msu(s.shipsValue) - msu(s.lostValue);
-    return s;
-  }
-  function dayStart(at) {
-    const d = new Date(at);
-    d.setHours(0, 0, 0, 0);
-    return d.getTime();
-  }
-  function periodRange(period, now) {
-    const today = dayStart(now);
-    switch (period) {
-      case "today":
-        return [today, Infinity];
-      case "yesterday":
-        return [dayStart(today - 1), today];
-      case "week":
-        return [dayStart(today - 6 * DAY), Infinity];
-      case "month":
-        return [dayStart(today - 29 * DAY), Infinity];
-      default:
-        return [0, Infinity];
-    }
-  }
-  function entriesIn(journal, [from, to]) {
-    return Object.values(journal).filter((e) => e.at >= from && e.at < to).sort((a, b) => b.at - a.at);
-  }
-  function byDay(entries, limit = 14) {
-    const days2 = /* @__PURE__ */ new Map();
-    for (const e of entries) {
-      if (e.kind === "raid") continue;
-      const key = dayStart(e.at);
-      const list = days2.get(key) ?? [];
-      list.push(e);
-      days2.set(key, list);
-    }
-    return [...days2.entries()].sort((a, b) => b[0] - a[0]).slice(0, limit).map(([day, list]) => ({ day, stats: periodStats(list) }));
-  }
-  function hourSeries(entries, day) {
-    const lists = Array.from({ length: 24 }, () => []);
-    for (const e of entries) {
-      if (e.kind === "raid" || dayStart(e.at) !== day) continue;
-      lists[new Date(e.at).getHours()].push(e);
-    }
-    return lists.map((list, h8) => ({ start: new Date(day).setHours(h8, 0, 0, 0), stats: periodStats(list) }));
-  }
-  function daySeries(entries, last2, n) {
-    const starts = [];
-    let d = dayStart(last2);
-    for (let i = 0; i < n; i++) {
-      starts.unshift(d);
-      d = dayStart(d - 1);
-    }
-    const lists = new Map(starts.map((s) => [s, []]));
-    for (const e of entries) if (e.kind !== "raid") lists.get(dayStart(e.at))?.push(e);
-    return starts.map((start) => ({ start, stats: periodStats(lists.get(start)) }));
-  }
-  function raidHours(entries, day) {
-    const lists = Array.from({ length: 24 }, () => []);
-    for (const e of entries) if (e.kind === "raid" && dayStart(e.at) === day) lists[new Date(e.at).getHours()].push(e);
-    return lists.map((list, h8) => ({ start: new Date(day).setHours(h8, 0, 0, 0), stats: raidStats(list) }));
-  }
-  function raidDays(entries, last2, n) {
-    const starts = [];
-    for (let i = 0, d = dayStart(last2); i < n; i++, d = dayStart(d - 1)) starts.unshift(d);
-    const lists = new Map(starts.map((s) => [s, []]));
-    for (const e of entries) if (e.kind === "raid") lists.get(dayStart(e.at))?.push(e);
-    return starts.map((start) => ({ start, stats: raidStats(lists.get(start)) }));
-  }
-  function raidTargets(entries) {
-    const by = /* @__PURE__ */ new Map();
-    for (const e of entries) {
-      if (e.kind !== "raid" || e.debris || e.summary || !e.coords) continue;
-      const t = by.get(e.coords) ?? { coords: e.coords, count: 0, msu: 0 };
-      t.count++;
-      t.msu += msu(e.res);
-      by.set(e.coords, t);
-    }
-    return [...by.values()].sort((a, b) => b.msu - a.msu || b.count - a.count);
-  }
-  function netRes(s) {
-    const of = (k) => s.res[k] + s.shipsValue[k] - s.lostValue[k];
-    return { metal: of("metal"), crystal: of("crystal"), deuterium: of("deuterium") };
-  }
-  function valueMix(s) {
-    return { metal: s.res.metal, crystal: s.res.crystal * 1.5, deuterium: s.res.deuterium * 3, ships: msu(s.shipsValue) };
-  }
-  function raidStats(entries) {
-    const s = { count: 0, res: ZERO2(), debris: ZERO2(), lost: {}, lostValue: ZERO2(), netMsu: 0 };
-    for (const e of entries) {
-      if (e.kind !== "raid") continue;
-      if (!e.debris) s.count += e.summary?.count ?? 1;
-      for (const r of e.debris ? [s.res, s.debris] : [s.res]) {
-        r.metal += e.res.metal;
-        r.crystal += e.res.crystal;
-        r.deuterium += e.res.deuterium;
-      }
-      for (const [id, n] of Object.entries(e.lost)) s.lost[Number(id)] = (s.lost[Number(id)] ?? 0) + n;
-    }
-    s.lostValue = unitsValue(s.lost);
-    s.netMsu = msu(s.res) - msu(s.lostValue);
-    return s;
   }
 
   // src/engines/oglight-import.ts
@@ -7865,387 +8687,6 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     i.innerHTML = resIconSvg(TOKEN_KEY[key], size);
     return i;
   }
-
-  // src/engines/orion.ts
-  var LEDGER_KEY = "orion.ledger";
-  var IGNORED_KEY = "orion.ignored";
-  var ARCHIVE_KEY = "orion.archive";
-  var PENDING_KEY = "orion.pending";
-  var IMPORTED_KEY = "orion.imported";
-  var HOUR2 = 36e5;
-  function profit(cost, rewards, perHour) {
-    const value = msu(rewards);
-    const net = cost - rewards.lithium;
-    if (!cost) return { index: -1, net: 0, free: false, hours: 0, msu: value };
-    if (net <= 0) return { index: 1e18 + value, net, free: true, hours: 0, msu: value };
-    return { index: perHour > 0 ? value * perHour / net : value * 1e6 / net, net, free: false, hours: perHour > 0 ? net / perHour : 0, msu: value };
-  }
-  var SCANNER_TTL = 24 * HOUR2;
-  function pruneLedger(ledger, now) {
-    const out = {};
-    let changed = false;
-    for (const [k, r] of Object.entries(ledger)) {
-      if (r.source === "scanner" && now - r.at > SCANNER_TTL) changed = true;
-      else out[k] = r;
-    }
-    return { ledger: changed ? out : ledger, changed };
-  }
-  var counted = (ledger, ignored) => Object.values(ledger).filter((r) => !ignored[r.coords]);
-  function projectMission(now, wave, seconds, known, at) {
-    const done = wave.total ? Math.max(0, wave.incoming - 1) : 0;
-    const scale = wave.total && done ? wave.total / done : 0;
-    const cost = Math.max(scale ? Math.round(now.cost * scale) : now.cost, known?.cost ?? 0);
-    const lithium = Math.max(scale ? Math.round(now.lithium * scale) : now.lithium, known?.lithium ?? 0);
-    return {
-      cost,
-      lithium,
-      partial: !scale && !((known?.cost ?? 0) > now.cost) && !!wave.total && done < wave.total,
-      endAt: seconds ? at + seconds * 1e3 : known?.endAt ?? at
-    };
-  }
-  function syncLedger(ledger, missions, now) {
-    const out = {};
-    for (const [k, r] of Object.entries(ledger)) if (r.source !== "mission") out[k] = r;
-    for (const m of missions) {
-      if (!m.coords) continue;
-      const known = ledger[m.coords];
-      const p = projectMission(m, { incoming: m.incoming, total: m.total }, m.seconds, known, now);
-      const total = m.totalCost ?? 0;
-      const value = m.possible ? msu(m.possible) : 0;
-      out[m.coords] = {
-        coords: m.coords,
-        name: m.name || m.coords,
-        ...p,
-        cost: Math.max(p.cost, total),
-        lithium: Math.max(p.lithium, m.possible?.lithium ?? 0),
-        partial: p.partial && !total,
-        source: "mission",
-        at: now,
-        ...value || known?.msu ? { msu: value || known.msu } : {}
-      };
-    }
-    return out;
-  }
-  function dueList(records, now) {
-    return records.map((r) => ({ h: Math.max(0, (r.endAt - now) / HOUR2), net: (r.cost || 0) - (r.lithium || 0), record: r })).sort((a, b) => a.h - b.h);
-  }
-  function poolAt(l, due, h8) {
-    let pool = l.now;
-    let t = 0;
-    const run = (to) => {
-      const hours = Math.max(0, Math.min(to, l.stopsIn) - Math.min(t, l.stopsIn));
-      if (hours > 0 && l.perHour > 0 && pool < l.cap) pool = Math.min(l.cap, pool + l.perHour * hours);
-      t = Math.max(t, to);
-    };
-    for (const d of due) {
-      if (d.h > h8) break;
-      run(d.h);
-      pool -= d.net;
-    }
-    run(h8);
-    return pool;
-  }
-  function launchPlan(card, hours, waves, l, records, ownCoords, now) {
-    if (!(hours > 0) || !(waves > 0) || !card.cost) return null;
-    const due = dueList(records.filter((r) => r.coords !== ownCoords), now);
-    const freeAt = (h8) => Math.min(poolAt(l, due, h8), ...due.filter((d) => d.h > h8).map((d) => poolAt(l, due, d.h) + card.lithium));
-    const free = freeAt(hours);
-    const covered = Math.max(0, Math.min(waves, Math.floor(free / (card.cost / waves))));
-    let wait = 0;
-    if (free < card.cost) {
-      const totalNet = due.reduce((s, d) => s + d.net, 0);
-      const last2 = due.length ? due[due.length - 1].h : 0;
-      const producing = l.perHour > 0 && l.stopsIn > 0;
-      const fill = producing && Number.isFinite(l.cap) ? last2 + l.cap / l.perHour : 0;
-      const need = !producing ? 0 : Number.isFinite(l.stopsIn) ? l.stopsIn : (card.cost + totalNet - l.now) / l.perHour;
-      const top = Math.max(hours, last2, fill, need) + 1;
-      if (freeAt(top) < card.cost) wait = null;
-      else {
-        let lo = hours;
-        let hi = top;
-        for (let i = 0; i < 40; i++) {
-          const mid = (lo + hi) / 2;
-          if (freeAt(mid) >= card.cost) hi = mid;
-          else lo = mid;
-        }
-        wait = hi - hours;
-      }
-    }
-    return { free, covered, waves, due: due.map((d) => d.record), reserved: Math.max(0, poolAt(l, [], hours) - free), msu: card.msu * covered / waves, wait };
-  }
-  function scansPossible(l, records, scanCost2, now) {
-    if (!scanCost2) return null;
-    const free = freeLithium(l, records, now);
-    return { cost: scanCost2, free, count: Math.max(0, Math.floor(free / scanCost2)) };
-  }
-  function freeLithium(l, records, now) {
-    const due = dueList(records, now);
-    return Math.min(poolAt(l, due, 0), ...due.map((d) => poolAt(l, due, d.h)));
-  }
-  var emptyArchive = () => ({ entries: {}, fuel: [], battles: {} });
-  function loadArchive(raw) {
-    return { entries: raw?.entries ?? {}, fuel: raw?.fuel ?? [], battles: raw?.battles ?? {} };
-  }
-  function syncArchive(archive, seen2, now) {
-    const entries = { ...archive.entries };
-    const listed = /* @__PURE__ */ new Set();
-    for (const s of seen2) {
-      if (!s.id) continue;
-      listed.add(s.id);
-      const old = entries[s.id] ?? { id: s.id, name: "", coords: "", level: 0, stars: 0, mode: "", kind: "", spawnedAt: 0, wave: 0, waves: 0, firstSeen: now, lastSeen: now, status: "running", endedAt: 0, collections: [] };
-      const known = Object.fromEntries(Object.entries(s).filter(([, v]) => v !== "" && v !== 0));
-      entries[s.id] = { ...old, ...known, ...s.coords ? { located: true } : {}, wave: Math.max(old.wave, s.wave), lastSeen: now, status: "running", endedAt: 0 };
-    }
-    for (const e of Object.values(entries)) {
-      if (e.status === "running" && !listed.has(e.id)) entries[e.id] = { ...e, status: e.collections.length ? "collected" : "expired", endedAt: now };
-      else if (e.status === "expired" && e.collections.length) entries[e.id] = { ...e, status: "collected" };
-    }
-    return { ...archive, entries };
-  }
-  function splitCount(text) {
-    const m = /^(.*?)\s*(\d[\d.,' ]*)$/.exec(text.replace(/\s+/g, " ").trim());
-    return m && m[1] ? [m[1], Number(m[2].replace(/\D/g, "")) || 0] : null;
-  }
-  function collectedOnly(r, before, after) {
-    if (!before) return r;
-    const out = { ...r, other: [] };
-    for (const k of ["metal", "crystal", "deuterium", "lithium"]) out[k] = Math.min(r[k] || 0, Math.max(0, (before[k] || 0) - (after ? after[k] || 0 : 0)));
-    const counts = (list) => list.reduce((acc, text) => {
-      const x = splitCount(text);
-      if (x) acc[x[0]] = (acc[x[0]] ?? 0) + x[1];
-      return acc;
-    }, {});
-    const had = counts(before.other);
-    const still = after ? counts(after.other) : {};
-    for (const text of r.other) {
-      const x = splitCount(text);
-      if (!x || !(x[0] in had)) {
-        out.other.push(text);
-        continue;
-      }
-      const n = Math.min(x[1], Math.max(0, had[x[0]] - (still[x[0]] ?? 0)));
-      if (n) out.other.push(n === x[1] ? text : `${x[0]} ${n}`);
-    }
-    return out;
-  }
-  var PENDING_TTL = 6e4;
-  var GONE_SETTLE = 3e3;
-  var cardValue = (r) => msu(r) + r.lithium;
-  function settle(pending2, archive, cards, dialogFor, now) {
-    const out = {};
-    const entries = { ...archive.entries };
-    let changed = false;
-    for (const [id, p] of Object.entries(pending2)) {
-      if (p.via === "card" && dialogFor(id)) {
-        changed = true;
-        continue;
-      }
-      const card = cards.get(id);
-      if (card) {
-        const q2 = p.goneSince ? (({ goneSince: _g, ...rest }) => rest)(p) : p;
-        if (p.goneSince) changed = true;
-        const paid = q2.cardCost ? card.cost < q2.cardCost : card.value < q2.cardValue;
-        if (!paid) {
-          if (now - q2.at > PENDING_TTL) changed = true;
-          else out[id] = q2;
-          continue;
-        }
-      } else {
-        if (!p.goneSince) {
-          out[id] = { ...p, goneSince: now };
-          changed = true;
-          continue;
-        }
-        if (now - p.goneSince < GONE_SETTLE) {
-          out[id] = p;
-          continue;
-        }
-      }
-      const entry = entries[id];
-      if (entry) {
-        const r = collectedOnly(p.rewards, p.before, card ? card.rewards : null);
-        const roll = entry.combat ? rollOf(msu(r), entry.possibleMsu ?? 0, p.waves, entry.waves) : void 0;
-        entries[id] = { ...entry, collections: [...entry.collections, { at: p.at, wave: p.wave, waves: p.waves, cost: p.cost, lithium: r.lithium, metal: r.metal, crystal: r.crystal, deuterium: r.deuterium, other: r.other, ...roll ? { roll } : {} }] };
-      }
-      changed = true;
-    }
-    return { pending: out, archive: { ...archive, entries }, changed };
-  }
-  var ANOMALY_MISSION = 14;
-  var DEEP_SPACE = 4;
-  var MARGIN = 12 * HOUR2;
-  function matchEntry(entries, coords, at, now) {
-    const fits = entries.filter((e) => e.coords === coords && at >= (e.spawnedAt || e.firstSeen || 0) - MARGIN && at <= (e.endedAt || now) + MARGIN);
-    const start = (e) => e.spawnedAt || e.firstSeen;
-    return fits.sort((a, b) => Math.abs(at - start(a)) - Math.abs(at - start(b)))[0] ?? null;
-  }
-  function noteFuel(archive, f) {
-    if (!(f.deut > 0)) return null;
-    const known = new Set(Object.values(archive.entries).filter((e) => e.located).map((e) => e.coords));
-    if (!(f.type === DEEP_SPACE || f.mission === ANOMALY_MISSION || known.has(f.coords))) return null;
-    return { ...archive, fuel: [...archive.fuel, { at: f.at, coords: f.coords, deut: f.deut, mission: f.mission }] };
-  }
-  function noteBattle(archive, b, now) {
-    if (!b.id || archive.battles[b.id]) return null;
-    if (b.targetType && b.targetType !== "anomaly") return null;
-    const byId = b.targetId ? archive.entries[b.targetId] : void 0;
-    const entry = byId ?? matchEntry(Object.values(archive.entries).filter((e) => e.located), b.coords, b.at, now);
-    if (!entry) return null;
-    const entries = !entry.located && b.coords ? { ...archive.entries, [entry.id]: { ...entry, coords: b.coords, located: true } } : archive.entries;
-    const lost = Object.fromEntries(Object.entries(b.lost).map(([k, n]) => [k, n]));
-    return { ...archive, entries, battles: { ...archive.battles, [b.id]: { at: b.at, coords: b.coords, entry: entry.id, lost, won: b.won, draw: b.draw } } };
-  }
-  function orionEvents(archive, home, now) {
-    const entries = Object.values(archive.entries);
-    const located = entries.filter((e) => e.located);
-    const out = [];
-    for (const e of entries) for (const c of e.collections) out.push({ kind: "collect", at: c.at, entry: e.id, c });
-    for (const f of archive.fuel) {
-      if (f.mission !== ANOMALY_MISSION && home.has(f.coords)) continue;
-      out.push({ kind: "fuel", at: f.at, entry: matchEntry(located, f.coords, f.at, now)?.id ?? "", deut: f.deut });
-    }
-    for (const b of Object.values(archive.battles)) out.push({ kind: "battle", at: b.at, entry: b.entry, lost: b.lost });
-    return out;
-  }
-  var noTotals = () => ({ rolled: 0, lowRolls: 0, collections: 0, waves: 0, paid: 0, back: 0, res: { metal: 0, crystal: 0, deuterium: 0 }, gain: 0, other: [], got: {}, gotN: 0, gotMsu: 0, fuel: 0, fuelMsu: 0, battles: 0, lost: {}, lostN: 0, lostMsu: 0 });
-  var unitsMsu = (units) => msu(unitsValue(Object.fromEntries(Object.entries(units).map(([k, n]) => [Number(k), n]))));
-  function orionTotals(events, shipOf) {
-    const t = noTotals();
-    for (const ev of events) {
-      if (ev.kind === "collect") {
-        const c = ev.c;
-        t.collections++;
-        t.waves += c.waves || 0;
-        t.paid += c.cost || 0;
-        t.back += c.lithium || 0;
-        t.res.metal += c.metal || 0;
-        t.res.crystal += c.crystal || 0;
-        t.res.deuterium += c.deuterium || 0;
-        t.gain += msu(c);
-        if (c.roll) {
-          t.rolled++;
-          if (c.roll === "low") t.lowRolls++;
-        }
-        for (const text of c.other ?? []) {
-          const ship = shipOf(text);
-          if (!ship) {
-            t.other.push(text);
-            continue;
-          }
-          t.got[ship.id] = (t.got[ship.id] ?? 0) + ship.n;
-          t.gotN += ship.n;
-          t.gotMsu += unitsMsu({ [ship.id]: ship.n });
-        }
-      } else if (ev.kind === "fuel") {
-        t.fuel += ev.deut || 0;
-        t.fuelMsu += msu({ metal: 0, crystal: 0, deuterium: ev.deut || 0 });
-      } else {
-        t.battles++;
-        for (const [id, n] of Object.entries(ev.lost)) {
-          t.lost[id] = (t.lost[id] ?? 0) + n;
-          t.lostN += n;
-        }
-        t.lostMsu += unitsMsu(ev.lost);
-      }
-    }
-    return t;
-  }
-  var balance = (t) => t.gain + t.gotMsu - t.lostMsu - t.fuelMsu;
-  function shipMatcher(names) {
-    const list = names.filter(([, n]) => n).sort((a, b) => b[1].length - a[1].length);
-    return (text) => {
-      const tx = text.replace(/\s+/g, " ").trim().toLowerCase();
-      const hit = list.find(([, name]) => tx.startsWith(name.toLowerCase()) && !/[a-zà-ÿ]/i.test(tx.charAt(name.length)));
-      if (!hit) return null;
-      const n = Number(tx.slice(hit[1].length).replace(/\D/g, "")) || 0;
-      return n ? { id: hit[0], n } : null;
-    };
-  }
-  function otherSummary(list, locale) {
-    const sums = /* @__PURE__ */ new Map();
-    for (const text of list) {
-      const x = splitCount(text);
-      const key = x ? x[0] : text.replace(/\s+/g, " ").trim();
-      const cur = sums.get(key) ?? { n: 0, times: 0, counted: !!x };
-      if (x) cur.n += x[1];
-      cur.times++;
-      sums.set(key, cur);
-    }
-    return [...sums].map(([name, v]) => v.counted ? `${name} ${v.n.toLocaleString(locale)}` : name + (v.times > 1 ? ` ×${v.times}` : "")).join(", ");
-  }
-  function importLegacy(cur, old) {
-    const a = old.archive ?? {};
-    const entries = { ...cur.archive.entries };
-    for (const [id, e] of Object.entries(a.entries ?? {})) {
-      if (entries[id] || !e) continue;
-      entries[id] = {
-        id,
-        name: e.name ?? "",
-        coords: e.coords ?? "",
-        level: e.level ?? 0,
-        stars: e.stars ?? 0,
-        mode: e.mode ?? "",
-        kind: e.kind ?? "",
-        spawnedAt: e.spawnedAt ?? 0,
-        wave: e.wave ?? 0,
-        waves: e.waves ?? 0,
-        ...e.located ? { located: true } : {},
-        firstSeen: e.firstSeen ?? 0,
-        lastSeen: e.lastSeen ?? 0,
-        status: e.status === "collected" || e.status === "expired" ? e.status : "running",
-        endedAt: e.endedAt ?? 0,
-        collections: (e.collections ?? []).map((c) => ({ at: c.at ?? 0, wave: c.wave ?? 0, waves: c.waves ?? 0, cost: c.cost ?? 0, lithium: c.lithium ?? 0, metal: c.metal ?? 0, crystal: c.crystal ?? 0, deuterium: c.deuterium ?? 0, other: c.other ?? [] }))
-      };
-    }
-    const seenFuel = new Set(cur.archive.fuel.map((f) => `${f.at}|${f.coords}`));
-    const fuel = [...cur.archive.fuel];
-    for (const f of a.fuel ?? []) {
-      if (!f.at || !f.coords || seenFuel.has(`${f.at}|${f.coords}`)) continue;
-      fuel.push({ at: f.at, coords: f.coords, deut: f.deut ?? 0, mission: f.mission ?? 0 });
-    }
-    const battles = { ...cur.archive.battles };
-    for (const [id, b] of Object.entries(a.battles ?? {})) {
-      if (battles[id] || !b?.v) continue;
-      battles[id] = { at: b.at ?? 0, coords: b.coords ?? "", entry: b.entry ?? "", lost: b.lost ?? {}, won: !!b.won, draw: !!b.draw };
-    }
-    const ledger = { ...cur.ledger };
-    for (const [k, r] of Object.entries(old.ledger ?? {})) if (!ledger[k] && r?.coords) ledger[k] = r;
-    const ignored = { ...cur.ignored };
-    for (const k of Object.keys(old.ignored ?? {})) ignored[k] = true;
-    return { archive: { entries, fuel, battles }, ledger, ignored };
-  }
-  var MULT_KEY = "orion.mult";
-  var waveBonus = (waves) => 1 + (Math.max(1, waves) - 1) / 51;
-  var multKey = (name, mode) => `${name.trim()}|${mode.trim().toLowerCase()}`;
-  function learnMult(mults, name, mode, cost, waves, r) {
-    const value = msu(r);
-    if (!name || !cost || !waves || !value || r.other.length) return false;
-    const k = value / (cost * waveBonus(waves));
-    const key = multKey(name, mode);
-    if (mults[key] !== void 0 && Math.abs(mults[key] - k) / k < 1e-6) return false;
-    mults[key] = k;
-    return true;
-  }
-  var SHIP_RATE = 0.75;
-  function budgetOf(k, cost, waves, r) {
-    if (!k || !cost || !waves) return null;
-    const budget = k * cost * waveBonus(waves);
-    return { budget, extra: Math.max(0, budget - msu(r)) };
-  }
-  var LOW_ROLL = 0.375;
-  function rollOf(collectedMsu, possibleMsu, waves, totalWaves) {
-    if (!possibleMsu || !waves || !totalWaves || !collectedMsu) return void 0;
-    const ratio = collectedMsu / (possibleMsu * waves / totalWaves);
-    return ratio < 0.6 ? "low" : ratio > 0.8 ? "high" : void 0;
-  }
-  var iasProduction = (level2, economy) => level2 > 0 ? Math.floor(15.36 * level2 * 1.1 ** level2 * economy) : 0;
-  var BASE_CARGO = { 202: 5e3, 203: 25e3, 204: 50, 205: 100, 206: 800, 207: 1500, 208: 7500, 209: 2e4, 210: 5, 211: 500, 213: 2e3, 214: 1e6, 215: 750, 217: 0, 218: 1e4, 219: 1e4 };
-  function fleetCapacity(ships) {
-    let total = 0;
-    for (const [id, x] of Object.entries(ships ?? {})) total += (x.amount ?? 0) * (BASE_CARGO[Number(id)] ?? 0) * (1 + (x.cargo ?? 0));
-    return Math.ceil(total);
-  }
-  var shipsFor = (capacity, perShip) => perShip > 0 ? Math.ceil(capacity / perShip) : 0;
 
   // src/data/messages.ts
   var json = (value, fallback) => {
@@ -8978,7 +9419,7 @@ td.spark-cell { width: 90px; }
   var RIGHT = ["loot", "fleet", "def"];
   var DEFAULT_VIEW = { sort: "loot", desc: true, cols: COLS, hideDefended: false, inactiveOnly: false, open: true };
   var expanded = /* @__PURE__ */ new Set();
-  function universeOf(doc, data) {
+  function universeOf2(doc, data) {
     const meta = (name) => doc.querySelector(`meta[name="${name}"]`)?.getAttribute("content") ?? "";
     return {
       galaxies: data?.galaxies || 9,
@@ -9090,7 +9531,7 @@ td.spark-cell { width: 90px; }
     };
     const ships = store.get(SHIPS_INFO_KEY, {});
     const cap = (id) => ships[String(id)]?.capacity || (id === 202 ? 5e3 : 25e3);
-    const universe = universeOf(doc, store.get(SERVER_DATA_KEY, null));
+    const universe = universeOf2(doc, store.get(SERVER_DATA_KEY, null));
     const showShared = store.get(SPY_SHARED_KEY, true);
     const tool = simTool(store.get(SIM_KEY, "osims"));
     const all2 = targetRows(board, spy.bases, { capacity: cap(203), speed: ships["203"]?.speed ?? 0, universe, now }).filter((r) => showShared || !r.entry.shared);
@@ -9670,7 +10111,7 @@ td.spark-cell { width: 90px; }
     copyApiOnClick(o.doc, o.t);
     const { doc, store, t, locale } = o;
     const ships = store.get(SHIPS_INFO_KEY, {});
-    const universe = universeOf(doc, store.get(SERVER_DATA_KEY, null));
+    const universe = universeOf2(doc, store.get(SERVER_DATA_KEY, null));
     const fold = store.get(FOLD_KEY, true);
     const sim = simTool(store.get(SIM_KEY, "osims"));
     const now = o.now?.() ?? Date.now();
@@ -9780,7 +10221,7 @@ td.spark-cell { width: 90px; }
         store.set(JOURNAL_KEY, journal);
       }
       const before = journal;
-      const r = record2(journal, expeditions);
+      const r = record(journal, expeditions);
       journal = r.journal;
       added += r.added;
       for (const e of expeditions) if (!before[e.id]) fresh.push(journal[e.id]);
@@ -9835,292 +10276,6 @@ td.spark-cell { width: 90px; }
     }
     return redraw;
   }
-
-  // src/engines/fleet.ts
-  var EMPTY_RESERVE = { ships: {}, resources: { metal: 0, crystal: 0, deuterium: 0 } };
-  var PROFILES_KEY = "fleet.profiles";
-  function profileFor(profiles, bodyId) {
-    const p = profiles[String(bodyId)] ?? { reserve: structuredClone(EMPTY_RESERVE), save: null };
-    return { ...p, gate: p.gate ?? { ...p.reserve.ships }, saveReserve: p.saveReserve ?? structuredClone(EMPTY_RESERVE) };
-  }
-  function activeProfile(p, s) {
-    return {
-      ...p,
-      reserve: { ships: s.shipsOn ? p.reserve.ships : {}, resources: s.resourcesOn ? p.reserve.resources : { ...EMPTY_RESERVE.resources } },
-      gate: s.gateOn ? p.gate : {}
-    };
-  }
-  var RESERVE_SECTIONS = ["ships", "resources", "gate", "fleetsave"];
-  var positive = (ships) => Object.fromEntries(Object.entries(ships).filter(([, n]) => n > 0));
-  function sectionValue(p, section2) {
-    switch (section2) {
-      case "ships":
-        return positive(p.reserve.ships);
-      case "resources":
-        return p.reserve.resources;
-      case "gate":
-        return positive(p.gate);
-      case "fleetsave":
-        return { save: p.save, ships: positive(p.saveReserve.ships), resources: p.saveReserve.resources };
-    }
-  }
-  function canonical(v) {
-    if (v === null || typeof v !== "object") return JSON.stringify(v ?? null);
-    return `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${canonical(v[k])}`).join(",")}}`;
-  }
-  function sectionEmpty(p, section2) {
-    const v = sectionValue(p, section2);
-    if (section2 === "resources") return !Object.values(v).some(Boolean);
-    if (section2 === "fleetsave") return v.save === null && canonical({ ships: v.ships, resources: v.resources }) === canonical({ ships: {}, resources: EMPTY_RESERVE.resources });
-    return Object.keys(v).length === 0;
-  }
-  function sameSection(profiles, fromId, ids, section2) {
-    const mine = canonical(sectionValue(profileFor(profiles, fromId), section2));
-    return ids.filter((id) => id !== fromId && canonical(sectionValue(profileFor(profiles, id), section2)) === mine);
-  }
-  function copySections(profiles, fromId, ids, sections) {
-    const src = structuredClone(profileFor(profiles, fromId));
-    const out = { ...profiles };
-    for (const id of ids) {
-      if (id === fromId) continue;
-      const p = structuredClone(profileFor(profiles, id));
-      if (sections.includes("ships")) p.reserve.ships = { ...src.reserve.ships };
-      if (sections.includes("resources")) p.reserve.resources = { ...src.reserve.resources };
-      if (sections.includes("gate")) p.gate = { ...src.gate };
-      if (sections.includes("fleetsave")) {
-        p.save = structuredClone(src.save);
-        p.saveReserve = structuredClone(src.saveReserve);
-      }
-      out[String(id)] = p;
-    }
-    return out;
-  }
-  function shipsAfterReserve(available, reserve) {
-    const out = {};
-    for (const [id, count2] of Object.entries(available)) {
-      const n = Math.max(0, count2 - (reserve.ships[id] ?? 0));
-      if (n > 0) out[id] = n;
-    }
-    return out;
-  }
-  function resourcesAfterReserve(available, reserve, fuel) {
-    return {
-      metal: Math.max(0, Math.floor(available.metal - reserve.resources.metal)),
-      crystal: Math.max(0, Math.floor(available.crystal - reserve.resources.crystal)),
-      deuterium: Math.max(0, Math.floor(available.deuterium - fuel - reserve.resources.deuterium))
-    };
-  }
-  function resolveTarget(save, origin) {
-    return {
-      galaxy: save.galaxy ?? origin.galaxy,
-      system: save.system ?? origin.system,
-      position: save.position,
-      type: save.type
-    };
-  }
-  function parseAmount(text) {
-    const raw = text.trim().toLowerCase().replace(/\s/g, "");
-    const m = raw.match(/^([\d.,]+)([kmg])?$/);
-    if (!m) return 0;
-    const unit = m[2] === "k" ? 1e3 : m[2] === "m" ? 1e6 : m[2] === "g" ? 1e9 : 1;
-    let num5 = m[1];
-    num5 = unit === 1 ? num5.replace(/[.,]/g, "") : num5.replace(",", ".");
-    const value = Number(num5) * unit;
-    return Number.isFinite(value) ? Math.floor(value) : 0;
-  }
-  var SETTINGS_KEY = "fleet.settings";
-  var DEFAULT_SETTINGS = {
-    mainShip: 203,
-    secondShip: 202,
-    transportSpeed: 100,
-    favTransport: null,
-    favDeploy: null,
-    expeditionShip: 0,
-    expeditionValue: "",
-    expeditionExtras: true,
-    expeditionBig: 0,
-    repeat: false,
-    expeditionStay: false,
-    expeditionSpread: 0,
-    expeditionSplit: false,
-    shipsOn: true,
-    resourcesOn: true,
-    gateOn: true,
-    ignoreFood: false,
-    // Off (Nicola, 2026-11-26): the ships reserve holds in every mission but the expedition and the fleetsave.
-    collectIgnoreShips: false,
-    collectDeployRes: true,
-    loadOrder: ["deuterium", "crystal", "metal"],
-    sendMode: null,
-    sendTarget: null,
-    sendPick: { metal: null, crystal: null, deuterium: null },
-    skipBodies: []
-  };
-  function settingsFrom(stored) {
-    const { reserveOn, ...rest } = stored;
-    const legacy = reserveOn === void 0 ? {} : { shipsOn: reserveOn, resourcesOn: reserveOn };
-    const big = rest.expeditionBig === void 0 && rest.expeditionExtras === false ? { expeditionBig: -1 } : {};
-    return { ...DEFAULT_SETTINGS, ...legacy, ...big, ...rest };
-  }
-  function pickedLoad(onPlanet2, pick, fuel, capacity) {
-    const want = (k, have) => Math.max(0, Math.floor(Math.min(have, pick[k] ?? 0)));
-    let room = Math.max(0, Math.floor(capacity));
-    const deuterium = Math.min(want("deuterium", onPlanet2.deuterium - fuel), room);
-    room -= deuterium;
-    const crystal = Math.min(want("crystal", onPlanet2.crystal), room);
-    room -= crystal;
-    const metal = Math.min(want("metal", onPlanet2.metal), room);
-    return { metal, crystal, deuterium };
-  }
-  function cargoCount(amount, othersCapacity, capacity, available, already = 0) {
-    if (capacity <= 0) return Math.min(available, already);
-    const need = Math.ceil(Math.max(0, amount - othersCapacity) / capacity);
-    return Math.min(available, Math.max(need, already));
-  }
-  function resolveSend(t, origin) {
-    return { galaxy: t.galaxy ?? origin.galaxy, system: t.system ?? origin.system, position: t.position, type: t.type };
-  }
-  function parseCoords(text) {
-    const parts = text.trim().split(/[^\d]+/).filter(Boolean).map(Number);
-    return parts.length === 3 && parts.every((n) => n > 0) ? parts : null;
-  }
-  var DELIVERY_KEY = "plan.delivery";
-  function deliveryLoad(onPlanet2, reserve, fuel, capacity, need) {
-    const free = resourcesAfterReserve(onPlanet2, reserve, fuel);
-    let room = Math.max(0, Math.floor(capacity));
-    const take = (a, b) => Math.max(0, Math.floor(Math.min(a, b, room)));
-    const deuterium = take(free.deuterium, Math.ceil(need.deuterium));
-    room -= deuterium;
-    const crystal = take(free.crystal, Math.ceil(need.crystal));
-    room -= crystal;
-    const metal = take(free.metal, Math.ceil(need.metal));
-    return { metal, crystal, deuterium };
-  }
-  var CARGO_SHIPS = [203, 202, 219, 209, 210];
-  function cargoShipsFor(amount, stock2, main2, second) {
-    const out = {};
-    let left = Math.max(0, amount);
-    for (const id of [main2, second]) {
-      if (!id || left <= 0) continue;
-      const s = stock2.find((x) => x.id === id);
-      if (!s || s.available <= 0 || s.capacity <= 0) continue;
-      const n = Math.min(s.available, Math.ceil(left / s.capacity));
-      if (n > 0) {
-        out[id] = (out[id] ?? 0) + n;
-        left -= n * s.capacity;
-      }
-    }
-    return out;
-  }
-  function cargoLoad(onPlanet2, reserve, fuel, capacity, order = GAME_ORDER) {
-    const free = resourcesAfterReserve(onPlanet2, reserve, fuel);
-    let room = Math.max(0, Math.floor(capacity));
-    const out = { metal: 0, crystal: 0, deuterium: 0 };
-    for (const k of validOrder(order)) {
-      out[k] = Math.max(0, Math.floor(Math.min(free[k], room)));
-      room -= out[k];
-    }
-    return out;
-  }
-  var GAME_ORDER = ["deuterium", "crystal", "metal"];
-  var LOAD_ORDERS = [
-    ["deuterium", "crystal", "metal"],
-    ["deuterium", "metal", "crystal"],
-    ["crystal", "deuterium", "metal"],
-    ["crystal", "metal", "deuterium"],
-    ["metal", "crystal", "deuterium"],
-    ["metal", "deuterium", "crystal"]
-  ];
-  function validOrder(order) {
-    const ok = Array.isArray(order) && order.length === 3 && ["metal", "crystal", "deuterium"].every((k) => order.includes(k));
-    return ok ? order : GAME_ORDER;
-  }
-  var EXPEDITION_TABLE = [
-    { topScore: 1e4, base: 10, max: 4e4 },
-    { topScore: 1e5, base: 125, max: 5e5 },
-    { topScore: 1e6, base: 300, max: 12e5 },
-    { topScore: 5e6, base: 450, max: 18e5 },
-    { topScore: 25e6, base: 600, max: 24e5 },
-    { topScore: 5e7, base: 750, max: 3e6 },
-    { topScore: 75e6, base: 900, max: 36e5 },
-    { topScore: 1e8, base: 1050, max: 42e5 },
-    { topScore: Infinity, base: 1250, max: 5e6 }
-  ];
-  function expeditionMax(o) {
-    const row = EXPEDITION_TABLE.find((r) => r.topScore >= (o.topScore ?? Infinity));
-    const factor = (o.characterClass === 3 ? 3 : 2) * o.economySpeed;
-    const bonus = (1 + o.classBooster) * (1 + (o.lfBooster ?? 0)) * (1 + (o.itemBoost ?? 0));
-    return { base: row.base, max: Math.round(row.max * factor * bonus) };
-  }
-  var EXPEDITION_MAX_KEY = "fleet.expeditionMax";
-  function expeditionTarget(calculated, value) {
-    const v = value.trim();
-    if (!v) return calculated;
-    if (v.endsWith("%")) return Math.round(calculated * (parseAmount(v.slice(0, -1)) || 0) / 100);
-    return parseAmount(v) || calculated;
-  }
-  var EXPEDITION_FACTOR = { 202: 1, 203: 3, 219: 5.75 };
-  var EXPEDITION_FILLERS = [218, 213, 211, 215, 207, 206, 205, 204];
-  function expeditionSystem(system, spread, u, rand = Math.random) {
-    const n = Math.max(0, Math.floor(spread || 0));
-    const size = Math.max(1, u.systems);
-    if (!n) return system;
-    const s = system + Math.min(2 * n, Math.floor(rand() * (2 * n + 1))) - n;
-    if (u.donut) return ((s - 1) % size + size) % size + 1;
-    return Math.min(size, Math.max(1, s));
-  }
-  function freeExpeditionSlots(used, max) {
-    return Math.max(1, (max || 0) - (used || 0));
-  }
-  function expeditionShare(available, slots) {
-    if (available <= 0) return 0;
-    return Math.max(1, Math.floor(available / Math.max(1, slots)));
-  }
-  function expeditionFleet(stock2, o) {
-    const avail = (id) => {
-      const n = stock2.find((s) => s.id === id)?.available ?? 0;
-      return o.slots && [219, 203, 202].includes(id) ? expeditionShare(n, o.slots) : n;
-    };
-    const has = (id) => (stock2.find((s) => s.id === id)?.available ?? 0) > 0;
-    const need = (id) => {
-      const s = stock2.find((x) => x.id === id);
-      if (!s || s.capacity <= 0) return Infinity;
-      return Math.max(Math.ceil(o.base / (EXPEDITION_FACTOR[id] ?? 1)), Math.ceil(o.target / s.capacity));
-    };
-    let ship = o.ship;
-    if (!ship) {
-      const options = [219, 203, 202].filter(has);
-      ship = options.find((id) => avail(id) >= need(id)) ?? options.sort((a, b) => {
-        const cap = (id) => avail(id) * stock2.find((x) => x.id === id).capacity;
-        return cap(b) - cap(a);
-      })[0] ?? 0;
-    }
-    const out = {};
-    if (ship && has(ship)) out[ship] = Math.min(avail(ship), need(ship));
-    const big = o.big ?? (o.extras ? 0 : -1);
-    if (big !== -1) {
-      const filler = big > 0 && big !== ship && has(big) ? big : EXPEDITION_FILLERS.find((id) => id !== ship && has(id));
-      if (filler) out[filler] = 1;
-    }
-    if (o.extras) {
-      if (ship !== 210 && has(210)) out[210] = 1;
-      if (ship !== 219 && has(219)) out[219] = 1;
-    }
-    return out;
-  }
-  function nextBody(list, current3, opts = {}) {
-    const isMoon2 = list.some((b) => b.moonId === current3);
-    const ids = list.filter((b) => isMoon2 || opts.onlyWithMoon ? b.moonId !== null : b.planetId !== null).map((b) => isMoon2 ? b.moonId : b.planetId);
-    const i = ids.indexOf(current3);
-    if (i < 0) return null;
-    for (let k = 1; k < ids.length; k++) {
-      const step = opts.backwards ? -k : k;
-      const id = ids[((i + step) % ids.length + ids.length) % ids.length];
-      if (id !== opts.skip && !opts.skipIds?.includes(id)) return id;
-    }
-    return null;
-  }
-  var LAST_FLEET_KEY = "fleet.last";
 
   // src/modules/fleet/icons.ts
   var LINE = 'fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"';
@@ -12995,7 +13150,7 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
       lfBooster: o.store.get(LF_BONUS_KEY, null)?.expedition ?? 0,
       itemBoost: expeditionItemBoost(o.store.get(ITEMS_KEY, null)),
       // Size and donut of the universe, for the random system (public API cache, else the page's meta tags).
-      ...(({ systems, donutSystem }) => ({ systems, donutSystem }))(universeOf(doc, o.store.get(SERVER_DATA_KEY, null)))
+      ...(({ systems, donutSystem }) => ({ systems, donutSystem }))(universeOf2(doc, o.store.get(SERVER_DATA_KEY, null)))
     });
     if (fleet1)
       void whenDispatcherReady().then((fd) => {
@@ -13695,6 +13850,7 @@ input.field { width: 190px; }
     let rulesPanel = null;
     let menu = { ...o.menu.settings };
     let status = "";
+    let carryList = null;
     const choice = (options, current3, onPick, disabled = false) => {
       const box = el7("span", "control");
       box.setAttribute("role", "group");
@@ -13795,7 +13951,7 @@ input.field { width: 190px; }
       spreadIn.setAttribute("aria-label", t("fleet.expeditionSpread"));
       spreadIn.addEventListener("change", () => set({ expeditionSpread: Math.min(499, Math.max(0, Math.floor(parseAmount(spreadIn.value) || 0))) }));
       spread.append(spreadIn);
-      const split = yesNo(f.expeditionSplit, (v) => set({ expeditionSplit: v }));
+      const split2 = yesNo(f.expeditionSplit, (v) => set({ expeditionSplit: v }));
       const lang = doc.documentElement.lang || "it";
       const shares = seen2?.cargo && seen2.free ? Object.entries(seen2.cargo).filter(([, n]) => n > 0).map(([id, n]) => t("fleet.expSplitCalc", { ship: shipName2(Number(id)), n: n.toLocaleString(lang), slots: seen2.free, each: expeditionShare(n, seen2.free).toLocaleString(lang) })) : [];
       const splitCalc = el7("div", "calc wide");
@@ -13827,7 +13983,7 @@ input.field { width: 190px; }
         row(t("fleet.expeditionExtras"), t("settings.extrasHint"), yesNo(f.expeditionExtras, (v) => set({ expeditionExtras: v }))),
         row(t("fleet.expeditionSpread"), t("settings.expSpreadHint"), spread),
         (() => {
-          const r = row(t("fleet.expeditionSplit"), t("settings.expSplitHint"), split);
+          const r = row(t("fleet.expeditionSplit"), t("settings.expSplitHint"), split2);
           r.append(splitCalc);
           return r;
         })(),
@@ -13837,6 +13993,44 @@ input.field { width: 190px; }
       ];
     };
     let listening = null;
+    const carryRows = (carry) => {
+      const show2 = (list, none) => {
+        carryList = list?.length ? list : null;
+        status = list === null ? t("settings.backupBad") : list.length ? "" : none;
+        draw();
+      };
+      const picker = el7("input");
+      picker.type = "file";
+      picker.hidden = true;
+      picker.accept = ".json,application/json";
+      picker.addEventListener("change", () => {
+        const file = picker.files?.[0];
+        picker.value = "";
+        if (!file) return;
+        file.text().then((text) => show2(carry.list(text), t("settings.carryNoneFile")), () => show2(null, ""));
+      });
+      const two = el7("span", "control");
+      for (const [label, fn] of [[t("settings.carryLocal"), () => show2(carry.list(), t("settings.carryNone"))], [t("settings.carryFile"), () => picker.click()]]) {
+        const b = el7("button", "seg", label);
+        b.type = "button";
+        b.addEventListener("click", fn);
+        two.append(b);
+      }
+      const rows = [row(t("settings.carry"), t("settings.carryHint"), two), picker];
+      for (const src of carryList ?? []) {
+        const box = el7("span", "control");
+        const b = el7("button", "seg", t("settings.carryDo"));
+        b.type = "button";
+        b.addEventListener("click", () => {
+          status = carry.apply(src.ns);
+          carryList = null;
+          draw();
+        });
+        box.append(b);
+        rows.push(row(t("settings.carrySource", { universe: src.universe, player: src.player }), t("settings.carrySourceHint", { n: src.journal, days: src.days }), box));
+      }
+      return rows;
+    };
     const keyRows = () => {
       const map = keymap(store);
       const out = [
@@ -14081,6 +14275,7 @@ input.field { width: 190px; }
             row(t("settings.oglight"), t("settings.backupImportHint"), action(t("settings.oglightImport"), () => picker.click())),
             picker
           );
+          if (o.carry) body.append(...carryRows(o.carry));
           const s = el7("div", "status", status);
           s.setAttribute("role", "status");
           body.append(s);
@@ -20593,6 +20788,7 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
     let refreshInbox = null;
     let refreshFleet = null;
     let menuCtx = { colonies: "" };
+    let carryData = {};
     const openFutureSettings = (section2) => {
       openSettings({
         doc: document,
@@ -20624,6 +20820,19 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
             const days2 = convertOglightStats(json2.stats ?? {}, store.get(JOURNAL_KEY, {}));
             store.set(JOURNAL_KEY, days2.journal);
             return t("settings.oglightDone", { players: out.players, seen: out.seen, exp: days2.expeditions.toLocaleString(locale), raids: days2.raids.toLocaleString(locale), days: days2.days });
+          }
+        },
+        carry: {
+          list: (text) => {
+            const data = text === void 0 ? exportBackup(gm, Date.now()).data : backupData(text);
+            if (!data) return null;
+            carryData = data;
+            return carrySources(data, namespace);
+          },
+          apply: (ns) => {
+            const r = carryOver(carryData, ns, (key) => store.get(key, void 0), Date.now());
+            for (const [key, value] of Object.entries(r.writes)) store.set(key, value);
+            return t("settings.carryDone", { settings: r.settings, exp: r.journal.toLocaleString(locale), days: r.days, orion: r.orion });
           }
         },
         notes: [menuCtx.colonies, snapshot ? t("toolbar.lastSync", { time: new Date(snapshot.fetchedAt).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) }) : ""].filter(Boolean),

@@ -22,13 +22,25 @@ export function exportBackup(kv: KeyValueStore, now: number): BackupFile {
   return { app: 'future', version: VERSION, at: now, data };
 }
 
+/** Future's own keys of a parsed backup file, or null when it is not one. */
+function dataOf(file: Partial<BackupFile> | null): Record<string, unknown> | null {
+  if (!file || file.app !== 'future' || file.version !== VERSION || !file.data || typeof file.data !== 'object' || Array.isArray(file.data)) return null;
+  // Only Future's own keys: a hand-edited file cannot write anything else into the storage.
+  return Object.fromEntries(Object.entries(file.data).filter(([k]) => k.startsWith(PREFIX)));
+}
+
+/** The values of a Future backup file, or null when the text is not one. */
+export function backupData(text: string): Record<string, unknown> | null {
+  try { return dataOf(JSON.parse(text) as Partial<BackupFile>); } catch { return null; }
+}
+
 /** Writes a backup back. Merges: keys missing from the file stay as they are. Returns the keys written. */
 export function importBackup(kv: KeyValueStore, text: string): number {
   let file: Partial<BackupFile>;
   try { file = JSON.parse(text) as Partial<BackupFile>; } catch { throw new Error('backup: not JSON'); }
-  if (!file || file.app !== 'future' || file.version !== VERSION || !file.data || typeof file.data !== 'object' || Array.isArray(file.data)) throw new Error('backup: not a Future backup');
-  // Only Future's own keys: a hand-edited file cannot write anything else into the storage.
-  const entries = Object.entries(file.data).filter(([k]) => k.startsWith(PREFIX));
+  const data = dataOf(file);
+  if (!data) throw new Error('backup: not a Future backup');
+  const entries = Object.entries(data);
   for (const [key, value] of entries) kv.set(key, value);
   return entries.length;
 }

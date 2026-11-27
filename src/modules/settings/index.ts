@@ -21,6 +21,7 @@ import { bodyRulesPanel, RULES_CSS, type FleetBody } from '../fleet';
 import { ACTIONS, assignKey, glyph, keyLabel, keymap, resetKeys, TOUCH_KEY, usableKey, type TouchMode } from '../shortcuts';
 import { followViewport, revealActiveTabs } from '../../core/viewport';
 import { helpButton } from '../../core/tour';
+import type { CarrySource } from '../../engines/carry-over';
 
 export const SETTINGS_ID = 'fut-settings-window';
 const TAB_KEY = 'settings.tab';
@@ -37,6 +38,11 @@ export interface SettingsOptions {
   };
   /** Backup and OGLight import; the import returns how many values or a message. */
   backup?: { onExport: () => number; onImport: (text: string) => number | string };
+  /**
+   * Another universe's settings and statistics (server merges): the universes in this browser (no text) or
+   * in a backup file; null when the text is not a backup. `apply` returns the message to show.
+   */
+  carry?: { list: (text?: string) => CarrySource[] | null; apply: (ns: string) => string };
   /** Facts shown at the bottom of the data section (colonies, last sync). */
   notes?: string[];
   /** Called after an inbox choice, so the open inbox redraws. */
@@ -157,6 +163,7 @@ export function openSettings(o: SettingsOptions): void {
   let rulesPanel: HTMLElement | null = null;
   let menu = { ...o.menu.settings };
   let status = '';
+  let carryList: CarrySource[] | null = null;
 
   /** A choice of two or more: one segmented control, the current value pressed. */
   const choice = <V>(options: [V, string][], current: V, onPick: (v: V) => void, disabled = false) => {
@@ -319,6 +326,46 @@ export function openSettings(o: SettingsOptions): void {
 
   /* Keys: one row per action, the key changes on a click; the touch bar's mode. */
   let listening: string | null = null;
+  /** Another universe's settings and statistics: first where from (this browser or a file), then which one. */
+  const carryRows = (carry: NonNullable<SettingsOptions['carry']>): HTMLElement[] => {
+    const show = (list: CarrySource[] | null, none: string) => {
+      carryList = list?.length ? list : null;
+      status = list === null ? t('settings.backupBad') : list.length ? '' : none;
+      draw();
+    };
+    const picker = el('input');
+    picker.type = 'file';
+    picker.hidden = true;
+    picker.accept = '.json,application/json';
+    picker.addEventListener('change', () => {
+      const file = picker.files?.[0];
+      picker.value = '';
+      if (!file) return;
+      file.text().then((text) => show(carry.list(text), t('settings.carryNoneFile')), () => show(null, ''));
+    });
+    const two = el('span', 'control');
+    for (const [label, fn] of [[t('settings.carryLocal'), () => show(carry.list(), t('settings.carryNone'))], [t('settings.carryFile'), () => picker.click()]] as const) {
+      const b = el('button', 'seg', label);
+      b.type = 'button';
+      b.addEventListener('click', fn);
+      two.append(b);
+    }
+    const rows = [row(t('settings.carry'), t('settings.carryHint'), two), picker];
+    for (const src of carryList ?? []) {
+      const box = el('span', 'control');
+      const b = el('button', 'seg', t('settings.carryDo'));
+      b.type = 'button';
+      b.addEventListener('click', () => {
+        status = carry.apply(src.ns);
+        carryList = null;
+        draw();
+      });
+      box.append(b);
+      rows.push(row(t('settings.carrySource', { universe: src.universe, player: src.player }), t('settings.carrySourceHint', { n: src.journal, days: src.days }), box));
+    }
+    return rows;
+  };
+
   const keyRows = (): HTMLElement[] => {
     const map = keymap(store);
     const out: HTMLElement[] = [
@@ -566,6 +613,7 @@ export function openSettings(o: SettingsOptions): void {
           row(t('settings.oglight'), t('settings.backupImportHint'), action(t('settings.oglightImport'), () => picker.click())),
           picker,
         );
+        if (o.carry) body.append(...carryRows(o.carry));
         const s = el('div', 'status', status);
         s.setAttribute('role', 'status');
         body.append(s);
