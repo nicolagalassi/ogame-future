@@ -18,6 +18,7 @@ import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { SERVER_DATA_KEY, type ServerData } from '../../data/server-data';
 import type { LfBonuses } from '../../data/bonuses';
 import { dismissSpy, raidWaves, SPY_BOARD_KEY, SPY_DISMISSED_KEY, targetRows, type Base, type SpyBoard, type SpyDismissed, type TargetRow, type Universe } from '../../engines/raids';
+import { teamKeyOf } from '../../data/ptre';
 import { SIM_KEY, SIM_TOOLS, simLink, simPrefill, simTool } from '../../engines/sim-links';
 import { shipIcon, shipName } from '../../data/ship-icons';
 import type { T } from '../../core/i18n';
@@ -59,7 +60,7 @@ export interface SpyContext {
   /** Alliance class id and lifeform bonuses, for the simulators (as OGLight fills them). */
   allianceClass?: number;
   lf?: LfBonuses | null;
-  /** Saves one report to the team's PTRE (only when the player has set a team key). */
+  /** Saves one report to the team's PTRE; its button shows only while a team key is saved. */
   ptre?: (apiKey: string) => Promise<{ ok: boolean; message: string }>;
 }
 
@@ -171,7 +172,7 @@ export function mountSpyPanel(o: SpyPanelOptions): void {
   // A sort saved before 2026-11-10 (MSU per hour, flight) falls back to the loot.
   if (!COLS.includes(view.sort)) view.sort = 'loot';
   view.cols = columnOrder(view.cols);
-  const prefs = [o.store.get<boolean>(SPY_SHARED_KEY, true), o.store.get<string>(SIM_KEY, 'osims'), [...expanded], !!o.spy.ptre, [...ptreState], Object.keys(o.store.get<Record<string, number>>(PTRE_SENT_KEY, {})).length];
+  const prefs = [o.store.get<boolean>(SPY_SHARED_KEY, true), o.store.get<string>(SIM_KEY, 'osims'), [...expanded], !!(o.spy.ptre && teamKeyOf(o.store)), [...ptreState], Object.keys(o.store.get<Record<string, number>>(PTRE_SENT_KEY, {})).length];
   const sig = JSON.stringify([Object.values(board).map((e) => e.id), view, prefs, Math.floor((o.now?.() ?? Date.now()) / 60_000)]);
   if (old && old.dataset.sig === sig && old.nextElementSibling === anchor) return;
   // Keep the keyboard where it was across the redraw.
@@ -413,7 +414,7 @@ function renderPanel(o: SpyPanelOptions, board: SpyBoard, view: View): HTMLEleme
     }
     // PTRE: one click saves this one report to the team (its API id only), as OGLight's button does.
     // COMPLIANCE (AGENTS.md §1.1, §1.9): one click, one report; only with the player's team key.
-    if (e.apiKey && spy.ptre) {
+    if (e.apiKey && spy.ptre && teamKeyOf(store)) {
       const key = e.apiKey;
       const save = spy.ptre;
       const sent = store.get<Record<string, number>>(PTRE_SENT_KEY, {})[key];
@@ -428,7 +429,7 @@ function renderPanel(o: SpyPanelOptions, board: SpyBoard, view: View): HTMLEleme
             ptreState.delete(key);
             const all = { ...store.get<Record<string, number>>(PTRE_SENT_KEY, {}), [key]: Date.now() };
             store.set(PTRE_SENT_KEY, Object.fromEntries(Object.entries(all).sort((a, b) => a[1] - b[1]).slice(-PTRE_SENT_MAX)));
-          } else ptreState.set(key, { busy: false, error: r.message || '?' });
+          } else ptreState.set(key, { busy: false, error: r.message === 'no-key' ? t('ptre.noKey') : r.message === 'server' ? t('ptre.noServer') : r.message || '?' });
           mountSpyPanel(o);
         });
       });

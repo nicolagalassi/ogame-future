@@ -1117,5 +1117,7 @@
   "ptre.save": "Save to PTRE",
   "ptre.saving": "Sending to PTRE…",
   "ptre.saved": "Saved to PTRE",
-  "ptre.saveFailed": "PTRE did not save it: {message}. Click to try again."
+  "ptre.saveFailed": "PTRE did not save it: {message}. Click to try again.",
+  "ptre.noKey": "team key missing",
+  "ptre.noServer": "universe not recognised"
 }

@@ -107,6 +107,7 @@ describe('saving a report to PTRE', () => {
   it('one click saves that report; the mark stays, a refusal shows PTRE\'s words', async () => {
     document.body.innerHTML = '<div data-subtab-id="20" class="active"></div><div id="messages"><div class="messagesHolder"></div></div>';
     const store = new Store(new MemoryStore(), 'x');
+    store.set('ptre.teamKey', 'TM-AAAA-BBBB-CCCC-DDDD');
     store.set(SPY_BOARD_KEY, { '1:476:11': { key: '1:476:11', id: '9', at: 1000, coords: '1:476:11', moon: false, playerId: 5, playerName: 'Bob', statuses: [], activity: 60, res: { metal: 1e6, crystal: 0, deuterium: 0 }, loot: 0.5, fleetValue: 0, defValue: 0, apiKey: 'sr-en-808-ab' } });
     const answers = [{ ok: false, message: 'Bad key' }, { ok: true, message: 'ok' }];
     const ptre = vi.fn(async () => answers.shift()!);
@@ -122,8 +123,11 @@ describe('saving a report to PTRE', () => {
     button().click();
     await vi.waitFor(() => expect(button().classList.contains('ok')).toBe(true));
     expect(button().title).toBe('Salvato su PTRE');
-    // Without a team key there is no button.
+    // Without a team key there is no button: removed in Settings, gone on the next draw.
     mountSpyPanel({ ...o, spy });
+    expect(document.querySelector('.fut-sp-ptre')).toBeNull();
+    store.delete('ptre.teamKey');
+    mountSpyPanel(o);
     expect(document.querySelector('.fut-sp-ptre')).toBeNull();
   });
 });

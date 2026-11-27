@@ -12,3 +12,8 @@ Piano e regole in `docs/PTRE.md` (fasi, script, conformità). Decisioni di Nicol
 - Key fuori dal backup (`core/backup` SECRETS), dentro «Azzera le impostazioni»; `Store.delete`.
 - Test: guard, tests/ptre-team.test.ts, backup, settings, spy-panel. Screenshot in scratchpad/ptre.
 - Non provato contro PTRE vero: la prova la fa Nicola con la key del server di test (mai nel codice).
+
+## 0.3.180
+- Paese e universo come OGLight (`ptreUniverse`: meta `ogame-language` + cifre dell'host), anche sui server di test.
+- Il pulsante della tabella spiate legge la key a ogni disegno (compare/sparisce senza ricaricare).
+- Errori interni tradotti (`ptre.noKey`, `ptre.noServer`).

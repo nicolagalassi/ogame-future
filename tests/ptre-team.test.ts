@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { NetworkGuard } from '../src/core/guard';
 import { MemoryStore, Store } from '../src/core/storage';
-import { ERRORS_KEY, normalTeamKey, ptreSaveSpyReport, TEAM_KEY, type PtreError } from '../src/data/ptre';
+import { ERRORS_KEY, normalTeamKey, ptreSaveSpyReport, ptreUniverse, TEAM_KEY, type PtreError } from '../src/data/ptre';
 
 const HOST = 's269-it.ogame.gameforge.com';
 const KEY = 'TM-AAAA-BBBB-CCCC-DDDD';
@@ -12,7 +12,7 @@ function deps(answer: unknown, key: string | null = KEY) {
   guard.closePageLoadWindow();
   const store = new Store(new MemoryStore(), 'x');
   if (key) store.set(TEAM_KEY, key);
-  return { fetchImpl, store, d: { guard, store, host: HOST, version: '0.3.179', now: () => 5000 } };
+  return { fetchImpl, store, d: { guard, store, host: HOST, lang: 'it', version: '0.3.179', now: () => 5000 } };
 }
 
 describe("the team's PTRE", () => {
@@ -21,6 +21,13 @@ describe("the team's PTRE", () => {
     expect(normalTeamKey('TMAAAABBBBCCCCDDDD')).toBe('TMAAAABBBBCCCCDDDD');
     expect(normalTeamKey('TM-AAAA-BBBB-CCCC')).toBeNull();
     expect(normalTeamKey('XX-AAAA-BBBB-CCCC-DDDD')).toBeNull();
+  });
+
+  it('names the universe as OGLight does: the language meta and the digits of the host', () => {
+    expect(ptreUniverse('s269-it.ogame.gameforge.com', 'it')).toEqual({ country: 'it', univers: '269' });
+    expect(ptreUniverse('s1-pioneers.ogame.gameforge.com', 'en')).toEqual({ country: 'en', univers: '1' });
+    expect(ptreUniverse('s808-en.ogame.gameforge.com', '')).toEqual({ country: 'en', univers: '808' });
+    expect(ptreUniverse('lobby.ogame.gameforge.com', 'it')).toBeNull();
   });
 
   it('saves one spy report by its API id, as OGLight does, with tool = future', async () => {
