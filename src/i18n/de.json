@@ -989,7 +989,7 @@
   "tour.help": "Anleitung zu diesem Fenster",
   "tour.zoneHelp": "Was dieser Bereich macht",
   "tour.inviteTitle": "Zum ersten Mal hier?",
-  "tour.inviteText": "Eine Minute zu «{name}»: Ich hebe jede Funktion hervor und erkläre, was sie macht und wie man sie nutzt.",
+  "tour.inviteText": "Eine Minute zu «{name}»: Ich hebe jede Funktion hervor und erkläre sie.",
   "tour.show": "Zeig es mir",
   "tour.later": "Später",
   "tour.no": "Nein, danke",
@@ -1014,7 +1014,7 @@
   "tour.firstSteps": "Erste Schritte",
   "tour.stepDone": "Erledigt",
   "tour.step.sync": "Daten abgleichen",
-  "tour.step.syncHint": "Der Pfeil-Knopf über den Planeten: Stufen und Forschung des ganzen Kontos.",
+  "tour.step.syncHint": "Der Pfeil-Knopf über den Planeten.",
   "tour.step.fleetsave": "Ziel des Fleetsave",
   "tour.step.fleetsaveHint": "In Planeten und Monde: wohin die Flotte jedes Körpers flieht.",
   "tour.step.mainShip": "Hauptschiff",
@@ -1062,7 +1062,7 @@
   "tour.board.0": "Willkommen bei Future|Future ergänzt das Spiel um ein Brett mit Zahlen, Plänen und Kürzeln. Es spielt nie für dich: jeder Versand bleibt dein Klick.",
   "tour.board.1": "Produktion|Was das Konto pro Tag einbringt, in MSU (alles in Metall umgerechnet). Klick: öffnet das Dashboard mit Investitionen, Minen und Verlauf.",
   "tour.board.2": "Plan|Die Gebäude, die du willst, und die fehlenden Rohstoffe. Hinzufügen mit dem Plan-Knopf auf Gebäude- und Forschungsseiten. Klick: öffnet den Plan.",
-  "tour.board.3": "Eine Zeile pro Planet|Rohstoffe im Lager (der Balken ist der Speicher), Minuten seit dem letzten Besuch, laufende Aufträge. Darunter die Flotten von und zu diesem Körper.\nRot mit Schwert oder Auge: Angriff oder Spionage im Anflug. Aktualisiert beim Laden einer Seite.",
+  "tour.board.3": "Eine Zeile pro Planet|Rohstoffe im Lager (der Balken ist der Speicher), Minuten seit dem letzten Besuch, laufende Aufträge. Darunter die Flotten von und zu diesem Körper.\nRot mit Schwert oder Auge: Angriff oder Spionage im Anflug, beim Laden gelesen.",
   "tour.board.4": "Abgleichen|Liest das ganze Konto neu aus dem Spiel: Stufen, Forschung, Lebensformen. Drücke es nach dem Bauen oder Forschen.",
   "tour.board.5": "Einstellungen|Alle Optionen von Future, in Reitern. Im Reiter Anleitung findest du die ersten Schritte und jede Anleitung.",
   "tour.board.6": "Expeditionstagebuch|Expeditionen von heute und gestern und ihr Ertrag. Füllt sich selbst, wenn du Berichte öffnest. Klick: das ganze Tagebuch.",
@@ -1079,5 +1079,5 @@
   "tour.fleet.7": "Ziel|Zum Mond: alles zum Mond dieses Planeten. Sammeln: bringt die Rohstoffe der Planeten zu einem Körper, per Transport oder Stationierung.",
   "tour.fleet.8": "Meldungen|Hier sagt Future, was es vorbereitet hat oder was fehlt. Zeige auf einen Knopf, um zu lesen, was er macht.",
   "tour.fleet.9": "Weiter und Absenden|Der Knopf des Spiels, in Daumennähe. Ihn zu drücken bleibt deine Wahl.",
-  "tour.fleet.10": "Fertig|Nächste Schritte: Fleetsave-Ziel in Regeln, Hauptschiff, dann Expedition ausprobieren.\nDie ? neben Mission, Ziel, Reserven und Runde erklären jeden Bereich erneut."
+  "tour.fleet.10": "Fertig|Nächste Schritte: Fleetsave-Ziel in Regeln, Hauptschiff, dann Expedition ausprobieren.\nDas ? neben jedem Bereich erklärt ihn erneut."
 }

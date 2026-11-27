@@ -11,6 +11,7 @@ import type { Store } from '../../core/storage';
 import type { T } from '../../core/i18n';
 import { icon, type IconName } from '../../core/icons';
 import { followViewport, ZOOMED_OUT } from '../../core/viewport';
+import { setTouchNote } from '../shortcuts';
 import { CARD_CSS, liveSteps, startTour, tourOpen, type TourLabels, type TourStep } from '../../core/tour';
 
 export type GuideId = 'board' | 'fleet' | 'settings' | 'dashboard' | 'planner' | 'journal' | 'galaxy' | 'messages' | 'tech';
@@ -89,7 +90,7 @@ const ROOTS: Record<GuideId, string> = {
   planner: `#${P}`,
   journal: `#${J}`,
   galaxy: '#fut-galaxy-bar',
-  messages: '.fut-msg',
+  messages: '.fut-msg, #fut-spypanel',
   tech: '.fut-tp-plan',
 };
 
@@ -126,8 +127,10 @@ const markSeen = (d: GuideDeps, id: GuideId) => d.store.set(SEEN_KEY, { ...seen(
 
 /** Guides this page still has to offer, in order. */
 const pending = new WeakMap<Document, GuideId[]>();
-/** «Più tardi»: not again on this page. */
-const later = new WeakMap<Document, Set<GuideId>>();
+/** «Più tardi»: when each guide was put off (shared store); not offered again for some hours. */
+export const LATER_KEY = 'tour.later';
+const LATER_MS = 6 * 3600_000;
+const putOff = (d: GuideDeps, id: GuideId) => Date.now() - (d.store.get<Partial<Record<GuideId, number>>>(LATER_KEY, {})[id] ?? 0) < LATER_MS;
 
 /** Runs guide `id` now (the player asked for it); `only` = just these steps (a zone's «?»). */
 export function startGuide(d: GuideDeps, id: GuideId, only?: number[]): void {
@@ -138,17 +141,22 @@ export function startGuide(d: GuideDeps, id: GuideId, only?: number[]): void {
     if (only) return;
     markSeen(d, id);
     // The next guide waiting on this page, if any (the planet menu's, then the fleet page's).
-    offerGuides(d, pending.get(d.doc) ?? []);
+    offerGuides(d, []);
   });
 }
 
 export function closeInvite(doc: Document): void {
-  doc.getElementById(INVITE_ID)?.remove();
+  const host = doc.getElementById(INVITE_ID);
+  // Riding on the touch bar: taken off it, or the bar would put it back when it redraws.
+  if (host?.classList.contains('note')) setTouchNote(doc, null);
+  host?.remove();
 }
 
 const INVITE_CSS = `${CARD_CSS}
 .card { right: 16px; bottom: 16px; z-index: 1000003; width: 320px; }
 .card.docked { right: auto; bottom: auto; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+/* On the touch bar, above its keys: the bar's note frames it. */
+.card.inbar { position: static; flex: 1; padding: 2px 0; background: none; box-shadow: none; animation: none; }
 .top { display: flex; align-items: center; gap: 8px; color: var(--label); }
 `;
 
@@ -156,12 +164,12 @@ const INVITE_CSS = `${CARD_CSS}
  *  blocked. Surfaces drawn later (galaxy, inbox) are offered when they show. */
 export function offerGuides(d: GuideDeps, ids: GuideId[]): void {
   const { doc, t } = d;
-  pending.set(doc, ids);
+  // The guides asked for now first, then those the page still waits for (galaxy, building panel).
+  pending.set(doc, [...new Set([...ids, ...(pending.get(doc) ?? [])])]);
   if (!d.store.get<boolean>(OFFER_KEY, true)) return;
   if (doc.getElementById(INVITE_ID) || tourOpen(doc)) return;
   const done = seen(d);
-  const skip = later.get(doc) ?? new Set<GuideId>();
-  const waiting = ids.filter((id) => !done[id] && !skip.has(id));
+  const waiting = (pending.get(doc) ?? []).filter((id) => !done[id] && !putOff(d, id));
   const id = waiting.find((g) => guideHere(doc, g) && liveSteps(doc, guideSteps(g, t)).length > 1);
   if (!id) {
     if (waiting.length) watchFor(d);
@@ -198,19 +206,19 @@ export function offerGuides(d: GuideDeps, ids: GuideId[]): void {
   btn('b quiet', t('tour.no'), () => {
     markSeen(d, id);
     closeInvite(doc);
-    offerGuides(d, ids);
+    offerGuides(d, []);
   });
   btn('b ghost', t('tour.later'), () => {
-    later.set(doc, skip.add(id));
+    d.store.set(LATER_KEY, { ...d.store.get(LATER_KEY, {}), [id]: Date.now() });
     closeInvite(doc);
-    offerGuides(d, ids);
   });
   btn('b primary', t('tour.show'), () => startGuide(d, id));
   card.append(top, p, acts);
   root.append(style, card);
+  // With a touch bar: just above its keys, which stay free (Avanti / Invia). Else in a corner; on a phone page
+  // zoomed out along the bottom, at the phone's size: the top holds the game's officers (AGENTS.md §1.7).
+  if (setTouchNote(doc, host)) return card.classList.add('inbar');
   doc.body.append(host);
-  // Phone, page zoomed out: along the bottom of the screen at the phone's size, over Future's own touch bar;
-  // the top holds the game's officers and resources, which it must not cover (AGENTS.md §1.7).
   const vv = doc.defaultView?.visualViewport;
   if (vv && vv.scale < ZOOMED_OUT) {
     card.classList.add('docked');
@@ -231,13 +239,13 @@ function watchFor(d: GuideDeps): void {
     // Reads the page only, a moment after it settles (no call to the server).
     setTimeout(() => {
       queued = false;
-      const left = (pending.get(doc) ?? []).filter((id) => !seen(d)[id] && !later.get(doc)?.has(id));
+      const left = (pending.get(doc) ?? []).filter((id) => !seen(d)[id] && !putOff(d, id));
       if (!left.length) {
         observer.disconnect();
         watching.delete(doc);
         return;
       }
-      if (left.some((id) => guideHere(doc, id))) offerGuides(d, pending.get(doc) ?? []);
+      if (left.some((id) => guideHere(doc, id))) offerGuides(d, []);
     }, 400);
   });
   observer.observe(doc.body, { childList: true, subtree: true });

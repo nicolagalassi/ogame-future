@@ -72,7 +72,8 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 `;
 
 const CSS = `${CARD_CSS}
-.veil { position: fixed; z-index: ${Z}; background: rgba(4, 6, 10, 0.72); }
+/* The page dimmed and softly blurred around the lit control (Nicola: «hover blurrato»). */
+.veil { position: fixed; z-index: ${Z}; background: rgba(4, 6, 10, 0.66); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
 .shield { position: fixed; z-index: ${Z}; }
 /* The lit control: a pawn-yellow ring printed around it, nothing over it. */
 .ring { position: fixed; z-index: ${Z + 1}; border-radius: 6px; box-shadow: 0 0 0 2px var(--accent); pointer-events: none; }
@@ -80,7 +81,8 @@ const CSS = `${CARD_CSS}
 .veil, .shield, .ring { --move: 220ms cubic-bezier(0.65, 0, 0.35, 1); transition: left var(--move), top var(--move), width var(--move), height var(--move); }
 .card { z-index: ${Z + 2}; width: 340px; max-width: calc(100vw - 24px); }
 .card.docked.at-bottom { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
-.arrow { position: absolute; width: 12px; height: 12px; background: var(--raised); transform: rotate(45deg); }
+/* The arrow points at the lit control: yellow as its ring. */
+.arrow { position: absolute; width: 12px; height: 12px; background: var(--accent); transform: rotate(45deg); }
 .card[data-side="below"] .arrow { top: -6px; }
 .card[data-side="above"] .arrow { bottom: -6px; }
 .card[data-side="right"] .arrow { left: -6px; }
@@ -163,6 +165,8 @@ export function startTour(doc: Document, steps: TourStep[], labels: TourLabels, 
     const vh = win?.innerHeight || 768;
     const vv = win?.visualViewport;
     const zoomed = !!vv && vv.scale < ZOOMED_OUT;
+    // The page redrew the control (the planet menu after an event landed): the same step's new one.
+    if (target && !target.isConnected) target = live[i]?.at?.(doc) ?? null;
     const r = target?.getBoundingClientRect();
     const box = (v: HTMLElement, l: number, t: number, w: number, h: number) =>
       Object.assign(v.style, { left: `${l}px`, top: `${t}px`, width: `${Math.max(0, w)}px`, height: `${Math.max(0, h)}px` });

@@ -1498,7 +1498,7 @@
     "tour.help": "Guida di questa finestra",
     "tour.zoneHelp": "Cosa fa questa zona",
     "tour.inviteTitle": "Prima volta qui?",
-    "tour.inviteText": "Guida di un minuto su «{name}»: illumino ogni funzione e ti dico cosa fa e come si usa.",
+    "tour.inviteText": "Guida di un minuto su «{name}»: illumino ogni funzione e ti dico cosa fa.",
     "tour.show": "Mostrami",
     "tour.later": "Più tardi",
     "tour.no": "No, grazie",
@@ -1523,7 +1523,7 @@
     "tour.firstSteps": "Primi passi",
     "tour.stepDone": "Fatto",
     "tour.step.sync": "Sincronizza i dati",
-    "tour.step.syncHint": "Il pulsante con le frecce sopra i pianeti: livelli e ricerche di tutto l'account.",
+    "tour.step.syncHint": "Il pulsante con le frecce sopra i pianeti.",
     "tour.step.fleetsave": "Bersaglio del fleetsave",
     "tour.step.fleetsaveHint": "In Pianeti e lune: dove fugge la flotta di ogni corpo.",
     "tour.step.mainShip": "Nave principale",
@@ -1571,7 +1571,7 @@
     "tour.board.0": "Benvenuto in Future|Future aggiunge al gioco una plancia con numeri, piani e scorciatoie. Non gioca al posto tuo: ogni invio resta un tuo clic.",
     "tour.board.1": "Produzione|Quanto rende l'account al giorno, in MSU (tutto convertito in metallo). Clic: apre la Dashboard con investimenti, miniere e storico.",
     "tour.board.2": "Piano|Le costruzioni che vuoi fare e quante risorse mancano. Le aggiungi con il pulsante Piano nelle pagine di costruzione e ricerca. Clic: apre il Piano.",
-    "tour.board.3": "Una riga per pianeta|Risorse in cassa (la barra è il deposito), minuti dall'ultima visita, code in corso. Sotto, le flotte in volo da e per quel corpo.\nRosso con spada o occhio: attacco o spiata in arrivo. Si aggiorna quando carichi una pagina.",
+    "tour.board.3": "Una riga per pianeta|Risorse in cassa (la barra è il deposito), minuti dall'ultima visita, code in corso. Sotto, le flotte in volo da e per quel corpo.\nRosso con spada o occhio: attacco o spiata in arrivo, letti al caricamento della pagina.",
     "tour.board.4": "Sincronizza|Rilegge dal gioco i dati di tutto l'account: livelli, ricerche, forme di vita. Premilo dopo aver costruito o ricercato.",
     "tour.board.5": "Impostazioni|Tutte le scelte di Future, divise per schede. Nella scheda Guida trovi i primi passi e ogni guida da rivedere.",
     "tour.board.6": "Diario spedizioni|Spedizioni di oggi e di ieri e cosa hanno reso. Si riempie da solo quando apri i rapporti nella posta. Clic: il diario completo.",
@@ -1588,7 +1588,7 @@
     "tour.fleet.7": "Destinazione|Su luna: tutto verso la luna di questo pianeta. Accentra: porta le risorse dei pianeti su un solo corpo, con trasporto o schieramento.",
     "tour.fleet.8": "Messaggi|Qui Future dice cosa ha preparato o cosa manca. Passa il mouse su un pulsante per sapere cosa fa.",
     "tour.fleet.9": "Avanti e Invia|Il pulsante del gioco, a portata di pollice. Premerlo resta una tua scelta.",
-    "tour.fleet.10": "Fatto|Prossimi passi: bersaglio del fleetsave in Regole, nave principale, poi prova Spedizione.\nI ? accanto a Missione, Destinazione, Riserve e Giro rispiegano ogni zona."
+    "tour.fleet.10": "Fatto|Prossimi passi: bersaglio del fleetsave in Regole, nave principale, poi prova Spedizione.\nIl ? accanto a ogni zona la rispiega."
   };
 
   // src/i18n/en.json
@@ -2583,7 +2583,7 @@
     "tour.help": "Guide to this window",
     "tour.zoneHelp": "What this zone does",
     "tour.inviteTitle": "First time here?",
-    "tour.inviteText": "A one-minute guide to «{name}»: I light up each feature and tell you what it does and how to use it.",
+    "tour.inviteText": "A one-minute guide to «{name}»: I light up each feature and say what it does.",
     "tour.show": "Show me",
     "tour.later": "Later",
     "tour.no": "No, thanks",
@@ -2608,7 +2608,7 @@
     "tour.firstSteps": "First steps",
     "tour.stepDone": "Done",
     "tour.step.sync": "Sync the data",
-    "tour.step.syncHint": "The arrows button above the planets: levels and research of the whole account.",
+    "tour.step.syncHint": "The arrows button above the planets.",
     "tour.step.fleetsave": "Fleetsave target",
     "tour.step.fleetsaveHint": "In Planets and moons: where each body's fleet flees.",
     "tour.step.mainShip": "Main ship",
@@ -2656,7 +2656,7 @@
     "tour.board.0": "Welcome to Future|Future adds a board of figures, plans and shortcuts to the game. It never plays for you: every send stays your click.",
     "tour.board.1": "Production|What the account makes per day, in MSU (all converted to metal). Click: opens the Dashboard with investments, mines and history.",
     "tour.board.2": "Plan|The buildings you want and the resources still missing. Add them with the Plan button on building and research pages. Click: opens the Plan.",
-    "tour.board.3": "One row per planet|Resources in stock (the bar is the storage), minutes since your last visit, running queues. Below, fleets flying from and to that body.\nRed with a sword or an eye: attack or spy probe incoming. Updated when you load a page.",
+    "tour.board.3": "One row per planet|Resources in stock (the bar is the storage), minutes since your last visit, running queues. Below, fleets flying from and to that body.\nRed with a sword or an eye: attack or spy probe incoming, read when a page loads.",
     "tour.board.4": "Sync|Reads the whole account again from the game: levels, research, lifeforms. Press it after building or researching.",
     "tour.board.5": "Settings|All of Future's choices, in tabs. The Guide tab has the first steps and every guide to see again.",
     "tour.board.6": "Expedition journal|Today's and yesterday's expeditions and what they brought. It fills itself when you open reports in your messages. Click: the full journal.",
@@ -2673,7 +2673,7 @@
     "tour.fleet.7": "Destination|To moon: everything to this planet's moon. Collect: brings the planets' resources to one body, by transport or deployment.",
     "tour.fleet.8": "Messages|Here Future says what it prepared or what is missing. Point at a button to read what it does.",
     "tour.fleet.9": "Next and Send|The game's button, within thumb's reach. Pressing it stays your choice.",
-    "tour.fleet.10": "Done|Next steps: fleetsave target in Rules, main ship, then try Expedition.\nThe ? next to Mission, Destination, Reserves and Round explain each zone again."
+    "tour.fleet.10": "Done|Next steps: fleetsave target in Rules, main ship, then try Expedition.\nThe ? beside each zone explains it again."
   };
 
   // src/i18n/fr.json
@@ -3668,7 +3668,7 @@
     "tour.help": "Guide de cette fenêtre",
     "tour.zoneHelp": "Ce que fait cette zone",
     "tour.inviteTitle": "Première visite ?",
-    "tour.inviteText": "Un guide d'une minute sur «{name}» : j'éclaire chaque fonction et je dis ce qu'elle fait et comment s'en servir.",
+    "tour.inviteText": "Un guide d'une minute sur «{name}» : j'éclaire chaque fonction et dis ce qu'elle fait.",
     "tour.show": "Montre-moi",
     "tour.later": "Plus tard",
     "tour.no": "Non, merci",
@@ -3693,7 +3693,7 @@
     "tour.firstSteps": "Premiers pas",
     "tour.stepDone": "Fait",
     "tour.step.sync": "Synchroniser les données",
-    "tour.step.syncHint": "Le bouton à flèches au-dessus des planètes : niveaux et recherches de tout le compte.",
+    "tour.step.syncHint": "Le bouton à flèches au-dessus des planètes.",
     "tour.step.fleetsave": "Cible du fleetsave",
     "tour.step.fleetsaveHint": "Dans Planètes et lunes : où fuit la flotte de chaque corps.",
     "tour.step.mainShip": "Vaisseau principal",
@@ -3741,7 +3741,7 @@
     "tour.board.0": "Bienvenue dans Future|Future ajoute au jeu un plateau de chiffres, de plans et de raccourcis. Il ne joue jamais à ta place : chaque envoi reste ton clic.",
     "tour.board.1": "Production|Ce que rapporte le compte par jour, en MSU (tout converti en métal). Clic : ouvre le tableau de bord avec investissements, mines et historique.",
     "tour.board.2": "Plan|Les bâtiments voulus et les ressources qui manquent. Ajoute-les avec le bouton Plan des pages bâtiments et recherche. Clic : ouvre le Plan.",
-    "tour.board.3": "Une ligne par planète|Ressources en stock (la barre est le hangar), minutes depuis ta dernière visite, files en cours. Dessous, les flottes en vol depuis et vers ce corps.\nRouge avec épée ou œil : attaque ou espionnage en approche. Mis à jour au chargement d'une page.",
+    "tour.board.3": "Une ligne par planète|Ressources en stock (la barre est le hangar), minutes depuis ta dernière visite, files en cours. Dessous, les flottes en vol depuis et vers ce corps.\nRouge avec épée ou œil : attaque ou espionnage en approche, lu au chargement.",
     "tour.board.4": "Synchroniser|Relit tout le compte depuis le jeu : niveaux, recherches, formes de vie. À faire après une construction ou une recherche.",
     "tour.board.5": "Réglages|Tous les choix de Future, en onglets. L'onglet Guide contient les premiers pas et chaque guide à revoir.",
     "tour.board.6": "Journal des expéditions|Les expéditions d'aujourd'hui et d'hier et leur gain. Se remplit seul quand tu ouvres les rapports. Clic : le journal complet.",
@@ -3758,7 +3758,7 @@
     "tour.fleet.7": "Destination|Vers lune : tout vers la lune de cette planète. Collecte : réunit les ressources des planètes sur un corps, en transport ou stationnement.",
     "tour.fleet.8": "Messages|Ici Future dit ce qu'il a préparé ou ce qui manque. Survole un bouton pour savoir ce qu'il fait.",
     "tour.fleet.9": "Suivant et Envoyer|Le bouton du jeu, à portée de pouce. Appuyer reste ton choix.",
-    "tour.fleet.10": "Terminé|Ensuite : cible du fleetsave dans Règles, vaisseau principal, puis essaie Expédition.\nLes ? à côté de Mission, Destination, Réserves et Tour réexpliquent chaque zone."
+    "tour.fleet.10": "Terminé|Ensuite : cible du fleetsave dans Règles, vaisseau principal, puis essaie Expédition.\nLe ? à côté de chaque zone la réexplique."
   };
 
   // src/i18n/de.json
@@ -4753,7 +4753,7 @@
     "tour.help": "Anleitung zu diesem Fenster",
     "tour.zoneHelp": "Was dieser Bereich macht",
     "tour.inviteTitle": "Zum ersten Mal hier?",
-    "tour.inviteText": "Eine Minute zu «{name}»: Ich hebe jede Funktion hervor und erkläre, was sie macht und wie man sie nutzt.",
+    "tour.inviteText": "Eine Minute zu «{name}»: Ich hebe jede Funktion hervor und erkläre sie.",
     "tour.show": "Zeig es mir",
     "tour.later": "Später",
     "tour.no": "Nein, danke",
@@ -4778,7 +4778,7 @@
     "tour.firstSteps": "Erste Schritte",
     "tour.stepDone": "Erledigt",
     "tour.step.sync": "Daten abgleichen",
-    "tour.step.syncHint": "Der Pfeil-Knopf über den Planeten: Stufen und Forschung des ganzen Kontos.",
+    "tour.step.syncHint": "Der Pfeil-Knopf über den Planeten.",
     "tour.step.fleetsave": "Ziel des Fleetsave",
     "tour.step.fleetsaveHint": "In Planeten und Monde: wohin die Flotte jedes Körpers flieht.",
     "tour.step.mainShip": "Hauptschiff",
@@ -4826,7 +4826,7 @@
     "tour.board.0": "Willkommen bei Future|Future ergänzt das Spiel um ein Brett mit Zahlen, Plänen und Kürzeln. Es spielt nie für dich: jeder Versand bleibt dein Klick.",
     "tour.board.1": "Produktion|Was das Konto pro Tag einbringt, in MSU (alles in Metall umgerechnet). Klick: öffnet das Dashboard mit Investitionen, Minen und Verlauf.",
     "tour.board.2": "Plan|Die Gebäude, die du willst, und die fehlenden Rohstoffe. Hinzufügen mit dem Plan-Knopf auf Gebäude- und Forschungsseiten. Klick: öffnet den Plan.",
-    "tour.board.3": "Eine Zeile pro Planet|Rohstoffe im Lager (der Balken ist der Speicher), Minuten seit dem letzten Besuch, laufende Aufträge. Darunter die Flotten von und zu diesem Körper.\nRot mit Schwert oder Auge: Angriff oder Spionage im Anflug. Aktualisiert beim Laden einer Seite.",
+    "tour.board.3": "Eine Zeile pro Planet|Rohstoffe im Lager (der Balken ist der Speicher), Minuten seit dem letzten Besuch, laufende Aufträge. Darunter die Flotten von und zu diesem Körper.\nRot mit Schwert oder Auge: Angriff oder Spionage im Anflug, beim Laden gelesen.",
     "tour.board.4": "Abgleichen|Liest das ganze Konto neu aus dem Spiel: Stufen, Forschung, Lebensformen. Drücke es nach dem Bauen oder Forschen.",
     "tour.board.5": "Einstellungen|Alle Optionen von Future, in Reitern. Im Reiter Anleitung findest du die ersten Schritte und jede Anleitung.",
     "tour.board.6": "Expeditionstagebuch|Expeditionen von heute und gestern und ihr Ertrag. Füllt sich selbst, wenn du Berichte öffnest. Klick: das ganze Tagebuch.",
@@ -4843,7 +4843,7 @@
     "tour.fleet.7": "Ziel|Zum Mond: alles zum Mond dieses Planeten. Sammeln: bringt die Rohstoffe der Planeten zu einem Körper, per Transport oder Stationierung.",
     "tour.fleet.8": "Meldungen|Hier sagt Future, was es vorbereitet hat oder was fehlt. Zeige auf einen Knopf, um zu lesen, was er macht.",
     "tour.fleet.9": "Weiter und Absenden|Der Knopf des Spiels, in Daumennähe. Ihn zu drücken bleibt deine Wahl.",
-    "tour.fleet.10": "Fertig|Nächste Schritte: Fleetsave-Ziel in Regeln, Hauptschiff, dann Expedition ausprobieren.\nDie ? neben Mission, Ziel, Reserven und Runde erklären jeden Bereich erneut."
+    "tour.fleet.10": "Fertig|Nächste Schritte: Fleetsave-Ziel in Regeln, Hauptschiff, dann Expedition ausprobieren.\nDas ? neben jedem Bereich erklärt ihn erneut."
   };
 
   // src/core/i18n.ts
@@ -11328,7 +11328,8 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .card { animation: none; } .b:active { transform: none; } }
 `;
   var CSS4 = `${CARD_CSS}
-.veil { position: fixed; z-index: ${Z}; background: rgba(4, 6, 10, 0.72); }
+/* The page dimmed and softly blurred around the lit control (Nicola: «hover blurrato»). */
+.veil { position: fixed; z-index: ${Z}; background: rgba(4, 6, 10, 0.66); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
 .shield { position: fixed; z-index: ${Z}; }
 /* The lit control: a pawn-yellow ring printed around it, nothing over it. */
 .ring { position: fixed; z-index: ${Z + 1}; border-radius: 6px; box-shadow: 0 0 0 2px var(--accent); pointer-events: none; }
@@ -11336,7 +11337,8 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .veil, .shield, .ring { --move: 220ms cubic-bezier(0.65, 0, 0.35, 1); transition: left var(--move), top var(--move), width var(--move), height var(--move); }
 .card { z-index: ${Z + 2}; width: 340px; max-width: calc(100vw - 24px); }
 .card.docked.at-bottom { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
-.arrow { position: absolute; width: 12px; height: 12px; background: var(--raised); transform: rotate(45deg); }
+/* The arrow points at the lit control: yellow as its ring. */
+.arrow { position: absolute; width: 12px; height: 12px; background: var(--accent); transform: rotate(45deg); }
 .card[data-side="below"] .arrow { top: -6px; }
 .card[data-side="above"] .arrow { bottom: -6px; }
 .card[data-side="right"] .arrow { left: -6px; }
@@ -11404,6 +11406,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
       const vh = win2?.innerHeight || 768;
       const vv = win2?.visualViewport;
       const zoomed = !!vv && vv.scale < ZOOMED_OUT;
+      if (target && !target.isConnected) target = live[i]?.at?.(doc) ?? null;
       const r = target?.getBoundingClientRect();
       const box = (v, l, t, w, h8) => Object.assign(v.style, { left: `${l}px`, top: `${t}px`, width: `${Math.max(0, w)}px`, height: `${Math.max(0, h8)}px` });
       if (!r) {
@@ -12474,10 +12477,10 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
     const list = doc.querySelector("#fleet1 #technologies");
     if (!list || list.dataset.futCap) return;
     list.dataset.futCap = "1";
-    const later2 = () => (doc.defaultView ?? globalThis).setTimeout(draw, 0);
-    for (const type of ["input", "keyup", "change", "click"]) list.addEventListener(type, later2);
+    const later = () => (doc.defaultView ?? globalThis).setTimeout(draw, 0);
+    for (const type of ["input", "keyup", "change", "click"]) list.addEventListener(type, later);
     doc.addEventListener("click", (e) => {
-      if (e.target?.closest?.("#sendall, a.send_all, #resetall, a.reset_all")) later2();
+      if (e.target?.closest?.("#sendall, a.send_all, #resetall, a.reset_all")) later();
     });
   }
   function cappedByReserve(loaded, onPlanet2, keep, fuel) {
@@ -14069,7 +14072,7 @@ input.field { width: 190px; }
     planner: `#${P}`,
     journal: `#${J}`,
     galaxy: "#fut-galaxy-bar",
-    messages: ".fut-msg",
+    messages: ".fut-msg, #fut-spypanel",
     tech: ".fut-tp-plan"
   };
   var FLEET_ZONES = { mission: 6, dest: 7, reserves: 4, round: 5 };
@@ -14090,7 +14093,9 @@ input.field { width: 190px; }
   var seen = (d) => d.store.get(SEEN_KEY, {});
   var markSeen = (d, id) => d.store.set(SEEN_KEY, { ...seen(d), [id]: Date.now() });
   var pending = /* @__PURE__ */ new WeakMap();
-  var later = /* @__PURE__ */ new WeakMap();
+  var LATER_KEY = "tour.later";
+  var LATER_MS = 6 * 36e5;
+  var putOff = (d, id) => Date.now() - (d.store.get(LATER_KEY, {})[id] ?? 0) < LATER_MS;
   function startGuide(d, id, only) {
     closeInvite(d.doc);
     const all2 = guideSteps(id, d.t);
@@ -14098,25 +14103,28 @@ input.field { width: 190px; }
     startTour(d.doc, steps, labels(d.t), () => {
       if (only) return;
       markSeen(d, id);
-      offerGuides(d, pending.get(d.doc) ?? []);
+      offerGuides(d, []);
     });
   }
   function closeInvite(doc) {
-    doc.getElementById(INVITE_ID)?.remove();
+    const host = doc.getElementById(INVITE_ID);
+    if (host?.classList.contains("note")) setTouchNote(doc, null);
+    host?.remove();
   }
   var INVITE_CSS = `${CARD_CSS}
 .card { right: 16px; bottom: 16px; z-index: 1000003; width: 320px; }
 .card.docked { right: auto; bottom: auto; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+/* On the touch bar, above its keys: the bar's note frames it. */
+.card.inbar { position: static; flex: 1; padding: 2px 0; background: none; box-shadow: none; animation: none; }
 .top { display: flex; align-items: center; gap: 8px; color: var(--label); }
 `;
   function offerGuides(d, ids) {
     const { doc, t } = d;
-    pending.set(doc, ids);
+    pending.set(doc, [.../* @__PURE__ */ new Set([...ids, ...pending.get(doc) ?? []])]);
     if (!d.store.get(OFFER_KEY, true)) return;
     if (doc.getElementById(INVITE_ID) || tourOpen(doc)) return;
     const done = seen(d);
-    const skip = later.get(doc) ?? /* @__PURE__ */ new Set();
-    const waiting = ids.filter((id2) => !done[id2] && !skip.has(id2));
+    const waiting = (pending.get(doc) ?? []).filter((id2) => !done[id2] && !putOff(d, id2));
     const id = waiting.find((g) => guideHere(doc, g) && liveSteps(doc, guideSteps(g, t)).length > 1);
     if (!id) {
       if (waiting.length) watchFor(d);
@@ -14153,16 +14161,16 @@ input.field { width: 190px; }
     btn("b quiet", t("tour.no"), () => {
       markSeen(d, id);
       closeInvite(doc);
-      offerGuides(d, ids);
+      offerGuides(d, []);
     });
     btn("b ghost", t("tour.later"), () => {
-      later.set(doc, skip.add(id));
+      d.store.set(LATER_KEY, { ...d.store.get(LATER_KEY, {}), [id]: Date.now() });
       closeInvite(doc);
-      offerGuides(d, ids);
     });
     btn("b primary", t("tour.show"), () => startGuide(d, id));
     card.append(top, p, acts);
     root.append(style, card);
+    if (setTouchNote(doc, host)) return card.classList.add("inbar");
     doc.body.append(host);
     const vv = doc.defaultView?.visualViewport;
     if (vv && vv.scale < ZOOMED_OUT) {
@@ -14181,13 +14189,13 @@ input.field { width: 190px; }
       queued2 = true;
       setTimeout(() => {
         queued2 = false;
-        const left = (pending.get(doc) ?? []).filter((id) => !seen(d)[id] && !later.get(doc)?.has(id));
+        const left = (pending.get(doc) ?? []).filter((id) => !seen(d)[id] && !putOff(d, id));
         if (!left.length) {
           observer.disconnect();
           watching.delete(doc);
           return;
         }
-        if (left.some((id) => guideHere(doc, id))) offerGuides(d, pending.get(doc) ?? []);
+        if (left.some((id) => guideHere(doc, id))) offerGuides(d, []);
       }, 400);
     });
     observer.observe(doc.body, { childList: true, subtree: true });

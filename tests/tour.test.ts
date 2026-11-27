@@ -3,8 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MemoryStore, Store } from '../src/core/storage';
 import { translator, type Locale } from '../src/core/i18n';
 import { endTour, startTour, TOUR_ID, tourOpen, type TourLabels } from '../src/core/tour';
-import { FLEET_ZONES, GUIDES, guideFromUrl, guidePanel, guideSteps, guideUrl, INVITE_ID, OFFER_KEY, offerGuides, SEEN_KEY, startGuide, type GuideDeps } from '../src/modules/guide';
-import { registerActions, resetShortcuts } from '../src/modules/shortcuts';
+import { FLEET_ZONES, GUIDES, LATER_KEY, guideFromUrl, guidePanel, guideSteps, guideUrl, INVITE_ID, OFFER_KEY, offerGuides, SEEN_KEY, startGuide, type GuideDeps } from '../src/modules/guide';
+import { mountTouchBar, registerActions, resetShortcuts } from '../src/modules/shortcuts';
 
 const t = translator('it');
 const labels: TourLabels = { next: 'Avanti', back: 'Indietro', done: 'Fine', close: 'Chiudi', count: (n, total) => `${n} di ${total}` };
@@ -145,7 +145,31 @@ describe('guides', () => {
     expect(off.doc.getElementById(INVITE_ID)).toBeNull();
   });
 
-  it("a fleet zone's «?» shows that zone's step alone", () => {
+  it('«Più tardi» holds for some hours, on every page; with a touch bar the invite rides above its keys', () => {
+    document.body.innerHTML = TOOLBAR;
+    const d = deps();
+    offerGuides(d, ['board']);
+    inviteButton(document, 'Più tardi').click();
+    expect(d.store.get<Record<string, number>>(LATER_KEY, {}).board).toBeGreaterThan(0);
+    const next = { ...d, doc: document.implementation.createHTMLDocument('') };
+    next.doc.body.innerHTML = TOOLBAR;
+    offerGuides(next, ['board']);
+    expect(next.doc.getElementById(INVITE_ID)).toBeNull();
+
+    const store = new Store(new MemoryStore(), 'x');
+    store.set('keys.touch', 'on');
+    registerActions(document, store, t, { 'fleet.expedition': () => {} });
+    mountTouchBar(document, store, t);
+    offerGuides(deps(), ['board']);
+    const invite = document.getElementById(INVITE_ID)!;
+    expect(invite.parentElement?.id).toBe('fut-touchbar');
+    inviteButton(document, 'Mostrami').click();
+    // Gone from the bar for good: a redraw of the bar does not bring it back.
+    mountTouchBar(document, store, t);
+    expect(document.getElementById(INVITE_ID)).toBeNull();
+  });
+
+    it("a fleet zone's «?» shows that zone's step alone", () => {
     document.body.innerHTML = '<div class="fut-fbar fut-freserves"><span class="fut-fgroup">R</span><span class="fut-fgroup">G</span></div>';
     startGuide(deps(), 'fleet', [FLEET_ZONES.round]);
     expect(card().querySelector('h3')!.textContent).toBe('5 · Giro');

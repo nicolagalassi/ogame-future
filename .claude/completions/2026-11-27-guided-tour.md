@@ -14,11 +14,18 @@ Richiesta di Nicola: tutorial «sopra al tool» che alla prima apertura di ogni 
 - Nessuna chiamata di rete; l'osservatore legge solo il DOM.
 
 ## Peso
-- Tetto 1150000 byte: build a 1149636. Per starci: output esbuild `charset: 'utf8'` (lettere accentate non più in escape, −4,6 KB su tutto lo script), CSS dei pulsanti condiviso, tolti due passi minori (Totali, Inverti), tolte due stringhe morte (`guard.refused`, `data.missing`; il test dei segnaposto usa `tour.count`).
+- Tetto 1150000 byte: build a 1149924. Per starci: output esbuild `charset: 'utf8'` (lettere accentate non più in escape, −4,6 KB su tutto lo script), CSS dei pulsanti condiviso, tolti due passi minori (Totali, Inverti), tolte due stringhe morte (`guard.refused`, `data.missing`; il test dei segnaposto usa `tour.count`).
 - Il tetto è praticamente pieno: la prossima funzione chiede a Nicola di alzarlo o togliere peso.
 
 ## Verifiche
 - 332 test (nuovo tests/tour.test.ts: ordine, salto, scudo, Esc prima delle finestre, tasti sospesi, inviti, No grazie/Più tardi/spento, «?» di zona, URL, scheda Guida, testi in 4 lingue).
 - Gioco vero desktop: invito, guida plancia (9 passi), guida flotta (10), Impostazioni sopra la finestra, Avvia Dashboard dalla scheda Guida, Galassia con invito dopo il caricamento.
 - Emulazione telefono (CDP, 412 px, zoom 0,38, tocco): fumetto agganciato, invito in basso, passo «Avanti e Invia» sulla barra, «?» Riserve. Firefox non provato.
-- Posta: nessun rapporto con riassunto nella scheda aperta, guida non vista dal vivo.
+- Dal vivo anche Piano (3 passi), Diario (4), Costruzioni (parte da `?futguide=tech` appena si apre un edificio), Posta (scheda spiate, `component=messages`).
+
+## Seconda passata (dopo revisione)
+- Invito sul telefono / con barra touch: sopra i tasti (setTouchNote), Avanti/Invia restano liberi; tolto dalla barra alla chiusura.
+- «Più tardi» vale 6 ore per tutte le pagine (`future:tour.later`) e non apre subito un altro invito.
+- Velo con sfocatura 2px (richiesta di Nicola), freccia gialla come l'anello.
+- Se la pagina ridisegna il controllo durante la guida, l'anello ritrova il nuovo.
+- Aprire una finestra non cancella le guide in attesa della pagina (galassia, edificio).

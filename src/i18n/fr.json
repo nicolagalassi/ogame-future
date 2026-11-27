@@ -989,7 +989,7 @@
   "tour.help": "Guide de cette fenêtre",
   "tour.zoneHelp": "Ce que fait cette zone",
   "tour.inviteTitle": "Première visite ?",
-  "tour.inviteText": "Un guide d'une minute sur «{name}» : j'éclaire chaque fonction et je dis ce qu'elle fait et comment s'en servir.",
+  "tour.inviteText": "Un guide d'une minute sur «{name}» : j'éclaire chaque fonction et dis ce qu'elle fait.",
   "tour.show": "Montre-moi",
   "tour.later": "Plus tard",
   "tour.no": "Non, merci",
@@ -1014,7 +1014,7 @@
   "tour.firstSteps": "Premiers pas",
   "tour.stepDone": "Fait",
   "tour.step.sync": "Synchroniser les données",
-  "tour.step.syncHint": "Le bouton à flèches au-dessus des planètes : niveaux et recherches de tout le compte.",
+  "tour.step.syncHint": "Le bouton à flèches au-dessus des planètes.",
   "tour.step.fleetsave": "Cible du fleetsave",
   "tour.step.fleetsaveHint": "Dans Planètes et lunes : où fuit la flotte de chaque corps.",
   "tour.step.mainShip": "Vaisseau principal",
@@ -1062,7 +1062,7 @@
   "tour.board.0": "Bienvenue dans Future|Future ajoute au jeu un plateau de chiffres, de plans et de raccourcis. Il ne joue jamais à ta place : chaque envoi reste ton clic.",
   "tour.board.1": "Production|Ce que rapporte le compte par jour, en MSU (tout converti en métal). Clic : ouvre le tableau de bord avec investissements, mines et historique.",
   "tour.board.2": "Plan|Les bâtiments voulus et les ressources qui manquent. Ajoute-les avec le bouton Plan des pages bâtiments et recherche. Clic : ouvre le Plan.",
-  "tour.board.3": "Une ligne par planète|Ressources en stock (la barre est le hangar), minutes depuis ta dernière visite, files en cours. Dessous, les flottes en vol depuis et vers ce corps.\nRouge avec épée ou œil : attaque ou espionnage en approche. Mis à jour au chargement d'une page.",
+  "tour.board.3": "Une ligne par planète|Ressources en stock (la barre est le hangar), minutes depuis ta dernière visite, files en cours. Dessous, les flottes en vol depuis et vers ce corps.\nRouge avec épée ou œil : attaque ou espionnage en approche, lu au chargement.",
   "tour.board.4": "Synchroniser|Relit tout le compte depuis le jeu : niveaux, recherches, formes de vie. À faire après une construction ou une recherche.",
   "tour.board.5": "Réglages|Tous les choix de Future, en onglets. L'onglet Guide contient les premiers pas et chaque guide à revoir.",
   "tour.board.6": "Journal des expéditions|Les expéditions d'aujourd'hui et d'hier et leur gain. Se remplit seul quand tu ouvres les rapports. Clic : le journal complet.",
@@ -1079,5 +1079,5 @@
   "tour.fleet.7": "Destination|Vers lune : tout vers la lune de cette planète. Collecte : réunit les ressources des planètes sur un corps, en transport ou stationnement.",
   "tour.fleet.8": "Messages|Ici Future dit ce qu'il a préparé ou ce qui manque. Survole un bouton pour savoir ce qu'il fait.",
   "tour.fleet.9": "Suivant et Envoyer|Le bouton du jeu, à portée de pouce. Appuyer reste ton choix.",
-  "tour.fleet.10": "Terminé|Ensuite : cible du fleetsave dans Règles, vaisseau principal, puis essaie Expédition.\nLes ? à côté de Mission, Destination, Réserves et Tour réexpliquent chaque zone."
+  "tour.fleet.10": "Terminé|Ensuite : cible du fleetsave dans Règles, vaisseau principal, puis essaie Expédition.\nLe ? à côté de chaque zone la réexplique."
 }

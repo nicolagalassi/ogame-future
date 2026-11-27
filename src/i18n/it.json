@@ -989,7 +989,7 @@
   "tour.help": "Guida di questa finestra",
   "tour.zoneHelp": "Cosa fa questa zona",
   "tour.inviteTitle": "Prima volta qui?",
-  "tour.inviteText": "Guida di un minuto su «{name}»: illumino ogni funzione e ti dico cosa fa e come si usa.",
+  "tour.inviteText": "Guida di un minuto su «{name}»: illumino ogni funzione e ti dico cosa fa.",
   "tour.show": "Mostrami",
   "tour.later": "Più tardi",
   "tour.no": "No, grazie",
@@ -1014,7 +1014,7 @@
   "tour.firstSteps": "Primi passi",
   "tour.stepDone": "Fatto",
   "tour.step.sync": "Sincronizza i dati",
-  "tour.step.syncHint": "Il pulsante con le frecce sopra i pianeti: livelli e ricerche di tutto l'account.",
+  "tour.step.syncHint": "Il pulsante con le frecce sopra i pianeti.",
   "tour.step.fleetsave": "Bersaglio del fleetsave",
   "tour.step.fleetsaveHint": "In Pianeti e lune: dove fugge la flotta di ogni corpo.",
   "tour.step.mainShip": "Nave principale",
@@ -1062,7 +1062,7 @@
   "tour.board.0": "Benvenuto in Future|Future aggiunge al gioco una plancia con numeri, piani e scorciatoie. Non gioca al posto tuo: ogni invio resta un tuo clic.",
   "tour.board.1": "Produzione|Quanto rende l'account al giorno, in MSU (tutto convertito in metallo). Clic: apre la Dashboard con investimenti, miniere e storico.",
   "tour.board.2": "Piano|Le costruzioni che vuoi fare e quante risorse mancano. Le aggiungi con il pulsante Piano nelle pagine di costruzione e ricerca. Clic: apre il Piano.",
-  "tour.board.3": "Una riga per pianeta|Risorse in cassa (la barra è il deposito), minuti dall'ultima visita, code in corso. Sotto, le flotte in volo da e per quel corpo.\nRosso con spada o occhio: attacco o spiata in arrivo. Si aggiorna quando carichi una pagina.",
+  "tour.board.3": "Una riga per pianeta|Risorse in cassa (la barra è il deposito), minuti dall'ultima visita, code in corso. Sotto, le flotte in volo da e per quel corpo.\nRosso con spada o occhio: attacco o spiata in arrivo, letti al caricamento della pagina.",
   "tour.board.4": "Sincronizza|Rilegge dal gioco i dati di tutto l'account: livelli, ricerche, forme di vita. Premilo dopo aver costruito o ricercato.",
   "tour.board.5": "Impostazioni|Tutte le scelte di Future, divise per schede. Nella scheda Guida trovi i primi passi e ogni guida da rivedere.",
   "tour.board.6": "Diario spedizioni|Spedizioni di oggi e di ieri e cosa hanno reso. Si riempie da solo quando apri i rapporti nella posta. Clic: il diario completo.",
@@ -1079,5 +1079,5 @@
   "tour.fleet.7": "Destinazione|Su luna: tutto verso la luna di questo pianeta. Accentra: porta le risorse dei pianeti su un solo corpo, con trasporto o schieramento.",
   "tour.fleet.8": "Messaggi|Qui Future dice cosa ha preparato o cosa manca. Passa il mouse su un pulsante per sapere cosa fa.",
   "tour.fleet.9": "Avanti e Invia|Il pulsante del gioco, a portata di pollice. Premerlo resta una tua scelta.",
-  "tour.fleet.10": "Fatto|Prossimi passi: bersaglio del fleetsave in Regole, nave principale, poi prova Spedizione.\nI ? accanto a Missione, Destinazione, Riserve e Giro rispiegano ogni zona."
+  "tour.fleet.10": "Fatto|Prossimi passi: bersaglio del fleetsave in Regole, nave principale, poi prova Spedizione.\nIl ? accanto a ogni zona la rispiega."
 }

@@ -989,7 +989,7 @@
   "tour.help": "Guide to this window",
   "tour.zoneHelp": "What this zone does",
   "tour.inviteTitle": "First time here?",
-  "tour.inviteText": "A one-minute guide to «{name}»: I light up each feature and tell you what it does and how to use it.",
+  "tour.inviteText": "A one-minute guide to «{name}»: I light up each feature and say what it does.",
   "tour.show": "Show me",
   "tour.later": "Later",
   "tour.no": "No, thanks",
@@ -1014,7 +1014,7 @@
   "tour.firstSteps": "First steps",
   "tour.stepDone": "Done",
   "tour.step.sync": "Sync the data",
-  "tour.step.syncHint": "The arrows button above the planets: levels and research of the whole account.",
+  "tour.step.syncHint": "The arrows button above the planets.",
   "tour.step.fleetsave": "Fleetsave target",
   "tour.step.fleetsaveHint": "In Planets and moons: where each body's fleet flees.",
   "tour.step.mainShip": "Main ship",
@@ -1062,7 +1062,7 @@
   "tour.board.0": "Welcome to Future|Future adds a board of figures, plans and shortcuts to the game. It never plays for you: every send stays your click.",
   "tour.board.1": "Production|What the account makes per day, in MSU (all converted to metal). Click: opens the Dashboard with investments, mines and history.",
   "tour.board.2": "Plan|The buildings you want and the resources still missing. Add them with the Plan button on building and research pages. Click: opens the Plan.",
-  "tour.board.3": "One row per planet|Resources in stock (the bar is the storage), minutes since your last visit, running queues. Below, fleets flying from and to that body.\nRed with a sword or an eye: attack or spy probe incoming. Updated when you load a page.",
+  "tour.board.3": "One row per planet|Resources in stock (the bar is the storage), minutes since your last visit, running queues. Below, fleets flying from and to that body.\nRed with a sword or an eye: attack or spy probe incoming, read when a page loads.",
   "tour.board.4": "Sync|Reads the whole account again from the game: levels, research, lifeforms. Press it after building or researching.",
   "tour.board.5": "Settings|All of Future's choices, in tabs. The Guide tab has the first steps and every guide to see again.",
   "tour.board.6": "Expedition journal|Today's and yesterday's expeditions and what they brought. It fills itself when you open reports in your messages. Click: the full journal.",
@@ -1079,5 +1079,5 @@
   "tour.fleet.7": "Destination|To moon: everything to this planet's moon. Collect: brings the planets' resources to one body, by transport or deployment.",
   "tour.fleet.8": "Messages|Here Future says what it prepared or what is missing. Point at a button to read what it does.",
   "tour.fleet.9": "Next and Send|The game's button, within thumb's reach. Pressing it stays your choice.",
-  "tour.fleet.10": "Done|Next steps: fleetsave target in Rules, main ship, then try Expedition.\nThe ? next to Mission, Destination, Reserves and Round explain each zone again."
+  "tour.fleet.10": "Done|Next steps: fleetsave target in Rules, main ship, then try Expedition.\nThe ? beside each zone explains it again."
 }
