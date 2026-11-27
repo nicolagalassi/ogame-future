@@ -806,7 +806,8 @@ function ptreSyncBar(o: SideOptions, ptre: PtreDeps): HTMLElement {
         if (r.ok) {
           const { marks, added } = mergePtreTargets(readMarks(store), r.targets, Date.now());
           store.set(MARKS_KEY, marks);
-          ptreSync = { busy: false, ok: true, text: t('ptre.synced', { n: r.targets.length, added }) };
+          // PTRE's own words after ours: what it did with the list sent (e.g. how many it took).
+          ptreSync = { busy: false, ok: true, text: [t('ptre.synced', { n: r.targets.length, added }), r.message && `PTRE: ${r.message}`].filter(Boolean).join(' ') };
         } else {
           const why = r.message === 'no-key' ? t('ptre.noKey') : r.message === 'server' ? t('ptre.noServer') : r.message || '?';
           ptreSync = { busy: false, ok: false, text: t('ptre.failed', { message: why }) };
