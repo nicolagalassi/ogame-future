@@ -56,12 +56,13 @@ const CSS = `
 #ranks .honorScore { line-height: 1; font-size: 10px; opacity: 0.75; }
 #ranks tr.fut-hs-top .highscoreNameFieldWrapper { height: 40px !important; }
 #ranks tr.fut-hs-top .highscoreNameAndTitleHolder > :not(.highscoreNameHolder) { font-size: 11px !important; line-height: 1.2; }
-/* The flag of Future's targets, in the column of the game's "i", before it. */
 /* The flag at the right edge of the name cell, next to the game's "i" (whose cell is left alone);
    the name and honour points keep clear of it. */
 #ranks td.fut-hs-fl { position: relative; }
-#ranks td.fut-hs-fl > .fut-mk-flag { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); margin: 0; }
-#ranks tr:not(.fut-hs-top) td.fut-hs-fl .highscoreNameAndTitleHolder { width: calc(100% - 54px) !important; }
+/* Above the game's own layers: on the top three rows the name, title and picture are a link to the
+   galaxy that would otherwise take the click. */
+#ranks td.fut-hs-fl > .fut-mk-flag { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); margin: 0; z-index: 3; }
+#ranks td.fut-hs-fl .highscoreNameAndTitleHolder { width: calc(100% - 54px) !important; }
 #fut-hs-top { position: fixed; right: 18px; bottom: 44px; z-index: 1000; display: none; width: 34px; height: 34px; padding: 0; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--fut-line); border-radius: 6px; background: var(--fut-btn); color: var(--fut-txt); }
 #fut-hs-top.on { display: flex; } #fut-hs-top:hover, #fut-hs-top:focus-visible { border-color: var(--fut-link); color: var(--fut-hi); }
 #fut-hs-top svg { transform: rotate(180deg); }`;
