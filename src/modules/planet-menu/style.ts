@@ -143,6 +143,12 @@ ${L} .fut-fl .w svg { stroke-width: 3; }
 ${L} .fut-fl .n { color: var(--text); font-variant-numeric: tabular-nums; }
 ${L} .fut-fl-moon { display: inline-flex; margin-left: 2px; color: var(--muted); }
 ${L} .fut-fl-moon svg { width: 9px; height: 9px; }
+/* Too many to fit (index.ts fitFlights): closer chips, then «+N» for the ones left out. */
+${L} .fut-fl-tight { gap: 2px; }
+${L} .fut-fl-tight .fut-fl { gap: 0; }
+${L} .fut-fl-tight .fut-fl-moon { margin-left: 0; }
+${L} .fut-fl-more { color: var(--text-2); }
+${L} .fut-flights [hidden] { display: none; }
 ${L} .fut-has-flights .fut-name .planet-name { font-size: 13px !important; line-height: 13px !important; }
 ${L} .fut-has-flights .fut-name .planet-koords { line-height: 12px !important; }
 ${L} .fut-fleet-m svg { flex: none; opacity: 0.8; }

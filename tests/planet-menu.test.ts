@@ -371,4 +371,33 @@ describe('fleets in flight on the planet menu', () => {
     expect(e.planetLink!.querySelector('.fut-threat')).toBeNull();
     expect(e.element.querySelector('.fut-flights')).toBeNull();
   });
+
+  it('too many missions for the row: the chips draw closer, then the last ones give way to «+N»', () => {
+    const entries = readPlanetList(document);
+    const e = entries.find((x) => x.moonId)!;
+    const own = (way: 'out' | 'in' | 'back', mission: number, count: number) => ({ mission, way, count, first: 1_000 });
+    const events = new Map([
+      [`${e.coords}|p`, { attack: null, spy: null, own: [own('out', 15, 2), own('out', 4, 1), own('in', 3, 1), own('back', 15, 3)] }],
+      [`${e.coords}|m`, { attack: null, spy: null, own: [own('back', 4, 4)] }],
+    ]);
+    // No layout in jsdom: the line is 80px wide, each chip shown 20px (plus 10px for the gaps until they close up).
+    const shown = (n: Element) => [...n.querySelectorAll('.fut-fl, .fut-fl-moon')].filter((c) => !(c as HTMLElement).hidden).length;
+    const scroll = vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.classList.contains('fut-flights') ? shown(this) * 20 + (this.classList.contains('fut-fl-tight') ? 0 : 10) : 0;
+    });
+    const client = vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.classList.contains('fut-flights') ? 80 : 0;
+    });
+    renderPlanetMenu({ doc: document, entries, snapshot: SNAPSHOT, settings: { showTotals: true }, now: 0, locale: 'it', t, onSync: vi.fn(async () => true), events });
+    scroll.mockRestore();
+    client.mockRestore();
+    const line = e.element.querySelector<HTMLElement>('.fut-flights')!;
+    expect(line.classList.contains('fut-fl-tight')).toBe(true);
+    const visible = [...line.querySelectorAll<HTMLElement>('.fut-fl')].filter((c) => !c.hidden);
+    // Three planet chips and the «+N»: the last planet chip (3 back) and the moon's (4, with its mark) are left out.
+    expect(visible.map((c) => c.textContent)).toEqual(['2', '', '', '+7']);
+    expect(line.querySelector<HTMLElement>('.fut-fl-moon')!.hidden).toBe(true);
+    // The tooltip still lists every fleet.
+    expect(line.title.split('\n')).toHaveLength(6);
+  });
 });

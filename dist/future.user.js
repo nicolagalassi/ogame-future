@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.172
+// @version      0.3.173
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -14522,6 +14522,12 @@ ${L} .fut-fl .w svg { stroke-width: 3; }
 ${L} .fut-fl .n { color: var(--text); font-variant-numeric: tabular-nums; }
 ${L} .fut-fl-moon { display: inline-flex; margin-left: 2px; color: var(--muted); }
 ${L} .fut-fl-moon svg { width: 9px; height: 9px; }
+/* Too many to fit (index.ts fitFlights): closer chips, then «+N» for the ones left out. */
+${L} .fut-fl-tight { gap: 2px; }
+${L} .fut-fl-tight .fut-fl { gap: 0; }
+${L} .fut-fl-tight .fut-fl-moon { margin-left: 0; }
+${L} .fut-fl-more { color: var(--text-2); }
+${L} .fut-flights [hidden] { display: none; }
 ${L} .fut-has-flights .fut-name .planet-name { font-size: 13px !important; line-height: 13px !important; }
 ${L} .fut-has-flights .fut-name .planet-koords { line-height: 12px !important; }
 ${L} .fut-fleet-m svg { flex: none; opacity: 0.8; }
@@ -15164,6 +15170,27 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     detailsOnTap(doc, line, () => [line.closest("a")?.querySelector(".planet-name")?.textContent?.trim(), o.t("flights.title")].filter(Boolean).join(" · "), () => lines);
     return line;
   }
+  function fitFlights(doc, line) {
+    line.classList.remove("fut-fl-tight");
+    line.querySelector(".fut-fl-more")?.remove();
+    line.querySelectorAll("[hidden]").forEach((n) => n.hidden = false);
+    const over = () => line.scrollWidth > line.clientWidth;
+    if (!over()) return;
+    line.classList.add("fut-fl-tight");
+    if (!over()) return;
+    const more = el5(doc, "span", "fut-fl fut-fl-more");
+    line.append(more);
+    const shown3 = [...line.querySelectorAll(".fut-fl:not(.fut-fl-more), .fut-fl-moon")];
+    let left = 0;
+    while (shown3.length) {
+      const last2 = shown3.pop();
+      last2.hidden = true;
+      left += last2.classList.contains("fut-fl") ? Number(last2.querySelector(".n")?.textContent || 1) : 0;
+      if (shown3.at(-1)?.classList.contains("fut-fl-moon")) shown3.pop().hidden = true;
+      more.textContent = `+${left}`;
+      if (!over()) break;
+    }
+  }
   function renderPlanetMenu(o) {
     const { doc } = o;
     const list = doc.getElementById("planetList");
@@ -15184,6 +15211,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
     const view2 = { fleet: o.settings.showFleet === true, t: o.t };
     list.style.removeProperty("--fut-row-h");
     const gameTips = o.settings.gameTips !== false;
+    const crowded = [];
     for (const entry of o.entries) {
       markThreat(entry.planetLink, o.events?.get(`${entry.coords}|p`), o);
       markThreat(entry.moonLink, o.events?.get(`${entry.coords}|m`), o);
@@ -15210,6 +15238,7 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
         }
         if (third.childElementCount) wrap.append(third);
         link.append(wrap, resourceColumn(doc, planetBody, o.now, o.locale, true, view2));
+        if (flights) crowded.push(flights);
         const pf = planetBody && view2.fleet ? fleetValue(planetBody) : 0;
         if (pf) link.append(fleetPeek(doc, pf, o, "fut-peek-planet"));
         const age = ageBadge(doc, entry.planetId, o.visits, o.now, o.t);
@@ -15225,12 +15254,12 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
         const mf = moonBody && view2.fleet ? fleetValue(moonBody) : 0;
         if (mf) {
           const peek = fleetPeek(doc, mf, o, "fut-peek-moon", true);
-          const fit = () => {
+          const fit2 = () => {
             const w = entry.planetLink?.offsetWidth ?? 0;
             if (w > 0) peek.style.setProperty("--fut-peek-w", `${w}px`);
           };
-          moon.addEventListener("mouseenter", fit);
-          moon.addEventListener("focus", fit);
+          moon.addEventListener("mouseenter", fit2);
+          moon.addEventListener("focus", fit2);
           moon.append(peek);
         }
         const age = ageBadge(doc, entry.moonId, o.visits, o.now, o.t);
@@ -15260,6 +15289,9 @@ ${L} .fut-flights, #planetbarcomponent .fut-threat { cursor: help; }
       }
       entry.element.querySelectorAll("img.planetPic, img.icon-moon").forEach(guardSkin);
     }
+    const fit = () => crowded.forEach((line) => line.isConnected && fitFlights(doc, line));
+    fit();
+    if (doc.fonts?.status === "loading") void doc.fonts.ready.then(fit);
     startAgeClock(doc);
     const colonies = (doc.getElementById("countColonies")?.textContent ?? "").replace(/\s+/g, " ").trim();
     list.before(toolbar(o, colonies));
