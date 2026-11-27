@@ -104,12 +104,20 @@ export const loadPlan = (store: Store): Plan => store.get<Plan>(PLAN_KEY, {});
 export const SAT_KEY = 'satEnergy';
 const SATELLITE = 212;
 
-/** Levelled tech: where the panel starts and the bonus the game applied. */
-function startLevel(details: TechDetails, listLevel: number | undefined, built: number | undefined): { level: number; discount: number } {
+/**
+ * Levelled tech: where the panel starts, the bonus the game applied and the level the game's own figures
+ * (cost, time) are about. A research under way shows its own level, which can no longer be started: the
+ * panel starts on the one after it, at the same bonus (Nicola: 25 → 26 running showed 25 → 26, not 26 → 27).
+ */
+function startLevel(details: TechDetails, listLevel: number | undefined, built: number | undefined): { level: number; discount: number; shown: number } {
   const candidates = [details.panelLevel ?? 0, (details.panelLevel ?? 0) + 1, (listLevel ?? 0) + 1, (built ?? 0) + 1];
   const match = matchShownLevel(details.id, candidates, details.shown);
-  if (match) return match;
-  return { level: (listLevel ?? details.panelLevel ?? 0) + 1, discount: 0 };
+  if (!match) {
+    const level = (listLevel ?? details.panelLevel ?? 0) + 1;
+    return { level, discount: 0, shown: level };
+  }
+  const running = listLevel !== undefined && built !== undefined && listLevel > built;
+  return { level: running ? Math.max(match.level, listLevel + 1) : match.level, discount: match.discount, shown: match.level };
 }
 
 const msu = (c: Cost): number => c.metal + c.crystal * 1.5 + c.deuterium * 3;
@@ -349,7 +357,7 @@ export function renderTechPanel(o: TechOptions, details: TechDetails): HTMLEleme
       const plan = loadPlan(o.store);
       let planned = true;
       for (let l = start.level; l <= to; l++) planned &&= inPlan(plan, o.bodyId, details.id, l);
-      const ms = (l: number) => (details.durationMs ? scaleDuration(details.id, start.level, details.durationMs, l) : 0);
+      const ms = (l: number) => (details.durationMs ? scaleDuration(details.id, start.shown, details.durationMs, l) : 0);
       let sumMs = 0;
       for (let l = start.level; l <= to; l++) sumMs += ms(l);
 

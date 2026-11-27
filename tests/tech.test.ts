@@ -207,6 +207,19 @@ describe('tech panel', () => {
     expect(box.querySelector('.fut-tp-disc')!.textContent).toContain('10,0%');
   });
 
+  it('a research under way: the panel starts on the level after it, at the same bonus and time scale', () => {
+    // Astrophysics 25 → 26 running: the game shows level 26 (its cost with 10% off, 2 h), which cannot be started again.
+    const raw = rawCost(124, 26);
+    const html = techPage({ id: 124, built: 25, target: 26, panelLevel: 26, shown: { metal: Math.floor(raw.metal * 0.9), crystal: Math.floor(raw.crystal * 0.9), deuterium: Math.floor(raw.deuterium * 0.9) } });
+    const { o } = setup(html);
+    document.getElementById('technologydetails_content')!.innerHTML = html;
+    const box = renderTechPanel(o, readTechDetails(document)!)!;
+    expect(level()).toBe('26 → 27');
+    expect(box.querySelector('.fut-tp-h:nth-child(2)')!.textContent).toBe('Liv. 27');
+    expect(box.querySelector('.fut-tp-disc')!.textContent).toContain('10,0%');
+    expect(document.querySelectorAll('.fut-tp-v')[0]!.getAttribute('title')).toBe(levelCost(124, 27, 0.1).metal.toLocaleString('it'));
+  });
+
   it('ships: any amount, also more than the game field allows', () => {
     const html = techPage({ id: 203, built: 0, shown: { metal: 6000, crystal: 6000 }, amount: true });
     const { store, o } = setup(html);
