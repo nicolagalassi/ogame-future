@@ -75,6 +75,17 @@ export function ptreUniverse(host: string, lang: string): { country: string; uni
  * password for the team's data: never in a backup file (core/backup), never in the network log (guard).
  */
 export const TEAM_KEY = 'ptre.teamKey';
+/** The last call to the team's PTRE, whatever its answer (shown in Settings › PTRE). */
+export const LAST_KEY = 'ptre.last';
+export interface PtreLast {
+  at: number;
+  /** The script called (its file name). */
+  script: string;
+  ok: boolean;
+  code: string;
+  message: string;
+}
+
 /** PTRE's last answers that were not a success, newest last (shown in Settings › PTRE). */
 export const ERRORS_KEY = 'ptre.errors';
 const ERRORS_MAX = 10;
@@ -141,6 +152,7 @@ export async function ptreCall(deps: PtreDeps, script: string, params: Record<st
   const code = String(data?.code ?? '?');
   const message = String(data?.message_verbose || data?.message || '');
   const ok = code === '1';
+  deps.store.set(LAST_KEY, { at: deps.now?.() ?? Date.now(), script, ok, code, message } satisfies PtreLast);
   if (!ok) {
     const errors = deps.store.get<PtreError[]>(ERRORS_KEY, []);
     deps.store.set(ERRORS_KEY, [...errors, { at: deps.now?.() ?? Date.now(), code, message }].slice(-ERRORS_MAX));
@@ -232,10 +244,14 @@ export async function ptreSendGalaxy(deps: PtreDeps, p: { positions: Record<stri
   if (Object.keys(p.activities).length) await ptreCall(deps, 'oglight_import_player_activity.php', {}, { method: 'POST', body: JSON.stringify(p.activities) }, 'user-browse');
 }
 
-/** Counter-espionage reports just read in the inbox, keyed by message id, in one call (as OGLight). */
+/**
+ * Counter-espionage reports just read in the inbox, keyed by message id, in one call (as OGLight). True when
+ * PTRE answered at all (taken, or already there from another tool): only an unanswered call is tried again.
+ */
 export async function ptreSendCounterSpies(deps: PtreDeps, reports: Record<string, Record<string, unknown>>): Promise<boolean> {
   if (!Object.keys(reports).length) return false;
-  return (await ptreCall(deps, 'oglight_import_player_activity.php', {}, { method: 'POST', body: JSON.stringify(reports) }, 'user-browse')).ok;
+  const r = await ptreCall(deps, 'oglight_import_player_activity.php', {}, { method: 'POST', body: JSON.stringify(reports) }, 'user-browse');
+  return r.data !== null && r.data.code !== undefined && r.data.code !== 'net';
 }
 
 /** When each player's planets were last asked of PTRE (ms): at most once an hour per player, as OGLight. */

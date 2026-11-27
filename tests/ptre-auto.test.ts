@@ -30,8 +30,10 @@ describe('PTRE while playing: what a galaxy system tells', () => {
     expect(first.positions['1:300:4']).toMatchObject({ teamkey: KEY, id: 41, player_id: 7, name: 'P7', status: 'v', moon: { id: 42, size: -1 }, old_player_id: -1, timestamp_ig: 1000 });
     expect(Object.keys(first.activities)).toEqual(['1:300:4']);
     expect(first.activities['1:300:4']).toEqual({ id: 41, player_id: 7, teamkey: KEY, mv: true, activity: '*', galaxy: 1, system: 300, position: 4, main: true, cdr_total_size: 0, moon: { id: 42, activity: 25 } });
-    // Same system again: no position changed.
-    expect(galaxyPayloads(s, first.ids, ctx).positions).toEqual({});
+    // Same system again: no position changed, the memory needs no write.
+    expect(galaxyPayloads(s, first.ids, ctx)).toMatchObject({ positions: {}, changed: false });
+    // A game administrator's row never goes.
+    expect(galaxyPayloads({ ...s, rows: [row(6, 3, 61, null, { statuses: ['admin'] })] }, {}, ctx).positions).toEqual({});
     // A moon appears at 5, the planet at 4 is gone.
     const later = galaxyPayloads({ ...s, rows: [row(5, 8, 51, 52)] }, first.ids, ctx);
     expect(later.positions['1:300:5']).toMatchObject({ moon: { id: 52 }, old_player_id: 8 });
@@ -65,6 +67,8 @@ describe('PTRE while playing: the switch and the guard', () => {
     const off = deps({ code: 1 }, false);
     expect(await ptreSendCounterSpies(off.d, { 21: { player_id: 9 } })).toBe(false);
     expect(off.fetchImpl).not.toHaveBeenCalled();
+    // Already imported by another tool (PTRE answers, not with 1): taken as done, not sent again and again.
+    expect(await ptreSendCounterSpies(deps({ code: -4, message: 'already imported' }).d, { 21: { player_id: 9 } })).toBe(true);
     const on = deps({ code: 1 });
     expect(await ptreSendCounterSpies(on.d, { 21: { player_id: 9 } })).toBe(true);
     const [url, init] = on.fetchImpl.mock.calls[0]!;

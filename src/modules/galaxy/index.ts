@@ -40,8 +40,13 @@ export interface GalaxyOptions {
   ptre?: PtreDeps;
 }
 
-/** The first row of each table the game drew and Future already sent to PTRE: one call per drawing. */
-const ptreSent = new WeakSet<Element>();
+/**
+ * What Future last sent to PTRE from each table the game drew: its first row → the rows' contents. The game
+ * may refill the same rows for the next system, so the contents decide, not the element: a new system's
+ * rows go once; the same rows touched again (a tooltip, Future's own marks) go never. The coordinate
+ * inputs alone never trigger a call, so a system's planets never leave under another system's coordinates.
+ */
+const ptreSent = new WeakMap<Element, string>();
 
 /** Position to mark in the next system drawn ("g:s:p"): the one the side bar or the URL asked for. */
 let highlight = '';
@@ -158,8 +163,10 @@ function remember(o: GalaxyOptions): void {
 function sendToPtre(o: GalaxyOptions, s: GalaxySystem, marks: Marks, recent: Set<number>, cards: Record<string, PlayerScores>): void {
   const first = s.rows[0]?.row;
   const teamKey = teamKeyOf(o.store);
-  if (!o.ptre || !first || !teamKey || !ptreAutoOn(o.store) || ptreSent.has(first)) return;
-  ptreSent.add(first);
+  if (!o.ptre || !first || !teamKey || !ptreAutoOn(o.store)) return;
+  const sig = s.rows.map((r) => `${r.position}.${r.playerId ?? ''}.${r.planetId ?? ''}.${r.moonId ?? ''}.${r.activity.planet ?? ''}.${r.activity.moon ?? ''}`).join('|');
+  if (ptreSent.get(first) === sig) return;
+  ptreSent.set(first, sig);
   const homes = new Set(Object.values(cards).map((c) => (c.planets ?? []).reduce<{ id: number; coords: string } | null>((lo, p) => (p.id > 0 && (!lo || p.id < lo.id) ? p : lo), null)?.coords));
   const rows = s.rows.map((r) => ({ ...r, debris: r.debris ? debrisTotal(r.debris) : 0 }));
   const p = galaxyPayloads({ galaxy: s.galaxy, system: s.system, rows }, o.store.get<GalaxyIds>(GALAXY_IDS_KEY, {}), {
@@ -172,7 +179,7 @@ function sendToPtre(o: GalaxyOptions, s: GalaxySystem, marks: Marks, recent: Set
       return c?.total ? { score: c.total.points, fleet: c.military?.points ?? -1 } : null;
     },
   });
-  o.store.set(GALAXY_IDS_KEY, p.ids);
+  if (p.changed) o.store.set(GALAXY_IDS_KEY, p.ids);
   void ptreSendGalaxy(o.ptre, p).catch(() => undefined);
 }
 

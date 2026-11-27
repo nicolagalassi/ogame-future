@@ -1142,7 +1142,16 @@
   "ptre.synced": "L'équipe a {n} cibles sur PTRE ; {added} nouvelles ici.",
   "ptre.manage": "Gérer sur PTRE",
   "ptre.auto": "Envoyer en jouant",
-  "ptre.autoHint": "Éteint tant que tu ne l'allumes pas. Allumé, Future envoie à PTRE sans un clic par envoi, comme OGLight : pour chaque système que tu ouvres dans la galaxie, les planètes et lunes nouvelles, changées ou disparues (id, joueur, nom, classement et statut) et l'activité des joueurs que tu suis (drapeau ou ouverts récemment) ; les contre-espionnages que tu lis dans la messagerie (qui t'a espionné, d'où, quand) ; et quand tu ouvres la fiche d'un joueur, il demande à PTRE ses planètes, au plus une fois par heure.",
+  "ptre.autoHint": "Éteint tant que tu ne l'allumes pas. Allumé, Future envoie à PTRE sans un clic par envoi, comme OGLight : pour chaque système que tu ouvres dans la galaxie, les planètes et lunes nouvelles, changées ou disparues (la première fois que tu ouvres un système, toutes les positions occupées, de chaque joueur) (id, joueur, nom, classement et statut) et l'activité des joueurs que tu suis (drapeau ou ouverts récemment) ; les contre-espionnages que tu lis dans la messagerie (qui t'a espionné, d'où, quand) ; et quand tu ouvres la fiche d'un joueur, il demande à PTRE ses planètes, au plus une fois par heure.",
   "ptre.autoOn": "Envoyer en jouant est allumé.",
-  "ptre.autoOff": "Envoyer en jouant est éteint : seul ce que tu fais d'un clic part."
+  "ptre.autoOff": "Envoyer en jouant est éteint : seul ce que tu fais d'un clic part.",
+  "ptre.last": "Dernier envoi à PTRE",
+  "ptre.lastNone": "Aucun pour l'instant.",
+  "ptre.lastRefused": "refusé",
+  "ptre.what.oglight_import": "rapport d'espionnage",
+  "ptre.what.oglight_get_player_infos": "infos joueur",
+  "ptre.what.api_sync_target_list": "cibles de l'équipe",
+  "ptre.what.oglight_import_player_activity": "activité",
+  "ptre.what.api_galaxy_import_infos": "planètes et lunes de la galaxie",
+  "ptre.what.api_galaxy_get_infos": "planètes du joueur"
 }

@@ -134,6 +134,17 @@ describe('PTRE while playing, in the galaxy', () => {
     document.querySelector('#galaxyRow4')!.append(document.createElement('span'));
     await new Promise((r) => setTimeout(r, 80));
     expect(ptreCalls()).toHaveLength(1);
+    // Only the coordinate fields change (the player typing), the rows are the old system's: nothing goes,
+    // so these planets never leave under another system's coordinates.
+    (document.getElementById('system_input') as HTMLInputElement).value = '301';
+    document.querySelector('#galaxyRow5')!.append(document.createElement('span'));
+    await new Promise((r) => setTimeout(r, 80));
+    expect(ptreCalls()).toHaveLength(1);
+    // The game refills the same rows with the next system: it goes, once.
+    document.querySelector('#galaxyRow5 [data-planet-id]')!.replaceWith(Object.assign(document.createElement('div'), { className: 'microplanet' }));
+    document.querySelector('#galaxyRow5 .microplanet')!.setAttribute('data-planet-id', '991');
+    await vi.waitFor(() => expect(ptreCalls()).toHaveLength(2));
+    expect(Object.keys(JSON.parse(String(ptreCalls()[1]![1]!.body)))).toEqual(['1:301:4', '1:301:5', '1:301:6']);
   });
 });
 

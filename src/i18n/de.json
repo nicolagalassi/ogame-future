@@ -1142,7 +1142,16 @@
   "ptre.synced": "Das Team hat {n} Ziele auf PTRE; {added} neu hier.",
   "ptre.manage": "Auf PTRE verwalten",
   "ptre.auto": "Beim Spielen senden",
-  "ptre.autoHint": "Aus, bis du es einschaltest. Eingeschaltet sendet Future an PTRE ohne einen Klick pro Anfrage, wie OGLight: für jedes System, das du in der Galaxie öffnest, neue, geänderte oder verschwundene Planeten und Monde (ID, Spieler, Name, Rang und Status) und die Aktivität der Spieler, denen du folgst (Flagge oder kürzlich geöffnet); die Spionageabwehr, die du im Posteingang liest (wer dich ausspioniert hat, von wo, wann); und wenn du den Steckbrief eines Spielers öffnest, fragt es PTRE nach seinen Planeten, höchstens einmal pro Stunde.",
+  "ptre.autoHint": "Aus, bis du es einschaltest. Eingeschaltet sendet Future an PTRE ohne einen Klick pro Anfrage, wie OGLight: für jedes System, das du in der Galaxie öffnest, neue, geänderte oder verschwundene Planeten und Monde (beim ersten Öffnen eines Systems alle besetzten Positionen, jedes Spielers) (ID, Spieler, Name, Rang und Status) und die Aktivität der Spieler, denen du folgst (Flagge oder kürzlich geöffnet); die Spionageabwehr, die du im Posteingang liest (wer dich ausspioniert hat, von wo, wann); und wenn du den Steckbrief eines Spielers öffnest, fragt es PTRE nach seinen Planeten, höchstens einmal pro Stunde.",
   "ptre.autoOn": "Beim Spielen senden ist an.",
-  "ptre.autoOff": "Beim Spielen senden ist aus: nur was du mit einem Klick tust, wird gesendet."
+  "ptre.autoOff": "Beim Spielen senden ist aus: nur was du mit einem Klick tust, wird gesendet.",
+  "ptre.last": "Letzte Anfrage an PTRE",
+  "ptre.lastNone": "Noch keine.",
+  "ptre.lastRefused": "abgelehnt",
+  "ptre.what.oglight_import": "Spionagebericht",
+  "ptre.what.oglight_get_player_infos": "Spielerinfos",
+  "ptre.what.api_sync_target_list": "Ziele des Teams",
+  "ptre.what.oglight_import_player_activity": "Aktivität",
+  "ptre.what.api_galaxy_import_infos": "Planeten und Monde der Galaxie",
+  "ptre.what.api_galaxy_get_infos": "Planeten des Spielers"
 }

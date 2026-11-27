@@ -52,6 +52,8 @@ export interface GalaxyPayloads {
   activities: Record<string, Record<string, unknown>>;
   /** The ids memory with this system as just seen. */
   ids: GalaxyIds;
+  /** False when the system looks as Future last saw it (the memory needs no write). */
+  changed: boolean;
 }
 
 export function galaxyPayloads(s: SystemRead, memory: GalaxyIds, c: GalaxyContext): GalaxyPayloads {
@@ -65,6 +67,11 @@ export function galaxyPayloads(s: SystemRead, memory: GalaxyIds, c: GalaxyContex
     const coords = `${key}:${p}`;
     const r = byPos.get(p);
     const old = before[String(p)] ?? [-1, -1, -1];
+    // Game administrators: left out, as OGLight leaves them out.
+    if (r?.statuses.includes('admin')) {
+      if (before[String(p)]) seen[String(p)] = before[String(p)]!;
+      continue;
+    }
     const player = r?.playerId && r.planetId ? r.playerId : -1;
     if (!r || player < 0) {
       // Occupied before, empty now: the team learns it went.
@@ -90,13 +97,14 @@ export function galaxyPayloads(s: SystemRead, memory: GalaxyIds, c: GalaxyContex
       };
     }
   }
+  const changed = JSON.stringify(seen) !== JSON.stringify(memory[key] ?? null);
   const ids: GalaxyIds = { ...memory };
   delete ids[key];
   ids[key] = seen;
   // Newest last (insertion order): past the limit the systems seen longest ago are forgotten.
   const keys = Object.keys(ids);
   for (const k of keys.slice(0, Math.max(0, keys.length - IDS_MAX))) delete ids[k];
-  return { positions, activities, ids };
+  return { positions, activities, ids, changed };
 }
 
 /** The fields every position entry carries (what Future knew of the position before). */

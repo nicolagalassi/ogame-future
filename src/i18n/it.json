@@ -1142,7 +1142,16 @@
   "ptre.synced": "Il team ha {n} bersagli su PTRE; {added} nuovi qui.",
   "ptre.manage": "Gestisci su PTRE",
   "ptre.auto": "Invii mentre giochi",
-  "ptre.autoHint": "Spento finché non lo accendi. Acceso, Future manda a PTRE senza un click per ogni invio, come OGLight: per ogni sistema che apri in galassia, i pianeti e le lune nuovi, cambiati o spariti (id, giocatore, nome, classifica e stato) e l'attività dei giocatori che segui (bandierina o aperti di recente); i controspionaggi che leggi in posta (chi ti ha spiato, da dove, quando); e quando apri la scheda di un giocatore chiede a PTRE i suoi pianeti, al massimo una volta l'ora.",
+  "ptre.autoHint": "Spento finché non lo accendi. Acceso, Future manda a PTRE senza un click per ogni invio, come OGLight: per ogni sistema che apri in galassia, i pianeti e le lune nuovi, cambiati o spariti (la prima volta che apri un sistema, tutte le posizioni occupate, di ogni giocatore) (id, giocatore, nome, classifica e stato) e l'attività dei giocatori che segui (bandierina o aperti di recente); i controspionaggi che leggi in posta (chi ti ha spiato, da dove, quando); e quando apri la scheda di un giocatore chiede a PTRE i suoi pianeti, al massimo una volta l'ora.",
   "ptre.autoOn": "Invii mentre giochi accesi.",
-  "ptre.autoOff": "Invii mentre giochi spenti: parte solo quello che fai con un click."
+  "ptre.autoOff": "Invii mentre giochi spenti: parte solo quello che fai con un click.",
+  "ptre.last": "Ultimo invio a PTRE",
+  "ptre.lastNone": "Ancora nessuno.",
+  "ptre.lastRefused": "rifiutato",
+  "ptre.what.oglight_import": "rapporto di spionaggio",
+  "ptre.what.oglight_get_player_infos": "info giocatore",
+  "ptre.what.api_sync_target_list": "bersagli del team",
+  "ptre.what.oglight_import_player_activity": "attività",
+  "ptre.what.api_galaxy_import_infos": "pianeti e lune della galassia",
+  "ptre.what.api_galaxy_get_infos": "pianeti del giocatore"
 }

@@ -1142,7 +1142,16 @@
   "ptre.synced": "The team has {n} targets on PTRE; {added} new here.",
   "ptre.manage": "Manage on PTRE",
   "ptre.auto": "Send while playing",
-  "ptre.autoHint": "Off until you turn it on. On, Future sends PTRE without a click for each call, as OGLight does: for every system you open in the galaxy, the planets and moons that are new, changed or gone (id, player, name, rank and status) and the activity of the players you follow (a flag, or opened lately); the counter-espionage you read in the inbox (who spied on you, from where, when); and when you open a player's sheet it asks PTRE for their planets, at most once an hour.",
+  "ptre.autoHint": "Off until you turn it on. On, Future sends PTRE without a click for each call, as OGLight does: for every system you open in the galaxy, the planets and moons that are new, changed or gone (the first time you open a system, every occupied position, of every player) (id, player, name, rank and status) and the activity of the players you follow (a flag, or opened lately); the counter-espionage you read in the inbox (who spied on you, from where, when); and when you open a player's sheet it asks PTRE for their planets, at most once an hour.",
   "ptre.autoOn": "Send while playing is on.",
-  "ptre.autoOff": "Send while playing is off: only what you do with a click is sent."
+  "ptre.autoOff": "Send while playing is off: only what you do with a click is sent.",
+  "ptre.last": "Last call to PTRE",
+  "ptre.lastNone": "None yet.",
+  "ptre.lastRefused": "refused",
+  "ptre.what.oglight_import": "spy report",
+  "ptre.what.oglight_get_player_infos": "player info",
+  "ptre.what.api_sync_target_list": "team targets",
+  "ptre.what.oglight_import_player_activity": "activity",
+  "ptre.what.api_galaxy_import_infos": "galaxy planets and moons",
+  "ptre.what.api_galaxy_get_infos": "player's planets"
 }
