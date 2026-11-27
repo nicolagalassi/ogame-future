@@ -92,7 +92,8 @@ export function sortRows(rows: TargetRow[], view: Pick<View, 'sort' | 'desc'>): 
   const val = (r: TargetRow): number | string => {
     switch (view.sort) {
       case 'target': return r.entry.playerName.toLowerCase();
-      case 'age': return r.ageMinutes;
+      // To the second (Nicola).
+      case 'age': return -r.entry.at;
       // Active now first, then by minutes; no activity (60+) last.
       case 'act': return r.entry.activity;
       case 'coords': return coordsRank(r.entry.coords) * 2 + (r.entry.moon ? 1 : 0);

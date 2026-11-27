@@ -47,4 +47,15 @@ describe('spy board', () => {
     expect(sorted[0]!.entry.coords).toBe('5:100:1');
     expect(targetRows(board, bases, { capacity: 1000, speed: 0, universe: U, now: 0 })[0]!.msuPerHour).toBeNull();
   });
+
+  it('sorts by age to the second: spies of the same minute stay in the order they were made', () => {
+    const board: SpyBoard = {};
+    // Three reports within one minute (12:00:05, 12:00:40, 12:00:20), all shown as «0m».
+    rememberSpies(board, [spy({ id: 'a', coords: '1:1:1', at: 5_000 }), spy({ id: 'b', coords: '1:1:2', at: 40_000 }), spy({ id: 'c', coords: '1:1:3', at: 20_000 })], 50_000);
+    const rows = targetRows(board, [], { capacity: 1000, speed: 0, universe: U, now: 50_000 });
+    // Rounded to minutes, «a» and «c» tie: the minutes alone could not order them.
+    expect(rows.find((r) => r.entry.id === 'a')!.ageMinutes).toBe(rows.find((r) => r.entry.id === 'c')!.ageMinutes);
+    expect(sortRows(rows, { sort: 'age', desc: false }).map((r) => r.entry.id)).toEqual(['b', 'c', 'a']);
+    expect(sortRows(rows, { sort: 'age', desc: true }).map((r) => r.entry.id)).toEqual(['a', 'c', 'b']);
+  });
 });
