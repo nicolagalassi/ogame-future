@@ -9,7 +9,7 @@
  */
 import { splitMilitary } from '../../engines/military';
 import { highscoreHref } from '../../core/game-links';
-import { loadMarks, MARKS_KEY, type Marks } from '../../engines/marks';
+import { loadMarks, MARKS_KEY, renamePlayers, type Marks } from '../../engines/marks';
 import { POSITIONS_KEY, recordSystem, type Positions } from '../../engines/positions';
 import { ensureMarksStyle, flagButton } from '../marks/picker';
 import type { NetworkGuard } from '../../core/guard';
@@ -137,6 +137,9 @@ function remember(o: GalaxyOptions): void {
   const rows = s.rows.filter((r) => !(r.planetId && o.ownPlanetIds.has(r.planetId))).map((r) => ({ ...r, debris: r.debris ? debrisTotal(r.debris) : 0 }));
   const next = recordSystem(o.store.get<Positions>(POSITIONS_KEY, {}), s.galaxy, s.system, rows, keep, Date.now());
   if (next) o.store.set(POSITIONS_KEY, next);
+  // Marked and recent players under the name the game shows now (the targets list kept the old one).
+  const renamed = renamePlayers(marks, s.rows.map((r) => [r.playerId ?? 0, r.playerName] as const));
+  if (renamed) o.store.set(MARKS_KEY, renamed);
 }
 
 function decorate(o: GalaxyOptions, content: Element): void {

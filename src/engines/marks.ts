@@ -53,6 +53,28 @@ export function notePlayer(m: Marks, id: number, note: string): Marks {
   return { ...m, players: { ...m.players, [String(id)]: next } };
 }
 
+/**
+ * Names as the game shows them now (galaxy rows, a player's card): flagged and recent players take a new
+ * name the player chose since. Null when no name changed (no write needed).
+ */
+export function renamePlayers(m: Marks, seen: Iterable<readonly [number, string]>): Marks | null {
+  let next: Marks | null = null;
+  for (const [id, name] of seen) {
+    if (!id || !name) continue;
+    const mark = (next ?? m).players[String(id)];
+    const recentAt = (next ?? m).recent.findIndex((r) => r.id === id && r.name !== name);
+    if (mark && mark.name !== name) {
+      next ??= { ...m, players: { ...m.players }, recent: [...m.recent] };
+      next.players[String(id)] = { ...mark, name };
+    }
+    if (recentAt >= 0) {
+      next ??= { ...m, players: { ...m.players }, recent: [...m.recent] };
+      next.recent[recentAt] = { id, name };
+    }
+  }
+  return next;
+}
+
 export function rememberRecent(m: Marks, id: number, name: string): Marks {
   return { ...m, recent: [{ id, name }, ...m.recent.filter((r) => r.id !== id)].slice(0, RECENT_MAX) };
 }

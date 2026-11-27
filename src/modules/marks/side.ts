@@ -28,7 +28,7 @@ import type { Activity } from '../../data/galaxy';
 import { PLAYER_SCORES_KEY, playerScores, type PlayerScores, type ScoreType } from '../../data/player-api';
 import { statusNames, universePlayers, type UniversePlayers } from '../../data/universe-players';
 import { UNIVERSE_RANKS_KEY, universeRanks, type UniverseRanks } from '../../data/universe-ranks';
-import { FLAGS, flagPlayer, loadMarks, MARKS_KEY, notePlayer, rememberRecent, type Flag, type Marks } from '../../engines/marks';
+import { FLAGS, loadMarks, MARKS_KEY, notePlayer, rememberRecent, renamePlayers, type Flag, type Marks } from '../../engines/marks';
 import { ageParts, planetsOf, POSITIONS_KEY, type Positions, type Seen } from '../../engines/positions';
 import { FLAG_COLORS, flagButton, markIcon, MARKS_CSS } from './picker';
 
@@ -504,10 +504,9 @@ function playerSheet(o: SideOptions, side: HTMLElement, scroll: HTMLElement, tit
       .then((fresh) => {
         sheetData.set(id, fresh);
         if (fresh) {
-          let m = rememberRecent(readMarks(store), id, fresh.name || known);
-          const flagged = m.players[String(id)];
-          if (flagged && !flagged.name) m = flagPlayer(m, id, fresh.name, flagged.flag, Date.now());
-          store.set(MARKS_KEY, m);
+          const m = rememberRecent(readMarks(store), id, fresh.name || known);
+          // The card's name is the game's current one: the list shows it too.
+          store.set(MARKS_KEY, (fresh.name && renamePlayers(m, [[id, fresh.name]])) || m);
         }
         refreshSide();
       });
