@@ -550,7 +550,7 @@
   "settings.oglightImport": "Importer l'export",
   "settings.oglightDone": "Depuis OGLight : {players} joueurs, {seen} positions, {exp} expéditions et {raids} raids sur {days} jours. Rechargez la page.",
   "settings.backupImportHint": "Une sauvegarde Future ou le fichier « Export data » d'OGLight (même univers)",
-  "exp.raids": "Raids (importés d'OGLight)",
+  "exp.raids": "Raids",
   "exp.raidCount": "Raids",
   "exp.raidLoot": "Butin et débris",
   "exp.raidLost": "Vaisseaux perdus",
@@ -1079,5 +1079,6 @@
   "tour.fleet.7": "Destination|Vers lune : tout vers la lune de cette planète. Collecte : réunit les ressources des planètes sur un corps, en transport ou stationnement.",
   "tour.fleet.8": "Messages|Ici Future dit ce qu'il a préparé ou ce qui manque. Survole un bouton pour savoir ce qu'il fait.",
   "tour.fleet.9": "Suivant et Envoyer|Le bouton du jeu, à portée de pouce. Appuyer reste ton choix.",
-  "tour.fleet.10": "Terminé|Ensuite : cible du fleetsave dans Règles, vaisseau principal, puis essaie Expédition.\nLe ? à côté de chaque zone la réexplique."
+  "tour.fleet.10": "Terminé|Ensuite : cible du fleetsave dans Règles, vaisseau principal, puis essaie Expédition.\nLe ? à côté de chaque zone la réexplique.",
+  "exp.raidDebris": "dont débris"
 }

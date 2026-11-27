@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { EMPTY_MARKS, flagPlayer, loadMarks, MARKS_KEY, migrateOld, rememberRecent, RECENT_MAX } from '../src/engines/marks';
+import { EMPTY_MARKS, flagPlayer, loadMarks, MARKS_KEY, migrateOld, rememberRecent, RECENT_MAX, renamePlayers } from '../src/engines/marks';
 import { flagButton } from '../src/modules/marks/picker';
 import { closeSide, isSideOpen, nextInSide, openSide, resetSideCache, restoreSide, SIDE_ID, toggleSide } from '../src/modules/marks/side';
 import { POSITIONS_KEY } from '../src/engines/positions';
@@ -31,6 +31,18 @@ describe('marks', () => {
     m = rememberRecent(m, 10, 'p10');
     expect(m.recent).toHaveLength(RECENT_MAX);
     expect(m.recent[0]).toEqual({ id: 10, name: 'p10' });
+  });
+
+  it('takes the names the galaxy shows now, for flagged and recent players', () => {
+    let m = flagPlayer(EMPTY_MARKS, 7, 'OldName', 'target', 1);
+    m = rememberRecent(m, 7, 'OldName');
+    m = rememberRecent(m, 8, 'Same');
+    const next = renamePlayers(m, [[7, 'NewName'], [8, 'Same'], [9, 'Unmarked'], [0, ''], [7, '']])!;
+    expect(next.players['7']).toMatchObject({ flag: 'target', name: 'NewName', at: 1 });
+    expect(next.recent).toEqual([{ id: 8, name: 'Same' }, { id: 7, name: 'NewName' }]);
+    expect(next.players['9']).toBeUndefined();
+    // Nothing changed: no write.
+    expect(renamePlayers(next, [[7, 'NewName'], [8, 'Same']])).toBeNull();
   });
 
   it('moves the old rivals once (the old galaxy targets are dropped)', () => {

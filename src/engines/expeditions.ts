@@ -13,7 +13,8 @@ const KEEP_MS = 550 * DAY;
 const MAX_ENTRIES = 25_000;
 
 export type JournalEntry = Omit<ExpeditionMessage, 'id' | 'kind'> & {
-  /** 'raid' only comes from an OGLight import (Future does not read combat loot itself). */
+  /** 'raid': the player's own attacks (combat reports, attacker side) and the debris they harvested, also
+   *  from an OGLight import. */
   kind: ExpeditionMessage['kind'] | 'raid';
   /** Losses from the combat report at position 16 (pirates/aliens), not a separate expedition. */
   combat?: boolean;
@@ -115,6 +116,42 @@ export function recordCombat(journal: Journal, id: string, at: number, lost: Rec
   };
   return { journal: { ...journal, [id]: entry }, added: 1 };
 }
+
+/** Espionage probe: a combat that only cost probes and brought nothing is a spy mission, not a raid. */
+const PROBE = 210;
+
+/**
+ * The player's own attack (combat report, attacker side): the loot brought home and the ships lost. Not at
+ * an expedition position (pirates and aliens count with the expeditions) nor a probe shot down while spying.
+ */
+export function recordRaid(journal: Journal, id: string, at: number, loot: { metal: number; crystal: number; deuterium: number }, lost: Record<number, number>, coords: string | null): { journal: Journal; added: number } {
+  const res = { metal: Math.max(0, loot.metal), crystal: Math.max(0, loot.crystal), deuterium: Math.max(0, loot.deuterium) };
+  const onlyProbes = Object.keys(lost).every((u) => Number(u) === PROBE) && res.metal + res.crystal + res.deuterium === 0;
+  if (journal[id] || onlyProbes) return { journal, added: 0 };
+  return { journal: { ...journal, [id]: raidEntry(at, res, lost, coords) }, added: 1 };
+}
+
+/** Debris the player's recyclers harvested away from expeditions: it counts with the raids, not as one more raid. */
+export function recordHarvest(journal: Journal, id: string, at: number, res: { metal: number; crystal: number; deuterium: number }, coords: string | null): { journal: Journal; added: number } {
+  if (journal[id] || res.metal + res.crystal + res.deuterium <= 0) return { journal, added: 0 };
+  return { journal: { ...journal, [id]: { ...raidEntry(at, res, {}, coords), debris: true } }, added: 1 };
+}
+
+const raidEntry = (at: number, res: { metal: number; crystal: number; deuterium: number }, lost: Record<number, number>, coords: string | null): JournalEntry => ({
+  kind: 'raid',
+  at,
+  result: 'unknown',
+  size: -1,
+  depletion: 0,
+  res: { metal: res.metal, crystal: res.crystal, deuterium: res.deuterium, darkMatter: 0, food: 0 },
+  ships: {},
+  lost,
+  item: null,
+  lfXp: 0,
+  lifeform: 0,
+  artefacts: 0,
+  coords,
+});
 
 export function trim(journal: Journal, now: number): Journal {
   const entries = Object.entries(journal).filter(([, e]) => e.at > now - KEEP_MS);
@@ -288,23 +325,26 @@ export function valueMix(s: PeriodStats): { metal: number; crystal: number; deut
   return { metal: s.res.metal, crystal: s.res.crystal * 1.5, deuterium: s.res.deuterium * 3, ships: msu(s.shipsValue) };
 }
 
-/** Raids (from an OGLight import): how many, loot, ships lost. */
+/** Raids: how many, loot and harvested debris together (`debris` = the harvested part), ships lost. */
 export interface RaidStats {
   count: number;
   res: Res4;
+  debris: Res4;
   lost: Record<number, number>;
   lostValue: Res4;
   netMsu: number;
 }
 
 export function raidStats(entries: JournalEntry[]): RaidStats {
-  const s: RaidStats = { count: 0, res: ZERO(), lost: {}, lostValue: ZERO(), netMsu: 0 };
+  const s: RaidStats = { count: 0, res: ZERO(), debris: ZERO(), lost: {}, lostValue: ZERO(), netMsu: 0 };
   for (const e of entries) {
     if (e.kind !== 'raid') continue;
-    s.count += e.summary?.count ?? 1;
-    s.res.metal += e.res.metal;
-    s.res.crystal += e.res.crystal;
-    s.res.deuterium += e.res.deuterium;
+    if (!e.debris) s.count += e.summary?.count ?? 1;
+    for (const r of e.debris ? [s.res, s.debris] : [s.res]) {
+      r.metal += e.res.metal;
+      r.crystal += e.res.crystal;
+      r.deuterium += e.res.deuterium;
+    }
     for (const [id, n] of Object.entries(e.lost)) s.lost[Number(id)] = (s.lost[Number(id)] ?? 0) + n;
   }
   s.lostValue = unitsValue(s.lost);

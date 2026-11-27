@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.169
+// @version      0.3.170
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -1059,7 +1059,7 @@
     "settings.oglightImport": "Importa export",
     "settings.oglightDone": "Da OGLight: {players} giocatori, {seen} posizioni, {exp} spedizioni e {raids} raid su {days} giorni. Ricarica la pagina.",
     "settings.backupImportHint": "Un backup di Future o il file «Export data» di OGLight (dello stesso universo)",
-    "exp.raids": "Raid (importati da OGLight)",
+    "exp.raids": "Raid",
     "exp.raidCount": "Raid",
     "exp.raidLoot": "Bottino e detriti",
     "exp.raidLost": "Navi perse",
@@ -1588,7 +1588,8 @@
     "tour.fleet.7": "Destinazione|Su luna: tutto verso la luna di questo pianeta. Accentra: porta le risorse dei pianeti su un solo corpo, con trasporto o schieramento.",
     "tour.fleet.8": "Messaggi|Qui Future dice cosa ha preparato o cosa manca. Passa il mouse su un pulsante per sapere cosa fa.",
     "tour.fleet.9": "Avanti e Invia|Il pulsante del gioco, a portata di pollice. Premerlo resta una tua scelta.",
-    "tour.fleet.10": "Fatto|Prossimi passi: bersaglio del fleetsave in Regole, nave principale, poi prova Spedizione.\nIl ? accanto a ogni zona la rispiega."
+    "tour.fleet.10": "Fatto|Prossimi passi: bersaglio del fleetsave in Regole, nave principale, poi prova Spedizione.\nIl ? accanto a ogni zona la rispiega.",
+    "exp.raidDebris": "di cui detriti"
   };
 
   // src/i18n/en.json
@@ -2144,7 +2145,7 @@
     "settings.oglightImport": "Import export",
     "settings.oglightDone": "From OGLight: {players} players, {seen} positions, {exp} expeditions and {raids} raids over {days} days. Reload the page.",
     "settings.backupImportHint": "A Future backup or OGLight's “Export data” file (same universe)",
-    "exp.raids": "Raids (imported from OGLight)",
+    "exp.raids": "Raids",
     "exp.raidCount": "Raids",
     "exp.raidLoot": "Loot and debris",
     "exp.raidLost": "Ships lost",
@@ -2673,7 +2674,8 @@
     "tour.fleet.7": "Destination|To moon: everything to this planet's moon. Collect: brings the planets' resources to one body, by transport or deployment.",
     "tour.fleet.8": "Messages|Here Future says what it prepared or what is missing. Point at a button to read what it does.",
     "tour.fleet.9": "Next and Send|The game's button, within thumb's reach. Pressing it stays your choice.",
-    "tour.fleet.10": "Done|Next steps: fleetsave target in Rules, main ship, then try Expedition.\nThe ? beside each zone explains it again."
+    "tour.fleet.10": "Done|Next steps: fleetsave target in Rules, main ship, then try Expedition.\nThe ? beside each zone explains it again.",
+    "exp.raidDebris": "of which debris"
   };
 
   // src/i18n/fr.json
@@ -3229,7 +3231,7 @@
     "settings.oglightImport": "Importer l'export",
     "settings.oglightDone": "Depuis OGLight : {players} joueurs, {seen} positions, {exp} expéditions et {raids} raids sur {days} jours. Rechargez la page.",
     "settings.backupImportHint": "Une sauvegarde Future ou le fichier « Export data » d'OGLight (même univers)",
-    "exp.raids": "Raids (importés d'OGLight)",
+    "exp.raids": "Raids",
     "exp.raidCount": "Raids",
     "exp.raidLoot": "Butin et débris",
     "exp.raidLost": "Vaisseaux perdus",
@@ -3758,7 +3760,8 @@
     "tour.fleet.7": "Destination|Vers lune : tout vers la lune de cette planète. Collecte : réunit les ressources des planètes sur un corps, en transport ou stationnement.",
     "tour.fleet.8": "Messages|Ici Future dit ce qu'il a préparé ou ce qui manque. Survole un bouton pour savoir ce qu'il fait.",
     "tour.fleet.9": "Suivant et Envoyer|Le bouton du jeu, à portée de pouce. Appuyer reste ton choix.",
-    "tour.fleet.10": "Terminé|Ensuite : cible du fleetsave dans Règles, vaisseau principal, puis essaie Expédition.\nLe ? à côté de chaque zone la réexplique."
+    "tour.fleet.10": "Terminé|Ensuite : cible du fleetsave dans Règles, vaisseau principal, puis essaie Expédition.\nLe ? à côté de chaque zone la réexplique.",
+    "exp.raidDebris": "dont débris"
   };
 
   // src/i18n/de.json
@@ -4314,7 +4317,7 @@
     "settings.oglightImport": "Export importieren",
     "settings.oglightDone": "Aus OGLight: {players} Spieler, {seen} Positionen, {exp} Expeditionen und {raids} Raids an {days} Tagen. Seite neu laden.",
     "settings.backupImportHint": "Ein Future-Backup oder die „Export data“-Datei von OGLight (gleiches Universum)",
-    "exp.raids": "Raids (aus OGLight importiert)",
+    "exp.raids": "Raids",
     "exp.raidCount": "Raids",
     "exp.raidLoot": "Beute und Trümmer",
     "exp.raidLost": "Verlorene Schiffe",
@@ -4843,7 +4846,8 @@
     "tour.fleet.7": "Ziel|Zum Mond: alles zum Mond dieses Planeten. Sammeln: bringt die Rohstoffe der Planeten zu einem Körper, per Transport oder Stationierung.",
     "tour.fleet.8": "Meldungen|Hier sagt Future, was es vorbereitet hat oder was fehlt. Zeige auf einen Knopf, um zu lesen, was er macht.",
     "tour.fleet.9": "Weiter und Absenden|Der Knopf des Spiels, in Daumennähe. Ihn zu drücken bleibt deine Wahl.",
-    "tour.fleet.10": "Fertig|Nächste Schritte: Fleetsave-Ziel in Regeln, Hauptschiff, dann Expedition ausprobieren.\nDas ? neben jedem Bereich erklärt ihn erneut."
+    "tour.fleet.10": "Fertig|Nächste Schritte: Fleetsave-Ziel in Regeln, Hauptschiff, dann Expedition ausprobieren.\nDas ? neben jedem Bereich erklärt ihn erneut.",
+    "exp.raidDebris": "davon Trümmer"
   };
 
   // src/core/i18n.ts
@@ -5279,6 +5283,23 @@
     if (text) next.note = text;
     else delete next.note;
     return { ...m, players: { ...m.players, [String(id)]: next } };
+  }
+  function renamePlayers(m, seen2) {
+    let next = null;
+    for (const [id, name] of seen2) {
+      if (!id || !name) continue;
+      const mark = (next ?? m).players[String(id)];
+      const recentAt = (next ?? m).recent.findIndex((r) => r.id === id && r.name !== name);
+      if (mark && mark.name !== name) {
+        next ?? (next = { ...m, players: { ...m.players }, recent: [...m.recent] });
+        next.players[String(id)] = { ...mark, name };
+      }
+      if (recentAt >= 0) {
+        next ?? (next = { ...m, players: { ...m.players }, recent: [...m.recent] });
+        next.recent[recentAt] = { id, name };
+      }
+    }
+    return next;
   }
   function rememberRecent(m, id, name) {
     return { ...m, recent: [{ id, name }, ...m.recent.filter((r) => r.id !== id)].slice(0, RECENT_MAX) };
@@ -6469,10 +6490,8 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
       void playerScores(o.guard, store, doc.location.origin, id, Date.now()).catch(() => null).then((fresh) => {
         sheetData.set(id, fresh);
         if (fresh) {
-          let m = rememberRecent(readMarks2(store), id, fresh.name || known);
-          const flagged2 = m.players[String(id)];
-          if (flagged2 && !flagged2.name) m = flagPlayer(m, id, fresh.name, flagged2.flag, Date.now());
-          store.set(MARKS_KEY, m);
+          const m = rememberRecent(readMarks2(store), id, fresh.name || known);
+          store.set(MARKS_KEY, fresh.name && renamePlayers(m, [[id, fresh.name]]) || m);
         }
         refreshSide();
       });
@@ -6666,6 +6685,8 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     const rows = s.rows.filter((r) => !(r.planetId && o.ownPlanetIds.has(r.planetId))).map((r) => ({ ...r, debris: r.debris ? debrisTotal(r.debris) : 0 }));
     const next = recordSystem(o.store.get(POSITIONS_KEY, {}), s.galaxy, s.system, rows, keep, Date.now());
     if (next) o.store.set(POSITIONS_KEY, next);
+    const renamed = renamePlayers(marks, s.rows.map((r) => [r.playerId ?? 0, r.playerName]));
+    if (renamed) o.store.set(MARKS_KEY, renamed);
   }
   function decorate(o, content) {
     const { doc, store, t, locale } = o;
@@ -7099,6 +7120,32 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     };
     return { journal: { ...journal, [id]: entry }, added: 1 };
   }
+  var PROBE = 210;
+  function recordRaid(journal, id, at, loot, lost, coords) {
+    const res = { metal: Math.max(0, loot.metal), crystal: Math.max(0, loot.crystal), deuterium: Math.max(0, loot.deuterium) };
+    const onlyProbes = Object.keys(lost).every((u) => Number(u) === PROBE) && res.metal + res.crystal + res.deuterium === 0;
+    if (journal[id] || onlyProbes) return { journal, added: 0 };
+    return { journal: { ...journal, [id]: raidEntry(at, res, lost, coords) }, added: 1 };
+  }
+  function recordHarvest(journal, id, at, res, coords) {
+    if (journal[id] || res.metal + res.crystal + res.deuterium <= 0) return { journal, added: 0 };
+    return { journal: { ...journal, [id]: { ...raidEntry(at, res, {}, coords), debris: true } }, added: 1 };
+  }
+  var raidEntry = (at, res, lost, coords) => ({
+    kind: "raid",
+    at,
+    result: "unknown",
+    size: -1,
+    depletion: 0,
+    res: { metal: res.metal, crystal: res.crystal, deuterium: res.deuterium, darkMatter: 0, food: 0 },
+    ships: {},
+    lost,
+    item: null,
+    lfXp: 0,
+    lifeform: 0,
+    artefacts: 0,
+    coords
+  });
   function trim(journal, now) {
     const entries = Object.entries(journal).filter(([, e]) => e.at > now - KEEP_MS);
     if (entries.length > MAX_ENTRIES) entries.sort((a, b) => b[1].at - a[1].at).splice(MAX_ENTRIES);
@@ -7218,13 +7265,15 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     return { metal: s.res.metal, crystal: s.res.crystal * 1.5, deuterium: s.res.deuterium * 3, ships: msu(s.shipsValue) };
   }
   function raidStats(entries) {
-    const s = { count: 0, res: ZERO2(), lost: {}, lostValue: ZERO2(), netMsu: 0 };
+    const s = { count: 0, res: ZERO2(), debris: ZERO2(), lost: {}, lostValue: ZERO2(), netMsu: 0 };
     for (const e of entries) {
       if (e.kind !== "raid") continue;
-      s.count += e.summary?.count ?? 1;
-      s.res.metal += e.res.metal;
-      s.res.crystal += e.res.crystal;
-      s.res.deuterium += e.res.deuterium;
+      if (!e.debris) s.count += e.summary?.count ?? 1;
+      for (const r of e.debris ? [s.res, s.debris] : [s.res]) {
+        r.metal += e.res.metal;
+        r.crystal += e.res.crystal;
+        r.deuterium += e.res.deuterium;
+      }
       for (const [id, n] of Object.entries(e.lost)) s.lost[Number(id)] = (s.lost[Number(id)] ?? 0) + n;
     }
     s.lostValue = unitsValue(s.lost);
@@ -9669,6 +9718,13 @@ td.spark-cell { width: 90px; }
           archive = next;
           archiveChanged = true;
         }
+      }
+      const pos = parsed.kind === "combat" || parsed.kind === "recycle" ? parsed.coords?.replace(/[[\]]/g, "").split(":")[2] : void 0;
+      if (pos && pos !== "16" && (parsed.kind === "combat" && parsed.attacker && parsed.place?.type !== "anomaly" || parsed.kind === "recycle")) {
+        journal ?? (journal = store.get(JOURNAL_KEY, {}));
+        const r = parsed.kind === "combat" ? recordRaid(journal, parsed.id, parsed.at, parsed.loot, parsed.lost, parsed.coords) : recordHarvest(journal, parsed.id, parsed.at, parsed.res, parsed.coords);
+        journal = r.journal;
+        added += r.added;
       }
       if (parsed.kind === "combat" && parsed.coords?.split(":")[2] === "16" && Object.keys(parsed.lost).length) {
         journal ?? (journal = store.get(JOURNAL_KEY, {}));
@@ -19043,6 +19099,7 @@ button.gbody:hover { border-color: var(--line); color: var(--text); }
           };
           cell(t("exp.raidCount"), r.count.toLocaleString(locale));
           cell(t("exp.raidLoot"), `${fmt(msu(r.res))} MSU`, "", triple(r.res));
+          if (msu(r.debris)) cell(t("exp.raidDebris"), `${fmt(msu(r.debris))} MSU`, "", triple(r.debris));
           cell(t("exp.raidLost"), msu(r.lostValue) ? `−${fmt(msu(r.lostValue))} MSU` : "—", msu(r.lostValue) ? "neg" : "");
           cell(t("exp.raidNet"), `${fmt(r.netMsu)} MSU`, r.netMsu < 0 ? "neg" : "pos");
           card.append(strip);

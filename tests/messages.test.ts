@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import { readMessage } from '../src/data/messages';
-import { byDay, dedupe, recordDebris, daySeries, entriesIn, hourSeries, JOURNAL_KEY, periodRange, periodStats, record, recordCombat, trim, valueMix, type Journal } from '../src/engines/expeditions';
+import { byDay, dedupe, recordDebris, daySeries, entriesIn, hourSeries, JOURNAL_KEY, periodRange, periodStats, raidStats, record, recordCombat, trim, valueMix, type Journal } from '../src/engines/expeditions';
 import { processMessages } from '../src/modules/messages';
 import { openJournal, closeJournal } from '../src/modules/messages/journal-view';
 import { MemoryStore, Store } from '../src/core/storage';
@@ -243,6 +243,39 @@ describe('inbox page', () => {
     expect(root.textContent).toContain('Navi trovate');
     closeJournal(document);
     expect(document.getElementById('fut-journal')).toBeNull();
+  });
+});
+
+describe('raids in the journal', () => {
+  it('records own attacks with their loot and losses, and the debris harvested, not probes shot down', () => {
+    const fleets = [{ side: 'attacker', fleetId: 7, player: { id: OWN } }];
+    const rounds = [{ fleets: [{ fleetId: 7, technologies: [{ technologyId: 204, destroyedTotal: 10 }] }] }];
+    const result = { winner: 'attacker', loot: { resources: [{ resource: 'metal', amount: 500000 }, { resource: 'crystal', amount: 200000 }] } };
+    const combat = (id: string, coords: string) =>
+      msg(id, { messagetype: '25', timestamp: '1793891482', coords, fleets: JSON.stringify(fleets), combatrounds: JSON.stringify(rounds), result: JSON.stringify(result), defenderspaceobject: '{}' });
+    const probes = (id: string) =>
+      msg(id, { messagetype: '25', timestamp: '1793891482', coords: '2:284:8', fleets: JSON.stringify(fleets), combatrounds: JSON.stringify([{ fleets: [{ fleetId: 7, technologies: [{ technologyId: 210, destroyedTotal: 3 }] }] }]), result: JSON.stringify({ winner: 'defender' }), defenderspaceobject: '{}' });
+    document.body.innerHTML = '';
+    document.body.append(
+      combat('40', '2:418:8'),
+      // Pirates at an expedition: they count with the expeditions, not as a raid.
+      combat('41', '2:418:16'),
+      probes('42'),
+      msg('43', { messagetype: '32', timestamp: '1793891500', coords: '2:418:8', recycledresources: '{"metal":30000,"crystal":60000,"deuterium":0}' }),
+    );
+    const store = new Store(new MemoryStore(), 'test');
+    processMessages({ doc: document, store, playerId: OWN, locale: 'it', t });
+    const journal = store.get<Journal>(JOURNAL_KEY, {});
+    expect(journal['40']).toMatchObject({ kind: 'raid', res: { metal: 500000, crystal: 200000 }, lost: { 204: 10 } });
+    expect(journal['43']).toMatchObject({ kind: 'raid', debris: true, res: { metal: 30000, crystal: 60000 } });
+    expect(journal['41']?.kind).toBe('expedition');
+    expect(journal['42']).toBeUndefined();
+    const r = raidStats(Object.values(journal));
+    expect(r.count).toBe(1);
+    expect(r.res).toMatchObject({ metal: 530000, crystal: 260000 });
+    expect(r.debris).toMatchObject({ metal: 30000, crystal: 60000 });
+    // Read again: not counted twice.
+    expect(processMessages({ doc: document, store, playerId: OWN, locale: 'it', t })).toBe(0);
   });
 });
 

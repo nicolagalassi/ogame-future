@@ -13,7 +13,7 @@ import { readMessage, type ExpeditionMessage, type ParsedMessage, type Res, type
 import { SHIPS_INFO_KEY, type ShipsInfo } from '../../data/fleet-dispatcher';
 import { shipIcon, shipName } from '../../data/ship-icons';
 import type { T } from '../../core/i18n';
-import { dedupe, JOURNAL_KEY, record, recordCombat, recordDebris, trim, unitsValue, msu, type Journal, type JournalEntry } from '../../engines/expeditions';
+import { dedupe, JOURNAL_KEY, record, recordCombat, recordDebris, recordHarvest, recordRaid, trim, unitsValue, msu, type Journal, type JournalEntry } from '../../engines/expeditions';
 import { rememberSpies, SPY_BOARD_KEY, SPY_DISMISSED_KEY, type SpyBoard, type SpyDismissed, type Universe } from '../../engines/raids';
 import { MESSAGES_CSS } from './style';
 import { mountSpyPanel, universeOf, type SpyContext } from './spy-table';
@@ -452,6 +452,15 @@ export function processMessages(o: MessagesOptions): number {
         archive = next;
         archiveChanged = true;
       }
+    }
+    // The player's own attacks and the debris harvested elsewhere than at an expedition: the journal's Raid
+    // tab (Nicola). Orion anomalies have their own tab; position 16 belongs to the expeditions.
+    const pos = parsed.kind === 'combat' || parsed.kind === 'recycle' ? parsed.coords?.replace(/[[\]]/g, '').split(':')[2] : undefined;
+    if (pos && pos !== '16' && ((parsed.kind === 'combat' && parsed.attacker && parsed.place?.type !== 'anomaly') || parsed.kind === 'recycle')) {
+      journal ??= store.get<Journal>(JOURNAL_KEY, {});
+      const r: { journal: Journal; added: number } = parsed.kind === 'combat' ? recordRaid(journal, parsed.id, parsed.at, parsed.loot, parsed.lost, parsed.coords) : recordHarvest(journal, parsed.id, parsed.at, parsed.res, parsed.coords);
+      journal = r.journal;
+      added += r.added;
     }
     // Pirates and aliens: the losses are in the combat report at position 16.
     if (parsed.kind === 'combat' && parsed.coords?.split(':')[2] === '16' && Object.keys(parsed.lost).length) {
