@@ -101,6 +101,20 @@ describe('PTRE targets', () => {
     expect(r.marks.players['7']).toEqual({ flag: 'ptre', name: 'Cy', at: 9 });
   });
 
+  it("the sheet shows the astrophysics level the team saw, with the colonies it allows", async () => {
+    resetSideCache();
+    const store = new Store(new MemoryStore(), 'astro');
+    store.set('ptre.astro', { 8: { level: 13, at: Date.UTC(2026, 10, 20) } });
+    const xml = '<?xml version="1.0"?><playerData id="8" name="Zed" timestamp="1"><positions></positions><planets><planet id="1" name="Home" coords="1:300:4"/></planets></playerData>';
+    const guard = new NetworkGuard(vi.fn(async () => new Response(xml)), 'http://localhost:3000');
+    document.body.innerHTML = '';
+    openSide({ doc: document, store, guard, t, locale: 'it' }, { player: 8 });
+    const root = () => document.getElementById(SIDE_ID)!.shadowRoot!;
+    await vi.waitFor(() => expect(root().querySelector('.foot .astro')?.textContent).toBe(' · Astrofisica 13 (7 colonie)'));
+    expect(root().querySelector<HTMLElement>('.foot .astro')!.title).toBe('Visto dal team su PTRE il 20/11/26: al massimo 8 pianeti con quello madre');
+    closeSide(document, store);
+  });
+
   it('the side bar syncs the PTRE list with one click', async () => {
     resetSideCache();
     const store = new Store(new MemoryStore(), 'psync');

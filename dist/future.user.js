@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.184
+// @version      0.3.185
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -2779,7 +2779,9 @@
     "ptre.what.api_sync_target_list": "bersagli del team",
     "ptre.what.oglight_import_player_activity": "attività",
     "ptre.what.api_galaxy_import_infos": "pianeti e lune della galassia",
-    "ptre.what.api_galaxy_get_infos": "pianeti del giocatore"
+    "ptre.what.api_galaxy_get_infos": "pianeti del giocatore",
+    "ptre.astro": "Astrofisica {level} ({n} colonie)",
+    "ptre.astroHint": "Visto dal team su PTRE il {date}: al massimo {n} pianeti con quello madre"
   };
 
   // src/i18n/en.json
@@ -3938,7 +3940,9 @@
     "ptre.what.api_sync_target_list": "team targets",
     "ptre.what.oglight_import_player_activity": "activity",
     "ptre.what.api_galaxy_import_infos": "galaxy planets and moons",
-    "ptre.what.api_galaxy_get_infos": "player's planets"
+    "ptre.what.api_galaxy_get_infos": "player's planets",
+    "ptre.astro": "Astrophysics {level} ({n} colonies)",
+    "ptre.astroHint": "Seen by the team on PTRE on {date}: at most {n} planets with the home one"
   };
 
   // src/i18n/fr.json
@@ -5097,7 +5101,9 @@
     "ptre.what.api_sync_target_list": "cibles de l'équipe",
     "ptre.what.oglight_import_player_activity": "activité",
     "ptre.what.api_galaxy_import_infos": "planètes et lunes de la galaxie",
-    "ptre.what.api_galaxy_get_infos": "planètes du joueur"
+    "ptre.what.api_galaxy_get_infos": "planètes du joueur",
+    "ptre.astro": "Astrophysique {level} ({n} colonies)",
+    "ptre.astroHint": "Vue par l'équipe sur PTRE le {date} : au plus {n} planètes avec la planète mère"
   };
 
   // src/i18n/de.json
@@ -6256,7 +6262,9 @@
     "ptre.what.api_sync_target_list": "Ziele des Teams",
     "ptre.what.oglight_import_player_activity": "Aktivität",
     "ptre.what.api_galaxy_import_infos": "Planeten und Monde der Galaxie",
-    "ptre.what.api_galaxy_get_infos": "Planeten des Spielers"
+    "ptre.what.api_galaxy_get_infos": "Planeten des Spielers",
+    "ptre.astro": "Astrophysik {level} ({n} Kolonien)",
+    "ptre.astroHint": "Vom Team auf PTRE gesehen am {date}: höchstens {n} Planeten mit dem Heimatplaneten"
   };
 
   // src/core/i18n.ts
@@ -6733,6 +6741,8 @@
   }
   var PLANETS_AT_KEY = "ptre.planetsAt";
   var PLANETS_EVERY = 36e5;
+  var ASTRO_KEY = "ptre.astro";
+  var coloniesFor = (astro) => Math.ceil(Math.max(0, astro) / 2);
   async function ptrePlayerPlanets(deps, playerId) {
     const now = deps.now?.() ?? Date.now();
     const asked = deps.store.get(PLANETS_AT_KEY, {});
@@ -6741,6 +6751,12 @@
     deps.store.set(PLANETS_AT_KEY, next);
     const r = await ptreCall(deps, "api_galaxy_get_infos.php", { player_id: String(playerId) }, {}, "user-browse");
     const list = r.ok && Array.isArray(r.data?.galaxy_array) ? r.data.galaxy_array : [];
+    const level2 = Number(r.data?.last_astro_level_seen);
+    const seenAt = Number(r.data?.last_astro_level_seen_timestamp) * 1e3;
+    if (r.ok && level2 > 0 && seenAt > 0) {
+      const astro = deps.store.get(ASTRO_KEY, {});
+      if ((astro[String(playerId)]?.at ?? 0) < seenAt) deps.store.set(ASTRO_KEY, { ...astro, [String(playerId)]: { level: level2, at: seenAt } });
+    }
     return r.ok ? list.map((p) => ({ coords: String(p?.coords ?? ""), playerId: Number(p?.player_id), moon: Number(p?.moon?.id) > 0, at: Number(p?.timestamp_ig) })) : null;
   }
 
@@ -8222,9 +8238,9 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     if (!sheetData.has(id)) {
       if (o.ptre) {
         void ptrePlayerPlanets(o.ptre, id).catch(() => null).then((planets) => {
-          const next = planets && mergePtrePlanets(store.get(POSITIONS_KEY, {}), planets);
-          if (!next) return;
-          store.set(POSITIONS_KEY, next);
+          if (!planets) return;
+          const next = mergePtrePlanets(store.get(POSITIONS_KEY, {}), planets);
+          if (next) store.set(POSITIONS_KEY, next);
           refreshSide();
         });
       }
@@ -8354,7 +8370,16 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
       wrap.append(row);
     });
     scroll.append(wrap);
-    scroll.append(h(doc, "p", "foot", t("marks.planets", { n: lines.length, moons: lines.filter((l) => l.moon).length }) + " · " + t("galaxy.apiAge", { time: new Date(data.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) })));
+    const foot = h(doc, "p", "foot");
+    const count2 = h(doc, "span", "", t("marks.planets", { n: lines.length, moons: lines.filter((l) => l.moon).length }));
+    const astro = store.get(ASTRO_KEY, {})[String(id)];
+    if (astro) {
+      const a = h(doc, "span", "astro", ` · ${t("ptre.astro", { level: astro.level, n: coloniesFor(astro.level) })}`);
+      a.title = t("ptre.astroHint", { date: new Date(astro.at).toLocaleDateString(locale, { day: "2-digit", month: "2-digit", year: "2-digit" }), n: coloniesFor(astro.level) + 1 });
+      count2.append(a);
+    }
+    foot.append(count2, h(doc, "span", "", t("galaxy.apiAge", { time: new Date(data.at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) })));
+    scroll.append(foot);
   }
   function askPtre(ptre, id, name) {
     const key = `${id}|${ptreFrame}`;

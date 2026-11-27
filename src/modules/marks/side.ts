@@ -32,7 +32,7 @@ import { FLAGS, loadMarks, MARKS_KEY, mergePtreTargets, notePlayer, ptreTargets,
 import { ageParts, planetsOf, POSITIONS_KEY, type Positions, type Seen } from '../../engines/positions';
 import { FLAG_COLORS, flagButton, markIcon, MARKS_CSS } from './picker';
 import { mergePtrePlanets } from '../../engines/ptre-galaxy';
-import { PTRE_FRAMES, PTRE_TARGETS_PAGE, ptrePlayerInfo, ptrePlayerPlanets, ptreProfileUrl, ptreSyncTargets, teamKeyOf, type PtreDeps, type PtreFrame, type PtrePlayer } from '../../data/ptre';
+import { ASTRO_KEY, coloniesFor, type PtreAstro, PTRE_FRAMES, PTRE_TARGETS_PAGE, ptrePlayerInfo, ptrePlayerPlanets, ptreProfileUrl, ptreSyncTargets, teamKeyOf, type PtreDeps, type PtreFrame, type PtrePlayer } from '../../data/ptre';
 import { shipName } from '../../data/ship-icons';
 
 type T = (key: string, vars?: Record<string, string | number>) => string;
@@ -552,9 +552,10 @@ function playerSheet(o: SideOptions, side: HTMLElement, scroll: HTMLElement, tit
       void ptrePlayerPlanets(o.ptre, id)
         .catch(() => null)
         .then((planets) => {
-          const next = planets && mergePtrePlanets(store.get<Positions>(POSITIONS_KEY, {}), planets);
-          if (!next) return;
-          store.set(POSITIONS_KEY, next);
+          if (!planets) return;
+          const next = mergePtrePlanets(store.get<Positions>(POSITIONS_KEY, {}), planets);
+          if (next) store.set(POSITIONS_KEY, next);
+          // Redrawn also for the astrophysics level that came with the planets.
           refreshSide();
         });
     }
@@ -699,7 +700,18 @@ function playerSheet(o: SideOptions, side: HTMLElement, scroll: HTMLElement, tit
     wrap.append(row);
   });
   scroll.append(wrap);
-  scroll.append(h(doc, 'p', 'foot', t('marks.planets', { n: lines.length, moons: lines.filter((l) => l.moon).length }) + ' · ' + t('galaxy.apiAge', { time: new Date(data.at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) })));
+  const foot = h(doc, 'p', 'foot');
+  const count = h(doc, 'span', '', t('marks.planets', { n: lines.length, moons: lines.filter((l) => l.moon).length }));
+  // The astrophysics level the team saw in a spy report (PTRE), and the colonies it allows: how many more
+  // planets the player can still have.
+  const astro = store.get<PtreAstro>(ASTRO_KEY, {})[String(id)];
+  if (astro) {
+    const a = h(doc, 'span', 'astro', ` · ${t('ptre.astro', { level: astro.level, n: coloniesFor(astro.level) })}`);
+    a.title = t('ptre.astroHint', { date: new Date(astro.at).toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: '2-digit' }), n: coloniesFor(astro.level) + 1 });
+    count.append(a);
+  }
+  foot.append(count, h(doc, 'span', '', t('galaxy.apiAge', { time: new Date(data.at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) })));
+  scroll.append(foot);
 }
 
 /** Reads one player's PTRE data for the frame picked, once per page (a click asks again only for a new frame). */

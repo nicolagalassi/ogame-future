@@ -43,3 +43,4 @@ In fase 2 un invio per sistema disegnato dal gioco, mai per ridisegno di Future 
 - La dimensione della luna parte come -1: la tabella che Future legge non la mostra.
 - `old_name`, `old_rank`, `old_score`, `old_fleet`, `timestamp_api` partono vuoti (-1/false): Future non
   tiene lo storico per posizione di tutti i giocatori come il `pdb` di OGLight; `old_player_id` sì.
+- In più rispetto alla fase 2 iniziale (0.3.185): il livello di astrofisica che PTRE manda con i pianeti del giocatore (`last_astro_level_seen`) resta in `ptre.astro` e compare nel piè della scheda, con le colonie possibili (`ceil(livello / 2)`).
