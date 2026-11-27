@@ -1153,5 +1153,7 @@
   "ptre.what.api_sync_target_list": "team targets",
   "ptre.what.oglight_import_player_activity": "activity",
   "ptre.what.api_galaxy_import_infos": "galaxy planets and moons",
-  "ptre.what.api_galaxy_get_infos": "player's planets"
+  "ptre.what.api_galaxy_get_infos": "player's planets",
+  "ptre.astro": "Astrophysics {level} ({n} colonies)",
+  "ptre.astroHint": "Seen by the team on PTRE on {date}: at most {n} planets with the home one"
 }

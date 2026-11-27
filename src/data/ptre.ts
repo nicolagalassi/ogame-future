@@ -258,7 +258,17 @@ export async function ptreSendCounterSpies(deps: PtreDeps, reports: Record<strin
 export const PLANETS_AT_KEY = 'ptre.planetsAt';
 const PLANETS_EVERY = 3_600_000;
 
-/** A player's planets known to the team, when the player opens that player's sheet (at most hourly). */
+/** Astrophysics level per player as the team last saw it in a spy report (PTRE), with when (ms). */
+export const ASTRO_KEY = 'ptre.astro';
+export type PtreAstro = Record<string, { level: number; at: number }>;
+
+/** Colonies an astrophysics level allows (one more every second level), besides the home planet. */
+export const coloniesFor = (astro: number): number => Math.ceil(Math.max(0, astro) / 2);
+
+/**
+ * A player's planets known to the team, when the player opens that player's sheet (at most hourly). The
+ * answer also carries the astrophysics level the team last saw: kept for the sheet (ASTRO_KEY).
+ */
 export async function ptrePlayerPlanets(deps: PtreDeps, playerId: number): Promise<PtrePlanet[] | null> {
   const now = deps.now?.() ?? Date.now();
   const asked = deps.store.get<Record<string, number>>(PLANETS_AT_KEY, {});
@@ -268,5 +278,11 @@ export async function ptrePlayerPlanets(deps: PtreDeps, playerId: number): Promi
   deps.store.set(PLANETS_AT_KEY, next);
   const r = await ptreCall(deps, 'api_galaxy_get_infos.php', { player_id: String(playerId) }, {}, 'user-browse');
   const list = r.ok && Array.isArray(r.data?.galaxy_array) ? (r.data.galaxy_array as { coords?: unknown; player_id?: unknown; moon?: { id?: unknown } | null; timestamp_ig?: unknown }[]) : [];
+  const level = Number(r.data?.last_astro_level_seen);
+  const seenAt = Number(r.data?.last_astro_level_seen_timestamp) * 1000;
+  if (r.ok && level > 0 && seenAt > 0) {
+    const astro = deps.store.get<PtreAstro>(ASTRO_KEY, {});
+    if ((astro[String(playerId)]?.at ?? 0) < seenAt) deps.store.set(ASTRO_KEY, { ...astro, [String(playerId)]: { level, at: seenAt } });
+  }
   return r.ok ? list.map((p) => ({ coords: String(p?.coords ?? ''), playerId: Number(p?.player_id), moon: Number(p?.moon?.id) > 0, at: Number(p?.timestamp_ig) })) : null;
 }

@@ -2,7 +2,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { GuardError, NetworkGuard } from '../src/core/guard';
 import { MemoryStore, Store } from '../src/core/storage';
-import { AUTO_KEY, PLANETS_AT_KEY, ptrePlayerPlanets, ptreSendCounterSpies, TEAM_KEY } from '../src/data/ptre';
+import { ASTRO_KEY, AUTO_KEY, coloniesFor, PLANETS_AT_KEY, ptrePlayerPlanets, ptreSendCounterSpies, TEAM_KEY } from '../src/data/ptre';
 import { counterSpyPayload, galaxyPayloads, mergePtrePlanets, statusTag, type SystemRow } from '../src/engines/ptre-galaxy';
 
 const KEY = 'TM-AAAA-BBBB-CCCC-DDDD';
@@ -77,10 +77,13 @@ describe('PTRE while playing: the switch and the guard', () => {
   });
 
   it("a player's planets from PTRE at most once an hour", async () => {
-    const { fetchImpl, store, d } = deps({ code: 1, galaxy_array: [{ coords: '3:20:8', player_id: '9', moon: { id: 77 }, timestamp_ig: 9_000_000 }] });
+    const { fetchImpl, store, d } = deps({ code: 1, galaxy_array: [{ coords: '3:20:8', player_id: '9', moon: { id: 77 }, timestamp_ig: 9_000_000 }], last_astro_level_seen: '13', last_astro_level_seen_timestamp: '9000' });
     expect(await ptrePlayerPlanets(d, 9)).toEqual([{ coords: '3:20:8', playerId: 9, moon: true, at: 9_000_000 }]);
     expect(await ptrePlayerPlanets(d, 9)).toBeNull();
     expect(fetchImpl).toHaveBeenCalledOnce();
     expect(store.get<Record<string, number>>(PLANETS_AT_KEY, {})).toEqual({ 9: 10_000_000 });
+    // The astrophysics level the team saw comes with them: kept for the sheet.
+    expect(store.get(ASTRO_KEY, {})).toEqual({ 9: { level: 13, at: 9_000_000 } });
+    expect([0, 1, 2, 13, 26].map(coloniesFor)).toEqual([0, 1, 1, 7, 13]);
   });
 });

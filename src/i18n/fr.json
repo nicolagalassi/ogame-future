@@ -1153,5 +1153,7 @@
   "ptre.what.api_sync_target_list": "cibles de l'équipe",
   "ptre.what.oglight_import_player_activity": "activité",
   "ptre.what.api_galaxy_import_infos": "planètes et lunes de la galaxie",
-  "ptre.what.api_galaxy_get_infos": "planètes du joueur"
+  "ptre.what.api_galaxy_get_infos": "planètes du joueur",
+  "ptre.astro": "Astrophysique {level} ({n} colonies)",
+  "ptre.astroHint": "Vue par l'équipe sur PTRE le {date} : au plus {n} planètes avec la planète mère"
 }
