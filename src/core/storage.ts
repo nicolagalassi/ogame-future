@@ -9,6 +9,8 @@ export interface KeyValueStore {
   set(key: string, value: unknown): void;
   /** Every key held, across all universes and players (for the backup). */
   keys(): string[];
+  /** Forgets a key: the next read gets the caller's default. */
+  delete(key: string): void;
 }
 
 export class GMStore implements KeyValueStore {
@@ -20,6 +22,9 @@ export class GMStore implements KeyValueStore {
   }
   keys(): string[] {
     return GM_listValues();
+  }
+  delete(key: string): void {
+    GM_deleteValue(key);
   }
 }
 
@@ -33,6 +38,9 @@ export class MemoryStore implements KeyValueStore {
   }
   keys(): string[] {
     return [...this.data.keys()];
+  }
+  delete(key: string): void {
+    this.data.delete(key);
   }
 }
 

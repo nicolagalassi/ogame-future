@@ -23,7 +23,7 @@ export const CARRY_COPY = [
   'exp.kind', 'exp.period', 'settings.tab', 'sim.tool', 'remind.desktop', 'dash.rates', 'dash.investExclude',
 ];
 /** The targets bar's view: kept, without the old universe's player whose sheet was open. */
-const MARKS_VIEW = 'marks.view';
+export const MARKS_VIEW = 'marks.view';
 
 export interface CarrySource {
   /** `future:<universe>:<player>`. */

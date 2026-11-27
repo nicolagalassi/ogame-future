@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.176
+// @version      0.3.177
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -12,6 +12,7 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_listValues
+// @grant        GM_deleteValue
 // @grant        unsafeWindow
 // @run-at       document-start
 // ==/UserScript==
@@ -421,6 +422,9 @@
     }
     keys() {
       return GM_listValues();
+    }
+    delete(key) {
+      GM_deleteValue(key);
     }
   };
   var Store = class {
@@ -2152,6 +2156,15 @@
     "settings.carrySourceHint": "{n} spedizioni e raid, {days} giorni di storico",
     "settings.carryDo": "Porta qui",
     "settings.carryDone": "Portati: {settings} impostazioni, {exp} spedizioni e raid, {days} giorni di storico, {orion} anomalie. Ricarica la pagina.",
+    "settings.reset.stats": "Azzera le statistiche",
+    "settings.reset.statsHint": "Svuota diario di spedizioni e raid, storico di punti e produzione e Orion di questo universo. I rapporti ancora nella posta verranno riletti. Prima fai un Esporta.",
+    "settings.reset.settings": "Azzera le impostazioni",
+    "settings.reset.settingsHint": "Tutte le scelte di Future in questo universo tornano come all'inizio, regole e fleetsave di pianeti e lune compresi. Bersagli, note, piani e statistiche restano.",
+    "settings.resetDo": "Azzera",
+    "settings.resetYes": "Sì, azzera",
+    "settings.resetNo": "Annulla",
+    "settings.resetDone.stats": "Statistiche azzerate. Ricarica la pagina.",
+    "settings.resetDone.settings": "Impostazioni tornate come all'inizio. Ricarica la pagina.",
     "exp.raidLoot": "Bottino e detriti",
     "exp.raidLost": "Navi perse",
     "exp.raidNet": "Netto raid",
@@ -3249,6 +3262,15 @@
     "settings.carrySourceHint": "{n} expeditions and raids, {days} days of history",
     "settings.carryDo": "Bring here",
     "settings.carryDone": "Brought over: {settings} settings, {exp} expeditions and raids, {days} days of history, {orion} anomalies. Reload the page.",
+    "settings.reset.stats": "Reset statistics",
+    "settings.reset.statsHint": "Empties this universe's expedition and raid journal, points and production history and Orion. Reports still in your inbox will be read again. Export first.",
+    "settings.reset.settings": "Reset settings",
+    "settings.reset.settingsHint": "Every Future choice in this universe goes back to the start, planet and moon rules and fleetsave included. Targets, notes, plans and statistics stay.",
+    "settings.resetDo": "Reset",
+    "settings.resetYes": "Yes, reset",
+    "settings.resetNo": "Cancel",
+    "settings.resetDone.stats": "Statistics reset. Reload the page.",
+    "settings.resetDone.settings": "Settings back to the start. Reload the page.",
     "exp.raidLoot": "Loot and debris",
     "exp.raidLost": "Ships lost",
     "exp.raidNet": "Raid net",
@@ -4346,6 +4368,15 @@
     "settings.carrySourceHint": "{n} expéditions et raids, {days} jours d'historique",
     "settings.carryDo": "Amener ici",
     "settings.carryDone": "Repris : {settings} réglages, {exp} expéditions et raids, {days} jours d'historique, {orion} anomalies. Recharge la page.",
+    "settings.reset.stats": "Remettre à zéro les statistiques",
+    "settings.reset.statsHint": "Vide le journal des expéditions et raids, l'historique des points et de la production et Orion de cet univers. Les rapports encore dans ta messagerie seront relus. Exporte d'abord.",
+    "settings.reset.settings": "Remettre à zéro les réglages",
+    "settings.reset.settingsHint": "Tous les choix de Future dans cet univers reviennent au départ, règles et fleetsave des planètes et lunes compris. Cibles, notes, plans et statistiques restent.",
+    "settings.resetDo": "Remettre à zéro",
+    "settings.resetYes": "Oui, remettre à zéro",
+    "settings.resetNo": "Annuler",
+    "settings.resetDone.stats": "Statistiques remises à zéro. Recharge la page.",
+    "settings.resetDone.settings": "Réglages revenus au départ. Recharge la page.",
     "exp.raidLoot": "Butin et débris",
     "exp.raidLost": "Vaisseaux perdus",
     "exp.raidNet": "Net raids",
@@ -5443,6 +5474,15 @@
     "settings.carrySourceHint": "{n} Expeditionen und Raids, {days} Tage Verlauf",
     "settings.carryDo": "Hierher holen",
     "settings.carryDone": "Übernommen: {settings} Einstellungen, {exp} Expeditionen und Raids, {days} Tage Verlauf, {orion} Anomalien. Lade die Seite neu.",
+    "settings.reset.stats": "Statistiken zurücksetzen",
+    "settings.reset.statsHint": "Leert das Expeditions- und Raid-Journal, den Punkte- und Produktionsverlauf und Orion dieses Universums. Berichte, die noch im Posteingang liegen, werden erneut gelesen. Vorher exportieren.",
+    "settings.reset.settings": "Einstellungen zurücksetzen",
+    "settings.reset.settingsHint": "Alle Entscheidungen in Future für dieses Universum gehen auf den Anfang zurück, auch Regeln und Fleetsave der Planeten und Monde. Ziele, Notizen, Pläne und Statistiken bleiben.",
+    "settings.resetDo": "Zurücksetzen",
+    "settings.resetYes": "Ja, zurücksetzen",
+    "settings.resetNo": "Abbrechen",
+    "settings.resetDone.stats": "Statistiken zurückgesetzt. Lade die Seite neu.",
+    "settings.resetDone.settings": "Einstellungen wie am Anfang. Lade die Seite neu.",
     "exp.raidLoot": "Beute und Trümmer",
     "exp.raidLost": "Verlorene Schiffe",
     "exp.raidNet": "Raids netto",
@@ -6310,6 +6350,14 @@
       onScore(score);
     });
     observer.observe(field, { childList: true, characterData: true, subtree: true });
+  }
+
+  // src/engines/reset.ts
+  var RESET_SETTINGS = [...CARRY_COPY, MARKS_VIEW, SETTINGS_KEY, PROFILES_KEY];
+  var RESET_STATS = [JOURNAL_KEY, HISTORY_KEY, ARCHIVE_KEY, MULT_KEY];
+  function resetKeys(held, namespace, kind) {
+    const names = new Set((kind === "settings" ? RESET_SETTINGS : RESET_STATS).map((k) => `${namespace}:${k}`));
+    return held.filter((k) => names.has(k));
   }
 
   // src/data/server-data.ts
@@ -11858,7 +11906,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     store.set(KEYMAP_KEY, saved);
     return taken;
   }
-  function resetKeys(store) {
+  function resetKeys2(store) {
     store.set(KEYMAP_KEY, {});
   }
   var runs = /* @__PURE__ */ new Map();
@@ -13795,6 +13843,8 @@ ${names.join("\n")}` : t("fleet.rule.onlyHereTitle");
 .seg[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--text); font-weight: 700; }
 .seg[aria-pressed="true"] + .seg { border-left: 1px solid var(--line); }
 .seg:disabled { opacity: 0.45; cursor: not-allowed; }
+/* The second press of a reset: the one that deletes, in the warning colour. */
+.seg.confirm { border-color: var(--warn); color: var(--warn); font-weight: 700; }
 .status { min-height: 16px; padding: 0 4px; color: var(--accent); font-size: 11px; }
 .notes { padding: 2px 4px; color: var(--muted); font-size: 11px; line-height: 1.5; }
 .field { height: 26px; width: 190px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: 12px Arial, sans-serif; }
@@ -13865,6 +13915,7 @@ input.field { width: 190px; }
     let menu = { ...o.menu.settings };
     let status = "";
     let carryList = null;
+    let resetAsk = null;
     const choice = (options, current3, onPick, disabled = false) => {
       const box = el7("span", "control");
       box.setAttribute("role", "group");
@@ -14045,6 +14096,33 @@ input.field { width: 190px; }
       }
       return rows;
     };
+    const resetRows = (reset) => ["stats", "settings"].map((kind) => {
+      const box = el7("span", "control");
+      const button3 = (label, onClick, cls = "") => {
+        const b = el7("button", `seg ${cls}`.trim(), label);
+        b.type = "button";
+        b.addEventListener("click", onClick);
+        box.append(b);
+      };
+      if (resetAsk === kind) {
+        button3(t("settings.resetYes"), () => {
+          resetAsk = null;
+          status = reset(kind);
+          draw();
+        }, "confirm");
+        button3(t("settings.resetNo"), () => {
+          resetAsk = null;
+          draw();
+        });
+      } else {
+        button3(t("settings.resetDo"), () => {
+          resetAsk = kind;
+          status = "";
+          draw();
+        });
+      }
+      return row(t(`settings.reset.${kind}`), t(`settings.reset.${kind}Hint`), box);
+    });
     const keyRows = () => {
       const map = keymap(store);
       const out = [
@@ -14099,7 +14177,7 @@ input.field { width: 190px; }
       const b = el7("button", "seg", t("settings.keysDefault"));
       b.type = "button";
       b.addEventListener("click", () => {
-        resetKeys(store);
+        resetKeys2(store);
         listening = null;
         status = t("settings.keysDefaultDone");
         o.onFleetChange?.();
@@ -14290,6 +14368,7 @@ input.field { width: 190px; }
             picker
           );
           if (o.carry) body.append(...carryRows(o.carry));
+          if (o.reset) body.append(...resetRows(o.reset));
           const s = el7("div", "status", status);
           s.setAttribute("role", "status");
           body.append(s);
@@ -20849,6 +20928,10 @@ ${face(barlow_semi_condensed_600_default, "501 900")}`;
             for (const [key, value] of Object.entries(r.writes)) store.set(key, value);
             return t("settings.carryDone", { settings: r.settings, exp: r.journal.toLocaleString(locale), days: r.days, orion: r.orion });
           }
+        },
+        reset: (kind) => {
+          for (const key of resetKeys(gm.keys(), namespace, kind)) gm.delete(key);
+          return t(`settings.resetDone.${kind}`);
         },
         notes: [menuCtx.colonies, snapshot ? t("toolbar.lastSync", { time: new Date(snapshot.fetchedAt).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) }) : ""].filter(Boolean),
         onMailChange: () => refreshInbox?.(),

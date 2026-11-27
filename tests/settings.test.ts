@@ -113,5 +113,19 @@ describe('expedition share calculator', () => {
     expect(w.root.querySelector('.status')!.textContent).toBe('Portati');
     expect(w.root.textContent).not.toContain('s150-it · giocatore');
   });
+
+  it('resets only on the second press, and «Annulla» leaves everything as it was', () => {
+    const reset = vi.fn((kind: string) => `fatto ${kind}`);
+    const w = open(new Store(new MemoryStore(), 'x'), { backup: { onExport: () => 0, onImport: () => 0 }, reset });
+    w.tab('Dati').click();
+    w.seg('Azzera', 'Azzera le impostazioni').click();
+    expect(reset).not.toHaveBeenCalled();
+    w.seg('Annulla', 'Azzera le impostazioni').click();
+    w.seg('Azzera', 'Azzera le statistiche').click();
+    w.seg('Sì, azzera', 'Azzera le statistiche').click();
+    expect(reset).toHaveBeenCalledTimes(1);
+    expect(reset).toHaveBeenCalledWith('stats');
+    expect(w.root.querySelector('.status')!.textContent).toBe('fatto stats');
+  });
 });
 
