@@ -3,11 +3,10 @@
  * players and on the player's own planets, debris (metal + crystal + deuterium), a flag on players and a colour on planets
  * (Future's targets, no probe button: AGENTS.md §1.5.1) and a card with the player's points and ranks.
  *
- * COMPLIANCE: everything is read from the system the game drew itself. The only call is the
- * public API card (`playerScores`, reason 'user-view', cached an hour), asked when the player
- * points at a rank badge. No game action, no game request.
+ * COMPLIANCE: everything is read from the system the game drew itself. Calls: the public API card
+ * (modules/player-card, reason 'user-view', cached an hour), asked when the player points at a name or
+ * a rank badge; PTRE only with «Send while playing» on (sendToPtre). No game action, no game request.
  */
-import { splitMilitary } from '../../engines/military';
 import { highscoreHref } from '../../core/game-links';
 import { loadMarks, MARKS_KEY, renamePlayers, type Marks } from '../../engines/marks';
 import { POSITIONS_KEY, recordSystem, type Positions } from '../../engines/positions';
@@ -16,8 +15,9 @@ import type { NetworkGuard } from '../../core/guard';
 import type { Store } from '../../core/storage';
 import { formatUnits } from '../../core/format';
 import { debrisTotal, readGalaxy, type GalaxyRow, type GalaxySystem } from '../../data/galaxy';
-import { PLAYER_SCORES_KEY, playerScores, SCORE_TYPES, type PlayerScores, type ScoreType } from '../../data/player-api';
+import { PLAYER_SCORES_KEY, type PlayerScores } from '../../data/player-api';
 import { GALAXY_CSS } from './style';
+import { attachPlayerCard } from '../player-card';
 import { ptreAutoOn, ptreSendGalaxy, teamKeyOf, type PtreDeps } from '../../data/ptre';
 import { GALAXY_IDS_KEY, galaxyPayloads, type GalaxyIds } from '../../engines/ptre-galaxy';
 import { BIG_DEBRIS, BIG_DEBRIS_KEY } from '../marks/side';
@@ -218,6 +218,8 @@ function decorate(o: GalaxyOptions, content: Element): void {
       const id = r.playerId;
       nameEl.addEventListener('click', () => o.onPlayer?.(id, r.playerName));
     }
+    // Pointing at the name shows the player's card (points and rank in every category), as OGLight.
+    if (nameEl && r.playerId && !own) attachPlayerCard(o, nameEl, r.playerId, r.playerName);
     if (playerCell && r.playerId && r.rank && !playerCell.querySelector('.fut-g-rank')) {
       const id = r.playerId;
       // The rank opens the highscore on the player's page (a plain link: the player's click, one navigation);
@@ -225,11 +227,7 @@ function decorate(o: GalaxyOptions, content: Element): void {
       const badge = el(doc, 'a', 'fut-g-rank', `#${r.rank.toLocaleString(locale)}`);
       badge.href = highscoreHref(id, r.rank);
       badge.setAttribute('aria-label', `${t('galaxy.rankTitle', { name: r.playerName })} · ${t('galaxy.rankOpen')}`);
-      const show = () => void openCard(o, badge, id, r.playerName);
-      badge.addEventListener('mouseenter', show);
-      badge.addEventListener('focus', show);
-      badge.addEventListener('mouseleave', () => closeCard(doc));
-      badge.addEventListener('blur', () => closeCard(doc));
+      attachPlayerCard(o, badge, id, r.playerName);
       playerCell.querySelector('.playerName')?.after(badge);
       if (!own) badge.after(flagButton(picker, id, r.playerName));
     }
@@ -264,70 +262,3 @@ function renderBar(o: GalaxyOptions, content: Element, s: GalaxySystem): void {
   content.before(bar);
 }
 
-const CARD_ID = 'fut-galaxy-card';
-let cardFor = 0;
-
-function closeCard(doc: Document): void {
-  cardFor = 0;
-  doc.getElementById(CARD_ID)?.remove();
-}
-
-async function openCard(o: GalaxyOptions, anchor: Element, id: number, name: string): Promise<void> {
-  const { doc, t, locale } = o;
-  closeCard(doc);
-  cardFor = id;
-  const card = el(doc, 'div', 'fut-g-card');
-  card.id = CARD_ID;
-  card.setAttribute('role', 'tooltip');
-  card.append(el(doc, 'h4', '', t('galaxy.rankTitle', { name })));
-  const note = el(doc, 'p', '', t('galaxy.loading'));
-  card.append(note);
-  doc.body.append(card);
-  // Under the badge, inside the window; above it when there is no room below.
-  const place = () => {
-    const box = anchor.getBoundingClientRect();
-    const view = doc.defaultView;
-    const h = card.offsetHeight;
-    const below = box.bottom + 6 + h <= (view?.innerHeight ?? 800);
-    card.style.left = `${Math.max(8, Math.min(box.left, (view?.innerWidth ?? 1200) - card.offsetWidth - 8))}px`;
-    card.style.top = `${below ? box.bottom + 6 : Math.max(8, box.top - 6 - h)}px`;
-  };
-  place();
-  let data: PlayerScores | null = null;
-  try {
-    data = await playerScores(o.guard, o.store, doc.location.origin, id, Date.now());
-  } catch {
-    data = null;
-  }
-  if (cardFor !== id || !card.isConnected) return; // the pointer moved on
-  if (!data) {
-    note.textContent = t('galaxy.apiError');
-    note.className = 'err';
-    return;
-  }
-  const table = el(doc, 'table');
-  for (const key of Object.keys(SCORE_TYPES) as ScoreType[]) {
-    const v = data.scores[key];
-    if (!v) continue;
-    const tr = el(doc, 'tr');
-    tr.append(el(doc, 'td', '', t(`galaxy.score.${key}`)), el(doc, 'td', '', formatUnits(v.points, locale)), el(doc, 'td', 'r', `#${v.rank.toLocaleString(locale)}`));
-    table.append(tr);
-    // Military split into fleet and defences, worked out from the other scores (engines/military).
-    if (key === 'military') {
-      const split = splitMilitary(data.scores);
-      if (split) {
-        for (const [part, points] of [['fleet', split.fleet], ['defence', split.defence]] as const) {
-          const sub = el(doc, 'tr', 'sub');
-          sub.title = t('galaxy.splitHint');
-          sub.append(el(doc, 'td', '', t(`galaxy.score.${part}`)), el(doc, 'td', '', formatUnits(points, locale)), el(doc, 'td', 'r'));
-          table.append(sub);
-        }
-      }
-    }
-  }
-  note.before(table);
-  const parts = [t('galaxy.apiAge', { time: new Date(data.at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) })];
-  if (data.ships) parts.unshift(t('galaxy.ships', { count: data.ships.toLocaleString(locale) }));
-  note.textContent = parts.join(' · ');
-  place();
-}

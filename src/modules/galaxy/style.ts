@@ -2,7 +2,7 @@ import { WINDOW_TOKENS } from '../../core/sheet';
 /** Galaxy view: summary strip, row marks, debris values, target list and the scores card (prefixed classes). */
 export const GALAXY_CSS = `
 /* Window tokens (core/sheet.ts) for every surface this sheet styles. */
-.fut-g-name, #galaxycomponent, .fut-g-bar, #galaxyContent, .fut-g-muted, .fut-g-inact, .fut-g-vac, .fut-g-deb, .fut-g-rank, #expeditionDebrisSlotDebrisContainer, .fut-g-dval, .fut-g-card { ${WINDOW_TOKENS} }
+.fut-g-name, #galaxycomponent, .fut-g-bar, #galaxyContent, .fut-g-muted, .fut-g-inact, .fut-g-vac, .fut-g-deb, .fut-g-rank, #expeditionDebrisSlotDebrisContainer, .fut-g-dval { ${WINDOW_TOKENS} }
 .fut-g-name { cursor: pointer; }
 .fut-g-name:hover { text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 2px; }
 /* The game's own header, drawn as the first row of one card with Future's summary under it:
@@ -92,19 +92,4 @@ export const GALAXY_CSS = `
 .fut-g-dval.big { color: var(--warn); font-weight: 700; text-shadow: 0 0 6px rgba(245, 181, 71, 0.45); }
 .fut-g-dval.deep { position: static; display: inline-flex; margin-left: 6px; font-size: 12px; }
 
-.fut-g-card {
-  position: fixed; z-index: 1000002; width: 250px; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: 8px;
-  background: var(--bg); box-shadow: 0 10px 30px rgba(0,0,0,0.6); font: 12px/16px Arial, Helvetica, sans-serif; color: var(--text-2);
-  text-align: left; pointer-events: none;
-}
-.fut-g-card h4 { margin: 0 0 6px; font-size: 12px; font-weight: 700; color: var(--text); }
-.fut-g-card table { width: 100%; border-collapse: collapse; }
-.fut-g-card td { padding: 2px 0; border-bottom: 1px solid var(--line-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.fut-g-card td + td { text-align: right; font-family: Consolas, "JetBrains Mono", monospace; }
-.fut-g-card td.r { color: var(--accent); padding-left: 10px; }
-/* Fleet and defences under Militare: indented and quieter, an estimate without a rank. */
-.fut-g-card tr.sub td { color: var(--muted); font-size: 11px; }
-.fut-g-card tr.sub td:first-child { padding-left: 12px; }
-.fut-g-card p { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
-.fut-g-card .err { color: var(--bad); }
 `;
