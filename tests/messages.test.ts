@@ -276,6 +276,15 @@ describe('raids in the journal', () => {
     expect(r.debris).toMatchObject({ metal: 30000, crystal: 60000 });
     // Read again: not counted twice.
     expect(processMessages({ doc: document, store, playerId: OWN, locale: 'it', t })).toBe(0);
+    // The Raid tab, laid out as the expeditions': the net, the loot with its debris, targets and losses.
+    openJournal({ doc: document, store, now: 1793891482000 + 3600_000, locale: 'it', t, kind: 'raid' });
+    const root = document.getElementById('fut-journal')!.shadowRoot!;
+    expect(root.querySelector('.hero .hero-sub')!.textContent).toContain('1 raid');
+    expect(root.querySelector('.hero')!.textContent).toContain('di cui detriti');
+    expect(root.querySelector('.outs a.o-l')!.textContent).toBe('[2:418:8]');
+    expect(root.querySelector('.ships.lost')).not.toBeNull();
+    expect(root.querySelector('.chart')).not.toBeNull();
+    closeJournal(document);
   });
 });
 

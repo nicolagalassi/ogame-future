@@ -314,6 +314,37 @@ export function daySeries(entries: JournalEntry[], last: number, n: number): Buc
   return starts.map((start) => ({ start, stats: periodStats(lists.get(start)!) }));
 }
 
+/** Raids of each hour of the day starting at `day`, or of each of the `n` days ending with `last`'s (oldest first). */
+export interface RaidBucket {
+  start: number;
+  stats: RaidStats;
+}
+export function raidHours(entries: JournalEntry[], day: number): RaidBucket[] {
+  const lists: JournalEntry[][] = Array.from({ length: 24 }, () => []);
+  for (const e of entries) if (e.kind === 'raid' && dayStart(e.at) === day) lists[new Date(e.at).getHours()]!.push(e);
+  return lists.map((list, h) => ({ start: new Date(day).setHours(h, 0, 0, 0), stats: raidStats(list) }));
+}
+export function raidDays(entries: JournalEntry[], last: number, n: number): RaidBucket[] {
+  const starts: number[] = [];
+  for (let i = 0, d = dayStart(last); i < n; i++, d = dayStart(d - 1)) starts.unshift(d);
+  const lists = new Map(starts.map((s) => [s, [] as JournalEntry[]]));
+  for (const e of entries) if (e.kind === 'raid') lists.get(dayStart(e.at))?.push(e);
+  return starts.map((start) => ({ start, stats: raidStats(lists.get(start)!) }));
+}
+
+/** Where the raids paid: each attacked position with its raids and loot (MSU), best first. Harvests left out. */
+export function raidTargets(entries: JournalEntry[]): { coords: string; count: number; msu: number }[] {
+  const by = new Map<string, { coords: string; count: number; msu: number }>();
+  for (const e of entries) {
+    if (e.kind !== 'raid' || e.debris || e.summary || !e.coords) continue;
+    const t = by.get(e.coords) ?? { coords: e.coords, count: 0, msu: 0 };
+    t.count++;
+    t.msu += msu(e.res);
+    by.set(e.coords, t);
+  }
+  return [...by.values()].sort((a, b) => b.msu - a.msu || b.count - a.count);
+}
+
 /** A period's net gain per resource: resources found, plus the cost of the ships found, minus that of the ships lost. In MSU it is `netMsu`. */
 export function netRes(s: PeriodStats): { metal: number; crystal: number; deuterium: number } {
   const of = (k: 'metal' | 'crystal' | 'deuterium') => s.res[k] + s.shipsValue[k] - s.lostValue[k];
