@@ -23,7 +23,7 @@ import { followViewport, revealActiveTabs } from '../../core/viewport';
 import { helpButton } from '../../core/tour';
 import type { CarrySource } from '../../engines/carry-over';
 import type { ResetKind } from '../../engines/reset';
-import { ERRORS_KEY as PTRE_ERRORS_KEY, normalTeamKey, TEAM_KEY as PTRE_TEAM_KEY, type PtreError } from '../../data/ptre';
+import { AUTO_KEY as PTRE_AUTO_KEY, ERRORS_KEY as PTRE_ERRORS_KEY, normalTeamKey, TEAM_KEY as PTRE_TEAM_KEY, type PtreError } from '../../data/ptre';
 
 export const SETTINGS_ID = 'fut-settings-window';
 const TAB_KEY = 'settings.tab';
@@ -459,6 +459,11 @@ export function openSettings(o: SettingsOptions): void {
       box.append(input, save);
     }
     const rows: HTMLElement[] = [intro, row(t('ptre.key'), t(key ? 'ptre.keyOnHint' : 'ptre.keyHint'), box)];
+    // What goes while playing, with no click for each: off until the player turns it on, after reading it.
+    if (key) rows.push(row(t('ptre.auto'), t('ptre.autoHint'), yesNo(store.get<boolean>(PTRE_AUTO_KEY, false), (v) => {
+      store.set(PTRE_AUTO_KEY, v);
+      status = t(v ? 'ptre.autoOn' : 'ptre.autoOff');
+    })));
     const st = el('div', 'status', status);
     st.setAttribute('role', 'status');
     rows.push(st);

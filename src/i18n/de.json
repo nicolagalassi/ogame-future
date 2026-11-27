@@ -1102,7 +1102,7 @@
   "exp.raidAvg": "pro Raid",
   "exp.raidTargets": "Beste Ziele",
   "settings.section.ptre": "PTRE",
-  "ptre.consent": "PTRE (ptre.chez.gg) ist die Datenbank deines Teams: Spionageberichte, Aktivität und Planeten der Spieler, gesammelt von den Mitgliedern.\nMit dem Team Key sendet Future an PTRE nur, was du mit einem Klick wählst, wie OGLight: einen Spionagebericht aus der Spionagetabelle (nur seine API-ID); ID und Name eines Spielers, wenn du seine PTRE-Infos im Steckbrief öffnest; ID und Name der Spieler mit der PTRE-Flagge, wenn du die Ziele synchronisierst. Jede Anfrage trägt den Team Key, dein Universum und die Version von Future. Ohne Key wird nichts gesendet.\nDer Key bleibt in diesem Browser und kommt in kein Backup.",
+  "ptre.consent": "PTRE (ptre.chez.gg) ist die Datenbank deines Teams: Spionageberichte, Aktivität und Planeten der Spieler, gesammelt von den Mitgliedern.\nMit dem Team Key sendet Future an PTRE nur, was du mit einem Klick wählst, wie OGLight: einen Spionagebericht aus der Spionagetabelle (nur seine API-ID); ID und Name eines Spielers, wenn du seine PTRE-Infos im Steckbrief öffnest; ID und Name der Spieler mit der PTRE-Flagge, wenn du die Ziele synchronisierst. Jede Anfrage trägt den Team Key, dein Universum und die Version von Future. Ohne Key wird nichts gesendet. Mit «Beim Spielen senden» an geht auch das unten Beschriebene.\nDer Key bleibt in diesem Browser und kommt in kein Backup.",
   "ptre.open": "PTRE öffnen",
   "ptre.key": "Team Key",
   "ptre.keyHint": "Du findest ihn auf PTRE, auf der Seite deines Teams. Mit dem Speichern stimmst du den oben beschriebenen Anfragen zu.",
@@ -1140,5 +1140,9 @@
   "ptre.sync": "Mit PTRE synchronisieren",
   "ptre.syncHint": "Sendet PTRE die Spieler mit der PTRE-Flagge und holt die Ziele des Teams",
   "ptre.synced": "Das Team hat {n} Ziele auf PTRE; {added} neu hier.",
-  "ptre.manage": "Auf PTRE verwalten"
+  "ptre.manage": "Auf PTRE verwalten",
+  "ptre.auto": "Beim Spielen senden",
+  "ptre.autoHint": "Aus, bis du es einschaltest. Eingeschaltet sendet Future an PTRE ohne einen Klick pro Anfrage, wie OGLight: für jedes System, das du in der Galaxie öffnest, neue, geänderte oder verschwundene Planeten und Monde (ID, Spieler, Name, Rang und Status) und die Aktivität der Spieler, denen du folgst (Flagge oder kürzlich geöffnet); die Spionageabwehr, die du im Posteingang liest (wer dich ausspioniert hat, von wo, wann); und wenn du den Steckbrief eines Spielers öffnest, fragt es PTRE nach seinen Planeten, höchstens einmal pro Stunde.",
+  "ptre.autoOn": "Beim Spielen senden ist an.",
+  "ptre.autoOff": "Beim Spielen senden ist aus: nur was du mit einem Klick tust, wird gesendet."
 }

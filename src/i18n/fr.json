@@ -1102,7 +1102,7 @@
   "exp.raidAvg": "par raid",
   "exp.raidTargets": "Meilleures cibles",
   "settings.section.ptre": "PTRE",
-  "ptre.consent": "PTRE (ptre.chez.gg) est la base de données de ton équipe : rapports d'espionnage, activité et planètes des joueurs, réunis par les membres de l'équipe.\nAvec la team key, Future n'envoie à PTRE que ce que tu choisis d'un clic, comme OGLight : un rapport d'espionnage depuis le tableau des espionnages (seulement son id API) ; l'id et le nom d'un joueur quand tu ouvres ses infos PTRE sur sa fiche ; l'id et le nom des joueurs marqués PTRE quand tu synchronises les cibles. Chaque envoi porte la team key, ton univers et la version de Future. Sans key, rien ne part.\nLa key reste dans ce navigateur et ne va jamais dans une sauvegarde.",
+  "ptre.consent": "PTRE (ptre.chez.gg) est la base de données de ton équipe : rapports d'espionnage, activité et planètes des joueurs, réunis par les membres de l'équipe.\nAvec la team key, Future n'envoie à PTRE que ce que tu choisis d'un clic, comme OGLight : un rapport d'espionnage depuis le tableau des espionnages (seulement son id API) ; l'id et le nom d'un joueur quand tu ouvres ses infos PTRE sur sa fiche ; l'id et le nom des joueurs marqués PTRE quand tu synchronises les cibles. Chaque envoi porte la team key, ton univers et la version de Future. Sans key, rien ne part. Avec «Envoyer en jouant» allumé, ce qui est décrit plus bas part aussi.\nLa key reste dans ce navigateur et ne va jamais dans une sauvegarde.",
   "ptre.open": "Ouvrir PTRE",
   "ptre.key": "Team key",
   "ptre.keyHint": "Tu la trouves sur PTRE, sur la page de ton équipe. En l'enregistrant, tu acceptes les envois décrits ci-dessus.",
@@ -1140,5 +1140,9 @@
   "ptre.sync": "Synchroniser avec PTRE",
   "ptre.syncHint": "Envoie à PTRE les joueurs marqués PTRE et prend les cibles de l'équipe",
   "ptre.synced": "L'équipe a {n} cibles sur PTRE ; {added} nouvelles ici.",
-  "ptre.manage": "Gérer sur PTRE"
+  "ptre.manage": "Gérer sur PTRE",
+  "ptre.auto": "Envoyer en jouant",
+  "ptre.autoHint": "Éteint tant que tu ne l'allumes pas. Allumé, Future envoie à PTRE sans un clic par envoi, comme OGLight : pour chaque système que tu ouvres dans la galaxie, les planètes et lunes nouvelles, changées ou disparues (id, joueur, nom, classement et statut) et l'activité des joueurs que tu suis (drapeau ou ouverts récemment) ; les contre-espionnages que tu lis dans la messagerie (qui t'a espionné, d'où, quand) ; et quand tu ouvres la fiche d'un joueur, il demande à PTRE ses planètes, au plus une fois par heure.",
+  "ptre.autoOn": "Envoyer en jouant est allumé.",
+  "ptre.autoOff": "Envoyer en jouant est éteint : seul ce que tu fais d'un clic part."
 }

@@ -20,6 +20,8 @@ import { mountSpyPanel, universeOf, type SpyContext } from './spy-table';
 import { showFreshExpeditions } from './exp-fresh';
 import { SERVER_DATA_KEY, type ServerData } from '../../data/server-data';
 import { converterLink, SIM_KEY, simTool, type SimTool } from '../../engines/sim-links';
+import { ptreAutoOn, ptreSendCounterSpies, teamKeyOf, type PtreDeps } from '../../data/ptre';
+import { counterSpyPayload } from '../../engines/ptre-galaxy';
 
 
 export const FOLD_KEY = 'msg.fold';
@@ -80,6 +82,43 @@ export interface MessagesOptions {
   onJournal?: (added: number) => void;
   /** The spy table's data (bases, research, server); none = no table. */
   spy?: SpyContext;
+  /** The team's PTRE: counter-espionage read here goes to it, only with «Send while playing» on. */
+  ptre?: PtreDeps;
+}
+
+/** Counter-espionage already sent to PTRE (message id → when), so a report read again goes once. */
+export const PTRE_COUNTER_KEY = 'ptre.counterSent';
+const PTRE_COUNTER_MAX = 500;
+/** Sent and not answered yet (this page). */
+const ptreCounterPending = new Set<string>();
+
+/**
+ * Counter-espionage reports just read, to the team's PTRE activity database, all in one call, as OGLight
+ * sends them when the inbox's espionage tab is read. COMPLIANCE (AGENTS.md §1.9): only with the team key
+ * and «Send while playing» on; who spied, from where and when, nothing else of the report.
+ */
+function sendCounterSpies(store: Store, ptre: PtreDeps, counters: SpyMessage[]): void {
+  const teamKey = teamKeyOf(store);
+  if (!teamKey || !ptreAutoOn(store)) return;
+  const sent = store.get<Record<string, number>>(PTRE_COUNTER_KEY, {});
+  const reports: Record<string, Record<string, unknown>> = {};
+  for (const m of counters) {
+    if (sent[m.id] || ptreCounterPending.has(m.id)) continue;
+    const body = counterSpyPayload(m, teamKey);
+    if (body) reports[m.id] = body;
+  }
+  const ids = Object.keys(reports);
+  if (!ids.length) return;
+  ids.forEach((id) => ptreCounterPending.add(id));
+  void ptreSendCounterSpies(ptre, reports)
+    .catch(() => false)
+    .then((ok) => {
+      ids.forEach((id) => ptreCounterPending.delete(id));
+      if (!ok) return;
+      const now = Date.now();
+      const all = { ...store.get<Record<string, number>>(PTRE_COUNTER_KEY, {}), ...Object.fromEntries(ids.map((id) => [id, now])) };
+      store.set(PTRE_COUNTER_KEY, Object.fromEntries(Object.entries(all).sort((a, b) => a[1] - b[1]).slice(-PTRE_COUNTER_MAX)));
+    });
 }
 
 function h<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, cls = '', text?: string): HTMLElementTagNameMap[K] {
@@ -370,6 +409,7 @@ export function processMessages(o: MessagesOptions): number {
   const sharedAny = !!doc.querySelector(['11', '12', '13'].map((n) => `[data-subtab-id="${n}"].active, [data-subtab-id="${n}"][aria-selected="true"]`).join(', '));
   const expeditions: ExpeditionMessage[] = [];
   const spies: SpyMessage[] = [];
+  const counters: SpyMessage[] = [];
   let journal: Journal | null = null;
   let added = 0;
   /** Shared reports found in the journal and taken out. */
@@ -436,6 +476,8 @@ export function processMessages(o: MessagesOptions): number {
     }
     if (parsed.kind === 'expedition' || parsed.kind === 'discovery') expeditions.push(parsed);
     if (parsed.kind === 'spy') spies.push(parsed);
+    // The player's own counter-espionage (not an alliance member's shared one): for PTRE's activity database.
+    if (parsed.kind === 'spy' && parsed.counter) counters.push(parsed);
     // Pathfinders on an expedition harvest the debris at position 16: those resources count with
     // the expeditions (not as one more expedition), as OGLight does.
     if (parsed.kind === 'recycle' && parsed.coords?.replace(/[[\]]/g, '').split(':')[2] === '16') {
@@ -491,6 +533,7 @@ export function processMessages(o: MessagesOptions): number {
     // Targets the player took off the table stay off until a newer report of them arrives.
     if (rememberSpies(board, spies, o.now?.() ?? Date.now(), sharedTab, store.get<SpyDismissed>(SPY_DISMISSED_KEY, {}))) store.set(SPY_BOARD_KEY, board);
   }
+  if (o.ptre && counters.length) sendCounterSpies(store, o.ptre, counters);
   if (o.spy) mountSpyPanel({ doc, store, t, locale, spy: o.spy, now: o.now });
   if (archive && archiveChanged) store.set(ARCHIVE_KEY, archive);
   if (journal && (added || dropped)) {

@@ -31,7 +31,8 @@ import { UNIVERSE_RANKS_KEY, universeRanks, type UniverseRanks } from '../../dat
 import { FLAGS, loadMarks, MARKS_KEY, mergePtreTargets, notePlayer, ptreTargets, rememberRecent, renamePlayers, type Flag, type Marks } from '../../engines/marks';
 import { ageParts, planetsOf, POSITIONS_KEY, type Positions, type Seen } from '../../engines/positions';
 import { FLAG_COLORS, flagButton, markIcon, MARKS_CSS } from './picker';
-import { PTRE_FRAMES, PTRE_TARGETS_PAGE, ptrePlayerInfo, ptreProfileUrl, ptreSyncTargets, teamKeyOf, type PtreDeps, type PtreFrame, type PtrePlayer } from '../../data/ptre';
+import { mergePtrePlanets } from '../../engines/ptre-galaxy';
+import { PTRE_FRAMES, PTRE_TARGETS_PAGE, ptrePlayerInfo, ptrePlayerPlanets, ptreProfileUrl, ptreSyncTargets, teamKeyOf, type PtreDeps, type PtreFrame, type PtrePlayer } from '../../data/ptre';
 import { shipName } from '../../data/ship-icons';
 
 type T = (key: string, vars?: Record<string, string | number>) => string;
@@ -545,6 +546,18 @@ function playerSheet(o: SideOptions, side: HTMLElement, scroll: HTMLElement, tit
   title.append(flagButton(picker, id, name));
 
   if (!sheetData.has(id)) {
+    // The player's planets the team saw (PTRE), at most hourly and only with «Send while playing» on:
+    // a colony found by a team member shows here before the weekly public API lists it (as OGLight).
+    if (o.ptre) {
+      void ptrePlayerPlanets(o.ptre, id)
+        .catch(() => null)
+        .then((planets) => {
+          const next = planets && mergePtrePlanets(store.get<Positions>(POSITIONS_KEY, {}), planets);
+          if (!next) return;
+          store.set(POSITIONS_KEY, next);
+          refreshSide();
+        });
+    }
     scroll.append(h(doc, 'p', 'empty', t('galaxy.loading')));
     void playerScores(o.guard, store, doc.location.origin, id, Date.now())
       .catch(() => null)

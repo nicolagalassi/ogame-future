@@ -18,6 +18,8 @@ import { formatUnits } from '../../core/format';
 import { debrisTotal, readGalaxy, type GalaxyRow, type GalaxySystem } from '../../data/galaxy';
 import { PLAYER_SCORES_KEY, playerScores, SCORE_TYPES, type PlayerScores, type ScoreType } from '../../data/player-api';
 import { GALAXY_CSS } from './style';
+import { ptreAutoOn, ptreSendGalaxy, teamKeyOf, type PtreDeps } from '../../data/ptre';
+import { GALAXY_IDS_KEY, galaxyPayloads, type GalaxyIds } from '../../engines/ptre-galaxy';
 import { BIG_DEBRIS, BIG_DEBRIS_KEY } from '../marks/side';
 
 /** Galaxy targets saved before 2026-11-06, moved into the planet marks (engines/marks). */
@@ -34,7 +36,12 @@ export interface GalaxyOptions {
   onSystem?: () => void;
   /** A click on a player's name: the side bar opens on that player's planets. */
   onPlayer?: (id: number, name: string) => void;
+  /** The team's PTRE: each system the game draws goes to it, only with «Send while playing» on. */
+  ptre?: PtreDeps;
 }
+
+/** The first row of each table the game drew and Future already sent to PTRE: one call per drawing. */
+const ptreSent = new WeakSet<Element>();
 
 /** Position to mark in the next system drawn ("g:s:p"): the one the side bar or the URL asked for. */
 let highlight = '';
@@ -140,6 +147,33 @@ function remember(o: GalaxyOptions): void {
   // Marked and recent players under the name the game shows now (the targets list kept the old one).
   const renamed = renamePlayers(marks, s.rows.map((r) => [r.playerId ?? 0, r.playerName] as const));
   if (renamed) o.store.set(MARKS_KEY, renamed);
+  sendToPtre(o, s, marks, recent, cards);
+}
+
+/**
+ * The system the game just drew, to the team's PTRE (engines/ptre-galaxy), as OGLight sends it on each
+ * system loaded. COMPLIANCE (AGENTS.md §1.3, §1.9): once per table the game draws (Future's own redraws and
+ * the observer's other wake-ups send nothing), only with the team key and «Send while playing» on.
+ */
+function sendToPtre(o: GalaxyOptions, s: GalaxySystem, marks: Marks, recent: Set<number>, cards: Record<string, PlayerScores>): void {
+  const first = s.rows[0]?.row;
+  const teamKey = teamKeyOf(o.store);
+  if (!o.ptre || !first || !teamKey || !ptreAutoOn(o.store) || ptreSent.has(first)) return;
+  ptreSent.add(first);
+  const homes = new Set(Object.values(cards).map((c) => (c.planets ?? []).reduce<{ id: number; coords: string } | null>((lo, p) => (p.id > 0 && (!lo || p.id < lo.id) ? p : lo), null)?.coords));
+  const rows = s.rows.map((r) => ({ ...r, debris: r.debris ? debrisTotal(r.debris) : 0 }));
+  const p = galaxyPayloads({ galaxy: s.galaxy, system: s.system, rows }, o.store.get<GalaxyIds>(GALAXY_IDS_KEY, {}), {
+    teamKey,
+    now: Date.now(),
+    follow: (id) => !!marks.players[String(id)] || recent.has(id),
+    home: (coords) => homes.has(coords),
+    scores: (id) => {
+      const c = cards[String(id)]?.scores;
+      return c?.total ? { score: c.total.points, fleet: c.military?.points ?? -1 } : null;
+    },
+  });
+  o.store.set(GALAXY_IDS_KEY, p.ids);
+  void ptreSendGalaxy(o.ptre, p).catch(() => undefined);
 }
 
 function decorate(o: GalaxyOptions, content: Element): void {

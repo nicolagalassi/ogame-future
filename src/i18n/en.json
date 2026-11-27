@@ -1102,7 +1102,7 @@
   "exp.raidAvg": "per raid",
   "exp.raidTargets": "Best targets",
   "settings.section.ptre": "PTRE",
-  "ptre.consent": "PTRE (ptre.chez.gg) is your team's database: spy reports, activity and players' planets, gathered by the team's members.\nWith the team key Future sends PTRE only what you choose with a click, as OGLight does: a spy report from the spy table (its API id only); a player's id and name when you open their PTRE info on the sheet; id and name of the players flagged PTRE when you sync the targets. Every call carries the team key, your universe and Future's version. Without a key nothing is sent.\nThe key stays in this browser and never goes into a backup.",
+  "ptre.consent": "PTRE (ptre.chez.gg) is your team's database: spy reports, activity and players' planets, gathered by the team's members.\nWith the team key Future sends PTRE only what you choose with a click, as OGLight does: a spy report from the spy table (its API id only); a player's id and name when you open their PTRE info on the sheet; id and name of the players flagged PTRE when you sync the targets. Every call carries the team key, your universe and Future's version. Without a key nothing is sent. With «Send while playing» on, what is described below goes too.\nThe key stays in this browser and never goes into a backup.",
   "ptre.open": "Open PTRE",
   "ptre.key": "Team key",
   "ptre.keyHint": "You find it on PTRE, on your team's page. Saving it, you accept the calls described above.",
@@ -1140,5 +1140,9 @@
   "ptre.sync": "Sync with PTRE",
   "ptre.syncHint": "Sends PTRE the players flagged PTRE and takes the team's targets",
   "ptre.synced": "The team has {n} targets on PTRE; {added} new here.",
-  "ptre.manage": "Manage on PTRE"
+  "ptre.manage": "Manage on PTRE",
+  "ptre.auto": "Send while playing",
+  "ptre.autoHint": "Off until you turn it on. On, Future sends PTRE without a click for each call, as OGLight does: for every system you open in the galaxy, the planets and moons that are new, changed or gone (id, player, name, rank and status) and the activity of the players you follow (a flag, or opened lately); the counter-espionage you read in the inbox (who spied on you, from where, when); and when you open a player's sheet it asks PTRE for their planets, at most once an hour.",
+  "ptre.autoOn": "Send while playing is on.",
+  "ptre.autoOff": "Send while playing is off: only what you do with a click is sent."
 }
