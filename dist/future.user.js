@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Future
 // @namespace    https://github.com/nicolagalassi/ogame-future
-// @version      0.3.186
+// @version      0.3.187
 // @description  Future: userscript per la gestione e lo sviluppo dell'account OGame
 // @author       Nicola Galassi
 // @license      MIT
@@ -7544,9 +7544,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 #${CARD_ID} tr.sub td:first-child { padding-left: 18px; }
 #${CARD_ID} p { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
 #${CARD_ID} .err { color: var(--bad); }
+/* The game's own actions on the player (from its tooltip, which the card replaces in the galaxy): clickable. */
+#${CARD_ID}.live { pointer-events: auto; }
+#${CARD_ID} .acts { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 8px 0 0; padding: 6px 0 0; border-top: 1px solid var(--line-soft); list-style: none; }
+#${CARD_ID} .acts li { margin: 0; padding: 0; }
+#${CARD_ID} .acts a { color: var(--accent); text-decoration: none; font-size: 12px; }
+#${CARD_ID} .acts a:hover, #${CARD_ID} .acts a:focus-visible { color: var(--text); text-decoration: underline; }
 `;
   var cardFor = 0;
   var pending;
+  var GRACE_MS = 200;
+  var closing;
   function el(doc, tag, cls = "", text = "") {
     const n = doc.createElement(tag);
     if (cls) n.className = cls;
@@ -7555,21 +7563,31 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   }
   function closePlayerCard(doc) {
     clearTimeout(pending);
+    clearTimeout(closing);
     cardFor = 0;
     doc.getElementById(CARD_ID)?.remove();
   }
-  function attachPlayerCard(o, anchor, id, name) {
+  function attachPlayerCard(o, anchor, id, name, actions) {
     if (anchor.dataset.futCard) return;
     anchor.dataset.futCard = String(id);
     anchor.addEventListener("mouseenter", () => {
       clearTimeout(pending);
-      pending = setTimeout(() => void openPlayerCard(o, anchor, id, name), INTENT_MS);
+      clearTimeout(closing);
+      if (cardFor === id && o.doc.getElementById(CARD_ID)) return;
+      pending = setTimeout(() => void openPlayerCard(o, anchor, id, name, actions), INTENT_MS);
     });
-    anchor.addEventListener("focus", () => void openPlayerCard(o, anchor, id, name));
-    anchor.addEventListener("mouseleave", () => closePlayerCard(o.doc));
-    anchor.addEventListener("blur", () => closePlayerCard(o.doc));
+    anchor.addEventListener("focus", () => void openPlayerCard(o, anchor, id, name, actions));
+    anchor.addEventListener("mouseleave", () => {
+      clearTimeout(pending);
+      if (!actions) return closePlayerCard(o.doc);
+      clearTimeout(closing);
+      closing = setTimeout(() => closePlayerCard(o.doc), GRACE_MS);
+    });
+    anchor.addEventListener("blur", (e) => {
+      if (!(e.relatedTarget instanceof Node && o.doc.getElementById(CARD_ID)?.contains(e.relatedTarget))) closePlayerCard(o.doc);
+    });
   }
-  async function openPlayerCard(o, anchor, id, name) {
+  async function openPlayerCard(o, anchor, id, name, actions) {
     const { doc, t, locale } = o;
     if (!doc.getElementById("fut-player-card-css")) {
       const style = el(doc, "style");
@@ -7587,6 +7605,21 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     card.append(head);
     const note = el(doc, "p", "", t("galaxy.loading"));
     card.append(note);
+    const acts = actions?.() ?? [];
+    if (acts.length) {
+      const list = el(doc, "ul", "acts");
+      list.append(...acts);
+      card.append(list);
+      card.classList.add("live");
+      card.addEventListener("mouseenter", () => clearTimeout(closing));
+      card.addEventListener("mouseleave", () => closePlayerCard(doc));
+      card.addEventListener("focusout", (e) => {
+        if (!(e.relatedTarget instanceof Node && (card.contains(e.relatedTarget) || e.relatedTarget === anchor))) closePlayerCard(doc);
+      });
+      card.addEventListener("click", (e) => {
+        if (e.target.closest("a")) closePlayerCard(doc);
+      });
+    }
     doc.body.append(card);
     const place2 = () => {
       const box = anchor.getBoundingClientRect();
@@ -8693,6 +8726,19 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
     }).observe(component, { childList: true, subtree: true });
     run();
   }
+  function quietGameTooltip(nameEl) {
+    nameEl.classList.remove("tooltipRel");
+    const off = () => nameEl._tippy?.disable?.();
+    off();
+    if (!nameEl.dataset.futQuiet) {
+      nameEl.dataset.futQuiet = "1";
+      nameEl.addEventListener("mouseenter", off);
+      nameEl.addEventListener("focus", off);
+    }
+  }
+  function gameActions(tip) {
+    return [...tip?.querySelectorAll(".ListLinks > li") ?? []].filter((li) => !li.classList.contains("rank") && li.querySelector("a")).map((li) => li.cloneNode(true));
+  }
   function remember(o) {
     const s = readGalaxy(o.doc);
     if (!s) return;
@@ -8762,7 +8808,11 @@ kbd { padding: 0 4px; border: 0; border-radius: 3px; background: var(--surface);
         const id = r.playerId;
         nameEl.addEventListener("click", () => o.onPlayer?.(id, r.playerName));
       }
-      if (nameEl && r.playerId && !own) attachPlayerCard(o, nameEl, r.playerId, r.playerName);
+      if (nameEl && r.playerId && !own) {
+        quietGameTooltip(nameEl);
+        const tip = nameEl.querySelector(".htmlTooltip");
+        attachPlayerCard(o, nameEl, r.playerId, r.playerName, () => gameActions(tip));
+      }
       if (playerCell && r.playerId && r.rank && !playerCell.querySelector(".fut-g-rank")) {
         const id = r.playerId;
         const badge = el2(doc, "a", "fut-g-rank", `#${r.rank.toLocaleString(locale)}`);
